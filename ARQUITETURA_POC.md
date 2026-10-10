@@ -7,7 +7,7 @@ Guia de orientação para quem lê ou mantém o código da PoC do Sistema de Gov
 
 ```mermaid
 flowchart LR
-    U["Usuário<br/>(navegador)"] -->|"1. requisição HTTP<br/>ex.: submeter FORM 1"| A
+    U["Usuário<br/>(navegador)"] -->|"1. requisição HTTP<br/>ex.: submeter, analisar, validar"| A
     subgraph S["Aplicação (Python 3.14)"]
         A["Camada de entrada<br/>FastAPI — rotas"] -->|"2. comando"| D
         D["Camada de domínio<br/>workflow · permissões · eventos/hash"] -->|"3. leitura e gravação"| P
@@ -17,6 +17,8 @@ flowchart LR
     P -->|"4. SQL (transação única)"| B[("PostgreSQL 18")]
     T -->|"6. HTML"| U
 ```
+
+O caminho é o mesmo para qualquer pedido e para qualquer Instrumento (FORM 1 a 4). Na PoC nuclear existe apenas o FORM 1 simplificado; os demais chegam na PoC ampliada sem mudar as camadas.
 
 ## 2. Responsabilidade de cada camada
 
