@@ -1,0 +1,15 @@
+# Arquivos que o Git NUNCA deve enviar ao GitHub
+
+# Senhas e configurações locais (o .env fica só no computador)
+.env
+
+# Preferências do editor (cada pessoa tem as suas)
+.vscode/
+
+# Arquivos temporários que o Python gera sozinho
+__pycache__/
+*.pyc
+
+# Evidências e dados gerados pela PoC (ficam fora do repositório)
+evidencias/
+*.log

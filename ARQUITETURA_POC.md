@@ -39,6 +39,21 @@ O caminho é o mesmo para qualquer pedido e para qualquer Instrumento (FORM 1 a 
 3. **Transação única.** Um comando grava o evento de domínio, a auditoria e a projeção juntos, ou nada (DA-26).
 4. **Integridade verificável.** Cada evento guarda o hash do anterior; qualquer alteração quebra a cadeia (DA-27). Demonstração: `primeiro_hash.py`.
 
-## 4. Status
+## 4. Mapa da pasta (o que é cada arquivo)
+
+| Arquivo | Para que serve | Vai para o GitHub? |
+|---|---|---|
+| `ARQUITETURA_POC.md` | Este guia: camadas, responsabilidades e mapa da pasta | Sim |
+| `DIARIO_POC.md` | Registro datado de tudo o que foi feito na PoC | Sim |
+| `COLA_COMANDOS.md` | Comandos do dia a dia (ambiente, Git, PostgreSQL) | Sim |
+| `.gitignore` | Lista do que o Git nunca envia (senhas, temporários, preferências do editor) | Sim |
+| `.env.exemplo` | Modelo das configurações de conexão, **sem senha** | Sim |
+| `.env` | Configurações reais de conexão, **com a senha** | **Não** (bloqueado pelo `.gitignore`) |
+| `primeiro_hash.py` | Demonstração da cadeia de hash (DA-27) | Sim |
+| `teste_conexao.py` | Confere se o Python conecta à base `lgpd_poc` | Sim |
+| `diagnostico_senha.py` | Compara a senha do `.env` com a do banco sem exibi-las (usa hash) | Sim |
+
+## 5. Status
 
 - 2026-10-09: ambiente preparado; demonstração da cadeia de hash (`primeiro_hash.py`). Camadas ainda não implementadas.
+- 2026-10-11: cofre de configuração (`.env`, `.gitignore`, `.env.exemplo`) e conexão Python → PostgreSQL validada com o usuário `lgpd_poc_app`.
