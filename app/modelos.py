@@ -62,3 +62,34 @@ class Conta(Base):
     ativa = Column(Boolean, nullable=False, default=True)
 
     pessoa = relationship("Pessoa", back_populates="contas")
+
+
+class Unidade(Base):
+    """Uma unidade administrativa (Secretaria, departamento...). Na PoC, unidades fictícias."""
+    __tablename__ = "unidade"
+
+    id = Column(String(50), primary_key=True)        # ex.: UNID-NORTE
+    nome = Column(String(150), nullable=False)        # nome fictício
+    ativa = Column(Boolean, nullable=False, default=True)
+
+
+class Designacao(Base):
+    """Quem exerce qual papel, em qual unidade (SAD 03).
+    O papel é dado à PESSOA (não à conta). Uma pessoa pode ter vários papéis.
+    Papéis usados na PoC nuclear: elaborador, analista, validador.
+    """
+    __tablename__ = "designacao"
+
+    id = Column(Integer, primary_key=True)                                     # número interno
+    pessoa_id = Column(String(50), ForeignKey("pessoa.id"), nullable=False)    # quem
+    unidade_id = Column(String(50), ForeignKey("unidade.id"), nullable=False)  # onde
+    papel = Column(String(30), nullable=False)                                 # qual papel
+    ativa = Column(Boolean, nullable=False, default=True)
+
+    pessoa = relationship("Pessoa")
+    unidade = relationship("Unidade")
+
+    __table_args__ = (
+        # a mesma pessoa não recebe o mesmo papel duas vezes na mesma unidade
+        UniqueConstraint("pessoa_id", "unidade_id", "papel", name="uq_designacao"),
+    )
