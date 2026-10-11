@@ -22,3 +22,8 @@ Regras deste diário: sem senhas, tokens ou dados pessoais; cada entrada com dat
 - Criados `.gitignore` (bloqueia `.env`, `.vscode/`, temporários e evidências) e `.env.exemplo` (modelo sem senha). O `.env` real fica só no computador.
 - Teste de conexão (`teste_conexao.py`): falhou por autenticação. Causa: senha do `.env` diferente da do banco (mesmo tamanho, conteúdo diferente). Diagnóstico feito com `diagnostico_senha.py`, comparando impressões digitais (hash) sem exibir senhas. Corrigido o `.env`; conexão validada (usuário `lgpd_poc_app`, base `lgpd_poc`).
 - Código de conexão usa `URL.create`, seguro para senhas com caracteres especiais.
+- Primeira tabela criada (`evento`, livro de atos) via `criar_tabelas.py` e `app/modelos.py`.
+- `app/eventos.py`: registro de eventos com cadeia de hash por objeto (SHA-256 sobre JSON canônico) e verificação relendo do banco. `demo_eventos.py` gravou 4 eventos fictícios (REG-0001 com 3, REG-0002 com 1); as duas correntes verificadas íntegras.
+- Simulação de fraude (UPDATE direto no banco, desfeito por rollback): adulteração detectada no evento 2 do REG-0001. Nenhum dado real; livro de atos não modificado.
+- Acesso direto ao banco: consulta somente leitura pelo pgAdmin (usuário `postgres`) para conferir a tabela `evento`.
+- Observação: os 4 eventos têm o mesmo `registrado_em` porque foram gravados na mesma transação (o PostgreSQL usa o horário de início da transação).
