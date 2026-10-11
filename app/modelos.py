@@ -1,9 +1,9 @@
 # Modelos: a descrição das tabelas do banco, escrita em Python.
 # O SQLAlchemy traduz cada classe abaixo em uma tabela do PostgreSQL.
 
-from sqlalchemy import (Column, BigInteger, Integer, String, DateTime, JSON,
-                        UniqueConstraint, func)
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy import (Column, BigInteger, Integer, String, DateTime, JSON, Boolean,
+                        ForeignKey, UniqueConstraint, func)
+from sqlalchemy.orm import DeclarativeBase, relationship
 
 
 class Base(DeclarativeBase):
@@ -35,3 +35,30 @@ class Evento(Base):
         # Garante que não existam dois eventos na mesma posição da mesma corrente
         UniqueConstraint("cadeia_id", "sequencia_cadeia", name="uq_evento_posicao_na_cadeia"),
     )
+
+
+class Pessoa(Base):
+    """Uma pessoa (servidor). É a PESSOA que a segregação de funções compara (SAD 03, O-66).
+    Na PoC, somente pessoas fictícias. Nenhum CPF, matrícula ou dado real.
+    """
+    __tablename__ = "pessoa"
+
+    id = Column(String(50), primary_key=True)          # identificador fictício (ex.: PESSOA-A)
+    nome = Column(String(100), nullable=False)          # nome fictício
+    ativa = Column(Boolean, nullable=False, default=True)
+
+    contas = relationship("Conta", back_populates="pessoa")  # uma pessoa pode ter várias contas
+
+
+class Conta(Base):
+    """Uma conta de acesso. Pertence a exatamente uma pessoa.
+    A mesma pessoa pode ter mais de uma conta (ex.: A1 e A2): por isso a regra
+    de segregação nunca compara contas, e sim as pessoas por trás delas.
+    """
+    __tablename__ = "conta"
+
+    id = Column(String(50), primary_key=True)                              # ex.: CONTA-A1
+    pessoa_id = Column(String(50), ForeignKey("pessoa.id"), nullable=False)  # a quem pertence
+    ativa = Column(Boolean, nullable=False, default=True)
+
+    pessoa = relationship("Pessoa", back_populates="contas")

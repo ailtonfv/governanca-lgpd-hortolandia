@@ -27,3 +27,5 @@ Regras deste diário: sem senhas, tokens ou dados pessoais; cada entrada com dat
 - Simulação de fraude (UPDATE direto no banco, desfeito por rollback): adulteração detectada no evento 2 do REG-0001. Nenhum dado real; livro de atos não modificado.
 - Acesso direto ao banco: consulta somente leitura pelo pgAdmin (usuário `postgres`) para conferir a tabela `evento`.
 - Observação: os 4 eventos têm o mesmo `registrado_em` porque foram gravados na mesma transação (o PostgreSQL usa o horário de início da transação).
+- Tabelas `pessoa` e `conta` criadas (base da segregação de funções, O-66). Cada conta pertence a uma pessoa (chave estrangeira). Semeadas 3 pessoas fictícias e 4 contas (PESSOA-A com CONTA-A1 e CONTA-A2), sem CPF, matrícula ou dado real (`semear_pessoas.py`).
+- Pendência registrada: alinhar a tabela `evento` ao SAD 05 REV11 e à DA-26 — trocar `pessoa_id` por `ator_tipo` + `ator_id` (eventos de pessoa, sistema ou integração), junto com os demais campos da DA-26.
