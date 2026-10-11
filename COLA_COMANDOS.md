@@ -20,7 +20,8 @@ code .
 ## Git — registrar e enviar alterações
 ```
 git status                      (o que mudou?)
-git add nome_do_arquivo         (separar para o registro)
+git add nome_do_arquivo         (separar UM arquivo para o registro)
+git add .                       (separar TODOS os alterados; o .gitignore protege o .env)
 git commit -m "descrição"       (fechar o registro)
 git push                        (enviar ao GitHub)
 git pull                        (trazer novidades do GitHub, se editou lá)
