@@ -13,3 +13,6 @@ __pycache__/
 # Evidências e dados gerados pela PoC (ficam fora do repositório)
 evidencias/
 *.log
+
+# Atalho pessoal (caminhos do computador do Encarregado)
+ABRIR_POC.bat

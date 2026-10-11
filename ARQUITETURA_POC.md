@@ -41,17 +41,41 @@ O caminho é o mesmo para qualquer pedido e para qualquer Instrumento (FORM 1 a 
 
 ## 4. Mapa da pasta (o que é cada arquivo)
 
-| Arquivo | Para que serve | Vai para o GitHub? |
-|---|---|---|
-| `ARQUITETURA_POC.md` | Este guia: camadas, responsabilidades e mapa da pasta | Sim |
-| `DIARIO_POC.md` | Registro datado de tudo o que foi feito na PoC | Sim |
-| `COLA_COMANDOS.md` | Comandos do dia a dia (ambiente, Git, PostgreSQL) | Sim |
-| `.gitignore` | Lista do que o Git nunca envia (senhas, temporários, preferências do editor) | Sim |
-| `.env.exemplo` | Modelo das configurações de conexão, **sem senha** | Sim |
-| `.env` | Configurações reais de conexão, **com a senha** | **Não** (bloqueado pelo `.gitignore`) |
-| `primeiro_hash.py` | Demonstração da cadeia de hash (DA-27) | Sim |
-| `teste_conexao.py` | Confere se o Python conecta à base `lgpd_poc` | Sim |
-| `diagnostico_senha.py` | Compara a senha do `.env` com a do banco sem exibi-las (usa hash) | Sim |
+```mermaid
+flowchart TB
+    subgraph DOC["📘 Documentação — vai para o GitHub"]
+        A1["ARQUITETURA_POC.md<br/>este guia"]
+        A2["DIARIO_POC.md<br/>registro datado"]
+        A3["COLA_COMANDOS.md<br/>comandos do dia a dia"]
+    end
+    subgraph COD["🐍 Código — vai para o GitHub"]
+        B1["primeiro_hash.py<br/>demonstração da cadeia de hash"]
+        B2["teste_conexao.py<br/>Python ↔ banco"]
+        B3["diagnostico_senha.py<br/>compara senhas sem exibi-las"]
+    end
+    subgraph CFG["⚙️ Configuração — vai para o GitHub"]
+        C1[".gitignore<br/>o que nunca sobe"]
+        C2[".env.exemplo<br/>modelo SEM senha"]
+    end
+    subgraph LOCAL["🔒 Só no computador — NUNCA vai para o GitHub"]
+        D1[".env<br/>senha do banco"]
+        D2[".vscode/<br/>preferências do editor"]
+    end
+    C1 -. bloqueia .-> LOCAL
+    C2 -. modelo de .-> D1
+    D1 -. senha lida por .-> B2
+
+    classDef doc fill:#1e3a5f,stroke:#5b9bd5,color:#fff
+    classDef cod fill:#1e4d2b,stroke:#5cb85c,color:#fff
+    classDef cfg fill:#4d3d1e,stroke:#d4a017,color:#fff
+    classDef loc fill:#5c1e1e,stroke:#d9534f,color:#fff
+    class A1,A2,A3 doc
+    class B1,B2,B3 cod
+    class C1,C2 cfg
+    class D1,D2 loc
+```
+
+**Legenda:** azul = documentação · verde = código · amarelo = configuração pública · vermelho = segredo local.
 
 ## 5. Status
 
