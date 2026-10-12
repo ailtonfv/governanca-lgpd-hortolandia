@@ -7,16 +7,25 @@ Guia de orientação para quem lê ou mantém o código da PoC do Sistema de Gov
 
 ```mermaid
 flowchart LR
-    U["Usuário<br/>(navegador)"] -->|"1. requisição HTTP<br/>ex.: submeter, analisar, validar"| A
+    U["👤 SERVIDOR<br/>(no navegador)"] -->|"1. IDA — formulário HTML<br/>preenche e clica Submeter, Analisar ou Validar"| A
     subgraph S["Aplicação (Python 3.14)"]
-        A["Camada de entrada<br/>FastAPI — rotas"] -->|"2. comando"| D
+        A["Camada de entrada<br/>FastAPI — balcão"] -->|"2. comando"| D
         D["Camada de domínio<br/>workflow · permissões · eventos/hash"] -->|"3. leitura e gravação"| P
         P["Camada de persistência<br/>SQLAlchemy"]
-        A -->|"5. página de resposta"| T["Camada de apresentação<br/>Jinja2 — páginas"]
+        A -->|"5. pede a página de resposta"| T["Camada de apresentação<br/>Jinja2 — monta o HTML<br/>(modelo com lacunas)"]
     end
     P -->|"4. SQL (transação única)"| B[("PostgreSQL 18")]
-    T -->|"6. HTML"| U
+    T -->|"6. VOLTA — página de resposta HTML<br/>ex.: Validado ✔ ou Negado: segregação"| U
+
+    classDef servidor fill:#1e3a5f,stroke:#5b9bd5,color:#fff,stroke-width:3px
+    classDef html fill:#4d3d1e,stroke:#d4a017,color:#fff
+    class U servidor
+    class T html
+    linkStyle 0 stroke:#5b9bd5,stroke-width:3px
+    linkStyle 5 stroke:#d4a017,stroke-width:3px
 ```
+
+**Legenda:** azul = o SERVIDOR e o formulário HTML que ele preenche (ida) · amarelo = a página de resposta HTML montada pelo Jinja2 (volta).
 
 O caminho é o mesmo para qualquer pedido e para qualquer Instrumento (FORM 1 a 4). Na PoC nuclear existe apenas o FORM 1 simplificado; os demais chegam na PoC ampliada sem mudar as camadas.
 
@@ -38,7 +47,7 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    N["Navegador<br/>servidor clica em Validar"] -->|"pedido HTTP"| F["FastAPI — balcão<br/>app/main.py"]
+    N["👤 SERVIDOR<br/>clica em Validar no navegador"] -->|"pedido HTTP"| F["FastAPI — balcão<br/>app/main.py"]
     F --> D["Domínio<br/>executar_acao()<br/>verificar_acao()"]
     D --> P["SQLAlchemy"] --> B[("PostgreSQL")]
     F -->|"monta a resposta"| J["Jinja2<br/>página HTML"] --> N
