@@ -29,3 +29,10 @@ Regras deste diário: sem senhas, tokens ou dados pessoais; cada entrada com dat
 - Observação: os 4 eventos têm o mesmo `registrado_em` porque foram gravados na mesma transação (o PostgreSQL usa o horário de início da transação).
 - Tabelas `pessoa` e `conta` criadas (base da segregação de funções, O-66). Cada conta pertence a uma pessoa (chave estrangeira). Semeadas 3 pessoas fictícias e 4 contas (PESSOA-A com CONTA-A1 e CONTA-A2), sem CPF, matrícula ou dado real (`semear_pessoas.py`).
 - Pendência registrada: alinhar a tabela `evento` ao SAD 05 REV11 e à DA-26 — trocar `pessoa_id` por `ator_tipo` + `ator_id` (eventos de pessoa, sistema ou integração), junto com os demais campos da DA-26.
+- Tabelas `unidade` e `designacao` criadas; semeadas 2 unidades fictícias e 5 designações (`semear_designacoes.py`). PESSOA-A acumula elaborador e validador na Unidade Norte (cenário do O-66); o papel é dado à pessoa, não à conta.
+
+## 2026-10-12 — README e dependências
+
+- Criado `README.md` (versão 1): o que é o projeto, camadas de validação, situação, como montar o ambiente e rodar a PoC, autoria.
+- Criado `requirements.txt` com as versões travadas das bibliotecas (reprodutibilidade).
+- `COLA_COMANDOS.md`: seção sobre `git init` × `git clone`.

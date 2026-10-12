@@ -28,6 +28,16 @@ git pull                        (trazer novidades do GitHub, se editou lá)
 git log                         (ver o histórico)
 ```
 
+## Git — começar um repositório: init ou clone?
+| Caminho | Comandos | Quando usar |
+|---|---|---|
+| Do zero | `git init` → `git add` → `git commit` → `git remote add origin <endereço>` → `git push` | A pasta já tem arquivos e ainda não é repositório |
+| Clonar (o nosso caso) | `git clone <endereço> <pasta>` → `git add` → `git commit` → `git push` | O repositório já existe no GitHub |
+
+- O `git clone` já faz o `git init` sozinho e já liga a pasta ao GitHub. Na `poc`, **não é preciso** `git init`.
+- Cuidado: nunca rodar `git init` na pasta errada (ex.: a pasta do usuário inteira).
+- A pasta oculta `.git` é o "arquivo morto" do Git: pode olhar, nunca mexer.
+
 ## PostgreSQL
 ```
 "C:\Program Files\PostgreSQL\18\bin\psql.exe" -U postgres

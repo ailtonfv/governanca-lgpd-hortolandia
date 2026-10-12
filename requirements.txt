@@ -1,0 +1,4 @@
+# Bibliotecas da PoC (versões travadas para reprodutibilidade — SAD 09 / DA-28)
+sqlalchemy==2.1.4
+psycopg[binary]==3.3.6
+python-dotenv==1.2.4
