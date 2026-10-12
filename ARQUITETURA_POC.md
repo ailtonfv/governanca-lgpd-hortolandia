@@ -20,6 +20,38 @@ flowchart LR
 
 O caminho é o mesmo para qualquer pedido e para qualquer Instrumento (FORM 1 a 4). Na PoC nuclear existe apenas o FORM 1 simplificado; os demais chegam na PoC ampliada sem mudar as camadas.
 
+## 1A. Onde entra o FastAPI — hoje e depois
+
+**Analogia:** o FastAPI é o **balcão de protocolo** da Prefeitura. Ele recebe o pedido de quem chega, confere quem é a pessoa e encaminha ao setor que decide. O balcão não decide nada: quem decide é o domínio (`permissoes.py`, `eventos.py`).
+
+**Hoje (sem FastAPI):** quem "chega ao balcão" é um script que nós rodamos no terminal.
+
+```mermaid
+flowchart LR
+    T["Terminal<br/>python teste_segregacao.py"] --> D["Domínio<br/>executar_acao()<br/>verificar_acao()"]
+    D --> P["SQLAlchemy"] --> B[("PostgreSQL")]
+    classDef hoje fill:#1e4d2b,stroke:#5cb85c,color:#fff
+    class T hoje
+```
+
+**Depois (com FastAPI):** quem chega é o servidor, pelo navegador. O domínio é **o mesmo**, sem mudar uma linha.
+
+```mermaid
+flowchart LR
+    N["Navegador<br/>servidor clica em Validar"] -->|"pedido HTTP"| F["FastAPI — balcão<br/>app/main.py"]
+    F --> D["Domínio<br/>executar_acao()<br/>verificar_acao()"]
+    D --> P["SQLAlchemy"] --> B[("PostgreSQL")]
+    F -->|"monta a resposta"| J["Jinja2<br/>página HTML"] --> N
+    classDef novo fill:#4d3d1e,stroke:#d4a017,color:#fff
+    class N,F,J novo
+```
+
+**Legenda:** verde = o que existe hoje · amarelo = o que o FastAPI e o Jinja2 acrescentam.
+
+O que muda é **só a porta de entrada**. É por isso que estamos construindo e testando o domínio primeiro: quando o balcão chegar, as regras já estarão provadas.
+
+Quando: etapa de telas mínimas da PoC nuclear (depois do ciclo de vida e dos testes). O FastAPI ainda não está instalado nem no `requirements.txt`.
+
 ## 2. Responsabilidade de cada camada
 
 | Camada | Tecnologia | O que faz | O que NÃO faz | SAD de referência | Arquivo(s) previsto(s) |

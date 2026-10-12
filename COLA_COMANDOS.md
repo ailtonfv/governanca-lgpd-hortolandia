@@ -45,6 +45,15 @@ git log                         (ver o histórico)
 Dentro do psql: `\l` lista as bases · `\q` sai · `\r` limpa um comando pela metade.
 Lembre: todo comando SQL termina com `;`.
 
+## FastAPI (ainda não usado — etapa de telas)
+
+- O que é: o **balcão** que recebe os pedidos do navegador e chama as regras. Diagrama em `ARQUITETURA_POC.md`, seção 1A.
+- Quando chegar a hora, será assim (não rodar agora):
+  - instalar: `pip install fastapi uvicorn`
+  - ligar o balcão: `uvicorn app.main:app --reload`
+  - abrir no navegador: http://127.0.0.1:8000
+  - desligar: Ctrl+C no terminal
+
 ## Lembretes
 - `(base)` = Python errado para a PoC. Use `conda activate lgpd-poc`.
 - Uma linha cinza = um comando = um Enter.
