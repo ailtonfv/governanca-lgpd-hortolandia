@@ -41,3 +41,11 @@ Regras deste diário: sem senhas, tokens ou dados pessoais; cada entrada com dat
 - Cada tentativa negada virou evento `acesso_negado` na corrente de auditoria mensal AUDITORIA-2026-10 (3 eventos), com ação tentada, objeto, conta e motivo.
 - Commit d70c508 enviado ao GitHub.
 - Limitação declarada: as contas foram criadas por script de carga (`semear_pessoas.py`), fora do livro de atos. O procedimento de criação de conta não está definido nos SADs (ver O-78).
+- Etapa 1 — livro de atos alinhado à DA-26 e à DA-27:
+  - Tabela antiga renomeada para `evento_v0` (10 eventos), travada como somente leitura (`arquivar_evento_v0.py`). Nada apagado.
+  - Criadas `comando` (pedido idempotente), `evento` (domínio: cadeia_tipo, tipo_evento × codigo_evento, comando_id + ordem_no_comando, ator_tipo + ator_id, em_nome_de, ocorrido_em, versao_regra, versões de esquema e de algoritmo, payload_canonico) e `evento_auditoria` (segmentos mensais, ex.: AUDITORIA-2026-10).
+  - `app/eventos.py` reescrito: lista fechada de campos lacrados, texto canônico guardado, data em UTC com microssegundos; conferência em quatro perguntas (numeração, elo, campos × texto lacrado, lacre × texto).
+  - `demo_eventos.py`: REG-DEMO-01 (2 atos de um mesmo pedido) e 1 consulta na auditoria; três fraudes simuladas e desfeitas por rollback, todas detectadas (campos alterados; lacre violado; elo quebrado).
+  - `app/permissoes.py` e `teste_segregacao.py` ajustados: REG-0003 refeito no livro novo; 8 cenários ✔, incluindo o clique duplo (pedido repetido, nada gravado). Tentativas negadas como `tentativa_negada` (catálogo do SAD 08). Ações gravadas com nome e código do catálogo: submeter (I3), iniciar_analise (I13), validar (I5), devolver (I6).
+  - Limitação declarada: quem controla o banco pode reescrever uma corrente inteira; a proteção é o checkpoint externo (SAD 08, DA-27), ainda a fazer. Fechamento de segmento e ligação entre meses também pendentes.
+  - Provisórios da PoC: versao_regra fixa "POC-1" (tabela versao_regra na etapa 2); segmento de auditoria por mês em UTC.

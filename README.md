@@ -78,9 +78,11 @@ flowchart LR
 | Item | Situação |
 |---|---|
 | Conexão Python ↔ PostgreSQL, com senha fora do código | ✔ |
-| Livro de atos (`evento`) com cadeia de hash por objeto — DA-26, DA-27 | ✔ gravando e verificando no banco |
+| Livro de atos do domínio (`evento`) e livro de auditoria mensal (`evento_auditoria`), com cadeia de hash, texto lacrado guardado, ator tipado e versões — DA-26, DA-27 | ✔ gravando e verificando no banco; três tipos de fraude detectados em simulação |
+| Pedido idempotente (`comando`): o mesmo pedido repetido não grava de novo — DA-26 | ✔ |
 | Pessoas, contas, unidades e designações de papéis (base da segregação de funções) | ✔ estrutura e dados fictícios |
-| Regra de segregação de funções (O-66) | em construção |
+| Regra de segregação de funções (O-66), comparando a pessoa e nunca a conta | ✔ cenários a, b, c, e, f; tentativas negadas registradas na auditoria. Cenário d (substituição) a fazer |
+| Checkpoint externo da cadeia (proteção contra reescrita da corrente inteira) — SAD 08 | a fazer |
 | Registro, versão, análise, pendência, workflow | a fazer |
 | Telas (FastAPI + Jinja2) e testes de aceite (pytest) | a fazer |
 
