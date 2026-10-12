@@ -36,3 +36,8 @@ Regras deste diário: sem senhas, tokens ou dados pessoais; cada entrada com dat
 - Criado `README.md` (versão 1): o que é o projeto, camadas de validação, situação, como montar o ambiente e rodar a PoC, autoria.
 - Criado `requirements.txt` com as versões travadas das bibliotecas (reprodutibilidade).
 - `COLA_COMANDOS.md`: seção sobre `git init` × `git clone`.
+- README: incluídos o diagrama "De onde vem este sistema" e a seção "Quem faz o quê" (Encarregado × equipe designada).
+- Segregação de funções (O-66): criados `app/permissoes.py` (papéis exigidos por ação; regra que compara a PESSOA, nunca a conta) e `teste_segregacao.py`. Cenários no REG-0003 (Unidade Norte, dados fictícios): (a) A valida pela A2 → negado; (b) A valida pela A1 → negado; (e) A devolve pela A2 → negado; B analisa → permitido; (c) B valida → permitido; (f) com A1 desativada (simulação desfeita por rollback), o autor continua sendo A e a tentativa pela A2 continua negada. Cenário (d), substituição com em_nome_de, pendente.
+- Cada tentativa negada virou evento `acesso_negado` na corrente de auditoria mensal AUDITORIA-2026-10 (3 eventos), com ação tentada, objeto, conta e motivo.
+- Commit d70c508 enviado ao GitHub.
+- Limitação declarada: as contas foram criadas por script de carga (`semear_pessoas.py`), fora do livro de atos. O procedimento de criação de conta não está definido nos SADs (ver O-78).
