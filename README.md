@@ -75,38 +75,55 @@ flowchart LR
 
 ## Como os Registros são organizados
 
-Cada **Registro LGPD** documenta um **tratamento de dados pessoais**. Serviços, processos e atividades são os objetos que o Registro descreve. O que define se há um ou dois Registros é o tratamento, não o rótulo do objeto.
+Cada **Registro LGPD** documenta um **tratamento de dados pessoais**. Serviços, processos e atividades são os **objetos** que os Registros descrevem:
+
+| Objeto | O que é | Pergunta-teste | Exemplo |
+|---|---|---|---|
+| 🟦 **Serviço** | O que o cidadão recebe | "O cidadão pede isso?" | 2ª via do IPTU |
+| 🟩 **Processo** | A sequência de etapas que produz um resultado, muitas vezes passando por várias unidades | "Tem começo, meio e fim?" | Lançamento do IPTU |
+| 🟪 **Atividade** | Uma etapa dentro de um processo | "É um pedaço de algo maior?" | Cálculo do valor venal |
 
 ```mermaid
 flowchart LR
-    subgraph CAT["📚 Catálogo de objetos — serviços, processos e atividades"]
-        S1["Serviço<br/>2ª via do IPTU"]
-        S2["Serviço<br/>Certidão de débitos"]
-        S3["Serviço<br/>Alvará de funcionamento"]
+    subgraph CAT["📚 Catálogo de objetos"]
+        S1["🟦 Serviço<br/>2ª via do IPTU"]
+        S2["🟦 Serviço<br/>Certidão de débitos"]
+        P1["🟩 Processo<br/>Lançamento do IPTU"]
+        A1["🟪 Atividade<br/>Cálculo do valor venal"]
+        A2["🟪 Atividade<br/>Emissão dos carnês"]
+        S1 -. "depende de" .-> P1
+        P1 -. "compõe-se de" .-> A1
+        P1 -. "compõe-se de" .-> A2
     end
-    R1["📁 Registro LGPD A<br/>tributos — mesma finalidade"]
-    R2["📁 Registro LGPD B<br/>alvará"]
-    RB["📁 Registro LGPD C<br/>Balcão de atendimento<br/>(canal transversal)"]
-    S1 --> R1
-    S2 --> R1
-    S3 --> R2
-    R1 -. "utiliza" .-> RB
-    R2 -. "utiliza" .-> RB
+    RA["📁 Registro A<br/>Atendimento tributário<br/>(2 serviços, mesma finalidade)"]
+    RB["📁 Registro B<br/>Lançamento do IPTU<br/>(processo e suas atividades)"]
+    RC["📁 Registro C<br/>Balcão de atendimento<br/>(canal transversal)"]
+    S1 --> RA
+    S2 --> RA
+    P1 --> RB
+    A1 --> RB
+    A2 --> RB
+    RA -. "utiliza" .-> RC
+    RA -. "relacionado a" .-> RB
     style CAT fill:#2b2b2b,stroke:#888,color:#fff
-    style R1 fill:#1e3a5f,stroke:#5b9bd5,color:#fff
-    style R2 fill:#1e3a5f,stroke:#5b9bd5,color:#fff
-    style RB fill:#4d3d1e,stroke:#d4a017,color:#fff
-    linkStyle 0,1,2 stroke:#5b9bd5,stroke-width:2px
-    linkStyle 3,4 stroke:#d4a017,stroke-width:2px
+    style RA fill:#1e3a5f,stroke:#5b9bd5,color:#fff
+    style RB fill:#1e4d2b,stroke:#5cb85c,color:#fff
+    style RC fill:#4d3d1e,stroke:#d4a017,color:#fff
+    linkStyle 0,1,2 stroke:#aaaaaa
+    linkStyle 3,4 stroke:#5b9bd5,stroke-width:2px
+    linkStyle 5,6,7 stroke:#5cb85c,stroke-width:2px
+    linkStyle 8,9 stroke:#d4a017,stroke-width:2px
 ```
 
-*Exemplos ilustrativos.*
+*Exemplos ilustrativos.* Linhas cinzas: a hierarquia entre os objetos. Linhas coloridas: a qual Registro cada objeto pertence. Linhas amarelas: relações entre Registros.
 
 | Regra | Referência |
 |---|---|
 | Um objeto tem **um** Registro, com uma unidade principal; as demais Secretarias participam do mesmo Registro | SAD 02, RF-PRC-06 |
 | Vários serviços com as mesmas operações e finalidade podem integrar **um único** Registro (A) | SAD 02, RF-PRC-13 |
-| Canais e serviços de apoio que tratam dados por conta própria (ex.: 156, Ouvidoria, e-SIC, protocolo, balcão de atendimento) têm Registro **próprio** (C); os demais Registros apontam para ele | SAD 02, RF-PRC-14; SAD 05, 13.1 |
+| Um processo e as suas atividades ficam, em regra, no **mesmo** Registro (B); uma atividade só ganha Registro próprio se tiver tratamento autônomo (ex.: atividade terceirizada, com operador e base de dados próprios) | decorre do SAD 02, RF-PRC-15; granularidade a confirmar pela governança (O-80) |
+| A hierarquia (serviço que depende de um processo; processo composto de atividades) **não** torna os objetos equivalentes: os Registros se ligam por relação | SAD 05, seção 13.1 |
+| Canais e serviços de apoio que tratam dados por conta própria (ex.: 156, Ouvidoria, e-SIC, protocolo, balcão de atendimento) têm Registro **próprio** (C); os demais Registros apontam para ele | SAD 02, RF-PRC-14 |
 | Um ou dois Registros? Decide o **tratamento autônomo** (finalidade, dados, titulares, hipótese legal, riscos), não o rótulo serviço, processo ou atividade | SAD 02, RF-PRC-15 |
 | Contra duplicidade: cada item do catálogo só pode estar ligado a **um** Registro não cancelado, com trava no próprio banco de dados | proposta em teste na PoC (O-80) |
 
