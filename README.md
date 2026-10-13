@@ -136,23 +136,34 @@ flowchart LR
 
 ### Assunto ou citado: o papel de cada objeto no Registro
 
+Os objetos ligados a um Registro têm um de quatro papéis. Os dois primeiros são o **assunto** do Registro e entram na trava contra duplicidade (🔒); os dois últimos são apenas **citados** e podem aparecer em vários Registros (🔓). À direita, um exemplo:
+
 ```mermaid
 flowchart LR
-    REG["📁 Registro LGPD"]
-    subgraph ASS["🔒 ASSUNTO do Registro — entra na trava"]
-        PR["PRINCIPAL<br/>o objeto que dá nome ao Registro"]
-        AB["ABRANGIDO<br/>objeto cujo tratamento<br/>o Registro descreve"]
+    PR["🔒 PRINCIPAL<br/>o objeto que dá nome ao Registro"]
+    AB["🔒 ABRANGIDO<br/>objeto cujo tratamento<br/>o Registro descreve"]
+    AP["🔓 APOIO<br/>canal, sistema ou<br/>função auxiliar"]
+    RE["🔓 RELACIONADO<br/>apenas contexto"]
+    subgraph EX["📋 Exemplo: Registro “Lançamento do IPTU”"]
+        E1["🟩 Processo<br/>Lançamento do IPTU"]
+        E2["🟪 Atividades<br/>Cálculo do valor venal<br/>e Emissão dos carnês"]
+        E3["🟧 Canal<br/>Balcão de atendimento"]
+        E4["🟦 Serviço<br/>2ª via do IPTU"]
     end
-    subgraph CIT["🔓 CITADO no Registro — pode aparecer em vários"]
-        AP["APOIO<br/>canal, sistema ou função auxiliar"]
-        RE["RELACIONADO<br/>apenas contexto"]
-    end
-    REG --> ASS
-    REG --> CIT
-    style ASS fill:#1e3a5f,stroke:#5b9bd5,color:#fff
-    style CIT fill:#2b2b2b,stroke:#888,color:#fff
-    style REG fill:#4d3d1e,stroke:#d4a017,color:#fff
+    PR -. "é o" .-> E1
+    AB -. "são as" .-> E2
+    AP -. "é o" .-> E3
+    RE -. "é o" .-> E4
+    style PR fill:#1e3a5f,stroke:#5b9bd5,color:#fff
+    style AB fill:#1e3a5f,stroke:#5b9bd5,color:#fff
+    style AP fill:#2b2b2b,stroke:#888,color:#fff
+    style RE fill:#2b2b2b,stroke:#888,color:#fff
+    style EX fill:#1e4d2b,stroke:#5cb85c,color:#fff
+    linkStyle 0,1 stroke:#5b9bd5,stroke-width:2px
+    linkStyle 2,3 stroke:#aaaaaa,stroke-width:2px
 ```
+
+*No exemplo, ninguém mais pode abrir um Registro cujo assunto seja o Lançamento do IPTU ou as suas atividades, para a mesma finalidade. Já o Balcão e a 2ª via podem ser citados em outros Registros, e o Balcão continua livre para ter o seu próprio Registro, em que será PRINCIPAL.*
 
 ### Situação bloqueadora
 
@@ -172,16 +183,16 @@ flowchart LR
 ```mermaid
 flowchart TD
     N["📁 Novo Registro<br/>para um objeto do catálogo"] --> P{"Trata só de uma<br/>parte operacional?"}
-    P -- "sim" --> ET["🧩 A etapa ou atividade<br/>é cadastrada no catálogo<br/>(se for divisão real e estável)"]
+    P -- "sim" --> ET["🧩 A etapa ou atividade<br/>é cadastrada no catálogo<br/>(se for divisão real e estável)<br/><i>Ex. 3</i>"]
     ET -- "a verificação segue<br/>com a etapa como objeto" --> Q1
     P -- "não" --> Q1{"O objeto já é ASSUNTO<br/>de outro Registro?"}
     Q1 -- "sim" --> Q2{"Para a mesma<br/>finalidade?"}
-    Q2 -- "sim" --> BL["🔒 BLOQUEADO<br/>o sistema mostra o Registro existente,<br/>o estado e as ações possíveis"]
-    Q2 -- "não" --> OK2["✔ Finalidade distinta<br/>cada Registro declara<br/>a sua finalidade"]
+    Q2 -- "sim" --> BL["🔒 BLOQUEADO<br/>o sistema mostra o Registro existente,<br/>o estado e as ações possíveis<br/><i>Ex. 1</i>"]
+    Q2 -- "não" --> OK2["✔ Finalidade distinta<br/>cada Registro declara<br/>a sua finalidade<br/><i>Ex. 2</i>"]
     OK2 --> Q3
     Q1 -- "não" --> Q3{"Há objetos relacionados<br/>com Registro próprio?"}
-    Q3 -- "sim" --> AL["🔔 ALERTA à governança<br/>avaliar se há sobreposição<br/>(não bloqueia)"]
-    Q3 -- "não" --> OK["✔ Registro criado"]
+    Q3 -- "sim" --> AL["🔔 ALERTA à governança<br/>avaliar se há sobreposição<br/>(não bloqueia)<br/><i>Ex. 2 e 3</i>"]
+    Q3 -- "não" --> OK["✔ Registro criado<br/><i>Ex. 2, 3 e 4</i>"]
     AL --> OK
     style BL fill:#5c1e1e,stroke:#d9534f,color:#fff
     style OK fill:#1e4d2b,stroke:#5cb85c,color:#fff
@@ -189,6 +200,15 @@ flowchart TD
     style AL fill:#4d3d1e,stroke:#d4a017,color:#fff
     style ET fill:#1e3a5f,stroke:#5b9bd5,color:#fff
 ```
+
+#### Exemplos (fictícios), cada um percorrendo o fluxograma acima
+
+| Ex. | Pedido | Caminho no fluxograma | Resultado |
+|---|---|---|---|
+| 1 | Criar um Registro chamado "IPTU" para o serviço **2ª via do IPTU**, finalidade *Arrecadação* | O objeto já é assunto do Registro A, para a mesma finalidade | 🔒 **Bloqueado.** O sistema mostra o Registro A, o estado e as ações possíveis (abrir, solicitar acesso) |
+| 2 | Criar um Registro para o **Cadastro imobiliário**, finalidade *Planejamento urbano* | O objeto já é assunto de outro Registro, mas para *Tributação*: finalidade distinta. Há objetos relacionados | 🔔 **Alerta** à governança e ✔ **criado** |
+| 3 | Registrar só a **entrega dos carnês por empresa contratada** | É parte operacional: vira atividade no catálogo e a verificação recomeça. Não é assunto de outro Registro, mas está relacionada ao Lançamento do IPTU | 🔔 **Alerta** à governança e ✔ **criado** |
+| 4 | Criar um Registro para o serviço **Poda de árvore** | Não é assunto de outro Registro e não tem objetos relacionados | ✔ **Criado** |
 
 *Proposta em teste na PoC (O-80). A PoC já possui uma trava experimental por objeto. A equivalência completa por papel e finalidade, assim como os alertas de sobreposição, permanece em implementação.*
 
