@@ -49,3 +49,12 @@ Regras deste diário: sem senhas, tokens ou dados pessoais; cada entrada com dat
   - `app/permissoes.py` e `teste_segregacao.py` ajustados: REG-0003 refeito no livro novo; 8 cenários ✔, incluindo o clique duplo (pedido repetido, nada gravado). Tentativas negadas como `tentativa_negada` (catálogo do SAD 08). Ações gravadas com nome e código do catálogo: submeter (I3), iniciar_analise (I13), validar (I5), devolver (I6).
   - Limitação declarada: quem controla o banco pode reescrever uma corrente inteira; a proteção é o checkpoint externo (SAD 08, DA-27), ainda a fazer. Fechamento de segmento e ligação entre meses também pendentes.
   - Provisórios da PoC: versao_regra fixa "POC-1" (tabela versao_regra na etapa 2); segmento de auditoria por mês em UTC.
+  - Custódia do checkpoint externo (quem guarda, quem confere, a quem se comunica divergência) registrada como O-79 na LISTA_OBSERVACOES_POS_POC: decisão institucional, independente da administração do banco.
+
+## 2026-10-13 — README em PDF e início da etapa 2
+
+- Gerado o PDF do README (README_PoC_LGPD_Hortolandia_2026-10-13.pdf, guardado na pasta LGPD, fora do repositório). Acrescentado ao README o comando `python teste_segregacao.py`.
+- Pendência para revisão futura do README: incluir na autoria a identificação "a.vendramini", como nos demais documentos.
+- Envio do README à TI previsto para sexta-feira, 16/10/2026.
+- Etapa 2a — ato G1 (Criar Registro): tabelas `registro`, `ciclo` e `instrumento`; `app/workflow.py` com `criar_registro` (portões: conta ativa, tipo de objeto válido, papel de elaborador na unidade; pedido idempotente; Registro, ciclo 1, FORM 1 e evento G1 na mesma transação). `demo_registro.py`: LGPD-2026-00001 criado por PESSOA-A; PESSOA-B negada (sem papel) e registrada na auditoria; clique duplo não criou segundo Registro. 3 cenários ✔.
+- Pré-condição do G1 ainda não implementada: "inexistência de Registro equivalente ativo" (SAD 04, seção 7; SAD 05, 5.3). Formato do codigo_lgpd (LGPD-AAAA-NNNNN) segue A VALIDAR.

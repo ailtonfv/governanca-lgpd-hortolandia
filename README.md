@@ -116,6 +116,7 @@ python criar_tabelas.py         (cria as tabelas)
 python semear_pessoas.py        (pessoas e contas fictícias)
 python semear_designacoes.py    (unidades e papéis fictícios)
 python demo_eventos.py          (grava eventos e verifica a cadeia de hash)
+python teste_segregacao.py      (cenários de segregação de funções, O-66)
 ```
 
 ## Documentos deste repositório

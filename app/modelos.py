@@ -165,3 +165,60 @@ class Designacao(Base):
         # a mesma pessoa não recebe o mesmo papel duas vezes na mesma unidade
         UniqueConstraint("pessoa_id", "unidade_id", "papel", name="uq_designacao"),
     )
+
+
+class Registro(Base):
+    """O Registro LGPD: a "pasta" de um processo, atividade ou serviço que trata dados pessoais.
+    SAD 05, seção 5. Criado pelo ato G1 (SAD 04, seção 7).
+
+    Os campos marcados como PROJEÇÃO são um resumo para consulta rápida: a verdade está
+    no livro de atos, e a projeção sempre pode ser reconstruída a partir dele (DA-26, item 5).
+    """
+    __tablename__ = "registro"
+
+    id = Column(String(36), primary_key=True)                     # registro_id: identificador técnico (UUID)
+    codigo_lgpd = Column(String(20), nullable=False, unique=True)  # identificador humano (ex.: LGPD-2026-00001)
+    tipo_objeto = Column(String(20), nullable=False)              # processo, atividade ou servico
+    titulo_objeto = Column(String(200), nullable=False)           # descrição curta, sem dados pessoais
+    unidade_principal_atual_id = Column(String(50), ForeignKey("unidade.id"), nullable=False)
+    criado_em = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    criado_por = Column(String(50), nullable=False)               # a PESSOA que criou
+    # --- projeções (resumo reconstruível a partir do livro de atos)
+    ciclo_atual = Column(Integer, nullable=False)                 # número do ciclo ativo
+    estado_atual = Column(String(30), nullable=False)             # ex.: em_andamento
+    sequencia_atual = Column(Integer, nullable=False)             # último número da corrente do Registro
+
+
+class Ciclo(Base):
+    """Um ciclo de vida do Registro. O ciclo 1 nasce com o Registro; a reabertura (fora da
+    PoC nuclear) abriria o ciclo 2. SAD 05, seção 6."""
+    __tablename__ = "ciclo"
+
+    id = Column(Integer, primary_key=True)                        # ciclo_id: número interno
+    registro_id = Column(String(36), ForeignKey("registro.id"), nullable=False)
+    numero = Column(Integer, nullable=False)                      # 1, 2, 3... dentro do Registro
+    iniciado_em = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    evento_inicio_id = Column(BigInteger, ForeignKey("evento.id"))  # o ato que abriu o ciclo
+    motivo_inicio = Column(String(200))                           # obrigatório a partir do ciclo 2
+    situacao = Column(String(20), nullable=False)                 # ativo, concluido ou cancelado (projeção)
+
+    __table_args__ = (
+        UniqueConstraint("registro_id", "numero", name="uq_ciclo_numero_no_registro"),
+    )
+
+
+class Instrumento(Base):
+    """Um FORM dentro do Registro (FORM 1 a 4). Uma entidade só, com o tipo como atributo.
+    No máximo um Instrumento de cada tipo por Registro. SAD 05, seção 7.1.
+    Na PoC nuclear existe só o FORM 1 (simplificado)."""
+    __tablename__ = "instrumento"
+
+    id = Column(String(36), primary_key=True)                     # instrumento_id (UUID)
+    registro_id = Column(String(36), ForeignKey("registro.id"), nullable=False)
+    tipo_instrumento = Column(String(10), nullable=False)         # FORM1, FORM2, FORM3 ou FORM4
+    estado_instrumento = Column(String(30), nullable=False)       # projeção: nao_iniciado, em_preenchimento...
+    versao_vigente_id = Column(String(36))                        # projeção: última versão validada (etapa 2b)
+
+    __table_args__ = (
+        UniqueConstraint("registro_id", "tipo_instrumento", name="uq_instrumento_tipo_no_registro"),
+    )
