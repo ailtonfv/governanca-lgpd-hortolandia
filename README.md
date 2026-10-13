@@ -84,6 +84,45 @@ Cada **Registro LGPD** documenta um **tratamento de dados pessoais**. Serviços,
 | 🟪 **Atividade** | Uma etapa dentro de um processo | "É um pedaço de algo maior?" | Cálculo do valor venal |
 | 🟧 **Canal** | A porta por onde o cidadão chega aos serviços | "Por onde o pedido entra?" | Balcão de atendimento |
 
+### O que é o catálogo
+
+O **catálogo de objetos** é a lista oficial dos serviços, processos, atividades e canais da Prefeitura que tratam, ou podem tratar, dados pessoais. Cada item tem um **identificador canônico**: é por ele, e não pelo nome digitado, que o sistema sabe se dois Registros falam da mesma coisa. Ao lado dele existe o **catálogo de finalidades**, para que a finalidade também seja escolhida, e não digitada.
+
+```mermaid
+flowchart LR
+    subgraph FON["📥 Fontes de consulta"]
+        F1["Carta de Serviços"]
+        F2["Plano de Classificação"]
+        F3["Levantamento<br/>junto às unidades"]
+    end
+    CUR["⚖️ Curadoria do catálogo<br/>inclui, altera e desativa itens,<br/>sempre com justificativa e evento"]
+    subgraph CAT["📚 Catálogos"]
+        C1["Catálogo de objetos<br/>serviço · processo · atividade · canal"]
+        C2["Catálogo de finalidades"]
+    end
+    REG["📁 Registros LGPD<br/>escolhem itens dos catálogos;<br/>não digitam objetos nem finalidades"]
+    FON --> CUR --> CAT --> REG
+    style CUR fill:#4d3d1e,stroke:#d4a017,color:#fff
+    style CAT fill:#1e3a5f,stroke:#5b9bd5,color:#fff
+    style REG fill:#1e4d2b,stroke:#5cb85c,color:#fff
+    style FON fill:#2b2b2b,stroke:#888,color:#fff
+```
+
+| Cada item do catálogo de objetos tem | Exemplo (fictício) |
+|---|---|
+| Identificador canônico | `OBJ-SRV-001` |
+| Tipo | serviço, processo, atividade ou canal |
+| Nome oficial | 2ª via do IPTU |
+| Relações com outros itens | depende de *Lançamento do IPTU*; atendido por *Balcão de atendimento* |
+| Referência oficial, quando houver | item da Carta de Serviços ou classe do Plano de Classificação |
+| Situação | ativo ou desativado — um item nunca é apagado |
+
+**O que o catálogo não é:** não é uma cópia importada da Carta de Serviços (que continua sendo referência de consulta, SAD 05, 13.4); não é preenchido pelo elaborador na hora de criar o Registro; e não contém dados pessoais.
+
+**Em aberto (O-80):** quem exerce a curadoria; como será a carga inicial; e a lista inicial de finalidades. Na PoC, os dois catálogos são fictícios.
+
+### Exemplo: objetos do catálogo e seus Registros
+
 ```mermaid
 flowchart LR
     subgraph CAT["📚 Catálogo de objetos"]
@@ -180,25 +219,38 @@ flowchart LR
 
 ### Como o sistema evita Registros duplicados
 
+As caixas amarelas (📋) mostram, ao lado de cada pergunta, como os exemplos da tabela abaixo respondem.
+
 ```mermaid
 flowchart TD
     N["📁 Novo Registro<br/>para um objeto do catálogo"] --> P{"Trata só de uma<br/>parte operacional?"}
-    P -- "sim" --> ET["🧩 A etapa ou atividade<br/>é cadastrada no catálogo<br/>(se for divisão real e estável)<br/><i>Ex. 3</i>"]
+    P -- "sim" --> ET["🧩 A etapa ou atividade<br/>é cadastrada no catálogo<br/>(se for divisão real e estável)"]
     ET -- "a verificação segue<br/>com a etapa como objeto" --> Q1
     P -- "não" --> Q1{"O objeto já é ASSUNTO<br/>de outro Registro?"}
     Q1 -- "sim" --> Q2{"Para a mesma<br/>finalidade?"}
-    Q2 -- "sim" --> BL["🔒 BLOQUEADO<br/>o sistema mostra o Registro existente,<br/>o estado e as ações possíveis<br/><i>Ex. 1</i>"]
-    Q2 -- "não" --> OK2["✔ Finalidade distinta<br/>cada Registro declara<br/>a sua finalidade<br/><i>Ex. 2</i>"]
+    Q2 -- "sim" --> BL["🔒 BLOQUEADO<br/>o sistema mostra o Registro existente,<br/>o estado e as ações possíveis"]
+    Q2 -- "não" --> OK2["✔ Finalidade distinta<br/>cada Registro declara<br/>a sua finalidade"]
     OK2 --> Q3
     Q1 -- "não" --> Q3{"Há objetos relacionados<br/>com Registro próprio?"}
-    Q3 -- "sim" --> AL["🔔 ALERTA à governança<br/>avaliar se há sobreposição<br/>(não bloqueia)<br/><i>Ex. 2 e 3</i>"]
-    Q3 -- "não" --> OK["✔ Registro criado<br/><i>Ex. 2, 3 e 4</i>"]
+    Q3 -- "sim" --> AL["🔔 ALERTA à governança<br/>avaliar se há sobreposição<br/>(não bloqueia)"]
+    Q3 -- "não" --> OK["✔ Registro criado"]
     AL --> OK
+    XP["📋 Ex.: entrega dos carnês por<br/>empresa contratada → <b>sim</b>,<br/>é parte do Lançamento do IPTU"]
+    XQ1["📋 Ex.: 2ª via do IPTU → <b>sim</b>,<br/>já é assunto do Registro A"]
+    XQ2["📋 Ex.: Arrecadação × Arrecadação → <b>sim</b><br/>Cadastro imobiliário:<br/>Planejamento × Tributação → <b>não</b>"]
+    XQ3["📋 Ex.: Cadastro imobiliário → <b>sim</b><br/>Poda de árvore → <b>não</b>"]
+    P -.- XP
+    Q1 -.- XQ1
+    Q2 -.- XQ2
+    Q3 -.- XQ3
     style BL fill:#5c1e1e,stroke:#d9534f,color:#fff
     style OK fill:#1e4d2b,stroke:#5cb85c,color:#fff
     style OK2 fill:#1e4d2b,stroke:#5cb85c,color:#fff
     style AL fill:#4d3d1e,stroke:#d4a017,color:#fff
     style ET fill:#1e3a5f,stroke:#5b9bd5,color:#fff
+    classDef ex fill:#fff8e6,stroke:#d4a017,color:#333
+    class XP,XQ1,XQ2,XQ3 ex
+    linkStyle 12,13,14,15 stroke:#d4a017,stroke-dasharray:4
 ```
 
 #### Exemplos (fictícios), cada um percorrendo o fluxograma acima
