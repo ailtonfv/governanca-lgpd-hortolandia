@@ -17,7 +17,7 @@ ACOES_POR_ESTADO = {
     "em_andamento": ["abrir", "solicitar acesso"],
     "em_validacao": ["abrir", "solicitar acesso"],
     "em_execucao": ["abrir", "solicitar acesso"],
-    "suspenso": ["abrir", "solicitar acesso", "retomar (G8)"],
+    "suspenso": ["abrir", "solicitar acesso", "retomar (G8)", "cancelar (G11)"],
     "concluido": ["abrir", "reabrir (G10)"],
 }
 

@@ -75,7 +75,7 @@ flowchart LR
 
 ## Como os Registros são organizados
 
-Cada **Registro LGPD** documenta um **tratamento de dados pessoais**. Serviços, processos e atividades são os **objetos** que os Registros descrevem:
+Cada **Registro LGPD** documenta um **tratamento de dados pessoais**. Serviços, processos e atividades — e, conforme o SAD 02 (RF-PRC-14), canais que realizem tratamento próprio — são os **objetos** que os Registros podem descrever. O tipo **Canal** é uma extensão proposta (O-80), ainda não prevista no SAD 04:
 
 | Objeto | O que é | Pergunta-teste | Exemplo |
 |---|---|---|---|
@@ -123,7 +123,8 @@ flowchart LR
 
 | Regra | Referência |
 |---|---|
-| Um objeto tem **um** Registro, com uma unidade principal; as demais Secretarias participam do mesmo Registro | SAD 02, RF-PRC-06 |
+| Cada combinação entre **objeto e finalidade** pode ser assunto de, no máximo, **um** Registro em situação bloqueadora. Um Registro pode abranger vários objetos, e um objeto pode participar de Registros distintos quando as finalidades forem materialmente diferentes | SAD 02, RF-PRC-13 e 15; proposta (O-80) |
+| O mesmo objeto prestado por várias Secretarias é um só Registro, com uma unidade principal; as demais participam dele | SAD 02, RF-PRC-06 |
 | Vários serviços com as mesmas operações e finalidade podem integrar **um único** Registro (A) | SAD 02, RF-PRC-13 |
 | Um processo e as suas atividades ficam, em regra, no **mesmo** Registro (B); uma atividade só ganha Registro próprio se tiver tratamento autônomo (ex.: atividade terceirizada, com operador e base de dados próprios) | decorre do SAD 02, RF-PRC-15; granularidade a confirmar pela governança (O-80) |
 | A hierarquia (serviço que depende de um processo; processo composto de atividades) **não** torna os objetos equivalentes: os Registros se ligam por relação | SAD 05, seção 13.1 |
@@ -153,16 +154,31 @@ flowchart LR
     style REG fill:#4d3d1e,stroke:#d4a017,color:#fff
 ```
 
+### Situação bloqueadora
+
+| Estado do Registro equivalente | Resultado |
+|---|---|
+| Em andamento | 🔒 Bloqueia |
+| Em validação | 🔒 Bloqueia |
+| Em execução | 🔒 Bloqueia |
+| Suspenso | 🔒 Bloqueia e orienta retomada ou cancelamento |
+| Concluído | 🔒 Bloqueia nova criação e orienta reabertura (G10) |
+| Cancelado | ✔ Permite novo Registro, com vínculo ao anterior |
+
+*Proposta (O-80). O SAD 04 exige, no G1, a inexistência de Registro equivalente **ativo**. Incluir Suspenso e Concluído vai além dessa expressão literal, mas é coerente com a preservação do mesmo Registro e de seus ciclos. Depende de decisão formal e de alteração do SAD 04.*
+
 ### Como o sistema evita Registros duplicados
 
 ```mermaid
 flowchart TD
     N["📁 Novo Registro<br/>para um objeto do catálogo"] --> P{"Trata só de uma<br/>parte operacional?"}
-    P -- "sim" --> ET["🧩 Cadastrar a etapa ou<br/>atividade no catálogo<br/>e registrar essa parte"]
+    P -- "sim" --> ET["🧩 A etapa ou atividade<br/>é cadastrada no catálogo<br/>(se for divisão real e estável)"]
+    ET -- "a verificação segue<br/>com a etapa como objeto" --> Q1
     P -- "não" --> Q1{"O objeto já é ASSUNTO<br/>de outro Registro?"}
     Q1 -- "sim" --> Q2{"Para a mesma<br/>finalidade?"}
     Q2 -- "sim" --> BL["🔒 BLOQUEADO<br/>o sistema mostra o Registro existente,<br/>o estado e as ações possíveis"]
-    Q2 -- "não" --> OK2["✔ Permitido<br/>cada Registro declara<br/>a sua finalidade"]
+    Q2 -- "não" --> OK2["✔ Finalidade distinta<br/>cada Registro declara<br/>a sua finalidade"]
+    OK2 --> Q3
     Q1 -- "não" --> Q3{"Há objetos relacionados<br/>com Registro próprio?"}
     Q3 -- "sim" --> AL["🔔 ALERTA à governança<br/>avaliar se há sobreposição<br/>(não bloqueia)"]
     Q3 -- "não" --> OK["✔ Registro criado"]
@@ -174,7 +190,7 @@ flowchart TD
     style ET fill:#1e3a5f,stroke:#5b9bd5,color:#fff
 ```
 
-*Proposta em teste na PoC (O-80). Hoje a PoC já executa o bloqueio por objeto; os papéis, a finalidade declarada e o alerta são os próximos passos.*
+*Proposta em teste na PoC (O-80). A PoC já possui uma trava experimental por objeto. A equivalência completa por papel e finalidade, assim como os alertas de sobreposição, permanece em implementação.*
 
 ## O que já funciona
 
@@ -186,8 +202,8 @@ flowchart TD
 | Pessoas, contas, unidades e designações de papéis (base da segregação de funções) | ✔ estrutura e dados fictícios |
 | Regra de segregação de funções (O-66), comparando a pessoa e nunca a conta | ✔ cenários a, b, c, e, f; tentativas negadas registradas na auditoria. Cenário d (substituição) a fazer |
 | Checkpoint externo da cadeia (proteção contra reescrita da corrente inteira) — SAD 08 | a fazer |
-| Criação do Registro (ato G1), com ciclo 1, FORM 1 e catálogo fictício de objetos | ✔ |
-| Trava contra Registros duplicados (O-80): pesquisa prévia + trava no próprio banco | ✔ cenários 1, 2, 3 e 7 (inclusive dois pedidos simultâneos); 4, 5, 6 e 8 dependem de suspender, concluir e cancelar |
+| Criação do Registro pelo ato G1, com ciclo 1 e instância do FORM 1 no estado Não iniciado; catálogo fictício de objetos | ✔ (o início do preenchimento do FORM 1 será comando posterior ao G1, como no cenário A1 do SAD 04) |
+| Trava experimental contra Registros duplicados, por objeto (O-80): pesquisa prévia + trava no próprio banco | ✔ cenários 1, 2, 3 e 7 (inclusive dois pedidos simultâneos); papéis, finalidade e alertas em implementação; 4, 5, 6 e 8 dependem de suspender, concluir e cancelar |
 | Versão, análise, pendência e demais atos do workflow | a fazer |
 | Telas (FastAPI + Jinja2) e testes de aceite (pytest) | a fazer |
 
@@ -222,8 +238,8 @@ python semear_pessoas.py        (pessoas e contas fictícias)
 python semear_designacoes.py    (unidades e papéis fictícios)
 python demo_eventos.py          (grava eventos e verifica a cadeia de hash)
 python teste_segregacao.py      (cenários de segregação de funções, O-66)
-python semear_catalogo.py       (catálogo fictício de serviços, processos e atividades)
-python demo_registro.py         (ato G1: cria um Registro, com ciclo 1 e FORM 1)
+python semear_catalogo.py       (catálogo fictício de serviços, processos, atividades e canais)
+python demo_registro.py         (ato G1: cria um Registro, com ciclo 1 e FORM 1 não iniciado)
 python teste_duplicidade.py     (trava contra Registros duplicados, O-80)
 ```
 
