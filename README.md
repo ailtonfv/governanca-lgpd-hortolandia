@@ -73,6 +73,43 @@ flowchart LR
 
 **Este repositório está na PoC nuclear.**
 
+## Como os Registros são organizados
+
+Cada **Registro LGPD** documenta um **tratamento de dados pessoais**. Serviços, processos e atividades são os objetos que o Registro descreve. O que define se há um ou dois Registros é o tratamento, não o rótulo do objeto.
+
+```mermaid
+flowchart LR
+    subgraph CAT["📚 Catálogo de objetos — serviços, processos e atividades"]
+        S1["Serviço<br/>2ª via do IPTU"]
+        S2["Serviço<br/>Certidão de débitos"]
+        S3["Serviço<br/>Alvará de funcionamento"]
+    end
+    R1["📁 Registro LGPD A<br/>tributos — mesma finalidade"]
+    R2["📁 Registro LGPD B<br/>alvará"]
+    RB["📁 Registro LGPD C<br/>Balcão de atendimento<br/>(canal transversal)"]
+    S1 --> R1
+    S2 --> R1
+    S3 --> R2
+    R1 -. "utiliza" .-> RB
+    R2 -. "utiliza" .-> RB
+    style CAT fill:#2b2b2b,stroke:#888,color:#fff
+    style R1 fill:#1e3a5f,stroke:#5b9bd5,color:#fff
+    style R2 fill:#1e3a5f,stroke:#5b9bd5,color:#fff
+    style RB fill:#4d3d1e,stroke:#d4a017,color:#fff
+    linkStyle 0,1,2 stroke:#5b9bd5,stroke-width:2px
+    linkStyle 3,4 stroke:#d4a017,stroke-width:2px
+```
+
+*Exemplos ilustrativos.*
+
+| Regra | Referência |
+|---|---|
+| Um objeto tem **um** Registro, com uma unidade principal; as demais Secretarias participam do mesmo Registro | SAD 02, RF-PRC-06 |
+| Vários serviços com as mesmas operações e finalidade podem integrar **um único** Registro (A) | SAD 02, RF-PRC-13 |
+| Canais e serviços de apoio que tratam dados por conta própria (ex.: 156, Ouvidoria, e-SIC, protocolo, balcão de atendimento) têm Registro **próprio** (C); os demais Registros apontam para ele | SAD 02, RF-PRC-14; SAD 05, 13.1 |
+| Um ou dois Registros? Decide o **tratamento autônomo** (finalidade, dados, titulares, hipótese legal, riscos), não o rótulo serviço, processo ou atividade | SAD 02, RF-PRC-15 |
+| Contra duplicidade: cada item do catálogo só pode estar ligado a **um** Registro não cancelado, com trava no próprio banco de dados | proposta em teste na PoC (O-80) |
+
 ## O que já funciona
 
 | Item | Situação |
