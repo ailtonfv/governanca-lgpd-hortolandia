@@ -82,6 +82,7 @@ Cada **Registro LGPD** documenta um **tratamento de dados pessoais**. Serviços,
 | 🟦 **Serviço** | O que o cidadão recebe | "O cidadão pede isso?" | 2ª via do IPTU |
 | 🟩 **Processo** | A sequência de etapas que produz um resultado, muitas vezes passando por várias unidades | "Tem começo, meio e fim?" | Lançamento do IPTU |
 | 🟪 **Atividade** | Uma etapa dentro de um processo | "É um pedaço de algo maior?" | Cálculo do valor venal |
+| 🟧 **Canal** | A porta por onde o cidadão chega aos serviços | "Por onde o pedido entra?" | Balcão de atendimento |
 
 ```mermaid
 flowchart LR
@@ -91,6 +92,7 @@ flowchart LR
         P1["🟩 Processo<br/>Lançamento do IPTU"]
         A1["🟪 Atividade<br/>Cálculo do valor venal"]
         A2["🟪 Atividade<br/>Emissão dos carnês"]
+        CN["🟧 Canal<br/>Balcão de atendimento"]
         S1 -. "depende de" .-> P1
         P1 -. "compõe-se de" .-> A1
         P1 -. "compõe-se de" .-> A2
@@ -103,8 +105,9 @@ flowchart LR
     P1 --> RB
     A1 --> RB
     A2 --> RB
+    CN --> RC
     RA -. "utiliza" .-> RC
-    RA -. "relacionado a" .-> RB
+    RA -. "relacionado a<br/>⚠️ alerta à governança" .-> RB
     style CAT fill:#2b2b2b,stroke:#888,color:#fff
     style RA fill:#1e3a5f,stroke:#5b9bd5,color:#fff
     style RB fill:#1e4d2b,stroke:#5cb85c,color:#fff
@@ -112,10 +115,11 @@ flowchart LR
     linkStyle 0,1,2 stroke:#aaaaaa
     linkStyle 3,4 stroke:#5b9bd5,stroke-width:2px
     linkStyle 5,6,7 stroke:#5cb85c,stroke-width:2px
-    linkStyle 8,9 stroke:#d4a017,stroke-width:2px
+    linkStyle 8 stroke:#d4a017,stroke-width:2px
+    linkStyle 9,10 stroke:#d4a017,stroke-width:2px
 ```
 
-*Exemplos ilustrativos.* Linhas cinzas: a hierarquia entre os objetos. Linhas coloridas: a qual Registro cada objeto pertence. Linhas amarelas: relações entre Registros.
+*Exemplos ilustrativos.* Linhas cinzas: a hierarquia entre os objetos. Linhas coloridas: a qual Registro cada objeto pertence. Linhas amarelas: relações entre Registros; a relação entre A e B gera um alerta para a governança avaliar se há sobreposição de tratamentos.
 
 | Regra | Referência |
 |---|---|
@@ -125,7 +129,8 @@ flowchart LR
 | A hierarquia (serviço que depende de um processo; processo composto de atividades) **não** torna os objetos equivalentes: os Registros se ligam por relação | SAD 05, seção 13.1 |
 | Canais e serviços de apoio que tratam dados por conta própria (ex.: 156, Ouvidoria, e-SIC, protocolo, balcão de atendimento) têm Registro **próprio** (C); os demais Registros apontam para ele | SAD 02, RF-PRC-14 |
 | Um ou dois Registros? Decide o **tratamento autônomo** (finalidade, dados, titulares, hipótese legal, riscos), não o rótulo serviço, processo ou atividade | SAD 02, RF-PRC-15 |
-| Contra duplicidade: cada item do catálogo só pode estar ligado a **um** Registro não cancelado, com trava no próprio banco de dados | proposta em teste na PoC (O-80) |
+| **Bloqueio** (determinístico): um objeto já abrangido por um Registro não cancelado não pode ser abrangido por outro — trava no próprio banco de dados | proposta em teste na PoC (O-80) |
+| **Alerta** (para análise humana): objetos diferentes, mas relacionados no catálogo ou com mesma finalidade, titulares ou dados, geram aviso de possível sobreposição para a governança avaliar; o sistema não funde nem bloqueia sozinho | SAD 05, 5.3; proposta (O-80) |
 
 ## O que já funciona
 
@@ -137,7 +142,9 @@ flowchart LR
 | Pessoas, contas, unidades e designações de papéis (base da segregação de funções) | ✔ estrutura e dados fictícios |
 | Regra de segregação de funções (O-66), comparando a pessoa e nunca a conta | ✔ cenários a, b, c, e, f; tentativas negadas registradas na auditoria. Cenário d (substituição) a fazer |
 | Checkpoint externo da cadeia (proteção contra reescrita da corrente inteira) — SAD 08 | a fazer |
-| Registro, versão, análise, pendência, workflow | a fazer |
+| Criação do Registro (ato G1), com ciclo 1, FORM 1 e catálogo fictício de objetos | ✔ |
+| Trava contra Registros duplicados (O-80): pesquisa prévia + trava no próprio banco | ✔ cenários 1, 2, 3 e 7 (inclusive dois pedidos simultâneos); 4, 5, 6 e 8 dependem de suspender, concluir e cancelar |
+| Versão, análise, pendência e demais atos do workflow | a fazer |
 | Telas (FastAPI + Jinja2) e testes de aceite (pytest) | a fazer |
 
 ## Tecnologias (DA-28)
@@ -171,6 +178,9 @@ python semear_pessoas.py        (pessoas e contas fictícias)
 python semear_designacoes.py    (unidades e papéis fictícios)
 python demo_eventos.py          (grava eventos e verifica a cadeia de hash)
 python teste_segregacao.py      (cenários de segregação de funções, O-66)
+python semear_catalogo.py       (catálogo fictício de serviços, processos e atividades)
+python demo_registro.py         (ato G1: cria um Registro, com ciclo 1 e FORM 1)
+python teste_duplicidade.py     (trava contra Registros duplicados, O-80)
 ```
 
 ## Documentos deste repositório

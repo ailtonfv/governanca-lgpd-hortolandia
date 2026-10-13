@@ -2,7 +2,7 @@
 # O SQLAlchemy traduz cada classe abaixo em uma tabela do PostgreSQL.
 
 from sqlalchemy import (Column, BigInteger, Integer, String, Text, DateTime, JSON, Boolean,
-                        ForeignKey, UniqueConstraint, func)
+                        ForeignKey, UniqueConstraint, Index, Sequence, func)
 from sqlalchemy.orm import DeclarativeBase, relationship
 
 
@@ -221,4 +221,41 @@ class Instrumento(Base):
 
     __table_args__ = (
         UniqueConstraint("registro_id", "tipo_instrumento", name="uq_instrumento_tipo_no_registro"),
+    )
+
+
+# Numerador dos códigos LGPD. Um contador do próprio banco: dois pedidos simultâneos
+# nunca recebem o mesmo número (pode haver "pulos" na numeração, o que é aceitável).
+seq_codigo_lgpd = Sequence("seq_codigo_lgpd", metadata=Base.metadata)
+
+
+class ObjetoCatalogo(Base):
+    """Um objeto da Jornada no catálogo: serviço, processo ou atividade (O-80).
+    O identificador canônico (id) é o que define a equivalência, nunca o nome digitado.
+    Na PoC, somente objetos fictícios."""
+    __tablename__ = "objeto_catalogo"
+
+    id = Column(String(50), primary_key=True)                 # identificador canônico (ex.: OBJ-SRV-001)
+    tipo_objeto = Column(String(20), nullable=False)          # servico, processo ou atividade
+    nome_canonico = Column(String(200), nullable=False)       # nome oficial no catálogo
+    referencia = Column(String(100))                          # item da Carta de Serviços ou do Plano de Classificação
+    ativo = Column(Boolean, nullable=False, default=True)
+
+
+class RegistroObjeto(Base):
+    """Vínculo entre um Registro e os objetos do catálogo que ele documenta.
+    Um Registro pode ter vários objetos (RF-PRC-13). A TRAVA (O-80): um objeto só pode
+    estar ligado a UM Registro não cancelado. Quem garante isso é o próprio banco,
+    pelo índice único parcial abaixo — mesmo que dois pedidos cheguem no mesmo instante."""
+    __tablename__ = "registro_objeto"
+
+    id = Column(Integer, primary_key=True)
+    registro_id = Column(String(36), ForeignKey("registro.id"), nullable=False)
+    objeto_id = Column(String(50), ForeignKey("objeto_catalogo.id"), nullable=False)
+    vinculado_em = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    ativo = Column(Boolean, nullable=False, default=True)     # vira False quando o Registro é cancelado
+
+    __table_args__ = (
+        Index("uq_objeto_em_um_registro_ativo", "objeto_id", unique=True,
+              postgresql_where=(ativo.is_(True))),
     )
