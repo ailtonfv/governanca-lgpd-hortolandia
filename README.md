@@ -209,18 +209,26 @@ flowchart LR
 
 *Exemplos ilustrativos.* Linhas cinzas: a hierarquia entre os objetos. Linhas tracejadas laranja: o serviço é atendido pelo canal. Linhas coloridas: a qual Registro cada objeto pertence. Linhas amarelas: relações entre Registros; a relação entre A e B gera um alerta para a governança avaliar se há sobreposição de tratamentos.
 
-| Regra | Referência |
+Cada regra abaixo traz duas informações separadas: a **situação normativa** (de onde a regra vem e quanto ela já vale) e a **situação na PoC** (o que o código já faz).
+
+| Símbolo | Situação normativa |
 |---|---|
-| Cada combinação entre **objeto e finalidade** pode ser assunto de, no máximo, **um** Registro em situação bloqueadora. Um Registro pode abranger vários objetos, e um objeto pode participar de Registros distintos quando as finalidades forem materialmente diferentes | SAD 02, RF-PRC-13 e 15; proposta (O-80) |
-| O mesmo objeto prestado por várias Secretarias é um só Registro, com uma unidade principal; as demais participam dele | SAD 02, RF-PRC-06 |
-| Vários serviços com as mesmas operações e finalidade podem integrar **um único** Registro (A) | SAD 02, RF-PRC-13 |
-| Um processo e as suas atividades ficam, em regra, no **mesmo** Registro (B); uma atividade só ganha Registro próprio se tiver tratamento autônomo (ex.: atividade terceirizada, com operador e base de dados próprios) | decorre do SAD 02, RF-PRC-15; granularidade a confirmar pela governança (O-80) |
-| A hierarquia (serviço que depende de um processo; processo composto de atividades) **não** torna os objetos equivalentes: os Registros se ligam por relação | SAD 05, seção 13.1 |
-| Um canal só tem Registro **próprio** quando realiza tratamento autônomo (senhas, agenda, gravação, protocolo próprio…); nesse Registro é PRINCIPAL (C). Nos Registros dos serviços atendidos, aparece como APOIO. O simples recebimento e encaminhamento não basta | SAD 02, RF-PRC-14; decisão (O-80) |
-| Um ou dois Registros? Decide o **tratamento autônomo** (finalidade, dados, titulares, hipótese legal, riscos), não o rótulo serviço, processo ou atividade | SAD 02, RF-PRC-15 |
-| **Bloqueio** (determinístico): não pode haver dois Registros em situação bloqueadora que descrevam o tratamento do mesmo objeto para a mesma finalidade — trava no próprio banco de dados | proposta em teste na PoC (O-80) |
-| **Sem atalhos**: a etapa só vira item próprio do catálogo quando for divisão real e estável do processo; a finalidade é escolhida de um catálogo de finalidades com identificadores canônicos, e não digitada — mudar o texto não cria novo Registro | proposta (O-80) |
-| **Alerta** (para análise humana): objetos diferentes, mas relacionados no catálogo ou com mesma finalidade, titulares ou dados, geram aviso de possível sobreposição para a governança avaliar; o sistema não funde nem bloqueia sozinho | SAD 05, 5.3; proposta (O-80) |
+| 📘 | **Requisito vigente**: está escrito num SAD em vigor |
+| 🔎 | **Interpretação** de um SAD: decorre do texto, mas não está escrita com essas palavras |
+| 🧪 | **Decisão provisória da PoC** (SAD 10, DA-36 ou DA-37): já vale para a PoC; os SADs afetados serão ajustados na revisão pós-PoC |
+
+| Regra | Situação normativa | Na PoC |
+|---|---|---|
+| Cada combinação entre **objeto e finalidade** pode ser assunto de, no máximo, **um** Registro em situação bloqueadora. Um Registro pode abranger vários objetos, e um objeto pode participar de Registros distintos quando as finalidades forem materialmente diferentes | 🧪 DA-36, item 1 — exige ajuste do SAD 02 e do SAD 05 | ⚙️ Parcial: trava por objeto; finalidade a implementar |
+| O mesmo objeto prestado por várias Secretarias é um só Registro, com uma unidade principal; as demais participam dele | 📘 SAD 02, RF-PRC-06 | Unidade principal ✔; participantes a fazer |
+| Vários serviços com as mesmas operações e finalidade podem integrar **um único** Registro (A) | 📘 SAD 02, RF-PRC-13 | ✔ Um Registro com vários objetos |
+| Um processo e as suas atividades ficam, em regra, no **mesmo** Registro (B); uma atividade só ganha Registro próprio se tiver tratamento autônomo (ex.: atividade terceirizada, com operador e base de dados próprios) | 🔎 Interpretação do SAD 02, RF-PRC-15 — granularidade a confirmar pela governança | ✔ Permitido pelo modelo |
+| A hierarquia (serviço que depende de um processo; processo composto de atividades) **não** torna os objetos equivalentes: os Registros se ligam por relação | 🔎 Interpretação do SAD 05, 13.1 | Relações no catálogo a fazer |
+| Um canal só tem Registro **próprio** quando realiza tratamento autônomo; nesse Registro é PRINCIPAL (C) e, nos Registros dos serviços atendidos, APOIO. O simples recebimento e encaminhamento não basta | 📘 SAD 02, RF-PRC-14 (Registro próprio) + 🧪 DA-36, item 6 (catálogo de canais, papel APOIO) | ✔ Catálogo de canais e relação "atendido por"; papéis a fazer |
+| Um ou dois Registros? Decide o **tratamento autônomo** (finalidade, dados, titulares, hipótese legal, riscos), não o rótulo serviço, processo ou atividade | 📘 SAD 02, RF-PRC-15 | — (decisão humana) |
+| **Bloqueio** (determinístico): não pode haver dois Registros em situação bloqueadora que descrevam o tratamento do mesmo objeto para a mesma finalidade — trava no próprio banco de dados | 🧪 DA-36, itens 1 e 7 | ⚙️ Parcial: trava apenas por objeto, inclusive para pedidos simultâneos |
+| **Sem atalhos**: a etapa só vira item próprio do catálogo quando for divisão real e estável do processo; a finalidade é escolhida de um catálogo de finalidades com identificadores canônicos, e não digitada | 🧪 DA-36, itens 4 e 5 | Catálogo de finalidades e curadoria a fazer |
+| **Alerta** (para análise humana): objetos diferentes, mas relacionados no catálogo ou com mesma finalidade, titulares ou dados, geram aviso de possível sobreposição para a governança avaliar; o sistema não funde nem bloqueia sozinho | 📘 SAD 05, 5.3 (identificar possível duplicidade) + 🧪 DA-36, item 7 | A fazer |
 
 ### Assunto ou citado: o papel de cada objeto no Registro
 
@@ -264,7 +272,17 @@ flowchart LR
 | Concluído | 🔒 Bloqueia nova criação e orienta reabertura (G10) |
 | Cancelado | ✔ Permite novo Registro, com vínculo ao anterior |
 
-*Proposta (O-80). O SAD 04 exige, no G1, a inexistência de Registro equivalente **ativo**. Incluir Suspenso e Concluído vai além dessa expressão literal, mas é coerente com a preservação do mesmo Registro e de seus ciclos. Depende de decisão formal e de alteração do SAD 04.*
+*🧪 DA-36, item 2 (SAD 10 REV13). O SAD 04 exige, no G1, a inexistência de Registro equivalente **ativo**. Incluir Suspenso e Concluído vai além dessa expressão literal, mas é coerente com a preservação do mesmo Registro e de seus ciclos. Exige ajuste do SAD 04.*
+
+#### Questão arquitetural: cancelar a partir de Suspenso ou Concluído (G11)
+
+O G11 do SAD 04 só permite cancelar a partir de estado **ativo** (Em andamento, Em validação, Em execução). Isso impedia cancelar um Registro duplicado que já estivesse Suspenso ou Concluído, a não ser por caminhos artificiais (retomar só para cancelar, ou reabrir criando um ciclo novo só para cancelar), que distorceriam a trilha.
+
+| Situação | Onde está |
+|---|---|
+| 🧪 Decisão provisória: o G11 passa a valer a partir de qualquer estado diferente de Cancelado; motivo escolhido de catálogo; competência reforçada para cancelar Registro Concluído, sem novo ciclo e sem apagar a conclusão histórica | DA-37 (SAD 10 REV14) |
+| Ajuste da especificação | SAD 04 (G11, Figura 2, seção 6.4, pendências e cenários): pendente, revisão pós-PoC (O-82) |
+| Na PoC | O cenário 8 (duplicidade descoberta depois) depende da DA-37 e dos atos de suspender, concluir e cancelar, ainda não implementados |
 
 ### Como o sistema evita Registros duplicados
 
@@ -272,7 +290,11 @@ As caixas amarelas (📋) mostram, ao lado de cada pergunta, como os exemplos da
 
 ```mermaid
 flowchart TD
-    N["📁 Novo Registro<br/>para um objeto do catálogo"] --> P{"Trata só de uma<br/>parte operacional?"}
+    N["📁 Novo Registro<br/>para um item do catálogo"] --> C0{"O item é<br/>um canal?"}
+    C0 -- "não" --> P{"Trata só de uma<br/>parte operacional?"}
+    C0 -- "sim" --> CA{"O canal realiza<br/>tratamento autônomo?"}
+    CA -- "não" --> APO["🔓 Sem Registro próprio<br/>APOIO nos Registros<br/>dos serviços atendidos"]
+    CA -- "sim" --> Q1
     P -- "sim" --> ET["🧩 A etapa ou atividade<br/>é cadastrada no catálogo<br/>(se for divisão real e estável)"]
     ET -- "a verificação segue<br/>com a etapa como objeto" --> Q1
     P -- "não" --> Q1{"O objeto já é ASSUNTO<br/>de outro Registro?"}
@@ -288,18 +310,21 @@ flowchart TD
     XQ1["📋 Ex.: 2ª via do IPTU → <b>sim</b>,<br/>já é assunto do Registro A"]
     XQ2["📋 Ex.: Arrecadação × Arrecadação → <b>sim</b><br/>Cadastro imobiliário:<br/>Planejamento × Tributação → <b>não</b>"]
     XQ3["📋 Ex.: Cadastro imobiliário → <b>sim</b><br/>Poda de árvore → <b>não</b>"]
+    XC["📋 Ex.: balcão com senhas e fila → <b>sim</b><br/>balcão que só recebe documentos → <b>não</b>"]
     P -.- XP
     Q1 -.- XQ1
     Q2 -.- XQ2
     Q3 -.- XQ3
+    CA -.- XC
     style BL fill:#5c1e1e,stroke:#d9534f,color:#fff
     style OK fill:#1e4d2b,stroke:#5cb85c,color:#fff
     style OK2 fill:#1e4d2b,stroke:#5cb85c,color:#fff
     style AL fill:#4d3d1e,stroke:#d4a017,color:#fff
     style ET fill:#1e3a5f,stroke:#5b9bd5,color:#fff
     classDef ex fill:#fff8e6,stroke:#d4a017,color:#333
-    class XP,XQ1,XQ2,XQ3 ex
-    linkStyle 12,13,14,15 stroke:#d4a017,stroke-dasharray:4
+    class XP,XQ1,XQ2,XQ3,XC ex
+    style APO fill:#2b2b2b,stroke:#888,color:#fff
+    linkStyle 16,17,18,19,20 stroke:#d4a017,stroke-dasharray:4
 ```
 
 #### Exemplos (fictícios), cada um percorrendo o fluxograma acima
@@ -324,7 +349,8 @@ flowchart TD
 | Regra de segregação de funções (O-66), comparando a pessoa e nunca a conta | ✔ cenários a, b, c, e, f; tentativas negadas registradas na auditoria. Cenário d (substituição) a fazer |
 | Checkpoint externo da cadeia (proteção contra reescrita da corrente inteira) — SAD 08 | a fazer |
 | Criação do Registro pelo ato G1, com ciclo 1 e instância do FORM 1 no estado Não iniciado; catálogo fictício de objetos | ✔ (o início do preenchimento do FORM 1 será comando posterior ao G1, como no cenário A1 do SAD 04) |
-| Trava experimental contra Registros duplicados, por objeto (O-80): pesquisa prévia + trava no próprio banco | ✔ cenários 1, 2, 3 e 7 (inclusive dois pedidos simultâneos); papéis, finalidade e alertas em implementação; 4, 5, 6 e 8 dependem de suspender, concluir e cancelar |
+| Catálogo de canais e relação serviço–canal ("atendido por"), separado do catálogo operacional — DA-36, item 6 | ✔ 3 canais e 3 ligações fictícias |
+| Trava experimental contra Registros duplicados, por objeto (O-80): pesquisa prévia + trava no próprio banco | ✔ cenários 1, 2, 3 e 7 (inclusive dois pedidos simultâneos); papéis, finalidade e alertas em implementação; 4, 5 e 6 dependem dos atos de suspender, concluir e cancelar; o 8 depende ainda da revisão normativa do G11 (DA-37; ajuste do SAD 04 pendente) |
 | Versão, análise, pendência e demais atos do workflow | a fazer |
 | Telas (FastAPI + Jinja2) e testes de aceite (pytest) | a fazer |
 
