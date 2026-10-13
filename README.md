@@ -75,18 +75,61 @@ flowchart LR
 
 ## Como os Registros são organizados
 
-Cada **Registro LGPD** documenta um **tratamento de dados pessoais**. Serviços, processos e atividades — e, conforme o SAD 02 (RF-PRC-14), canais que realizem tratamento próprio — são os **objetos** que os Registros podem descrever. O tipo **Canal** é uma extensão proposta (O-80), ainda não prevista no SAD 04:
+Cada **Registro LGPD** documenta um **tratamento de dados pessoais**. Serviços, processos e atividades são os **objetos** que os Registros descrevem; os **canais** de atendimento formam uma dimensão à parte (veja adiante):
 
 | Objeto | O que é | Pergunta-teste | Exemplo |
 |---|---|---|---|
 | 🟦 **Serviço** | O que o cidadão recebe | "O cidadão pede isso?" | 2ª via do IPTU |
 | 🟩 **Processo** | A sequência de etapas que produz um resultado, muitas vezes passando por várias unidades | "Tem começo, meio e fim?" | Lançamento do IPTU |
 | 🟪 **Atividade** | Uma etapa dentro de um processo | "É um pedaço de algo maior?" | Cálculo do valor venal |
-| 🟧 **Canal** | A porta por onde o cidadão chega aos serviços | "Por onde o pedido entra?" | Balcão de atendimento |
+
+### Canais: uma dimensão transversal
+
+Serviços, processos e atividades formam a **estrutura operacional**: os serviços dependem de processos, e os processos são compostos por atividades. Os **canais** constituem uma **dimensão transversal de atendimento** e se relacionam com os serviços em associação muitos para muitos (o serviço *é atendido pelo* canal; o canal *atende* o serviço — é uma única relação, vista dos dois lados). O canal somente possui Registro LGPD próprio quando realiza tratamento autônomo. Caso funcione apenas como meio de acesso ou encaminhamento, aparece como APOIO nos Registros dos serviços atendidos.
+
+```mermaid
+flowchart TB
+    subgraph OPE["⚙️ Catálogo operacional — o que se faz"]
+        direction LR
+        S["🟦 Serviço"] -- "depende de" --> P["🟩 Processo"] -- "compõe-se de" --> A["🟪 Atividades"]
+    end
+    subgraph CNL["🚪 Catálogo de canais — por onde o cidadão chega"]
+        C1["Balcão · Portal · Telefone · Aplicativo · Totem"]
+    end
+    OPE <-. "atendido por / atende<br/>(muitos para muitos)" .-> CNL
+    style OPE fill:#1e3a5f,stroke:#5b9bd5,color:#fff
+    style CNL fill:#4d3d1e,stroke:#d4a017,color:#fff
+```
+
+#### Quando o canal ganha Registro próprio
+
+```mermaid
+flowchart LR
+    Q{"O canal realiza<br/>tratamento próprio?"}
+    Q -- "não" --> N["Não tem Registro próprio<br/>aparece como APOIO<br/>nos Registros dos serviços"]
+    Q -- "sim" --> S["Tem Registro próprio,<br/>em que é PRINCIPAL;<br/>continua como APOIO<br/>nos Registros dos serviços"]
+    style N fill:#2b2b2b,stroke:#888,color:#fff
+    style S fill:#4d3d1e,stroke:#d4a017,color:#fff
+```
+
+São exemplos de tratamento próprio do canal: gestão de senhas e filas; agendamento; cadastro prévio; gravação de chamadas; videomonitoramento; identificação do atendente e do cidadão; armazenamento temporário em sistema próprio; geração de protocolo transversal. **O simples recebimento e encaminhamento de documentos do serviço não caracteriza, por si só, tratamento autônomo do canal.**
+
+#### Exemplo: separar o que é do canal e o que é do serviço
+
+| | Registro C — Gestão do balcão | Registro A — Atendimento tributário (2ª via do IPTU) |
+|---|---|---|
+| Descreve | Só o tratamento comum e autônomo do canal | O tratamento do serviço |
+| Finalidade | Organizar o atendimento | Emitir a segunda via |
+| Dados | Nome, senha, horário e guichê | Inscrição imobiliária e dados do contribuinte |
+| Retenção | Histórico da fila por determinado período | Conforme o serviço |
+| Sistema | Gerenciador de atendimento | Sistema tributário |
+| Balcão de atendimento | **PRINCIPAL** | **APOIO** (canal utilizado) |
+
+Mesmo que o servidor do balcão visualize os dados do IPTU, esse tratamento pertence ao serviço: o Registro do canal contém apenas o que o próprio canal faz com os dados.
 
 ### O que é o catálogo
 
-O **catálogo de objetos** é a lista oficial dos serviços, processos, atividades e canais da Prefeitura que tratam, ou podem tratar, dados pessoais. Cada item tem um **identificador canônico**: é por ele, e não pelo nome digitado, que o sistema sabe se dois Registros falam da mesma coisa. Ao lado dele existe o **catálogo de finalidades**, para que a finalidade também seja escolhida, e não digitada.
+O **catálogo operacional** é a lista oficial dos serviços, processos e atividades da Prefeitura que tratam, ou podem tratar, dados pessoais; o **catálogo de canais** lista as portas de atendimento. Cada item tem um **identificador canônico**: é por ele, e não pelo nome digitado, que o sistema sabe se dois Registros falam da mesma coisa. Ao lado dele existe o **catálogo de finalidades**, para que a finalidade também seja escolhida, e não digitada.
 
 ```mermaid
 flowchart LR
@@ -97,7 +140,8 @@ flowchart LR
     end
     CUR["⚖️ Curadoria do catálogo<br/>inclui, altera e desativa itens,<br/>sempre com justificativa e evento"]
     subgraph CAT["📚 Catálogos"]
-        C1["Catálogo de objetos<br/>serviço · processo · atividade · canal"]
+        C1["Catálogo operacional<br/>serviço · processo · atividade"]
+        C3["Catálogo de canais<br/>balcão · portal · telefone…"]
         C2["Catálogo de finalidades"]
     end
     REG["📁 Registros LGPD<br/>escolhem itens dos catálogos;<br/>não digitam objetos nem finalidades"]
@@ -108,10 +152,10 @@ flowchart LR
     style FON fill:#2b2b2b,stroke:#888,color:#fff
 ```
 
-| Cada item do catálogo de objetos tem | Exemplo (fictício) |
+| Cada item do catálogo operacional tem | Exemplo (fictício) |
 |---|---|
 | Identificador canônico | `OBJ-SRV-001` |
-| Tipo | serviço, processo, atividade ou canal |
+| Tipo | serviço, processo ou atividade |
 | Nome oficial | 2ª via do IPTU |
 | Relações com outros itens | depende de *Lançamento do IPTU*; atendido por *Balcão de atendimento* |
 | Referência oficial, quando houver | item da Carta de Serviços ou classe do Plano de Classificação |
@@ -119,26 +163,30 @@ flowchart LR
 
 **O que o catálogo não é:** não é uma cópia importada da Carta de Serviços (que continua sendo referência de consulta, SAD 05, 13.4); não é preenchido pelo elaborador na hora de criar o Registro; e não contém dados pessoais.
 
-**Em aberto (O-80):** quem exerce a curadoria; como será a carga inicial; e a lista inicial de finalidades. Na PoC, os dois catálogos são fictícios.
+**Em aberto (O-80):** quem exerce a curadoria; como será a carga inicial; e a lista inicial de finalidades. Na PoC, os catálogos são fictícios.
 
 ### Exemplo: objetos do catálogo e seus Registros
 
 ```mermaid
 flowchart LR
-    subgraph CAT["📚 Catálogo de objetos"]
+    subgraph CAT["⚙️ Catálogo operacional"]
         S1["🟦 Serviço<br/>2ª via do IPTU"]
         S2["🟦 Serviço<br/>Certidão de débitos"]
         P1["🟩 Processo<br/>Lançamento do IPTU"]
         A1["🟪 Atividade<br/>Cálculo do valor venal"]
         A2["🟪 Atividade<br/>Emissão dos carnês"]
-        CN["🟧 Canal<br/>Balcão de atendimento"]
         S1 -. "depende de" .-> P1
         P1 -. "compõe-se de" .-> A1
         P1 -. "compõe-se de" .-> A2
     end
+    subgraph CNL["🚪 Catálogo de canais"]
+        CN["Balcão de atendimento"]
+    end
+    S1 -. "atendido por" .- CN
+    S2 -. "atendido por" .- CN
     RA["📁 Registro A<br/>Atendimento tributário<br/>(2 serviços, mesma finalidade)"]
     RB["📁 Registro B<br/>Lançamento do IPTU<br/>(processo e suas atividades)"]
-    RC["📁 Registro C<br/>Balcão de atendimento<br/>(canal transversal)"]
+    RC["📁 Registro C<br/>Gestão do balcão<br/>(tratamento próprio do canal)"]
     S1 --> RA
     S2 --> RA
     P1 --> RB
@@ -148,17 +196,18 @@ flowchart LR
     RA -. "utiliza" .-> RC
     RA -. "relacionado a<br/>⚠️ alerta à governança" .-> RB
     style CAT fill:#2b2b2b,stroke:#888,color:#fff
+    style CNL fill:#4d3d1e,stroke:#d4a017,color:#fff
     style RA fill:#1e3a5f,stroke:#5b9bd5,color:#fff
     style RB fill:#1e4d2b,stroke:#5cb85c,color:#fff
     style RC fill:#4d3d1e,stroke:#d4a017,color:#fff
     linkStyle 0,1,2 stroke:#aaaaaa
-    linkStyle 3,4 stroke:#5b9bd5,stroke-width:2px
-    linkStyle 5,6,7 stroke:#5cb85c,stroke-width:2px
-    linkStyle 8 stroke:#d4a017,stroke-width:2px
-    linkStyle 9,10 stroke:#d4a017,stroke-width:2px
+    linkStyle 3,4 stroke:#d4a017,stroke-dasharray:4
+    linkStyle 5,6 stroke:#5b9bd5,stroke-width:2px
+    linkStyle 7,8,9 stroke:#5cb85c,stroke-width:2px
+    linkStyle 10,11,12 stroke:#d4a017,stroke-width:2px
 ```
 
-*Exemplos ilustrativos.* Linhas cinzas: a hierarquia entre os objetos. Linhas coloridas: a qual Registro cada objeto pertence. Linhas amarelas: relações entre Registros; a relação entre A e B gera um alerta para a governança avaliar se há sobreposição de tratamentos.
+*Exemplos ilustrativos.* Linhas cinzas: a hierarquia entre os objetos. Linhas tracejadas laranja: o serviço é atendido pelo canal. Linhas coloridas: a qual Registro cada objeto pertence. Linhas amarelas: relações entre Registros; a relação entre A e B gera um alerta para a governança avaliar se há sobreposição de tratamentos.
 
 | Regra | Referência |
 |---|---|
@@ -167,7 +216,7 @@ flowchart LR
 | Vários serviços com as mesmas operações e finalidade podem integrar **um único** Registro (A) | SAD 02, RF-PRC-13 |
 | Um processo e as suas atividades ficam, em regra, no **mesmo** Registro (B); uma atividade só ganha Registro próprio se tiver tratamento autônomo (ex.: atividade terceirizada, com operador e base de dados próprios) | decorre do SAD 02, RF-PRC-15; granularidade a confirmar pela governança (O-80) |
 | A hierarquia (serviço que depende de um processo; processo composto de atividades) **não** torna os objetos equivalentes: os Registros se ligam por relação | SAD 05, seção 13.1 |
-| Canais e serviços de apoio que tratam dados por conta própria (ex.: 156, Ouvidoria, e-SIC, protocolo, balcão de atendimento) têm Registro **próprio** (C); os demais Registros apontam para ele | SAD 02, RF-PRC-14 |
+| Um canal só tem Registro **próprio** quando realiza tratamento autônomo (senhas, agenda, gravação, protocolo próprio…); nesse Registro é PRINCIPAL (C). Nos Registros dos serviços atendidos, aparece como APOIO. O simples recebimento e encaminhamento não basta | SAD 02, RF-PRC-14; decisão (O-80) |
 | Um ou dois Registros? Decide o **tratamento autônomo** (finalidade, dados, titulares, hipótese legal, riscos), não o rótulo serviço, processo ou atividade | SAD 02, RF-PRC-15 |
 | **Bloqueio** (determinístico): não pode haver dois Registros em situação bloqueadora que descrevam o tratamento do mesmo objeto para a mesma finalidade — trava no próprio banco de dados | proposta em teste na PoC (O-80) |
 | **Sem atalhos**: a etapa só vira item próprio do catálogo quando for divisão real e estável do processo; a finalidade é escolhida de um catálogo de finalidades com identificadores canônicos, e não digitada — mudar o texto não cria novo Registro | proposta (O-80) |
