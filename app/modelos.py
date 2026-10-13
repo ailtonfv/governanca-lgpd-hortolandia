@@ -259,3 +259,34 @@ class RegistroObjeto(Base):
         Index("uq_objeto_em_um_registro_ativo", "objeto_id", unique=True,
               postgresql_where=(ativo.is_(True))),
     )
+
+
+class Canal(Base):
+    """Catálogo de CANAIS: as portas por onde o cidadão chega aos serviços (DA-36, item 6).
+    O canal não faz parte da hierarquia serviço → processo → atividade: é uma dimensão transversal.
+    Na PoC, somente canais fictícios."""
+    __tablename__ = "canal"
+
+    id = Column(String(50), primary_key=True)                 # identificador canônico (ex.: CNL-001)
+    nome_canonico = Column(String(200), nullable=False)       # ex.: Balcão de atendimento
+    ativo = Column(Boolean, nullable=False, default=True)     # desativado, nunca apagado
+
+
+class ServicoCanal(Base):
+    """Relação muitos para muitos entre serviço e canal (DA-36, item 6).
+    Lida de um lado: o serviço É ATENDIDO PELO canal. Do outro: o canal ATENDE o serviço.
+    Uma única relação, com vigência: encerrar é preencher vigente_ate, nunca apagar."""
+    __tablename__ = "servico_canal"
+
+    id = Column(Integer, primary_key=True)
+    servico_id = Column(String(50), ForeignKey("objeto_catalogo.id"), nullable=False)
+    canal_id = Column(String(50), ForeignKey("canal.id"), nullable=False)
+    vigente_de = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    vigente_ate = Column(DateTime(timezone=True))             # vazio = ainda vigente
+    observacao = Column(String(200))
+
+    __table_args__ = (
+        # o mesmo par serviço–canal não pode estar vigente duas vezes
+        Index("uq_servico_canal_vigente", "servico_id", "canal_id", unique=True,
+              postgresql_where=(vigente_ate.is_(None))),
+    )

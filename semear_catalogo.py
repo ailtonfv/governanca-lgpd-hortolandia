@@ -1,4 +1,5 @@
-# Catálogo FICTÍCIO de objetos da Jornada: serviços, processos, atividades e canais (O-80).
+# Catálogo operacional FICTÍCIO: serviços, processos e atividades (O-80, DA-36).
+# Os canais ficam em catálogo próprio: ver semear_canais.py.
 # O identificador (id) é o que define a equivalência; o nome é só para leitura.
 # Pode ser rodado mais de uma vez: só acrescenta o que ainda não existe.
 
@@ -16,7 +17,6 @@ OBJETOS = [
     ("OBJ-ATV-002", "atividade", "Emissão dos carnês (fictício)"),
     ("OBJ-SRV-010", "servico",   "Atendimento ao contribuinte (fictício)"),   # mesmo nome,
     ("OBJ-PRC-010", "processo",  "Atendimento ao contribuinte (fictício)"),   # tipo diferente
-    ("OBJ-CNL-001", "canal",     "Balcão de atendimento (fictício)"),
     ("OBJ-SRV-900", "servico",   "Serviço fictício de demonstração"),
     ("OBJ-SRV-901", "servico",   "Outro serviço fictício de demonstração"),
 ]
