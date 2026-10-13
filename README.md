@@ -129,8 +129,52 @@ flowchart LR
 | A hierarquia (serviço que depende de um processo; processo composto de atividades) **não** torna os objetos equivalentes: os Registros se ligam por relação | SAD 05, seção 13.1 |
 | Canais e serviços de apoio que tratam dados por conta própria (ex.: 156, Ouvidoria, e-SIC, protocolo, balcão de atendimento) têm Registro **próprio** (C); os demais Registros apontam para ele | SAD 02, RF-PRC-14 |
 | Um ou dois Registros? Decide o **tratamento autônomo** (finalidade, dados, titulares, hipótese legal, riscos), não o rótulo serviço, processo ou atividade | SAD 02, RF-PRC-15 |
-| **Bloqueio** (determinístico): um objeto já abrangido por um Registro não cancelado não pode ser abrangido por outro — trava no próprio banco de dados | proposta em teste na PoC (O-80) |
+| **Bloqueio** (determinístico): não pode haver dois Registros em situação bloqueadora que descrevam o tratamento do mesmo objeto para a mesma finalidade — trava no próprio banco de dados | proposta em teste na PoC (O-80) |
+| **Sem atalhos**: a etapa só vira item próprio do catálogo quando for divisão real e estável do processo; a finalidade é escolhida de um catálogo de finalidades com identificadores canônicos, e não digitada — mudar o texto não cria novo Registro | proposta (O-80) |
 | **Alerta** (para análise humana): objetos diferentes, mas relacionados no catálogo ou com mesma finalidade, titulares ou dados, geram aviso de possível sobreposição para a governança avaliar; o sistema não funde nem bloqueia sozinho | SAD 05, 5.3; proposta (O-80) |
+
+### Assunto ou citado: o papel de cada objeto no Registro
+
+```mermaid
+flowchart LR
+    REG["📁 Registro LGPD"]
+    subgraph ASS["🔒 ASSUNTO do Registro — entra na trava"]
+        PR["PRINCIPAL<br/>o objeto que dá nome ao Registro"]
+        AB["ABRANGIDO<br/>objeto cujo tratamento<br/>o Registro descreve"]
+    end
+    subgraph CIT["🔓 CITADO no Registro — pode aparecer em vários"]
+        AP["APOIO<br/>canal, sistema ou função auxiliar"]
+        RE["RELACIONADO<br/>apenas contexto"]
+    end
+    REG --> ASS
+    REG --> CIT
+    style ASS fill:#1e3a5f,stroke:#5b9bd5,color:#fff
+    style CIT fill:#2b2b2b,stroke:#888,color:#fff
+    style REG fill:#4d3d1e,stroke:#d4a017,color:#fff
+```
+
+### Como o sistema evita Registros duplicados
+
+```mermaid
+flowchart TD
+    N["📁 Novo Registro<br/>para um objeto do catálogo"] --> P{"Trata só de uma<br/>parte operacional?"}
+    P -- "sim" --> ET["🧩 Cadastrar a etapa ou<br/>atividade no catálogo<br/>e registrar essa parte"]
+    P -- "não" --> Q1{"O objeto já é ASSUNTO<br/>de outro Registro?"}
+    Q1 -- "sim" --> Q2{"Para a mesma<br/>finalidade?"}
+    Q2 -- "sim" --> BL["🔒 BLOQUEADO<br/>o sistema mostra o Registro existente,<br/>o estado e as ações possíveis"]
+    Q2 -- "não" --> OK2["✔ Permitido<br/>cada Registro declara<br/>a sua finalidade"]
+    Q1 -- "não" --> Q3{"Há objetos relacionados<br/>com Registro próprio?"}
+    Q3 -- "sim" --> AL["🔔 ALERTA à governança<br/>avaliar se há sobreposição<br/>(não bloqueia)"]
+    Q3 -- "não" --> OK["✔ Registro criado"]
+    AL --> OK
+    style BL fill:#5c1e1e,stroke:#d9534f,color:#fff
+    style OK fill:#1e4d2b,stroke:#5cb85c,color:#fff
+    style OK2 fill:#1e4d2b,stroke:#5cb85c,color:#fff
+    style AL fill:#4d3d1e,stroke:#d4a017,color:#fff
+    style ET fill:#1e3a5f,stroke:#5b9bd5,color:#fff
+```
+
+*Proposta em teste na PoC (O-80). Hoje a PoC já executa o bloqueio por objeto; os papéis, a finalidade declarada e o alerta são os próximos passos.*
 
 ## O que já funciona
 
