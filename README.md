@@ -1,6 +1,6 @@
-# Sistema de Governança Municipal LGPD — PoC nuclear
+# Sistema de Governança Municipal LGPD — Prova de Conceito
 
-**Prefeitura Municipal de Hortolândia** · Prova de Conceito (PoC) · repositório privado · em construção
+**Prefeitura Municipal de Hortolândia** · PoC nuclear (em construção) e PoC ampliada (planejada) · repositório privado
 
 > ⚠️ **Somente dados fictícios.** Nenhum dado pessoal real, CPF, matrícula, senha ou token entra neste repositório, no código, nos testes ou nos logs.
 
@@ -9,21 +9,26 @@
 O sistema nasce do programa de proteção de dados pessoais da Prefeitura. Dois conjuntos de documentos o sustentam, cada um com um papel:
 
 ```mermaid
+%% wide
 flowchart TB
     L["LGPD e atos municipais<br/>(Comitê, Encarregado de Dados)"] --> C
     L --> S
     C["📗 <b>Cartilha LGPD</b><br/>orienta os <b>servidores</b>:<br/>o que fazer no dia a dia"]
     S["📘 <b>Série SAD</b><br/>especifica o <b>sistema</b>:<br/>como ele apoia esse trabalho"]
     C -. mesma linguagem e mesmos conceitos .- S
-    S --> P["🧪 <b>Esta PoC</b><br/>prova que o desenho dos SADs funciona"]
+    S --> POC
+    subgraph POC["🧪 Prova de Conceito — sempre com dados fictícios"]
+        direction LR
+        P["<b>PoC nuclear</b> (M1a)<br/>prova que o desenho funciona"] -- "após o aceite do M1a" --> A["<b>PoC ampliada</b> (M1b, M2, M3A)<br/>prova que o desenho resiste<br/>às situações difíceis"]
+    end
     style C fill:#1e4d2b,stroke:#5cb85c,color:#fff
     style S fill:#1e3a5f,stroke:#5b9bd5,color:#fff
-    style P fill:#4d3d1e,stroke:#d4a017,color:#fff
+    style POC fill:#4d3d1e,stroke:#d4a017,color:#fff
 ```
 
 - **Cartilha LGPD** — orienta os servidores sobre o tratamento de dados pessoais: conceitos, responsabilidades, a quem recorrer. É o ponto de partida para entender o *porquê* do sistema.
 - **Série SAD** — especifica o sistema que apoia esse trabalho: requisitos, papéis, workflow, dados, segurança e decisões de arquitetura.
-- **Esta PoC** — verifica, com dados fictícios, se o desenho dos SADs funciona na prática.
+- **PoC nuclear e PoC ampliada** — verificam, sempre com dados fictícios, se o desenho dos SADs funciona (nuclear, marco M1a) e se resiste às situações difíceis da administração (ampliada, marcos M1b, M2 e M3A). A ampliada só começa depois do aceite da nuclear.
 
 A Cartilha e os SADs serão publicados neste repositório na próxima etapa.
 
@@ -71,7 +76,23 @@ flowchart LR
     style P fill:#4d3d1e,stroke:#d4a017,color:#fff
 ```
 
-**Este repositório está na PoC nuclear.**
+**Hoje, este repositório está na PoC nuclear (M1a).** Este documento descreve também a PoC ampliada, que reaproveita o mesmo código e começa depois do aceite do M1a.
+
+#### PoC nuclear × PoC ampliada
+
+As duas camadas usam dados fictícios e são construídas pelo Encarregado de Dados; a diferença está no que cada uma precisa provar (SAD 09, seção 4A):
+
+| | PoC nuclear | PoC ampliada |
+|---|---|---|
+| Pergunta | O desenho funciona? | O desenho resiste às situações difíceis? |
+| Marcos (SAD 09) | M1a | M1b, M2 e M3A, cada um iniciado após o aceite do anterior |
+| Escopo | Registro, FORM 1 sintético simplificado, versão, submissão, análise com segregação de funções, devolução com pendência, validação, conclusão, pendência intersecretarial, livro de atos com cadeia de hash e reconstrução da trilha | Suspensão e retomada, cancelamento com efeito nas pendências, reabertura com novo ciclo, continuidade institucional (ausência, saída, troca de chefia), participação por unidade, backup e restauração; FORM 1 real de ponta a ponta, segundo Instrumento, Dossiê e compartilhamento |
+| Cenários do SAD 04 | Cerca de 15 (A1 a A4, A9 a A12, A14, A15, A28 a A30) | Cerca de 16 novos, mais a reexecução de todos os da nuclear com o FORM 1 real |
+| Dependências externas | Nenhuma além da autorização para implementar | Contrato integral do FORM 1 e envelope de ingestão (SAD09-05 e 01); decisão SAD09-10 |
+| Entregáveis | Código, testes de aceite, evidências e diário | Também o relatório de validação e o Relatório de Encerramento e Transferência Técnica (SAD 09, seção 37) |
+| Participação da TI | Recebe informação | Acompanha a construção |
+
+A PoC ampliada exige mais trabalho: são três marcos em sequência, as situações difíceis mexem em várias peças ao mesmo tempo, e parte das condições depende de decisões institucionais. Em compensação, ela não começa do zero: reaproveita o chassi da nuclear (livro de atos, pedido idempotente, barreiras e auditoria), e cada ato novo segue o mesmo molde.
 
 ## Como os Registros são organizados
 
@@ -80,18 +101,18 @@ Cada **Registro LGPD** documenta um **tratamento de dados pessoais**. Serviços,
 | Objeto | O que é | Pergunta-teste | Exemplo |
 |---|---|---|---|
 | 🟦 **Serviço** | O que o cidadão recebe | "O cidadão pede isso?" | 2ª via do IPTU |
-| 🟩 **Processo** | A sequência de etapas que produz um resultado, muitas vezes passando por várias unidades | "Tem começo, meio e fim?" | Lançamento do IPTU |
+| 🟩 **Processo** | A sequência de etapas que produz um resultado, muitas vezes passando por várias unidades | "Tem começo, meio e fim?" | Lançamento e cobrança do IPTU |
 | 🟪 **Atividade** | Uma etapa dentro de um processo | "É um pedaço de algo maior?" | Cálculo do valor venal |
 
 ### Canais: uma dimensão transversal
 
-Serviços, processos e atividades formam a **estrutura operacional**: os serviços dependem de processos, e os processos são compostos por atividades. Os **canais** constituem uma **dimensão transversal de atendimento** e se relacionam com os serviços em associação muitos para muitos (o serviço *é atendido pelo* canal; o canal *atende* o serviço — é uma única relação, vista dos dois lados). O canal somente possui Registro LGPD próprio quando realiza tratamento autônomo. Caso funcione apenas como meio de acesso ou encaminhamento, aparece como APOIO nos Registros dos serviços atendidos.
+Serviços, processos e atividades formam a **estrutura operacional**: os serviços **são realizados por** processos (um serviço pode ser realizado por vários processos, e um processo pode realizar vários serviços), e os processos são compostos por atividades. A expressão "depende de" fica reservada para dependência efetiva (técnica, organizacional, informacional ou operacional). Os **canais** constituem uma **dimensão transversal de atendimento** e se relacionam com os serviços em associação muitos para muitos (o serviço *é atendido pelo* canal; o canal *atende* o serviço — é uma única relação, vista dos dois lados). O canal somente possui Registro LGPD próprio quando realiza tratamento autônomo. Caso funcione apenas como meio de acesso ou encaminhamento, aparece como APOIO nos Registros dos serviços atendidos.
 
 ```mermaid
 flowchart TB
     subgraph OPE["⚙️ Catálogo operacional — o que se faz"]
         direction LR
-        S["🟦 Serviço"] -- "depende de" --> P["🟩 Processo"] -- "compõe-se de" --> A["🟪 Atividades"]
+        S["🟦 Serviço"] -- "é realizado por" --> P["🟩 Processo"] -- "compõe-se de" --> A["🟪 Atividades"]
     end
     subgraph CNL["🚪 Catálogo de canais — por onde o cidadão chega"]
         C1["Balcão · Portal · Telefone · Aplicativo · Totem"]
@@ -129,22 +150,15 @@ Mesmo que o servidor do balcão visualize os dados do IPTU, esse tratamento pert
 
 ### O que é o catálogo
 
-O **catálogo operacional** é a lista oficial dos serviços, processos e atividades da Prefeitura que tratam, ou podem tratar, dados pessoais; o **catálogo de canais** lista as portas de atendimento. Cada item tem um **identificador canônico**: é por ele, e não pelo nome digitado, que o sistema sabe se dois Registros falam da mesma coisa. Ao lado dele existe o **catálogo de finalidades**, para que a finalidade também seja escolhida, e não digitada.
+O **catálogo operacional** é a lista oficial dos serviços, processos e atividades da Prefeitura que tratam, ou podem tratar, dados pessoais; o **catálogo de canais** lista as portas de atendimento. Cada item tem um **identificador canônico**: é por ele, e não pelo nome digitado, que o sistema sabe se dois Registros falam da mesma coisa. Ao lado deles existem o **catálogo de contextos de atuação**, para que o contexto também seja escolhido, e não digitado, e o **catálogo de bases e conjuntos de dados** (veja adiante).
 
 ```mermaid
+%% wide
 flowchart LR
-    subgraph FON["📥 Fontes de consulta"]
-        F1["Carta de Serviços"]
-        F2["Plano de Classificação"]
-        F3["Levantamento<br/>junto às unidades"]
-    end
-    CUR["⚖️ Curadoria do catálogo<br/>inclui, altera e desativa itens,<br/>sempre com justificativa e evento"]
-    subgraph CAT["📚 Catálogos"]
-        C1["Catálogo operacional<br/>serviço · processo · atividade"]
-        C3["Catálogo de canais<br/>balcão · portal · telefone…"]
-        C2["Catálogo de finalidades"]
-    end
-    REG["📁 Registros LGPD<br/>escolhem itens dos catálogos;<br/>não digitam objetos nem finalidades"]
+    FON["📥 <b>Fontes de consulta</b><br/>Carta de Serviços<br/>Plano de Classificação<br/>levantamento junto<br/>às unidades"]
+    CUR["⚖️ <b>Curadoria</b><br/>inclui, altera e<br/>desativa itens, sempre<br/>com justificativa<br/>e evento"]
+    CAT["📚 <b>Catálogos</b><br/>operacional: serviço · processo · atividade<br/>de canais: balcão · portal · telefone…<br/>de bases e conjuntos de dados<br/>de contextos de atuação"]
+    REG["📁 <b>Registros LGPD</b><br/>escolhem itens<br/>dos catálogos;<br/>não digitam objetos<br/>nem contextos"]
     FON --> CUR --> CAT --> REG
     style CUR fill:#4d3d1e,stroke:#d4a017,color:#fff
     style CAT fill:#1e3a5f,stroke:#5b9bd5,color:#fff
@@ -157,25 +171,129 @@ flowchart LR
 | Identificador canônico | `OBJ-SRV-001` |
 | Tipo | serviço, processo ou atividade |
 | Nome oficial | 2ª via do IPTU |
-| Relações com outros itens | depende de *Lançamento do IPTU*; atendido por *Balcão de atendimento* |
+| Relações com outros itens | é realizado por *Lançamento e cobrança do IPTU*; atendido por *Balcão de atendimento* |
 | Referência oficial, quando houver | item da Carta de Serviços ou classe do Plano de Classificação |
 | Situação | ativo ou desativado — um item nunca é apagado |
 
 **O que o catálogo não é:** não é uma cópia importada da Carta de Serviços (que continua sendo referência de consulta, SAD 05, 13.4); não é preenchido pelo elaborador na hora de criar o Registro; e não contém dados pessoais.
 
-**Em aberto (O-80):** quem exerce a curadoria; como será a carga inicial; e a lista inicial de finalidades. Na PoC, os catálogos são fictícios.
+**Em aberto (O-80 e O-83):** quem exerce a curadoria; como será a carga inicial; e a lista inicial de contextos de atuação. Na PoC, os catálogos são fictícios.
+
+### Contexto de atuação e finalidade: duas coisas diferentes
+
+Na LGPD, **finalidade** tem sentido preciso: "realização do tratamento para propósitos legítimos, específicos, explícitos e informados ao titular" (art. 6º, I). Para não confundir, o sistema usa outro nome para a classificação que serve à prevenção de duplicidade: **contexto de atuação**.
+
+| | Contexto de atuação | Finalidade (LGPD) |
+|---|---|---|
+| O que é | Classificação cadastral do recorte administrativo e funcional em que o tratamento é descrito | O propósito específico do tratamento, informado ao titular |
+| Onde fica | Catálogo de contextos de atuação (escolhido, nunca digitado) | FORM 1, com versões e validação |
+| Para que serve | Distinguir tratamentos do mesmo objeto e evitar Registros duplicados | Cumprir o art. 6º, I, e orientar o titular |
+| Exemplo | CTX-TRIB-03 — Arrecadação e cobrança tributária | Emitir a 2ª via do carnê para que o contribuinte pague o IPTU do exercício |
+
+A finalidade é sempre declarada **dentro** de um contexto de atuação.
+
+**Definição.** Contexto de atuação é a classificação cadastral que identifica o recorte administrativo e funcional no qual o tratamento associado a um objeto é descrito pelo Registro LGPD. É utilizado para distinguir tratamentos autônomos envolvendo o mesmo objeto e para prevenir Registros duplicados. Não substitui a finalidade do tratamento exigida pela LGPD, não representa a hipótese legal e não corresponde necessariamente a uma Secretaria ou unidade organizacional.
+
+**Pergunta-teste:** *Em qual frente concreta de atuação administrativa este objeto está sendo utilizado ou executado neste Registro?*
+
+A combinação usada na equivalência é: **objeto + contexto de atuação**.
+
+> **A escolha de contextos diferentes permite a análise separada, mas não prova, por si só, que existem tratamentos autônomos.** Quem decide se há um ou dois tratamentos é a análise do tratamento (finalidade, dados, titulares, hipótese legal, riscos — SAD 02, RF-PRC-15), não o código do contexto.
+
+**Não confundir com:**
+
+| Confusão comum | Exemplo do erro | O que é de fato |
+|---|---|---|
+| Hipótese legal | "Cumprimento de obrigação legal" | A base que autoriza o tratamento (LGPD, art. 7º), registrada no FORM |
+| Operação de tratamento | "Coleta e armazenamento" | O que se faz com o dado |
+| Nome do serviço | "2ª via do IPTU" | O objeto do catálogo |
+| Justificativa genérica | "Cumprir a LGPD" | Não diz em que frente se atua |
+
+#### Exemplos de contextos de atuação (fictícios)
+
+| Código | Contexto de atuação | Descrição |
+|---|---|---|
+| CTX-TRIB-01 | Gestão cadastral tributária | Manutenção de cadastros utilizados na constituição e administração de tributos municipais |
+| CTX-TRIB-02 | Lançamento tributário | Apuração e constituição de créditos tributários municipais |
+| CTX-TRIB-03 | Arrecadação e cobrança tributária | Emissão de guias, pagamentos, parcelamentos e cobrança administrativa de tributos |
+| CTX-URB-01 | Planejamento territorial | Uso de informações para planejamento urbano, territorial e definição de políticas de ocupação |
+| CTX-URB-02 | Licenciamento de obras | Análise, autorização e acompanhamento de obras e edificações |
+| CTX-URB-03 | Regularização fundiária | Identificação e regularização jurídica, urbanística e social de imóveis e ocupações |
+| CTX-ATD-01 | Gestão do atendimento ao cidadão | Organização de filas, senhas, agendamentos, protocolos e histórico do atendimento |
+| CTX-ATD-02 | Gestão de manifestações | Recebimento e tratamento de reclamações, sugestões, elogios, denúncias e solicitações |
+| CTX-TRA-01 | Transparência e acesso à informação | Atendimento de pedidos de acesso à informação e acompanhamento de respostas |
+| CTX-RH-01 | Administração funcional | Gestão de vínculos, lotações, frequência, férias, remuneração e demais informações funcionais |
+| CTX-RH-02 | Saúde ocupacional | Acompanhamento da saúde, segurança e aptidão laboral dos agentes públicos |
+| CTX-EDU-01 | Gestão da vida escolar | Matrícula, frequência, avaliação, transferência e histórico de estudantes |
+| CTX-SAU-01 | Assistência à saúde | Prestação e acompanhamento de atendimentos e cuidados de saúde |
+| CTX-SOC-01 | Proteção e assistência social | Atendimento, acompanhamento e concessão de benefícios socioassistenciais |
+| CTX-FIS-01 | Fiscalização administrativa | Planejamento, execução e registro de ações de fiscalização municipal |
+| CTX-COM-01 | Contratações públicas | Planejamento, seleção de fornecedores, contratação e gestão contratual |
+| CTX-MOB-01 | Mobilidade e trânsito | Gestão da circulação, transporte, fiscalização e segurança viária |
+| CTX-AMB-01 | Gestão e fiscalização ambiental | Licenciamento, monitoramento e fiscalização de atividades com impacto ambiental |
+| CTX-SEG-01 | Segurança patrimonial | Controle de acesso, vigilância e proteção de instalações e bens municipais |
+| CTX-JUR-01 | Representação e defesa jurídica | Gestão de processos judiciais, administrativos e atividades de representação do Município |
+
+O prefixo do código (TRIB, URB, ATD, RH…) forma uma **família**. O mesmo objeto em dois contextos da **mesma família** gera **advertência**, não erro: *"Este objeto está associado a mais de um contexto da mesma família. Confirme se ele é transversal ou escolha um contexto principal."* Pode ser classificação equivocada, duplicação ou objeto legitimamente transversal. A advertência se resolve definindo um contexto principal e os demais como secundários, marcando o objeto como transversal, registrando justificativa curta ou removendo a associação feita por engano. Entre famílias diferentes (ex.: TRIB e URB) não há advertência, pois a transversalidade entre áreas é legítima. Só famílias configuradas como mutuamente exclusivas impedem duas classificações simultâneas.
+
+#### Mesmo objeto em contextos diferentes
+
+**Processo de gestão de servidores**
+- Gestão de servidores + Administração funcional
+- Gestão de servidores + Saúde ocupacional
+- Gestão de servidores + Representação e defesa jurídica
+
+A existência de mais de um Registro dependerá de os tratamentos serem efetivamente autônomos.
+
+**Balcão de atendimento** + Gestão do atendimento ao cidadão: aplica-se quando o balcão tem tratamento próprio (emissão de senhas, agendamento, identificação do cidadão, registro de horário e guichê, sistema próprio). Quando o balcão apenas recebe e encaminha documentos, ele aparece como APOIO no Registro do serviço e não precisa de combinação própria.
+
+#### Exemplos inadequados
+
+- **Contextos amplos demais:** Administração · Prefeitura · Interesse público · Gestão municipal · Atendimento · Cumprimento legal.
+- **Nomes de unidades:** Secretaria de Finanças · Departamento de Recursos Humanos · Gabinete · Secretaria de Educação.
+
+### Bases e conjuntos de dados: o terceiro eixo
+
+Uma base de dados como o **Cadastro imobiliário** não é serviço, processo nem atividade: é um **ativo informacional transversal**, usado por várias atividades, cada uma com a sua finalidade. **A base ou conjunto de dados, enquanto ativo informacional, não é assunto de Registro. As atividades que criam, mantêm ou utilizam a base podem constituir tratamentos documentados em Registros.** Por isso fica num catálogo próprio, o **catálogo de bases e conjuntos de dados**. O nome cobre banco de dados, planilha, arquivo físico ou sistema, porque a LGPD protege os dados pessoais onde quer que estejam.
+
+```mermaid
+flowchart TB
+    subgraph CNL["🚪 Catálogo de canais"]
+        CA["Balcão · Portal · Telefone"]
+    end
+    subgraph OPE["⚙️ Catálogo operacional"]
+        direction LR
+        S["🟦 Serviço"] -- "é realizado por" --> P["🟩 Processo"] -- "compõe-se de" --> A["🟪 Atividade"]
+    end
+    subgraph BAS["🗄️ Catálogo de bases e conjuntos de dados"]
+        B["Cadastro imobiliário · Cadastro de servidores · …"]
+    end
+    CNL -. "atende<br/>(muitos para muitos)" .-> OPE
+    OPE -. "utiliza<br/>(muitos para muitos)" .-> BAS
+    style CNL fill:#4d3d1e,stroke:#d4a017,color:#fff
+    style OPE fill:#1e3a5f,stroke:#5b9bd5,color:#fff
+    style BAS fill:#3b2a4d,stroke:#9b72cf,color:#fff
+```
+
+| Elemento | Exemplo | Papel no modelo |
+|---|---|---|
+| 🗄️ Base ou conjunto de dados | Cadastro imobiliário | Ativo informacional: não é assunto de Registro e não entra na trava |
+| ⚙️ Atividade que cria e mantém a base | Gerir e manter o Cadastro imobiliário | Pode constituir tratamento documentado em Registro: coleta, correção, atualização e conservação dos dados |
+| ⚙️ Atividades que utilizam a base | Tributação imobiliária, planejamento urbano, regularização fundiária, fiscalização, atendimento | Podem constituir tratamentos documentados em Registros, cada uma com finalidade própria, ligada à base por "utiliza" |
+
+A atividade de tratamento continua sendo o elemento central para finalidade, hipótese legal, titulares, compartilhamentos e retenção; a base funciona como ativo associado a essas atividades. *📝 Decisão do Encarregado (O-83), a registrar no SAD 10.*
 
 ### Exemplo: objetos do catálogo e seus Registros
 
 ```mermaid
-flowchart LR
+flowchart TB
     subgraph CAT["⚙️ Catálogo operacional"]
         S1["🟦 Serviço<br/>2ª via do IPTU"]
         S2["🟦 Serviço<br/>Certidão de débitos"]
-        P1["🟩 Processo<br/>Lançamento do IPTU"]
+        P1["🟩 Processo<br/>Lançamento e cobrança do IPTU"]
         A1["🟪 Atividade<br/>Cálculo do valor venal"]
         A2["🟪 Atividade<br/>Emissão dos carnês"]
-        S1 -. "depende de" .-> P1
+        S1 -. "é realizado por" .-> P1
         P1 -. "compõe-se de" .-> A1
         P1 -. "compõe-se de" .-> A2
     end
@@ -184,8 +302,8 @@ flowchart LR
     end
     S1 -. "atendido por" .- CN
     S2 -. "atendido por" .- CN
-    RA["📁 Registro A<br/>Atendimento tributário<br/>(2 serviços, mesma finalidade)"]
-    RB["📁 Registro B<br/>Lançamento do IPTU<br/>(processo e suas atividades)"]
+    RA["📁 Registro A<br/>Atendimento tributário<br/>(2 serviços, mesmo contexto)"]
+    RB["📁 Registro B<br/>Lançamento e cobrança do IPTU<br/>(processo e suas atividades)"]
     RC["📁 Registro C<br/>Gestão do balcão<br/>(tratamento próprio do canal)"]
     S1 --> RA
     S2 --> RA
@@ -216,19 +334,28 @@ Cada regra abaixo traz duas informações separadas: a **situação normativa** 
 | 📘 | **Requisito vigente**: está escrito num SAD em vigor |
 | 🔎 | **Interpretação** de um SAD: decorre do texto, mas não está escrita com essas palavras |
 | 🧪 | **Decisão provisória da PoC** (SAD 10, DA-36 ou DA-37): já vale para a PoC; os SADs afetados serão ajustados na revisão pós-PoC |
+| 📝 | **Decisão do Encarregado ainda não registrada no SAD 10** (O-83): será levada a uma nova ficha DA |
+
+#### Organização dos Registros
 
 | Regra | Situação normativa | Na PoC |
 |---|---|---|
-| Cada combinação entre **objeto e finalidade** pode ser assunto de, no máximo, **um** Registro em situação bloqueadora. Um Registro pode abranger vários objetos, e um objeto pode participar de Registros distintos quando as finalidades forem materialmente diferentes | 🧪 DA-36, item 1 — exige ajuste do SAD 02 e do SAD 05 | ⚙️ Parcial: trava por objeto; finalidade a implementar |
-| O mesmo objeto prestado por várias Secretarias é um só Registro, com uma unidade principal; as demais participam dele | 📘 SAD 02, RF-PRC-06 | Unidade principal ✔; participantes a fazer |
+| O mesmo objeto prestado por várias Secretarias é **um só** Registro, com uma unidade principal e as demais como participantes, **quando se tratar do mesmo objeto, no mesmo contexto de atuação e sem tratamentos materialmente autônomos** | 📘 SAD 02, RF-PRC-06 | Unidade principal ✔; participantes a fazer |
 | Vários serviços com as mesmas operações e finalidade podem integrar **um único** Registro (A) | 📘 SAD 02, RF-PRC-13 | ✔ Um Registro com vários objetos |
-| Um processo e as suas atividades ficam, em regra, no **mesmo** Registro (B); uma atividade só ganha Registro próprio se tiver tratamento autônomo (ex.: atividade terceirizada, com operador e base de dados próprios) | 🔎 Interpretação do SAD 02, RF-PRC-15 — granularidade a confirmar pela governança | ✔ Permitido pelo modelo |
-| A hierarquia (serviço que depende de um processo; processo composto de atividades) **não** torna os objetos equivalentes: os Registros se ligam por relação | 🔎 Interpretação do SAD 05, 13.1 | Relações no catálogo a fazer |
-| Um canal só tem Registro **próprio** quando realiza tratamento autônomo; nesse Registro é PRINCIPAL (C) e, nos Registros dos serviços atendidos, APOIO. O simples recebimento e encaminhamento não basta | 📘 SAD 02, RF-PRC-14 (Registro próprio) + 🧪 DA-36, item 6 (catálogo de canais, papel APOIO) | ✔ Catálogo de canais e relação "atendido por"; papéis a fazer |
+| Um processo e as suas atividades ficam, em regra, no **mesmo** Registro (B); uma atividade só ganha Registro próprio se tiver tratamento autônomo (ex.: terceirizada, com operador e base próprios) | 🔎 SAD 02, RF-PRC-15 — granularidade a confirmar | ✔ Permitido pelo modelo |
+| A hierarquia (serviço realizado por processo; processo composto de atividades) **não** torna os objetos equivalentes: os Registros se ligam por relação | 🔎 SAD 05, 13.1 | Relações no catálogo a fazer |
+| Um canal só tem Registro **próprio** quando realiza tratamento autônomo; nele é PRINCIPAL (C) e, nos Registros dos serviços, APOIO. Receber e encaminhar não basta | 📘 SAD 02, RF-PRC-14 + 🧪 DA-36, item 6 | ✔ Catálogo de canais; papéis a fazer |
 | Um ou dois Registros? Decide o **tratamento autônomo** (finalidade, dados, titulares, hipótese legal, riscos), não o rótulo serviço, processo ou atividade | 📘 SAD 02, RF-PRC-15 | — (decisão humana) |
-| **Bloqueio** (determinístico): não pode haver dois Registros em situação bloqueadora que descrevam o tratamento do mesmo objeto para a mesma finalidade — trava no próprio banco de dados | 🧪 DA-36, itens 1 e 7 | ⚙️ Parcial: trava apenas por objeto, inclusive para pedidos simultâneos |
-| **Sem atalhos**: a etapa só vira item próprio do catálogo quando for divisão real e estável do processo; a finalidade é escolhida de um catálogo de finalidades com identificadores canônicos, e não digitada | 🧪 DA-36, itens 4 e 5 | Catálogo de finalidades e curadoria a fazer |
-| **Alerta** (para análise humana): objetos diferentes, mas relacionados no catálogo ou com mesma finalidade, titulares ou dados, geram aviso de possível sobreposição para a governança avaliar; o sistema não funde nem bloqueia sozinho | 📘 SAD 05, 5.3 (identificar possível duplicidade) + 🧪 DA-36, item 7 | A fazer |
+
+#### Prevenção de duplicidade
+
+| Regra | Situação normativa | Na PoC |
+|---|---|---|
+| **Bloqueio** (determinístico): não pode haver dois Registros em situação bloqueadora nos quais o mesmo objeto, no mesmo contexto de atuação, apareça como PRINCIPAL ou ABRANGIDO — trava no próprio banco de dados | 🧪 DA-36, itens 1 e 7 + 📝 O-83 (contexto de atuação no lugar de "finalidade") | ⚙️ Parcial: trava por objeto, inclusive para pedidos simultâneos; contexto a fazer |
+| **Contexto distinto não basta**: permite a análise separada, mas não prova, por si só, que os tratamentos são autônomos | 📝 O-83 | — (decisão humana) |
+| **Sem atalhos**: a etapa só vira item próprio do catálogo quando for divisão real e estável do processo; o contexto é escolhido de catálogo, nunca digitado | 🧪 DA-36, itens 4 e 5 + 📝 O-83 | Catálogo de contextos a fazer |
+| **Advertência de família**: mesmo objeto em dois contextos da **mesma família** (ex.: CTX-TRIB-01 e CTX-TRIB-03) exige justificativa; famílias diferentes não geram aviso; só famílias configuradas como mutuamente exclusivas impedem | 📝 O-83 | A fazer |
+| **Alerta** (análise humana): objetos diferentes, mas relacionados no catálogo ou com mesma finalidade, titulares ou dados, geram aviso de possível sobreposição; o sistema não funde nem bloqueia sozinho | 📘 SAD 05, 5.3 + 🧪 DA-36, item 7 | A fazer |
 
 ### Assunto ou citado: o papel de cada objeto no Registro
 
@@ -240,8 +367,8 @@ flowchart LR
     AB["🔒 ABRANGIDO<br/>objeto cujo tratamento<br/>o Registro descreve"]
     AP["🔓 APOIO<br/>canal, sistema ou<br/>função auxiliar"]
     RE["🔓 RELACIONADO<br/>apenas contexto"]
-    subgraph EX["📋 Exemplo: Registro “Lançamento do IPTU”"]
-        E1["🟩 Processo<br/>Lançamento do IPTU"]
+    subgraph EX["📋 Exemplo: Registro “Lançamento e cobrança do IPTU”"]
+        E1["🟩 Processo<br/>Lançamento e cobrança do IPTU"]
         E2["🟪 Atividades<br/>Cálculo do valor venal<br/>e Emissão dos carnês"]
         E3["🟧 Canal<br/>Balcão de atendimento"]
         E4["🟦 Serviço<br/>2ª via do IPTU"]
@@ -259,7 +386,7 @@ flowchart LR
     linkStyle 2,3 stroke:#aaaaaa,stroke-width:2px
 ```
 
-*No exemplo, ninguém mais pode abrir um Registro cujo assunto seja o Lançamento do IPTU ou as suas atividades, para a mesma finalidade. Já o Balcão e a 2ª via podem ser citados em outros Registros, e o Balcão continua livre para ter o seu próprio Registro, em que será PRINCIPAL.*
+*No exemplo, ninguém mais pode abrir um Registro cujo assunto seja o Lançamento e cobrança do IPTU ou as suas atividades, no mesmo contexto de atuação. Já o Balcão e a 2ª via podem ser citados em outros Registros, e o Balcão continua livre para ter o seu próprio Registro, em que será PRINCIPAL.*
 
 ### Situação bloqueadora
 
@@ -286,73 +413,158 @@ O G11 do SAD 04 só permite cancelar a partir de estado **ativo** (Em andamento,
 
 ### Como o sistema evita Registros duplicados
 
-As caixas amarelas (📋) mostram, ao lado de cada pergunta, como os exemplos da tabela abaixo respondem.
+**Ordem de verificação (precedência).** Antes de tudo, a triagem define qual é o objeto (um canal sem tratamento próprio não tem Registro; uma parte operacional vira atividade do catálogo). Depois, as verificações seguem sempre esta ordem:
+
+| Ordem | Verificação | Se a resposta for "sim" | Natureza |
+|---|---|---|---|
+| 1 | **Equivalência bloqueadora**: o objeto já é PRINCIPAL ou ABRANGIDO de outro Registro em situação bloqueadora, no mesmo contexto de atuação? | 🔒 Bloqueia; as etapas seguintes não se aplicam | Determinística (banco de dados) |
+| 2 | **Família de contexto**: o objeto já é assunto de Registro em outro contexto da mesma família? | ⚠️ Advertência: exige justificativa | Confirmação humana |
+| 3 | **Objetos relacionados e semelhança material**: há objetos relacionados no catálogo, ou mesma finalidade, titulares ou dados? | 🔔 Alerta à governança | Análise humana posterior |
+| 4 | **Resultado** | **Bloquear**, **criar com justificativa** (após 2) ou **criar** (com ou sem alerta) | — |
+
+O fluxograma está dividido em duas partes. As caixas amarelas (📋) mostram como os exemplos da tabela adiante respondem.
+
+#### Parte 1 — Triagem e bloqueio por equivalência (verificação 1)
 
 ```mermaid
+%% tall
 flowchart TD
     N["📁 Novo Registro<br/>para um item do catálogo"] --> C0{"O item é<br/>um canal?"}
-    C0 -- "não" --> P{"Trata só de uma<br/>parte operacional?"}
     C0 -- "sim" --> CA{"O canal realiza<br/>tratamento autônomo?"}
     CA -- "não" --> APO["🔓 Sem Registro próprio<br/>APOIO nos Registros<br/>dos serviços atendidos"]
     CA -- "sim" --> Q1
-    P -- "sim" --> ET["🧩 A etapa ou atividade<br/>é cadastrada no catálogo<br/>(se for divisão real e estável)"]
-    ET -- "a verificação segue<br/>com a etapa como objeto" --> Q1
-    P -- "não" --> Q1{"O objeto já é ASSUNTO<br/>de outro Registro?"}
-    Q1 -- "sim" --> Q2{"Para a mesma<br/>finalidade?"}
+    C0 -- "não" --> P{"Trata só de uma<br/>parte operacional?"}
+    P -- "sim" --> ET["🧩 A etapa é cadastrada<br/>no catálogo (se for divisão<br/>real e estável) e vira o objeto"]
+    ET --> Q1
+    P -- "não" --> Q1{"O objeto já é ASSUNTO<br/>de outro Registro em<br/>situação bloqueadora?"}
+    Q1 -- "sim" --> Q2{"No mesmo contexto<br/>de atuação?"}
     Q2 -- "sim" --> BL["🔒 BLOQUEADO<br/>o sistema mostra o Registro existente,<br/>o estado e as ações possíveis"]
-    Q2 -- "não" --> OK2["✔ Finalidade distinta<br/>cada Registro declara<br/>a sua finalidade"]
-    OK2 --> Q3
-    Q1 -- "não" --> Q3{"Há objetos relacionados<br/>com Registro próprio?"}
-    Q3 -- "sim" --> AL["🔔 ALERTA à governança<br/>avaliar se há sobreposição<br/>(não bloqueia)"]
-    Q3 -- "não" --> OK["✔ Registro criado"]
-    AL --> OK
-    XP["📋 Ex.: entrega dos carnês por<br/>empresa contratada → <b>sim</b>,<br/>é parte do Lançamento do IPTU"]
-    XQ1["📋 Ex.: 2ª via do IPTU → <b>sim</b>,<br/>já é assunto do Registro A"]
-    XQ2["📋 Ex.: Arrecadação × Arrecadação → <b>sim</b><br/>Cadastro imobiliário:<br/>Planejamento × Tributação → <b>não</b>"]
-    XQ3["📋 Ex.: Cadastro imobiliário → <b>sim</b><br/>Poda de árvore → <b>não</b>"]
-    XC["📋 Ex.: balcão com senhas e fila → <b>sim</b><br/>balcão que só recebe documentos → <b>não</b>"]
+    Q2 -- "não" --> P2A["➡️ Parte 2<br/>com o contexto já usado"]
+    Q1 -- "não" --> P2B["➡️ Parte 2<br/>sem outro contexto"]
+    XC["📋 Balcão com senhas e fila → <b>sim</b><br/>balcão que só recebe documentos → <b>não</b>"]
+    XP["📋 Entrega dos carnês por empresa<br/>contratada → <b>sim</b>, é parte do<br/>Lançamento e cobrança do IPTU"]
+    XQ1["📋 2ª via do IPTU → <b>sim</b>,<br/>já é assunto do Registro A"]
+    XQ2["📋 2ª via: TRIB-03 × TRIB-03 → <b>sim</b><br/>Cadastro: URB-01 × TRIB-01 → <b>não</b>"]
+    CA -.- XC
     P -.- XP
     Q1 -.- XQ1
     Q2 -.- XQ2
-    Q3 -.- XQ3
-    CA -.- XC
     style BL fill:#5c1e1e,stroke:#d9534f,color:#fff
-    style OK fill:#1e4d2b,stroke:#5cb85c,color:#fff
-    style OK2 fill:#1e4d2b,stroke:#5cb85c,color:#fff
-    style AL fill:#4d3d1e,stroke:#d4a017,color:#fff
     style ET fill:#1e3a5f,stroke:#5b9bd5,color:#fff
-    classDef ex fill:#fff8e6,stroke:#d4a017,color:#333
-    class XP,XQ1,XQ2,XQ3,XC ex
     style APO fill:#2b2b2b,stroke:#888,color:#fff
-    linkStyle 16,17,18,19,20 stroke:#d4a017,stroke-dasharray:4
+    style P2A fill:#1e4d2b,stroke:#5cb85c,color:#fff
+    style P2B fill:#1e4d2b,stroke:#5cb85c,color:#fff
+    classDef ex fill:#fff8e6,stroke:#d4a017,color:#333
+    class XC,XP,XQ1,XQ2 ex
+    linkStyle 12,13,14,15 stroke:#d4a017,stroke-dasharray:4
 ```
 
-#### Exemplos (fictícios), cada um percorrendo o fluxograma acima
+#### Parte 2 — Advertências e alertas (verificações 2 e 3)
+
+```mermaid
+%% tall
+flowchart TD
+    A0["➡️ Vindo da Parte 1<br/>sem equivalência bloqueadora"] --> QF{"O objeto já é assunto<br/>em outro contexto<br/>da mesma família?"}
+    QF -- "sim" --> ADV["⚠️ Advertência<br/>confirmar transversalidade<br/>ou justificar"]
+    QF -- "não" --> Q3
+    ADV --> Q3{"Há objetos relacionados<br/>ou semelhança material<br/>com outro Registro?"}
+    Q3 -- "sim" --> AL["🔔 ALERTA à governança<br/>avaliar se há sobreposição<br/>(não bloqueia)"]
+    Q3 -- "não" --> OK["✔ Registro criado<br/>(com a justificativa,<br/>se houve advertência)"]
+    AL --> OK
+    XQF["📋 Cadastro: TRIB-01 × TRIB-03 → <b>sim</b><br/>URB-01 × TRIB-01 → <b>não</b>"]
+    XQ3["📋 Entrega dos carnês → <b>sim</b><br/>Poda de árvore → <b>não</b>"]
+    QF -.- XQF
+    Q3 -.- XQ3
+    style A0 fill:#1e4d2b,stroke:#5cb85c,color:#fff
+    style ADV fill:#4d3d1e,stroke:#d4a017,color:#fff
+    style AL fill:#4d3d1e,stroke:#d4a017,color:#fff
+    style OK fill:#1e4d2b,stroke:#5cb85c,color:#fff
+    classDef ex fill:#fff8e6,stroke:#d4a017,color:#333
+    class XQF,XQ3 ex
+    linkStyle 7,8 stroke:#d4a017,stroke-dasharray:4
+```
+
+#### Exemplos (fictícios), cada um percorrendo as duas partes do fluxograma
 
 | Ex. | Pedido | Caminho no fluxograma | Resultado |
 |---|---|---|---|
-| 1 | Criar um Registro chamado "IPTU" para o serviço **2ª via do IPTU**, finalidade *Arrecadação* | O objeto já é assunto do Registro A, para a mesma finalidade | 🔒 **Bloqueado.** O sistema mostra o Registro A, o estado e as ações possíveis (abrir, solicitar acesso) |
-| 2 | Criar um Registro para o **Cadastro imobiliário**, finalidade *Planejamento urbano* | O objeto já é assunto de outro Registro, mas para *Tributação*: finalidade distinta. Há objetos relacionados | 🔔 **Alerta** à governança e ✔ **criado** |
-| 3 | Registrar só a **entrega dos carnês por empresa contratada** | É parte operacional: vira atividade no catálogo e a verificação recomeça. Não é assunto de outro Registro, mas está relacionada ao Lançamento do IPTU | 🔔 **Alerta** à governança e ✔ **criado** |
+| 1 | Criar um Registro chamado "IPTU" para o serviço **2ª via do IPTU**, contexto *Arrecadação e cobrança tributária* (CTX-TRIB-03) | O objeto já é assunto do Registro A, no mesmo contexto | 🔒 **Bloqueado.** O sistema mostra o Registro A, o estado e as ações possíveis (abrir, solicitar acesso) |
+| 2 | Registrar a atividade **Gerir e manter o Cadastro imobiliário** no contexto *Planejamento territorial* (CTX-URB-01), quando ela já tem Registro em *Gestão cadastral tributária* (CTX-TRIB-01) | Já é assunto de outro Registro, mas em contexto distinto e de outra família: sem advertência. O contexto distinto permite a análise separada, mas a autonomia dos tratamentos é confirmada na análise do Registro | ✔ **Criado** |
+| 3 | Registrar só a **entrega dos carnês por empresa contratada** | É parte operacional: vira atividade no catálogo e a verificação recomeça. Não é assunto de outro Registro, mas está relacionada ao Lançamento e cobrança do IPTU | 🔔 **Alerta** à governança e ✔ **criado** |
 | 4 | Criar um Registro para o serviço **Poda de árvore** | Não é assunto de outro Registro e não tem objetos relacionados | ✔ **Criado** |
+| 5 | Registrar a mesma atividade de cadastro em *Arrecadação e cobrança tributária* (CTX-TRIB-03), quando já existe em CTX-TRIB-01 | Contexto distinto, mas da mesma família TRIB: pode ser o mesmo tratamento fatiado | ⚠️ **Advertência**, com justificativa, e ✔ **criado** |
 
-*Proposta em teste na PoC (O-80). A PoC já possui uma trava experimental por objeto. A equivalência completa por papel e finalidade, assim como os alertas de sobreposição, permanece em implementação.*
+*Proposta em teste na PoC (O-80 e O-83). A PoC já possui uma trava experimental por objeto. A equivalência completa por papel e contexto de atuação, a advertência de família e os alertas de sobreposição permanecem em implementação.*
 
 ## O que já funciona
 
 | Item | Situação |
 |---|---|
 | Conexão Python ↔ PostgreSQL, com senha fora do código | ✔ |
-| Livro de atos do domínio (`evento`) e livro de auditoria mensal (`evento_auditoria`), com cadeia de hash, texto lacrado guardado, ator tipado e versões — DA-26, DA-27 | ✔ gravando e verificando no banco; três tipos de fraude detectados em simulação |
-| Pedido idempotente (`comando`): o mesmo pedido repetido não grava de novo — DA-26 | ✔ |
-| Pessoas, contas, unidades e designações de papéis (base da segregação de funções) | ✔ estrutura e dados fictícios |
-| Regra de segregação de funções (O-66), comparando a pessoa e nunca a conta | ✔ cenários a, b, c, e, f; tentativas negadas registradas na auditoria. Cenário d (substituição) a fazer |
-| Checkpoint externo da cadeia (proteção contra reescrita da corrente inteira) — SAD 08 | a fazer |
-| Criação do Registro pelo ato G1, com ciclo 1 e instância do FORM 1 no estado Não iniciado; catálogo fictício de objetos | ✔ (o início do preenchimento do FORM 1 será comando posterior ao G1, como no cenário A1 do SAD 04) |
-| Catálogo de canais e relação serviço–canal ("atendido por"), separado do catálogo operacional — DA-36, item 6 | ✔ 3 canais e 3 ligações fictícias |
-| Trava experimental contra Registros duplicados, por objeto (O-80): pesquisa prévia + trava no próprio banco | ✔ cenários 1, 2, 3 e 7 (inclusive dois pedidos simultâneos); papéis, finalidade e alertas em implementação; 4, 5 e 6 dependem dos atos de suspender, concluir e cancelar; o 8 depende ainda da revisão normativa do G11 (DA-37; ajuste do SAD 04 pendente) |
+| Livro de atos do domínio e livro de auditoria mensal, com cadeia de hash (DA-26, DA-27) | ✔ três tipos de fraude detectados em simulação |
+| Pedido idempotente: o mesmo pedido repetido não grava de novo (DA-26) | ✔ |
+| Pessoas, contas, unidades e designações de papéis | ✔ dados fictícios |
+| Segregação de funções, comparando a pessoa e nunca a conta (O-66) | ✔ cenários a, b, c, e, f ¹ |
+| Criação do Registro pelo G1, com ciclo 1 e FORM 1 Não iniciado | ✔ ² |
+| Catálogo operacional e catálogo de canais, com a relação "atendido por" (DA-36, item 6) | ✔ fictícios |
+| Trava contra Registros duplicados, por objeto (O-80) | ⚙️ Parcial ³ |
+| Checkpoint externo da cadeia (SAD 08) | a fazer |
 | Versão, análise, pendência e demais atos do workflow | a fazer |
-| Telas (FastAPI + Jinja2) e testes de aceite (pytest) | a fazer |
+| Telas (FastAPI + Jinja2) e testes de aceite automatizados (pytest) | a fazer |
+
+¹ Tentativas negadas ficam registradas na auditoria. O cenário d (substituição) está a fazer.
+² O início do preenchimento do FORM 1 será um comando posterior ao G1, como no cenário A1 do SAD 04.
+³ Pesquisa prévia + trava no próprio banco: cenários 1, 2, 3 e 7 aprovados, inclusive dois pedidos simultâneos. Papéis, contexto de atuação, advertência e alertas em implementação. Os cenários 4, 5 e 6 dependem dos atos de suspender, concluir e cancelar; o 8, também da revisão normativa do G11 (DA-37; ajuste do SAD 04 pendente).
+
+## Marcos e critérios de saída
+
+Cada marco tem as suas condições de entrada e de saída (SAD 09, seções 4A, 4C e 30). Cada critério de aceite (POC-CA) gera uma evidência de mesmo número (POC-EV): POC-CA-001 → POC-EV-001, e assim por diante. Uma camada só é aceita quando os seus cenários, testes e critérios forem verificados.
+
+**Regras comuns a todos os marcos** (📘 SAD 09, seção 30):
+
+- **Quem aprova:** o operador da PoC executa os testes; o **Encarregado de Dados** aceita o marco e eventuais exceções.
+- **Como se encerra:** aceite registrado em ata da PoC (pasta do SAD 09), referenciado no SAD 10; evidências preservadas até o fim do Piloto.
+- **O que impede:** nenhum defeito **crítico** (impede a finalidade do marco ou compromete integridade, segregação ou dados) ou **alto** (falha de requisito obrigatório sem contorno) pode estar aberto. O marco é reaberto se um desses defeitos aparecer depois do aceite.
+
+*Na PoC nuclear, operador e aceitante são a mesma pessoa. Por isso as evidências são automatizadas e reproduzíveis: qualquer terceiro, inclusive a TI, pode reexecutá-las.*
+
+| | M1a · PoC nuclear | M1b · PoC ampliada |
+|---|---|---|
+| Condições de entrada | SAD 09 aprovado e instrução "IMPLEMENTAR PoC" (seção 35); SAD09-02, 04, 06, 07, 08 e 09 resolvidas (DA-28, DA-34); SAD09-03 provisória | M1a aceito |
+| Critérios de aceite | POC-CA-001 a 006, 009, 011, 014 e 015; cenários A1 a A4, A9 a A12, A14, A15, A28 a A30; testes POC-TS-001 a 009 | POC-CA-010, 012 e 013; cenários A5 a A7, A13, A16, A18, A19, A24, A31 a A33, A35, A36; testes POC-TS-010, 011, 013 a 017 |
+| Evidências exigidas | POC-EV-001 a 006, 009, 011, 014 e 015 | POC-EV-010, 012 e 013 |
+| Autoridade que aprova | Encarregado de Dados | Encarregado de Dados |
+| Condição de encerramento | Critérios aprovados, cadeia de eventos verificada e ata do aceite | Critérios aprovados, cenários do M1a reexecutados e ata do aceite |
+| Pendências que impedem avançar | Defeito crítico ou alto aberto; regra usada pelo código ainda sem registro no SAD 10 (hoje, O-83) | Defeito crítico ou alto aberto; G11 conforme DA-37 sem implementar; competência para cancelar Registro Concluído (DA-37, item 4) em aberto |
+
+| | M2 · PoC ampliada | M3A · PoC ampliada |
+|---|---|---|
+| Condições de entrada | M1b aceito; contrato integral do FORM 1 aprovado (SAD09-05) e envelope de ingestão definido (SAD09-01) | M2 aceito; decisão SAD09-10 definida antes do encerramento da PoC |
+| Critérios de aceite | POC-CA-007 e 008; cenários A17 e A34; teste POC-TS-012 | POC-CA-012, 016 e 017, com verificação final de todos os demais; reexecução dos cenários anteriores com o FORM 1 real |
+| Evidências exigidas | POC-EV-007 e 008 | POC-EV-012, 016 e 017, mais as evidências reexecutadas |
+| Autoridade que aprova | Encarregado de Dados | Encarregado de Dados |
+| Condição de encerramento | Critérios aprovados e ata do aceite | Critérios aprovados, ata do aceite e Relatório de Encerramento e Transferência Técnica (SAD 09, seção 37): encerra a PoC |
+| Pendências que impedem avançar | SAD09-01 ou SAD09-05 em aberto; cópias fictícias equivalentes aos formulários reais não preparadas | SAD09-10 em aberto; relatório não elaborado. O Piloto exige autorização própria (SAD 09, 4A.7) |
+
+## Próximos passos
+
+| Ordem | Passo | O que inclui | Marco |
+|---|---|---|---|
+| 1 | Concluir o núcleo do workflow | Completar a equivalência do G1 (papéis, contexto de atuação, advertência de família); rascunho, versão, submissão, análise com segregação, devolução com pendência, validação, conclusão e pendência intersecretarial | M1a |
+| 2 | Automatizar os testes de aceite do M1a | Suíte pytest com os cenários POC-TS-001 a 009, gerando as evidências POC-EV do marco | M1a |
+| 3 | Fechar as decisões normativas pendentes | Registrar o O-83 em ficha DA no SAD 10; definir a competência do item 4 da DA-37 (quadro abaixo) | M1a → M1b |
+| 4 | Iniciar o M1b.1 | Suspender, retomar e cancelar (G8 e G11, conforme DA-37), fechando os cenários 4, 5, 6 e 8 da duplicidade | M1b |
+| 5 | Executar os demais incrementos do M1b | Reabertura com novo ciclo, pendências completas, participação por unidade, continuidade institucional, backup e restauração | M1b |
+
+## Pendências normativas consolidadas
+
+| Item | Assunto | Quem decide | O que bloqueia | Onde será registrado |
+|---|---|---|---|---|
+| O-80 | Curadoria e carga dos catálogos | A definir | Catálogo definitivo (na PoC, os catálogos são fictícios) | SAD correspondente (SAD 05 e SAD 03) |
+| O-82 | Revisão normativa do G11 (cancelar a partir de Suspenso e Concluído) | Encarregado | Cenário 8 da duplicidade | SAD 04 (já decidido para a PoC na DA-37) |
+| O-83 | Contextos de atuação, bases e conjuntos de dados, advertências de família | Encarregado | Equivalência completa | SAD 10 (nova ficha DA) e SADs afetados |
+| DA-37, item 4 | Papel competente para cancelar Registro Concluído | Encarregado | Cancelamento de Registro Concluído (M1b) | SAD 03 |
+| SAD09-01, 05 e 10 | Envelope de ingestão, contrato integral do FORM 1, decisão de encerramento | Conforme SAD 09, seção 33 | Entrada do M2 e encerramento do M3A | SAD 09 e SAD 10 |
 
 ## Tecnologias (DA-28)
 
