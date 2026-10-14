@@ -1,5 +1,7 @@
 # Teste da trava contra Registros duplicados (O-80). Somente dados fictícios.
-# Requer o catálogo fictício (python semear_catalogo.py).
+# Requer o catálogo fictício (python semear_catalogo.py) e os contextos (python semear_contextos.py).
+# Desde a etapa 2c, parte 2, todos os pedidos informam o contexto de atuação (DA-38);
+# os cenários de contexto e papéis estão em teste_contexto.py.
 # Cada cenário compara o resultado ESPERADO com o OBTIDO.
 # Roda uma vez: se o pedido CMD-DUP-01 já existir, apenas mostra o que está gravado.
 
@@ -16,17 +18,17 @@ def mostrar(selo_ok, rotulo, registro, motivo, existente):
     selo = "✔" if selo_ok else "✘ FALHOU"
     resultado = f"CRIADO {registro.codigo_lgpd}" if registro else f"NEGADO ({motivo})"
     print(f"{selo} {rotulo:<48} -> {resultado}")
-    if existente:
+    if existente and existente.get("registro_existente"):
         print(f"      ↳ existente: {existente['registro_existente']} · {existente['objeto']} · "
               f"estado {existente['estado']} · unidade {existente['unidade']} · "
               f"responsável {existente['responsavel']}")
         print(f"      ↳ ações possíveis: {', '.join(existente['acoes_possiveis'])}")
 
 
-def pedido(conta, unidade, objetos, titulo, cmd):
+def pedido(conta, unidade, objetos, titulo, cmd, contexto="CTX-TRIB-03"):
     """Um pedido numa transação própria (expire_on_commit=False: o resultado continua legível depois)."""
     with Session(motor, expire_on_commit=False) as sessao, sessao.begin():
-        return criar_registro(sessao, conta, unidade, objetos, titulo, cmd)
+        return criar_registro(sessao, conta, unidade, objetos, titulo, contexto, comando_id=cmd)
 
 
 with Session(motor) as sessao:
@@ -70,14 +72,14 @@ if not ja_existe:
     def servidor_a():
         with Session(motor, expire_on_commit=False) as sessao, sessao.begin():
             resultados["A"] = criar_registro(sessao, "CONTA-A1", "UNID-NORTE", ["OBJ-PRC-001"],
-                                             "Lançamento do IPTU", "CMD-DUP-06")
+                                             "Lançamento do IPTU", "CTX-TRIB-02", comando_id="CMD-DUP-06")
             a_gravou.set()
             time.sleep(2)            # transação ainda aberta: o Registro de A não é visível a C
 
     def servidor_c():
         a_gravou.wait()
         resultados["C"] = pedido("CONTA-C1", "UNID-SUL", ["OBJ-PRC-001"],
-                                 "Lançamento do IPTU (2)", "CMD-DUP-07")
+                                 "Lançamento do IPTU (2)", "CMD-DUP-07", contexto="CTX-TRIB-02")
 
     t1, t2 = threading.Thread(target=servidor_a), threading.Thread(target=servidor_c)
     t1.start(); t2.start(); t1.join(); t2.join()
@@ -91,4 +93,5 @@ with Session(motor) as sessao:
     print("\n=== Objetos do catálogo ocupados (Registros não cancelados) ===")
     for v in sessao.scalars(select(RegistroObjeto).where(RegistroObjeto.ativo.is_(True))
                             .order_by(RegistroObjeto.objeto_id)):
-        print(f"  {v.objeto_id:<12} -> {sessao.get(Registro, v.registro_id).codigo_lgpd}")
+        print(f"  {v.objeto_id:<12} {v.papel:<11} {v.contexto_atuacao_id:<12} "
+              f"-> {sessao.get(Registro, v.registro_id).codigo_lgpd}")

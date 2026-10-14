@@ -2,7 +2,7 @@
 #   1. PESSOA-A (elaboradora na Unidade Norte) cria um Registro: nasce com ciclo 1 e FORM 1;
 #   2. PESSOA-B (sem papel de elaborador) tenta criar outro: negado e registrado na auditoria;
 #   3. clique duplo: o pedido 1 é repetido e nada novo é gravado.
-# Requer o catálogo fictício (python semear_catalogo.py).
+# Requer o catálogo fictício (python semear_catalogo.py) e os contextos (python semear_contextos.py).
 # Grava uma vez só: se o pedido CMD-G1-01 já existir, apenas mostra.
 
 from sqlalchemy import select
@@ -18,15 +18,17 @@ with Session(motor) as sessao:
 if not ja_existe:
     with Session(motor) as sessao, sessao.begin():   # tudo ou nada
         reg, motivo, _ = criar_registro(sessao, "CONTA-A1", "UNID-NORTE", ["OBJ-SRV-900"],
-                                        "Serviço fictício de demonstração", "CMD-G1-01")
+                                        "Serviço fictício de demonstração", "CTX-TRIB-03",
+                                        comando_id="CMD-G1-01")
         print(f"{'✔' if reg else '✘ FALHOU'} PESSOA-A cria Registro       -> {motivo}: {reg.codigo_lgpd if reg else '-'}")
 
         reg2, motivo2, _ = criar_registro(sessao, "CONTA-B1", "UNID-NORTE", ["OBJ-SRV-901"],
-                                          "Tentativa sem papel", "CMD-G1-02")
+                                          "Tentativa sem papel", "CTX-TRIB-03", comando_id="CMD-G1-02")
         print(f"{'✔' if reg2 is None else '✘ FALHOU'} PESSOA-B tenta criar (sem papel) -> NEGADO ({motivo2})")
 
         reg3, motivo3, _ = criar_registro(sessao, "CONTA-A1", "UNID-NORTE", ["OBJ-SRV-900"],
-                                          "Serviço fictício de demonstração", "CMD-G1-01")
+                                          "Serviço fictício de demonstração", "CTX-TRIB-03",
+                                          comando_id="CMD-G1-01")
         ok = reg3 is not None and reg3.id == reg.id
         print(f"{'✔' if ok else '✘ FALHOU'} Clique duplo no pedido 1     -> {motivo3}: mesmo Registro {reg3.codigo_lgpd}")
 else:

@@ -17,6 +17,7 @@ OBJETOS = [
     ("OBJ-ATV-002", "atividade", "Emissão dos carnês (fictício)"),
     ("OBJ-SRV-010", "servico",   "Atendimento ao contribuinte (fictício)"),   # mesmo nome,
     ("OBJ-PRC-010", "processo",  "Atendimento ao contribuinte (fictício)"),   # tipo diferente
+    ("OBJ-ATV-020", "atividade", "Gerir e manter o Cadastro imobiliário (fictício)"),
     ("OBJ-SRV-900", "servico",   "Serviço fictício de demonstração"),
     ("OBJ-SRV-901", "servico",   "Outro serviço fictício de demonstração"),
 ]

@@ -74,7 +74,8 @@ def selar_e_gravar(sessao, evento, campos):
 
 def registrar_evento(sessao, comando, cadeia_tipo, cadeia_id, tipo_evento, conteudo,
                      codigo_evento=None, ordem_no_comando=1, registro_id=None, ciclo_id=None,
-                     em_nome_de=None, versao_regra=VERSAO_REGRA_POC):
+                     em_nome_de=None, versao_regra=VERSAO_REGRA_POC,
+                     versao_esquema_evento=VERSAO_ESQUEMA_EVENTO):
     """Acrescenta um ato ao fim da corrente do objeto. Quem praticou é quem fez o pedido (comando)."""
     ultimo = sessao.scalars(
         select(Evento)
@@ -98,7 +99,7 @@ def registrar_evento(sessao, comando, cadeia_tipo, cadeia_id, tipo_evento, conte
         em_nome_de=em_nome_de,
         ocorrido_em=agora_utc(),
         versao_regra=versao_regra,
-        versao_esquema_evento=VERSAO_ESQUEMA_EVENTO,
+        versao_esquema_evento=versao_esquema_evento,
         versao_algoritmo_hash=VERSAO_ALGORITMO_HASH,
         conteudo=conteudo,
         hash_anterior=HASH_INICIAL if ultimo is None else ultimo.hash,

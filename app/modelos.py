@@ -242,22 +242,89 @@ class ObjetoCatalogo(Base):
     ativo = Column(Boolean, nullable=False, default=True)
 
 
+class FamiliaContexto(Base):
+    """Família de contextos de atuação: o prefixo do código (TRIB, URB, RH...). DA-38, item 6.
+    O mesmo objeto em dois contextos da MESMA família gera advertência (pede justificativa).
+    Se a família estiver configurada como mutuamente exclusiva, em vez de advertência há bloqueio."""
+    __tablename__ = "familia_contexto"
+
+    id = Column(String(10), primary_key=True)                 # ex.: TRIB
+    nome = Column(String(100), nullable=False)                # ex.: Tributação
+    mutuamente_exclusiva = Column(Boolean, nullable=False, default=False)
+
+
+class ContextoAtuacao(Base):
+    """Catálogo de CONTEXTOS DE ATUAÇÃO (DA-38; antes chamado "de finalidades").
+    Recorte administrativo e funcional em que o tratamento de um objeto é descrito.
+    NÃO é a finalidade da LGPD (art. 6º, I), que é declarada no FORM 1.
+    Na PoC, somente contextos fictícios."""
+    __tablename__ = "contexto_atuacao"
+
+    id = Column(String(20), primary_key=True)                 # ex.: CTX-TRIB-01
+    familia_id = Column(String(10), ForeignKey("familia_contexto.id"), nullable=False)
+    nome = Column(String(150), nullable=False)                # ex.: Gestão cadastral tributária
+    descricao = Column(Text)
+    ativo = Column(Boolean, nullable=False, default=True)     # desativado, nunca apagado
+
+
+# Papéis de um objeto no Registro (DA-36, item 3). Os dois primeiros são o ASSUNTO e entram na trava.
+PAPEIS_ASSUNTO = ("PRINCIPAL", "ABRANGIDO")
+PAPEIS_CITADOS = ("APOIO", "RELACIONADO")
+
+
 class RegistroObjeto(Base):
-    """Vínculo entre um Registro e os objetos do catálogo que ele documenta.
-    Um Registro pode ter vários objetos (RF-PRC-13). A TRAVA (O-80): um objeto só pode
-    estar ligado a UM Registro não cancelado. Quem garante isso é o próprio banco,
-    pelo índice único parcial abaixo — mesmo que dois pedidos cheguem no mesmo instante."""
+    """Vínculo entre um Registro e os objetos do catálogo (RF-PRC-13), com PAPEL e CONTEXTO.
+
+    A TRAVA (DA-36 e DA-38), garantida pelo próprio banco nos índices abaixo:
+      1. o mesmo objeto, no mesmo contexto de atuação, só pode ser ASSUNTO (PRINCIPAL ou
+         ABRANGIDO) de UM Registro não cancelado — mesmo que dois pedidos cheguem juntos;
+      2. cada Registro tem exatamente UM objeto PRINCIPAL.
+    APOIO e RELACIONADO são apenas citados: não entram na trava."""
     __tablename__ = "registro_objeto"
 
     id = Column(Integer, primary_key=True)
     registro_id = Column(String(36), ForeignKey("registro.id"), nullable=False)
     objeto_id = Column(String(50), ForeignKey("objeto_catalogo.id"), nullable=False)
+    papel = Column(String(20), nullable=False)                # PRINCIPAL, ABRANGIDO, APOIO ou RELACIONADO
+    contexto_atuacao_id = Column(String(20), ForeignKey("contexto_atuacao.id"), nullable=False)
     vinculado_em = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
     ativo = Column(Boolean, nullable=False, default=True)     # vira False quando o Registro é cancelado
 
     __table_args__ = (
-        Index("uq_objeto_em_um_registro_ativo", "objeto_id", unique=True,
-              postgresql_where=(ativo.is_(True))),
+        Index("uq_objeto_contexto_assunto_ativo", "objeto_id", "contexto_atuacao_id", unique=True,
+              postgresql_where=(ativo.is_(True) & papel.in_(PAPEIS_ASSUNTO))),
+        Index("uq_um_principal_por_registro", "registro_id", unique=True,
+              postgresql_where=(ativo.is_(True) & (papel == "PRINCIPAL"))),
+    )
+
+
+class BaseDados(Base):
+    """Catálogo de BASES E CONJUNTOS DE DADOS: o terceiro eixo transversal (DA-38, item 7).
+    Banco de dados, planilha, arquivo físico ou sistema. A base, enquanto ativo informacional,
+    NÃO é assunto de Registro: as atividades que a criam, mantêm ou utilizam é que podem ser.
+    Na PoC, somente bases fictícias."""
+    __tablename__ = "base_dados"
+
+    id = Column(String(20), primary_key=True)                 # ex.: BAS-001
+    nome_canonico = Column(String(200), nullable=False)       # ex.: Cadastro imobiliário
+    suporte = Column(String(30), nullable=False)              # banco, planilha, arquivo físico ou sistema
+    ativo = Column(Boolean, nullable=False, default=True)
+
+
+class ObjetoBase(Base):
+    """Relação "utiliza" (muitos para muitos): a atividade ou o processo UTILIZA a base (DA-38, item 7).
+    Com vigência: encerrar é preencher vigente_ate, nunca apagar."""
+    __tablename__ = "objeto_base"
+
+    id = Column(Integer, primary_key=True)
+    objeto_id = Column(String(50), ForeignKey("objeto_catalogo.id"), nullable=False)
+    base_id = Column(String(20), ForeignKey("base_dados.id"), nullable=False)
+    vigente_de = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    vigente_ate = Column(DateTime(timezone=True))
+
+    __table_args__ = (
+        Index("uq_objeto_base_vigente", "objeto_id", "base_id", unique=True,
+              postgresql_where=(vigente_ate.is_(None))),
     )
 
 
