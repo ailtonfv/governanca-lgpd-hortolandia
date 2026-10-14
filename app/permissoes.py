@@ -4,14 +4,13 @@
 # A comparação é feita pela PESSOA, nunca pela conta: a Pessoa A não escapa da regra
 # trocando da conta A1 para a A2.
 #
-# Todo pedido vira um COMANDO (DA-26, item 3): se o mesmo pedido chegar duas vezes,
-# o sistema devolve a resposta original e não grava nada de novo.
+# Todo pedido vira um COMANDO (DA-26, item 3), em versão estrita (app/comandos.py).
 # Ato permitido -> livro de atos do domínio. Tentativa negada -> livro de auditoria do mês (DA-26, item 4).
 
-import uuid
 from sqlalchemy import select
-from app.modelos import Comando, Conta, Designacao, Evento
+from app.modelos import Conta, Designacao, Evento
 from app.eventos import registrar_evento, registrar_auditoria
+from app.comandos import abrir_comando, fechar_comando
 
 # Qual papel é exigido para cada ação (provisório da PoC, a partir da matriz do SAD 03)
 PAPEIS_EXIGIDOS = {
@@ -82,32 +81,28 @@ def verificar_acao(sessao, conta_id, cadeia_id, unidade_id, acao):
 
 
 def executar_acao(sessao, conta_id, cadeia_id, unidade_id, acao, conteudo=None, comando_id=None):
-    """Recebe um pedido, decide e registra. Devolve (permitido, motivo, repetido).
+    """Recebe um pedido, decide e registra. Devolve (permitido, motivo, reexecutado).
 
-    - Pedido repetido (mesmo comando_id): devolve a resposta original, sem gravar nada.
+    - Pedido idempotente estrito (Etapa 2d): comando_id obrigatório; repetição com os mesmos
+      parâmetros devolve o resultado original; com parâmetros diferentes, é recusada.
     - Permitido: grava o ato no livro de atos do objeto.
     - Negado: grava a tentativa no livro de auditoria do mês.
     """
-    # 1. o pedido já foi atendido antes?
-    if comando_id is not None:
-        anterior = sessao.get(Comando, comando_id)
-        if anterior is not None:
-            return anterior.resultado["permitido"], anterior.resultado["motivo"], True
+    conta = obter_conta(sessao, conta_id)
+    pessoa_id = conta.pessoa_id if conta is not None else None
+    ator_tipo, ator_id = ("pessoa", pessoa_id) if pessoa_id else ("desconhecido", conta_id)
+    parametros = {"conta_id": conta_id, "cadeia_id": cadeia_id, "unidade_id": unidade_id,
+                  "acao": acao, "conteudo": conteudo or {}}
+
+    # 1. o pedido (novo, repetido ou chave reutilizada?)
+    comando, resposta = abrir_comando(sessao, comando_id, acao, parametros, ator_tipo, ator_id, conta_id)
+    if resposta is not None:
+        return resposta["permitido"], resposta["motivo"], resposta["reexecutado"]
 
     # 2. decide
-    permitido, motivo, pessoa_id = verificar_acao(sessao, conta_id, cadeia_id, unidade_id, acao)
+    permitido, motivo, _ = verificar_acao(sessao, conta_id, cadeia_id, unidade_id, acao)
 
-    # 3. registra o pedido (quem pediu é a PESSOA; a conta fica só como informação)
-    if pessoa_id is None:
-        ator_tipo, ator_id = "desconhecido", conta_id   # conta inexistente: não há pessoa a apontar
-    else:
-        ator_tipo, ator_id = "pessoa", pessoa_id
-    comando = Comando(id=comando_id or str(uuid.uuid4()), tipo=acao,
-                      ator_tipo=ator_tipo, ator_id=ator_id, conta_id=conta_id)
-    sessao.add(comando)
-    sessao.flush()
-
-    # 4. grava no livro certo
+    # 3. grava no livro certo
     if permitido:
         tipo_evento, codigo = EVENTO_DA_ACAO[acao]
         registrar_evento(sessao, comando, "registro", cadeia_id, tipo_evento,
@@ -120,7 +115,7 @@ def executar_acao(sessao, conta_id, cadeia_id, unidade_id, acao, conteudo=None, 
             "motivo": motivo,
         }, comando_id=comando.id)
 
-    # 5. guarda a resposta, para devolver igual se o pedido se repetir
-    comando.resultado = {"permitido": permitido, "motivo": motivo}
+    # 4. guarda a resposta original, para devolver igual se o pedido se repetir
+    fechar_comando(comando, {"permitido": permitido, "motivo": motivo})
     sessao.flush()
     return permitido, motivo, False

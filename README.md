@@ -334,7 +334,7 @@ Cada regra abaixo traz duas informações separadas: a **situação normativa** 
 | 📘 | **Requisito vigente**: está escrito num SAD em vigor |
 | 🔎 | **Interpretação** de um SAD: decorre do texto, mas não está escrita com essas palavras |
 | 🧪 | **Decisão provisória da PoC** (SAD 10, DA-36, DA-37 ou DA-38): já vale para a PoC; os SADs afetados serão ajustados na revisão pós-PoC |
-| 📝 | **Decisão do Encarregado ainda não registrada no SAD 10**: será levada a uma nova ficha DA (nenhuma no momento) |
+| 📝 | **Decisão do Encarregado ainda não registrada no SAD 10**: será levada a uma nova ficha DA (hoje: D1, D2, D4 e a verificação em dois momentos, de 14/10/2026) |
 
 #### Organização dos Registros
 
@@ -354,8 +354,8 @@ Cada regra abaixo traz duas informações separadas: a **situação normativa** 
 | **Bloqueio** (determinístico): não pode haver dois Registros em situação bloqueadora nos quais o mesmo objeto, no mesmo contexto de atuação, apareça como PRINCIPAL ou ABRANGIDO — trava no próprio banco de dados | 🧪 DA-36, itens 1 e 7 + DA-38, item 3 (contexto de atuação no lugar de "finalidade") | ✔ Trava por objeto + contexto no próprio banco, inclusive para pedidos simultâneos |
 | **Contexto distinto não basta**: permite a análise separada, mas não prova, por si só, que os tratamentos são autônomos | 🧪 DA-38, item 4 | — (decisão humana) |
 | **Sem atalhos**: a etapa só vira item próprio do catálogo quando for divisão real e estável do processo; o contexto é escolhido de catálogo, nunca digitado | 🧪 DA-36, itens 4 e 5 + DA-38, item 1 | ✔ Catálogo fictício de contextos (20) |
-| **Advertência de família**: mesmo objeto em dois contextos da **mesma família** (ex.: CTX-TRIB-01 e CTX-TRIB-03) exige justificativa; famílias diferentes não geram aviso; só famílias configuradas como mutuamente exclusivas impedem | 🧪 DA-38, item 6 | ✔ Advertência com justificativa |
-| **Alerta** (análise humana): objetos diferentes, mas relacionados no catálogo ou com mesma finalidade, titulares ou dados, geram aviso de possível sobreposição; o sistema não funde nem bloqueia sozinho | 📘 SAD 05, 5.3 + 🧪 DA-36, item 7 | ⚙️ Parcial: alerta por base de dados comum; relações do catálogo a fazer |
+| **Advertência de família**: mesmo objeto em dois contextos da **mesma família** (ex.: CTX-TRIB-01 e CTX-TRIB-03) exige resolução; famílias diferentes não geram aviso; só famílias configuradas como mutuamente exclusivas impedem | 🧪 DA-38, item 6 + 📝 D2 (resolução revista: correção do pedido, justificativa específica ou transversalidade declarada pela governança) | ⚙️ Em revisão (Etapa 2d) |
+| **Alerta** (análise humana), em dois momentos: na **criação**, por objetos relacionados no catálogo ou base de dados comum; na **submissão do FORM 1**, por mesma finalidade, titulares, categorias de dados ou compartilhamentos. O sistema não funde nem bloqueia sozinho | 📘 SAD 05, 5.3 + 🧪 DA-36, item 7 + 📝 dois momentos (Etapa 2d) | ⚙️ Parcial: base comum; relações do catálogo e verificação na submissão a fazer |
 
 ### Assunto ou citado: o papel de cada objeto no Registro
 
@@ -408,8 +408,8 @@ O G11 do SAD 04 só permite cancelar a partir de estado **ativo** (Em andamento,
 | Situação | Onde está |
 |---|---|
 | 🧪 Decisão provisória: o G11 passa a valer a partir de qualquer estado diferente de Cancelado; motivo escolhido de catálogo; competência reforçada para cancelar Registro Concluído, sem novo ciclo e sem apagar a conclusão histórica | DA-37 (SAD 10 REV14) |
-| Ajuste da especificação | SAD 04 (G11, Figura 2, seção 6.4, pendências e cenários): pendente, revisão pós-PoC (O-82) |
-| Na PoC | O cenário 8 (duplicidade descoberta depois) depende da DA-37 e dos atos de suspender, concluir e cancelar, ainda não implementados |
+| Consolidação documental | SAD 04 (G11, Figura 2, seção 6.4, pendências e cenários), na revisão pós-PoC (O-82). Não impede a PoC |
+| Na PoC | O cenário 8 (duplicidade descoberta depois) depende da implementação dos atos de suspender, concluir e cancelar, já regulados pela DA-37 |
 
 ### Como o sistema evita Registros duplicados
 
@@ -419,7 +419,7 @@ O G11 do SAD 04 só permite cancelar a partir de estado **ativo** (Em andamento,
 |---|---|---|---|
 | 1 | **Equivalência bloqueadora**: o objeto já é PRINCIPAL ou ABRANGIDO de outro Registro em situação bloqueadora, no mesmo contexto de atuação? | 🔒 Bloqueia; as etapas seguintes não se aplicam | Determinística (banco de dados) |
 | 2 | **Família de contexto**: o objeto já é assunto de Registro em outro contexto da mesma família? | ⚠️ Advertência: exige justificativa | Confirmação humana |
-| 3 | **Objetos relacionados e semelhança material**: há objetos relacionados no catálogo, ou mesma finalidade, titulares ou dados? | 🔔 Alerta à governança | Análise humana posterior |
+| 3 | **Objetos relacionados** (triagem estrutural): há objetos relacionados no catálogo ou que usam a mesma base de dados? A semelhança material (finalidade, titulares, dados) é verificada depois, na submissão do FORM 1 | 🔔 Alerta à governança | Análise humana posterior |
 | 4 | **Resultado** | **Bloquear**, **criar com justificativa** (após 2) ou **criar** (com ou sem alerta) | — |
 
 O fluxograma está dividido em duas partes. As caixas amarelas (📋) mostram como os exemplos da tabela adiante respondem.
@@ -467,7 +467,7 @@ flowchart TD
     A0["➡️ Vindo da Parte 1<br/>sem equivalência bloqueadora"] --> QF{"O objeto já é assunto<br/>em outro contexto<br/>da mesma família?"}
     QF -- "sim" --> ADV["⚠️ Advertência<br/>confirmar transversalidade<br/>ou justificar"]
     QF -- "não" --> Q3
-    ADV --> Q3{"Há objetos relacionados<br/>ou semelhança material<br/>com outro Registro?"}
+    ADV --> Q3{"Há objetos relacionados<br/>no catálogo ou com<br/>a mesma base de dados?"}
     Q3 -- "sim" --> AL["🔔 ALERTA à governança<br/>avaliar se há sobreposição<br/>(não bloqueia)"]
     Q3 -- "não" --> OK["✔ Registro criado<br/>(com a justificativa,<br/>se houve advertência)"]
     AL --> OK
@@ -494,7 +494,7 @@ flowchart TD
 | 4 | Criar um Registro para o serviço **Poda de árvore** | Não é assunto de outro Registro e não tem objetos relacionados | ✔ **Criado** |
 | 5 | Registrar a mesma atividade de cadastro em *Arrecadação e cobrança tributária* (CTX-TRIB-03), quando já existe em CTX-TRIB-01 | Contexto distinto, mas da mesma família TRIB: pode ser o mesmo tratamento fatiado | ⚠️ **Advertência**, com justificativa, e ✔ **criado** |
 
-*Proposta em teste na PoC (DA-36 e DA-38). A PoC já executa os exemplos 1, 2, 4 e 5 e o alerta por base de dados comum; o alerta por relações hierárquicas do catálogo (exemplo 3) depende da curadoria (O-80).*
+*Proposta em teste na PoC (DA-36 e DA-38), em revisão na Etapa 2d. A PoC já executa os exemplos 1, 2, 4 e 5 e o alerta por base de dados comum; o alerta por relações hierárquicas do catálogo (exemplo 3) depende da curadoria (O-80).*
 
 ## O que já funciona
 
@@ -507,15 +507,22 @@ flowchart TD
 | Segregação de funções, comparando a pessoa e nunca a conta (O-66) | ✔ cenários a, b, c, e, f ¹ |
 | Criação do Registro pelo G1, com ciclo 1 e FORM 1 Não iniciado | ✔ ² |
 | Catálogo operacional e catálogo de canais, com a relação "atendido por" (DA-36, item 6) | ✔ fictícios |
-| Catálogos fictícios de contextos de atuação (com famílias) e de bases e conjuntos de dados, com a relação "utiliza" | ✔ |
-| Prevenção de duplicidade: objeto + contexto, papéis, advertência de família e alerta (DA-36, DA-38) | ✔ ³ |
+| **Prevenção de duplicidade** (geral) | ⚙️ Em revisão (Etapa 2d) ³ |
+| ↳ Catálogos fictícios de contextos (com famílias) e de bases e conjuntos de dados, com a relação "utiliza" | ✔ Implementado |
+| ↳ Trava determinística objeto + contexto, no próprio banco | ✔ Implementada |
+| ↳ Exatamente um PRINCIPAL por Registro, no próprio banco | ✔ Implementado |
+| ↳ Advertência de família | ⚙️ Em revisão (Etapa 2d) |
+| ↳ Declaração estruturada de transversalidade | A fazer (Etapa 2d) |
+| ↳ Alerta por base de dados comum | ⚙️ Parcial |
+| ↳ Semelhança por finalidade, titulares e dados | A fazer, após o preenchimento do FORM 1 |
+| ↳ Testes automatizados | A fazer (Etapa 2d) |
 | Checkpoint externo da cadeia (SAD 08) | a fazer |
 | Versão, análise, pendência e demais atos do workflow | a fazer |
 | Telas (FastAPI + Jinja2) e testes de aceite automatizados (pytest) | a fazer |
 
 ¹ Tentativas negadas ficam registradas na auditoria. O cenário d (substituição) está a fazer.
 ² O início do preenchimento do FORM 1 será um comando posterior ao G1, como no cenário A1 do SAD 04.
-³ Pesquisa prévia + trava no próprio banco (objeto + contexto para PRINCIPAL e ABRANGIDO; exatamente um PRINCIPAL por Registro): cenários de duplicidade 1, 2, 3 e 7 e os 11 cenários de contexto aprovados, inclusive dois pedidos simultâneos. O alerta por relações hierárquicas do catálogo depende da curadoria (O-80). Os cenários 4, 5 e 6 dependem dos atos de suspender, concluir e cancelar; o 8, também da revisão normativa do G11 (DA-37; ajuste do SAD 04 pendente).
+³ Trava determinística por objeto e contexto implementada no banco; cardinalidade do contexto, resolução da advertência de família, transversalidade, alertas materiais e testes automatizados em consolidação. Os cenários de duplicidade 1, 2, 3 e 7 (inclusive dois pedidos simultâneos) e os 11 cenários de contexto foram executados como demonstração; conversão em testes automatizados e aceite formal na Etapa 2d. Os cenários 4, 5, 6 e 8 dependem da implementação dos atos de suspender, concluir e cancelar, já regulados pela DA-37.
 
 ## Marcos e critérios de saída
 
@@ -536,7 +543,7 @@ Cada marco tem as suas condições de entrada e de saída (SAD 09, seções 4A, 
 | Evidências exigidas | POC-EV-001 a 006, 009, 011, 014 e 015 | POC-EV-010, 012 e 013 |
 | Autoridade que aprova | Encarregado de Dados | Encarregado de Dados |
 | Condição de encerramento | Critérios aprovados, cadeia de eventos verificada e ata do aceite | Critérios aprovados, cenários do M1a reexecutados e ata do aceite |
-| Pendências que impedem avançar | Defeito crítico ou alto aberto; regra usada pelo código ainda sem registro no SAD 10 (hoje, nenhuma) | Defeito crítico ou alto aberto; G11 conforme DA-37 sem implementar; competência para cancelar Registro Concluído (DA-37, item 4) em aberto |
+| Pendências que impedem avançar | Defeito crítico ou alto aberto; regra usada pelo código ainda sem registro no SAD 10 (hoje: D1, D2 e D4) | Defeito crítico ou alto aberto; G11 conforme DA-37 sem implementar; competência para cancelar Registro Concluído (DA-37, item 4) em aberto |
 
 | | M2 · PoC ampliada | M3A · PoC ampliada |
 |---|---|---|
@@ -547,29 +554,69 @@ Cada marco tem as suas condições de entrada e de saída (SAD 09, seções 4A, 
 | Condição de encerramento | Critérios aprovados e ata do aceite | Critérios aprovados, ata do aceite e Relatório de Encerramento e Transferência Técnica (SAD 09, seção 37): encerra a PoC |
 | Pendências que impedem avançar | SAD09-01 ou SAD09-05 em aberto; cópias fictícias equivalentes aos formulários reais não preparadas | SAD09-10 em aberto; relatório não elaborado. O Piloto exige autorização própria (SAD 09, 4A.7) |
 
+## Pacotes de implementação do M1b
+
+O workflow é **um só**, definido no SAD 04. O escopo, os marcos e os testes de aceite estão no SAD 09. Os pacotes abaixo só **organizam o trabalho** dentro do M1b: não redefinem regras. A situação de cada pacote é *pendente*, *em execução* ou *concluído* (com testes). O **aceite formal**, com ata, é do M1b inteiro (SAD 09, seção 30).
+
+```
+M1a — PoC nuclear
+M1b — Fluxos de controle
+  M1b.1 — Autorizações, suspensão, retomada e cancelamento
+          (inclui o P10 mínimo necessário ao cancelamento em cascata)
+  M1b.2 — Reabertura e novos ciclos
+  M1b.3 — Pendências completas, participação e continuidade
+          (inclui P5 a P9 e a integração completa do P10; AB-02 decidida antes do aceite final)
+  M1b.4 — Backup, restauração, integridade e adaptadores
+```
+
+| Pacote | Escopo principal | Cenários (SAD 04) | Testes | Critérios específicos | Situação |
+|---|---|---|---|---|---|
+| M1b.1 | Matriz provisória de autorizações; suspensão; retomada; cancelamento; P10 mínimo para o efeito em cascata | A5, A6, A35 | POC-TS-011, 016, 017 | Cenários aprovados | Pendente |
+| M1b.2 | Reabertura; novo ciclo; preservação dos ciclos; ações e pendências pós-conclusão | A7, A13, A32, A33 | — | Cenários aprovados | Pendente |
+| M1b.3 | P5 a P9; participação por unidade; continuidade institucional; reatribuições; integração do P10 ao fluxo completo | A16, A18, A19, A24, A31, A36 | — | POC-CA-010 | Pendente |
+| M1b.4 | Backup; restauração; evidências; verificação das cadeias; adaptadores simulados | — | POC-TS-010, 013, 014, 015 | POC-CA-012 e 013 | Pendente |
+
+*Fora do M1b:* A17, A34, POC-TS-012 e POC-CA-007 e 008 pertencem ao **M2** (ingestão, mapeamento e reprocessamento). Cada cenário, teste e critério do M1b aparece em exatamente um pacote.
+
+**Dependências explícitas** (o pacote só começa quando estiverem cumpridas):
+
+| Pacote | Dependências |
+|---|---|
+| M1b.1 | M1a aceito; matriz provisória de autorizações; **regras de prazo decididas** (O-84); calendário da PoC definido; P10 mínimo para o cancelamento em cascata |
+| M1b.2 | M1a aceito; **percurso com medidas e G6 comprovados no M1a**, com a ação obrigatória sintética disponível (usada no A32); regras de ciclo e de preservação das ações definidas |
+| M1b.3 | M1b.1 concluído; P1 a P4 disponíveis; regras de substituição e reatribuição definidas; **AB-02 decidida antes do aceite final** (não impede o início do pacote; se não virar situação autônoma, registra-se qual dos quatro casos absorve o comportamento) |
+| M1b.4 | Pacotes funcionais anteriores concluídos; conteúdo do backup definido; ambiente limpo de restauração; contrato dos adaptadores e verificação das cadeias disponíveis |
+
+**Critérios gerais**, reaplicados como verificação em cada pacote: POC-CA-001 (requisitos obrigatórios implementados), 002 (todos com método de verificação), 003 (cenários críticos executados), 014 (ausência de dados reais) e 015 (nenhum defeito crítico ou alto aberto).
+
 ## Próximos passos
 
 | Ordem | Passo | O que inclui | Marco |
 |---|---|---|---|
-| 1 | Concluir o núcleo do workflow | Rascunho, versão, submissão, análise com segregação, devolução com pendência, validação, conclusão e pendência intersecretarial | M1a |
-| 2 | Automatizar os testes de aceite do M1a | Suíte pytest com os cenários POC-TS-001 a 009, gerando as evidências POC-EV do marco | M1a |
-| 3 | Fechar as decisões normativas pendentes | Definir a competência do item 4 da DA-37 (quadro abaixo). O O-83 já virou a DA-38 | M1a → M1b |
-| 4 | Iniciar o M1b.1 | Suspender, retomar e cancelar (G8 e G11, conforme DA-37), fechando os cenários 4, 5, 6 e 8 da duplicidade | M1b |
-| 5 | Executar os demais incrementos do M1b | Reabertura com novo ciclo, pendências completas, participação por unidade, continuidade institucional, backup e restauração | M1b |
+| 1 | Etapa 2d: testes automatizados | Converter os cenários atuais em testes (pytest), num banco de teste próprio | M1a |
+| 2 | Etapa 2d: correções | Idempotência estrita, tratamento específico das recusas do banco, papéis explícitos no pedido, numeração anual (D4), um contexto por Registro (D1) | M1a |
+| 3 | Etapa 2d: advertência e transversalidade | Resolução da advertência de família e declaração de transversalidade (D2) | M1a |
+| 4 | Concluir o núcleo do workflow | Rascunho, versão, submissão (com a verificação material), análise com segregação, devolução com pendência, validação, conclusão e pendência intersecretarial; ação obrigatória sintética mínima e percurso com medidas (I5 → G4 → Em execução → G6) | M1a |
+| 5 | Automatizar os testes de aceite do M1a | Cenários POC-TS-001 a 009, gerando as evidências POC-EV do marco | M1a |
+| 6 | Fechar as decisões normativas pendentes | Competência do item 4 da DA-37 (quadro abaixo) | M1a → M1b |
+| 7 | Executar o M1b em quatro pacotes | M1b.1 a M1b.4, cada um só depois de cumpridas as suas dependências (quadro "Pacotes de implementação do M1b") | M1b |
 
 ## Pendências normativas consolidadas
 
-| Item | Assunto | Quem decide | O que bloqueia | Onde será registrado |
-|---|---|---|---|---|
-| O-80 | Curadoria e carga dos catálogos | A definir | Catálogo definitivo (na PoC, os catálogos são fictícios) | SAD correspondente (SAD 05 e SAD 03) |
-| O-82 | Revisão normativa do G11 (cancelar a partir de Suspenso e Concluído) | Encarregado | Cenário 8 da duplicidade | SAD 04 (já decidido para a PoC na DA-37) |
-| O-83 | Contextos de atuação, bases e conjuntos de dados, advertências de família | Encarregado | — (decidido para a PoC na DA-38, SAD 10 REV15) | SADs afetados, na revisão pós-PoC |
-| DA-37, item 4 | Papel competente para cancelar Registro Concluído | Encarregado | Cancelamento de Registro Concluído (M1b) | SAD 03 |
-| SAD09-01, 05 e 10 | Envelope de ingestão, contrato integral do FORM 1, decisão de encerramento | Conforme SAD 09, seção 33 | Entrada do M2 e encerramento do M3A | SAD 09 e SAD 10 |
+| Item | Assunto | Natureza | Quem decide | O que bloqueia | Onde será registrado |
+|---|---|---|---|---|---|
+| O-80 | Curadoria e carga dos catálogos | ⏳ Decisão pendente | A definir | Catálogo definitivo (na PoC, os catálogos são fictícios) | SAD correspondente (SAD 05 e SAD 03) |
+| O-82 | Consolidação documental da decisão do G11 no SAD 04 | 📄 Consolidação (decidido na DA-37) | Encarregado | Nada na PoC | SAD 04, na revisão pós-PoC |
+| O-83 | Consolidação documental de contextos, bases e famílias | 📄 Consolidação (decidido na DA-38) | Encarregado | Nada na PoC | SADs 02, 04, 05, 08 e 09, na revisão pós-PoC |
+| D1, D2, D4 | Um contexto por Registro; advertência e transversalidade; numeração anual | 📄 Decidido pelo Encarregado em 14/10/2026, a registrar no SAD 10 | Encarregado | — | SAD 10 (nova ficha DA) |
+| DA-37, item 4 | Papel competente para cancelar Registro Concluído | ⏳ Decisão pendente | Encarregado | Cancelamento de Registro Concluído (M1b) | SAD 03 |
+| AB-02 | Saída não programada como quinta situação de continuidade | ⏳ Decisão pendente | Encarregado | Aceite final do M1b.3 (não impede o início) | SAD 04 e SAD 02 |
+| Prazos (O-84) | Regras de prazo na suspensão: contagem por tipo de prazo, retomada, prazos pausáveis, alteração da data, histórico, calendário | ⏳ Decisão de entrada do M1b.1 (proposta registrada no O-84) | Encarregado | Início do M1b.1 | SAD 04 (14) e SAD 10 |
+| SAD09-01, 05 e 10 | Envelope de ingestão, contrato integral do FORM 1, decisão de encerramento | ⏳ Decisão pendente | Conforme SAD 09, seção 33 | Entrada do M2 e encerramento do M3A | SAD 09 e SAD 10 |
 
 ## Tecnologias (DA-28)
 
-Python 3.14 · PostgreSQL 18 · SQLAlchemy · psycopg · python-dotenv · (a seguir: FastAPI, Jinja2, pytest)
+Python 3.14 · PostgreSQL 18 · SQLAlchemy · psycopg · python-dotenv · pytest · (a seguir: FastAPI, Jinja2)
 
 ## Como montar o ambiente
 
@@ -582,30 +629,44 @@ Python 3.14 · PostgreSQL 18 · SQLAlchemy · psycopg · python-dotenv · (a seg
 2. **Banco** — no `psql`, como administrador, criar o usuário da aplicação (sem privilégios de administrador) e a base:
    ```sql
    CREATE ROLE lgpd_poc_app LOGIN PASSWORD 'escolha_uma_senha';
-   CREATE DATABASE lgpd_poc OWNER lgpd_poc_app;
+   CREATE DATABASE lgpd_poc_v2 OWNER lgpd_poc_app;
+   CREATE DATABASE lgpd_poc_teste OWNER lgpd_poc_app;
    ```
+   A base `lgpd_poc_v2` é a da PoC; a `lgpd_poc_teste`, só dos testes automatizados. A base anterior (`lgpd_poc`, até a Etapa 2c) foi preservada, com cópia de segurança, apenas para consulta.
 3. **Configuração** — copiar o modelo e preencher a senha (o `.env` nunca vai para o GitHub):
    ```
    copy .env.exemplo .env
    ```
-4. **Conferir** — `python teste_conexao.py` deve responder "Conexão estabelecida!".
+4. **Conferir** — `python -m instalacao.teste_conexao` deve responder "Conexão estabelecida!".
 
 ## Como rodar a PoC (até aqui)
 
+Os comandos estão separados pelo que fazem. Todos são rodados na pasta do projeto, com `python -m pasta.arquivo` (ponto, não barra).
+
+**1. Instalação** — uma vez, num banco vazio:
 ```
-python criar_tabelas.py         (cria as tabelas)
-python semear_pessoas.py        (pessoas e contas fictícias)
-python semear_designacoes.py    (unidades e papéis fictícios)
-python demo_eventos.py          (grava eventos e verifica a cadeia de hash)
-python teste_segregacao.py      (cenários de segregação de funções, O-66)
-python semear_catalogo.py       (catálogo operacional fictício: serviços, processos e atividades)
-python semear_canais.py         (catálogo fictício de canais e relação serviço–canal)
-python semear_contextos.py      (catálogo fictício de contextos de atuação e famílias)
-python semear_bases.py          (catálogo fictício de bases e conjuntos de dados, relação "utiliza")
-python migrar_vinculos_2c2.py   (uma vez: papel e contexto nos vínculos antigos, por ato novo)
-python demo_registro.py         (ato G1: cria um Registro, com ciclo 1 e FORM 1 não iniciado)
-python teste_duplicidade.py     (trava contra Registros duplicados, O-80)
-python teste_contexto.py        (objeto + contexto, papéis, advertência de família e alerta)
+python -m instalacao.criar_tabelas      (cria as tabelas e registra a versão 1 do esquema)
+```
+
+**2. Migrações** — evolução do esquema; roda só as que faltam, e rodar de novo não faz nada:
+```
+python -m migracoes.aplicar
+```
+
+**3. Carga fictícia** — pessoas, unidades, papéis e catálogos; pode ser repetida:
+```
+python -m carga_ficticia
+```
+
+**4. Demonstrações** — para ver funcionando; gravam uma vez só:
+```
+python -m demonstracoes.demo_eventos    (livro de atos, cadeia de hash e três fraudes simuladas)
+python -m demonstracoes.demo_registro   (ato G1: criação, repetição, bloqueio e advertência)
+```
+
+**5. Testes automatizados** — num banco de teste próprio (`lgpd_poc_teste`), esvaziado a cada teste; nunca no banco da PoC:
+```
+python -m pytest
 ```
 
 ## Documentos deste repositório

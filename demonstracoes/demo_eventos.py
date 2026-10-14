@@ -5,6 +5,7 @@
 #   3. as duas correntes são conferidas;
 #   4. três fraudes são simuladas e desfeitas (rollback): nada fica alterado no banco.
 # Grava uma vez só: se a REG-DEMO-01 já existir, apenas mostra e confere.
+# Uso: python -m demonstracoes.demo_eventos
 
 import uuid
 from sqlalchemy import select

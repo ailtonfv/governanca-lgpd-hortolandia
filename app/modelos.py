@@ -2,7 +2,7 @@
 # O SQLAlchemy traduz cada classe abaixo em uma tabela do PostgreSQL.
 
 from sqlalchemy import (Column, BigInteger, Integer, String, Text, DateTime, JSON, Boolean,
-                        ForeignKey, UniqueConstraint, Index, Sequence, func)
+                        ForeignKey, ForeignKeyConstraint, UniqueConstraint, CheckConstraint, Index, func)
 from sqlalchemy.orm import DeclarativeBase, relationship
 
 
@@ -26,6 +26,8 @@ class Comando(Base):
     conta_id = Column(String(50))                          # a credencial usada (só informativo)
     recebido_em = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
     resultado = Column(JSON)                               # a resposta dada, para devolver na repetição
+    hash_parametros = Column(String(64))                   # lacre dos parâmetros do pedido: a mesma chave
+                                                           # com outro conteúdo é recusada (Etapa 2d)
 
 
 class Evento(Base):
@@ -181,12 +183,31 @@ class Registro(Base):
     tipo_objeto = Column(String(20), nullable=False)              # processo, atividade ou servico
     titulo_objeto = Column(String(200), nullable=False)           # descrição curta, sem dados pessoais
     unidade_principal_atual_id = Column(String(50), ForeignKey("unidade.id"), nullable=False)
+    contexto_atuacao_id = Column(String(20), ForeignKey("contexto_atuacao.id"), nullable=False)  # D1: um por Registro
+    ano_codigo = Column(Integer, nullable=False)                  # D4: ano da criação (America/Sao_Paulo)
+    numero_codigo = Column(Integer, nullable=False)               # D4: número dentro do ano (recomeça a cada ano)
     criado_em = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
     criado_por = Column(String(50), nullable=False)               # a PESSOA que criou
     # --- projeções (resumo reconstruível a partir do livro de atos)
     ciclo_atual = Column(Integer, nullable=False)                 # número do ciclo ativo
     estado_atual = Column(String(30), nullable=False)             # ex.: em_andamento
     sequencia_atual = Column(Integer, nullable=False)             # último número da corrente do Registro
+
+    __table_args__ = (
+        UniqueConstraint("ano_codigo", "numero_codigo", name="uq_registro_ano_numero"),
+        # permite que os vínculos apontem para (Registro, contexto): garante contexto único por Registro (D1)
+        UniqueConstraint("id", "contexto_atuacao_id", name="uq_registro_id_contexto"),
+    )
+
+
+class ContadorRegistro(Base):
+    """Contador anual do código LGPD (D4): LGPD-2026-00041, depois LGPD-2027-00001.
+    Atualizado na mesma transação do G1, com INSERT ... ON CONFLICT ... RETURNING:
+    dois pedidos simultâneos nunca recebem o mesmo número."""
+    __tablename__ = "contador_registro"
+
+    ano = Column(Integer, primary_key=True)
+    ultimo_numero = Column(Integer, nullable=False)
 
 
 class Ciclo(Base):
@@ -226,7 +247,6 @@ class Instrumento(Base):
 
 # Numerador dos códigos LGPD. Um contador do próprio banco: dois pedidos simultâneos
 # nunca recebem o mesmo número (pode haver "pulos" na numeração, o que é aceitável).
-seq_codigo_lgpd = Sequence("seq_codigo_lgpd", metadata=Base.metadata)
 
 
 class ObjetoCatalogo(Base):
@@ -273,29 +293,73 @@ PAPEIS_CITADOS = ("APOIO", "RELACIONADO")
 
 
 class RegistroObjeto(Base):
-    """Vínculo entre um Registro e os objetos do catálogo (RF-PRC-13), com PAPEL e CONTEXTO.
+    """Vínculo entre um Registro e os objetos do catálogo (RF-PRC-13), com PAPEL.
 
-    A TRAVA (DA-36 e DA-38), garantida pelo próprio banco nos índices abaixo:
-      1. o mesmo objeto, no mesmo contexto de atuação, só pode ser ASSUNTO (PRINCIPAL ou
-         ABRANGIDO) de UM Registro não cancelado — mesmo que dois pedidos cheguem juntos;
-      2. cada Registro tem exatamente UM objeto PRINCIPAL.
-    APOIO e RELACIONADO são apenas citados: não entram na trava."""
+    D1 — um contexto por Registro: o contexto aparece aqui só para a trava funcionar, e o banco
+    garante que ele é SEMPRE o mesmo do Registro (chave estrangeira composta).
+      - ASSUNTO (PRINCIPAL, ABRANGIDO): contexto obrigatório, igual ao do Registro;
+      - CITADO (APOIO, RELACIONADO): contexto vazio — não ganha contexto naquele Registro.
+
+    A TRAVA (DA-36 e DA-38), garantida pelo próprio banco:
+      1. o mesmo objeto, no mesmo contexto, só pode ser ASSUNTO de UM Registro não cancelado;
+      2. cada Registro tem exatamente UM objeto PRINCIPAL."""
     __tablename__ = "registro_objeto"
 
     id = Column(Integer, primary_key=True)
     registro_id = Column(String(36), ForeignKey("registro.id"), nullable=False)
     objeto_id = Column(String(50), ForeignKey("objeto_catalogo.id"), nullable=False)
     papel = Column(String(20), nullable=False)                # PRINCIPAL, ABRANGIDO, APOIO ou RELACIONADO
-    contexto_atuacao_id = Column(String(20), ForeignKey("contexto_atuacao.id"), nullable=False)
+    contexto_atuacao_id = Column(String(20))                  # só para ASSUNTO; vazio para CITADO
     vinculado_em = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
     ativo = Column(Boolean, nullable=False, default=True)     # vira False quando o Registro é cancelado
 
     __table_args__ = (
+        ForeignKeyConstraint(["registro_id", "contexto_atuacao_id"],
+                             ["registro.id", "registro.contexto_atuacao_id"],
+                             name="fk_vinculo_contexto_do_registro"),
+        CheckConstraint(
+            "(papel IN ('PRINCIPAL','ABRANGIDO') AND contexto_atuacao_id IS NOT NULL) OR "
+            "(papel IN ('APOIO','RELACIONADO') AND contexto_atuacao_id IS NULL)",
+            name="ck_papel_e_contexto"),
         Index("uq_objeto_contexto_assunto_ativo", "objeto_id", "contexto_atuacao_id", unique=True,
               postgresql_where=(ativo.is_(True) & papel.in_(PAPEIS_ASSUNTO))),
         Index("uq_um_principal_por_registro", "registro_id", unique=True,
               postgresql_where=(ativo.is_(True) & (papel == "PRINCIPAL"))),
     )
+
+
+class Transversalidade(Base):
+    """Declaração de transversalidade de um objeto DENTRO de uma família de contextos (D2).
+    Alcance: objeto + família (não é global). Só a governança de proteção de dados (na PoC,
+    o Encarregado) declara ou revoga. Enquanto vigente, resolve as advertências de família
+    daquele objeto naquela família — sem afastar a trava nem os alertas.
+    Encerrar é preencher vigente_ate; nunca apagar."""
+    __tablename__ = "transversalidade"
+
+    id = Column(Integer, primary_key=True)
+    objeto_id = Column(String(50), ForeignKey("objeto_catalogo.id"), nullable=False)
+    familia_id = Column(String(10), ForeignKey("familia_contexto.id"), nullable=False)
+    fundamento = Column(Text, nullable=False)
+    decidido_por = Column(String(50), nullable=False)         # a PESSOA com papel de governança
+    vigente_de = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    vigente_ate = Column(DateTime(timezone=True))
+    comando_id = Column(String(64), ForeignKey("comando.id"), nullable=False)  # o pedido que a declarou
+
+    __table_args__ = (
+        Index("uq_transversalidade_vigente", "objeto_id", "familia_id", unique=True,
+              postgresql_where=(vigente_ate.is_(None))),
+    )
+
+
+class VersaoEsquema(Base):
+    """Migrações já aplicadas a este banco (Etapa 2d): número, nome, quando e por quem.
+    O aplicador (python -m migracoes.aplicar) só roda as que não estiverem aqui."""
+    __tablename__ = "versao_esquema"
+
+    numero = Column(Integer, primary_key=True)
+    nome = Column(String(100), nullable=False)
+    aplicada_em = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    aplicada_por = Column(String(50), nullable=False)
 
 
 class BaseDados(Base):

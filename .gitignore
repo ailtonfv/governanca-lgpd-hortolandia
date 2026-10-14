@@ -20,3 +20,6 @@ ABRIR_POC.bat
 # Trilha de aprendizagem pessoal (fica só no computador)
 TRILHA_APRENDIZAGEM.md
 treino/
+
+# cópias de segurança do banco (nunca no GitHub)
+*.dump
