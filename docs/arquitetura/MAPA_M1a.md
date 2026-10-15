@@ -8,20 +8,54 @@
 
 ```mermaid
 flowchart TD
-    I(("início")) -- "G1 Criar Registro" --> A["🟦 Em andamento"]
-    A -- "I3 Submeter<br/>(G2 automático)" --> V["🟨 Em validação"]
+    I(("início")) -- "G1 Criar Registro" --> A["Em andamento"]
+    A -- "I3 Submeter<br/>(G2 automático)" --> V["Em validação"]
     V -- "I6 Devolver ou I4 Retirar<br/>(G3 automático)" --> A
     V -- "I5 Validar, sem medidas<br/>(G4 automático)" --> A
-    V -- "I5 Validar, com medidas<br/>(G4 automático)" --> X["🟧 Em execução"]
-    A -- "G5 Concluir<br/>sem medidas" --> C["🟩 Concluído"]
+    V -- "I5 Validar, com medidas<br/>(G4 automático)" --> X["Em execução"]
+    A -- "G5 Concluir<br/>sem medidas" --> C["Concluído"]
     X -- "ação concluída → G6 Concluir<br/>após execução" --> C
-    style A fill:#dbe9f7,stroke:#5b9bd5
-    style V fill:#fff3c4,stroke:#d4a017
-    style X fill:#fde3cc,stroke:#e07b39
-    style C fill:#d8f0dc,stroke:#5cb85c
+    R["📁 O Registro é a pasta do tratamento inteiro:<br/>objetos, FORMs, versões, pendências e eventos.<br/>O estado acima é o da pasta, não de um formulário."]
+    R -.- A
+    classDef estado color:#1f2328,font-weight:bold
+    class A,V,X,C estado
+    style A fill:#dbe9f7,stroke:#5b9bd5,color:#1f2328
+    style V fill:#fff3c4,stroke:#d4a017,color:#1f2328
+    style X fill:#fde3cc,stroke:#e07b39,color:#1f2328
+    style C fill:#d8f0dc,stroke:#5cb85c,color:#1f2328
+    style R fill:#f6f8fa,stroke:#8c959f,color:#1f2328,stroke-dasharray:4
 ```
 
 **Uma regra só decide o estado** (SAD 04, 6.3): há instrumento pronto para validação → *Em validação*; senão, há ação obrigatória aberta → *Em execução*; senão → *Em andamento*. Por isso G2, G3 e G4 não são pedidos de ninguém: o sistema os grava **na mesma transação** do ato que os causou.
+
+### 1A. Os estados do FORM 1 (o Instrumento) no M1a
+
+Dentro da pasta, o FORM 1 tem os seus próprios estados (SAD 04, seção 9). É o estado do FORM 1 que **puxa** o estado do Registro.
+
+```mermaid
+flowchart LR
+    N["Não iniciado"] -- "I1 Iniciar<br/>preenchimento" --> P["Em preenchimento"]
+    P -- "I2 Salvar e sair" --> P
+    P -- "I3 Submeter<br/>(cria a Versão N)" --> R["Pronto para<br/>validação"]
+    R -- "I4 Retirar<br/>(antes do I13)" --> P
+    R -- "I5 Validar" --> VA["Validado"]
+    R -- "I6 Devolver<br/>(cria a pendência)" --> D["Devolvido<br/>para ajuste"]
+    D -- "I7 Iniciar ajuste" --> P
+    style N fill:#eaeef2,stroke:#8c959f,color:#1f2328
+    style P fill:#dbe9f7,stroke:#5b9bd5,color:#1f2328
+    style R fill:#fff3c4,stroke:#d4a017,color:#1f2328
+    style VA fill:#d8f0dc,stroke:#5cb85c,color:#1f2328
+    style D fill:#fde3cc,stroke:#e07b39,color:#1f2328
+```
+
+| Quando o FORM 1 está… | o Registro fica… |
+|---|---|
+| Não iniciado, Em preenchimento ou Devolvido para ajuste | Em andamento |
+| Pronto para validação | Em validação |
+| Validado, com ação obrigatória aberta | Em execução |
+| Validado, sem ação aberta | Em andamento, até alguém concluir (G5) |
+
+*No M1a só existe o FORM 1. Na PoC ampliada, com mais de um formulário, a mesma regra olha para todos: basta um estar Pronto para validação para o Registro ficar Em validação.*
 
 ## 2. Percurso principal: sem medidas
 
@@ -61,9 +95,9 @@ sequenceDiagram
     A->>S: I13 Iniciar análise
     A->>S: I6 Devolver, com motivo
     S-->>S: mesma transação: P1 cria a pendência + G3
-    Note over E,A: Registro: Em andamento · Versão 1 preservada<br/>pendência Aberta (bloqueia novo I3)
+    Note over E,A: Registro: Em andamento · FORM 1: Devolvido para ajuste<br/>Versão 1 preservada · pendência Aberta (bloqueia novo I3)
     E->>S: P2 Assumir a pendência
-    E->>S: corrige o rascunho
+    E->>S: I7 Iniciar ajuste e corrige o rascunho
     E->>S: P3 Responder (bloqueia o rascunho e registra o hash)
     alt resposta insuficiente
         A->>S: P5 Devolver a resposta, com motivo
