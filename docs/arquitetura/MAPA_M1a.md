@@ -4,28 +4,19 @@
 
 > **Como ler.** Cada coluna é **quem age**. Cada seta é **um ato**, com o seu código. As faixas amarelas mostram **em que estado ficou o Registro** (ou a pendência).
 
-## 1. Os estados do Registro no M1a
-
-**Legenda.** Caixa colorida = **estado do Registro**. Texto na seta = o que provoca a mudança:
-
-| Código | O que é | Quem faz |
-|---|---|---|
-| **I** (I3, I4, I5, I6) | ato sobre o **Instrumento** (o FORM) | uma **pessoa** |
-| **G1, G5, G6** | ato sobre o **Registro** (a pasta) | uma **pessoa** |
-| **G2, G3, G4** | recálculo do estado do Registro | o **sistema**, sozinho, junto com o ato da pessoa |
-
-Por isso cada seta mostra primeiro o ato da pessoa e, depois do **+**, o recálculo automático que ele dispara.
+## 1. Visão geral do fluxo
 
 ```mermaid
 flowchart TD
-    I(("início")) -- "G1 Criar Registro<br/>(pessoa)" --> A["Em andamento"]
-    A -- "I3 Submeter<br/>+ G2 automático" --> V["Em validação"]
-    V -- "I6 Devolver<br/>+ G3 automático" --> A
-    V -- "I4 Retirar<br/>+ G3 automático" --> A
-    V -- "I5 Validar, sem medidas<br/>+ G4 automático" --> A
-    V -- "I5 Validar, com medidas<br/>+ G4 automático" --> X["Em execução"]
-    A -- "G5 Concluir (pessoa)<br/>depois de validado<br/>sem medidas" --> C["Concluído"]
-    X -- "G6 Concluir (pessoa)<br/>depois de encerrada<br/>a ação obrigatória" --> C
+    I(("Início")) -- "Criar o Registro" --> A["Registro em andamento"]
+    A -- "Enviar para validação" --> V["Registro em validação"]
+    V -- "Devolver para ajustes" --> A
+    V -- "Retirar da validação" --> A
+    V -- "Validar" --> D{"A validação identificou<br/>medidas necessárias?"}
+    D -- "Não" --> A
+    D -- "Sim" --> X["Registro em execução"]
+    A -- "Concluir após validação<br/>sem medidas" --> C["Registro concluído"]
+    X -- "Concluir após executar<br/>as medidas" --> C
     R["O Registro é a pasta do<br/>tratamento inteiro: objetos,<br/>FORMs, versões, pendências<br/>e eventos. O estado nas<br/>caixas é o da pasta,<br/>não de um formulário."]
     R -.- A
     classDef estado color:#1f2328,font-weight:bold
@@ -34,12 +25,21 @@ flowchart TD
     style V fill:#fff3c4,stroke:#d4a017,color:#1f2328
     style X fill:#fde3cc,stroke:#e07b39,color:#1f2328
     style C fill:#d8f0dc,stroke:#5cb85c,color:#1f2328
+    style D fill:#f6f8fa,stroke:#57606a,color:#1f2328
     style R fill:#f6f8fa,stroke:#8c959f,color:#1f2328,stroke-dasharray:4
 ```
 
-**Por que "validar sem medidas" não leva direto a Concluído.** Pelo SAD 04 (REV12), o G4 só recalcula o estado: sem ação obrigatória aberta, o Registro volta para *Em andamento*. Concluir é sempre uma **decisão humana** (G5 ou G6), nunca automática.
+> **Nota de rastreabilidade técnica.** Algumas ações do **agente público autorizado** (Cartilha, seção 3.1), doravante **agente**, provocam atualizações automáticas no sistema. Os códigos de cada ação estão na tabela abaixo e no quadro técnico (seção 1B). A definição completa de cada código está no **SAD 04 (REV12)**: seção 7 para os atos **G** (Registro) e seção 9 para os atos **I** (Instrumento), reproduzida ao final da seção 1B.
 
-**Uma regra só decide o estado** (SAD 04, 6.3): há instrumento pronto para validação → *Em validação*; senão, há ação obrigatória aberta → *Em execução*; senão → *Em andamento*. Por isso G2, G3 e G4 não são pedidos de ninguém: o sistema os grava **na mesma transação** do ato que os causou.
+| O agente público autorizado faz | Código do ato | Atualização automática após o ato |
+|---|---|---|
+| Criar o Registro | G1 | — |
+| Enviar para validação | I3 | G2 |
+| Devolver para ajustes | I6 | G3 |
+| Retirar da validação | I4 | G3 |
+| Validar | I5 | G4 |
+| Concluir após validação sem medidas | G5 | — |
+| Concluir após executar as medidas | G6 | — |
 
 ### 1A. Os estados do FORM 1 (o Instrumento) no M1a
 
@@ -69,6 +69,67 @@ flowchart LR
 | Validado, sem ação aberta | Em andamento, até alguém concluir (G5) |
 
 *No M1a só existe o FORM 1. Na PoC ampliada, com mais de um formulário, a mesma regra olha para todos: basta um estar Pronto para validação para o Registro ficar Em validação.*
+
+### 1B. Quadro técnico do fluxo
+
+**Legenda.** Caixa colorida = **estado do Registro**. Texto na seta = o que provoca a mudança:
+
+| Código | O que é | Quem faz |
+|---|---|---|
+| **I** (I3, I4, I5, I6) | ato sobre o **Instrumento** (o FORM) | o **agente** |
+| **G1, G5, G6** | ato sobre o **Registro** (a pasta) | o **agente** |
+| **G2, G3, G4** | recálculo do estado do Registro | o **sistema**, sozinho, junto com o ato do agente |
+
+Por isso cada seta mostra primeiro o ato do agente e, depois do **+**, o recálculo automático que ele dispara.
+
+```mermaid
+flowchart TD
+    I(("início")) -- "G1 Criar Registro<br/>(agente)" --> A["Em andamento"]
+    A -- "I3 Submeter<br/>+ G2 automático" --> V["Em validação"]
+    V -- "I6 Devolver<br/>+ G3 automático" --> A
+    V -- "I4 Retirar<br/>+ G3 automático" --> A
+    V -- "I5 Validar, sem medidas<br/>+ G4 automático" --> A
+    V -- "I5 Validar, com medidas<br/>+ G4 automático" --> X["Em execução"]
+    A -- "G5 Concluir (agente)<br/>após validação<br/>sem medidas" --> C["Concluído"]
+    X -- "G6 Concluir (agente)<br/>após executar<br/>as medidas" --> C
+    classDef estado color:#1f2328,font-weight:bold
+    class A,V,X,C estado
+    style A fill:#dbe9f7,stroke:#5b9bd5,color:#1f2328
+    style V fill:#fff3c4,stroke:#d4a017,color:#1f2328
+    style X fill:#fde3cc,stroke:#e07b39,color:#1f2328
+    style C fill:#d8f0dc,stroke:#5cb85c,color:#1f2328
+```
+
+**Por que "validar sem medidas" não leva direto a Concluído.** Pelo SAD 04 (REV12), o G4 só recalcula o estado: sem ação obrigatória aberta, o Registro volta para *Em andamento*. Concluir é sempre uma **decisão do agente** (G5 ou G6), nunca automática.
+
+**Uma regra só decide o estado** (SAD 04, 6.3): há instrumento pronto para validação → *Em validação*; senão, há ação obrigatória aberta → *Em execução*; senão → *Em andamento*. Por isso G2, G3 e G4 não são pedidos de ninguém: o sistema os grava **na mesma transação** do ato que os causou.
+
+#### Tabela completa dos códigos usados neste mapa
+
+Transcrição das matrizes do SAD 04 (REV12), seções 7 e 9, sem a coluna de registros mínimos. Em caso de divergência, prevalece o SAD.
+
+| Código | De | Ato | Quem pratica | Condições | Para |
+|---|---|---|---|---|---|
+| **G1** | — | Criar Registro | Responsável funcional / gestor da área | Tratamento identificado; um único contexto de atuação; exatamente um objeto PRINCIPAL e zero ou mais ABRANGIDOS; inexistência de Registro equivalente em situação bloqueadora — Em andamento, Em validação, Em execução, Suspenso ou Concluído (Cancelado não bloqueia; para Concluído, o caminho é G10) — conforme DA-36, DA-38 e DA-39 | Em andamento |
+| **G2** | Em andamento ou Em execução | Instrumento submetido | AUTOMÁTICA | Algum instrumento Pronto para validação | Estado ativo recalculado (seção 6.3) |
+| **G3** | Em validação | Instrumento devolvido / retirado | AUTOMÁTICA | Nenhum instrumento Pronto para validação; há instrumento em preenchimento, devolvido ou revisão | Estado ativo recalculado (seção 6.3) |
+| **G4** | Em validação | Recalcular após validação | AUTOMÁTICA | I5 validou a Versão N | Estado ativo recalculado (seção 6.3): Em validação se outro instrumento estiver Pronto para validação; Em execução se houver ações obrigatórias abertas; Em andamento nos demais casos |
+| **G5** | Em andamento | Concluir sem medidas | Papel com permissão Concluir e competência formal (SAD 03) | Instrumentos obrigatórios válidos; nenhuma pendência bloqueante; sem medidas a executar; pendências não bloqueantes abertas marcadas como pós-conclusão ou encerradas (seção 13.5) | Concluído |
+| **G6** | Em execução | Concluir | Papel com permissão Concluir e competência formal (SAD 03) | Ações obrigatórias concluídas ou encerradas; nenhuma pendência bloqueante; pendências não bloqueantes abertas marcadas como pós-conclusão ou encerradas (seção 13.5) | Concluído |
+| **I1** | Não iniciado | Iniciar preenchimento | Responsável pelo preenchimento | Gate de precedência atendido | Em preenchimento |
+| **I2** | Em preenchimento | Salvar e sair | Responsável pelo preenchimento | — | Em preenchimento |
+| **I3** | Em preenchimento | Submeter | Responsável pelo preenchimento | Campos mínimos; nenhuma pendência bloqueante para a submissão; havendo pendência de devolução encerrada por P4, o lacre do rascunho é igual ao aceito (DA-39, item 6) | Pronto para validação |
+| **I4** | Pronto para validação | Retirar submissão | Responsável pelo preenchimento | Sem evento “Iniciar análise” para a Versão N | Em preenchimento |
+| **I5** | Pronto para validação | Validar | Responsável vigente pela análise, designado pela instância validadora definida no SAD 03 | Análise iniciada para a Versão N; executor é o responsável vigente pela análise e não é o submetente da Versão N (SAD 08, SEG-01) | Validado |
+| **I6** | Pronto para validação | Devolver | Responsável vigente pela análise, designado pela instância validadora definida no SAD 03 | Análise iniciada para a Versão N; lacuna/inconsistência; executor é o responsável vigente pela análise e não é o submetente da Versão N (SAD 08, SEG-01) | Devolvido para ajuste |
+| **I7** | Devolvido para ajuste | Iniciar ajuste | Responsável pelo preenchimento | — | Em preenchimento |
+
+Eventos de análise do SAD 04 (I13 e I14), que não mudam o estado do FORM:
+
+| Código | Ato | Objeto e efeito |
+|---|---|---|
+| **I13** | Iniciar análise | Instrumento (Versão N): atribui a análise a um único validador; bloqueia I4 (seção 8.3). |
+| **I14** | Reatribuir análise | Instrumento (Versão N): troca o responsável vigente, com motivo; novo responsável distinto do submetente. |
 
 ## 2. Percurso principal: sem medidas
 
