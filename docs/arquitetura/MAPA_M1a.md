@@ -1,4 +1,4 @@
-# Mapa do M1a — como um Registro anda na PoC nuclear
+# Mapa do M1a — como um Registro caminha dentro da PoC nuclear
 
 *Volta ao [README](../../README.md). Leitura em 5 minutos. Este mapa só ilustra: a regra vale como está no SAD 04 (REV12), no SAD 09 (4A.1 e 27.1) e no SAD 10 (DA-39). Em caso de divergência, prevalecem os SADs. Somente dados fictícios.*
 
