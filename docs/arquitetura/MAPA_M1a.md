@@ -6,16 +6,27 @@
 
 ## 1. Os estados do Registro no M1a
 
+**Legenda.** Caixa colorida = **estado do Registro**. Texto na seta = o que provoca a mudança:
+
+| Código | O que é | Quem faz |
+|---|---|---|
+| **I** (I3, I4, I5, I6) | ato sobre o **Instrumento** (o FORM) | uma **pessoa** |
+| **G1, G5, G6** | ato sobre o **Registro** (a pasta) | uma **pessoa** |
+| **G2, G3, G4** | recálculo do estado do Registro | o **sistema**, sozinho, junto com o ato da pessoa |
+
+Por isso cada seta mostra primeiro o ato da pessoa e, depois do **+**, o recálculo automático que ele dispara.
+
 ```mermaid
 flowchart TD
-    I(("início")) -- "G1 Criar Registro" --> A["Em andamento"]
-    A -- "I3 Submeter<br/>(G2 automático)" --> V["Em validação"]
-    V -- "I6 Devolver ou I4 Retirar<br/>(G3 automático)" --> A
-    V -- "I5 Validar, sem medidas<br/>(G4 automático)" --> A
-    V -- "I5 Validar, com medidas<br/>(G4 automático)" --> X["Em execução"]
-    A -- "G5 Concluir<br/>sem medidas" --> C["Concluído"]
-    X -- "ação concluída → G6 Concluir<br/>após execução" --> C
-    R["📁 O Registro é a pasta do tratamento inteiro:<br/>objetos, FORMs, versões, pendências e eventos.<br/>O estado acima é o da pasta, não de um formulário."]
+    I(("início")) -- "G1 Criar Registro<br/>(pessoa)" --> A["Em andamento"]
+    A -- "I3 Submeter<br/>+ G2 automático" --> V["Em validação"]
+    V -- "I6 Devolver<br/>+ G3 automático" --> A
+    V -- "I4 Retirar<br/>+ G3 automático" --> A
+    V -- "I5 Validar, sem medidas<br/>+ G4 automático" --> A
+    V -- "I5 Validar, com medidas<br/>+ G4 automático" --> X["Em execução"]
+    A -- "G5 Concluir (pessoa)<br/>depois de validado<br/>sem medidas" --> C["Concluído"]
+    X -- "G6 Concluir (pessoa)<br/>depois de encerrada<br/>a ação obrigatória" --> C
+    R["O Registro é a pasta do<br/>tratamento inteiro: objetos,<br/>FORMs, versões, pendências<br/>e eventos. O estado nas<br/>caixas é o da pasta,<br/>não de um formulário."]
     R -.- A
     classDef estado color:#1f2328,font-weight:bold
     class A,V,X,C estado
@@ -25,6 +36,8 @@ flowchart TD
     style C fill:#d8f0dc,stroke:#5cb85c,color:#1f2328
     style R fill:#f6f8fa,stroke:#8c959f,color:#1f2328,stroke-dasharray:4
 ```
+
+**Por que "validar sem medidas" não leva direto a Concluído.** Pelo SAD 04 (REV12), o G4 só recalcula o estado: sem ação obrigatória aberta, o Registro volta para *Em andamento*. Concluir é sempre uma **decisão humana** (G5 ou G6), nunca automática.
 
 **Uma regra só decide o estado** (SAD 04, 6.3): há instrumento pronto para validação → *Em validação*; senão, há ação obrigatória aberta → *Em execução*; senão → *Em andamento*. Por isso G2, G3 e G4 não são pedidos de ninguém: o sistema os grava **na mesma transação** do ato que os causou.
 
