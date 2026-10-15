@@ -23,3 +23,6 @@ treino/
 
 # cópias de segurança do banco (nunca no GitHub)
 *.dump
+
+# Cola de comandos pessoal (fica só no computador)
+docs/operacao/COLA_COMANDOS.md

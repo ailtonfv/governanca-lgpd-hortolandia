@@ -4,6 +4,17 @@
 
 > ⚠️ **Somente dados fictícios.** Nenhum dado pessoal real, CPF, matrícula, senha ou token entra neste repositório, no código, nos testes ou nos logs.
 
+## Por onde começar
+
+| Se você quer… | Vá para |
+|---|---|
+| Entender o que é o sistema e de onde vem | as seções logo abaixo ("De onde vem", "O que é") |
+| Ver, em 5 minutos, como um Registro anda no M1a | [Mapa do M1a](docs/arquitetura/MAPA_M1a.md) |
+| Saber o que já funciona e o que falta | [O que já funciona](#o-que-já-funciona) e [Próximos passos](#próximos-passos) |
+| Montar o ambiente e rodar os testes | [Instalação e execução](docs/operacao/INSTALACAO.md) |
+| Entender as camadas do código | [Arquitetura](docs/arquitetura/ARQUITETURA_POC.md) |
+
+
 ## De onde vem este sistema
 
 O sistema nasce do programa de proteção de dados pessoais da Prefeitura. Dois conjuntos de documentos o sustentam, cada um com um papel:
@@ -528,7 +539,7 @@ flowchart TD
 
 ## Marcos e critérios de saída
 
-> 🗺️ **Para entender o percurso de um Registro no M1a em cinco minutos, veja o [Mapa do M1a](MAPA_M1a.md)**: estados, percursos (sem medidas, com devolução, com medidas, pendência para outra Secretaria) e regras comuns. O mapa só ilustra; prevalecem o SAD 04 (REV12), o SAD 09 e a DA-39.
+> 🗺️ **Para entender o percurso de um Registro no M1a em cinco minutos, veja o [Mapa do M1a](docs/arquitetura/MAPA_M1a.md)**: estados, percursos (sem medidas, com devolução, com medidas, pendência para outra Secretaria) e regras comuns. O mapa só ilustra; prevalecem o SAD 04 (REV12), o SAD 09 e a DA-39.
 
 Cada marco tem as suas condições de entrada e de saída (SAD 09, seções 4A, 4C e 30). Cada critério de aceite (POC-CA) gera uma evidência de mesmo número (POC-EV): POC-CA-001 → POC-EV-001, e assim por diante. Uma camada só é aceita quando os seus cenários, testes e critérios forem verificados.
 
@@ -622,54 +633,14 @@ M1b — Fluxos de controle
 
 Python 3.14 · PostgreSQL 18 · SQLAlchemy · psycopg · python-dotenv · pytest · (a seguir: FastAPI, Jinja2)
 
-## Como montar o ambiente
+## Instalação e execução
 
-1. **Python** — criar e ativar o ambiente:
-   ```
-   conda create -n lgpd-poc python=3.14
-   conda activate lgpd-poc
-   python -m pip install -r requirements.txt
-   ```
-2. **Banco** — no `psql`, como administrador, criar o usuário da aplicação (sem privilégios de administrador) e a base:
-   ```sql
-   CREATE ROLE lgpd_poc_app LOGIN PASSWORD 'escolha_uma_senha';
-   CREATE DATABASE lgpd_poc_v2 OWNER lgpd_poc_app;
-   CREATE DATABASE lgpd_poc_teste OWNER lgpd_poc_app;
-   ```
-   A base `lgpd_poc_v2` é a da PoC; a `lgpd_poc_teste`, só dos testes automatizados. A base anterior (`lgpd_poc`, até a Etapa 2c) foi preservada, com cópia de segurança, apenas para consulta.
-3. **Configuração** — copiar o modelo e preencher a senha (o `.env` nunca vai para o GitHub):
-   ```
-   copy .env.exemplo .env
-   ```
-4. **Conferir** — `python -m instalacao.teste_conexao` deve responder "Conexão estabelecida!".
+O passo a passo para montar o ambiente (Python, PostgreSQL, `.env`) e rodar a PoC — instalação, migrações, carga fictícia, demonstrações e testes automatizados — está em **[docs/operacao/INSTALACAO.md](docs/operacao/INSTALACAO.md)**.
 
-## Como rodar a PoC (até aqui)
-
-Os comandos estão separados pelo que fazem. Todos são rodados na pasta do projeto, com `python -m pasta.arquivo` (ponto, não barra).
-
-**1. Instalação** — uma vez, num banco vazio:
+Resumo, numa base já configurada:
 ```
-python -m instalacao.criar_tabelas      (cria as tabelas e registra a versão 1 do esquema)
-```
-
-**2. Migrações** — evolução do esquema; roda só as que faltam, e rodar de novo não faz nada:
-```
-python -m migracoes.aplicar
-```
-
-**3. Carga fictícia** — pessoas, unidades, papéis e catálogos; pode ser repetida:
-```
+python -m instalacao.criar_tabelas
 python -m carga_ficticia
-```
-
-**4. Demonstrações** — para ver funcionando; gravam uma vez só:
-```
-python -m demonstracoes.demo_eventos    (livro de atos, cadeia de hash e três fraudes simuladas)
-python -m demonstracoes.demo_registro   (ato G1: criação, repetição, bloqueio e advertência)
-```
-
-**5. Testes automatizados** — num banco de teste próprio (`lgpd_poc_teste`), esvaziado a cada teste; nunca no banco da PoC:
-```
 python -m pytest
 ```
 
@@ -677,9 +648,13 @@ python -m pytest
 
 | Documento | Para que serve |
 |---|---|
-| [ARQUITETURA_POC.md](ARQUITETURA_POC.md) | Camadas do sistema, responsabilidades e mapa da pasta |
-| [DIARIO_POC.md](DIARIO_POC.md) | Registro datado de tudo o que foi feito |
-| [COLA_COMANDOS.md](COLA_COMANDOS.md) | Comandos do dia a dia |
+| [docs/arquitetura/MAPA_M1a.md](docs/arquitetura/MAPA_M1a.md) | O percurso de um Registro no M1a, em diagramas (ilustrativo; prevalecem os SADs) |
+| [docs/arquitetura/ARQUITETURA_POC.md](docs/arquitetura/ARQUITETURA_POC.md) | Camadas do sistema, responsabilidades e mapa das pastas |
+| [docs/operacao/INSTALACAO.md](docs/operacao/INSTALACAO.md) | Montar o ambiente e rodar a PoC |
+| [docs/diario/DIARIO_POC.md](docs/diario/DIARIO_POC.md) | Registro datado de tudo o que foi feito |
+| [docs/revisoes/](docs/revisoes/) | Revisões técnicas de etapas (ex.: Etapa 2c) |
+
+**Organização das pastas:** pasta na raiz = código (`app`, `instalacao`, `migracoes`, `carga_ficticia`, `demonstracoes`, `scripts`, `testes`); `docs/` = texto.
 
 ## Autoria
 
