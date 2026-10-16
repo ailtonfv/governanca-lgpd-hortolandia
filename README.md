@@ -475,15 +475,15 @@ flowchart TD
 ```mermaid
 %% tall
 flowchart TD
-    A0["➡️ Vindo da Parte 1<br/>sem equivalência bloqueadora"] --> QF{"O objeto já é assunto<br/>em outro contexto<br/>da mesma família?"}
-    QF -- "sim" --> ADV["⚠️ Advertência<br/>confirmar transversalidade<br/>ou justificar"]
+    A0["➡️ Vindo da Parte 1<br/>sem equivalência<br/>bloqueadora"] --> QF{"O objeto já é<br/>assunto em outro<br/>contexto da mesma<br/>família?"}
+    QF -- "sim" --> ADV["⚠️ Advertência<br/>confirmar<br/>transversalidade<br/>ou justificar"]
     QF -- "não" --> Q3
-    ADV --> Q3{"Há objetos relacionados<br/>no catálogo ou com<br/>a mesma base de dados?"}
-    Q3 -- "sim" --> AL["🔔 ALERTA à governança<br/>avaliar se há sobreposição<br/>(não bloqueia)"]
-    Q3 -- "não" --> OK["✔ Registro criado<br/>(com a justificativa,<br/>se houve advertência)"]
+    ADV --> Q3{"Há objetos<br/>relacionados<br/>ou base de dados<br/>em comum?"}
+    Q3 -- "sim" --> AL["🔔 ALERTA<br/>à governança<br/>avaliar possível<br/>sobreposição<br/>(não bloqueia)"]
+    Q3 -- "não" --> OK["✔ Registro criado<br/>com justificativa<br/>quando exigida"]
     AL --> OK
-    XQF["📋 Cadastro: TRIB-01 × TRIB-03 → <b>sim</b><br/>URB-01 × TRIB-01 → <b>não</b>"]
-    XQ3["📋 Entrega dos carnês → <b>sim</b><br/>Poda de árvore → <b>não</b>"]
+    XQF["📋 Cadastro<br/>TRIB-01 × TRIB-03:<br/><b>sim</b><br/>URB-01 × TRIB-01:<br/><b>não</b>"]
+    XQ3["📋 Entrega dos<br/>carnês: <b>sim</b><br/>Poda de árvore:<br/><b>não</b>"]
     QF -.- XQF
     Q3 -.- XQ3
     style A0 fill:#1e4d2b,stroke:#5cb85c,color:#fff
@@ -531,6 +531,7 @@ flowchart TD
 | ↳ Testes automatizados (pytest, base própria) | ✔ 54 aprovados |
 | Checkpoint externo da cadeia (SAD 08) | a fazer |
 | Rascunho do FORM 1: I1 iniciar preenchimento e I2 salvar, com controle otimista | ✔ |
+| ↳ Testes de I1 e I2 | ✔ 14 testes: estado, lacre, cadeia, idempotência, autorização, concorrência, rollback, migração e POC-TS-004 |
 | Versão, submissão, análise, pendência e demais atos do workflow | a fazer |
 | Telas (FastAPI + Jinja2) e testes de aceite do M1a (POC-TS-001 a 009) | a fazer |
 
