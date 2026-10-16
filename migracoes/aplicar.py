@@ -12,10 +12,11 @@ from sqlalchemy import select, inspect
 from sqlalchemy.orm import Session
 from app.banco import motor
 from app.modelos import VersaoEsquema
+from migracoes.rascunho_versoes import aplicar as migracao_0002
 
 MIGRACOES = [
     # (número, nome, função que recebe a sessão)
-    # ex.: (2, "acrescenta coluna x", migracao_0002),
+    (2, "rascunho e versões do Instrumento (M1a: I1 a I3)", migracao_0002),
 ]
 
 

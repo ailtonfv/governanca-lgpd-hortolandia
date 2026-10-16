@@ -92,3 +92,11 @@ Regras deste diário: sem senhas, tokens ou dados pessoais; cada entrada com dat
 ## 2026-10-15 — Repositório reorganizado
 
 - Regra: pasta na raiz = código; docs/ = texto. Documentos movidos para docs/arquitetura (ARQUITETURA_POC.md, MAPA_M1a.md), docs/operacao (INSTALACAO.md novo, com o passo a passo que saiu do README), docs/diario (este diário) e docs/revisoes; primeiro_hash.py para scripts/. README com "Por onde começar" e links atualizados. ARQUITETURA_POC.md atualizado (mapa das pastas, comandos atuais, app/comandos.py). COLA_COMANDOS.md agora é pessoal (docs/operacao, no .gitignore) e foi atualizada com os comandos python -m.
+
+## 2026-10-16 — M1a: rascunho e salvamento (I1 e I2)
+
+- Implementados os atos reais do Instrumento: I1 cria o rascunho vazio, muda o FORM 1 de `nao_iniciado` para `em_preenchimento` e grava evento na cadeia própria do Instrumento; I2 salva o conteúdo sintético, incrementa a versão do rascunho e atualiza o lacre.
+- Ambos exigem pedido idempotente, conta ativa e papel de elaborador na unidade principal; recusas são auditadas e cada ato é transacional.
+- O Instrumento é travado durante I1 e I2. O I2 compara a versão lida com a vigente: uma gravação desatualizada é recusada sem sobrescrever conteúdo, cobrindo o POC-TS-004.
+- Migração 2 acrescentada para as tabelas `rascunho_instrumento` e `versao_instrumento`; a estrutura de versão já fica persistida, mas o ato I3 continua fora deste incremento.
+- Suíte completa: 54 testes aprovados no banco próprio `lgpd_poc_teste`, incluindo idempotência, autorização, dois I1 simultâneos, dois I2 simultâneos, rollback de I1 e I2, cadeia íntegra e recriação das tabelas pela migração.

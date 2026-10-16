@@ -245,6 +245,48 @@ class Instrumento(Base):
     )
 
 
+class RascunhoInstrumento(Base):
+    """O RASCUNHO de um Instrumento: a folha de trabalho, que pode ser rasurada (Incremento 1).
+    Uma linha por Instrumento. Nasce no I1 (Iniciar preenchimento); é reescrita a cada I2 (Salvar).
+
+    Controle otimista (POC-TS-004, A9): quem salva informa o número do salvamento que LEU.
+    Se outra pessoa salvou nesse meio-tempo, o número já subiu e a gravação é recusada,
+    para que ninguém apague o trabalho alheio sem ver."""
+    __tablename__ = "rascunho_instrumento"
+
+    instrumento_id = Column(String(36), ForeignKey("instrumento.id"), primary_key=True)
+    conteudo = Column(JSON, nullable=False)                   # o que está preenchido (só dados fictícios)
+    versao_rascunho = Column(Integer, nullable=False)         # nº do salvamento: 1 no I1, +1 a cada I2
+    salvo_por = Column(String(50), nullable=False)            # a PESSOA que salvou por último
+    salvo_em = Column(DateTime(timezone=True), nullable=False)
+    lacre_conteudo = Column(String(64), nullable=False)       # lacre do conteúdo atual (usado no P3/P4)
+
+    __table_args__ = (
+        CheckConstraint("versao_rascunho >= 1", name="ck_rascunho_versao_positiva"),
+    )
+
+
+class VersaoInstrumento(Base):
+    """Uma VERSÃO N do Instrumento: a cópia protocolada no I3 (Submeter). Nunca é alterada.
+    Uma retirada (I4) não apaga a versão; a próxima submissão cria a Versão N+1 (cenário A11).
+    O lacre é o SHA-256 do texto canônico do conteúdo, pelo mesmo método dos eventos (DA-27)."""
+    __tablename__ = "versao_instrumento"
+
+    id = Column(String(36), primary_key=True)                 # UUID da versão
+    instrumento_id = Column(String(36), ForeignKey("instrumento.id"), nullable=False)
+    numero = Column(Integer, nullable=False)                  # 1, 2, 3... dentro do Instrumento
+    conteudo = Column(JSON, nullable=False)                   # o conteúdo congelado
+    conteudo_canonico = Column(Text, nullable=False)          # o texto exato que foi lacrado
+    lacre = Column(String(64), nullable=False)                # SHA-256 do conteudo_canonico
+    submetida_por = Column(String(50), nullable=False)        # a PESSOA que submeteu
+    submetida_em = Column(DateTime(timezone=True), nullable=False)
+    evento_submissao_id = Column(BigInteger, ForeignKey("evento.id"), nullable=False)  # o ato I3
+
+    __table_args__ = (
+        UniqueConstraint("instrumento_id", "numero", name="uq_versao_numero_no_instrumento"),
+    )
+
+
 # Numerador dos códigos LGPD. Um contador do próprio banco: dois pedidos simultâneos
 # nunca recebem o mesmo número (pode haver "pulos" na numeração, o que é aceitável).
 
