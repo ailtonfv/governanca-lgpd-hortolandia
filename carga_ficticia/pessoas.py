@@ -11,6 +11,7 @@ PESSOAS = [
     ("PESSOA-C", "Servidor Gama (fictício)",      ["CONTA-C1"]),
     ("PESSOA-D", "Curador do catálogo (fictício)", ["CONTA-D1"]),
     ("PESSOA-E", "Encarregado de Dados (fictício)", ["CONTA-E1"]),
+    ("PESSOA-F", "Servidor Delta (fictício)",       ["CONTA-F1"]),
 ]
 
 UNIDADES = [
@@ -26,6 +27,7 @@ DESIGNACOES = [
     # B analisa e valida o trabalho dos outros
     ("PESSOA-B", "UNID-NORTE", "analista"),
     ("PESSOA-B", "UNID-NORTE", "validador"),
+    ("PESSOA-F", "UNID-NORTE", "analista"),
     # C elabora em outra unidade
     ("PESSOA-C", "UNID-SUL", "elaborador"),
     # D cuida do catálogo; E é a governança de proteção de dados (D2)

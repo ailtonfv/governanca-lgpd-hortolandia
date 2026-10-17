@@ -275,6 +275,7 @@ class VersaoInstrumento(Base):
     id = Column(String(36), primary_key=True)                 # UUID da versão
     instrumento_id = Column(String(36), ForeignKey("instrumento.id"), nullable=False)
     numero = Column(Integer, nullable=False)                  # 1, 2, 3... dentro do Instrumento
+    versao_contrato = Column(Integer, nullable=False, server_default="1")  # formato do conteúdo
     conteudo = Column(JSON, nullable=False)                   # o conteúdo congelado
     conteudo_canonico = Column(Text, nullable=False)          # o texto exato que foi lacrado
     lacre = Column(String(64), nullable=False)                # SHA-256 do conteudo_canonico
@@ -284,6 +285,104 @@ class VersaoInstrumento(Base):
 
     __table_args__ = (
         UniqueConstraint("instrumento_id", "numero", name="uq_versao_numero_no_instrumento"),
+    )
+
+
+class AnaliseInstrumento(Base):
+    """A análise aberta pelo I13 para uma versão submetida do Instrumento.
+
+    Há uma única análise por versão. I14 poderá trocar o responsável atual sem
+    apagar o autor do início nem os eventos anteriores da cadeia do Instrumento.
+    """
+    __tablename__ = "analise_instrumento"
+
+    id = Column(String(36), primary_key=True)
+    versao_id = Column(String(36), ForeignKey("versao_instrumento.id"), nullable=False)
+    instrumento_id = Column(String(36), ForeignKey("instrumento.id"), nullable=False)
+    responsavel_atual_id = Column(String(50), ForeignKey("pessoa.id"), nullable=False)
+    iniciada_por = Column(String(50), ForeignKey("pessoa.id"), nullable=False)
+    iniciada_em = Column(DateTime(timezone=True), nullable=False)
+    atualizada_em = Column(DateTime(timezone=True), nullable=False)
+    situacao = Column(String(20), nullable=False)              # ativa ou encerrada
+    evento_inicio_id = Column(BigInteger, ForeignKey("evento.id"), nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("versao_id", name="uq_analise_por_versao"),
+        CheckConstraint("situacao IN ('ativa', 'encerrada')", name="ck_analise_situacao"),
+    )
+
+
+class AcaoObrigatoria(Base):
+    """Ação sintética mínima usada para provar o percurso com medidas no M1a.
+
+    O FORM 4 completo está fora desta etapa. Aqui fica apenas o necessário para
+    o G4 saber se o Registro deve permanecer em execução e, no próximo
+    incremento, para comprovar a conclusão ou o encerramento formal da medida.
+    """
+    __tablename__ = "acao_obrigatoria"
+
+    id = Column(String(36), primary_key=True)
+    registro_id = Column(String(36), ForeignKey("registro.id"), nullable=False)
+    ciclo_id = Column(Integer, ForeignKey("ciclo.id"), nullable=False)
+    instrumento_id = Column(String(36), ForeignKey("instrumento.id"), nullable=False)
+    estado = Column(String(20), nullable=False)                 # aberta, concluida ou encerrada
+    responsavel_id = Column(String(50), ForeignKey("pessoa.id"), nullable=False)
+    evidencia = Column(JSON)                                    # sintética e sem dados pessoais reais
+    criada_em = Column(DateTime(timezone=True), nullable=False)
+    atualizada_em = Column(DateTime(timezone=True), nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "estado IN ('aberta', 'concluida', 'encerrada')",
+            name="ck_acao_obrigatoria_estado",
+        ),
+    )
+
+
+class Pendencia(Base):
+    """Providência rastreável; no M1a, começa pela devolução automática do I6.
+
+    A pendência pertence ao Registro e ao ciclo em que nasceu. Quando decorre
+    de um Instrumento, mantém também esse vínculo e aponta para o evento que a
+    originou. O destino inicial é uma unidade, nunca uma pessoa específica.
+    """
+    __tablename__ = "pendencia"
+
+    id = Column(String(36), primary_key=True)
+    tipo_pendencia = Column(String(30), nullable=False)       # devolucao, providencia...
+    registro_id = Column(String(36), ForeignKey("registro.id"), nullable=False)
+    ciclo_origem_id = Column(Integer, ForeignKey("ciclo.id"), nullable=False)
+    ciclo_contexto_atual_id = Column(Integer, ForeignKey("ciclo.id"), nullable=False)
+    instrumento_id = Column(String(36), ForeignKey("instrumento.id"))
+    evento_origem_id = Column(BigInteger, ForeignKey("evento.id"), nullable=False, unique=True)
+    unidade_origem_id = Column(String(50), ForeignKey("unidade.id"), nullable=False)
+    unidade_destino_id = Column(String(50), ForeignKey("unidade.id"), nullable=False)
+    responsavel_atual_id = Column(String(50), ForeignKey("pessoa.id"))
+    estado = Column(String(40), nullable=False)
+    bloqueante = Column(Boolean, nullable=False)
+    gate_bloqueado = Column(String(30))                        # ex.: submissao
+    motivo = Column(Text, nullable=False)
+    lacre_resposta = Column(String(64))                        # preenchido no futuro P3
+    lacre_aceito = Column(String(64))                          # preenchido no futuro P4
+    criada_em = Column(DateTime(timezone=True), nullable=False)
+    atualizada_em = Column(DateTime(timezone=True), nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "tipo_pendencia IN ('devolucao', 'providencia', 'participacao', "
+            "'avaliacao_ripd', 'inconsistencia_ingestao')",
+            name="ck_pendencia_tipo",
+        ),
+        CheckConstraint(
+            "estado IN ('aberta', 'em_atendimento', 'respondida', 'encerrada', "
+            "'devolvida_para_complementacao', 'cancelada')",
+            name="ck_pendencia_estado",
+        ),
+        CheckConstraint(
+            "(bloqueante AND gate_bloqueado IS NOT NULL) OR "
+            "(NOT bloqueante AND gate_bloqueado IS NULL)",
+            name="ck_pendencia_gate_bloqueante",
+        ),
     )
 
 

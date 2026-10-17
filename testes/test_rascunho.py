@@ -10,8 +10,9 @@ from sqlalchemy.orm import Session
 from app.banco import motor
 from app.eventos import verificar_cadeia
 from app.instrumentos import iniciar_preenchimento, lacre_do_conteudo, salvar_rascunho
-from app.modelos import (Comando, Conta, Evento, EventoAuditoria, Instrumento,
-                         RascunhoInstrumento, VersaoInstrumento)
+from app.modelos import (AnaliseInstrumento, Comando, Conta, Evento, EventoAuditoria,
+                         Instrumento, RascunhoInstrumento, VersaoInstrumento)
+from migracoes.analise_instrumento import aplicar as aplicar_migracao_analise
 from migracoes.rascunho_versoes import aplicar as aplicar_migracao_rascunho_versoes
 from testes.apoio import CADASTRO, g1, sem_reexecucao
 
@@ -140,7 +141,7 @@ def test_i1_e_atomico_se_a_transacao_falha():
 def test_i2_salva_incrementa_lacre_e_evento():
     instrumento_id = criar_form1()
     i1(instrumento_id)
-    conteudo = {"titulares": ["contribuinte fictício"],
+    conteudo = {"categorias_titulares": ["TIT-CONTRIBUINTE"],
                 "finalidade": "Emitir documento tributário fictício"}
     resultado = i2(instrumento_id, 1, conteudo)
     assert resultado["permitido"] and resultado["versao_rascunho"] == 2
@@ -232,12 +233,14 @@ def test_i2_e_atomico_se_a_transacao_falha():
                              .where(Evento.cadeia_id == instrumento_id)) == 1
 
 
-def test_migracao_2_recria_as_duas_tabelas_do_modelo_local():
-    """O banco evoluído e um banco novo terminam com o mesmo par de tabelas."""
+def test_migracoes_recriam_as_tabelas_do_instrumento_e_da_analise():
+    """O banco evoluído e um banco novo terminam com as mesmas tabelas."""
     with motor.begin() as conexao:
+        AnaliseInstrumento.__table__.drop(bind=conexao, checkfirst=True)
         VersaoInstrumento.__table__.drop(bind=conexao, checkfirst=True)
         RascunhoInstrumento.__table__.drop(bind=conexao, checkfirst=True)
         with Session(bind=conexao) as sessao:
             aplicar_migracao_rascunho_versoes(sessao)
+            aplicar_migracao_analise(sessao)
         nomes = set(conexao.dialect.get_table_names(conexao))
-        assert {"rascunho_instrumento", "versao_instrumento"} <= nomes
+        assert {"rascunho_instrumento", "versao_instrumento", "analise_instrumento"} <= nomes

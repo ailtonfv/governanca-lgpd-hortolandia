@@ -21,6 +21,9 @@ ABRIR_POC.bat
 TRILHA_APRENDIZAGEM.md
 treino/
 
+# Artefatos temporários de geração e validação local
+.codex-build/
+
 # cópias de segurança do banco (nunca no GitHub)
 *.dump
 

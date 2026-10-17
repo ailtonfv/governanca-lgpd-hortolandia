@@ -199,7 +199,7 @@ G2, G3 e G4 não são botões nem pedidos independentes. São eventos derivados 
 
 **G1 — Criar Registro.** O pedido cria um Registro com exatamente um contexto de atuação, um objeto PRINCIPAL e zero ou mais objetos ABRANGIDOS. O código humano segue o formato `LGPD-AAAA-NNNNN`; o UUID permanece como identificador técnico. Antes de criar, o sistema verifica equivalência e sobreposição estrutural conforme a DA-39.
 
-**I3 — Submeter.** O pedido cria uma Versão N imutável. Além das validações de campos e pendências bloqueantes, a submissão executa a comparação material de finalidade, titulares, categorias de dados e compartilhamentos. Uma semelhança gera alerta para exame na análise, sem bloqueio automático apenas por esse motivo.
+**I3 — Submeter.** O pedido cria uma Versão N imutável. Além das validações de campos e pendências bloqueantes, a submissão executa a comparação material de finalidade, categorias de titulares, categorias de dados e compartilhamentos. No FORM 1 sintético, as categorias vêm de catálogos fechados; nomes ou outros identificadores de titulares não integram o contrato. Uma semelhança gera alerta para exame na análise, sem bloqueio automático apenas por esse motivo.
 
 Essas verificações pertencem ao ato indicado pela seta. Elas não devem ser implementadas como correções posteriores ou controles apenas de interface.
 

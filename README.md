@@ -4,6 +4,12 @@
 
 > ⚠️ **Somente dados fictícios.** Nenhum dado pessoal real, CPF, matrícula, senha ou token entra neste repositório, no código, nos testes ou nos logs.
 
+## Contexto institucional
+
+Este trabalho é desenvolvido para a **Prefeitura Municipal de Hortolândia**, no âmbito da **Secretaria de Planejamento Urbano e Gestão Estratégica**. As referências institucionais de reporte são **Andreia Missio**, Secretária Adjunta, e **Eduardo Marchetti Francisco**, Secretário Municipal.
+
+Toda apresentação institucional derivada deste projeto deve utilizar o **brasão da Prefeitura Municipal de Hortolândia**, seguindo a identidade já adotada na Cartilha LGPD. Materiais de outras administrações públicas podem aparecer como fontes ou referências históricas, mas não substituem a identidade visual de Hortolândia.
+
 ## Por onde começar
 
 | Se você quer… | Vá para |
@@ -527,17 +533,243 @@ flowchart TD
 | ↳ Advertência de família, com três resoluções (DA-39, item 2) | ✔ Implementada |
 | ↳ Declaração de transversalidade, só pela governança (DA-39, item 2) | ✔ Implementada |
 | ↳ Alerta estrutural | ⚙️ Parcial: base de dados comum ✔; relações do catálogo a fazer (O-80) |
-| ↳ Semelhança por finalidade, titulares e dados | A fazer, na submissão do FORM 1 (DA-39, item 4) |
-| ↳ Testes automatizados (pytest, base própria) | ✔ 54 aprovados |
+| ↳ Semelhança por finalidade, categorias de titulares, categorias de dados e compartilhamentos | ✔ Alerta não bloqueante no I3 (DA-39, item 4) |
+| ↳ Testes automatizados (pytest, base própria) | ✔ 113 aprovados |
 | Checkpoint externo da cadeia (SAD 08) | a fazer |
 | Rascunho do FORM 1: I1 iniciar preenchimento e I2 salvar, com controle otimista | ✔ |
 | ↳ Testes de I1 e I2 | ✔ 14 testes: estado, lacre, cadeia, idempotência, autorização, concorrência, rollback, migração e POC-TS-004 |
-| Versão, submissão, análise, pendência e demais atos do workflow | a fazer |
+| Contrato fechado do FORM 1 sintético: categorias selecionadas por código, sem nomes de titulares | ✔ Versão 2; códigos desconhecidos e campos livres são recusados |
+| Submissão do FORM 1: I3 cria versão imutável e G2 leva o Registro a Em validação | ✔ |
+| ↳ Testes de I3 e G2 | ✔ 10 testes: snapshot, cadeias, idempotência, validação, autorização, concorrência, rollback, sobreposição e imutabilidade |
+| Retirada antes da análise: I4 devolve o FORM 1 ao rascunho e G3 leva o Registro a Em andamento | ✔ |
+| ↳ Testes de I4 e G3 | ✔ 7 testes: estados, cadeias, idempotência, autorização, bloqueio após I13, concorrência, rollback e cenário A11 com Versão 2 |
+| Início da análise: I13 atribui a versão a um único agente responsável pela análise, com segregação de funções | ✔ |
+| ↳ Testes de I13 | ✔ 8 testes: responsável vigente, estados, idempotência, autorização, segregação pela pessoa, versão atual, concorrência, rollback e migração |
+| Reatribuição da análise: I14 troca o responsável vigente sem apagar a autoria anterior | ✔ |
+| ↳ Testes de I14 | ✔ 6 testes: autoria preservada, idempotência, competência, segregação, concorrência e rollback |
+| Validação: I5 valida a versão e G4 recalcula o estado do Registro | ✔ |
+| ↳ Ação obrigatória sintética mínima | ✔ Migração 6; estado, responsável, evidência e vínculos com Registro, ciclo e Instrumento |
+| ↳ Testes de I5 e G4 | ✔ 8 testes: caminhos com e sem ação aberta, responsável vigente, idempotência, concorrência, rollback e migração |
+| Devolução: I6 preserva a versão, P1 cria a pendência e G3 recalcula o Registro | ✔ |
+| ↳ Testes de I6, P1 e G3 | ✔ 9 testes: estados, cadeias, motivo, responsável vigente, segregação, versão, idempotência, concorrência, rollback e migração |
+| Assunção e ajuste: P2 atribui a pendência e I7 recria o rascunho da versão devolvida | ✔ |
+| ↳ Flags operacionais da tela inicial | ✔ Calculadas: correção solicitada, pendência atribuída e submissão bloqueada |
+| ↳ Testes de P2, I7 e flags | ✔ 9 testes: autorização, flags, idempotência, concorrência, rollback, assunção obrigatória, responsável e retomada do I2 |
+| Demais atos da pendência e do workflow | a fazer |
 | Telas (FastAPI + Jinja2) e testes de aceite do M1a (POC-TS-001 a 009) | a fazer |
 
 ¹ Tentativas negadas ficam registradas na auditoria. O cenário d (substituição) está a fazer.
 ² O início do preenchimento do FORM 1 será um comando posterior ao G1, como no cenário A1 do SAD 04.
-³ Trava determinística por objeto e contexto e exatamente um PRINCIPAL, no próprio banco; um contexto por Registro garantido por chave composta (DA-39, item 1); advertência de família e transversalidade (DA-39, item 2); recusas do banco tratadas pelo nome da regra. A suíte chegou a 54 testes automatizados aprovados em 16/10/2026, inclusive pedidos simultâneos. Os cenários de Suspenso, Concluído e Cancelado são testados como regra do banco até a chegada dos atos do M1b.1.
+³ Trava determinística por objeto e contexto e exatamente um PRINCIPAL, no próprio banco; um contexto por Registro garantido por chave composta (DA-39, item 1); advertência de família e transversalidade (DA-39, item 2); recusas do banco tratadas pelo nome da regra. A suíte chegou a 113 testes automatizados aprovados em 16/10/2026, inclusive pedidos simultâneos. Os cenários de Suspenso, Concluído e Cancelado são testados como regra do banco até a chegada dos atos do M1b.1.
+
+### O que os 113 testes garantem, em linguagem simples
+
+Os testes atuais exercitam o motor da PoC com dados fictícios e procuram responder a perguntas práticas:
+
+- **Criação do Registro:** uma pessoa autorizada consegue criar o Registro, o ciclo 1 e o FORM 1 juntos; uma conta inativa ou uma pessoa sem o papel necessário não consegue.
+- **Prevenção de duplicidade:** o mesmo objeto não ocupa duas vezes o mesmo contexto; objetos apenas citados não bloqueiam; advertências de família e alertas por base comum aparecem sem confundir alerta com proibição.
+- **Pedidos repetidos e concorrentes:** um duplo clique ou reenvio não duplica o ato; reutilizar a mesma chave com dados diferentes é recusado; pedidos simultâneos recebem tratamento consistente pelo banco.
+- **Numeração e integridade:** os códigos anuais continuam distintos mesmo com criações simultâneas, a virada do ano respeita o fuso de São Paulo e as regras estruturais também são protegidas pelo banco.
+- **Autoria e segregação:** a regra olha para a pessoa, não apenas para a conta usada. Assim, trocar de conta não permite que alguém valide ou devolva a própria submissão.
+- **Rascunho do FORM 1:** I1 inicia o preenchimento e I2 salva sem deixar uma tela antiga apagar um conteúdo mais novo. Falhas simuladas desfazem a operação inteira, sem deixar metade do trabalho gravada.
+- **Preenchimento sem nomes de titulares:** categorias de titulares, dados e destinatários são escolhas de catálogos fechados. Texto livre, campo antigo ou código inventado impede a submissão.
+- **Submissão:** I3 e G2 criam uma única versão, atualizam os estados juntos, resistem a envios simultâneos, geram o alerta material e impedem alteração ou exclusão da versão protocolada.
+- **Retirada antes da análise:** I4 e G3 devolvem o formulário ao rascunho sem apagar a versão enviada. Uma correção seguida de nova submissão cria a Versão 2 e mantém a Versão 1 no histórico.
+- **Início da análise:** I13 entrega a versão mais recente a um único agente responsável pela análise. Quem submeteu não pode analisar o próprio trabalho, nem mesmo usando outra conta; duas tentativas simultâneas não criam duas análises.
+- **Troca do responsável:** I14 muda somente o agente responsável atual. Quem iniciou e tudo o que já ocorreu continuam no histórico; uma tela desatualizada não consegue desfazer uma reatribuição mais recente.
+- **Validação:** somente o responsável atual da análise pode executar I5. O sistema encerra a análise, torna a versão validada a versão vigente e executa o G4 junto: ação aberta leva a **Em execução**; sem ação aberta, o Registro volta a **Em andamento**.
+- **Devolução:** somente o agente responsável atual pela análise pode executar I6. O sistema preserva a versão, cria uma pendência bloqueante para a unidade elaboradora e executa o G3 junto, sem deixar partes soltas se ocorrer uma falha.
+- **Assunção e ajuste:** P2 garante que apenas um agente autorizado assuma a pendência; I7 recria o rascunho a partir da versão devolvida e libera novamente o salvamento pelo I2.
+- **Flags operacionais:** os avisos da futura tela inicial são calculados a partir da pendência real. Eles mudam de “Correção solicitada” para “Pendência atribuída a você” sem manter uma segunda verdade no banco.
+
+Esses 113 testes são a cobertura automatizada atual do motor. Eles ainda **não substituem** os testes de aceite POC-TS-001 a POC-TS-009, que exigirão os percursos completos, as telas mínimas e as respectivas evidências.
+
+### Legenda operacional: agentes e funções
+
+Todos os atores humanos do fluxo são **Agentes Públicos Autorizados**. A expressão usada ao lado do agente indica a função que ele exerce naquele ato; não representa um tipo diferente de pessoa.
+
+| Função exercida | Atuação principal |
+|---|---|
+| Responsável pelo preenchimento | Inicia, salva, submete e ajusta o FORM 1 |
+| Responsável pela análise | Examina, valida ou devolve a versão |
+| Responsável pela ação | Executa a medida e registra sua evidência |
+| Competente para concluir | Executa G5 ou G6 |
+| Instância validadora competente | Inicia ou reatribui a análise |
+
+```mermaid
+flowchart TD
+    A["Agente público"] --> F{"Função<br/>neste ato"}
+    F --> P["Preenchimento"]
+    F --> N["Análise"]
+    F --> M["Ação"]
+    F --> C["Conclusão"]
+```
+
+Uma mesma pessoa pode exercer mais de uma função quando possuir autorização e competência, mas a segregação continua valendo. Por exemplo, quem submeteu uma versão não pode iniciar sua análise, validá-la nem devolvê-la. No código, nomes como `elaborador`, `analista` e `validador` são identificadores técnicos dos papéis usados para conferir essas autorizações.
+
+### Como o FORM 1 evita nomes de titulares
+
+O FORM 1 sintético descreve o tratamento, não as pessoas. Em vez de digitar nomes, o servidor seleciona categorias como **Contribuinte**, **Servidor público** ou **Estudante**. O mesmo vale para categorias de dados e destinatários de compartilhamento.
+
+```mermaid
+flowchart LR
+    S["Servidor"] --> E["Seleciona categorias<br/>em listas fechadas"]
+    E --> C["Sistema guarda<br/>somente os códigos"]
+    L["Texto livre ou<br/>código desconhecido"] --> R["Submissão recusada"]
+```
+
+A única descrição livre deste contrato é a finalidade, limitada a 500 caracteres e acompanhada da orientação de não informar nomes, CPF, matrícula ou qualquer outro dado pessoal. Se uma categoria estiver ausente, ela deve ser incluída pela governança; não existe a opção “Outro” com texto livre. A relação completa está no [Contrato do FORM 1 sintético](docs/arquitetura/CONTRATO_FORM1_SINTETICO.md).
+
+### Orientação operacional: retomar o preenchimento depois
+
+Ao retornar no dia seguinte — ou depois de fechar o navegador e abrir novamente — o servidor deve encontrar o FORM 1 no estado **Em preenchimento**, com o conteúdo do último I2 (**Salvar**) confirmado pelo sistema. O Registro continua **Em andamento** até que o formulário seja submetido.
+
+```mermaid
+flowchart TD
+    A["Servidor retorna"] --> B["Carregar último I2"]
+    B --> C["FORM 1<br/>Em preenchimento"]
+    C --> D{"Há salvamento<br/>mais recente?"}
+    D -- "não" --> E["Continuar preenchendo"]
+    D -- "sim" --> F["Recarregar antes<br/>de salvar"]
+```
+
+Na futura tela, a retomada deve seguir estas diretrizes:
+
+- mostrar o conteúdo do último salvamento confirmado, o número do rascunho, a data, a hora e a pessoa que salvou;
+- informar claramente que texto apenas digitado, mas ainda não salvo, não foi preservado — o motor atual não possui salvamento automático;
+- nunca deixar uma tela antiga sobrescrever silenciosamente uma alteração mais nova;
+- se outra pessoa tiver salvado durante o intervalo, recusar o salvamento desatualizado e orientar o servidor a recarregar o formulário;
+- depois da submissão pelo I3, abrir a versão preservada para consulta e não apresentar o FORM 1 como um rascunho livremente editável.
+
+Esse comportamento já está implementado e testado no motor e no banco. A interface ainda será construída e deverá tornar essas informações visíveis em linguagem simples, por exemplo: “Último salvamento em 16/10/2026 às 17h42, por Servidor Alfa (fictício)”.
+
+### O que acontece quando o FORM 1 é enviado para validação
+
+```mermaid
+flowchart TD
+    A["Registro: Em andamento<br/>FORM 1: Em preenchimento"]
+    B["Registro: Em validação<br/>FORM 1: Pronto para validação<br/>Versão 1 preservada"]
+    C["Registro: Em andamento<br/>FORM 1: Em preenchimento<br/>Versão 1 preservada"]
+    D["Registro: Em validação<br/>FORM 1: Pronto para validação<br/>Versões 1 e 2 preservadas"]
+    E["Análise ativa<br/>I4 fica bloqueado"]
+
+    A -- "I3 Submeter<br/>+ G2 automático" --> B
+    B -- "I4 Retirar<br/>+ G3 automático" --> C
+    C -- "I2 Corrigir<br/>I3 Submeter novamente" --> D
+    B -. "I13 Iniciar análise" .-> E
+```
+
+Enquanto o FORM 1 está **Em preenchimento**, ele é um rascunho: o elaborador pode salvá-lo várias vezes pelo I2. Cada salvamento aumenta o número do rascunho, para que uma tela antiga não sobrescreva silenciosamente um conteúdo mais novo.
+
+Ao acionar o I3 (**Submeter**), o sistema faz o seguinte:
+
+1. Confirma que a conta está ativa e que a pessoa é elaboradora da unidade responsável.
+2. Confere se o rascunho ainda é a versão que a pessoa leu e se o seu lacre corresponde ao conteúdo guardado.
+3. Verifica os campos mínimos do FORM 1 sintético: finalidade, categorias de titulares, categorias de dados e compartilhamentos; as categorias devem usar códigos conhecidos.
+4. Compara essas informações com as versões mais recentes dos outros Registros. Uma coincidência gera um **alerta para análise humana**, mas não bloqueia automaticamente a submissão.
+5. Tira uma “fotografia” do rascunho e a guarda como **Versão 1** — ou Versão N nas submissões futuras. Essa versão não pode ser editada nem apagada, inclusive por alteração direta no banco.
+6. Grava o I3 na cadeia do Instrumento e, como consequência automática, grava o G2 na cadeia do Registro.
+7. Deixa o FORM 1 **Pronto para validação** e o Registro **Em validação**.
+
+Esses passos formam uma única operação: se qualquer parte falhar, nenhuma delas fica gravada pela metade. Repetir exatamente o mesmo pedido também não cria outra versão. Se duas pessoas tentarem submeter simultaneamente, somente uma submissão é aceita.
+
+> **Importante:** “submetida” ainda não significa “validada”. Depois do I3, a versão foi preservada para exame, mas `versao_vigente_id` continua vazia. Somente o I5, depois de uma análise ativa, torna essa versão vigente.
+
+#### E se o elaborador perceber um erro antes da análise?
+
+Enquanto ninguém tiver iniciado a análise pelo I13, o elaborador pode usar o I4 (**Retirar da validação**). A Versão 1 permanece intacta no histórico, mas o FORM 1 volta a **Em preenchimento** e o G3 automático devolve o Registro a **Em andamento**. O rascunho pode então ser corrigido pelo I2; ao submeter novamente, o sistema cria a Versão 2, sem substituir nem apagar a anterior.
+
+O I4 também é uma operação única com o G3: os dois eventos e as duas mudanças de estado são gravados juntos ou são desfeitos juntos. Depois que o I13 iniciar a análise, a retirada deixa de ser permitida; qualquer correção deverá seguir o percurso formal de devolução.
+
+### O que acontece quando alguém inicia a análise
+
+O I13 não valida nem devolve o formulário. Ele apenas registra que uma pessoa autorizada assumiu a análise de uma versão específica. Neste texto, **agente** é a pessoa que atua no processo; **analista** é apenas o nome técnico do papel que autoriza essa pessoa a exercer a função de análise naquele momento.
+
+```mermaid
+flowchart TD
+    S["Pedido para iniciar a análise"] --> P{"O agente possui o papel<br/>técnico de analista?"}
+    P -- "não" --> N["Pedido recusado<br/>e tentativa auditada"]
+    P -- "sim" --> A{"É a mesma pessoa<br/>que submeteu a versão?"}
+    A -- "sim" --> N
+    A -- "não" --> V{"É a versão mais recente<br/>e ainda está sem análise?"}
+    V -- "não" --> N
+    V -- "sim" --> OK["I13 gravado<br/>responsável vigente definido<br/>I4 bloqueado"]
+```
+
+A segregação é feita pela **pessoa**, e não pelo nome da conta. Portanto, quem submeteu pela conta A1 não pode trocar para a conta A2 e analisar o próprio trabalho. O sistema também impede que dois agentes assumam simultaneamente a mesma versão: somente o primeiro pedido válido cria a análise; o outro é recusado e auditado.
+
+O FORM 1 continua **Pronto para validação** e o Registro continua **Em validação**, porque iniciar a análise não decide o resultado. A análise fica ligada à versão e mantém um único responsável vigente.
+
+#### Como funciona a troca do agente responsável
+
+O I14 permite que uma pessoa com competência de validador transfira a análise para outro agente autorizado a exercer o papel técnico de analista. A troca não apaga quem iniciou a análise nem altera eventos anteriores:
+
+```mermaid
+flowchart LR
+    A["I13<br/>Análise iniciada por B"] --> B["Responsável atual: B"]
+    B -- "I14 reatribuir" --> C["Responsável atual: F"]
+    A -. "autoria preservada" .-> C
+```
+
+O pedido informa o responsável que aparecia na tela. Se outra pessoa já tiver feito uma reatribuição, o sistema pede para recarregar em vez de sobrescrever a mudança. O novo responsável precisa estar ativo, estar autorizado para a função de análise na unidade e não pode ser quem submeteu a versão.
+
+### O que acontece quando o agente responsável devolve
+
+Quando a versão tem uma lacuna ou inconsistência, o responsável vigente pela análise pode executar I6 com um motivo. O sistema realiza três registros inseparáveis:
+
+```mermaid
+flowchart TD
+    I6["I6<br/>Devolver versão"] --> P1["P1 automático<br/>Criar pendência"]
+    P1 --> G3["G3 automático<br/>Recalcular Registro"]
+    G3 --> R["Registro<br/>Em andamento"]
+    G3 --> F["FORM 1<br/>Devolvido para ajuste"]
+```
+
+A Versão N continua intacta. A análise daquela versão é encerrada e a pendência nasce **Aberta**, bloqueando uma nova submissão. Ela é enviada para a unidade responsável pelo preenchimento, e não diretamente para uma pessoa: P2 registra qual agente assumiu a providência.
+
+O rascunho também não é liberado automaticamente pelo I6. I7 marca o início formal do ajuste. Se I6, P1 ou G3 falhar, a operação inteira é desfeita; repetir o mesmo pedido não cria outra pendência.
+
+#### Como a pendência sai da fila e chega ao agente
+
+P2 e I7 são dois atos separados. Primeiro, um agente autorizado da unidade assume a pendência; somente depois ele inicia o ajuste:
+
+```mermaid
+flowchart LR
+    A["Pendência<br/>Aberta"] -- "P2 assumir" --> E["Em atendimento<br/>Responsável definido"]
+    E -- "I7 iniciar ajuste" --> F["FORM 1<br/>Em preenchimento"]
+    F --> S["I2<br/>Salvar correção"]
+```
+
+Se duas pessoas tentarem assumir ao mesmo tempo, somente a primeira confirmação vale. O I7 confere que o pedido veio da mesma pessoa que assumiu a pendência, cria um novo rascunho copiando a versão devolvida e mantém a pendência **Em atendimento** até a futura resposta P3.
+
+#### Flags da futura tela inicial
+
+As flags não são gravadas como caixas independentes. Elas são calculadas sempre que a tela é carregada:
+
+```mermaid
+flowchart TD
+    A["Pendência aberta"] --> C["Atenção<br/>Correção solicitada"]
+    A --> B["Bloqueio<br/>Submissão bloqueada"]
+    P["P2 confirmado"] --> V["Próxima ação<br/>Atribuída a você"]
+    P --> B
+```
+
+Assim, uma mudança no workflow aparece imediatamente na tela e não existe o risco de uma flag antiga contradizer o estado real. Um agente de outra unidade não recebe a correção na sua fila; quem assumiu passa a receber a próxima ação de iniciar o ajuste.
+
+### O que acontece quando o agente responsável valida
+
+O I5 só aceita o pedido da pessoa que aparece como responsável atual da análise. Quando ela valida, o sistema encerra a análise, marca o FORM 1 como **Validado** e aponta a versão examinada como a versão vigente. Na mesma operação, o G4 olha para as ações obrigatórias abertas e decide o estado global:
+
+```mermaid
+flowchart TD
+    I5["I5<br/>Versão validada"] --> G4{"G4<br/>Há ação aberta?"}
+    G4 -- "não" --> A["Registro<br/>Em andamento"]
+    G4 -- "sim" --> E["Registro<br/>Em execução"]
+```
+
+Em linguagem simples: o agente responsável pela análise não escolhe manualmente entre **Em andamento** e **Em execução**. Ele apenas valida. Se existir uma providência que ainda precisa ser acompanhada, o sistema mantém o Registro em execução; se não existir, devolve-o a Em andamento, pronto para o futuro G5 concluir formalmente o Registro.
+
+A ação usada nesta etapa é propositalmente pequena: guarda estado, responsável, evidência e vínculos com o Registro, o ciclo e o Instrumento. Ela serve para provar o percurso do M1a sem fingir que o FORM 4 completo já foi construído. Neste incremento a ação já aparece como condição do cenário; concluir ou encerrar essa ação e executar o G6 pertencem a um incremento posterior.
 
 ## Marcos e critérios de saída
 

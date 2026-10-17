@@ -100,3 +100,75 @@ Regras deste diário: sem senhas, tokens ou dados pessoais; cada entrada com dat
 - O Instrumento é travado durante I1 e I2. O I2 compara a versão lida com a vigente: uma gravação desatualizada é recusada sem sobrescrever conteúdo, cobrindo o POC-TS-004.
 - Migração 2 acrescentada para as tabelas `rascunho_instrumento` e `versao_instrumento`; a estrutura de versão já fica persistida, mas o ato I3 continua fora deste incremento.
 - Suíte completa: 54 testes aprovados no banco próprio `lgpd_poc_teste`, incluindo idempotência, autorização, dois I1 simultâneos, dois I2 simultâneos, rollback de I1 e I2, cadeia íntegra e recriação das tabelas pela migração.
+
+## 2026-10-16 — M1a: submissão e versão imutável (I3 e G2)
+
+- I3 implementado sobre o FORM 1 sintético: valida os campos mínimos, confere a versão e o lacre do rascunho e cria a Versão N como snapshot canônico lacrado.
+- A mesma transação grava I3 na cadeia do Instrumento e o G2 derivado na cadeia do Registro; o Instrumento passa a `pronto_para_validacao` e o Registro a `em_validacao`. A versão vigente continua vazia, pois só uma validação futura poderá defini-la.
+- A comparação material verifica finalidade, titulares, categorias de dados e compartilhamentos contra a versão mais recente dos demais Instrumentos. Coincidências geram alerta para análise, sem bloqueio automático.
+- A migração 3 acrescenta uma proteção no PostgreSQL contra `UPDATE` e `DELETE` de versões submetidas.
+- Acrescentados 10 testes de I3/G2: snapshot e cadeias, idempotência, validação obrigatória, autorização, rascunho desatualizado, submissão concorrente, rollback conjunto, alerta material, bloqueio de I2 após submissão e imutabilidade no banco.
+- Suíte completa: 64 testes aprovados no banco próprio `lgpd_poc_teste`.
+
+## 2026-10-16 — M1a: retirada antes da análise (I4 e G3)
+
+- I4 implementado para o elaborador retirar um FORM 1 que esteja `pronto_para_validacao`, antes do início da análise. A versão submetida permanece imutável no histórico e o rascunho volta a poder ser editado.
+- A mesma transação grava I4 na cadeia do Instrumento e o G3 derivado na cadeia do Registro; o Instrumento retorna a `em_preenchimento` e o Registro a `em_andamento`.
+- O cenário A11 foi comprovado: após retirar a submissão, salvar a correção e submeter novamente, o sistema preserva a Versão 1 e cria a Versão 2.
+- Acrescentados 7 testes de I4/G3, cobrindo estados e cadeias, idempotência, autorização, bloqueio após I13, concorrência, rollback conjunto e o cenário A11.
+- Suíte completa: 71 testes aprovados no banco próprio `lgpd_poc_teste`.
+
+## 2026-10-16 — M1a: início da análise (I13)
+
+- I13 implementado para atribuir a análise da versão submetida a um único responsável vigente, sem mudar os estados `pronto_para_validacao` do Instrumento e `em_validacao` do Registro.
+- O ato exige conta ativa e papel de analista na unidade responsável, sempre considerando a pessoa por trás da conta. Quem submeteu a versão não pode iniciar a própria análise, mesmo usando outra conta.
+- O pedido identifica explicitamente a versão e só aceita a versão submetida mais recente. A trava do Instrumento e a unicidade no banco impedem duas análises concorrentes da mesma versão.
+- A projeção `analise_instrumento` preserva quem iniciou, quando iniciou e quem é o responsável atual; a futura reatribuição I14 poderá trocar apenas o responsável vigente, mantendo a trilha nos eventos.
+- Migração 4 aplicada à base local da PoC. Acrescentados 8 testes de I13, elevando a suíte completa para 79 testes aprovados no banco próprio `lgpd_poc_teste`.
+
+## 2026-10-16 — M1a: contrato fechado do FORM 1 sintético
+
+- O campo livre `titulares` foi substituído por `categorias_titulares`. Categorias de titulares, categorias de dados e destinatários de compartilhamento agora aceitam somente códigos de catálogos fechados e fictícios.
+- O contrato rejeita campos adicionais, códigos desconhecidos e códigos repetidos. A finalidade permanece textual, limitada a 500 caracteres e orientada a não conter nomes, CPF, matrícula ou outros dados pessoais.
+- O contrato vigente recebeu a versão 2. Versões anteriores permanecem identificadas como contrato 1 e não têm seus snapshots reescritos.
+- Criado `docs/arquitetura/CONTRATO_FORM1_SINTETICO.md`, com campos, catálogos, regras e diagrama de preenchimento. README e mapa foram alinhados em linguagem coloquial.
+- Migração 5 aplicada à base local da PoC. Acrescentados 2 testes de recusa de texto livre e códigos desconhecidos, elevando a suíte completa para 81 testes aprovados.
+
+## 2026-10-16 — M1a: reatribuição da análise (I14)
+
+- I14 implementado para a pessoa com competência de validador transferir uma análise ativa a outro analista autorizado da unidade responsável.
+- A projeção troca somente `responsavel_atual_id`; `iniciada_por`, o evento I13 e todos os atos anteriores permanecem intactos. O evento I14 registra responsável anterior e novo responsável.
+- O novo responsável deve estar ativo, possuir papel de analista e não pode ser o autor da submissão. Os estados do Instrumento e do Registro não mudam.
+- A reatribuição usa controle otimista pelo responsável visto na tela: duas tentativas simultâneas com a mesma leitura não se sobrescrevem; somente uma vence.
+- Acrescentados 6 testes de I14, elevando a suíte completa para 87 testes aprovados no banco próprio `lgpd_poc_teste`.
+
+## 2026-10-16 — M1a: validação e recálculo (I5 e G4)
+
+- I5 implementado para o responsável vigente da análise validar exatamente a versão examinada. A análise é encerrada, o Instrumento passa a `validado` e `versao_vigente_id` aponta para a versão aprovada.
+- G4 é gravado na mesma transação do I5 e decide o estado sem escolha manual: ação obrigatória aberta leva o Registro a `em_execucao`; sem ação aberta, leva a `em_andamento`. A regra geral que prioriza outro Instrumento pronto também foi mantida no código, embora o M1a tenha somente o FORM 1.
+- Criada a ação obrigatória sintética mínima, com estado, responsável, evidência e vínculos com Registro, ciclo e Instrumento. Ela permite provar o percurso com medidas sem antecipar o FORM 4 completo.
+- Migração 6 aplicada à base local da PoC. Acrescentados 8 testes de I5/G4: caminhos com e sem ação aberta, ação concluída ignorada, responsável vigente após I14, idempotência, concorrência, rollback conjunto e recriação da tabela.
+- Suíte completa naquele checkpoint: 95 testes aprovados no banco próprio `lgpd_poc_teste`. A conclusão da ação, G5, G6 e o percurso de devolução ainda estavam pendentes.
+
+## 2026-10-16 — M1a: devolução com pendência automática (I6, P1 e G3)
+
+- I6 implementado para o agente responsável vigente pela análise devolver exatamente a versão examinada, sempre com motivo. O autor da submissão continua impedido, mesmo diante de uma projeção inconsistente.
+- A mesma transação preserva a Versão N, encerra a análise, deixa o Instrumento `devolvido_para_ajuste`, cria P1 na cadeia própria da pendência e grava G3 na cadeia do Registro, que volta a `em_andamento`.
+- A pendência nasce `aberta`, bloqueia o gate de submissão e é dirigida à unidade responsável pelo preenchimento, sem atribuição prematura a uma pessoa. P2 fará a assunção e I7 liberará formalmente o ajuste no próximo incremento.
+- Migração 7 aplicada à base local da PoC. Acrescentados 9 testes para estados e cadeias, motivo obrigatório, responsável vigente após I14, segregação, versão analisada, idempotência, concorrência, rollback conjunto e recriação da tabela.
+- Suíte completa: 104 testes aprovados no banco próprio `lgpd_poc_teste`.
+
+## 2026-10-16 — M1a: assunção da pendência, início do ajuste e flags (P2 e I7)
+
+- P2 implementado como ato separado: um agente com autorização de preenchimento na unidade de destino assume a pendência aberta, que passa a `em_atendimento` e recebe um único responsável atual. A trava da linha garante que duas confirmações simultâneas não criem duas assunções.
+- I7 exige a pendência assumida e o mesmo agente responsável. O FORM 1 passa de `devolvido_para_ajuste` para `em_preenchimento`, e o rascunho é recriado a partir do conteúdo e do lacre da versão devolvida; a pendência permanece em atendimento até P3.
+- Criado o contrato inicial das flags operacionais da futura tela: `CORRECAO_SOLICITADA`, `PENDENCIA_ATRIBUIDA_A_VOCE` e `SUBMISSAO_BLOQUEADA`. As flags são calculadas a partir do estado real e não persistidas como uma segunda fonte de verdade.
+- Acrescentados 9 testes de P2, I7 e flags: autorização por unidade, mudança dos alertas, idempotência, concorrência, rollback, assunção obrigatória, responsável vigente, reconstrução do rascunho e retomada do I2.
+- Suíte completa: 113 testes aprovados no banco próprio `lgpd_poc_teste`. Não houve mudança de esquema neste incremento.
+
+## 2026-10-17 — contexto institucional e identidade das apresentações
+
+- Registrado que o trabalho é desenvolvido para a Prefeitura Municipal de Hortolândia, dentro da Secretaria de Planejamento Urbano e Gestão Estratégica.
+- Referências institucionais de reporte: Andreia Missio, Secretária Adjunta, e Eduardo Marchetti Francisco, Secretário Municipal.
+- Definido como padrão que toda apresentação do projeto utilize o brasão da Prefeitura Municipal de Hortolândia, conforme a identidade já adotada na Cartilha LGPD.
+- Materiais do Governo do Estado de Mato Grosso do Sul permanecem como referências conceituais e históricas, sem substituir a identidade visual institucional de Hortolândia.

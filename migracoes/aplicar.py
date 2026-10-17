@@ -12,11 +12,21 @@ from sqlalchemy import select, inspect
 from sqlalchemy.orm import Session
 from app.banco import motor
 from app.modelos import VersaoEsquema
+from migracoes.acao_obrigatoria import aplicar as migracao_0006
+from migracoes.analise_instrumento import aplicar as migracao_0004
+from migracoes.contrato_form1 import aplicar as migracao_0005
+from migracoes.imutabilidade_versao import aplicar as migracao_0003
+from migracoes.pendencia import aplicar as migracao_0007
 from migracoes.rascunho_versoes import aplicar as migracao_0002
 
 MIGRACOES = [
     # (número, nome, função que recebe a sessão)
     (2, "rascunho e versões do Instrumento (M1a: I1 a I3)", migracao_0002),
+    (3, "imutabilidade das versões do Instrumento (M1a: I3)", migracao_0003),
+    (4, "análise vigente da versão do Instrumento (M1a: I13 e I14)", migracao_0004),
+    (5, "contrato fechado do FORM 1 sintético", migracao_0005),
+    (6, "ação obrigatória sintética mínima (M1a: G4 e G6)", migracao_0006),
+    (7, "pendência mínima da devolução (M1a: I6 e P1)", migracao_0007),
 ]
 
 
