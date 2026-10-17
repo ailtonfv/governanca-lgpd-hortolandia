@@ -27,7 +27,11 @@ def listar_alertas_operacionais(sessao, conta_id):
         autorizada_na_unidade = tem_papel(
             sessao, conta.pessoa_id, pendencia.unidade_destino_id, {"elaborador"}
         )
-        if not autorizada_na_unidade and pendencia.responsavel_atual_id != conta.pessoa_id:
+        autorizada_a_decidir = tem_papel(
+            sessao, conta.pessoa_id, pendencia.unidade_origem_id, {"validador"}
+        )
+        responsavel = pendencia.responsavel_atual_id == conta.pessoa_id
+        if not autorizada_na_unidade and not autorizada_a_decidir and not responsavel:
             continue
 
         base = {"pendencia_id": pendencia.id, "registro_id": pendencia.registro_id,
@@ -37,13 +41,22 @@ def listar_alertas_operacionais(sessao, conta_id):
                 base, codigo="CORRECAO_SOLICITADA", nivel="atencao",
                 proxima_acao="assumir_pendencia",
             ))
-        if (pendencia.estado == "em_atendimento"
-                and pendencia.responsavel_atual_id == conta.pessoa_id):
+        if pendencia.estado == "em_atendimento" and responsavel:
             alertas.append(dict(
                 base, codigo="PENDENCIA_ATRIBUIDA_A_VOCE", nivel="proxima_acao",
                 proxima_acao="iniciar_ajuste",
             ))
-        if pendencia.bloqueante:
+        if pendencia.estado == "respondida" and autorizada_a_decidir:
+            alertas.append(dict(
+                base, codigo="RESPOSTA_AGUARDANDO_DECISAO", nivel="proxima_acao",
+                proxima_acao="decidir_resposta",
+            ))
+        if pendencia.estado == "devolvida_para_complementacao" and responsavel:
+            alertas.append(dict(
+                base, codigo="COMPLEMENTACAO_SOLICITADA", nivel="proxima_acao",
+                proxima_acao="retomar_pendencia",
+            ))
+        if pendencia.bloqueante and (autorizada_na_unidade or responsavel):
             alertas.append(dict(
                 base, codigo="SUBMISSAO_BLOQUEADA", nivel="bloqueio",
                 proxima_acao="resolver_pendencia",

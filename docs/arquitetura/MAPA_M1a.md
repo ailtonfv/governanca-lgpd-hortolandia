@@ -339,6 +339,8 @@ sequenceDiagram
 
 P4 não valida a Versão 2. Ele apenas reconhece que a correção solicitada foi apresentada e registra o hash aceito. O novo I3 só é permitido quando o hash do rascunho coincide com o hash aceito. A validação continua dependendo de I13 e I5.
 
+Ao executar P3, o sistema registra o hash do rascunho corrigido e bloqueia novos I2 enquanto a pendência estiver Respondida. Assim, P4 ou P5 sempre examina exatamente o conteúdo apresentado, sem alteração silenciosa durante a conferência.
+
 No M1a, P5 e P6 existem somente neste percurso restrito da pendência criada automaticamente por I6. A aplicação geral de P5 e P6 pertence à PoC ampliada.
 
 ## 10. Percurso com medidas
@@ -534,11 +536,13 @@ G5 parte de **Em andamento** e exige:
 
 G6 parte de **Em execução** e exige:
 
-- ações obrigatórias concluídas ou formalmente encerradas;
-- nenhuma pendência bloqueante aberta;
-- pendências não bloqueantes encerradas ou marcadas como pós-conclusão.
+- todos os Instrumentos obrigatórios validados;
+- ao menos uma ação obrigatória no ciclo;
+- ações obrigatórias concluídas com evidência ou formalmente encerradas com motivo e evidência;
+- todas as pendências encerradas ou canceladas;
+- ciclo atual ativo.
 
-O sistema pode informar que as condições foram satisfeitas, mas não conclui automaticamente. G5 e G6 são decisões institucionais praticadas por agente com permissão e competência formal.
+O responsável pela ação registra primeiro o resultado no evento técnico AO1. O sistema pode informar que as condições foram satisfeitas, mas não conclui automaticamente. G5 e G6 são decisões institucionais praticadas por agente com permissão e competência formal.
 
 ## 15. O que pertence e o que não pertence ao M1a
 

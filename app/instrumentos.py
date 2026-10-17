@@ -177,6 +177,22 @@ def salvar_rascunho(sessao, *, comando_id, conta_id, instrumento_id, versao_lida
                       "I2 exige Instrumento no estado em_preenchimento",
                       estado_atual=instrumento.estado_instrumento)
 
+    pendencia_congelante = sessao.scalars(
+        select(Pendencia).where(
+            Pendencia.instrumento_id == instrumento.id,
+            Pendencia.tipo_pendencia == "devolucao",
+            Pendencia.estado.in_(("respondida", "devolvida_para_complementacao")),
+        ).with_for_update()
+    ).first()
+    if pendencia_congelante is not None:
+        return _negar(
+            sessao, comando, ator_tipo, ator_id, "salvar_rascunho",
+            conta_id, instrumento_id,
+            "rascunho congelado enquanto a resposta da pendência aguarda decisão",
+            pendencia_id=pendencia_congelante.id,
+            estado_pendencia=pendencia_congelante.estado,
+        )
+
     rascunho = sessao.get(RascunhoInstrumento, instrumento.id)
     if rascunho is None:
         return _negar(sessao, comando, ator_tipo, ator_id, "salvar_rascunho",
@@ -316,6 +332,35 @@ def submeter_instrumento(sessao, *, comando_id, conta_id, instrumento_id, versao
                       conta_id, instrumento_id,
                       "rascunho desatualizado: recarregue antes de submeter",
                       versao_lida=versao_lida, versao_atual=rascunho.versao_rascunho)
+
+    pendencias_devolucao = sessao.scalars(
+        select(Pendencia)
+        .where(Pendencia.instrumento_id == instrumento.id,
+               Pendencia.tipo_pendencia == "devolucao")
+        .order_by(Pendencia.criada_em.desc(), Pendencia.id.desc())
+        .with_for_update()
+    ).all()
+    pendencia_ativa = next(
+        (item for item in pendencias_devolucao if item.estado != "encerrada"), None
+    )
+    if pendencia_ativa is not None:
+        return _negar(
+            sessao, comando, ator_tipo, ator_id, "submeter_instrumento",
+            conta_id, instrumento_id,
+            "I3 bloqueado até a pendência de devolução ser aceita por P4",
+            pendencia_id=pendencia_ativa.id,
+            estado_pendencia=pendencia_ativa.estado,
+        )
+    ultima_aceita = next(
+        (item for item in pendencias_devolucao if item.lacre_aceito is not None), None
+    )
+    if ultima_aceita is not None and rascunho.lacre_conteudo != ultima_aceita.lacre_aceito:
+        return _negar(
+            sessao, comando, ator_tipo, ator_id, "submeter_instrumento",
+            conta_id, instrumento_id,
+            "o rascunho atual não coincide com a correção aceita por P4",
+            pendencia_id=ultima_aceita.id,
+        )
 
     problemas = validar_form1_sintetico(rascunho.conteudo)
     if problemas:

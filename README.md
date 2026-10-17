@@ -534,7 +534,7 @@ flowchart TD
 | ↳ Declaração de transversalidade, só pela governança (DA-39, item 2) | ✔ Implementada |
 | ↳ Alerta estrutural | ⚙️ Parcial: base de dados comum ✔; relações do catálogo a fazer (O-80) |
 | ↳ Semelhança por finalidade, categorias de titulares, categorias de dados e compartilhamentos | ✔ Alerta não bloqueante no I3 (DA-39, item 4) |
-| ↳ Testes automatizados (pytest, base própria) | ✔ 113 aprovados |
+| ↳ Testes automatizados (pytest, base própria) | ✔ 146 aprovados |
 | Checkpoint externo da cadeia (SAD 08) | a fazer |
 | Rascunho do FORM 1: I1 iniciar preenchimento e I2 salvar, com controle otimista | ✔ |
 | ↳ Testes de I1 e I2 | ✔ 14 testes: estado, lacre, cadeia, idempotência, autorização, concorrência, rollback, migração e POC-TS-004 |
@@ -553,16 +553,24 @@ flowchart TD
 | Devolução: I6 preserva a versão, P1 cria a pendência e G3 recalcula o Registro | ✔ |
 | ↳ Testes de I6, P1 e G3 | ✔ 9 testes: estados, cadeias, motivo, responsável vigente, segregação, versão, idempotência, concorrência, rollback e migração |
 | Assunção e ajuste: P2 atribui a pendência e I7 recria o rascunho da versão devolvida | ✔ |
-| ↳ Flags operacionais da tela inicial | ✔ Calculadas: correção solicitada, pendência atribuída e submissão bloqueada |
+| ↳ Flags operacionais da tela inicial | ✔ Calculadas: correção solicitada, pendência atribuída, resposta aguardando decisão, complementação solicitada e submissão bloqueada |
 | ↳ Testes de P2, I7 e flags | ✔ 9 testes: autorização, flags, idempotência, concorrência, rollback, assunção obrigatória, responsável e retomada do I2 |
-| Demais atos da pendência e do workflow | a fazer |
+| Resposta da correção: P3 registra o lacre do rascunho e congela novas alterações | ✔ |
+| ↳ Testes de P3 | ✔ 6 testes: lacre, congelamento, tela desatualizada, responsável, idempotência, concorrência e rollback |
+| Decisão da correção: P4 aceita; P5 devolve a mesma pendência; P6 retoma a edição | ✔ P5/P6 restritos à pendência criada pelo I6 |
+| ↳ Testes de P4, P5, P6 e novo I3 | ✔ 9 testes: A2a, A2b, lacre aceito, motivo, segregação, idempotência, concorrência, rollback e histórico |
+| Conclusão sem medidas: G5 conclui o Registro e o ciclo após a validação | ✔ Competência formal separada e portões objetivos |
+| ↳ Testes de G5 | ✔ 8 testes: versão validada, competência, pendências, medidas, Versão 2, idempotência, concorrência e rollback |
+| Conclusão com medidas: ação obrigatória finalizada com evidência e G6 conclui Registro e ciclo | ✔ Responsável pela ação separado do agente competente para concluir |
+| ↳ Testes da ação e do G6 | ✔ 10 testes: momento e responsável corretos, campos obrigatórios, evidência, encerramento formal, competência, bloqueio, preservação, idempotência, concorrência e rollback |
+| Demais atos do workflow | a fazer |
 | Telas (FastAPI + Jinja2) e testes de aceite do M1a (POC-TS-001 a 009) | a fazer |
 
 ¹ Tentativas negadas ficam registradas na auditoria. O cenário d (substituição) está a fazer.
 ² O início do preenchimento do FORM 1 será um comando posterior ao G1, como no cenário A1 do SAD 04.
-³ Trava determinística por objeto e contexto e exatamente um PRINCIPAL, no próprio banco; um contexto por Registro garantido por chave composta (DA-39, item 1); advertência de família e transversalidade (DA-39, item 2); recusas do banco tratadas pelo nome da regra. A suíte chegou a 113 testes automatizados aprovados em 16/10/2026, inclusive pedidos simultâneos. Os cenários de Suspenso, Concluído e Cancelado são testados como regra do banco até a chegada dos atos do M1b.1.
+³ Trava determinística por objeto e contexto e exatamente um PRINCIPAL, no próprio banco; um contexto por Registro garantido por chave composta (DA-39, item 1); advertência de família e transversalidade (DA-39, item 2); recusas do banco tratadas pelo nome da regra. A suíte chegou a 146 testes automatizados aprovados em 17/10/2026, inclusive pedidos simultâneos. Suspenso e Cancelado continuam testados como regra do banco até a chegada dos atos do M1b.1; Concluído já é alcançado pelos G5 e G6 reais.
 
-### O que os 113 testes garantem, em linguagem simples
+### O que os 146 testes garantem, em linguagem simples
 
 Os testes atuais exercitam o motor da PoC com dados fictícios e procuram responder a perguntas práticas:
 
@@ -580,9 +588,12 @@ Os testes atuais exercitam o motor da PoC com dados fictícios e procuram respon
 - **Validação:** somente o responsável atual da análise pode executar I5. O sistema encerra a análise, torna a versão validada a versão vigente e executa o G4 junto: ação aberta leva a **Em execução**; sem ação aberta, o Registro volta a **Em andamento**.
 - **Devolução:** somente o agente responsável atual pela análise pode executar I6. O sistema preserva a versão, cria uma pendência bloqueante para a unidade elaboradora e executa o G3 junto, sem deixar partes soltas se ocorrer uma falha.
 - **Assunção e ajuste:** P2 garante que apenas um agente autorizado assuma a pendência; I7 recria o rascunho a partir da versão devolvida e libera novamente o salvamento pelo I2.
+- **Resposta e decisão da correção:** P3 lacra a resposta; P4 aceita exatamente esse conteúdo; ou P5 devolve a mesma pendência com motivo e P6 libera outra correção. O novo I3 só cria a Versão 2 quando o rascunho coincide com o lacre aceito.
+- **Conclusão sem medidas:** G5 somente conclui quando o FORM 1 está validado, não existe pendência aberta nem ação obrigatória no ciclo e o agente possui competência formal para concluir. Registro e ciclo são encerrados juntos, sem apagar a versão validada.
+- **Conclusão com medidas:** a ação só pode ser finalizada pelo seu responsável quando o Registro está Em execução e sempre exige evidência. Um encerramento excepcional também exige motivo. Depois disso, G6 confere todos os portões e um agente com competência formal conclui Registro e ciclo sem apagar a versão nem a comprovação da medida.
 - **Flags operacionais:** os avisos da futura tela inicial são calculados a partir da pendência real. Eles mudam de “Correção solicitada” para “Pendência atribuída a você” sem manter uma segunda verdade no banco.
 
-Esses 113 testes são a cobertura automatizada atual do motor. Eles ainda **não substituem** os testes de aceite POC-TS-001 a POC-TS-009, que exigirão os percursos completos, as telas mínimas e as respectivas evidências.
+Esses 146 testes são a cobertura automatizada atual do motor. Eles ainda **não substituem** os testes de aceite POC-TS-001 a POC-TS-009, que exigirão os percursos completos, as telas mínimas e as respectivas evidências.
 
 ### Legenda operacional: agentes e funções
 
@@ -593,7 +604,7 @@ Todos os atores humanos do fluxo são **Agentes Públicos Autorizados**. A expre
 | Responsável pelo preenchimento | Inicia, salva, submete e ajusta o FORM 1 |
 | Responsável pela análise | Examina, valida ou devolve a versão |
 | Responsável pela ação | Executa a medida e registra sua evidência |
-| Competente para concluir | Executa G5 ou G6 |
+| Competente para concluir | Executa G5 ou G6; na PoC, a autorização técnica provisória é o papel `concluidor` |
 | Instância validadora competente | Inicia ou reatribui a análise |
 
 ```mermaid
@@ -715,6 +726,21 @@ O pedido informa o responsável que aparecia na tela. Se outra pessoa já tiver 
 
 ### O que acontece quando o agente responsável devolve
 
+#### Guia rápido dos procedimentos P
+
+A letra **P** identifica os atos praticados sobre uma **Pendência**. Ela não significa uma nova espécie de formulário: representa a providência que precisa ser acompanhada até ter uma resposta e uma decisão.
+
+| Procedimento | Em linguagem simples | Quem atua | Resultado |
+|---|---|---|---|
+| **P1 — Criar** | Abre automaticamente a pendência quando o I6 devolve a versão | Sistema, provocado pelo I6 | Pendência **Aberta** |
+| **P2 — Assumir** | Um agente autorizado aceita cuidar da providência | Responsável pelo preenchimento | Pendência **Em atendimento** |
+| **P3 — Responder** | Entrega a correção e registra o lacre exato do rascunho | Agente que assumiu | Pendência **Respondida** e rascunho congelado |
+| **P4 — Aceitar** | Confirma que a correção apresentada é suficiente | Instância validadora, com segregação | Pendência **Encerrada** e lacre aceito |
+| **P5 — Devolver resposta** | Informa, com motivo, que a correção ainda é insuficiente | Instância validadora, com segregação | Mesma pendência **Devolvida para complementação** |
+| **P6 — Retomar** | Reabre o trabalho para complementar a correção | Agente responsável pela pendência | Pendência volta a **Em atendimento** e a edição é liberada |
+
+No M1a, P5 e P6 são usados somente nesta pendência de correção criada pelo I6. O uso geral desses procedimentos em outros tipos de pendência pertence à PoC ampliada.
+
 Quando a versão tem uma lacuna ou inconsistência, o responsável vigente pela análise pode executar I6 com um motivo. O sistema realiza três registros inseparáveis:
 
 ```mermaid
@@ -740,7 +766,38 @@ flowchart LR
     F --> S["I2<br/>Salvar correção"]
 ```
 
-Se duas pessoas tentarem assumir ao mesmo tempo, somente a primeira confirmação vale. O I7 confere que o pedido veio da mesma pessoa que assumiu a pendência, cria um novo rascunho copiando a versão devolvida e mantém a pendência **Em atendimento** até a futura resposta P3.
+Se duas pessoas tentarem assumir ao mesmo tempo, somente a primeira confirmação vale. O I7 confere que o pedido veio da mesma pessoa que assumiu a pendência, cria um novo rascunho copiando a versão devolvida e mantém a pendência **Em atendimento** até a resposta P3.
+
+#### Como a correção é entregue sem mudar durante a conferência
+
+Depois de corrigir e salvar, o agente que assumiu a pendência usa o P3 para apresentar a resposta. O sistema não guarda apenas a frase "corrigido": ele registra o **lacre do conteúdo exato** que está sendo entregue.
+
+```mermaid
+flowchart LR
+    A["I2<br/>Correção salva"] --> P["P3<br/>Apresentar resposta"]
+    P --> L["Lacre do rascunho<br/>registrado"]
+    L --> R["Pendência<br/>Respondida"]
+    R --> B["Novos I2 bloqueados<br/>até a decisão"]
+```
+
+Em termos práticos, é como colocar a correção em um envelope lacrado: a pessoa responsável pela análise examina exatamente aquilo que foi apresentado. Uma tela antiga não consegue responder por cima de uma gravação mais nova; dois cliques simultâneos produzem uma única resposta; e qualquer falha desfaz a operação inteira.
+
+#### O que acontece com o envelope da correção
+
+Uma pessoa autorizada da instância validadora, diferente de quem submeteu o formulário, escolhe um dos dois caminhos:
+
+```mermaid
+flowchart TD
+    R["Pendência Respondida<br/>rascunho congelado"] --> D{"A correção é suficiente?"}
+    D -- "sim · P4" --> E["Pendência Encerrada<br/>lacre aceito"]
+    E --> I["I3 permitido somente<br/>com o mesmo lacre"]
+    I --> V["Versão 2 imutável"]
+    D -- "não · P5 com motivo" --> C["Mesma pendência<br/>Devolvida para complementação"]
+    C -- "P6 retomar" --> A["Em atendimento<br/>edição liberada"]
+    A -- "I2 + novo P3" --> R
+```
+
+O P5 não abre outra pendência e não apaga a primeira resposta: tudo permanece no histórico. O P6 apenas devolve a pendência ao agente responsável e libera o rascunho. Se alguém alterar o conteúdo depois do P4, o I3 percebe que o lacre mudou e recusa a submissão; é necessário apresentar e aceitar a correção adequada.
 
 #### Flags da futura tela inicial
 
@@ -752,9 +809,12 @@ flowchart TD
     A --> B["Bloqueio<br/>Submissão bloqueada"]
     P["P2 confirmado"] --> V["Próxima ação<br/>Atribuída a você"]
     P --> B
+    R["P3 respondida"] --> D["Validador<br/>Resposta aguardando decisão"]
+    X["P5 devolvida"] --> N["Agente responsável<br/>Complementação solicitada"]
+    X --> B
 ```
 
-Assim, uma mudança no workflow aparece imediatamente na tela e não existe o risco de uma flag antiga contradizer o estado real. Um agente de outra unidade não recebe a correção na sua fila; quem assumiu passa a receber a próxima ação de iniciar o ajuste.
+Assim, uma mudança no workflow aparece imediatamente na tela e não existe o risco de uma flag antiga contradizer o estado real. Um agente de outra unidade não recebe a correção na sua fila; quem assumiu recebe as ações de ajuste e complementação, enquanto a instância validadora recebe a resposta que precisa decidir.
 
 ### O que acontece quando o agente responsável valida
 
@@ -767,9 +827,47 @@ flowchart TD
     G4 -- "sim" --> E["Registro<br/>Em execução"]
 ```
 
-Em linguagem simples: o agente responsável pela análise não escolhe manualmente entre **Em andamento** e **Em execução**. Ele apenas valida. Se existir uma providência que ainda precisa ser acompanhada, o sistema mantém o Registro em execução; se não existir, devolve-o a Em andamento, pronto para o futuro G5 concluir formalmente o Registro.
+Em linguagem simples: o agente responsável pela análise não escolhe manualmente entre **Em andamento** e **Em execução**. Ele apenas valida. Se existir uma providência que ainda precisa ser acompanhada, o sistema mantém o Registro em execução; se não existir, devolve-o a Em andamento, pronto para o G5 concluir formalmente o Registro.
 
-A ação usada nesta etapa é propositalmente pequena: guarda estado, responsável, evidência e vínculos com o Registro, o ciclo e o Instrumento. Ela serve para provar o percurso do M1a sem fingir que o FORM 4 completo já foi construído. Neste incremento a ação já aparece como condição do cenário; concluir ou encerrar essa ação e executar o G6 pertencem a um incremento posterior.
+### Como o Registro é concluído quando não há medidas
+
+Validar e concluir são decisões diferentes. O I5 confirma o conteúdo técnico; depois, um agente com competência formal executa o G5 para encerrar institucionalmente o Registro:
+
+```mermaid
+flowchart TD
+    V["FORM 1 Validado<br/>Registro Em andamento"] --> P{"Portões do G5"}
+    P -- "FORM validado" --> A{"Há pendência aberta<br/>ou medida no ciclo?"}
+    P -- "FORM incompleto" --> N["Conclusão recusada"]
+    A -- "sim" --> N
+    A -- "não" --> C{"Agente possui competência<br/>formal para concluir?"}
+    C -- "não" --> N
+    C -- "sim · G5" --> F["Registro Concluído<br/>Ciclo concluído"]
+```
+
+O G5 não é automático e não é consequência escondida do botão **Validar**. Ele exige o papel técnico provisório `concluidor`, encerra Registro e ciclo na mesma transação e preserva o FORM 1 e sua versão validada. Dois cliques simultâneos produzem uma única conclusão; se ocorrer uma falha, nada fica concluído pela metade.
+
+### Como o Registro é concluído quando há medidas
+
+A ação usada nesta etapa é propositalmente pequena: guarda estado, responsável, evidência e vínculos com o Registro, o ciclo e o Instrumento. Ela prova o percurso do M1a sem fingir que o FORM 4 completo já foi construído.
+
+```mermaid
+flowchart TD
+    V["I5 valida o FORM 1"] --> G4{"G4<br/>Há ação aberta?"}
+    G4 -- "sim" --> E["Registro Em execução"]
+    E --> R{"Agente é o responsável<br/>pela ação?"}
+    R -- "não" --> B["Finalização recusada"]
+    R -- "sim" --> D{"Resultado da medida"}
+    D -- "concluída" --> P["Evidência obrigatória"]
+    D -- "encerrada" --> M["Motivo e evidência<br/>obrigatórios"]
+    P --> G6{"Agente competente executa G6<br/>e todos os portões estão livres?"}
+    M --> G6
+    G6 -- "não" --> E
+    G6 -- "sim" --> F["Registro Concluído<br/>Ciclo concluído"]
+```
+
+Em linguagem simples: validar o formulário não finge que a medida já foi cumprida. O responsável pela ação primeiro documenta o que aconteceu. Se a medida foi substituída ou deixou de ser aplicável, ele pode encerrá-la formalmente, mas precisa explicar o motivo e anexar evidência. Depois, outra decisão institucional acontece: um agente com o papel técnico provisório `concluidor` executa G6. O sistema confere FORM validado, ciclo ativo, pendências resolvidas e todas as ações finalizadas com evidência; só então conclui Registro e ciclo juntos.
+
+O G6 também resiste a duplo clique e pedidos simultâneos. Se houver falha antes do commit, Registro e ciclo continuam Em execução, sem uma conclusão pela metade. A versão validada e a evidência da medida permanecem no histórico.
 
 ## Marcos e critérios de saída
 

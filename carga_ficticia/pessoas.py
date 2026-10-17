@@ -27,6 +27,7 @@ DESIGNACOES = [
     # B analisa e valida o trabalho dos outros
     ("PESSOA-B", "UNID-NORTE", "analista"),
     ("PESSOA-B", "UNID-NORTE", "validador"),
+    ("PESSOA-B", "UNID-NORTE", "concluidor"),
     ("PESSOA-F", "UNID-NORTE", "analista"),
     # C elabora em outra unidade
     ("PESSOA-C", "UNID-SUL", "elaborador"),

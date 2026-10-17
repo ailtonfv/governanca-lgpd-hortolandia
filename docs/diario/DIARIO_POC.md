@@ -172,3 +172,38 @@ Regras deste diário: sem senhas, tokens ou dados pessoais; cada entrada com dat
 - Referências institucionais de reporte: Andreia Missio, Secretária Adjunta, e Eduardo Marchetti Francisco, Secretário Municipal.
 - Definido como padrão que toda apresentação do projeto utilize o brasão da Prefeitura Municipal de Hortolândia, conforme a identidade já adotada na Cartilha LGPD.
 - Materiais do Governo do Estado de Mato Grosso do Sul permanecem como referências conceituais e históricas, sem substituir a identidade visual institucional de Hortolândia.
+
+## 2026-10-17 — M1a: resposta da correção e congelamento do rascunho (P3)
+
+- P3 implementado para o agente que assumiu a pendência apresentar a correção. O ato exige a versão atual do rascunho, registra seu lacre na pendência e muda o estado de `em_atendimento` para `respondida`.
+- Enquanto a pendência estiver `respondida`, novos I2 são bloqueados. A trava do Instrumento serializa salvamento e resposta concorrentes, impedindo que o conteúdo mude silenciosamente durante a conferência.
+- Acrescentados 6 testes de P3: lacre e cadeia, congelamento do rascunho, recusa de tela desatualizada, responsável vigente, idempotência, concorrência e rollback.
+- Suíte completa: 119 testes aprovados no banco próprio `lgpd_poc_teste`. Não houve mudança de esquema neste incremento.
+
+## 2026-10-17 — M1a: decisão e complementação da correção (P4, P5 e P6)
+
+- P4 implementado para a instância validadora aceitar exatamente o lacre apresentado no P3, encerrar a pendência e retirar o bloqueio da submissão. A segregação impede o autor da versão devolvida de aceitar a própria correção.
+- O novo I3 só cria a Versão 2 quando não existe pendência de devolução ativa e o lacre do rascunho coincide com o aceito no P4. Alteração posterior ao aceite é detectada e recusada.
+- P5 devolve a mesma pendência com motivo obrigatório; P6 permite que o agente responsável retome a edição. A nova resposta substitui apenas a projeção corrente, enquanto todas as respostas e motivos anteriores permanecem na cadeia de eventos.
+- As flags calculadas passaram a avisar a instância validadora quando uma resposta aguarda P4/P5 e o agente responsável quando P5 solicita complementação; o bloqueio de submissão continua aparecendo somente para quem atua no preenchimento.
+- O README recebeu um guia operacional único de P1 a P6, com significado coloquial, responsável por cada ato, resultado e a ressalva de que P5/P6 são restritos ao percurso de correção do I6 no M1a.
+- Acrescentados 9 testes para os cenários A2a e A2b, competência, segregação, motivo, lacre aceito, histórico, idempotência, concorrência e rollback.
+- Suíte completa: 128 testes aprovados no banco próprio `lgpd_poc_teste`. Não houve mudança de esquema neste incremento.
+
+## 2026-10-17 — M1a: conclusão sem medidas (G5)
+
+- G5 implementado como decisão humana separada da validação. Ele parte de `em_andamento` e exige todos os Instrumentos validados, ciclo ativo, nenhuma pendência aberta e nenhuma ação obrigatória no ciclo.
+- Criado o papel técnico provisório `concluidor`, separado de `validador`, para representar a competência formal exigida pelo SAD. Na carga fictícia, a Pessoa B recebeu essa designação apenas para demonstrar o percurso, sem definir a futura matriz institucional da Prefeitura.
+- Registro e ciclo passam juntos a `concluido`; a versão validada e toda a cadeia anterior permanecem preservadas. A lista de ações possíveis em `em_andamento` passou a indicar G5 como dependente de competência e de seus portões.
+- Acrescentados 8 testes de G5: conclusão e preservação, Instrumento validado, competência formal, pendência aberta, medida no ciclo, idempotência, concorrência, rollback e conclusão depois da correção com Versão 2.
+- Suíte completa: 136 testes aprovados no banco próprio `lgpd_poc_teste`. Não houve mudança de esquema neste incremento.
+
+## 2026-10-17 — M1a: conclusão com medidas (ação obrigatória e G6)
+
+- Implementada a finalização da ação obrigatória sintética. Somente o responsável vigente pode praticar o ato, e apenas quando o Registro está `em_execucao`. Tanto a conclusão normal quanto o encerramento formal exigem evidência estruturada; o encerramento formal também exige motivo.
+- A finalização produz o evento técnico `AO1`, preserva evidência e justificativa na projeção da ação e mantém o pedido idempotente. A ordem das travas é Registro → ação, a mesma adotada pelo G6, evitando interbloqueio entre os dois atos.
+- G6 implementado como decisão humana posterior à execução: exige papel técnico provisório `concluidor`, ciclo ativo, todos os Instrumentos validados, nenhuma pendência ativa, ao menos uma ação no ciclo e todas as ações finalizadas com evidência.
+- Registro e ciclo passam juntos a `concluido`; versão validada, ações e evidências permanecem preservadas. A lista de ações possíveis em `em_execucao` passou a apresentar G6 e seus portões.
+- O README recebeu a explicação coloquial e o diagrama completo do percurso com medidas.
+- Acrescentados 10 testes: momento e responsável corretos, validações dos campos, evidência e cadeia, bloqueio por ação aberta, conclusão e preservação, encerramento formal, competência, idempotência, concorrência e rollback.
+- Suíte completa: 146 testes aprovados no banco próprio `lgpd_poc_teste`. Não houve mudança de esquema neste incremento.

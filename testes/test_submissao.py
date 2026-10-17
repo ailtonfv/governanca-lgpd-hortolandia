@@ -23,7 +23,8 @@ from migracoes.acao_obrigatoria import aplicar as aplicar_migracao_acao
 from migracoes.analise_instrumento import aplicar as aplicar_migracao_analise
 from migracoes.imutabilidade_versao import aplicar as aplicar_imutabilidade
 from migracoes.pendencia import aplicar as aplicar_migracao_pendencia
-from app.pendencias import assumir_pendencia
+from app.pendencias import (aceitar_resposta, assumir_pendencia, devolver_resposta,
+                            responder_pendencia, retomar_pendencia)
 from testes.apoio import CADASTRO, g1, sem_reexecucao
 
 
@@ -125,6 +126,40 @@ def i7(instrumento_id, pendencia_id, cmd="CMD-S-I7", conta="CONTA-A1", **extra):
         return iniciar_ajuste(
             sessao, comando_id=cmd, conta_id=conta, instrumento_id=instrumento_id,
             pendencia_id=pendencia_id, **extra,
+        )
+
+
+def p3(instrumento_id, pendencia_id, versao=3, cmd="CMD-S-P3",
+       conta="CONTA-A1", **extra):
+    with Session(motor, expire_on_commit=False) as sessao, sessao.begin():
+        return responder_pendencia(
+            sessao, comando_id=cmd, conta_id=conta, pendencia_id=pendencia_id,
+            instrumento_id=instrumento_id, versao_lida=versao, **extra,
+        )
+
+
+def p4(instrumento_id, pendencia_id, cmd="CMD-S-P4", conta="CONTA-B1", **extra):
+    with Session(motor, expire_on_commit=False) as sessao, sessao.begin():
+        return aceitar_resposta(
+            sessao, comando_id=cmd, conta_id=conta, pendencia_id=pendencia_id,
+            instrumento_id=instrumento_id, **extra,
+        )
+
+
+def p5(instrumento_id, pendencia_id, motivo="Complementar a justificativa fictícia",
+       cmd="CMD-S-P5", conta="CONTA-B1", **extra):
+    with Session(motor, expire_on_commit=False) as sessao, sessao.begin():
+        return devolver_resposta(
+            sessao, comando_id=cmd, conta_id=conta, pendencia_id=pendencia_id,
+            instrumento_id=instrumento_id, motivo=motivo, **extra,
+        )
+
+
+def p6(instrumento_id, pendencia_id, cmd="CMD-S-P6", conta="CONTA-A1", **extra):
+    with Session(motor, expire_on_commit=False) as sessao, sessao.begin():
+        return retomar_pendencia(
+            sessao, comando_id=cmd, conta_id=conta, pendencia_id=pendencia_id,
+            instrumento_id=instrumento_id, **extra,
         )
 
 
@@ -1214,5 +1249,363 @@ def test_i7_repetido_e_idempotente_e_rollback_preserva_estado_anterior():
 
     original = i7(instrumento_id, pendencia_id)
     repetido = i7(instrumento_id, pendencia_id)
+    assert original["permitido"] and repetido["reexecutado"] is True
+    assert sem_reexecucao(repetido) == sem_reexecucao(original)
+
+
+def preparar_correcao():
+    instrumento_id, registro_id, codigo, submissao, analise, devolucao = preparar_devolucao()
+    pendencia_id = devolucao["pendencia_id"]
+    assert p2(pendencia_id)["permitido"]
+    assert i7(instrumento_id, pendencia_id)["permitido"]
+    corrigido = deepcopy(FORM_VALIDO)
+    corrigido["finalidade"] = "Finalidade corrigida e pronta para conferência"
+    with Session(motor, expire_on_commit=False) as sessao, sessao.begin():
+        salvo = salvar_rascunho(
+            sessao, comando_id="CMD-S-P3-I2", conta_id="CONTA-A1",
+            instrumento_id=instrumento_id, versao_lida=3, conteudo=corrigido,
+        )
+    assert salvo["permitido"] and salvo["versao_rascunho"] == 4
+    return (instrumento_id, registro_id, codigo, submissao, analise,
+            devolucao, salvo)
+
+
+def test_p3_registra_lacre_da_correcao_e_congela_o_rascunho():
+    instrumento_id, _, _, _, _, devolucao, salvo = preparar_correcao()
+    pendencia_id = devolucao["pendencia_id"]
+    momento = datetime(2026, 10, 17, 12, 0, tzinfo=timezone.utc)
+
+    resultado = p3(instrumento_id, pendencia_id, versao=4, momento=momento)
+
+    assert resultado["permitido"]
+    assert resultado["estado_pendencia"] == "respondida"
+    assert resultado["lacre_resposta"] == salvo["lacre_conteudo"]
+    assert resultado["evento_p3"] == 3
+    with Session(motor) as sessao:
+        pendencia = sessao.get(Pendencia, pendencia_id)
+        rascunho = sessao.get(RascunhoInstrumento, instrumento_id)
+        assert pendencia.estado == "respondida"
+        assert pendencia.lacre_resposta == rascunho.lacre_conteudo
+        assert pendencia.atualizada_em == momento
+        assert verificar_cadeia(sessao, pendencia_id)[0]
+        assert {alerta["codigo"] for alerta in listar_alertas_operacionais(
+            sessao, "CONTA-B1"
+        )} == {"RESPOSTA_AGUARDANDO_DECISAO"}
+
+    alterado = deepcopy(FORM_VALIDO)
+    alterado["finalidade"] = "Tentativa de alterar depois da resposta"
+    with Session(motor, expire_on_commit=False) as sessao, sessao.begin():
+        bloqueado = salvar_rascunho(
+            sessao, comando_id="CMD-S-P3-I2-BLOQ", conta_id="CONTA-A1",
+            instrumento_id=instrumento_id, versao_lida=4, conteudo=alterado,
+        )
+    assert not bloqueado["permitido"] and "congelado" in bloqueado["motivo"]
+
+
+def test_p3_recusa_rascunho_desatualizado():
+    instrumento_id, _, _, _, _, devolucao, _ = preparar_correcao()
+    resultado = p3(instrumento_id, devolucao["pendencia_id"], versao=3)
+    assert not resultado["permitido"] and "desatualizado" in resultado["motivo"]
+    assert resultado["versao_atual"] == 4
+    with Session(motor) as sessao:
+        pendencia = sessao.get(Pendencia, devolucao["pendencia_id"])
+        assert pendencia.estado == "em_atendimento" and pendencia.lacre_resposta is None
+
+
+def test_p3_so_pode_ser_executado_por_quem_assumiu_a_pendencia():
+    instrumento_id, _, _, _, _, devolucao, _ = preparar_correcao()
+    with Session(motor) as sessao, sessao.begin():
+        sessao.add(Designacao(pessoa_id="PESSOA-F", unidade_id="UNID-NORTE",
+                              papel="elaborador", ativa=True))
+
+    resultado = p3(instrumento_id, devolucao["pendencia_id"], versao=4,
+                    cmd="CMD-S-P3-OUTRO", conta="CONTA-F1")
+    assert not resultado["permitido"] and "assumiu" in resultado["motivo"]
+
+
+def test_p3_repetido_e_idempotente():
+    instrumento_id, _, _, _, _, devolucao, _ = preparar_correcao()
+    pendencia_id = devolucao["pendencia_id"]
+    original = p3(instrumento_id, pendencia_id, versao=4)
+    repetido = p3(instrumento_id, pendencia_id, versao=4)
+    assert original["permitido"] and repetido["reexecutado"] is True
+    assert sem_reexecucao(repetido) == sem_reexecucao(original)
+    with Session(motor) as sessao:
+        assert sessao.scalar(select(func.count()).select_from(Evento)
+                             .where(Evento.codigo_evento == "P3")) == 1
+
+
+def test_dois_p3_simultaneos_registram_uma_unica_resposta():
+    instrumento_id, _, _, _, _, devolucao, _ = preparar_correcao()
+    pendencia_id = devolucao["pendencia_id"]
+    barreira = threading.Barrier(2)
+    resultados = []
+
+    def responder(numero):
+        barreira.wait()
+        resultados.append(p3(
+            instrumento_id, pendencia_id, versao=4,
+            cmd=f"CMD-S-P3-CONC-{numero}",
+        ))
+
+    threads = [threading.Thread(target=responder, args=(numero,)) for numero in (1, 2)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+
+    assert sorted(resultado["permitido"] for resultado in resultados) == [False, True]
+    with Session(motor) as sessao:
+        assert sessao.scalar(select(func.count()).select_from(Evento)
+                             .where(Evento.codigo_evento == "P3")) == 1
+
+
+def test_p3_e_desfeito_no_rollback():
+    instrumento_id, _, _, _, _, devolucao, salvo = preparar_correcao()
+    pendencia_id = devolucao["pendencia_id"]
+    with pytest.raises(RuntimeError):
+        with Session(motor) as sessao, sessao.begin():
+            resultado = responder_pendencia(
+                sessao, comando_id="CMD-S-P3-ROLLBACK", conta_id="CONTA-A1",
+                pendencia_id=pendencia_id, instrumento_id=instrumento_id,
+                versao_lida=4,
+            )
+            assert resultado["permitido"]
+            raise RuntimeError("falha simulada antes do commit")
+
+    with Session(motor) as sessao:
+        pendencia = sessao.get(Pendencia, pendencia_id)
+        assert pendencia.estado == "em_atendimento" and pendencia.lacre_resposta is None
+        assert sessao.get(RascunhoInstrumento, instrumento_id).lacre_conteudo == salvo["lacre_conteudo"]
+        assert sessao.get(Comando, "CMD-S-P3-ROLLBACK") is None
+        assert sessao.scalar(select(func.count()).select_from(Evento)
+                             .where(Evento.codigo_evento == "P3")) == 0
+
+
+def preparar_resposta():
+    dados = preparar_correcao()
+    instrumento_id, _, _, _, _, devolucao, _ = dados
+    resposta = p3(instrumento_id, devolucao["pendencia_id"], versao=4)
+    assert resposta["permitido"]
+    return (*dados, resposta)
+
+
+def test_p4_aceita_o_lacre_e_libera_a_versao_2():
+    instrumento_id, _, _, _, _, devolucao, salvo, _ = preparar_resposta()
+    pendencia_id = devolucao["pendencia_id"]
+
+    aceite = p4(instrumento_id, pendencia_id)
+
+    assert aceite["permitido"] and aceite["estado_pendencia"] == "encerrada"
+    assert aceite["lacre_aceito"] == salvo["lacre_conteudo"]
+    with Session(motor) as sessao:
+        pendencia = sessao.get(Pendencia, pendencia_id)
+        assert not pendencia.bloqueante and pendencia.gate_bloqueado is None
+        assert pendencia.lacre_aceito == salvo["lacre_conteudo"]
+        assert verificar_cadeia(sessao, pendencia_id)[0]
+
+    submissao_2 = i3(instrumento_id, versao=4, cmd="CMD-S-A2A-I3-2")
+    assert submissao_2["permitido"] and submissao_2["numero_versao"] == 2
+    assert submissao_2["lacre_conteudo"] == aceite["lacre_aceito"]
+
+
+def test_p4_exige_validador_distinto_do_autor_da_submissao():
+    instrumento_id, _, _, _, _, devolucao, _, _ = preparar_resposta()
+    pendencia_id = devolucao["pendencia_id"]
+
+    mesmo_autor = p4(instrumento_id, pendencia_id, cmd="CMD-S-P4-AUTOR",
+                      conta="CONTA-A2")
+    sem_competencia = p4(instrumento_id, pendencia_id, cmd="CMD-S-P4-SEM-PAPEL",
+                         conta="CONTA-F1")
+
+    assert not mesmo_autor["permitido"] and "segregação" in mesmo_autor["motivo"]
+    assert not sem_competencia["permitido"] and "validador" in sem_competencia["motivo"]
+
+
+def test_i3_bloqueia_pendencia_ativa_e_rascunho_diferente_do_aceito():
+    instrumento_id, _, _, _, _, devolucao, _, _ = preparar_resposta()
+    pendencia_id = devolucao["pendencia_id"]
+
+    bloqueado = i3(instrumento_id, versao=4, cmd="CMD-S-I3-ANTES-P4")
+    assert not bloqueado["permitido"] and "P4" in bloqueado["motivo"]
+    assert p4(instrumento_id, pendencia_id)["permitido"]
+
+    alterado = deepcopy(FORM_VALIDO)
+    alterado["finalidade"] = "Conteúdo alterado depois do aceite"
+    with Session(motor, expire_on_commit=False) as sessao, sessao.begin():
+        salvo = salvar_rascunho(
+            sessao, comando_id="CMD-S-I2-DEPOIS-P4", conta_id="CONTA-A1",
+            instrumento_id=instrumento_id, versao_lida=4, conteudo=alterado,
+        )
+    assert salvo["permitido"] and salvo["versao_rascunho"] == 5
+    divergente = i3(instrumento_id, versao=5, cmd="CMD-S-I3-LACRE-DIVERGENTE")
+    assert not divergente["permitido"] and "não coincide" in divergente["motivo"]
+
+
+def test_p4_e_idempotente_e_rollback_preserva_a_resposta():
+    instrumento_id, _, _, _, _, devolucao, _, _ = preparar_resposta()
+    pendencia_id = devolucao["pendencia_id"]
+    with pytest.raises(RuntimeError):
+        with Session(motor) as sessao, sessao.begin():
+            resultado = aceitar_resposta(
+                sessao, comando_id="CMD-S-P4-ROLLBACK", conta_id="CONTA-B1",
+                pendencia_id=pendencia_id, instrumento_id=instrumento_id,
+            )
+            assert resultado["permitido"]
+            raise RuntimeError("falha simulada antes do commit")
+    with Session(motor) as sessao:
+        pendencia = sessao.get(Pendencia, pendencia_id)
+        assert pendencia.estado == "respondida" and pendencia.lacre_aceito is None
+        assert pendencia.bloqueante
+
+    original = p4(instrumento_id, pendencia_id)
+    repetido = p4(instrumento_id, pendencia_id)
+    assert original["permitido"] and repetido["reexecutado"] is True
+    assert sem_reexecucao(repetido) == sem_reexecucao(original)
+
+
+def test_p5_exige_motivo_e_devolve_a_mesma_pendencia():
+    instrumento_id, _, _, _, _, devolucao, _, _ = preparar_resposta()
+    pendencia_id = devolucao["pendencia_id"]
+    sem_motivo = p5(instrumento_id, pendencia_id, motivo="   ",
+                    cmd="CMD-S-P5-SEM-MOTIVO")
+    assert not sem_motivo["permitido"] and "motivo" in sem_motivo["motivo"]
+
+    resultado = p5(instrumento_id, pendencia_id,
+                   motivo="  Explicar melhor a finalidade fictícia  ")
+    assert resultado["permitido"]
+    assert resultado["estado_pendencia"] == "devolvida_para_complementacao"
+    assert resultado["motivo_complementacao"] == "Explicar melhor a finalidade fictícia"
+    with Session(motor) as sessao:
+        pendencia = sessao.get(Pendencia, pendencia_id)
+        assert pendencia.estado == "devolvida_para_complementacao"
+        assert pendencia.motivo == "Explicar melhor a finalidade fictícia"
+        assert sessao.scalar(select(func.count()).select_from(Pendencia)) == 1
+        assert {alerta["codigo"] for alerta in listar_alertas_operacionais(
+            sessao, "CONTA-A1"
+        )} == {"COMPLEMENTACAO_SOLICITADA", "SUBMISSAO_BLOQUEADA"}
+
+    with Session(motor, expire_on_commit=False) as sessao, sessao.begin():
+        bloqueado = salvar_rascunho(
+            sessao, comando_id="CMD-S-P5-I2-BLOQ", conta_id="CONTA-A1",
+            instrumento_id=instrumento_id, versao_lida=4, conteudo=FORM_VALIDO,
+        )
+    assert not bloqueado["permitido"] and "congelado" in bloqueado["motivo"]
+
+
+def test_p6_exige_responsavel_e_libera_nova_correcao():
+    instrumento_id, _, _, _, _, devolucao, _, _ = preparar_resposta()
+    pendencia_id = devolucao["pendencia_id"]
+    assert p5(instrumento_id, pendencia_id)["permitido"]
+    with Session(motor) as sessao, sessao.begin():
+        sessao.add(Designacao(pessoa_id="PESSOA-F", unidade_id="UNID-NORTE",
+                              papel="elaborador", ativa=True))
+
+    outro = p6(instrumento_id, pendencia_id, cmd="CMD-S-P6-OUTRO", conta="CONTA-F1")
+    assert not outro["permitido"] and "responsável" in outro["motivo"]
+    retomada = p6(instrumento_id, pendencia_id)
+    assert retomada["permitido"] and retomada["estado_pendencia"] == "em_atendimento"
+    with Session(motor) as sessao:
+        assert {alerta["codigo"] for alerta in listar_alertas_operacionais(
+            sessao, "CONTA-A1"
+        )} == {"PENDENCIA_ATRIBUIDA_A_VOCE", "SUBMISSAO_BLOQUEADA"}
+
+    complemento = deepcopy(FORM_VALIDO)
+    complemento["finalidade"] = "Finalidade fictícia novamente complementada"
+    with Session(motor, expire_on_commit=False) as sessao, sessao.begin():
+        salvo = salvar_rascunho(
+            sessao, comando_id="CMD-S-P6-I2", conta_id="CONTA-A1",
+            instrumento_id=instrumento_id, versao_lida=4, conteudo=complemento,
+        )
+    assert salvo["permitido"] and salvo["versao_rascunho"] == 5
+
+
+def test_a2b_reutiliza_a_pendencia_e_preserva_as_duas_respostas():
+    instrumento_id, _, _, _, _, devolucao, primeira_correcao, primeira_resposta = preparar_resposta()
+    pendencia_id = devolucao["pendencia_id"]
+    assert p5(instrumento_id, pendencia_id, motivo="Detalhar melhor")["permitido"]
+    assert p6(instrumento_id, pendencia_id)["permitido"]
+
+    complemento = deepcopy(FORM_VALIDO)
+    complemento["finalidade"] = "Finalidade fictícia detalhada na segunda resposta"
+    with Session(motor, expire_on_commit=False) as sessao, sessao.begin():
+        salvo_2 = salvar_rascunho(
+            sessao, comando_id="CMD-S-A2B-I2-2", conta_id="CONTA-A1",
+            instrumento_id=instrumento_id, versao_lida=4, conteudo=complemento,
+        )
+    resposta_2 = p3(instrumento_id, pendencia_id, versao=5, cmd="CMD-S-A2B-P3-2")
+    assert resposta_2["permitido"] and resposta_2["lacre_resposta"] == salvo_2["lacre_conteudo"]
+    assert resposta_2["lacre_resposta"] != primeira_resposta["lacre_resposta"]
+    assert p4(instrumento_id, pendencia_id)["permitido"]
+    submissao_2 = i3(instrumento_id, versao=5, cmd="CMD-S-A2B-I3-2")
+    assert submissao_2["permitido"] and submissao_2["numero_versao"] == 2
+
+    with Session(motor) as sessao:
+        assert sessao.scalar(select(func.count()).select_from(Pendencia)) == 1
+        eventos_p3 = sessao.scalars(
+            select(Evento).where(Evento.codigo_evento == "P3")
+            .order_by(Evento.sequencia_cadeia)
+        ).all()
+        assert [evento.conteudo["lacre_resposta"] for evento in eventos_p3] == [
+            primeira_correcao["lacre_conteudo"], salvo_2["lacre_conteudo"],
+        ]
+
+
+def test_p4_e_p5_concorrentes_registram_uma_unica_decisao():
+    instrumento_id, _, _, _, _, devolucao, _, _ = preparar_resposta()
+    pendencia_id = devolucao["pendencia_id"]
+    barreira = threading.Barrier(2)
+    resultados = []
+
+    def decidir(aceitar):
+        barreira.wait()
+        if aceitar:
+            resultados.append(p4(instrumento_id, pendencia_id, cmd="CMD-S-P4-CONC"))
+        else:
+            resultados.append(p5(instrumento_id, pendencia_id, cmd="CMD-S-P5-CONC"))
+
+    threads = [threading.Thread(target=decidir, args=(valor,)) for valor in (True, False)]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+
+    assert sorted(resultado["permitido"] for resultado in resultados) == [False, True]
+    with Session(motor) as sessao:
+        total = sessao.scalar(
+            select(func.count()).select_from(Evento)
+            .where(Evento.codigo_evento.in_(["P4", "P5"]))
+        )
+        assert total == 1
+
+
+def test_p5_e_p6_sao_idempotentes_e_rollback_nao_avanca_estado():
+    instrumento_id, _, _, _, _, devolucao, _, _ = preparar_resposta()
+    pendencia_id = devolucao["pendencia_id"]
+    with pytest.raises(RuntimeError):
+        with Session(motor) as sessao, sessao.begin():
+            resultado = devolver_resposta(
+                sessao, comando_id="CMD-S-P5-ROLLBACK", conta_id="CONTA-B1",
+                pendencia_id=pendencia_id, instrumento_id=instrumento_id,
+                motivo="Motivo que será desfeito",
+            )
+            assert resultado["permitido"]
+            raise RuntimeError("falha simulada antes do commit")
+    assert p5(instrumento_id, pendencia_id)["permitido"]
+    assert p5(instrumento_id, pendencia_id)["reexecutado"] is True
+
+    with pytest.raises(RuntimeError):
+        with Session(motor) as sessao, sessao.begin():
+            resultado = retomar_pendencia(
+                sessao, comando_id="CMD-S-P6-ROLLBACK", conta_id="CONTA-A1",
+                pendencia_id=pendencia_id, instrumento_id=instrumento_id,
+            )
+            assert resultado["permitido"]
+            raise RuntimeError("falha simulada antes do commit")
+    with Session(motor) as sessao:
+        assert sessao.get(Pendencia, pendencia_id).estado == "devolvida_para_complementacao"
+
+    original = p6(instrumento_id, pendencia_id)
+    repetido = p6(instrumento_id, pendencia_id)
     assert original["permitido"] and repetido["reexecutado"] is True
     assert sem_reexecucao(repetido) == sem_reexecucao(original)

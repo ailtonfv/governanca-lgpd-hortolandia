@@ -150,7 +150,7 @@ class Unidade(Base):
 class Designacao(Base):
     """Quem exerce qual papel, em qual unidade (SAD 03).
     O papel é dado à PESSOA (não à conta). Uma pessoa pode ter vários papéis.
-    Papéis usados na PoC nuclear: elaborador, analista, validador.
+    Papéis usados na PoC nuclear: elaborador, analista, validador e concluidor.
     """
     __tablename__ = "designacao"
 
@@ -316,8 +316,8 @@ class AcaoObrigatoria(Base):
     """Ação sintética mínima usada para provar o percurso com medidas no M1a.
 
     O FORM 4 completo está fora desta etapa. Aqui fica apenas o necessário para
-    o G4 saber se o Registro deve permanecer em execução e, no próximo
-    incremento, para comprovar a conclusão ou o encerramento formal da medida.
+    o G4 saber se o Registro deve permanecer em execução e para o G6 comprovar
+    a conclusão ou o encerramento formal da medida.
     """
     __tablename__ = "acao_obrigatoria"
 

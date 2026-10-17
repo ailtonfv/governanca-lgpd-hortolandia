@@ -13,9 +13,10 @@ from zoneinfo import ZoneInfo
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError
-from app.modelos import (Conta, Designacao, Registro, Ciclo, Instrumento, ObjetoCatalogo,
-                         RegistroObjeto, ContextoAtuacao, FamiliaContexto, ObjetoBase,
-                         Transversalidade, ContadorRegistro, PAPEIS_ASSUNTO, PAPEIS_CITADOS)
+from app.modelos import (AcaoObrigatoria, Conta, Designacao, Registro, Ciclo, Instrumento,
+                         ObjetoCatalogo, Pendencia, RegistroObjeto, ContextoAtuacao,
+                         FamiliaContexto, ObjetoBase, Transversalidade, ContadorRegistro,
+                         PAPEIS_ASSUNTO, PAPEIS_CITADOS)
 from app.eventos import registrar_evento, registrar_auditoria
 from app.permissoes import tem_papel
 from app.comandos import (abrir_comando, fechar_comando, nome_da_restricao,
@@ -31,9 +32,15 @@ MENSAGEM_FAMILIA = ("Este objeto está associado a mais de um contexto da mesma 
 # O que pode ser feito com um Registro existente, por estado. Competências ainda não definidas
 # nos SADs aparecem como tal, e não como ação possível (Etapa 2d, item A5).
 ACOES_DO_ESTADO = {
-    "em_andamento": [("cancelar (G11)", "competência do G11 (SAD 04, seção 7)")],
+    "em_andamento": [
+        ("concluir sem medidas (G5)", "papel concluidor e portões do G5"),
+        ("cancelar (G11)", "competência do G11 (SAD 04, seção 7)"),
+    ],
     "em_validacao": [("cancelar (G11)", "competência do G11 (SAD 04, seção 7)")],
-    "em_execucao": [("cancelar (G11)", "competência do G11 (SAD 04, seção 7)")],
+    "em_execucao": [
+        ("concluir após as medidas (G6)", "papel concluidor e portões do G6"),
+        ("cancelar (G11)", "competência do G11 (SAD 04, seção 7)"),
+    ],
     "suspenso": [("retomar (G8)", "competência do G8 (SAD 04, seção 7)"),
                  ("cancelar (G11)", "competência do G11 (SAD 04, seção 7)")],
     "concluido": [("reabrir (G10)", "competência do G10 (SAD 04, seção 7)"),
@@ -313,6 +320,246 @@ def _nascer_registro(sessao, comando, conta_id, unidade_id, objetos, papeis, con
     registro.sequencia_atual = evento.sequencia_cadeia
     sessao.flush()
     return registro, evento
+
+
+# ---------------------------------------------------------------- G5
+
+def concluir_registro_sem_medidas(sessao, *, comando_id, conta_id, registro_id,
+                                  momento=None):
+    """G5 — conclui um Registro validado, sem medidas ou pendências em aberto."""
+    momento = momento or agora_utc()
+    parametros = {"conta_id": conta_id, "registro_id": registro_id}
+    conta = sessao.get(Conta, conta_id)
+    pessoa_id = conta.pessoa_id if conta is not None else None
+    ator_tipo, ator_id = (("pessoa", pessoa_id) if pessoa_id
+                          else ("desconhecido", conta_id))
+    comando, resposta = abrir_comando(
+        sessao, comando_id, "concluir_registro_sem_medidas", parametros,
+        ator_tipo, ator_id, conta_id,
+    )
+    if resposta is not None:
+        return resposta
+
+    def negar(motivo, **detalhes):
+        registrar_auditoria(
+            sessao, "tentativa_negada", ator_tipo, ator_id,
+            {"acao_tentada": "concluir_registro_sem_medidas",
+             "registro_id": registro_id, "conta_id": conta_id, "motivo": motivo},
+            comando_id=comando.id,
+        )
+        resultado = fechar_comando(
+            comando, dict({"permitido": False, "motivo": motivo}, **detalhes)
+        )
+        sessao.flush()
+        return resultado
+
+    registro = sessao.scalars(
+        select(Registro).where(Registro.id == registro_id).with_for_update()
+    ).one_or_none()
+    if registro is None:
+        return negar("Registro inexistente")
+    if conta is None or not conta.ativa:
+        return negar("conta inexistente ou desativada")
+    if not tem_papel(
+            sessao, pessoa_id, registro.unidade_principal_atual_id, {"concluidor"}):
+        return negar("a pessoa não possui competência formal para concluir nesta unidade")
+    if registro.estado_atual != "em_andamento":
+        return negar(
+            "G5 exige Registro no estado em_andamento",
+            estado_registro=registro.estado_atual,
+        )
+
+    ciclo = sessao.scalars(
+        select(Ciclo).where(
+            Ciclo.registro_id == registro.id,
+            Ciclo.numero == registro.ciclo_atual,
+        ).with_for_update()
+    ).one_or_none()
+    if ciclo is None or ciclo.situacao != "ativo":
+        return negar(
+            "o ciclo atual do Registro não está ativo",
+            situacao_ciclo=None if ciclo is None else ciclo.situacao,
+        )
+
+    instrumentos = sessao.scalars(
+        select(Instrumento).where(Instrumento.registro_id == registro.id)
+        .order_by(Instrumento.tipo_instrumento, Instrumento.id)
+        .with_for_update()
+    ).all()
+    instrumentos_invalidos = [
+        {"instrumento_id": item.id, "tipo": item.tipo_instrumento,
+         "estado": item.estado_instrumento}
+        for item in instrumentos
+        if item.estado_instrumento != "validado" or item.versao_vigente_id is None
+    ]
+    if not instrumentos or instrumentos_invalidos:
+        return negar(
+            "G5 exige todos os Instrumentos obrigatórios validados",
+            instrumentos_invalidos=instrumentos_invalidos,
+        )
+
+    pendencias_abertas = list(sessao.scalars(
+        select(Pendencia.id).where(
+            Pendencia.registro_id == registro.id,
+            Pendencia.estado.not_in(("encerrada", "cancelada")),
+        ).order_by(Pendencia.id).with_for_update()
+    ))
+    if pendencias_abertas:
+        return negar(
+            "G5 exige todas as pendências encerradas ou canceladas",
+            pendencias_abertas=pendencias_abertas,
+        )
+
+    acoes_do_ciclo = list(sessao.scalars(
+        select(AcaoObrigatoria.id).where(
+            AcaoObrigatoria.registro_id == registro.id,
+            AcaoObrigatoria.ciclo_id == ciclo.id,
+        ).order_by(AcaoObrigatoria.id).with_for_update()
+    ))
+    if acoes_do_ciclo:
+        return negar(
+            "G5 é o percurso sem medidas e não admite ação obrigatória no ciclo",
+            acoes_obrigatorias=acoes_do_ciclo,
+        )
+
+    estado_anterior = registro.estado_atual
+    registro.estado_atual = "concluido"
+    ciclo.situacao = "concluido"
+    evento_g5 = registrar_evento(
+        sessao, comando, "registro", registro.codigo_lgpd, "concluir_sem_medidas",
+        {"registro_id": registro.id, "ciclo_id": ciclo.id,
+         "numero_ciclo": ciclo.numero, "estado_anterior": estado_anterior,
+         "estado_atual": "concluido",
+         "instrumentos_validados": [item.id for item in instrumentos],
+         "pendencias_abertas": [], "acoes_obrigatorias": [],
+         "conta_id": conta_id, "concluido_em": momento.isoformat()},
+        codigo_evento="G5", registro_id=registro.id, ciclo_id=ciclo.id,
+        versao_esquema_evento=2,
+    )
+    registro.sequencia_atual = evento_g5.sequencia_cadeia
+    resultado = fechar_comando(
+        comando,
+        {"permitido": True, "motivo": "Registro concluído sem medidas",
+         "registro_id": registro.id, "codigo_lgpd": registro.codigo_lgpd,
+         "ciclo_id": ciclo.id, "estado_registro": "concluido",
+         "situacao_ciclo": "concluido",
+         "evento_g5": evento_g5.sequencia_cadeia},
+    )
+    sessao.flush()
+    return resultado
+
+
+def concluir_registro_apos_medidas(sessao, *, comando_id, conta_id, registro_id,
+                                   momento=None):
+    """G6 — conclui um Registro em execução depois de todas as medidas finalizadas."""
+    momento = momento or agora_utc()
+    parametros = {"conta_id": conta_id, "registro_id": registro_id}
+    conta = sessao.get(Conta, conta_id)
+    pessoa_id = conta.pessoa_id if conta is not None else None
+    ator_tipo, ator_id = (("pessoa", pessoa_id) if pessoa_id
+                          else ("desconhecido", conta_id))
+    comando, resposta = abrir_comando(
+        sessao, comando_id, "concluir_registro_apos_medidas", parametros,
+        ator_tipo, ator_id, conta_id,
+    )
+    if resposta is not None:
+        return resposta
+
+    def negar(motivo, **detalhes):
+        registrar_auditoria(
+            sessao, "tentativa_negada", ator_tipo, ator_id,
+            {"acao_tentada": "concluir_registro_apos_medidas",
+             "registro_id": registro_id, "conta_id": conta_id, "motivo": motivo},
+            comando_id=comando.id,
+        )
+        retorno = fechar_comando(
+            comando, dict({"permitido": False, "motivo": motivo}, **detalhes)
+        )
+        sessao.flush()
+        return retorno
+
+    registro = sessao.scalars(
+        select(Registro).where(Registro.id == registro_id).with_for_update()
+    ).one_or_none()
+    if registro is None:
+        return negar("Registro inexistente")
+    if conta is None or not conta.ativa:
+        return negar("conta inexistente ou desativada")
+    if not tem_papel(
+            sessao, pessoa_id, registro.unidade_principal_atual_id, {"concluidor"}):
+        return negar("a pessoa não possui competência formal para concluir nesta unidade")
+    if registro.estado_atual != "em_execucao":
+        return negar(
+            "G6 exige Registro no estado em_execucao",
+            estado_registro=registro.estado_atual,
+        )
+
+    ciclo = sessao.scalars(
+        select(Ciclo).where(Ciclo.registro_id == registro.id,
+                            Ciclo.numero == registro.ciclo_atual).with_for_update()
+    ).one_or_none()
+    if ciclo is None or ciclo.situacao != "ativo":
+        return negar("o ciclo atual do Registro não está ativo")
+
+    instrumentos = sessao.scalars(
+        select(Instrumento).where(Instrumento.registro_id == registro.id)
+        .order_by(Instrumento.tipo_instrumento, Instrumento.id).with_for_update()
+    ).all()
+    if (not instrumentos or any(item.estado_instrumento != "validado"
+                                or item.versao_vigente_id is None
+                                for item in instrumentos)):
+        return negar("G6 exige todos os Instrumentos obrigatórios validados")
+
+    pendencias_abertas = list(sessao.scalars(
+        select(Pendencia.id).where(
+            Pendencia.registro_id == registro.id,
+            Pendencia.estado.not_in(("encerrada", "cancelada")),
+        ).order_by(Pendencia.id).with_for_update()
+    ))
+    if pendencias_abertas:
+        return negar("G6 exige todas as pendências encerradas ou canceladas",
+                     pendencias_abertas=pendencias_abertas)
+
+    acoes = sessao.scalars(
+        select(AcaoObrigatoria).where(
+            AcaoObrigatoria.registro_id == registro.id,
+            AcaoObrigatoria.ciclo_id == ciclo.id,
+        ).order_by(AcaoObrigatoria.id).with_for_update()
+    ).all()
+    if not acoes:
+        return negar("G6 exige ao menos uma ação obrigatória no ciclo")
+    acoes_pendentes = [item.id for item in acoes if item.estado == "aberta"]
+    acoes_sem_evidencia = [item.id for item in acoes if not item.evidencia]
+    if acoes_pendentes or acoes_sem_evidencia:
+        return negar(
+            "G6 exige todas as ações finalizadas com evidência",
+            acoes_pendentes=acoes_pendentes,
+            acoes_sem_evidencia=acoes_sem_evidencia,
+        )
+
+    registro.estado_atual = "concluido"
+    ciclo.situacao = "concluido"
+    evento = registrar_evento(
+        sessao, comando, "registro", registro.codigo_lgpd, "concluir_apos_medidas",
+        {"registro_id": registro.id, "ciclo_id": ciclo.id,
+         "numero_ciclo": ciclo.numero, "estado_anterior": "em_execucao",
+         "estado_atual": "concluido",
+         "instrumentos_validados": [item.id for item in instrumentos],
+         "acoes_finalizadas": [{"id": item.id, "estado": item.estado} for item in acoes],
+         "conta_id": conta_id, "concluido_em": momento.isoformat()},
+        codigo_evento="G6", registro_id=registro.id, ciclo_id=ciclo.id,
+        versao_esquema_evento=2,
+    )
+    registro.sequencia_atual = evento.sequencia_cadeia
+    retorno = fechar_comando(
+        comando,
+        {"permitido": True, "motivo": "Registro concluído após as medidas",
+         "registro_id": registro.id, "codigo_lgpd": registro.codigo_lgpd,
+         "ciclo_id": ciclo.id, "estado_registro": "concluido",
+         "situacao_ciclo": "concluido", "evento_g6": evento.sequencia_cadeia},
+    )
+    sessao.flush()
+    return retorno
 
 
 # ---------------------------------------------------------------- transversalidade (D2)
