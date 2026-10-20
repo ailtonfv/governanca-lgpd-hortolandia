@@ -78,10 +78,10 @@ def test_novo_registro_define_tipo_unidade_principal_e_contexto_antes_do_form1()
     resposta = cliente.get("/registros/novo", params={"conta_id": "CONTA-A1"})
 
     assert resposta.status_code == 200
-    assert "Em qual unidade o mapeamento será feito?" in resposta.text
-    assert resposta.text.index("1. Secretaria/unidade responsável principal") < resposta.text.index("2. O que será mapeado?")
+    assert "Qual Secretaria é responsável por este Registro?" in resposta.text
+    assert resposta.text.index("1. Secretaria responsável pelo Registro") < resposta.text.index("2. O que será mapeado?")
     assert "Serviço" in resposta.text and "Processo" in resposta.text and "Atividade" in resposta.text
-    assert "Secretaria/unidade responsável principal" in resposta.text
+    assert "Secretaria responsável pelo Registro" in resposta.text
     assert "Unidade Norte (fictícia)" in resposta.text
     assert "Unidade Sul (fictícia)" not in resposta.text
     assert "O FORM 1 somente começa depois da criação do Registro" in resposta.text

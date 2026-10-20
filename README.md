@@ -622,7 +622,7 @@ Os testes atuais exercitam o motor da PoC com dados fictícios e procuram respon
 - **Troca do responsável:** I14 muda somente o agente responsável atual. Quem iniciou e tudo o que já ocorreu continuam no histórico; uma tela desatualizada não consegue desfazer uma reatribuição mais recente.
 - **Validação:** somente o responsável atual da análise pode executar I5. O sistema encerra a análise, torna a versão validada a versão vigente e executa o G4 junto: ação aberta leva a **Em execução**; sem ação aberta, o Registro volta a **Em andamento**.
 - **Primeiras telas:** o painel identifica claramente qual agente fictício está sendo simulado, mostra somente os Registros dentro do alcance institucional e apresenta as flags calculadas. No detalhe, o elaborador pode iniciar e salvar o FORM 1; outro papel apenas consulta. Se alguém tentar abrir diretamente um Registro de outra unidade, o sistema nega a consulta e registra a tentativa na auditoria.
-- **Identidade e contexto inicial:** cada pessoa fictícia possui matrícula única. Antes do FORM 1, a tela confirma primeiro uma unidade principal em que o agente seja elaborador; depois exige um serviço, processo ou atividade coerente com o catálogo e um contexto. O G1 cria o Registro e o FORM 1 Não iniciado.
+- **Identidade e contexto inicial:** cada pessoa fictícia possui matrícula única. Antes do FORM 1, a tela confirma primeiro a Secretaria responsável pelo Registro, dentre aquelas em que o agente seja elaborador; depois exige um serviço, processo ou atividade coerente com o catálogo e um contexto. O G1 cria o Registro e o FORM 1 Não iniciado.
 - **Devolução:** somente o agente responsável atual pela análise pode executar I6. O sistema preserva a versão, cria uma pendência bloqueante para a unidade elaboradora e executa o G3 junto, sem deixar partes soltas se ocorrer uma falha.
 - **Assunção e ajuste:** P2 garante que apenas um agente autorizado assuma a pendência; I7 recria o rascunho a partir da versão devolvida e libera novamente o salvamento pelo I2.
 - **Resposta e decisão da correção:** P3 lacra a resposta; P4 aceita exatamente esse conteúdo; ou P5 devolve a mesma pendência com motivo e P6 libera outra correção. O novo I3 só cria a Versão 2 quando o rascunho coincide com o lacre aceito.
@@ -864,18 +864,20 @@ Assim, uma mudança no workflow aparece imediatamente na tela e não existe o ri
 
 Ao abrir a aplicação, escolhemos uma matrícula **fictícia** para simular o agente. Isso ainda não é o login definitivo: é uma maneira transparente de demonstrar os papéis da PoC. Em produção, o servidor deverá informar matrícula e senha individual; a Prefeitura validará a credencial e fornecerá a identidade funcional necessária. A plataforma não armazenará senha na PoC nem improvisará uma integração direta com o banco de pessoal.
 
-Depois da identidade vem o contexto do trabalho. Antes de iniciar o FORM 1, o agente confirma primeiro a Secretaria/unidade responsável principal dentro de seu alcance institucional. Em seguida, escolhe se mapeará um serviço, processo ou atividade do catálogo e seleciona o contexto de atuação. O G1 então cria o Registro, o ciclo 1 e o FORM 1 **Não iniciado**:
+Depois da identidade vem o contexto do trabalho. Antes de iniciar o FORM 1, o agente seleciona primeiro a Secretaria responsável pelo Registro dentro de seu alcance institucional. Em seguida, escolhe se mapeará um serviço, processo ou atividade do catálogo e seleciona o contexto de atuação. O G1 então cria o Registro, o ciclo 1 e o FORM 1 **Não iniciado**:
 
 ```mermaid
 flowchart LR
-    M["Matrícula fictícia"] --> U["Unidade principal<br/>autorizada"]
+    M["Matrícula fictícia"] --> U["Secretaria responsável<br/>autorizada"]
     U --> T{"Serviço, processo<br/>ou atividade?"}
     T --> O["Item do catálogo"]
     O --> C["Contexto"]
     C --> G["G1<br/>Registro + FORM 1"]
 ```
 
-O nome do objeto não é digitado livremente: vem do catálogo oficial. A unidade principal é a responsável interna que cria e mantém o Registro e aparece primeiro para delimitar o contexto institucional; participações posteriores não transferem essa responsabilidade. O contrato completo está em [Identidade do agente e contexto inicial](docs/arquitetura/CONTRATO_IDENTIDADE_E_CONTEXTO_INICIAL.md).
+O nome do objeto não é digitado livremente: vem do catálogo oficial. A Secretaria responsável cria e mantém o Registro e aparece primeiro para delimitar o contexto institucional. Na implantação municipal, ela será selecionada em lista fechada das 18 Secretarias; departamentos e setores poderão executar partes do trabalho, e outras Secretarias poderão participar, sem transferência automática da responsabilidade. O contrato completo está em [Identidade do agente e contexto inicial](docs/arquitetura/CONTRATO_IDENTIDADE_E_CONTEXTO_INICIAL.md).
+
+Nesta PoC, o catálogo institucional está limitado às **18 Secretarias da Administração Direta**. O Hortoprev não será tratado: por ser autarquia da Administração Indireta, fica fora do recorte aprovado para esta demonstração.
 
 O painel procura os Registros da unidade do agente e também aqueles que chegaram até ele por uma pendência institucional ativa.
 
@@ -1087,7 +1089,7 @@ Com o último comando em execução, a tela fica disponível em `http://127.0.0.
 
 | Documento | Para que serve |
 |---|---|
-| [Contrato de identidade e contexto inicial](docs/arquitetura/CONTRATO_IDENTIDADE_E_CONTEXTO_INICIAL.md) | Registra matrícula, autenticação futura e o percurso serviço/processo/atividade → unidade principal → contexto → G1 |
+| [Contrato de identidade e contexto inicial](docs/arquitetura/CONTRATO_IDENTIDADE_E_CONTEXTO_INICIAL.md) | Registra matrícula, autenticação futura e o percurso Secretaria responsável → serviço/processo/atividade → contexto → G1 |
 | [docs/arquitetura/MAPA_M1a.md](docs/arquitetura/MAPA_M1a.md) | O percurso de um Registro no M1a, em diagramas (ilustrativo; prevalecem os SADs) |
 | [docs/arquitetura/ARQUITETURA_POC.md](docs/arquitetura/ARQUITETURA_POC.md) | Camadas do sistema, responsabilidades e mapa das pastas |
 | [docs/operacao/INSTALACAO.md](docs/operacao/INSTALACAO.md) | Montar o ambiente e rodar a PoC |

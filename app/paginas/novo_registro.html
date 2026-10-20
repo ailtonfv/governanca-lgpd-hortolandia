@@ -5,8 +5,8 @@
 
 <section class="detalhe">
   <p class="etiqueta">Novo Registro LGPD · agente {{ identidade.matricula }}</p>
-  <h1>Em qual unidade o mapeamento será feito?</h1>
-  <p>Primeiro confirme a responsabilidade institucional; depois informe se o objeto é um serviço, processo ou atividade. O FORM 1 somente começa depois da criação do Registro.</p>
+  <h1>Qual Secretaria é responsável por este Registro?</h1>
+  <p>Primeiro confirme a Secretaria que coordenará o mapeamento; depois informe se o objeto é um serviço, processo ou atividade. O FORM 1 somente começa depois da criação do Registro.</p>
 </section>
 
 {% if mensagem %}
@@ -20,11 +20,11 @@
     <input type="hidden" name="conta_id" value="{{ conta_id }}">
     <input type="hidden" name="comando_id" value="{{ comando_g1 }}">
 
-    <label for="unidade_id">1. Secretaria/unidade responsável principal</label>
+    <label for="unidade_id">1. Secretaria responsável pelo Registro</label>
     <select id="unidade_id" name="unidade_id" required>
       {% for unidade in unidades %}<option value="{{ unidade.id }}">{{ unidade.nome }}</option>{% endfor %}
     </select>
-    <p class="ajuda">É a unidade “master” que cria e mantém o Registro. A lista respeita o alcance institucional do agente.</p>
+    <p class="ajuda">Selecione a Secretaria que coordena e mantém este mapeamento. A lista é fechada e respeita o alcance institucional do agente; outras Secretarias poderão participar posteriormente.</p>
 
     <fieldset>
       <legend>2. O que será mapeado?</legend>

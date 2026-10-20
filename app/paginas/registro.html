@@ -8,7 +8,7 @@
   <p class="destaque">{{ registro.titulo }}</p>
   <dl>
     <div><dt>Situação</dt><dd>{{ registro.estado }}</dd></div>
-    <div><dt>Unidade principal</dt><dd>{{ registro.unidade }}</dd></div>
+    <div><dt>Secretaria responsável</dt><dd>{{ registro.unidade }}</dd></div>
     <div><dt>Contexto de atuação</dt><dd>{{ registro.contexto_id }}</dd></div>
   </dl>
 </section>
@@ -83,7 +83,7 @@
       </div>
     </form>
     {% else %}
-    <p class="aviso-leitura">O FORM 1 está em preenchimento, mas este agente não possui o papel de elaborador da unidade principal.</p>
+    <p class="aviso-leitura">O FORM 1 está em preenchimento, mas este agente não possui o papel de elaborador da Secretaria responsável.</p>
     {% endif %}
   {% else %}
     <p class="aviso-leitura">O FORM 1 está em {{ registro.form1.estado|replace('_', ' ') }}. A edição não está disponível neste estado.</p>
