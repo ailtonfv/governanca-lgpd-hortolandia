@@ -380,24 +380,22 @@ No M1a, a ação obrigatória contém somente o necessário para provar o percur
 Uma pendência intersecretarial não transfere o Registro e não concede edição automática do FORM 1. A unidade de destino recebe apenas o contexto necessário para responder.
 
 ```mermaid
-sequenceDiagram
-    autonumber
-    box Agente Público Autorizado — funções exercidas no fluxo
-        participant O as Função: agente da unidade de origem
-        participant D as Função: agente da unidade de destino
-    end
-    box Sistema — automação provocada por comando ou evento
-        participant S as Sistema
-    end
+flowchart LR
+    O["Origem<br/>agente autorizado"] -- "P1 · criar para outra Secretaria" --> A["Pendência<br/>Aberta"]
+    A -- "P2 · assumir" --> D["Destino<br/>responsável definido"]
+    D -- "P3 · responder<br/>e vincular evidência" --> R["Resposta<br/>lacrada"]
+    R -- "P4 · aceitar" --> E["Pendência<br/>Encerrada"]
+    E -. "Registro permanece<br/>na Secretaria responsável" .-> O
+    N["Destino acessa somente<br/>o necessário e não edita o FORM 1"] -.-> D
+    C["Em concorrência, somente<br/>a primeira confirmação vence"] -.-> A
 
-    Note over O,D: As raias representam funções; origem e destino podem estar em Secretarias distintas
-    O->>S: P1 Criar pendência para a unidade de destino
-    D->>S: P2 Assumir a pendência
-    Note over D,S: Se houver concorrência, a primeira confirmação vence
-    D->>S: P3 Responder e registrar ou vincular a evidência
-    Note over D: Acessa somente o necessário e não edita o FORM 1
-    O->>S: P4 Aceitar a resposta
-    Note over O,D: Pendência Encerrada · Registro permanece com a unidade principal
+    style O fill:#1e3a5f,stroke:#5b9bd5,color:#fff
+    style D fill:#4d3d1e,stroke:#d4a017,color:#fff
+    style A fill:#dbe9f7,stroke:#5b9bd5,color:#1f2328
+    style R fill:#fde3cc,stroke:#e07b39,color:#1f2328
+    style E fill:#d8f0dc,stroke:#5cb85c,color:#1f2328
+    style N fill:#2b2b2b,stroke:#888,color:#fff
+    style C fill:#2b2b2b,stroke:#888,color:#fff
 ```
 
 P1 admite duas origens no SAD 04:
