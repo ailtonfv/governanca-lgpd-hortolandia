@@ -1,14 +1,23 @@
 """Atos das pendências usados pelo núcleo do M1a."""
 
+from copy import deepcopy
 from datetime import datetime, timezone
+import uuid
 
 from sqlalchemy import select
 
 from app.comandos import abrir_comando, fechar_comando
-from app.eventos import registrar_auditoria, registrar_evento
-from app.modelos import (Conta, Evento, Instrumento, Pendencia, RascunhoInstrumento,
-                         VersaoInstrumento)
+from app.eventos import lacre, registrar_auditoria, registrar_evento
+from app.instrumentos import conteudo_canonico
+from app.modelos import (Ciclo, Conta, Evento, Instrumento, Pendencia,
+                         RascunhoInstrumento, Registro, Unidade, VersaoInstrumento)
 from app.permissoes import tem_papel
+
+
+CAMPOS_RESPOSTA_INTERSECRETARIAL = {
+    "etapa_executada", "entrada_recebida", "operacoes_realizadas",
+    "saida_produzida", "interfaces_seguinte", "evidencias",
+}
 
 
 def agora_utc():
@@ -39,6 +48,144 @@ def _negar(sessao, comando, ator_tipo, ator_id, acao, conta_id, pendencia_id, mo
     return resposta
 
 
+def _texto_curto(valor, limite=1000):
+    if not isinstance(valor, str):
+        return None
+    texto = " ".join(valor.split())
+    return texto if texto and len(texto) <= limite else None
+
+
+def _lista_textos(valor, *, obrigatoria, limite_itens=20, limite_texto=500):
+    if not isinstance(valor, list) or len(valor) > limite_itens:
+        return None
+    itens = [_texto_curto(item, limite_texto) for item in valor]
+    if any(item is None for item in itens) or (obrigatoria and not itens):
+        return None
+    return itens
+
+
+def _normalizar_resposta_intersecretarial(resposta):
+    """Contrato mínimo fechado da participação; rejeita campos livres imprevistos."""
+    if not isinstance(resposta, dict) or set(resposta) != CAMPOS_RESPOSTA_INTERSECRETARIAL:
+        return None
+    etapa = _texto_curto(resposta["etapa_executada"])
+    entrada = _texto_curto(resposta["entrada_recebida"])
+    operacoes = _lista_textos(resposta["operacoes_realizadas"], obrigatoria=True)
+    saida = _texto_curto(resposta["saida_produzida"])
+    interfaces = _lista_textos(resposta["interfaces_seguinte"], obrigatoria=False)
+    evidencias = _lista_textos(resposta["evidencias"], obrigatoria=True)
+    if any(item is None for item in (etapa, entrada, operacoes, saida, interfaces, evidencias)):
+        return None
+    return {
+        "etapa_executada": etapa,
+        "entrada_recebida": entrada,
+        "operacoes_realizadas": operacoes,
+        "saida_produzida": saida,
+        "interfaces_seguinte": interfaces,
+        "evidencias": evidencias,
+    }
+
+
+def criar_pendencia_intersecretarial(
+        sessao, *, comando_id, conta_id, registro_id, unidade_destino_id,
+        solicitacao, itens_atribuidos, momento=None):
+    """P1 humano — encaminha uma participação à fila de outra unidade."""
+    momento = momento or agora_utc()
+    solicitacao = _texto_curto(solicitacao)
+    itens = _lista_textos(itens_atribuidos, obrigatoria=True)
+    parametros = {
+        "conta_id": conta_id, "registro_id": registro_id,
+        "unidade_destino_id": unidade_destino_id, "solicitacao": solicitacao,
+        "itens_atribuidos": itens_atribuidos,
+    }
+    conta, pessoa_id, ator_tipo, ator_id = _ator(sessao, conta_id)
+    comando, resposta = abrir_comando(
+        sessao, comando_id, "criar_pendencia_intersecretarial", parametros,
+        ator_tipo, ator_id, conta_id,
+    )
+    if resposta is not None:
+        return resposta
+
+    pendencia_id = str(uuid.uuid4())
+
+    def negar(motivo, **detalhes):
+        return _negar(
+            sessao, comando, ator_tipo, ator_id,
+            "criar_pendencia_intersecretarial", conta_id, pendencia_id,
+            motivo, **detalhes,
+        )
+
+    if solicitacao is None:
+        return negar("P1 exige solicitação textual entre 1 e 1000 caracteres")
+    if itens is None:
+        return negar("P1 exige de 1 a 20 itens atribuídos, com até 500 caracteres cada")
+
+    registro = sessao.scalars(
+        select(Registro).where(Registro.id == registro_id).with_for_update()
+    ).one_or_none()
+    if registro is None:
+        return negar("Registro inexistente")
+    if conta is None or not conta.ativa:
+        return negar("conta inexistente ou desativada")
+    if registro.estado_atual not in {"em_andamento", "em_validacao", "em_execucao"}:
+        return negar(
+            "P1 intersecretarial exige Registro ativo no M1a",
+            estado_registro=registro.estado_atual,
+        )
+    if not tem_papel(
+            sessao, pessoa_id, registro.unidade_principal_atual_id,
+            {"agente_pendencia"}):
+        return negar("a pessoa não está designada para criar pendências pela unidade de origem")
+
+    destino = sessao.get(Unidade, unidade_destino_id)
+    if destino is None or not destino.ativa:
+        return negar("unidade de destino inexistente ou desativada")
+    if destino.id == registro.unidade_principal_atual_id:
+        return negar("a pendência intersecretarial exige unidade de destino diferente da origem")
+
+    ciclo = sessao.scalars(
+        select(Ciclo).where(
+            Ciclo.registro_id == registro.id, Ciclo.numero == registro.ciclo_atual,
+        ).with_for_update()
+    ).one_or_none()
+    if ciclo is None or ciclo.situacao != "ativo":
+        return negar("o ciclo atual do Registro não está ativo")
+
+    evento_p1 = registrar_evento(
+        sessao, comando, "pendencia", pendencia_id,
+        "criar_pendencia_intersecretarial",
+        {"pendencia_id": pendencia_id, "tipo_pendencia": "participacao",
+         "registro_id": registro.id,
+         "unidade_origem_id": registro.unidade_principal_atual_id,
+         "unidade_destino_id": destino.id, "solicitacao": solicitacao,
+         "itens_atribuidos": itens, "bloqueante": True,
+         "gate_bloqueado": "conclusao", "estado_atual": "aberta",
+         "conta_id": conta_id},
+        codigo_evento="P1", registro_id=registro.id, ciclo_id=ciclo.id,
+        versao_esquema_evento=2,
+    )
+    sessao.add(Pendencia(
+        id=pendencia_id, tipo_pendencia="participacao", registro_id=registro.id,
+        ciclo_origem_id=ciclo.id, ciclo_contexto_atual_id=ciclo.id,
+        instrumento_id=None, evento_origem_id=evento_p1.id,
+        unidade_origem_id=registro.unidade_principal_atual_id,
+        unidade_destino_id=destino.id, responsavel_atual_id=None,
+        estado="aberta", bloqueante=True, gate_bloqueado="conclusao",
+        motivo=solicitacao, criada_em=momento, atualizada_em=momento,
+    ))
+    resultado = fechar_comando(
+        comando,
+        {"permitido": True, "motivo": "Pendência intersecretarial criada",
+         "pendencia_id": pendencia_id, "registro_id": registro.id,
+         "unidade_origem_id": registro.unidade_principal_atual_id,
+         "unidade_destino_id": destino.id, "estado_pendencia": "aberta",
+         "gate_bloqueado": "conclusao",
+         "evento_p1": evento_p1.sequencia_cadeia},
+    )
+    sessao.flush()
+    return resultado
+
+
 def assumir_pendencia(sessao, *, comando_id, conta_id, pendencia_id, momento=None):
     """P2 — atribui uma pendência aberta a um agente autorizado da unidade de destino."""
     momento = momento or agora_utc()
@@ -60,7 +207,9 @@ def assumir_pendencia(sessao, *, comando_id, conta_id, pendencia_id, momento=Non
         return _negar(sessao, comando, ator_tipo, ator_id, "assumir_pendencia",
                       conta_id, pendencia_id,
                       "conta inexistente ou desativada")
-    if not tem_papel(sessao, pessoa_id, pendencia.unidade_destino_id, {"elaborador"}):
+    papeis_destino = ({"elaborador"} if pendencia.tipo_pendencia == "devolucao"
+                      else {"agente_pendencia"})
+    if not tem_papel(sessao, pessoa_id, pendencia.unidade_destino_id, papeis_destino):
         return _negar(
             sessao, comando, ator_tipo, ator_id, "assumir_pendencia",
             conta_id, pendencia_id,
@@ -93,6 +242,172 @@ def assumir_pendencia(sessao, *, comando_id, conta_id, pendencia_id, momento=Non
          "pendencia_id": pendencia.id, "estado_pendencia": "em_atendimento",
          "responsavel_atual_id": pessoa_id,
          "evento_p2": evento_p2.sequencia_cadeia},
+    )
+    sessao.flush()
+    return resultado
+
+
+def responder_pendencia_intersecretarial(
+        sessao, *, comando_id, conta_id, pendencia_id, resposta, momento=None):
+    """P3 — registra a participação e suas evidências, sem editar Instrumento."""
+    momento = momento or agora_utc()
+    resposta_normalizada = _normalizar_resposta_intersecretarial(resposta)
+    parametros = {
+        "conta_id": conta_id, "pendencia_id": pendencia_id,
+        "resposta": deepcopy(resposta),
+    }
+    conta, pessoa_id, ator_tipo, ator_id = _ator(sessao, conta_id)
+    comando, repeticao = abrir_comando(
+        sessao, comando_id, "responder_pendencia_intersecretarial", parametros,
+        ator_tipo, ator_id, conta_id,
+    )
+    if repeticao is not None:
+        return repeticao
+    if resposta_normalizada is None:
+        return _negar(
+            sessao, comando, ator_tipo, ator_id,
+            "responder_pendencia_intersecretarial", conta_id, pendencia_id,
+            "P3 exige resposta estruturada completa, sem campos adicionais",
+        )
+
+    pendencia = sessao.scalars(
+        select(Pendencia).where(Pendencia.id == pendencia_id).with_for_update()
+    ).one_or_none()
+    if pendencia is None or pendencia.tipo_pendencia != "participacao":
+        return _negar(
+            sessao, comando, ator_tipo, ator_id,
+            "responder_pendencia_intersecretarial", conta_id, pendencia_id,
+            "a pendência informada não é uma participação intersecretarial",
+        )
+    if conta is None or not conta.ativa:
+        return _negar(
+            sessao, comando, ator_tipo, ator_id,
+            "responder_pendencia_intersecretarial", conta_id, pendencia_id,
+            "conta inexistente ou desativada",
+        )
+    if pendencia.estado != "em_atendimento":
+        return _negar(
+            sessao, comando, ator_tipo, ator_id,
+            "responder_pendencia_intersecretarial", conta_id, pendencia_id,
+            "P3 exige pendência em_atendimento",
+            estado_pendencia=pendencia.estado,
+        )
+    if pendencia.responsavel_atual_id != pessoa_id:
+        return _negar(
+            sessao, comando, ator_tipo, ator_id,
+            "responder_pendencia_intersecretarial", conta_id, pendencia_id,
+            "P3 só pode ser executado pelo agente que assumiu a pendência",
+            responsavel_atual_id=pendencia.responsavel_atual_id,
+        )
+    if not tem_papel(
+            sessao, pessoa_id, pendencia.unidade_destino_id,
+            {"agente_pendencia"}):
+        return _negar(
+            sessao, comando, ator_tipo, ator_id,
+            "responder_pendencia_intersecretarial", conta_id, pendencia_id,
+            "a pessoa não está designada para responder pela unidade de destino",
+        )
+
+    estado_anterior = pendencia.estado
+    lacre_resposta = lacre(conteudo_canonico(resposta_normalizada))
+    pendencia.estado = "respondida"
+    pendencia.lacre_resposta = lacre_resposta
+    pendencia.atualizada_em = momento
+    evento_p3 = registrar_evento(
+        sessao, comando, "pendencia", pendencia.id,
+        "responder_pendencia_intersecretarial",
+        {"pendencia_id": pendencia.id, "tipo_pendencia": pendencia.tipo_pendencia,
+         "estado_anterior": estado_anterior, "estado_atual": "respondida",
+         "unidade_destino_id": pendencia.unidade_destino_id,
+         "responsavel_atual_id": pessoa_id,
+         "resposta": deepcopy(resposta_normalizada),
+         "lacre_resposta": lacre_resposta, "conta_id": conta_id},
+        codigo_evento="P3", registro_id=pendencia.registro_id,
+        ciclo_id=pendencia.ciclo_contexto_atual_id, versao_esquema_evento=2,
+    )
+    resultado = fechar_comando(
+        comando,
+        {"permitido": True, "motivo": "Participação intersecretarial respondida",
+         "pendencia_id": pendencia.id, "estado_pendencia": "respondida",
+         "lacre_resposta": lacre_resposta,
+         "evento_p3": evento_p3.sequencia_cadeia},
+    )
+    sessao.flush()
+    return resultado
+
+
+def aceitar_pendencia_intersecretarial(
+        sessao, *, comando_id, conta_id, pendencia_id, momento=None):
+    """P4 — a unidade de origem aceita a participação e encerra a pendência."""
+    momento = momento or agora_utc()
+    parametros = {"conta_id": conta_id, "pendencia_id": pendencia_id}
+    conta, pessoa_id, ator_tipo, ator_id = _ator(sessao, conta_id)
+    comando, repeticao = abrir_comando(
+        sessao, comando_id, "aceitar_pendencia_intersecretarial", parametros,
+        ator_tipo, ator_id, conta_id,
+    )
+    if repeticao is not None:
+        return repeticao
+
+    pendencia = sessao.scalars(
+        select(Pendencia).where(Pendencia.id == pendencia_id).with_for_update()
+    ).one_or_none()
+    if pendencia is None or pendencia.tipo_pendencia != "participacao":
+        return _negar(
+            sessao, comando, ator_tipo, ator_id,
+            "aceitar_pendencia_intersecretarial", conta_id, pendencia_id,
+            "a pendência informada não é uma participação intersecretarial",
+        )
+    if conta is None or not conta.ativa:
+        return _negar(
+            sessao, comando, ator_tipo, ator_id,
+            "aceitar_pendencia_intersecretarial", conta_id, pendencia_id,
+            "conta inexistente ou desativada",
+        )
+    if not tem_papel(
+            sessao, pessoa_id, pendencia.unidade_origem_id,
+            {"agente_pendencia"}):
+        return _negar(
+            sessao, comando, ator_tipo, ator_id,
+            "aceitar_pendencia_intersecretarial", conta_id, pendencia_id,
+            "a pessoa não está designada para aceitar pela unidade de origem",
+        )
+    if pendencia.estado != "respondida":
+        return _negar(
+            sessao, comando, ator_tipo, ator_id,
+            "aceitar_pendencia_intersecretarial", conta_id, pendencia_id,
+            "P4 exige pendência respondida",
+            estado_pendencia=pendencia.estado,
+        )
+    if not pendencia.lacre_resposta:
+        return _negar(
+            sessao, comando, ator_tipo, ator_id,
+            "aceitar_pendencia_intersecretarial", conta_id, pendencia_id,
+            "pendência respondida não possui lacre da resposta; inconsistência detectada",
+        )
+
+    estado_anterior = pendencia.estado
+    pendencia.estado = "encerrada"
+    pendencia.bloqueante = False
+    pendencia.gate_bloqueado = None
+    pendencia.lacre_aceito = pendencia.lacre_resposta
+    pendencia.atualizada_em = momento
+    evento_p4 = registrar_evento(
+        sessao, comando, "pendencia", pendencia.id,
+        "aceitar_pendencia_intersecretarial",
+        {"pendencia_id": pendencia.id, "tipo_pendencia": pendencia.tipo_pendencia,
+         "estado_anterior": estado_anterior, "estado_atual": "encerrada",
+         "unidade_origem_id": pendencia.unidade_origem_id,
+         "lacre_aceito": pendencia.lacre_aceito, "conta_id": conta_id},
+        codigo_evento="P4", registro_id=pendencia.registro_id,
+        ciclo_id=pendencia.ciclo_contexto_atual_id, versao_esquema_evento=2,
+    )
+    resultado = fechar_comando(
+        comando,
+        {"permitido": True, "motivo": "Participação intersecretarial aceita",
+         "pendencia_id": pendencia.id, "estado_pendencia": "encerrada",
+         "lacre_aceito": pendencia.lacre_aceito,
+         "evento_p4": evento_p4.sequencia_cadeia},
     )
     sessao.flush()
     return resultado

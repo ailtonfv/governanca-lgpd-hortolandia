@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block titulo %}{{ registro.codigo_lgpd }} · PoC LGPD{% endblock %}
+{% block conteudo %}
+<p><a class="voltar" href="/?conta_id={{ conta_id }}">← Voltar ao painel</a></p>
+<section class="detalhe">
+  <p class="etiqueta">{{ registro.tipo }} · ciclo {{ registro.ciclo }}</p>
+  <h1>{{ registro.codigo_lgpd }}</h1>
+  <p class="destaque">{{ registro.titulo }}</p>
+  <dl>
+    <div><dt>Situação</dt><dd>{{ registro.estado }}</dd></div>
+    <div><dt>Unidade principal</dt><dd>{{ registro.unidade }}</dd></div>
+    <div><dt>Contexto de atuação</dt><dd>{{ registro.contexto_id }}</dd></div>
+  </dl>
+</section>
+
+{% if mensagem %}
+<p class="mensagem {% if erro %}mensagem-erro{% else %}mensagem-sucesso{% endif %}" role="status">{{ mensagem }}</p>
+{% endif %}
+
+<section class="form1" aria-labelledby="titulo-form1">
+  <div class="cabecalho-secao">
+    <div>
+      <p class="etiqueta">Instrumento sintético · contrato 2</p>
+      <h2 id="titulo-form1">FORM 1</h2>
+    </div>
+    <span class="estado">{{ registro.form1.estado_rotulo }}</span>
+  </div>
+
+  {% if registro.form1.estado == 'nao_iniciado' %}
+    <p>O preenchimento ainda não começou. I1 criará um rascunho vazio e registrará o início no livro de atos.</p>
+    {% if registro.form1.pode_preencher %}
+    <form method="post" action="{{ url_for('iniciar_form1', registro_id=registro.id) }}">
+      <input type="hidden" name="conta_id" value="{{ conta_id }}">
+      <input type="hidden" name="comando_id" value="{{ comando_i1 }}">
+      <button class="botao-primario" type="submit">Iniciar preenchimento (I1)</button>
+    </form>
+    {% else %}
+    <p class="aviso-leitura">Este agente pode consultar o Registro, mas não possui o papel de elaborador necessário para iniciar o FORM 1.</p>
+    {% endif %}
+  {% elif registro.form1.estado == 'em_preenchimento' and registro.form1.rascunho %}
+    {% set conteudo = registro.form1.rascunho.conteudo %}
+    {% if registro.form1.pode_preencher %}
+    <form class="formulario" method="post" action="{{ url_for('salvar_form1', registro_id=registro.id) }}">
+      <input type="hidden" name="conta_id" value="{{ conta_id }}">
+      <input type="hidden" name="comando_id" value="{{ comando_i2 }}">
+      <input type="hidden" name="versao_lida" value="{{ registro.form1.rascunho.versao }}">
+
+      <label for="finalidade">Finalidade do tratamento</label>
+      <textarea id="finalidade" name="finalidade" maxlength="500" rows="4" placeholder="Descreva o propósito sem nomes, CPF, matrícula ou outros identificadores pessoais.">{{ conteudo.get('finalidade', '') }}</textarea>
+      <p class="ajuda">Rascunho parcial permitido. Não informe dados pessoais reais.</p>
+
+      <fieldset>
+        <legend>Categorias de titulares</legend>
+        <p class="ajuda">Você pode marcar mais de uma opção, mas somente quando esses papéis forem relevantes para este serviço, processo ou atividade. Não marque papéis que a pessoa exerça fora deste contexto.</p>
+        <div class="grade-opcoes">
+        {% for codigo, rotulo in registro.form1.catalogos.titulares.items() %}
+          <label class="opcao"><input type="checkbox" name="categorias_titulares" value="{{ codigo }}" {% if codigo in conteudo.get('categorias_titulares', []) %}checked{% endif %}> <span>{{ rotulo }}</span></label>
+        {% endfor %}
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Categorias de dados</legend>
+        <div class="grade-opcoes">
+        {% for codigo, rotulo in registro.form1.catalogos.dados.items() %}
+          <label class="opcao"><input type="checkbox" name="categorias_dados" value="{{ codigo }}" {% if codigo in conteudo.get('categorias_dados', []) %}checked{% endif %}> <span>{{ rotulo }}</span></label>
+        {% endfor %}
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Compartilhamentos</legend>
+        <div class="grade-opcoes">
+        {% for codigo, rotulo in registro.form1.catalogos.compartilhamentos.items() %}
+          <label class="opcao"><input type="checkbox" name="compartilhamentos" value="{{ codigo }}" {% if codigo in conteudo.get('compartilhamentos', []) %}checked{% endif %}> <span>{{ rotulo }}</span></label>
+        {% endfor %}
+        </div>
+      </fieldset>
+
+      <div class="rodape-formulario">
+        <p>Rascunho {{ registro.form1.rascunho.versao }} · último salvamento por {{ registro.form1.rascunho.salvo_por }}</p>
+        <button class="botao-primario" type="submit">Salvar rascunho (I2)</button>
+      </div>
+    </form>
+    {% else %}
+    <p class="aviso-leitura">O FORM 1 está em preenchimento, mas este agente não possui o papel de elaborador da unidade principal.</p>
+    {% endif %}
+  {% else %}
+    <p class="aviso-leitura">O FORM 1 está em {{ registro.form1.estado|replace('_', ' ') }}. A edição não está disponível neste estado.</p>
+  {% endif %}
+</section>
+{% endblock %}

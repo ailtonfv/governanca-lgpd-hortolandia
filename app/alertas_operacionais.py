@@ -24,11 +24,14 @@ def listar_alertas_operacionais(sessao, conta_id):
         .order_by(Pendencia.criada_em, Pendencia.id)
     ).all()
     for pendencia in pendencias:
+        intersecretarial = pendencia.tipo_pendencia == "participacao"
+        papel_destino = {"agente_pendencia"} if intersecretarial else {"elaborador"}
+        papel_origem = {"agente_pendencia"} if intersecretarial else {"validador"}
         autorizada_na_unidade = tem_papel(
-            sessao, conta.pessoa_id, pendencia.unidade_destino_id, {"elaborador"}
+            sessao, conta.pessoa_id, pendencia.unidade_destino_id, papel_destino
         )
         autorizada_a_decidir = tem_papel(
-            sessao, conta.pessoa_id, pendencia.unidade_origem_id, {"validador"}
+            sessao, conta.pessoa_id, pendencia.unidade_origem_id, papel_origem
         )
         responsavel = pendencia.responsavel_atual_id == conta.pessoa_id
         if not autorizada_na_unidade and not autorizada_a_decidir and not responsavel:
@@ -38,18 +41,29 @@ def listar_alertas_operacionais(sessao, conta_id):
                 "instrumento_id": pendencia.instrumento_id}
         if pendencia.estado == "aberta" and autorizada_na_unidade:
             alertas.append(dict(
-                base, codigo="CORRECAO_SOLICITADA", nivel="atencao",
+                base,
+                codigo=("PROVIDENCIA_INTERSECRETARIAL_RECEBIDA" if intersecretarial
+                        else "CORRECAO_SOLICITADA"),
+                nivel="atencao",
                 proxima_acao="assumir_pendencia",
             ))
         if pendencia.estado == "em_atendimento" and responsavel:
             alertas.append(dict(
-                base, codigo="PENDENCIA_ATRIBUIDA_A_VOCE", nivel="proxima_acao",
-                proxima_acao="iniciar_ajuste",
+                base,
+                codigo=("PROVIDENCIA_INTERSECRETARIAL_ATRIBUIDA_A_VOCE"
+                        if intersecretarial else "PENDENCIA_ATRIBUIDA_A_VOCE"),
+                nivel="proxima_acao",
+                proxima_acao=("responder_pendencia_intersecretarial"
+                              if intersecretarial else "iniciar_ajuste"),
             ))
         if pendencia.estado == "respondida" and autorizada_a_decidir:
             alertas.append(dict(
-                base, codigo="RESPOSTA_AGUARDANDO_DECISAO", nivel="proxima_acao",
-                proxima_acao="decidir_resposta",
+                base,
+                codigo=("RESPOSTA_INTERSECRETARIAL_AGUARDANDO_DECISAO"
+                        if intersecretarial else "RESPOSTA_AGUARDANDO_DECISAO"),
+                nivel="proxima_acao",
+                proxima_acao=("aceitar_pendencia_intersecretarial"
+                              if intersecretarial else "decidir_resposta"),
             ))
         if pendencia.estado == "devolvida_para_complementacao" and responsavel:
             alertas.append(dict(
@@ -58,7 +72,10 @@ def listar_alertas_operacionais(sessao, conta_id):
             ))
         if pendencia.bloqueante and (autorizada_na_unidade or responsavel):
             alertas.append(dict(
-                base, codigo="SUBMISSAO_BLOQUEADA", nivel="bloqueio",
+                base,
+                codigo=("CONCLUSAO_BLOQUEADA" if pendencia.gate_bloqueado == "conclusao"
+                        else "SUBMISSAO_BLOQUEADA"),
+                nivel="bloqueio",
                 proxima_acao="resolver_pendencia",
             ))
 

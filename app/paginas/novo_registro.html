@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block titulo %}Novo mapeamento · PoC LGPD{% endblock %}
+{% block conteudo %}
+<p><a class="voltar" href="/?conta_id={{ conta_id }}">← Voltar ao painel</a></p>
+
+<section class="detalhe">
+  <p class="etiqueta">Novo Registro LGPD · agente {{ identidade.matricula }}</p>
+  <h1>Em qual unidade o mapeamento será feito?</h1>
+  <p>Primeiro confirme a responsabilidade institucional; depois informe se o objeto é um serviço, processo ou atividade. O FORM 1 somente começa depois da criação do Registro.</p>
+</section>
+
+{% if mensagem %}
+<p class="mensagem {% if erro %}mensagem-erro{% else %}mensagem-sucesso{% endif %}" role="status">{{ mensagem }}</p>
+{% endif %}
+
+<section class="form1" aria-labelledby="titulo-contexto">
+  <h2 id="titulo-contexto">Contexto inicial</h2>
+  {% if unidades %}
+  <form class="formulario" method="post" action="{{ url_for('criar_registro_pela_tela') }}">
+    <input type="hidden" name="conta_id" value="{{ conta_id }}">
+    <input type="hidden" name="comando_id" value="{{ comando_g1 }}">
+
+    <label for="unidade_id">1. Secretaria/unidade responsável principal</label>
+    <select id="unidade_id" name="unidade_id" required>
+      {% for unidade in unidades %}<option value="{{ unidade.id }}">{{ unidade.nome }}</option>{% endfor %}
+    </select>
+    <p class="ajuda">É a unidade “master” que cria e mantém o Registro. A lista respeita o alcance institucional do agente.</p>
+
+    <fieldset>
+      <legend>2. O que será mapeado?</legend>
+      <p class="ajuda">Escolha a natureza do item que será documentado.</p>
+      <div class="grade-opcoes grade-tipos">
+        <label class="opcao"><input type="radio" name="tipo_objeto" value="servico" required> <span><strong>Serviço</strong><br>O que é entregue ao cidadão.</span></label>
+        <label class="opcao"><input type="radio" name="tipo_objeto" value="processo" required> <span><strong>Processo</strong><br>Sequência que produz um resultado.</span></label>
+        <label class="opcao"><input type="radio" name="tipo_objeto" value="atividade" required> <span><strong>Atividade</strong><br>Etapa concreta de execução.</span></label>
+      </div>
+    </fieldset>
+
+    <label for="objeto_principal_id">3. Item do catálogo oficial</label>
+    <select id="objeto_principal_id" name="objeto_principal_id" required>
+      <option value="">Selecione depois de escolher o tipo</option>
+      {% for objeto in objetos %}
+      <option value="{{ objeto.id }}" data-tipo="{{ objeto.tipo_objeto }}">{{ objeto.tipo_objeto|capitalize }} · {{ objeto.nome_canonico }}</option>
+      {% endfor %}
+    </select>
+    <p class="ajuda">O nome oficial vem do catálogo; não é digitado livremente.</p>
+
+    <label for="contexto_id">4. Contexto de atuação</label>
+    <select id="contexto_id" name="contexto_id" required>
+      <option value="">Selecione o contexto</option>
+      {% for contexto in contextos %}<option value="{{ contexto.id }}">{{ contexto.nome }}</option>{% endfor %}
+    </select>
+
+    <div class="rodape-formulario">
+      <p>Ao confirmar, o G1 criará o Registro e o FORM 1 no estado “Não iniciado”.</p>
+      <button class="botao-primario" type="submit">Criar Registro</button>
+    </div>
+  </form>
+  {% else %}
+  <p class="aviso-leitura">Este agente não possui designação de elaborador em nenhuma unidade e não pode criar Registros.</p>
+  {% endif %}
+</section>
+
+<script>
+  const tipos = document.querySelectorAll('input[name="tipo_objeto"]');
+  const objeto = document.getElementById('objeto_principal_id');
+  function filtrarObjetos() {
+    const tipo = document.querySelector('input[name="tipo_objeto"]:checked')?.value;
+    for (const opcao of objeto.options) {
+      opcao.hidden = Boolean(opcao.value && opcao.dataset.tipo !== tipo);
+    }
+    objeto.value = '';
+  }
+  tipos.forEach((item) => item.addEventListener('change', filtrarObjetos));
+</script>
+{% endblock %}

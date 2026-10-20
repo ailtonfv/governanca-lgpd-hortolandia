@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block titulo %}Painel inicial · PoC LGPD{% endblock %}
+{% block conteudo %}
+<section class="abertura">
+  <div>
+    <p class="etiqueta">Agente simulado · matrícula {{ identidade.matricula }}</p>
+    <h1>Olá, {{ identidade.nome }}</h1>
+    <p>Esta tela reúne o que está no seu alcance institucional e o que precisa da sua atenção.</p>
+  </div>
+  <form class="simulador" method="get">
+    <label for="conta_id">Simular entrada por matrícula</label>
+    <select id="conta_id" name="conta_id" onchange="this.form.submit()">
+      {% for id, nome in [('CONTA-A1', 'MAT-FICT-0001 · Alfa · Unidade Norte'), ('CONTA-B1', 'MAT-FICT-0002 · Beta · Unidade Norte'), ('CONTA-C1', 'MAT-FICT-0003 · Gama · Unidade Sul')] %}
+      <option value="{{ id }}" {% if conta_id == id %}selected{% endif %}>{{ nome }}</option>
+      {% endfor %}
+    </select>
+    <p class="ajuda">A PoC não solicita senha. Na solução futura, a Prefeitura validará matrícula e senha individual antes de liberar o painel.</p>
+    <noscript><button type="submit">Trocar</button></noscript>
+  </form>
+</section>
+
+<p class="acao-painel"><a class="botao-link" href="{{ url_for('novo_registro') }}?conta_id={{ conta_id }}">Mapear novo serviço, processo ou atividade</a></p>
+
+<section aria-labelledby="titulo-alertas">
+  <div class="cabecalho-secao">
+    <div>
+      <p class="etiqueta">Flags calculadas</p>
+      <h2 id="titulo-alertas">Atenção agora</h2>
+    </div>
+    <span class="contador">{{ alertas|length }}</span>
+  </div>
+  {% if alertas %}
+  <div class="grade-alertas">
+    {% for alerta in alertas %}
+    <article class="alerta alerta-{{ alerta.nivel }}">
+      <p class="etiqueta">{{ alerta.codigo_lgpd }}</p>
+      <h3>{{ alerta.rotulo }}</h3>
+      <p>Próxima ação: {{ alerta.proxima_acao|replace('_', ' ') }}.</p>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="vazio">Nenhum alerta operacional para este agente.</p>
+  {% endif %}
+</section>
+
+<section aria-labelledby="titulo-registros">
+  <div class="cabecalho-secao">
+    <div>
+      <p class="etiqueta">Escopo institucional</p>
+      <h2 id="titulo-registros">Registros ao seu alcance</h2>
+    </div>
+    <span class="contador">{{ registros|length }}</span>
+  </div>
+  {% if registros %}
+  <div class="tabela-responsiva">
+    <table>
+      <caption>Registros visíveis para {{ identidade.nome }}</caption>
+      <thead><tr><th>Código</th><th>Objeto</th><th>Unidade</th><th>Situação</th><th></th></tr></thead>
+      <tbody>
+      {% for registro in registros %}
+      <tr>
+        <td><strong>{{ registro.codigo_lgpd }}</strong></td>
+        <td>{{ registro.titulo }}</td>
+        <td>{{ registro.unidade }}</td>
+        <td><span class="estado estado-{{ registro.estado_codigo }}">{{ registro.estado }}</span></td>
+        <td><a href="{{ url_for('detalhe_registro', registro_id=registro.id) }}?conta_id={{ conta_id }}">Abrir</a></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="vazio">Nenhum Registro está no alcance institucional deste agente.</p>
+  {% endif %}
+</section>
+{% endblock %}

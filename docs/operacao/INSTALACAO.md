@@ -54,3 +54,9 @@ python -m demonstracoes.demo_registro   (ato G1: criação, repetição, bloquei
 ```
 python -m pytest
 ```
+
+**6. Tela da PoC** — liga o servidor local; mantenha este terminal aberto:
+```
+python -m uvicorn app.main:app --reload
+```
+Depois, abra `http://127.0.0.1:8000` no navegador. O seletor de agente usa apenas contas fictícias para demonstrar o alcance institucional; ele ainda não representa a autenticação definitiva.

@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}PoC LGPD{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('estaticos', path='/estilo.css') }}">
+</head>
+<body>
+  <header class="topo">
+    <div>
+      <p class="sobretitulo">Prefeitura de Hortolândia · Secretaria de Planejamento</p>
+      <p class="marca">Mapeamento LGPD</p>
+    </div>
+    <span class="selo">PoC · somente dados fictícios</span>
+  </header>
+  <main class="conteudo">
+    {% block conteudo %}{% endblock %}
+  </main>
+</body>
+</html>

@@ -16,6 +16,7 @@ from migracoes.acao_obrigatoria import aplicar as migracao_0006
 from migracoes.analise_instrumento import aplicar as migracao_0004
 from migracoes.contrato_form1 import aplicar as migracao_0005
 from migracoes.imutabilidade_versao import aplicar as migracao_0003
+from migracoes.identidade_agente import aplicar as migracao_0008
 from migracoes.pendencia import aplicar as migracao_0007
 from migracoes.rascunho_versoes import aplicar as migracao_0002
 
@@ -27,6 +28,7 @@ MIGRACOES = [
     (5, "contrato fechado do FORM 1 sintético", migracao_0005),
     (6, "ação obrigatória sintética mínima (M1a: G4 e G6)", migracao_0006),
     (7, "pendência mínima da devolução (M1a: I6 e P1)", migracao_0007),
+    (8, "matrícula funcional única do agente da plataforma", migracao_0008),
 ]
 
 

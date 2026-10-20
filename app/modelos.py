@@ -118,10 +118,13 @@ class Pessoa(Base):
     __tablename__ = "pessoa"
 
     id = Column(String(50), primary_key=True)          # identificador fictício (ex.: PESSOA-A)
+    matricula = Column(String(30), nullable=False)      # matrícula funcional única; fictícia na PoC
     nome = Column(String(100), nullable=False)          # nome fictício
     ativa = Column(Boolean, nullable=False, default=True)
 
     contas = relationship("Conta", back_populates="pessoa")  # uma pessoa pode ter várias contas
+
+    __table_args__ = (UniqueConstraint("matricula", name="uq_pessoa_matricula"),)
 
 
 class Conta(Base):
@@ -150,7 +153,8 @@ class Unidade(Base):
 class Designacao(Base):
     """Quem exerce qual papel, em qual unidade (SAD 03).
     O papel é dado à PESSOA (não à conta). Uma pessoa pode ter vários papéis.
-    Papéis usados na PoC nuclear: elaborador, analista, validador e concluidor.
+    Papéis usados na PoC nuclear: elaborador, analista, validador, concluidor e
+    agente_pendencia (designação provisória para atuar na fila institucional).
     """
     __tablename__ = "designacao"
 

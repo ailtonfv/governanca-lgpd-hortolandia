@@ -405,6 +405,8 @@ P1 admite duas origens no SAD 04:
 - **humana**, quando um agente autorizado da unidade de origem cria uma pendência para outra unidade;
 - **automática**, quando I6 devolve um Instrumento e o sistema cria a pendência de correção na mesma transação.
 
+Na implementação do M1a, o papel técnico provisório `agente_pendencia` representa a designação prévia para atuar na fila institucional; ele não concede preenchimento, análise ou validação. A pendência de participação bloqueia o gate de conclusão até P4. O P3 registra e lacra um contrato fechado com etapa executada, entrada, operações, saída, interfaces e referências de evidência. O Instrumento não é alterado por esse percurso.
+
 ### 11.1 Percurso transversal por várias Secretarias
 
 O Registro permanece vinculado à unidade principal. O que circula entre as Secretarias são pendências, participações e respostas necessárias à reconstrução do percurso. Cada unidade documenta somente a etapa que efetivamente executa, identificando a origem recebida, o tratamento realizado e o destino dado aos dados.

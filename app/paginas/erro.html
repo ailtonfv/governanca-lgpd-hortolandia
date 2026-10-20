@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block titulo %}{{ titulo }} · PoC LGPD{% endblock %}
+{% block conteudo %}
+<section class="erro">
+  <p class="etiqueta">Navegação protegida</p>
+  <h1>{{ titulo }}</h1>
+  <p>{{ mensagem }}</p>
+  <p><a href="/">Voltar ao painel inicial</a></p>
+</section>
+{% endblock %}

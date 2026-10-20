@@ -300,6 +300,37 @@ flowchart TB
 
 A atividade de tratamento continua sendo o elemento central para finalidade, hipótese legal, titulares, compartilhamentos e retenção; a base funciona como ativo associado a essas atividades. *🧪 DA-38, item 7 (SAD 10 REV15).*
 
+### Temporalidade, retenção e descarte
+
+Mapear um tratamento não termina em saber **quais dados entram** e **para que são usados**. Também precisamos documentar **por quanto tempo devem permanecer**, **qual fato inicia a contagem** e **o que acontece no final**. Esse cuidado vale para dados pessoais em sistemas, bancos, planilhas, documentos físicos e demais conjuntos de dados utilizados pela atividade.
+
+Na Prefeitura já existe um grupo trabalhando a temporalidade documental. Esse grupo é a referência institucional para os prazos e as destinações. A Jornada LGPD não substitui esse trabalho e não cria uma tabela paralela: ela deve ligar cada tratamento à regra oficial aplicável e apontar claramente quando ainda falta definição.
+
+```mermaid
+flowchart LR
+    T["Tratamento que utiliza<br/>dados pessoais"] --> R["Identificar a regra oficial<br/>de temporalidade"]
+    R --> G{"Regra já foi<br/>aprovada?"}
+    G -- "não" --> P["Registrar pendência<br/>sem inventar prazo"]
+    G -- "sim" --> C["Documentar marco inicial,<br/>prazo e destinação"]
+    C --> E{"Existe impedimento<br/>para o descarte?"}
+    E -- "sim" --> S["Suspender a destinação<br/>e registrar o motivo"]
+    E -- "não" --> D["Eliminar, anonimizar ou<br/>recolher conforme a regra"]
+    D --> V["Guardar evidência da execução,<br/>sem conservar o conteúdo eliminado"]
+```
+
+Em termos práticos, o Registro LGPD deverá conseguir informar:
+
+| Pergunta | O que precisa ser documentado |
+|---|---|
+| Qual regra se aplica? | Código ou referência da tabela de temporalidade e sua versão; enquanto não existir, pendência institucional identificada |
+| Quando começa a contagem? | Evento objetivo, como encerramento do processo, término do vínculo ou cumprimento da obrigação |
+| Por quanto tempo? | Prazo aprovado, sem estimativa inventada pelo agente |
+| Qual é a destinação? | Eliminação segura, anonimização, recolhimento para guarda permanente ou outra destinação formal |
+| O descarte está impedido? | Motivo e vigência da suspensão, por exemplo demanda judicial, auditoria, incidente ou obrigação de prestação de contas |
+| Como provar a execução? | Quem autorizou, quando ocorreu, qual regra foi aplicada, qual foi o escopo e qual foi o resultado — sem reter novamente os dados descartados |
+
+**Limite atual da PoC:** o FORM 1 sintético ainda não executa descarte nem calcula prazo. Na PoC nuclear, versões e eventos fictícios permanecem preservados para provar integridade e reconstrução da trilha. Isso não significa “guardar dados pessoais para sempre”: a PoC usa somente dados fictícios, e a PoC ampliada deverá incorporar o contrato de temporalidade aprovado antes de automatizar alerta, bloqueio ou destinação. Até lá, não haverá eliminação automática.
+
 ### Exemplo: objetos do catálogo e seus Registros
 
 ```mermaid
@@ -534,11 +565,13 @@ flowchart TD
 | ↳ Declaração de transversalidade, só pela governança (DA-39, item 2) | ✔ Implementada |
 | ↳ Alerta estrutural | ⚙️ Parcial: base de dados comum ✔; relações do catálogo a fazer (O-80) |
 | ↳ Semelhança por finalidade, categorias de titulares, categorias de dados e compartilhamentos | ✔ Alerta não bloqueante no I3 (DA-39, item 4) |
-| ↳ Testes automatizados (pytest, base própria) | ✔ 146 aprovados |
+| ↳ Testes automatizados (pytest, base própria) | ✔ 177 aprovados |
 | Checkpoint externo da cadeia (SAD 08) | a fazer |
 | Rascunho do FORM 1: I1 iniciar preenchimento e I2 salvar, com controle otimista | ✔ |
 | ↳ Testes de I1 e I2 | ✔ 14 testes: estado, lacre, cadeia, idempotência, autorização, concorrência, rollback, migração e POC-TS-004 |
+| ↳ Tela de I1 e I2 | ✔ Botões ligados ao domínio, opções fechadas, orientação contextual e versão lida enviada no salvamento; 6 testes HTTP específicos |
 | Contrato fechado do FORM 1 sintético: categorias selecionadas por código, sem nomes de titulares | ✔ Versão 2; códigos desconhecidos e campos livres são recusados |
+| Temporalidade, retenção e descarte | ⚙️ Diretriz registrada; prazos e destinações dependerão da tabela oficial e do grupo municipal responsável; sem eliminação automática nesta etapa |
 | Submissão do FORM 1: I3 cria versão imutável e G2 leva o Registro a Em validação | ✔ |
 | ↳ Testes de I3 e G2 | ✔ 10 testes: snapshot, cadeias, idempotência, validação, autorização, concorrência, rollback, sobreposição e imutabilidade |
 | Retirada antes da análise: I4 devolve o FORM 1 ao rascunho e G3 leva o Registro a Em andamento | ✔ |
@@ -563,14 +596,16 @@ flowchart TD
 | ↳ Testes de G5 | ✔ 8 testes: versão validada, competência, pendências, medidas, Versão 2, idempotência, concorrência e rollback |
 | Conclusão com medidas: ação obrigatória finalizada com evidência e G6 conclui Registro e ciclo | ✔ Responsável pela ação separado do agente competente para concluir |
 | ↳ Testes da ação e do G6 | ✔ 10 testes: momento e responsável corretos, campos obrigatórios, evidência, encerramento formal, competência, bloqueio, preservação, idempotência, concorrência e rollback |
-| Demais atos do workflow | a fazer |
-| Telas (FastAPI + Jinja2) e testes de aceite do M1a (POC-TS-001 a 009) | a fazer |
+| Pendência intersecretarial mínima: P1 humano, P2, P3 com evidência e P4 pela origem | ✔ Registro permanece na unidade principal e o FORM 1 não é editado pelo destino |
+| ↳ Testes da pendência intersecretarial | ✔ 15 testes: criação, contexto mínimo, designações, fila, flags, resposta, evidência, aceite, propriedade, idempotência, concorrência, rollback de P1/P3/P4 e bloqueio do G5 |
+| Demais atos ampliados do workflow | a fazer no M1b |
+| Telas (FastAPI + Jinja2) e testes de aceite do M1a (POC-TS-001 a 009) | ⚙️ Em andamento: identidade fictícia, contexto inicial, painel, detalhe, I1/I2, escopo institucional e negação auditada; 14 testes HTTP |
 
 ¹ Tentativas negadas ficam registradas na auditoria. O cenário d (substituição) está a fazer.
 ² O início do preenchimento do FORM 1 será um comando posterior ao G1, como no cenário A1 do SAD 04.
-³ Trava determinística por objeto e contexto e exatamente um PRINCIPAL, no próprio banco; um contexto por Registro garantido por chave composta (DA-39, item 1); advertência de família e transversalidade (DA-39, item 2); recusas do banco tratadas pelo nome da regra. A suíte chegou a 146 testes automatizados aprovados em 17/10/2026, inclusive pedidos simultâneos. Suspenso e Cancelado continuam testados como regra do banco até a chegada dos atos do M1b.1; Concluído já é alcançado pelos G5 e G6 reais.
+³ Trava determinística por objeto e contexto e exatamente um PRINCIPAL, no próprio banco; um contexto por Registro garantido por chave composta (DA-39, item 1); advertência de família e transversalidade (DA-39, item 2); recusas do banco tratadas pelo nome da regra. A suíte chegou a 177 testes automatizados aprovados em 19/10/2026, inclusive pedidos simultâneos, quatorze testes HTTP e dois testes específicos de identidade. Suspenso e Cancelado continuam testados como regra do banco até a chegada dos atos do M1b.1; Concluído já é alcançado pelos G5 e G6 reais.
 
-### O que os 146 testes garantem, em linguagem simples
+### O que os 177 testes garantem, em linguagem simples
 
 Os testes atuais exercitam o motor da PoC com dados fictícios e procuram responder a perguntas práticas:
 
@@ -586,14 +621,17 @@ Os testes atuais exercitam o motor da PoC com dados fictícios e procuram respon
 - **Início da análise:** I13 entrega a versão mais recente a um único agente responsável pela análise. Quem submeteu não pode analisar o próprio trabalho, nem mesmo usando outra conta; duas tentativas simultâneas não criam duas análises.
 - **Troca do responsável:** I14 muda somente o agente responsável atual. Quem iniciou e tudo o que já ocorreu continuam no histórico; uma tela desatualizada não consegue desfazer uma reatribuição mais recente.
 - **Validação:** somente o responsável atual da análise pode executar I5. O sistema encerra a análise, torna a versão validada a versão vigente e executa o G4 junto: ação aberta leva a **Em execução**; sem ação aberta, o Registro volta a **Em andamento**.
+- **Primeiras telas:** o painel identifica claramente qual agente fictício está sendo simulado, mostra somente os Registros dentro do alcance institucional e apresenta as flags calculadas. No detalhe, o elaborador pode iniciar e salvar o FORM 1; outro papel apenas consulta. Se alguém tentar abrir diretamente um Registro de outra unidade, o sistema nega a consulta e registra a tentativa na auditoria.
+- **Identidade e contexto inicial:** cada pessoa fictícia possui matrícula única. Antes do FORM 1, a tela confirma primeiro uma unidade principal em que o agente seja elaborador; depois exige um serviço, processo ou atividade coerente com o catálogo e um contexto. O G1 cria o Registro e o FORM 1 Não iniciado.
 - **Devolução:** somente o agente responsável atual pela análise pode executar I6. O sistema preserva a versão, cria uma pendência bloqueante para a unidade elaboradora e executa o G3 junto, sem deixar partes soltas se ocorrer uma falha.
 - **Assunção e ajuste:** P2 garante que apenas um agente autorizado assuma a pendência; I7 recria o rascunho a partir da versão devolvida e libera novamente o salvamento pelo I2.
 - **Resposta e decisão da correção:** P3 lacra a resposta; P4 aceita exatamente esse conteúdo; ou P5 devolve a mesma pendência com motivo e P6 libera outra correção. O novo I3 só cria a Versão 2 quando o rascunho coincide com o lacre aceito.
 - **Conclusão sem medidas:** G5 somente conclui quando o FORM 1 está validado, não existe pendência aberta nem ação obrigatória no ciclo e o agente possui competência formal para concluir. Registro e ciclo são encerrados juntos, sem apagar a versão validada.
 - **Conclusão com medidas:** a ação só pode ser finalizada pelo seu responsável quando o Registro está Em execução e sempre exige evidência. Um encerramento excepcional também exige motivo. Depois disso, G6 confere todos os portões e um agente com competência formal conclui Registro e ciclo sem apagar a versão nem a comprovação da medida.
-- **Flags operacionais:** os avisos da futura tela inicial são calculados a partir da pendência real. Eles mudam de “Correção solicitada” para “Pendência atribuída a você” sem manter uma segunda verdade no banco.
+- **Participação intersecretarial:** a unidade principal envia uma pendência à fila institucional de outra unidade. Um agente previamente designado assume e responde com entrada, operações, saída, interfaces e evidências; a origem aceita. O destino não edita o FORM 1, o Registro não muda de unidade principal e G5 permanece bloqueado até o aceite.
+- **Flags operacionais:** os avisos da tela inicial são calculados a partir da pendência real. Eles mudam de “Correção solicitada” para “Pendência atribuída a você” sem manter uma segunda verdade no banco.
 
-Esses 146 testes são a cobertura automatizada atual do motor. Eles ainda **não substituem** os testes de aceite POC-TS-001 a POC-TS-009, que exigirão os percursos completos, as telas mínimas e as respectivas evidências.
+Esses 177 testes são a cobertura automatizada atual do motor e dos primeiros cortes HTTP. Eles ainda **não substituem** a bateria formal completa POC-TS-001 a POC-TS-009, que exigirá os percursos de aceite e as respectivas evidências; a tela desatualizada exercita o POC-TS-004 e a negação auditada da consulta prepara o POC-TS-007.
 
 ### Legenda operacional: agentes e funções
 
@@ -604,6 +642,7 @@ Todos os atores humanos do fluxo são **Agentes Públicos Autorizados**. A expre
 | Responsável pelo preenchimento | Inicia, salva, submete e ajusta o FORM 1 |
 | Responsável pela análise | Examina, valida ou devolve a versão |
 | Responsável pela ação | Executa a medida e registra sua evidência |
+| Agente da fila institucional | Assume e responde pendências destinadas à sua unidade; na PoC, usa o papel técnico provisório `agente_pendencia` |
 | Competente para concluir | Executa G5 ou G6; na PoC, a autorização técnica provisória é o papel `concluidor` |
 | Instância validadora competente | Inicia ou reatribui a análise |
 
@@ -613,6 +652,7 @@ flowchart TD
     F --> P["Preenchimento"]
     F --> N["Análise"]
     F --> M["Ação"]
+    F --> D["Pendência da unidade"]
     F --> C["Conclusão"]
 ```
 
@@ -622,11 +662,15 @@ Uma mesma pessoa pode exercer mais de uma função quando possuir autorização 
 
 O FORM 1 sintético descreve o tratamento, não as pessoas. Em vez de digitar nomes, o servidor seleciona categorias como **Contribuinte**, **Servidor público** ou **Estudante**. O mesmo vale para categorias de dados e destinatários de compartilhamento.
 
+As categorias permitem **seleção múltipla**, mas isso não significa marcar todos os papéis que uma pessoa exerce na vida. O servidor marca somente os papéis pertinentes ao serviço, processo ou atividade que está sendo documentado. Uma pessoa que trabalha na Prefeitura, paga IPTU e utiliza a farmácia de alto custo aparece como **Servidor público** no tratamento funcional, **Contribuinte** no tratamento tributário e **Cidadão usuário de serviço público** no atendimento farmacêutico. Duas ou mais categorias são marcadas juntas apenas quando o mesmo tratamento realmente alcança esses diferentes papéis.
+
 ```mermaid
-flowchart LR
-    S["Servidor"] --> E["Seleciona categorias<br/>em listas fechadas"]
-    E --> C["Sistema guarda<br/>somente os códigos"]
-    L["Texto livre ou<br/>código desconhecido"] --> R["Submissão recusada"]
+flowchart TD
+    O["Serviço, processo<br/>ou atividade"] --> P{"O papel é relevante<br/>neste tratamento?"}
+    P -- "sim" --> M["Marcar a categoria"]
+    P -- "não" --> N["Não marcar"]
+    M --> C["Sistema guarda<br/>somente códigos conhecidos"]
+    X["Texto livre ou<br/>código desconhecido"] --> R["Submissão recusada"]
 ```
 
 A única descrição livre deste contrato é a finalidade, limitada a 500 caracteres e acompanhada da orientação de não informar nomes, CPF, matrícula ou qualquer outro dado pessoal. Se uma categoria estiver ausente, ela deve ser incluída pela governança; não existe a opção “Outro” com texto livre. A relação completa está no [Contrato do FORM 1 sintético](docs/arquitetura/CONTRATO_FORM1_SINTETICO.md).
@@ -652,7 +696,7 @@ Na futura tela, a retomada deve seguir estas diretrizes:
 - se outra pessoa tiver salvado durante o intervalo, recusar o salvamento desatualizado e orientar o servidor a recarregar o formulário;
 - depois da submissão pelo I3, abrir a versão preservada para consulta e não apresentar o FORM 1 como um rascunho livremente editável.
 
-Esse comportamento já está implementado e testado no motor e no banco. A interface ainda será construída e deverá tornar essas informações visíveis em linguagem simples, por exemplo: “Último salvamento em 16/10/2026 às 17h42, por Servidor Alfa (fictício)”.
+Esse comportamento está implementado e testado no motor, no banco e no primeiro corte da interface. A tela atual mostra o número do rascunho e a pessoa responsável pelo último salvamento; exibir também data e hora em linguagem simples permanece como aprimoramento da interface.
 
 ### O que acontece quando o FORM 1 é enviado para validação
 
@@ -732,10 +776,10 @@ A letra **P** identifica os atos praticados sobre uma **Pendência**. Ela não s
 
 | Procedimento | Em linguagem simples | Quem atua | Resultado |
 |---|---|---|---|
-| **P1 — Criar** | Abre automaticamente a pendência quando o I6 devolve a versão | Sistema, provocado pelo I6 | Pendência **Aberta** |
-| **P2 — Assumir** | Um agente autorizado aceita cuidar da providência | Responsável pelo preenchimento | Pendência **Em atendimento** |
-| **P3 — Responder** | Entrega a correção e registra o lacre exato do rascunho | Agente que assumiu | Pendência **Respondida** e rascunho congelado |
-| **P4 — Aceitar** | Confirma que a correção apresentada é suficiente | Instância validadora, com segregação | Pendência **Encerrada** e lacre aceito |
+| **P1 — Criar** | Abre a pendência: automaticamente na devolução do I6 ou por um agente da unidade de origem no percurso intersecretarial | Sistema ou agente designado da origem | Pendência **Aberta** na fila da unidade destinatária |
+| **P2 — Assumir** | Um agente autorizado aceita cuidar da providência | Agente autorizado da unidade de destino | Pendência **Em atendimento** com responsável nominal |
+| **P3 — Responder** | Na correção, entrega e lacra o rascunho; na participação, registra entrada, operações, saída, interfaces e evidências | Agente que assumiu | Pendência **Respondida** e conteúdo exato lacrado |
+| **P4 — Aceitar** | Confirma que a resposta apresentada é suficiente | Instância validadora na correção ou agente designado da unidade de origem na participação | Pendência **Encerrada** e lacre aceito |
 | **P5 — Devolver resposta** | Informa, com motivo, que a correção ainda é insuficiente | Instância validadora, com segregação | Mesma pendência **Devolvida para complementação** |
 | **P6 — Retomar** | Reabre o trabalho para complementar a correção | Agente responsável pela pendência | Pendência volta a **Em atendimento** e a edição é liberada |
 
@@ -799,7 +843,7 @@ flowchart TD
 
 O P5 não abre outra pendência e não apaga a primeira resposta: tudo permanece no histórico. O P6 apenas devolve a pendência ao agente responsável e libera o rascunho. Se alguém alterar o conteúdo depois do P4, o I3 percebe que o lacre mudou e recusa a submissão; é necessário apresentar e aceitar a correção adequada.
 
-#### Flags da futura tela inicial
+#### Flags da tela inicial
 
 As flags não são gravadas como caixas independentes. Elas são calculadas sempre que a tela é carregada:
 
@@ -815,6 +859,65 @@ flowchart TD
 ```
 
 Assim, uma mudança no workflow aparece imediatamente na tela e não existe o risco de uma flag antiga contradizer o estado real. Um agente de outra unidade não recebe a correção na sua fila; quem assumiu recebe as ações de ajuste e complementação, enquanto a instância validadora recebe a resposta que precisa decidir.
+
+#### O primeiro corte da interface
+
+Ao abrir a aplicação, escolhemos uma matrícula **fictícia** para simular o agente. Isso ainda não é o login definitivo: é uma maneira transparente de demonstrar os papéis da PoC. Em produção, o servidor deverá informar matrícula e senha individual; a Prefeitura validará a credencial e fornecerá a identidade funcional necessária. A plataforma não armazenará senha na PoC nem improvisará uma integração direta com o banco de pessoal.
+
+Depois da identidade vem o contexto do trabalho. Antes de iniciar o FORM 1, o agente confirma primeiro a Secretaria/unidade responsável principal dentro de seu alcance institucional. Em seguida, escolhe se mapeará um serviço, processo ou atividade do catálogo e seleciona o contexto de atuação. O G1 então cria o Registro, o ciclo 1 e o FORM 1 **Não iniciado**:
+
+```mermaid
+flowchart LR
+    M["Matrícula fictícia"] --> U["Unidade principal<br/>autorizada"]
+    U --> T{"Serviço, processo<br/>ou atividade?"}
+    T --> O["Item do catálogo"]
+    O --> C["Contexto"]
+    C --> G["G1<br/>Registro + FORM 1"]
+```
+
+O nome do objeto não é digitado livremente: vem do catálogo oficial. A unidade principal é a responsável interna que cria e mantém o Registro e aparece primeiro para delimitar o contexto institucional; participações posteriores não transferem essa responsabilidade. O contrato completo está em [Identidade do agente e contexto inicial](docs/arquitetura/CONTRATO_IDENTIDADE_E_CONTEXTO_INICIAL.md).
+
+O painel procura os Registros da unidade do agente e também aqueles que chegaram até ele por uma pendência institucional ativa.
+
+```mermaid
+flowchart LR
+    A["Conta fictícia escolhida"] --> I["Identifica pessoa,<br/>papéis e unidades"]
+    I --> E{"Registro está<br/>no alcance?"}
+    E -- "sim" --> P["Painel mostra Registro<br/>e flags calculadas"]
+    E -- "não" --> N["Consulta negada"]
+    N --> U["Tentativa registrada<br/>na auditoria"]
+```
+
+No detalhe do Registro, o agente com papel de elaborador já pode iniciar o FORM 1 pelo I1 e salvar o rascunho pelo I2. A finalidade possui espaço limitado para uma descrição sem dados pessoais; titulares, dados e compartilhamentos aparecem como opções fechadas, sem campo “Outro”.
+
+```mermaid
+flowchart LR
+    R["Registro aberto"] --> I1["I1<br/>Iniciar preenchimento"]
+    I1 --> V1["Rascunho 1<br/>vazio"]
+    V1 --> T["Agente preenche<br/>e seleciona categorias"]
+    T --> I2["I2<br/>Salvar com a versão lida"]
+    I2 --> V2["Rascunho seguinte<br/>lacrado"]
+    A["Tela antiga"] -. "versão não confere" .-> N["Salvamento negado<br/>conteúdo novo preservado"]
+```
+
+Em linguagem simples, cada salvamento aumenta o número do rascunho. Se duas telas tentarem salvar o mesmo número, apenas a primeira vence; a segunda recebe a orientação para recarregar. O HTML não decide essa regra: ele envia o pedido para as funções de domínio já testadas. A submissão I3 e as decisões posteriores ainda não foram ligadas à interface.
+
+### Como funciona a pendência entre duas unidades
+
+No percurso intersecretarial, P1 é humano: um agente designado da unidade principal envia uma participação para a fila institucional de outra unidade. O destino não recebe autorização para editar o FORM 1 e o Registro não troca de proprietário.
+
+```mermaid
+flowchart LR
+    N["Unidade Norte<br/>mantém o Registro"] -- "P1: solicita participação" --> F["Fila institucional<br/>Unidade Sul"]
+    F -- "P2: agente designado assume" --> T["Providência em atendimento"]
+    T -- "P3: resposta + evidências" --> R["Resposta lacrada"]
+    R -- "P4: origem aceita" --> E["Pendência encerrada"]
+    E -. "Registro continua na origem" .-> N
+```
+
+A resposta possui um contrato pequeno e fechado: etapa executada, entrada recebida, operações realizadas, saída produzida, interfaces com a etapa seguinte e referências de evidência. Campos inesperados ou evidência vazia são recusados. Na carga fictícia, `agente_pendencia` representa a designação prévia pela chefia mencionada no SAD; não é sinônimo de elaborador, analista ou validador.
+
+Enquanto a participação estiver ativa, a futura tela da unidade destinatária mostra a providência recebida ou atribuída e informa que a conclusão está bloqueada. Depois do P3, a unidade de origem vê a resposta aguardando decisão. O P4 encerra a pendência e libera o portão de conclusão. Duas pessoas tentando assumir ao mesmo tempo não produzem dois responsáveis: somente a primeira confirmação vence.
 
 ### O que acontece quando o agente responsável valida
 
@@ -944,7 +1047,7 @@ M1b — Fluxos de controle
 | 2 | Etapa 2d: correções | Idempotência estrita, tratamento específico das recusas do banco, papéis explícitos no pedido, numeração anual (D4), um contexto por Registro (D1) | M1a |
 | 3 | Etapa 2d: advertência e transversalidade | Resolução da advertência de família e declaração de transversalidade (D2) | M1a |
 | 4 | Concluir o núcleo do workflow | Rascunho, versão, submissão (com a verificação material), retirada da submissão antes da análise (I4, cenário A11), análise com segregação e reatribuição da análise (I14, cenário A14), devolução com pendência (P1 a P4, e P5/P6 no percurso da devolução), validação, conclusão e pendência intersecretarial; ação obrigatória sintética mínima e percurso com medidas (I5 → G4 → Em execução → G6) | M1a |
-| 5 | Automatizar os testes de aceite do M1a | Cenários POC-TS-001 a 009, gerando as evidências POC-EV do marco | M1a |
+| 5 | Automatizar os testes de aceite do M1a | Em andamento: primeiro corte HTTP e negação auditada concluídos; completar POC-TS-001 a 009 e gerar as evidências POC-EV do marco | M1a |
 | 6 | Fechar as decisões normativas pendentes | Competência do item 4 da DA-37 (quadro abaixo) | M1a → M1b |
 | 7 | Executar o M1b em quatro pacotes | M1b.1 a M1b.4, cada um só depois de cumpridas as suas dependências (quadro "Pacotes de implementação do M1b") | M1b |
 
@@ -960,10 +1063,11 @@ M1b — Fluxos de controle
 | AB-02 | Saída não programada como quinta situação de continuidade | ⏳ Decisão pendente | Encarregado | Aceite final do M1b.3 (não impede o início) | SAD 04 e SAD 02 |
 | Prazos (O-84) | Regras de prazo na suspensão: contagem por tipo de prazo, retomada, prazos pausáveis, alteração da data, histórico, calendário | ⏳ Decisão de entrada do M1b.1 (proposta registrada no O-84) | Encarregado | Início do M1b.1 | SAD 04 (14) e SAD 10 |
 | SAD09-01, 05 e 10 | Envelope de ingestão, contrato integral do FORM 1, decisão de encerramento | ⏳ Decisão pendente | Conforme SAD 09, seção 33 | Entrada do M2 e encerramento do M3A | SAD 09 e SAD 10 |
+| Temporalidade e descarte | Referência oficial, versão, marco inicial, prazo, destinação, suspensão e evidência da execução | ⏳ Articulação institucional | Grupo municipal responsável pela temporalidade, com participação da governança LGPD | Automação de alertas e descarte na PoC ampliada; não bloqueia a PoC nuclear fictícia | FORM 1 integral, SADs afetados e tabela oficial de temporalidade |
 
 ## Tecnologias (DA-28)
 
-Python 3.14 · PostgreSQL 18 · SQLAlchemy · psycopg · python-dotenv · pytest · (a seguir: FastAPI, Jinja2)
+Python 3.14 · PostgreSQL 18 · SQLAlchemy · psycopg · python-dotenv · pytest · FastAPI · Jinja2
 
 ## Instalação e execução
 
@@ -974,12 +1078,16 @@ Resumo, numa base já configurada:
 python -m instalacao.criar_tabelas
 python -m carga_ficticia
 python -m pytest
+python -m uvicorn app.main:app --reload
 ```
+
+Com o último comando em execução, a tela fica disponível em `http://127.0.0.1:8000`. Ela usa somente as pessoas, contas e Registros fictícios da PoC.
 
 ## Documentos deste repositório
 
 | Documento | Para que serve |
 |---|---|
+| [Contrato de identidade e contexto inicial](docs/arquitetura/CONTRATO_IDENTIDADE_E_CONTEXTO_INICIAL.md) | Registra matrícula, autenticação futura e o percurso serviço/processo/atividade → unidade principal → contexto → G1 |
 | [docs/arquitetura/MAPA_M1a.md](docs/arquitetura/MAPA_M1a.md) | O percurso de um Registro no M1a, em diagramas (ilustrativo; prevalecem os SADs) |
 | [docs/arquitetura/ARQUITETURA_POC.md](docs/arquitetura/ARQUITETURA_POC.md) | Camadas do sistema, responsabilidades e mapa das pastas |
 | [docs/operacao/INSTALACAO.md](docs/operacao/INSTALACAO.md) | Montar o ambiente e rodar a PoC |

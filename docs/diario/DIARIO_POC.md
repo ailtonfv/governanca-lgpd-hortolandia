@@ -207,3 +207,54 @@ Regras deste diário: sem senhas, tokens ou dados pessoais; cada entrada com dat
 - O README recebeu a explicação coloquial e o diagrama completo do percurso com medidas.
 - Acrescentados 10 testes: momento e responsável corretos, validações dos campos, evidência e cadeia, bloqueio por ação aberta, conclusão e preservação, encerramento formal, competência, idempotência, concorrência e rollback.
 - Suíte completa: 146 testes aprovados no banco próprio `lgpd_poc_teste`. Não houve mudança de esquema neste incremento.
+
+## 2026-10-19 — M1a: pendência intersecretarial mínima (P1 a P4)
+
+- Implementado o P1 humano para a unidade principal encaminhar uma participação à fila institucional de outra unidade. O destino, os itens atribuídos e a solicitação ficam explícitos; a pendência nasce bloqueante para o gate de conclusão.
+- Criado o papel técnico provisório `agente_pendencia`, separado de preenchimento, análise e validação. Na carga fictícia, Pessoa A representa a Unidade Norte e Pessoa C representa a Unidade Sul nesse percurso.
+- O P2 compartilhado passou a exigir `agente_pendencia` nas participações e manteve `elaborador` nas devoluções do I6. A trava da pendência continua garantindo um único responsável diante de assunções simultâneas.
+- P3 intersecretarial registra um contrato fechado com etapa executada, entrada recebida, operações, saída, interfaces e evidências. A resposta é lacrada e preservada no evento; o agente destinatário não edita o FORM 1.
+- P4 intersecretarial exige agente designado na unidade de origem, aceita o lacre e encerra a pendência. O Registro permanece na unidade principal durante todo o percurso.
+- As flags operacionais passaram a distinguir providência intersecretarial recebida, atribuída, resposta aguardando decisão e conclusão bloqueada.
+- Acrescentados 15 testes: criação e cadeia, contexto mínimo, autorização, idempotência de P1/P3/P4, fila e flags, resposta estruturada, evidência, proteção do FORM 1, aceite, propriedade do Registro, concorrência, rollback independente de P1/P3/P4 e integração com o portão do G5.
+- Suíte completa: 161 testes aprovados no banco próprio `lgpd_poc_teste`. Não houve mudança de esquema neste incremento.
+
+## 2026-10-19 — M1a: primeiro corte da interface web
+
+- Criada a aplicação FastAPI mínima com páginas Jinja2 e estilo responsivo. O painel identifica explicitamente o agente fictício simulado, lista os Registros do seu alcance institucional e apresenta as flags calculadas a partir do estado real.
+- O alcance reúne os Registros da unidade em que a pessoa possui designação ativa e os Registros que chegaram à sua atuação por pendência institucional vigente. A camada `consultas_interface.py` prepara os dados; os templates não consultam o banco nem repetem regras de negócio.
+- Criada a página de detalhe em modo somente consulta. Uma tentativa de abrir diretamente um Registro fora do alcance retorna HTTP 403 e grava `tentativa_negada` na auditoria, preparando o cenário POC-TS-007.
+- O seletor de contas A1, B1 e C1 é apenas um simulador transparente com dados fictícios; não é tratado como autenticação definitiva.
+- Acrescentados 4 testes HTTP: identidade e recorte por unidade, pendência intersecretarial visível no destino com flags, acesso direto negado e auditado e conta inexistente.
+- README e guias operacionais atualizados com explicação coloquial, diagrama da decisão de alcance e comando para ligar a tela.
+- Suíte completa: 165 testes aprovados no banco próprio `lgpd_poc_teste`. Não houve mudança de esquema neste incremento.
+
+## 2026-10-19 — diretriz para temporalidade, retenção e descarte
+
+- Identificada uma lacuna didática: o README mencionava retenção, mas não explicava o ciclo até a destinação dos dados.
+- Registrado que há um grupo municipal trabalhando a temporalidade documental e que ele é a referência institucional para prazos e destinações. A Jornada LGPD não criará tabela paralela nem inventará prazo ausente.
+- O README passou a distinguir regra oficial, marco inicial da contagem, prazo, destinação, impedimento temporário e evidência da execução, com diagrama do percurso.
+- Limite da etapa explicitado: a PoC nuclear usa somente dados fictícios, preserva versões e eventos para provar integridade e não executa eliminação automática. A automação dependerá do contrato de temporalidade aprovado para a PoC ampliada.
+
+## 2026-10-19 — M1a: I1 e I2 ligados à interface
+
+- A página de detalhe do Registro passou a mostrar o estado do FORM 1. O elaborador pode executar I1 para criar o rascunho; agentes com outros papéis continuam em consulta.
+- O formulário de I2 oferece finalidade limitada a 500 caracteres e seleções fechadas para categorias de titulares, categorias de dados e compartilhamentos. Códigos inventados ou repetidos são recusados também na fronteira HTTP.
+- Cada formulário carrega um `comando_id`, preservando a idempotência em reenvios, e envia a `versao_lida` do rascunho. Uma tela desatualizada é recusada pelo domínio e não sobrescreve o conteúdo mais novo.
+- Aplicado o padrão POST → redirecionamento → GET: depois do ato, a página recarrega o estado confirmado pelo PostgreSQL e apresenta mensagem de sucesso ou de recusa.
+- Acrescentados 5 testes HTTP específicos: visibilidade por papel, I1 pela tela, I2 com catálogos fechados, POC-TS-004 pela tela e recusa de código forjado. Com os quatro testes anteriores, a interface possui 9 testes.
+- Suíte completa: 170 testes aprovados no banco próprio `lgpd_poc_teste`. Não houve mudança de esquema neste incremento.
+- Teste operacional executado com o Registro fictício `LGPD-2026-00001`: o I1 criou o primeiro rascunho e o I2 preservou no PostgreSQL a finalidade, `TIT-CONTRIBUINTE` e as categorias de identificação, endereço e dados financeiros. A cadeia confirmou I1 na sequência 1 e I2 na sequência 2; o rascunho chegou à versão 2.
+- A dúvida surgida no preenchimento mostrou que seleção múltipla não pode ser confundida com todos os papéis sociais de uma pessoa. A tela e o README passaram a orientar que somente os papéis pertinentes ao serviço, processo ou atividade documentado devem ser marcados.
+- Acrescentado 1 teste HTTP para essa orientação contextual, elevando a interface a 10 testes. Os 10 testes da interface e a suíte completa de 171 testes foram executados com aprovação integral.
+
+## 2026-10-19 — identidade do agente e contexto antes do FORM 1
+
+- Registrada a decisão institucional informada por servidor da Prefeitura: em Hortolândia, cada servidor, concursado ou não, possui uma única matrícula. Na solução futura, a matrícula será o nome de usuário e a senha será individual, validada pelo mecanismo institucional a confirmar com Ana e Rafael.
+- A PoC recebeu matrículas exclusivamente fictícias e únicas. O seletor inicial passou a apresentar a simulação por matrícula e continua sem senha real.
+- Criada a etapa anterior ao FORM 1: o elaborador confirma primeiro a Secretaria/unidade responsável principal dentro de seu alcance institucional; depois escolhe serviço, processo ou atividade do catálogo e o contexto de atuação. O nome oficial vem do catálogo; o G1 existente cria o Registro, o ciclo 1 e o FORM 1 Não iniciado.
+- O cadastro permanente de unidades participantes não foi antecipado: permanece na PoC ampliada. A colaboração mínima do M1a continua pelo percurso intersecretarial, sem troca da unidade principal.
+- Criado contrato arquitetural específico para identidade e contexto inicial. Incluída migração 8 para acrescentar matrícula única sem perder as pessoas fictícias existentes.
+- Acrescentados 6 testes: duas garantias da identidade e quatro percursos HTTP. O novo percurso integrado cria um Registro isolado e atravessa contexto inicial, G1, I1 e I2, sem apagar nem recomeçar o Registro 0001. Os 16 testes de identidade/interface e a suíte completa de 177 testes foram aprovados.
+- Migração 8 aplicada à base local. O Registro fictício `LGPD-2026-00001` permaneceu `em_andamento`; o FORM 1 permaneceu `em_preenchimento`, com rascunho 2 e `TIT-CONTRIBUINTE` preservados.
+- Servidor local reiniciado sem `--reload`. Painel e nova etapa contextual responderam HTTP 200 com matrícula fictícia, os três tipos de objeto e a unidade principal.
