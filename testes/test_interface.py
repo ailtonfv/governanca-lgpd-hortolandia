@@ -82,8 +82,8 @@ def test_novo_registro_define_tipo_unidade_principal_e_contexto_antes_do_form1()
     assert resposta.text.index("1. Secretaria responsável pelo Registro") < resposta.text.index("2. O que será mapeado?")
     assert "Serviço" in resposta.text and "Processo" in resposta.text and "Atividade" in resposta.text
     assert "Secretaria responsável pelo Registro" in resposta.text
-    assert "Unidade Norte (fictícia)" in resposta.text
-    assert "Unidade Sul (fictícia)" not in resposta.text
+    assert "Planejamento Urbano e Gestão Estratégica" in resposta.text
+    assert "Finanças" not in resposta.text
     assert "O FORM 1 somente começa depois da criação do Registro" in resposta.text
 
 
@@ -104,7 +104,7 @@ def test_g1_pela_tela_cria_registro_contextualizado_e_form1_nao_iniciado():
     assert "Registro criado. Confirme o contexto antes de iniciar o FORM 1." in resposta.text
     assert "ciclo 1" in resposta.text
     assert "Certidão de débitos (fictício)" in resposta.text
-    assert "Unidade Norte (fictícia)" in resposta.text
+    assert "Planejamento Urbano e Gestão Estratégica" in resposta.text
     assert "CTX-TRIB-03" in resposta.text
     assert "Não iniciado" in resposta.text
     with Session(motor) as sessao:

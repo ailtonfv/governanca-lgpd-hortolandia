@@ -194,7 +194,38 @@ flowchart LR
 
 **O que o catálogo não é:** não é uma cópia importada da Carta de Serviços (que continua sendo referência de consulta, SAD 05, 13.4); não é preenchido pelo elaborador na hora de criar o Registro; e não contém dados pessoais.
 
-**Em aberto (O-80):** quem exerce a curadoria; como será a carga inicial; e a lista inicial de contextos de atuação. Na PoC, os catálogos são fictícios.
+#### Como o catálogo real poderá ser formado
+
+A Carta de Serviços e o portal municipal fornecem uma primeira relação de **serviços**. Os FORMs devolvidos pelas Secretarias revelarão também os **processos e atividades** realmente executados. Em ambos os casos, o conteúdo recebido será apenas uma **proposta de item**: não entrará automaticamente no catálogo oficial.
+
+```mermaid
+flowchart LR
+    CS["Carta de Serviços<br/>e portal municipal"] --> CAND["Itens candidatos"]
+    FO["FORMs recebidos<br/>das Secretarias"] --> CAND
+    CAND --> TRI["Curadoria<br/>confere o uso de dados pessoais<br/>tipo · Secretaria · duplicidade<br/>fonte e data de referência"]
+    TRI -->|aprovado| CAT["Catálogo oficial<br/>identificador canônico"]
+    TRI -->|ajustes| DEV["Devolver para<br/>complementação"]
+    CAT --> REG["Novo Registro LGPD"]
+```
+
+A curadoria deverá ligar cada item a uma ou mais Secretarias, registrar qual delas é responsável e quais apenas participam, normalizar nomes equivalentes e impedir duplicidades. Só interessam ao catálogo LGPD os serviços, processos e atividades que tratem dados pessoais; o sistema não pretende inventariar toda a Prefeitura.
+
+#### A tela não deve abrir um catálogo global
+
+O percurso definitivo será em cascata: **Secretaria responsável → serviço, processo ou atividade → itens vinculados à Secretaria → contextos compatíveis com o item**. Assim, um agente de Planejamento não recebe uma lista indiscriminada de objetos de todas as áreas. Se nenhum item ou contexto servir, ele solicitará revisão do catálogo, sem criar uma denominação livre.
+
+No corte atual da PoC, os objetos e contextos ainda são fictícios e globais. A filtragem por Secretaria e as relações **Secretaria ↔ objeto** e **objeto ↔ contextos permitidos** ficaram deliberadamente para um incremento testado posterior; não foram improvisadas nesta rodada.
+
+#### Onde entram os canais, como o 156
+
+Canal não é um quarto tipo ao lado de serviço, processo e atividade. Depois da escolha do objeto, a interface poderá exibir **“Canais de atendimento relacionados”** como informação proveniente do catálogo — não como uma lista livre de marcações do agente.
+
+- Se o canal apenas encaminha a solicitação, ele é apoio do Registro do serviço ou processo.
+- Se o próprio canal identifica a pessoa, protocola, grava, mantém histórico ou realiza outro tratamento autônomo de dados pessoais, ele poderá ter Registro próprio.
+
+Essa decisão preserva a transversalidade sem confundir o canal de entrada com o objeto que efetivamente entrega o serviço ou executa o processo.
+
+**Em aberto (O-80):** quem exercerá formalmente a curadoria; quais serão os primeiros itens aprovados; e a lista inicial de contextos de atuação. O método de formação e revisão está definido acima, mas o catálogo definitivo ainda depende dessa decisão institucional. Na PoC, objetos e contextos permanecem fictícios.
 
 ### Contexto de atuação e finalidade: duas coisas diferentes
 
@@ -210,6 +241,8 @@ Na LGPD, **finalidade** tem sentido preciso: "realização do tratamento para pr
 A finalidade é sempre declarada **dentro** de um contexto de atuação.
 
 **Definição.** Contexto de atuação é a classificação cadastral que identifica o recorte administrativo e funcional no qual o tratamento associado a um objeto é descrito pelo Registro LGPD. É utilizado para distinguir tratamentos autônomos envolvendo o mesmo objeto e para prevenir Registros duplicados. Não substitui a finalidade do tratamento exigida pela LGPD, não representa a hipótese legal e não corresponde necessariamente a uma Secretaria ou unidade organizacional.
+
+Na tela, a explicação curta será: **“Contexto de atuação é a frente administrativa e funcional em que este serviço, processo ou atividade utiliza dados pessoais. Ele ajuda a diferenciar tratamentos e evitar Registros duplicados.”** A ajuda também esclarecerá que contexto não é a Secretaria responsável, o canal de atendimento, a hipótese legal nem a finalidade do tratamento — esta última será descrita no FORM 1.
 
 **Pergunta-teste:** *Em qual frente concreta de atuação administrativa este objeto está sendo utilizado ou executado neste Registro?*
 
@@ -565,7 +598,7 @@ flowchart TD
 | ↳ Declaração de transversalidade, só pela governança (DA-39, item 2) | ✔ Implementada |
 | ↳ Alerta estrutural | ⚙️ Parcial: base de dados comum ✔; relações do catálogo a fazer (O-80) |
 | ↳ Semelhança por finalidade, categorias de titulares, categorias de dados e compartilhamentos | ✔ Alerta não bloqueante no I3 (DA-39, item 4) |
-| ↳ Testes automatizados (pytest, base própria) | ✔ 177 aprovados |
+| ↳ Testes automatizados (pytest, base própria) | ✔ 178 aprovados |
 | Checkpoint externo da cadeia (SAD 08) | a fazer |
 | Rascunho do FORM 1: I1 iniciar preenchimento e I2 salvar, com controle otimista | ✔ |
 | ↳ Testes de I1 e I2 | ✔ 14 testes: estado, lacre, cadeia, idempotência, autorização, concorrência, rollback, migração e POC-TS-004 |
@@ -603,9 +636,9 @@ flowchart TD
 
 ¹ Tentativas negadas ficam registradas na auditoria. O cenário d (substituição) está a fazer.
 ² O início do preenchimento do FORM 1 será um comando posterior ao G1, como no cenário A1 do SAD 04.
-³ Trava determinística por objeto e contexto e exatamente um PRINCIPAL, no próprio banco; um contexto por Registro garantido por chave composta (DA-39, item 1); advertência de família e transversalidade (DA-39, item 2); recusas do banco tratadas pelo nome da regra. A suíte chegou a 177 testes automatizados aprovados em 19/10/2026, inclusive pedidos simultâneos, quatorze testes HTTP e dois testes específicos de identidade. Suspenso e Cancelado continuam testados como regra do banco até a chegada dos atos do M1b.1; Concluído já é alcançado pelos G5 e G6 reais.
+³ Trava determinística por objeto e contexto e exatamente um PRINCIPAL, no próprio banco; um contexto por Registro garantido por chave composta (DA-39, item 1); advertência de família e transversalidade (DA-39, item 2); recusas do banco tratadas pelo nome da regra. A suíte chegou a 178 testes automatizados aprovados em 20/10/2026, inclusive pedidos simultâneos, quatorze testes HTTP e três testes específicos de identidade e catálogo institucional. Suspenso e Cancelado continuam testados como regra do banco até a chegada dos atos do M1b.1; Concluído já é alcançado pelos G5 e G6 reais.
 
-### O que os 177 testes garantem, em linguagem simples
+### O que os 178 testes garantem, em linguagem simples
 
 Os testes atuais exercitam o motor da PoC com dados fictícios e procuram responder a perguntas práticas:
 
@@ -631,7 +664,7 @@ Os testes atuais exercitam o motor da PoC com dados fictícios e procuram respon
 - **Participação intersecretarial:** a unidade principal envia uma pendência à fila institucional de outra unidade. Um agente previamente designado assume e responde com entrada, operações, saída, interfaces e evidências; a origem aceita. O destino não edita o FORM 1, o Registro não muda de unidade principal e G5 permanece bloqueado até o aceite.
 - **Flags operacionais:** os avisos da tela inicial são calculados a partir da pendência real. Eles mudam de “Correção solicitada” para “Pendência atribuída a você” sem manter uma segunda verdade no banco.
 
-Esses 177 testes são a cobertura automatizada atual do motor e dos primeiros cortes HTTP. Eles ainda **não substituem** a bateria formal completa POC-TS-001 a POC-TS-009, que exigirá os percursos de aceite e as respectivas evidências; a tela desatualizada exercita o POC-TS-004 e a negação auditada da consulta prepara o POC-TS-007.
+Esses 178 testes são a cobertura automatizada atual do motor e dos primeiros cortes HTTP. Eles ainda **não substituem** a bateria formal completa POC-TS-001 a POC-TS-009, que exigirá os percursos de aceite e as respectivas evidências; a tela desatualizada exercita o POC-TS-004 e a negação auditada da consulta prepara o POC-TS-007.
 
 ### Legenda operacional: agentes e funções
 
@@ -879,6 +912,8 @@ O nome do objeto não é digitado livremente: vem do catálogo oficial. A Secret
 
 Nesta PoC, o catálogo institucional está limitado às **18 Secretarias da Administração Direta**. O Hortoprev não será tratado: por ser autarquia da Administração Indireta, fica fora do recorte aprovado para esta demonstração.
 
+Os nomes das 18 Secretarias são metadados institucionais públicos e aparecem como no portal municipal; agentes, matrículas, designações, serviços e Registros permanecem fictícios. O catálogo não concede autorização: cada agente visualiza para criação somente as Secretarias em que possui designação vigente de elaborador.
+
 O painel procura os Registros da unidade do agente e também aqueles que chegaram até ele por uma pendência institucional ativa.
 
 ```mermaid
@@ -904,17 +939,41 @@ flowchart LR
 
 Em linguagem simples, cada salvamento aumenta o número do rascunho. Se duas telas tentarem salvar o mesmo número, apenas a primeira vence; a segunda recebe a orientação para recarregar. O HTML não decide essa regra: ele envia o pedido para as funções de domínio já testadas. A submissão I3 e as decisões posteriores ainda não foram ligadas à interface.
 
-### Como funciona a pendência entre duas unidades
+### O Registro permanece com a Secretaria responsável
 
-No percurso intersecretarial, P1 é humano: um agente designado da unidade principal envia uma participação para a fila institucional de outra unidade. O destino não recebe autorização para editar o FORM 1 e o Registro não troca de proprietário.
+O Registro não é “enviado” nem transferido sempre que outra pessoa precisa atuar. **Planejamento Urbano e Gestão Estratégica continua sendo a Secretaria responsável**; o que circula são tarefas, versões para análise e pendências de participação. Essa distinção evita perder a responsabilidade institucional e preserva uma única trilha de auditoria.
+
+| Situação | O que acontece | O que não acontece |
+|---|---|---|
+| Outro agente da mesma Secretaria precisa atuar | O agente autorizado recebe ou assume a próxima ação conforme seu papel | O Registro não muda de Secretaria |
+| O FORM 1 é submetido para validação | A versão segue para análise; I13 define o responsável e I14 permite reatribuir a análise | O analista não se torna proprietário do Registro |
+| Outra Secretaria precisa colaborar | A Secretaria responsável cria uma pendência de participação; o destino assume, responde e devolve evidências | O destino não edita o FORM 1 nem assume o Registro |
+| Seria necessário mudar a Secretaria responsável | Exige decisão institucional e percurso próprio, ainda não implementado | A troca não pode ser feita informalmente por um agente |
+
+```mermaid
+flowchart TD
+    R["Registro permanece em<br/>Planejamento"]
+    R --> A["Outro agente de Planejamento<br/>atua conforme seu papel"]
+    R --> V["Versão do FORM 1<br/>segue para análise"]
+    R --> P["Pendência solicita participação<br/>de outra Secretaria"]
+    A -. "não transfere" .-> R
+    V -. "não transfere" .-> R
+    P -. "resposta e evidências retornam" .-> R
+```
+
+Na interface, as expressões operacionais serão **“Solicitar participação de outra Secretaria”** e **“Atribuir próxima ação a outro agente”**, evitando o rótulo ambíguo “Enviar Registro”. O M1a já implementa a participação intersecretarial e a reatribuição da análise; o repasse interno formal da responsabilidade pelo preenchimento e as regras completas de substituição pertencem aos incrementos posteriores.
+
+### Como funciona a pendência entre duas Secretarias
+
+No percurso intersecretarial, P1 é humano: um agente designado da Secretaria responsável solicita uma participação à fila institucional de outra Secretaria. O destino não recebe autorização para editar o FORM 1 e o Registro não troca de responsável institucional.
 
 ```mermaid
 flowchart LR
-    N["Unidade Norte<br/>mantém o Registro"] -- "P1: solicita participação" --> F["Fila institucional<br/>Unidade Sul"]
+    N["Planejamento<br/>mantém o Registro"] -- "P1: solicita participação" --> F["Fila institucional<br/>Finanças"]
     F -- "P2: agente designado assume" --> T["Providência em atendimento"]
     T -- "P3: resposta + evidências" --> R["Resposta lacrada"]
     R -- "P4: origem aceita" --> E["Pendência encerrada"]
-    E -. "Registro continua na origem" .-> N
+    E -. "Registro continua em Planejamento" .-> N
 ```
 
 A resposta possui um contrato pequeno e fechado: etapa executada, entrada recebida, operações realizadas, saída produzida, interfaces com a etapa seguinte e referências de evidência. Campos inesperados ou evidência vazia são recusados. Na carga fictícia, `agente_pendencia` representa a designação prévia pela chefia mencionada no SAD; não é sinônimo de elaborador, analista ou validador.
@@ -1057,7 +1116,7 @@ M1b — Fluxos de controle
 
 | Item | Assunto | Natureza | Quem decide | O que bloqueia | Onde será registrado |
 |---|---|---|---|---|---|
-| O-80 | Curadoria e carga dos catálogos | ⏳ Decisão pendente | A definir | Catálogo definitivo (na PoC, os catálogos são fictícios) | SAD correspondente (SAD 05 e SAD 03) |
+| O-80 | Curadoria e carga dos catálogos | ⏳ Responsável institucional e conteúdo inicial pendentes; método operacional definido | A definir | Catálogo definitivo (na PoC, objetos e contextos são fictícios) | SAD correspondente (SAD 05 e SAD 03) |
 | O-82 | Consolidação documental da decisão do G11 no SAD 04 | 📄 Consolidação (decidido na DA-37) | Encarregado | Nada na PoC | SAD 04, na revisão pós-PoC |
 | O-83 | Consolidação documental de contextos, bases e famílias | 📄 Consolidação (decidido na DA-38) | Encarregado | Nada na PoC | SADs 02, 04, 05, 08 e 09, na revisão pós-PoC |
 | D1, D2, D4 e devolução | Um contexto por Registro; advertência e transversalidade; numeração anual; devolução com congelamento por hash e P5/P6 | 📄 Consolidação (decidido na DA-39, SAD 10 REV16) | Encarregado | Nada na PoC | SADs 02, 03, 05 e 08, na revisão pós-PoC |

@@ -142,7 +142,8 @@ class Conta(Base):
 
 
 class Unidade(Base):
-    """Uma unidade administrativa (Secretaria, departamento...). Na PoC, unidades fictícias."""
+    """Uma unidade administrativa. A PoC usa nomes públicos reais das Secretarias, mas agentes,
+    designações, Registros e conteúdos continuam fictícios."""
     __tablename__ = "unidade"
 
     id = Column(String(50), primary_key=True)        # ex.: UNID-NORTE

@@ -1,5 +1,6 @@
-# Carga FICTÍCIA: pessoas, contas, unidades e designações de papéis (SAD 03; O-66; D2).
-# Nenhum dado pessoal real, CPF, matrícula ou senha.
+# Carga da PoC: pessoas, contas e designações FICTÍCIAS; nomes institucionais públicos das
+# 18 Secretarias da Administração Direta de Hortolândia, conferidos no portal municipal em
+# 19/10/2026. O Hortoprev não integra o recorte. Nenhum dado pessoal real, CPF ou senha.
 
 from sqlalchemy import select
 from app.modelos import Pessoa, Conta, Unidade, Designacao
@@ -14,9 +15,28 @@ PESSOAS = [
     ("PESSOA-F", "MAT-FICT-0006", "Servidor Delta (fictício)",       ["CONTA-F1"]),
 ]
 
-UNIDADES = [
-    ("UNID-NORTE", "Unidade Norte (fictícia)"),
-    ("UNID-SUL", "Unidade Sul (fictícia)"),
+SECRETARIAS = [
+    ("SEC-ADM-GP", "Administração e Gestão de Pessoal"),
+    ("SEC-AJ", "Assuntos Jurídicos"),
+    ("SEC-CULT", "Cultura"),
+    ("SEC-DETTI", "Desenvolvimento Econômico, Trabalho, Turismo e Inovação"),
+    ("SEC-EDUC", "Educação, Ciência e Tecnologia"),
+    ("SEC-ESP", "Esporte e Lazer"),
+    ("UNID-SUL", "Finanças"),  # id legado preservado para não alterar Registros e eventos
+    ("SEC-GOV", "Governo"),
+    ("SEC-HAB", "Habitação"),
+    ("SEC-IDS", "Inclusão e Desenvolvimento Social"),
+    ("SEC-MA", "Meio Ambiente, Desenvolvimento Sustentável e Assuntos Climáticos"),
+    ("SEC-MOB", "Mobilidade Urbana"),
+    ("SEC-OBRAS", "Obras"),
+    ("UNID-NORTE", "Planejamento Urbano e Gestão Estratégica"),  # id legado preservado
+    ("SEC-SAUDE", "Saúde"),
+    ("SEC-SEG", "Segurança Pública"),
+    ("SEC-SU", "Serviços Urbanos"),
+    ("SEC-TI", "Tecnologia e Inovação"),
+]
+
+UNIDADES = SECRETARIAS + [
     ("UNID-GOV", "Governança de proteção de dados (fictícia)"),
 ]
 
@@ -52,9 +72,13 @@ def semear(sessao):
                 sessao.add(Conta(id=cid, pessoa_id=pid))
                 novos += 1
     for uid, nome in UNIDADES:
-        if sessao.get(Unidade, uid) is None:
+        unidade = sessao.get(Unidade, uid)
+        if unidade is None:
             sessao.add(Unidade(id=uid, nome=nome))
             novos += 1
+        elif unidade.nome != nome:
+            # Sincroniza somente metadado institucional público; ids e vínculos permanecem.
+            unidade.nome = nome
     sessao.flush()
     for pid, uid, papel in DESIGNACOES:
         existe = sessao.scalars(select(Designacao).where(

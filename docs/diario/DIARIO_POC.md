@@ -259,3 +259,16 @@ Regras deste diário: sem senhas, tokens ou dados pessoais; cada entrada com dat
 - Acrescentados 6 testes: duas garantias da identidade e quatro percursos HTTP. O novo percurso integrado cria um Registro isolado e atravessa contexto inicial, G1, I1 e I2, sem apagar nem recomeçar o Registro 0001. Os 16 testes de identidade/interface e a suíte completa de 177 testes foram aprovados.
 - Migração 8 aplicada à base local. O Registro fictício `LGPD-2026-00001` permaneceu `em_andamento`; o FORM 1 permaneceu `em_preenchimento`, com rascunho 2 e `TIT-CONTRIBUINTE` preservados.
 - Servidor local reiniciado sem `--reload`. Painel e nova etapa contextual responderam HTTP 200 com matrícula fictícia, os três tipos de objeto e a unidade principal.
+
+## 2026-10-20 — catálogo institucional das Secretarias
+
+- Autorizado o uso dos nomes reais e públicos das 18 Secretarias da Administração Direta no catálogo institucional; o Hortoprev permanece fora do recorte. Pessoas, matrículas, designações, serviços e Registros continuam fictícios.
+- Os ids legados `UNID-NORTE` e `UNID-SUL` foram preservados para manter vínculos e eventos, passando a exibir, respectivamente, Planejamento Urbano e Gestão Estratégica e Finanças. As outras 16 Secretarias foram acrescentadas sem receber designações automáticas.
+- O catálogo não amplia permissões: a tela de criação apresenta somente Secretarias em que o agente possui designação vigente de elaborador. Alfa vê Planejamento e não vê Finanças.
+- Acrescentado teste que garante exatamente 18 Secretarias, nomes e identificadores únicos e ausência do Hortoprev. Os 17 testes de identidade/interface e a suíte completa de 178 testes foram aprovados.
+- A carga foi sincronizada na base local. O Registro `LGPD-2026-00001` permaneceu preservado.
+- README ganhou diretriz operacional com diagrama: o Registro permanece com a Secretaria responsável; agentes, versões e pendências circulam sem transferência informal. Foram diferenciadas atuação interna, submissão para análise, participação de outra Secretaria e eventual mudança da Secretaria responsável. Os rótulos recomendados são “Solicitar participação de outra Secretaria” e “Atribuir próxima ação a outro agente”.
+- Fechado o método operacional de formação do catálogo: Carta de Serviços e portal fornecem candidatos a serviços; os FORMs recebidos das Secretarias fornecem candidatos também a processos e atividades. Nenhum item se torna oficial automaticamente: a curadoria verifica o tratamento de dados pessoais, tipo, Secretaria, duplicidades, fonte e data e atribui o identificador canônico.
+- Definido o percurso futuro em cascata: Secretaria responsável → tipo → objeto vinculado à Secretaria → contextos permitidos. A filtragem e as relações de catálogo não foram implementadas nesta rodada, conforme decisão de não antecipá-las sem carga e curadoria; ficaram como incremento próprio testado.
+- Consolidada a explicação de contexto para a interface: é a frente administrativa e funcional em que o objeto utiliza dados pessoais; não é Secretaria, canal, hipótese legal nem finalidade do FORM 1.
+- Canais como o 156 não formarão um quarto tipo de objeto. Serão relações informativas do catálogo; quando apenas encaminharem, serão apoio, e somente receberão Registro próprio se realizarem tratamento autônomo de dados pessoais.

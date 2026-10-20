@@ -5,7 +5,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.banco import motor
-from app.modelos import Pessoa
+from app.modelos import Pessoa, Unidade
+from carga_ficticia.pessoas import SECRETARIAS
 
 
 def test_carga_atribui_uma_matricula_unica_a_cada_pessoa():
@@ -23,3 +24,15 @@ def test_banco_recusa_matricula_repetida():
             id="PESSOA-REPETIDA", matricula="MAT-FICT-0001",
             nome="Servidor repetido (fictício)", ativa=True,
         ))
+
+
+def test_catalogo_institucional_tem_as_18_secretarias_sem_hortoprev():
+    assert len(SECRETARIAS) == 18
+    assert len({identificador for identificador, _ in SECRETARIAS}) == 18
+    assert len({nome for _, nome in SECRETARIAS}) == 18
+    assert all("Hortoprev" not in nome for _, nome in SECRETARIAS)
+    with Session(motor) as sessao:
+        assert all(
+            sessao.get(Unidade, identificador).nome == nome
+            for identificador, nome in SECRETARIAS
+        )
