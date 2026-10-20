@@ -87,6 +87,19 @@ def test_novo_registro_define_tipo_unidade_principal_e_contexto_antes_do_form1()
     assert "O FORM 1 somente começa depois da criação do Registro" in resposta.text
 
 
+def test_contexto_inicial_diferencia_contexto_e_finalidade_por_exemplo():
+    resposta = cliente.get("/registros/novo", params={"conta_id": "CONTA-A1"})
+
+    assert resposta.status_code == 200
+    assert 'aria-describedby="exemplo-contexto"' in resposta.text
+    assert "fornecimento de medicamento de alto custo" in resposta.text
+    assert "Assistência farmacêutica" in resposta.text
+    assert "somente os dados de identificação, contato e saúde necessários" in resposta.text
+    assert "verificar os requisitos, fornecer o medicamento" in resposta.text
+    assert "Pergunta-chave:" in resposta.text
+    assert "para que os dados pessoais são utilizados?" in resposta.text
+
+
 def test_g1_pela_tela_cria_registro_contextualizado_e_form1_nao_iniciado():
     resposta = cliente.post(
         "/registros",

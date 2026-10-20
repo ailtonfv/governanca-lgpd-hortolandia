@@ -242,7 +242,7 @@ A finalidade é sempre declarada **dentro** de um contexto de atuação.
 
 **Definição.** Contexto de atuação é a classificação cadastral que identifica o recorte administrativo e funcional no qual o tratamento associado a um objeto é descrito pelo Registro LGPD. É utilizado para distinguir tratamentos autônomos envolvendo o mesmo objeto e para prevenir Registros duplicados. Não substitui a finalidade do tratamento exigida pela LGPD, não representa a hipótese legal e não corresponde necessariamente a uma Secretaria ou unidade organizacional.
 
-Na tela, a explicação curta será: **“Contexto de atuação é a frente administrativa e funcional em que este serviço, processo ou atividade utiliza dados pessoais. Ele ajuda a diferenciar tratamentos e evitar Registros duplicados.”** A ajuda também esclarecerá que contexto não é a Secretaria responsável, o canal de atendimento, a hipótese legal nem a finalidade do tratamento — esta última será descrita no FORM 1.
+Na tela de criação, a diferença é ensinada por um exemplo da Saúde: no fornecimento de medicamento de alto custo, **Assistência farmacêutica** é o contexto de atuação; a finalidade, descrita depois no FORM 1, é utilizar somente os dados de identificação, contato e saúde necessários para verificar os requisitos, fornecer o medicamento e acompanhar a continuidade do tratamento. Em linguagem direta: **finalidade define para que os dados pessoais são utilizados**.
 
 **Pergunta-teste:** *Em qual frente concreta de atuação administrativa este objeto está sendo utilizado ou executado neste Registro?*
 
@@ -598,7 +598,7 @@ flowchart TD
 | ↳ Declaração de transversalidade, só pela governança (DA-39, item 2) | ✔ Implementada |
 | ↳ Alerta estrutural | ⚙️ Parcial: base de dados comum ✔; relações do catálogo a fazer (O-80) |
 | ↳ Semelhança por finalidade, categorias de titulares, categorias de dados e compartilhamentos | ✔ Alerta não bloqueante no I3 (DA-39, item 4) |
-| ↳ Testes automatizados (pytest, base própria) | ✔ 178 aprovados |
+| ↳ Testes automatizados (pytest, base própria) | ✔ 179 aprovados |
 | Checkpoint externo da cadeia (SAD 08) | a fazer |
 | Rascunho do FORM 1: I1 iniciar preenchimento e I2 salvar, com controle otimista | ✔ |
 | ↳ Testes de I1 e I2 | ✔ 14 testes: estado, lacre, cadeia, idempotência, autorização, concorrência, rollback, migração e POC-TS-004 |
@@ -632,13 +632,13 @@ flowchart TD
 | Pendência intersecretarial mínima: P1 humano, P2, P3 com evidência e P4 pela origem | ✔ Registro permanece na unidade principal e o FORM 1 não é editado pelo destino |
 | ↳ Testes da pendência intersecretarial | ✔ 15 testes: criação, contexto mínimo, designações, fila, flags, resposta, evidência, aceite, propriedade, idempotência, concorrência, rollback de P1/P3/P4 e bloqueio do G5 |
 | Demais atos ampliados do workflow | a fazer no M1b |
-| Telas (FastAPI + Jinja2) e testes de aceite do M1a (POC-TS-001 a 009) | ⚙️ Em andamento: identidade fictícia, contexto inicial, painel, detalhe, I1/I2, escopo institucional e negação auditada; 14 testes HTTP |
+| Telas (FastAPI + Jinja2) e testes de aceite do M1a (POC-TS-001 a 009) | ⚙️ Em andamento: identidade fictícia, contexto inicial, painel, detalhe, I1/I2, escopo institucional e negação auditada; 15 testes HTTP |
 
 ¹ Tentativas negadas ficam registradas na auditoria. O cenário d (substituição) está a fazer.
 ² O início do preenchimento do FORM 1 será um comando posterior ao G1, como no cenário A1 do SAD 04.
-³ Trava determinística por objeto e contexto e exatamente um PRINCIPAL, no próprio banco; um contexto por Registro garantido por chave composta (DA-39, item 1); advertência de família e transversalidade (DA-39, item 2); recusas do banco tratadas pelo nome da regra. A suíte chegou a 178 testes automatizados aprovados em 20/10/2026, inclusive pedidos simultâneos, quatorze testes HTTP e três testes específicos de identidade e catálogo institucional. Suspenso e Cancelado continuam testados como regra do banco até a chegada dos atos do M1b.1; Concluído já é alcançado pelos G5 e G6 reais.
+³ Trava determinística por objeto e contexto e exatamente um PRINCIPAL, no próprio banco; um contexto por Registro garantido por chave composta (DA-39, item 1); advertência de família e transversalidade (DA-39, item 2); recusas do banco tratadas pelo nome da regra. A suíte chegou a 179 testes automatizados aprovados em 20/10/2026, inclusive pedidos simultâneos, quinze testes HTTP e três testes específicos de identidade e catálogo institucional. Suspenso e Cancelado continuam testados como regra do banco até a chegada dos atos do M1b.1; Concluído já é alcançado pelos G5 e G6 reais.
 
-### O que os 178 testes garantem, em linguagem simples
+### O que os 179 testes garantem, em linguagem simples
 
 Os testes atuais exercitam o motor da PoC com dados fictícios e procuram responder a perguntas práticas:
 
@@ -664,7 +664,7 @@ Os testes atuais exercitam o motor da PoC com dados fictícios e procuram respon
 - **Participação intersecretarial:** a unidade principal envia uma pendência à fila institucional de outra unidade. Um agente previamente designado assume e responde com entrada, operações, saída, interfaces e evidências; a origem aceita. O destino não edita o FORM 1, o Registro não muda de unidade principal e G5 permanece bloqueado até o aceite.
 - **Flags operacionais:** os avisos da tela inicial são calculados a partir da pendência real. Eles mudam de “Correção solicitada” para “Pendência atribuída a você” sem manter uma segunda verdade no banco.
 
-Esses 178 testes são a cobertura automatizada atual do motor e dos primeiros cortes HTTP. Eles ainda **não substituem** a bateria formal completa POC-TS-001 a POC-TS-009, que exigirá os percursos de aceite e as respectivas evidências; a tela desatualizada exercita o POC-TS-004 e a negação auditada da consulta prepara o POC-TS-007.
+Esses 179 testes são a cobertura automatizada atual do motor e dos primeiros cortes HTTP. Eles ainda **não substituem** a bateria formal completa POC-TS-001 a POC-TS-009, que exigirá os percursos de aceite e as respectivas evidências; a tela desatualizada exercita o POC-TS-004 e a negação auditada da consulta prepara o POC-TS-007.
 
 ### Legenda operacional: agentes e funções
 

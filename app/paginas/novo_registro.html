@@ -46,10 +46,11 @@
     <p class="ajuda">O nome oficial vem do catálogo; não é digitado livremente.</p>
 
     <label for="contexto_id">4. Contexto de atuação</label>
-    <select id="contexto_id" name="contexto_id" required>
+    <select id="contexto_id" name="contexto_id" aria-describedby="exemplo-contexto" required>
       <option value="">Selecione o contexto</option>
       {% for contexto in contextos %}<option value="{{ contexto.id }}">{{ contexto.nome }}</option>{% endfor %}
     </select>
+    <p class="ajuda" id="exemplo-contexto"><strong>Exemplo — fornecimento de medicamento de alto custo</strong><br><strong>Contexto:</strong> Assistência farmacêutica.<br><strong>Finalidade no FORM 1:</strong> utilizar somente os dados de identificação, contato e saúde necessários para verificar os requisitos, fornecer o medicamento e acompanhar o tratamento.<br><strong>Pergunta-chave:</strong> para que os dados pessoais são utilizados?</p>
 
     <div class="rodape-formulario">
       <p>Ao confirmar, o G1 criará o Registro e o FORM 1 no estado “Não iniciado”.</p>
