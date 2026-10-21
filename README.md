@@ -640,7 +640,7 @@ flowchart TD
 | ↳ Declaração de transversalidade, só pela governança (DA-39, item 2) | ✔ Implementada |
 | ↳ Alerta estrutural | ⚙️ Parcial: base comum e vínculos fictícios Secretaria → item → contexto ✔; curadoria institucional continua em O-80 |
 | ↳ Semelhança por finalidade, categorias de titulares, categorias de dados e compartilhamentos | ✔ Alerta não bloqueante no I3 (DA-39, item 4) |
-| ↳ Testes automatizados (pytest, base própria) | ✔ 184 aprovados |
+| ↳ Testes automatizados (pytest, base própria) | ✔ 188 aprovados |
 | Checkpoint externo da cadeia (SAD 08) | a fazer |
 | Rascunho do FORM 1: I1 iniciar preenchimento e I2 salvar, com controle otimista | ✔ |
 | ↳ Testes de I1 e I2 | ✔ 14 testes: estado, lacre, cadeia, idempotência, autorização, concorrência, rollback, migração e POC-TS-004 |
@@ -678,9 +678,9 @@ flowchart TD
 
 ¹ Tentativas negadas ficam registradas na auditoria. O cenário d (substituição) está a fazer.
 ² O início do preenchimento do FORM 1 será um comando posterior ao G1, como no cenário A1 do SAD 04.
-³ Trava determinística por objeto e contexto e exatamente um PRINCIPAL, no próprio banco; um contexto por Registro garantido por chave composta (DA-39, item 1); advertência de família e transversalidade (DA-39, item 2); recusas do banco tratadas pelo nome da regra. A suíte chegou a 184 testes automatizados aprovados em 21/10/2026, inclusive pedidos simultâneos, dezenove testes HTTP e quatro testes específicos de identidade e catálogo institucional. Suspenso e Cancelado continuam testados como regra do banco até a chegada dos atos do M1b.1; Concluído já é alcançado pelos G5 e G6 reais.
+³ Trava determinística por objeto e contexto e exatamente um PRINCIPAL, no próprio banco; um contexto por Registro garantido por chave composta (DA-39, item 1); advertência de família e transversalidade (DA-39, item 2); recusas do banco tratadas pelo nome da regra. A suíte chegou a 188 testes automatizados aprovados em 21/10/2026, inclusive pedidos simultâneos, dezenove testes HTTP, quatro testes específicos de identidade e catálogo institucional e quatro variações da barreira de dados pessoais na carga fictícia. Suspenso e Cancelado continuam testados como regra do banco até a chegada dos atos do M1b.1; Concluído já é alcançado pelos G5 e G6 reais.
 
-### O que os 184 testes garantem, em linguagem simples
+### O que os 188 testes garantem, em linguagem simples
 
 Os testes atuais exercitam o motor da PoC com dados fictícios e procuram responder a perguntas práticas:
 
@@ -707,7 +707,29 @@ Os testes atuais exercitam o motor da PoC com dados fictícios e procuram respon
 - **Participação intersecretarial:** a unidade principal envia uma pendência à fila institucional de outra unidade. Um agente previamente designado assume e responde com entrada, operações, saída, interfaces e evidências; a origem aceita. O destino não edita o FORM 1, o Registro não muda de unidade principal e G5 permanece bloqueado até o aceite.
 - **Flags operacionais:** os avisos da tela inicial são calculados a partir da pendência real. Eles mudam de “Correção solicitada” para “Pendência atribuída a você” sem manter uma segunda verdade no banco.
 
-Esses 184 testes são a cobertura automatizada atual do motor e dos primeiros cortes HTTP. Eles ainda **não substituem** a bateria formal completa POC-TS-001 a POC-TS-009, que exigirá os percursos de aceite e as respectivas evidências; a tela desatualizada exercita o POC-TS-004 e a negação auditada da consulta prepara o POC-TS-007.
+Esses 188 testes são a cobertura automatizada atual do motor e dos primeiros cortes HTTP. Eles ainda **não substituem** a bateria formal completa POC-TS-001 a POC-TS-009, que exigirá os percursos de aceite e as respectivas evidências; a tela desatualizada exercita o POC-TS-004, a negação auditada da consulta prepara o POC-TS-007 e a barreira da carga cobre o POC-TS-008.
+
+### Matriz de aceite da PoC nuclear
+
+Em termos simples, o caminho até o aceite é este:
+
+```mermaid
+flowchart LR
+    R["Regra"] --> C["Cenário POC-TS"]
+    C --> A["Teste automatizado"]
+    A --> E["Evidência"]
+    E --> V["Aceite do M1a"]
+```
+
+Hoje, **oito dos nove testes formais possuem cobertura automatizada relevante**, mas ainda precisam de uma rodada identificada e das evidências formais. O único ensaio técnico ainda pendente é o volume de 1.000 Registros com cerca de 50.000 eventos (`POC-TS-009`). No `POC-TS-003`, o teste concorrente confirma a assunção única e a auditoria da tentativa perdedora; no `POC-TS-008`, a carga rejeita identidades sem marcadores sintéticos e textos com CPF, e-mail ou telefone em formato pessoal antes do primeiro `INSERT`, sem repetir o conteúdo suspeito no erro.
+
+| Situação | Testes | O que significa |
+|---|---|---|
+| ⚙️ Cobertura existente; aceite parcial | POC-TS-001 a 008 | O comportamento principal já é exercitado, mas a execução e a evidência ainda precisam ser formalizadas. |
+| ⏳ Ensaio pendente | POC-TS-009 | Ainda é necessário preparar e executar o ensaio completo de volume. |
+| ✔ Aceite formal concluído | Nenhum ainda | Só será marcado depois da execução identificada, evidência, conferência e registro no aceite. |
+
+> 📋 A correspondência teste por teste, os arquivos que já dão cobertura e as evidências que faltam estão na [Matriz de aceite do M1a](docs/aceite/MATRIZ_ACEITE_M1A.md).
 
 ### Legenda operacional: agentes e funções
 
@@ -1151,7 +1173,7 @@ M1b — Fluxos de controle
 | 2 | Etapa 2d: correções | Idempotência estrita, tratamento específico das recusas do banco, papéis explícitos no pedido, numeração anual (D4), um contexto por Registro (D1) | M1a |
 | 3 | Etapa 2d: advertência e transversalidade | Resolução da advertência de família e declaração de transversalidade (D2) | M1a |
 | 4 | Concluir o núcleo do workflow | Rascunho, versão, submissão (com a verificação material), retirada da submissão antes da análise (I4, cenário A11), análise com segregação e reatribuição da análise (I14, cenário A14), devolução com pendência (P1 a P4, e P5/P6 no percurso da devolução), validação, conclusão e pendência intersecretarial; ação obrigatória sintética mínima e percurso com medidas (I5 → G4 → Em execução → G6) | M1a |
-| 5 | Automatizar os testes de aceite do M1a | Em andamento: primeiro corte HTTP e negação auditada concluídos; completar POC-TS-001 a 009 e gerar as evidências POC-EV do marco | M1a |
+| 5 | Formalizar os testes de aceite do M1a | Oito dos nove testes possuem cobertura automatizada relevante; executar o ensaio de volume POC-TS-009 e gerar as evidências POC-EV do marco conforme a [matriz de aceite](docs/aceite/MATRIZ_ACEITE_M1A.md) | M1a |
 | 6 | Fechar as decisões normativas pendentes | Competência do item 4 da DA-37 (quadro abaixo) | M1a → M1b |
 | 7 | Executar o M1b em quatro pacotes | M1b.1 a M1b.4, cada um só depois de cumpridas as suas dependências (quadro "Pacotes de implementação do M1b") | M1b |
 
@@ -1193,6 +1215,7 @@ Com o último comando em execução, a tela fica disponível em `http://127.0.0.
 |---|---|
 | [Contrato de identidade e contexto inicial](docs/arquitetura/CONTRATO_IDENTIDADE_E_CONTEXTO_INICIAL.md) | Registra matrícula, autenticação futura e o percurso Secretaria responsável → serviço/processo/atividade → contexto → G1 |
 | [docs/arquitetura/MAPA_M1a.md](docs/arquitetura/MAPA_M1a.md) | O percurso de um Registro no M1a, em diagramas (ilustrativo; prevalecem os SADs) |
+| [docs/aceite/MATRIZ_ACEITE_M1A.md](docs/aceite/MATRIZ_ACEITE_M1A.md) | O que cada POC-TS-001 a 009 comprova, a cobertura já existente e as evidências que ainda faltam para o aceite |
 | [docs/arquitetura/ARQUITETURA_POC.md](docs/arquitetura/ARQUITETURA_POC.md) | Camadas do sistema, responsabilidades e mapa das pastas |
 | [docs/operacao/INSTALACAO.md](docs/operacao/INSTALACAO.md) | Montar o ambiente e rodar a PoC |
 | [docs/diario/DIARIO_POC.md](docs/diario/DIARIO_POC.md) | Registro datado de tudo o que foi feito |

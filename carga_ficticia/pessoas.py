@@ -4,6 +4,8 @@
 
 from sqlalchemy import select
 from app.modelos import Pessoa, Conta, Unidade, Designacao
+from carga_ficticia.seguranca import (validar_ausencia_de_identificadores,
+                                      validar_identidades)
 
 PESSOAS = [
     # (pessoa,     matrícula fictícia, nome fictício,                   contas técnicas)
@@ -61,6 +63,13 @@ DESIGNACOES = [
 
 def semear(sessao):
     """Acrescenta o que ainda não existe. Devolve quantos itens novos foram criados."""
+    # A validação acontece antes do primeiro INSERT. Uma carga suspeita não deixa
+    # nem mesmo um fragmento no banco e a mensagem nunca repete o valor encontrado.
+    validar_identidades(PESSOAS)
+    validar_ausencia_de_identificadores(
+        "estrutura institucional",
+        {"secretarias": SECRETARIAS, "unidades": UNIDADES, "designacoes": DESIGNACOES},
+    )
     novos = 0
     for pid, matricula, nome, contas in PESSOAS:
         if sessao.get(Pessoa, pid) is None:

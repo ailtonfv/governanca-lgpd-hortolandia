@@ -7,6 +7,7 @@ from sqlalchemy import select
 from app.modelos import (ObjetoCatalogo, UnidadeObjetoCatalogo, ObjetoContextoCatalogo,
                          Canal, ServicoCanal, FamiliaContexto, ContextoAtuacao,
                          BaseDados, ObjetoBase)
+from carga_ficticia.seguranca import validar_ausencia_de_identificadores
 
 OBJETOS = [
     # (id canônico,   tipo,        nome canônico)
@@ -119,6 +120,22 @@ USOS = [
 
 def semear(sessao):
     """Acrescenta o que ainda não existe. Devolve quantos itens novos foram criados."""
+    # Os catálogos podem conter nomes públicos de órgãos e descrições funcionais,
+    # mas nunca identificadores de pessoas. A barreira roda antes do primeiro INSERT.
+    validar_ausencia_de_identificadores(
+        "catálogos",
+        {
+            "objetos": OBJETOS,
+            "objetos_por_unidade": OBJETOS_POR_UNIDADE,
+            "canais": CANAIS,
+            "atendimentos": ATENDIMENTOS,
+            "familias": FAMILIAS,
+            "contextos": CONTEXTOS,
+            "contextos_por_objeto": CONTEXTOS_POR_OBJETO,
+            "bases": BASES,
+            "usos": USOS,
+        },
+    )
     novos = 0
     for oid, tipo, nome in OBJETOS:
         if sessao.get(ObjetoCatalogo, oid) is None:

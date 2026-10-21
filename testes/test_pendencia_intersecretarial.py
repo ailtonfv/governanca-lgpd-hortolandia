@@ -11,8 +11,8 @@ from sqlalchemy.orm import Session
 from app.alertas_operacionais import listar_alertas_operacionais
 from app.banco import motor
 from app.eventos import verificar_cadeia
-from app.modelos import (Comando, Designacao, Evento, Instrumento, Pendencia,
-                         Registro)
+from app.modelos import (Comando, Designacao, Evento, EventoAuditoria, Instrumento,
+                         Pendencia, Registro)
 from app.pendencias import (aceitar_pendencia_intersecretarial, assumir_pendencia,
                             criar_pendencia_intersecretarial,
                             responder_pendencia_intersecretarial)
@@ -275,6 +275,13 @@ def test_p2_concorrente_mantem_um_unico_responsavel():
         assert sessao.scalar(select(func.count()).select_from(Evento).where(
             Evento.cadeia_id == pendencia.id, Evento.codigo_evento == "P2"
         )) == 1
+        auditorias = sessao.scalars(select(EventoAuditoria).where(
+            EventoAuditoria.comando_id.in_({"CMD-PI-P2-CONC-1", "CMD-PI-P2-CONC-2"})
+        )).all()
+        assert len(auditorias) == 1
+        assert auditorias[0].tipo_evento == "tentativa_negada"
+        assert auditorias[0].conteudo["acao_tentada"] == "assumir_pendencia"
+        assert auditorias[0].conteudo["pendencia_id"] == pendencia.id
 
 
 def test_p4_repetido_e_idempotente():

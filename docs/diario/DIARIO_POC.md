@@ -290,3 +290,13 @@ Regras deste diário: sem senhas, tokens ou dados pessoais; cada entrada com dat
 - A PoC nuclear permanece com o FORM 1 sintético; a PoC ampliada deverá cobrir o FORM 1 integral de ponta a ponta.
 - Os FORMs 2, 3 e 4 ficam como referência arquitetural para etapa posterior.
 - Inventários e relatórios são apoio: não criam campos nem são importados automaticamente, mas agrupamentos recorrentes podem sugerir candidatos ao catálogo de contextos, sempre sujeitos à curadoria.
+
+### 21/10/2026 — matriz de aceite da PoC nuclear
+
+- Criada a matriz detalhada dos testes formais `POC-TS-001` a `POC-TS-009`, preservando as descrições e os resultados esperados do SAD 09 REV12.
+- A matriz separa cobertura automatizada, evidência formal e aceite institucional: sete testes possuem cobertura relevante, mas nenhum foi marcado como formalmente aceito antes da rodada identificada e da conferência das evidências.
+- Permanecem como ensaios completos pendentes o bloqueio de dado pessoal real na carga sintética (`POC-TS-008`) e o volume de 1.000 Registros com cerca de 50.000 eventos (`POC-TS-009`).
+- O README recebeu um resumo coloquial, um diagrama do caminho Regra → POC-TS → teste automatizado → evidência → aceite e um link para a matriz detalhada.
+- O `POC-TS-003` foi reforçado no ensaio concorrente com duas pessoas: além de uma única assunção e um único evento P2, o teste exige exatamente uma tentativa negada na auditoria, ligada ao comando perdedor e à pendência disputada. O teste específico e a suíte completa de 184 testes foram aprovados.
+- Implementada a barreira do `POC-TS-008` antes das gravações da carga fictícia. Pessoas, matrículas, nomes e contas exigem marcadores sintéticos; toda a massa é examinada contra CPF, e-mail e telefone em formato pessoal. A recusa aponta somente o tipo e a posição do problema, sem reproduzir o conteúdo suspeito.
+- Quatro variações controladas comprovam que uma identidade sem marcadores e valores simulados nos formatos de CPF, e-mail e telefone são recusados antes de qualquer gravação. Nenhum dado pessoal real foi incluído nos testes ou nas evidências. A suíte completa passou a 188 testes aprovados.
