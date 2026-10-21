@@ -6,7 +6,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.banco import motor
-from app.modelos import Pessoa, Unidade, UnidadeObjetoCatalogo
+from app.modelos import (Pessoa, Unidade, UnidadeObjetoCatalogo,
+                         ObjetoContextoCatalogo)
 from carga_ficticia.pessoas import SECRETARIAS
 
 
@@ -48,3 +49,9 @@ def test_vinculos_ficticios_do_catalogo_identificam_secretaria_e_fonte():
         )).one()
         assert saude.papel == "RESPONSAVEL"
         assert saude.fonte == "carga fictícia da PoC"
+        contexto = sessao.scalars(select(ObjetoContextoCatalogo).where(
+            ObjetoContextoCatalogo.objeto_id == "OBJ-SRV-020",
+            ObjetoContextoCatalogo.contexto_id == "CTX-SAU-01",
+            ObjetoContextoCatalogo.vigente_ate.is_(None),
+        )).one()
+        assert contexto.fonte == "carga fictícia da PoC"

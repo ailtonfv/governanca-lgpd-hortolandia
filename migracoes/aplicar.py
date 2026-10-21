@@ -18,6 +18,7 @@ from migracoes.contrato_form1 import aplicar as migracao_0005
 from migracoes.imutabilidade_versao import aplicar as migracao_0003
 from migracoes.identidade_agente import aplicar as migracao_0008
 from migracoes.catalogo_por_secretaria import aplicar as migracao_0009
+from migracoes.contextos_por_objeto import aplicar as migracao_0010
 from migracoes.pendencia import aplicar as migracao_0007
 from migracoes.rascunho_versoes import aplicar as migracao_0002
 
@@ -31,6 +32,7 @@ MIGRACOES = [
     (7, "pendência mínima da devolução (M1a: I6 e P1)", migracao_0007),
     (8, "matrícula funcional única do agente da plataforma", migracao_0008),
     (9, "vínculo entre Secretarias e itens do catálogo operacional", migracao_0009),
+    (10, "vínculo entre itens do catálogo e contextos de atuação", migracao_0010),
 ]
 
 

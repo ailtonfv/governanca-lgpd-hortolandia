@@ -4,8 +4,9 @@
 # O identificador canônico (id) é o que define a equivalência; o nome é só para leitura.
 
 from sqlalchemy import select
-from app.modelos import (ObjetoCatalogo, UnidadeObjetoCatalogo, Canal, ServicoCanal,
-                         FamiliaContexto, ContextoAtuacao, BaseDados, ObjetoBase)
+from app.modelos import (ObjetoCatalogo, UnidadeObjetoCatalogo, ObjetoContextoCatalogo,
+                         Canal, ServicoCanal, FamiliaContexto, ContextoAtuacao,
+                         BaseDados, ObjetoBase)
 
 OBJETOS = [
     # (id canônico,   tipo,        nome canônico)
@@ -79,6 +80,30 @@ CONTEXTOS = [
     ("CTX-JUR-01", "Representação e defesa jurídica", "Gestão de processos judiciais, administrativos e atividades de representação do Município"),
 ]
 
+# Relações de demonstração necessárias aos percursos da PoC. Não representam
+# competência ou classificação oficial da Prefeitura.
+CONTEXTOS_POR_OBJETO = [
+    ("OBJ-ATV-020", "CTX-TRIB-01"),
+    ("OBJ-ATV-020", "CTX-TRIB-03"),
+    ("OBJ-ATV-020", "CTX-URB-01"),
+    ("OBJ-ATV-020", "CTX-URB-02"),
+    ("OBJ-ATV-020", "CTX-URB-03"),
+    ("OBJ-PRC-001", "CTX-TRIB-02"),
+    ("OBJ-SRV-001", "CTX-TRIB-03"),
+    ("OBJ-SRV-002", "CTX-TRIB-03"),
+    ("OBJ-SRV-010", "CTX-TRIB-03"),
+    ("OBJ-PRC-010", "CTX-TRIB-03"),
+    ("OBJ-ATV-001", "CTX-TRIB-02"),
+    ("OBJ-ATV-001", "CTX-TRIB-03"),
+    ("OBJ-ATV-002", "CTX-TRIB-03"),
+    ("OBJ-SRV-900", "CTX-TRIB-01"),
+    ("OBJ-SRV-900", "CTX-TRIB-03"),
+    ("OBJ-SRV-900", "CTX-URB-01"),
+    ("OBJ-SRV-901", "CTX-ATD-01"),
+    ("OBJ-SRV-902", "CTX-COM-01"),
+    ("OBJ-SRV-020", "CTX-SAU-01"),
+]
+
 BASES = [
     # (id,       nome,                                         suporte)
     ("BAS-001", "Cadastro imobiliário (fictício)",            "sistema"),
@@ -127,6 +152,20 @@ def semear(sessao):
         if sessao.get(ContextoAtuacao, cid) is None:
             sessao.add(ContextoAtuacao(id=cid, familia_id=cid.split("-")[1], nome=nome,
                                        descricao=descricao)); novos += 1
+    sessao.flush()
+    for objeto_id, contexto_id in CONTEXTOS_POR_OBJETO:
+        existe = sessao.scalars(select(ObjetoContextoCatalogo).where(
+            ObjetoContextoCatalogo.objeto_id == objeto_id,
+            ObjetoContextoCatalogo.contexto_id == contexto_id,
+            ObjetoContextoCatalogo.vigente_ate.is_(None),
+        )).first()
+        if existe is None:
+            sessao.add(ObjetoContextoCatalogo(
+                objeto_id=objeto_id,
+                contexto_id=contexto_id,
+                fonte="carga fictícia da PoC",
+            ))
+            novos += 1
     for sid, cid in ATENDIMENTOS:
         if sessao.scalars(select(ServicoCanal).where(ServicoCanal.servico_id == sid, ServicoCanal.canal_id == cid,
                                                      ServicoCanal.vigente_ate.is_(None))).first() is None:

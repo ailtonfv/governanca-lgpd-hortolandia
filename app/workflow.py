@@ -14,7 +14,8 @@ from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError
 from app.modelos import (AcaoObrigatoria, Conta, Designacao, Registro, Ciclo, Instrumento,
-                         ObjetoCatalogo, UnidadeObjetoCatalogo, Pendencia, RegistroObjeto, ContextoAtuacao,
+                         ObjetoCatalogo, ObjetoContextoCatalogo, UnidadeObjetoCatalogo,
+                         Pendencia, RegistroObjeto, ContextoAtuacao,
                          FamiliaContexto, ObjetoBase, Transversalidade, ContadorRegistro,
                          PAPEIS_ASSUNTO, PAPEIS_CITADOS)
 from app.eventos import registrar_evento, registrar_auditoria
@@ -225,6 +226,15 @@ def criar_registro(sessao, *, comando_id, conta_id, unidade_id, contexto_id, tit
     contexto = sessao.get(ContextoAtuacao, contexto_id) if contexto_id else None
     if contexto is None or not contexto.ativo:
         return negar("contexto de atuação fora do catálogo ou desativado")
+    objetos_do_contexto = set(sessao.scalars(
+        select(ObjetoContextoCatalogo.objeto_id).where(
+            ObjetoContextoCatalogo.objeto_id.in_(assunto),
+            ObjetoContextoCatalogo.contexto_id == contexto.id,
+            ObjetoContextoCatalogo.vigente_ate.is_(None),
+        )
+    ))
+    if objetos_do_contexto != set(assunto):
+        return negar("contexto de atuação não permitido para o item do catálogo")
     if not tem_papel(sessao, pessoa_id, unidade_id, {"elaborador"}):
         return negar("a pessoa não tem papel de elaborador nesta unidade")
     if resolucao_familia is not None and resolucao_familia not in RESOLUCOES_DE_FAMILIA:

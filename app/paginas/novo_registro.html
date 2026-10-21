@@ -48,7 +48,7 @@
     <label for="contexto_id">4. Contexto de atuação</label>
     <select id="contexto_id" name="contexto_id" aria-describedby="exemplo-contexto" required>
       <option value="">Selecione o contexto</option>
-      {% for contexto in contextos %}<option value="{{ contexto.id }}">{{ contexto.nome }}</option>{% endfor %}
+      {% for contexto in contextos %}<option value="{{ contexto.id }}" data-objetos="{{ contexto.objetos|join(',') }}">{{ contexto.nome }}</option>{% endfor %}
     </select>
     <p class="ajuda" id="exemplo-contexto"><strong>Exemplo — fornecimento de medicamento de alto custo</strong><br><strong>Contexto:</strong> Assistência farmacêutica.<br><strong>Finalidade no FORM 1:</strong> utilizar somente os dados de identificação, contato e saúde necessários para verificar os requisitos, fornecer o medicamento e acompanhar o tratamento.<br><strong>Pergunta-chave:</strong> para que os dados pessoais são utilizados?</p>
 
@@ -66,6 +66,14 @@
   const tipos = document.querySelectorAll('input[name="tipo_objeto"]');
   const unidade = document.getElementById('unidade_id');
   const objeto = document.getElementById('objeto_principal_id');
+  const contexto = document.getElementById('contexto_id');
+  function filtrarContextos() {
+    for (const opcao of contexto.options) {
+      const objetos = (opcao.dataset.objetos || '').split(',');
+      opcao.hidden = Boolean(opcao.value && !objetos.includes(objeto.value));
+    }
+    contexto.value = '';
+  }
   function filtrarObjetos() {
     const tipo = document.querySelector('input[name="tipo_objeto"]:checked')?.value;
     for (const opcao of objeto.options) {
@@ -73,8 +81,11 @@
       opcao.hidden = Boolean(opcao.value && (opcao.dataset.tipo !== tipo || !unidades.includes(unidade.value)));
     }
     objeto.value = '';
+    filtrarContextos();
   }
   tipos.forEach((item) => item.addEventListener('change', filtrarObjetos));
   unidade.addEventListener('change', filtrarObjetos);
+  objeto.addEventListener('change', filtrarContextos);
+  filtrarContextos();
 </script>
 {% endblock %}

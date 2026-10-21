@@ -103,13 +103,15 @@ As duas camadas usam dados fictícios e são construídas pelo Encarregado de Da
 |---|---|---|
 | Pergunta | O desenho funciona? | O desenho resiste às situações difíceis? |
 | Marcos (SAD 09) | M1a | M1b, M2 e M3A, cada um iniciado após o aceite do anterior |
-| Escopo | Registro, FORM 1 sintético simplificado, versão, submissão, análise com segregação de funções, devolução com pendência, validação, conclusão, pendência intersecretarial, livro de atos com cadeia de hash e reconstrução da trilha | Suspensão e retomada, cancelamento com efeito nas pendências, reabertura com novo ciclo, continuidade institucional (ausência, saída, troca de chefia), participação por unidade, backup e restauração; FORM 1 real de ponta a ponta, segundo Instrumento, Dossiê e compartilhamento |
+| Escopo | Registro, FORM 1 sintético simplificado, versão, submissão, análise com segregação de funções, devolução com pendência, validação, conclusão, pendência intersecretarial, livro de atos com cadeia de hash e reconstrução da trilha | Suspensão e retomada, cancelamento com efeito nas pendências, reabertura com novo ciclo, continuidade institucional (ausência, saída, troca de chefia), participação por unidade, backup e restauração; FORM 1 integral de ponta a ponta |
 | Cenários do SAD 04 | Cerca de 15 (A1 a A4, A9 a A12, A14, A15, A28 a A30) | Cerca de 16 novos, mais a reexecução de todos os da nuclear com o FORM 1 real |
 | Dependências externas | Nenhuma além da autorização para implementar | Contrato integral do FORM 1 e envelope de ingestão (SAD09-05 e 01); decisão SAD09-10 |
 | Entregáveis | Código, testes de aceite, evidências e diário | Também o relatório de validação e o Relatório de Encerramento e Transferência Técnica (SAD 09, seção 37) |
 | Participação da TI | Recebe informação | Acompanha a construção |
 
 A PoC ampliada exige mais trabalho: são três marcos em sequência, as situações difíceis mexem em várias peças ao mesmo tempo, e parte das condições depende de decisões institucionais. Em compensação, ela não começa do zero: reaproveita o chassi da nuclear (livro de atos, pedido idempotente, barreiras e auditoria), e cada ato novo segue o mesmo molde.
+
+**Limite funcional acordado:** os quatro FORMs da Cartilha permanecem como referência principal do método, mas a implementação da PoC ampliada termina no **FORM 1 integral**. Os FORMs 2, 3 e 4 ficam alinhados na arquitetura e reservados para uma etapa posterior; inventários e relatórios de apoio não ampliam esse escopo.
 
 ## Como os Registros são organizados
 
@@ -212,7 +214,18 @@ A curadoria deverá ligar cada item a uma ou mais Secretarias, registrar qual de
 
 #### O que foi aproveitado dos inventários existentes
 
-A conferência dos materiais de referência mostrou três representações do mesmo inventário — relação de perguntas, formulário renderizado e planilha — com 81 perguntas organizadas em 11 blocos. A Cartilha, por sua vez, organiza a jornada municipal em quatro momentos que orientam os quatro FORMs: realidade, legitimidade, risco e ação/acompanhamento.
+A **Cartilha e seus quatro FORMs** são a referência funcional principal. A PoC nuclear exercita uma versão sintética do FORM 1; a PoC ampliada deverá executar o FORM 1 integral. Os FORMs 2, 3 e 4 permanecem visíveis no desenho geral, mas não entram no escopo de implementação dessas duas PoCs.
+
+Os inventários e relatórios preenchidos a partir do modelo de referência servem como **apoio**: oferecem exemplos, vocabulário e situações reais para verificar se o FORM 1 faz as perguntas adequadas. Eles não substituem a Cartilha, não definem novos campos e não são importados automaticamente. Quando revelarem agrupamentos recorrentes — como formação cultural, biblioteca, fiscalização ou gestão de pessoas — esses agrupamentos poderão ser usados como **candidatos ao campo Contexto de atuação**, sempre sujeitos à curadoria.
+
+```mermaid
+flowchart LR
+    C["Cartilha LGPD"] --> F["FORMs 1, 2, 3 e 4"]
+    F --> N["PoC nuclear<br/>FORM 1 sintético"]
+    F --> A["PoC ampliada<br/>FORM 1 integral"]
+    F --> P["FORMs 2, 3 e 4<br/>etapa posterior"]
+    I["Inventários e relatórios"] -. "apoio e contextos candidatos" .-> F
+```
 
 Para o catálogo inicial, o inventário oferece somente **candidatos**. Alguns campos ajudam a formar e localizar o item; os demais pertencem ao preenchimento e à análise do tratamento:
 
@@ -223,14 +236,16 @@ Para o catálogo inicial, o inventário oferece somente **candidatos**. Alguns c
 | Frequência e unidade executora | Caracterização operacional posterior; não altera a identidade canônica do item |
 | Fontes, meios, sistemas e canais — inclusive 156 | Fluxo e transversalidade do tratamento; não são um quarto tipo de objeto |
 | Finalidade, hipótese legal, dados e titulares | FORM 1 e análise de legitimidade, nunca o catálogo inicial |
-| Retenção, eliminação, segurança, contratos e riscos | Instrumentos posteriores e controles; não são usados para liberar o G1 |
+| Retenção, eliminação, segurança, contratos e riscos | Instrumento previsto na Cartilha e análise posterior; não são usados para liberar o G1 |
 
 Nenhuma resposta vira catálogo oficial automaticamente. Os FORMs podem conter grafias diferentes, itens repetidos e dados funcionais ou pessoais que não devem ser copiados para o catálogo. A curadoria utiliza apenas a estrutura necessária, preserva a fonte e a data de referência e publica um identificador canônico depois da conferência.
 
 ```mermaid
 flowchart LR
     I["Inventários recebidos"] --> E["Extrair somente estrutura<br/>nome · tipo · Secretaria · fonte"]
+    I --> X["Sugerir contextos<br/>sem publicá-los automaticamente"]
     E --> C{"Curadoria"}
+    X --> C
     C -->|"aprovado"| V["Vínculo vigente<br/>Secretaria ↔ item"]
     C -->|"dúvida ou duplicidade"| R["Revisar com a unidade"]
     V --> T["Catálogo mostrado<br/>na tela de criação"]
@@ -241,7 +256,7 @@ flowchart LR
 
 O percurso definitivo será em cascata: **Secretaria responsável → serviço, processo ou atividade → itens vinculados à Secretaria → contextos compatíveis com o item**. Assim, um agente de Planejamento não recebe uma lista indiscriminada de objetos de todas as áreas. Se nenhum item ou contexto servir, ele solicitará revisão do catálogo, sem criar uma denominação livre.
 
-No corte atual da PoC, os objetos e seus vínculos continuam fictícios. A relação **Secretaria ↔ objeto** já é persistida com papel, fonte e vigência; a tela mostra apenas os itens em que uma Secretaria ao alcance do agente aparece como responsável, e o G1 repete a conferência no servidor para impedir um envio forjado. A relação **objeto ↔ contextos permitidos** permanece para incremento posterior, depois da curadoria inicial dos contextos.
+No corte atual da PoC, os objetos e seus vínculos continuam fictícios. As relações **Secretaria ↔ objeto** e **objeto ↔ contexto permitido** são persistidas com fonte e vigência. A tela apresenta somente os itens em que uma Secretaria ao alcance do agente aparece como responsável e, depois da escolha do item, somente seus contextos permitidos. O G1 repete as duas conferências no servidor para impedir um envio forjado. A futura curadoria substituirá os vínculos demonstrativos por relações institucionais aprovadas, sem mudar esse percurso.
 
 #### Onde entram os canais, como o 156
 
@@ -623,9 +638,9 @@ flowchart TD
 | ↳ Exatamente um PRINCIPAL por Registro, no próprio banco | ✔ Implementado |
 | ↳ Advertência de família, com três resoluções (DA-39, item 2) | ✔ Implementada |
 | ↳ Declaração de transversalidade, só pela governança (DA-39, item 2) | ✔ Implementada |
-| ↳ Alerta estrutural | ⚙️ Parcial: base de dados comum ✔; relações do catálogo a fazer (O-80) |
+| ↳ Alerta estrutural | ⚙️ Parcial: base comum e vínculos fictícios Secretaria → item → contexto ✔; curadoria institucional continua em O-80 |
 | ↳ Semelhança por finalidade, categorias de titulares, categorias de dados e compartilhamentos | ✔ Alerta não bloqueante no I3 (DA-39, item 4) |
-| ↳ Testes automatizados (pytest, base própria) | ✔ 179 aprovados |
+| ↳ Testes automatizados (pytest, base própria) | ✔ 184 aprovados |
 | Checkpoint externo da cadeia (SAD 08) | a fazer |
 | Rascunho do FORM 1: I1 iniciar preenchimento e I2 salvar, com controle otimista | ✔ |
 | ↳ Testes de I1 e I2 | ✔ 14 testes: estado, lacre, cadeia, idempotência, autorização, concorrência, rollback, migração e POC-TS-004 |
@@ -663,9 +678,9 @@ flowchart TD
 
 ¹ Tentativas negadas ficam registradas na auditoria. O cenário d (substituição) está a fazer.
 ² O início do preenchimento do FORM 1 será um comando posterior ao G1, como no cenário A1 do SAD 04.
-³ Trava determinística por objeto e contexto e exatamente um PRINCIPAL, no próprio banco; um contexto por Registro garantido por chave composta (DA-39, item 1); advertência de família e transversalidade (DA-39, item 2); recusas do banco tratadas pelo nome da regra. A suíte chegou a 182 testes automatizados aprovados em 21/10/2026, inclusive pedidos simultâneos, dezessete testes HTTP e quatro testes específicos de identidade e catálogo institucional. Suspenso e Cancelado continuam testados como regra do banco até a chegada dos atos do M1b.1; Concluído já é alcançado pelos G5 e G6 reais.
+³ Trava determinística por objeto e contexto e exatamente um PRINCIPAL, no próprio banco; um contexto por Registro garantido por chave composta (DA-39, item 1); advertência de família e transversalidade (DA-39, item 2); recusas do banco tratadas pelo nome da regra. A suíte chegou a 184 testes automatizados aprovados em 21/10/2026, inclusive pedidos simultâneos, dezenove testes HTTP e quatro testes específicos de identidade e catálogo institucional. Suspenso e Cancelado continuam testados como regra do banco até a chegada dos atos do M1b.1; Concluído já é alcançado pelos G5 e G6 reais.
 
-### O que os 182 testes garantem, em linguagem simples
+### O que os 184 testes garantem, em linguagem simples
 
 Os testes atuais exercitam o motor da PoC com dados fictícios e procuram responder a perguntas práticas:
 
@@ -683,7 +698,7 @@ Os testes atuais exercitam o motor da PoC com dados fictícios e procuram respon
 - **Validação:** somente o responsável atual da análise pode executar I5. O sistema encerra a análise, torna a versão validada a versão vigente e executa o G4 junto: ação aberta leva a **Em execução**; sem ação aberta, o Registro volta a **Em andamento**.
 - **Primeiras telas:** o painel identifica claramente qual agente fictício está sendo simulado, mostra somente os Registros dentro do alcance institucional e apresenta as flags calculadas. No detalhe, o elaborador pode iniciar e salvar o FORM 1; outro papel apenas consulta. Se alguém tentar abrir diretamente um Registro de outra unidade, o sistema nega a consulta e registra a tentativa na auditoria.
 - **Identidade e contexto inicial:** cada pessoa fictícia possui matrícula única. Antes do FORM 1, a tela confirma primeiro a Secretaria responsável pelo Registro, dentre aquelas em que o agente seja elaborador; depois exige um serviço, processo ou atividade coerente com o catálogo e um contexto. O G1 cria o Registro e o FORM 1 Não iniciado.
-- **Catálogo por Secretaria:** a tela não mistura itens de todas as Secretarias. Ela apresenta somente os vínculos fictícios vigentes da Secretaria escolhida, e o servidor recusa um item de outra Secretaria mesmo que alguém tente forjar o pedido fora da tela.
+- **Catálogo por Secretaria e contexto:** a tela não mistura itens de todas as Secretarias nem contextos incompatíveis. Ela apresenta somente os vínculos fictícios vigentes da Secretaria e do item escolhidos; o servidor repete as conferências e recusa um pedido forjado fora da tela.
 - **Devolução:** somente o agente responsável atual pela análise pode executar I6. O sistema preserva a versão, cria uma pendência bloqueante para a unidade elaboradora e executa o G3 junto, sem deixar partes soltas se ocorrer uma falha.
 - **Assunção e ajuste:** P2 garante que apenas um agente autorizado assuma a pendência; I7 recria o rascunho a partir da versão devolvida e libera novamente o salvamento pelo I2.
 - **Resposta e decisão da correção:** P3 lacra a resposta; P4 aceita exatamente esse conteúdo; ou P5 devolve a mesma pendência com motivo e P6 libera outra correção. O novo I3 só cria a Versão 2 quando o rascunho coincide com o lacre aceito.
@@ -692,7 +707,7 @@ Os testes atuais exercitam o motor da PoC com dados fictícios e procuram respon
 - **Participação intersecretarial:** a unidade principal envia uma pendência à fila institucional de outra unidade. Um agente previamente designado assume e responde com entrada, operações, saída, interfaces e evidências; a origem aceita. O destino não edita o FORM 1, o Registro não muda de unidade principal e G5 permanece bloqueado até o aceite.
 - **Flags operacionais:** os avisos da tela inicial são calculados a partir da pendência real. Eles mudam de “Correção solicitada” para “Pendência atribuída a você” sem manter uma segunda verdade no banco.
 
-Esses 182 testes são a cobertura automatizada atual do motor e dos primeiros cortes HTTP. Eles ainda **não substituem** a bateria formal completa POC-TS-001 a POC-TS-009, que exigirá os percursos de aceite e as respectivas evidências; a tela desatualizada exercita o POC-TS-004 e a negação auditada da consulta prepara o POC-TS-007.
+Esses 184 testes são a cobertura automatizada atual do motor e dos primeiros cortes HTTP. Eles ainda **não substituem** a bateria formal completa POC-TS-001 a POC-TS-009, que exigirá os percursos de aceite e as respectivas evidências; a tela desatualizada exercita o POC-TS-004 e a negação auditada da consulta prepara o POC-TS-007.
 
 ### Legenda operacional: agentes e funções
 

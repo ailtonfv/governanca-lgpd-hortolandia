@@ -281,3 +281,12 @@ Regras deste diário: sem senhas, tokens ou dados pessoais; cada entrada com dat
 - Implementada a migração 9, com vínculo vigente entre Secretaria e objeto, papel `RESPONSAVEL` ou `PARTICIPANTE` e fonte. Os vínculos da carga continuam explicitamente fictícios e não afirmam competências reais das Secretarias.
 - A tela passou a mostrar somente objetos responsáveis vinculados às Secretarias ao alcance do elaborador. O G1 repete a conferência no servidor e recusa pedidos forjados com item de outra Secretaria.
 - Acrescentados três testes: vínculo fictício com proveniência, filtragem da tela por Secretaria e recusa no domínio. A suíte completa chegou a 182 testes aprovados.
+- Implementada a migração 10 para a relação vigente entre item do catálogo e contexto de atuação, também com fonte. A tela agora completa a cascata Secretaria → tipo → item → contextos permitidos; o G1 recusa contexto incompatível mesmo em pedido forjado.
+- Acrescentados dois testes HTTP para a filtragem e a proteção do contexto. A cobertura passou a 19 testes de interface e 184 testes no total.
+
+### 21/10/2026 — hierarquia dos FORMs e apoio dos inventários
+
+- Confirmado que a Cartilha e seus quatro FORMs são a referência funcional principal.
+- A PoC nuclear permanece com o FORM 1 sintético; a PoC ampliada deverá cobrir o FORM 1 integral de ponta a ponta.
+- Os FORMs 2, 3 e 4 ficam como referência arquitetural para etapa posterior.
+- Inventários e relatórios são apoio: não criam campos nem são importados automaticamente, mas agrupamentos recorrentes podem sugerir candidatos ao catálogo de contextos, sempre sujeitos à curadoria.

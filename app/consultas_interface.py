@@ -6,7 +6,8 @@ from app.alertas_operacionais import listar_alertas_operacionais
 from app.form1_sintetico import (CATEGORIAS_DADOS, CATEGORIAS_TITULARES,
                                  DESTINATARIOS_COMPARTILHAMENTO)
 from app.modelos import (Conta, ContextoAtuacao, Designacao, Instrumento,
-                         ObjetoCatalogo, UnidadeObjetoCatalogo, Pendencia, Pessoa,
+                         ObjetoCatalogo, ObjetoContextoCatalogo,
+                         UnidadeObjetoCatalogo, Pendencia, Pessoa,
                          RascunhoInstrumento, Registro, Unidade)
 
 
@@ -159,10 +160,27 @@ def carregar_opcoes_novo_registro(sessao, conta_id):
         })
         item["unidades"].append(unidade_id)
     objetos = list(objetos_por_id.values())
-    contextos = sessao.scalars(
-        select(ContextoAtuacao).where(ContextoAtuacao.ativo.is_(True))
+    ids_objetos = set(objetos_por_id)
+    linhas_contextos = sessao.execute(
+        select(ContextoAtuacao, ObjetoContextoCatalogo.objeto_id)
+        .join(ObjetoContextoCatalogo,
+              ObjetoContextoCatalogo.contexto_id == ContextoAtuacao.id)
+        .where(
+            ContextoAtuacao.ativo.is_(True),
+            ObjetoContextoCatalogo.objeto_id.in_(ids_objetos),
+            ObjetoContextoCatalogo.vigente_ate.is_(None),
+        )
         .order_by(ContextoAtuacao.nome)
-    ).all()
+    ).all() if ids_objetos else []
+    contextos_por_id = {}
+    for contexto, objeto_id in linhas_contextos:
+        item = contextos_por_id.setdefault(contexto.id, {
+            "id": contexto.id,
+            "nome": contexto.nome,
+            "objetos": [],
+        })
+        item["objetos"].append(objeto_id)
+    contextos = list(contextos_por_id.values())
     return {
         "identidade": identidade,
         "unidades": unidades,

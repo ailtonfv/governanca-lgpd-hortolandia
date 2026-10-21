@@ -132,6 +132,34 @@ def test_g1_recusa_item_de_outra_secretaria_mesmo_se_forjado():
         assert sessao.query(Registro).count() == 0
 
 
+def test_contextos_da_tela_respeitam_o_item_do_catalogo():
+    resposta = cliente.get("/registros/novo", params={"conta_id": "CONTA-A1"})
+
+    assert resposta.status_code == 200
+    assert 'value="CTX-TRIB-03" data-objetos="' in resposta.text
+    assert "OBJ-SRV-002" in resposta.text
+    assert 'value="CTX-SAU-01"' not in resposta.text
+
+
+def test_g1_recusa_contexto_incompativel_mesmo_se_forjado():
+    resposta = cliente.post(
+        "/registros",
+        data={
+            "conta_id": "CONTA-A1",
+            "comando_id": "CMD-UI-CONTEXTO-FORJADO",
+            "tipo_objeto": "servico",
+            "objeto_principal_id": "OBJ-SRV-002",
+            "unidade_id": "UNID-NORTE",
+            "contexto_id": "CTX-URB-01",
+        },
+    )
+
+    assert resposta.status_code == 200
+    assert "contexto de atuação não permitido para o item" in resposta.text
+    with Session(motor) as sessao:
+        assert sessao.query(Registro).count() == 0
+
+
 def test_g1_pela_tela_cria_registro_contextualizado_e_form1_nao_iniciado():
     resposta = cliente.post(
         "/registros",

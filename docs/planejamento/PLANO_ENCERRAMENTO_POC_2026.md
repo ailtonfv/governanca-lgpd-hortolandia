@@ -43,10 +43,11 @@ Previsão de 60 a 80 horas de trabalho efetivo, sujeita à estabilidade das deci
 
 ### 4.1 Pergunta que deve responder
 
-O núcleo arquitetural continua funcionando diante de suspensão, cancelamento, reabertura, continuidade institucional, concorrência e restauração?
+O núcleo arquitetural continua funcionando com o FORM 1 integral diante de suspensão, cancelamento, reabertura, continuidade institucional, concorrência e restauração?
 
 ### 4.2 Escopo incluído
 
+- FORM 1 integral de ponta a ponta, conforme a Cartilha;
 - autorizações mínimas necessárias aos atos demonstrados;
 - regras de prazo indispensáveis ao percurso selecionado;
 - suspensão e retomada;
@@ -64,9 +65,7 @@ A PoC ampliada essencial terá como referência 85 horas, com faixa de planejame
 
 ### 4.4 Fora do escopo de 2026
 
-- FORM 1 integral em toda a sua extensão;
-- segundo Instrumento completo;
-- Dossiê completo;
+- implementação dos FORMs 2, 3 e 4 completos;
 - integrações reais com sistemas municipais;
 - ingestão e reprocessamento completos;
 - interfaces sofisticadas;

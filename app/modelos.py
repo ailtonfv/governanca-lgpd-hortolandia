@@ -439,6 +439,32 @@ class UnidadeObjetoCatalogo(Base):
     )
 
 
+class ObjetoContextoCatalogo(Base):
+    """Contexto em que um item do catálogo pode iniciar um Registro.
+
+    A relação é curada e versionável. Na PoC, todos os vínculos são fictícios;
+    em produção, a fonte permite rastrear a decisão institucional.
+    """
+    __tablename__ = "objeto_contexto_catalogo"
+
+    id = Column(Integer, primary_key=True)
+    objeto_id = Column(String(50), ForeignKey("objeto_catalogo.id"), nullable=False)
+    contexto_id = Column(String(20), ForeignKey("contexto_atuacao.id"), nullable=False)
+    fonte = Column(String(150), nullable=False)
+    vigente_de = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    vigente_ate = Column(DateTime(timezone=True))
+
+    __table_args__ = (
+        Index(
+            "uq_objeto_contexto_catalogo_vigente",
+            "objeto_id",
+            "contexto_id",
+            unique=True,
+            postgresql_where=(vigente_ate.is_(None)),
+        ),
+    )
+
+
 class FamiliaContexto(Base):
     """Família de contextos de atuação: o prefixo do código (TRIB, URB, RH...). DA-38, item 6.
     O mesmo objeto em dois contextos da MESMA família gera advertência (pede justificativa).
