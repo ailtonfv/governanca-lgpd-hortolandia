@@ -40,7 +40,7 @@
     <select id="objeto_principal_id" name="objeto_principal_id" required>
       <option value="">Selecione depois de escolher o tipo</option>
       {% for objeto in objetos %}
-      <option value="{{ objeto.id }}" data-tipo="{{ objeto.tipo_objeto }}">{{ objeto.tipo_objeto|capitalize }} · {{ objeto.nome_canonico }}</option>
+      <option value="{{ objeto.id }}" data-tipo="{{ objeto.tipo_objeto }}" data-unidades="{{ objeto.unidades|join(',') }}">{{ objeto.tipo_objeto|capitalize }} · {{ objeto.nome_canonico }}</option>
       {% endfor %}
     </select>
     <p class="ajuda">O nome oficial vem do catálogo; não é digitado livremente.</p>
@@ -64,14 +64,17 @@
 
 <script>
   const tipos = document.querySelectorAll('input[name="tipo_objeto"]');
+  const unidade = document.getElementById('unidade_id');
   const objeto = document.getElementById('objeto_principal_id');
   function filtrarObjetos() {
     const tipo = document.querySelector('input[name="tipo_objeto"]:checked')?.value;
     for (const opcao of objeto.options) {
-      opcao.hidden = Boolean(opcao.value && opcao.dataset.tipo !== tipo);
+      const unidades = (opcao.dataset.unidades || '').split(',');
+      opcao.hidden = Boolean(opcao.value && (opcao.dataset.tipo !== tipo || !unidades.includes(unidade.value)));
     }
     objeto.value = '';
   }
   tipos.forEach((item) => item.addEventListener('change', filtrarObjetos));
+  unidade.addEventListener('change', filtrarObjetos);
 </script>
 {% endblock %}

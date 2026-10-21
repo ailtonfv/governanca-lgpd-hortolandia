@@ -6,8 +6,8 @@ from app.alertas_operacionais import listar_alertas_operacionais
 from app.form1_sintetico import (CATEGORIAS_DADOS, CATEGORIAS_TITULARES,
                                  DESTINATARIOS_COMPARTILHAMENTO)
 from app.modelos import (Conta, ContextoAtuacao, Designacao, Instrumento,
-                         ObjetoCatalogo, Pendencia, Pessoa, RascunhoInstrumento,
-                         Registro, Unidade)
+                         ObjetoCatalogo, UnidadeObjetoCatalogo, Pendencia, Pessoa,
+                         RascunhoInstrumento, Registro, Unidade)
 
 
 ROTULOS_ESTADO = {
@@ -138,10 +138,27 @@ def carregar_opcoes_novo_registro(sessao, conta_id):
         if item["papel"] == "elaborador" and item["unidade_id"] not in vistos:
             vistos.add(item["unidade_id"])
             unidades.append({"id": item["unidade_id"], "nome": item["unidade"]})
-    objetos = sessao.scalars(
-        select(ObjetoCatalogo).where(ObjetoCatalogo.ativo.is_(True))
+    linhas_objetos = sessao.execute(
+        select(ObjetoCatalogo, UnidadeObjetoCatalogo.unidade_id)
+        .join(UnidadeObjetoCatalogo, UnidadeObjetoCatalogo.objeto_id == ObjetoCatalogo.id)
+        .where(
+            ObjetoCatalogo.ativo.is_(True),
+            UnidadeObjetoCatalogo.unidade_id.in_(vistos),
+            UnidadeObjetoCatalogo.papel == "RESPONSAVEL",
+            UnidadeObjetoCatalogo.vigente_ate.is_(None),
+        )
         .order_by(ObjetoCatalogo.tipo_objeto, ObjetoCatalogo.nome_canonico)
-    ).all()
+    ).all() if vistos else []
+    objetos_por_id = {}
+    for objeto, unidade_id in linhas_objetos:
+        item = objetos_por_id.setdefault(objeto.id, {
+            "id": objeto.id,
+            "tipo_objeto": objeto.tipo_objeto,
+            "nome_canonico": objeto.nome_canonico,
+            "unidades": [],
+        })
+        item["unidades"].append(unidade_id)
+    objetos = list(objetos_por_id.values())
     contextos = sessao.scalars(
         select(ContextoAtuacao).where(ContextoAtuacao.ativo.is_(True))
         .order_by(ContextoAtuacao.nome)

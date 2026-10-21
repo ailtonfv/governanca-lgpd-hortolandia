@@ -14,7 +14,7 @@ from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError
 from app.modelos import (AcaoObrigatoria, Conta, Designacao, Registro, Ciclo, Instrumento,
-                         ObjetoCatalogo, Pendencia, RegistroObjeto, ContextoAtuacao,
+                         ObjetoCatalogo, UnidadeObjetoCatalogo, Pendencia, RegistroObjeto, ContextoAtuacao,
                          FamiliaContexto, ObjetoBase, Transversalidade, ContadorRegistro,
                          PAPEIS_ASSUNTO, PAPEIS_CITADOS)
 from app.eventos import registrar_evento, registrar_auditoria
@@ -212,6 +212,16 @@ def criar_registro(sessao, *, comando_id, conta_id, unidade_id, contexto_id, tit
     objetos = {oid: sessao.get(ObjetoCatalogo, oid) for oid in todos}
     if any(o is None or not o.ativo for o in objetos.values()):
         return negar("objeto fora do catálogo ou desativado")
+    objetos_da_unidade = set(sessao.scalars(
+        select(UnidadeObjetoCatalogo.objeto_id).where(
+            UnidadeObjetoCatalogo.unidade_id == unidade_id,
+            UnidadeObjetoCatalogo.objeto_id.in_(assunto),
+            UnidadeObjetoCatalogo.papel == "RESPONSAVEL",
+            UnidadeObjetoCatalogo.vigente_ate.is_(None),
+        )
+    ))
+    if objetos_da_unidade != set(assunto):
+        return negar("objeto não vinculado à Secretaria responsável no catálogo")
     contexto = sessao.get(ContextoAtuacao, contexto_id) if contexto_id else None
     if contexto is None or not contexto.ativo:
         return negar("contexto de atuação fora do catálogo ou desativado")

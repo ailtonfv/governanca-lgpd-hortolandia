@@ -1,11 +1,12 @@
 """Identidade mínima do agente: matrícula fictícia única e separada da conta técnica."""
 
 import pytest
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.banco import motor
-from app.modelos import Pessoa, Unidade
+from app.modelos import Pessoa, Unidade, UnidadeObjetoCatalogo
 from carga_ficticia.pessoas import SECRETARIAS
 
 
@@ -36,3 +37,14 @@ def test_catalogo_institucional_tem_as_18_secretarias_sem_hortoprev():
             sessao.get(Unidade, identificador).nome == nome
             for identificador, nome in SECRETARIAS
         )
+
+
+def test_vinculos_ficticios_do_catalogo_identificam_secretaria_e_fonte():
+    with Session(motor) as sessao:
+        saude = sessao.scalars(select(UnidadeObjetoCatalogo).where(
+            UnidadeObjetoCatalogo.unidade_id == "SEC-SAUDE",
+            UnidadeObjetoCatalogo.objeto_id == "OBJ-SRV-020",
+            UnidadeObjetoCatalogo.vigente_ate.is_(None),
+        )).one()
+        assert saude.papel == "RESPONSAVEL"
+        assert saude.fonte == "carga fictícia da PoC"

@@ -4,8 +4,8 @@
 # O identificador canônico (id) é o que define a equivalência; o nome é só para leitura.
 
 from sqlalchemy import select
-from app.modelos import (ObjetoCatalogo, Canal, ServicoCanal, FamiliaContexto, ContextoAtuacao,
-                         BaseDados, ObjetoBase)
+from app.modelos import (ObjetoCatalogo, UnidadeObjetoCatalogo, Canal, ServicoCanal,
+                         FamiliaContexto, ContextoAtuacao, BaseDados, ObjetoBase)
 
 OBJETOS = [
     # (id canônico,   tipo,        nome canônico)
@@ -19,6 +19,19 @@ OBJETOS = [
     ("OBJ-ATV-020", "atividade", "Gerir e manter o Cadastro imobiliário (fictício)"),
     ("OBJ-SRV-900", "servico",   "Serviço fictício de demonstração"),
     ("OBJ-SRV-901", "servico",   "Outro serviço fictício de demonstração"),
+    ("OBJ-SRV-902", "servico",   "Serviço financeiro fictício de demonstração"),
+    ("OBJ-SRV-020", "servico",   "Fornecimento de medicamento de alto custo (fictício)"),
+]
+
+# Relações estritamente demonstrativas da PoC. Não afirmam a competência real das
+# Secretarias: o catálogo definitivo virá dos FORMs e das fontes oficiais, com curadoria.
+# (unidade, objeto, papel)
+OBJETOS_POR_UNIDADE = [
+    *(("UNID-NORTE", oid, "RESPONSAVEL") for oid, _, _ in OBJETOS if oid not in {"OBJ-SRV-902", "OBJ-SRV-020"}),
+    ("UNID-SUL", "OBJ-ATV-020", "RESPONSAVEL"),
+    ("UNID-SUL", "OBJ-PRC-001", "RESPONSAVEL"),
+    ("UNID-SUL", "OBJ-SRV-902", "RESPONSAVEL"),
+    ("SEC-SAUDE", "OBJ-SRV-020", "RESPONSAVEL"),
 ]
 
 CANAIS = [
@@ -85,6 +98,21 @@ def semear(sessao):
     for oid, tipo, nome in OBJETOS:
         if sessao.get(ObjetoCatalogo, oid) is None:
             sessao.add(ObjetoCatalogo(id=oid, tipo_objeto=tipo, nome_canonico=nome)); novos += 1
+    sessao.flush()
+    for unidade_id, objeto_id, papel in OBJETOS_POR_UNIDADE:
+        existe = sessao.scalars(select(UnidadeObjetoCatalogo).where(
+            UnidadeObjetoCatalogo.unidade_id == unidade_id,
+            UnidadeObjetoCatalogo.objeto_id == objeto_id,
+            UnidadeObjetoCatalogo.vigente_ate.is_(None),
+        )).first()
+        if existe is None:
+            sessao.add(UnidadeObjetoCatalogo(
+                unidade_id=unidade_id,
+                objeto_id=objeto_id,
+                papel=papel,
+                fonte="carga fictícia da PoC",
+            ))
+            novos += 1
     for cid, nome in CANAIS:
         if sessao.get(Canal, cid) is None:
             sessao.add(Canal(id=cid, nome_canonico=nome)); novos += 1

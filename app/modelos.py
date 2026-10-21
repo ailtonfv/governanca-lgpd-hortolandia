@@ -408,6 +408,37 @@ class ObjetoCatalogo(Base):
     ativo = Column(Boolean, nullable=False, default=True)
 
 
+class UnidadeObjetoCatalogo(Base):
+    """Vínculo curado entre uma Secretaria e um item do catálogo operacional.
+
+    Na carga da PoC, vínculos e objetos são fictícios. Em produção, a fonte e a
+    vigência permitirão saber por que o item aparece para determinada Secretaria.
+    """
+    __tablename__ = "unidade_objeto_catalogo"
+
+    id = Column(Integer, primary_key=True)
+    unidade_id = Column(String(50), ForeignKey("unidade.id"), nullable=False)
+    objeto_id = Column(String(50), ForeignKey("objeto_catalogo.id"), nullable=False)
+    papel = Column(String(20), nullable=False, default="RESPONSAVEL")
+    fonte = Column(String(150), nullable=False)
+    vigente_de = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    vigente_ate = Column(DateTime(timezone=True))
+
+    __table_args__ = (
+        CheckConstraint(
+            "papel IN ('RESPONSAVEL', 'PARTICIPANTE')",
+            name="ck_unidade_objeto_papel",
+        ),
+        Index(
+            "uq_unidade_objeto_vigente",
+            "unidade_id",
+            "objeto_id",
+            unique=True,
+            postgresql_where=(vigente_ate.is_(None)),
+        ),
+    )
+
+
 class FamiliaContexto(Base):
     """Família de contextos de atuação: o prefixo do código (TRIB, URB, RH...). DA-38, item 6.
     O mesmo objeto em dois contextos da MESMA família gera advertência (pede justificativa).

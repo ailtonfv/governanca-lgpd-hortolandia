@@ -100,6 +100,38 @@ def test_contexto_inicial_diferencia_contexto_e_finalidade_por_exemplo():
     assert "para que os dados pessoais são utilizados?" in resposta.text
 
 
+def test_catalogo_da_tela_respeita_a_secretaria_do_agente():
+    planejamento = cliente.get("/registros/novo", params={"conta_id": "CONTA-A1"})
+    financas = cliente.get("/registros/novo", params={"conta_id": "CONTA-C1"})
+
+    assert planejamento.status_code == 200
+    assert financas.status_code == 200
+    assert "Serviço financeiro fictício de demonstração" not in planejamento.text
+    assert "Fornecimento de medicamento de alto custo" not in planejamento.text
+    assert "Serviço financeiro fictício de demonstração" in financas.text
+    assert 'data-unidades="UNID-SUL"' in financas.text
+    assert "Fornecimento de medicamento de alto custo" not in financas.text
+
+
+def test_g1_recusa_item_de_outra_secretaria_mesmo_se_forjado():
+    resposta = cliente.post(
+        "/registros",
+        data={
+            "conta_id": "CONTA-A1",
+            "comando_id": "CMD-UI-CATALOGO-FORJADO",
+            "tipo_objeto": "servico",
+            "objeto_principal_id": "OBJ-SRV-902",
+            "unidade_id": "UNID-NORTE",
+            "contexto_id": "CTX-TRIB-03",
+        },
+    )
+
+    assert resposta.status_code == 200
+    assert "objeto não vinculado à Secretaria responsável" in resposta.text
+    with Session(motor) as sessao:
+        assert sessao.query(Registro).count() == 0
+
+
 def test_g1_pela_tela_cria_registro_contextualizado_e_form1_nao_iniciado():
     resposta = cliente.post(
         "/registros",

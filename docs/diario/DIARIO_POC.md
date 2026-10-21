@@ -273,3 +273,11 @@ Regras deste diário: sem senhas, tokens ou dados pessoais; cada entrada com dat
 - Consolidada a explicação de contexto para a interface: é a frente administrativa e funcional em que o objeto utiliza dados pessoais; não é Secretaria, canal, hipótese legal nem finalidade do FORM 1.
 - Canais como o 156 não formarão um quarto tipo de objeto. Serão relações informativas do catálogo; quando apenas encaminharem, serão apoio, e somente receberão Registro próprio se realizarem tratamento autônomo de dados pessoais.
 - A tela de criação passou a diferenciar contexto e finalidade por um exemplo da Saúde: fornecimento de medicamento de alto custo, contexto Assistência farmacêutica e finalidade restrita aos dados necessários para verificar requisitos, fornecer o medicamento e acompanhar o tratamento. A orientação está associada ao campo para leitores de tela; o catálogo, o banco e as regras de contexto não foram alterados neste incremento. O novo teste HTTP e a suíte completa de 179 testes foram aprovados.
+
+## 2026-10-21 — catálogo por Secretaria e leitura dos inventários
+
+- Conferidos os materiais locais de inventário sem importar respostas ou dados pessoais. Os dois PDFs e a planilha são três representações do mesmo levantamento de 81 perguntas; a Cartilha organiza o percurso em quatro momentos: realidade, legitimidade, risco e ação/acompanhamento.
+- Definido o aproveitamento seguro: nome candidato do objeto, tipo, Secretaria principal e proveniência podem alimentar a curadoria do catálogo. Frequência, executor, canais, finalidade, dados, titulares, retenção, segurança, contratos e riscos permanecem nos instrumentos e na análise posterior.
+- Implementada a migração 9, com vínculo vigente entre Secretaria e objeto, papel `RESPONSAVEL` ou `PARTICIPANTE` e fonte. Os vínculos da carga continuam explicitamente fictícios e não afirmam competências reais das Secretarias.
+- A tela passou a mostrar somente objetos responsáveis vinculados às Secretarias ao alcance do elaborador. O G1 repete a conferência no servidor e recusa pedidos forjados com item de outra Secretaria.
+- Acrescentados três testes: vínculo fictício com proveniência, filtragem da tela por Secretaria e recusa no domínio. A suíte completa chegou a 182 testes aprovados.

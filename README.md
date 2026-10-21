@@ -210,11 +210,38 @@ flowchart LR
 
 A curadoria deverá ligar cada item a uma ou mais Secretarias, registrar qual delas é responsável e quais apenas participam, normalizar nomes equivalentes e impedir duplicidades. Só interessam ao catálogo LGPD os serviços, processos e atividades que tratem dados pessoais; o sistema não pretende inventariar toda a Prefeitura.
 
+#### O que foi aproveitado dos inventários existentes
+
+A conferência dos materiais de referência mostrou três representações do mesmo inventário — relação de perguntas, formulário renderizado e planilha — com 81 perguntas organizadas em 11 blocos. A Cartilha, por sua vez, organiza a jornada municipal em quatro momentos que orientam os quatro FORMs: realidade, legitimidade, risco e ação/acompanhamento.
+
+Para o catálogo inicial, o inventário oferece somente **candidatos**. Alguns campos ajudam a formar e localizar o item; os demais pertencem ao preenchimento e à análise do tratamento:
+
+| Informação do inventário | Destino correto no sistema |
+|---|---|
+| Nome do serviço, processo ou atividade | Candidato a item do catálogo, sujeito a normalização e deduplicação |
+| Secretaria ou unidade principal | Relação entre a Secretaria responsável e o item do catálogo |
+| Frequência e unidade executora | Caracterização operacional posterior; não altera a identidade canônica do item |
+| Fontes, meios, sistemas e canais — inclusive 156 | Fluxo e transversalidade do tratamento; não são um quarto tipo de objeto |
+| Finalidade, hipótese legal, dados e titulares | FORM 1 e análise de legitimidade, nunca o catálogo inicial |
+| Retenção, eliminação, segurança, contratos e riscos | Instrumentos posteriores e controles; não são usados para liberar o G1 |
+
+Nenhuma resposta vira catálogo oficial automaticamente. Os FORMs podem conter grafias diferentes, itens repetidos e dados funcionais ou pessoais que não devem ser copiados para o catálogo. A curadoria utiliza apenas a estrutura necessária, preserva a fonte e a data de referência e publica um identificador canônico depois da conferência.
+
+```mermaid
+flowchart LR
+    I["Inventários recebidos"] --> E["Extrair somente estrutura<br/>nome · tipo · Secretaria · fonte"]
+    E --> C{"Curadoria"}
+    C -->|"aprovado"| V["Vínculo vigente<br/>Secretaria ↔ item"]
+    C -->|"dúvida ou duplicidade"| R["Revisar com a unidade"]
+    V --> T["Catálogo mostrado<br/>na tela de criação"]
+    I -. "finalidade · dados · titulares<br/>retenção · riscos" .-> F["FORMs e análise posterior"]
+```
+
 #### A tela não deve abrir um catálogo global
 
 O percurso definitivo será em cascata: **Secretaria responsável → serviço, processo ou atividade → itens vinculados à Secretaria → contextos compatíveis com o item**. Assim, um agente de Planejamento não recebe uma lista indiscriminada de objetos de todas as áreas. Se nenhum item ou contexto servir, ele solicitará revisão do catálogo, sem criar uma denominação livre.
 
-No corte atual da PoC, os objetos e contextos ainda são fictícios e globais. A filtragem por Secretaria e as relações **Secretaria ↔ objeto** e **objeto ↔ contextos permitidos** ficaram deliberadamente para um incremento testado posterior; não foram improvisadas nesta rodada.
+No corte atual da PoC, os objetos e seus vínculos continuam fictícios. A relação **Secretaria ↔ objeto** já é persistida com papel, fonte e vigência; a tela mostra apenas os itens em que uma Secretaria ao alcance do agente aparece como responsável, e o G1 repete a conferência no servidor para impedir um envio forjado. A relação **objeto ↔ contextos permitidos** permanece para incremento posterior, depois da curadoria inicial dos contextos.
 
 #### Onde entram os canais, como o 156
 
@@ -636,9 +663,9 @@ flowchart TD
 
 ¹ Tentativas negadas ficam registradas na auditoria. O cenário d (substituição) está a fazer.
 ² O início do preenchimento do FORM 1 será um comando posterior ao G1, como no cenário A1 do SAD 04.
-³ Trava determinística por objeto e contexto e exatamente um PRINCIPAL, no próprio banco; um contexto por Registro garantido por chave composta (DA-39, item 1); advertência de família e transversalidade (DA-39, item 2); recusas do banco tratadas pelo nome da regra. A suíte chegou a 179 testes automatizados aprovados em 20/10/2026, inclusive pedidos simultâneos, quinze testes HTTP e três testes específicos de identidade e catálogo institucional. Suspenso e Cancelado continuam testados como regra do banco até a chegada dos atos do M1b.1; Concluído já é alcançado pelos G5 e G6 reais.
+³ Trava determinística por objeto e contexto e exatamente um PRINCIPAL, no próprio banco; um contexto por Registro garantido por chave composta (DA-39, item 1); advertência de família e transversalidade (DA-39, item 2); recusas do banco tratadas pelo nome da regra. A suíte chegou a 182 testes automatizados aprovados em 21/10/2026, inclusive pedidos simultâneos, dezessete testes HTTP e quatro testes específicos de identidade e catálogo institucional. Suspenso e Cancelado continuam testados como regra do banco até a chegada dos atos do M1b.1; Concluído já é alcançado pelos G5 e G6 reais.
 
-### O que os 179 testes garantem, em linguagem simples
+### O que os 182 testes garantem, em linguagem simples
 
 Os testes atuais exercitam o motor da PoC com dados fictícios e procuram responder a perguntas práticas:
 
@@ -656,6 +683,7 @@ Os testes atuais exercitam o motor da PoC com dados fictícios e procuram respon
 - **Validação:** somente o responsável atual da análise pode executar I5. O sistema encerra a análise, torna a versão validada a versão vigente e executa o G4 junto: ação aberta leva a **Em execução**; sem ação aberta, o Registro volta a **Em andamento**.
 - **Primeiras telas:** o painel identifica claramente qual agente fictício está sendo simulado, mostra somente os Registros dentro do alcance institucional e apresenta as flags calculadas. No detalhe, o elaborador pode iniciar e salvar o FORM 1; outro papel apenas consulta. Se alguém tentar abrir diretamente um Registro de outra unidade, o sistema nega a consulta e registra a tentativa na auditoria.
 - **Identidade e contexto inicial:** cada pessoa fictícia possui matrícula única. Antes do FORM 1, a tela confirma primeiro a Secretaria responsável pelo Registro, dentre aquelas em que o agente seja elaborador; depois exige um serviço, processo ou atividade coerente com o catálogo e um contexto. O G1 cria o Registro e o FORM 1 Não iniciado.
+- **Catálogo por Secretaria:** a tela não mistura itens de todas as Secretarias. Ela apresenta somente os vínculos fictícios vigentes da Secretaria escolhida, e o servidor recusa um item de outra Secretaria mesmo que alguém tente forjar o pedido fora da tela.
 - **Devolução:** somente o agente responsável atual pela análise pode executar I6. O sistema preserva a versão, cria uma pendência bloqueante para a unidade elaboradora e executa o G3 junto, sem deixar partes soltas se ocorrer uma falha.
 - **Assunção e ajuste:** P2 garante que apenas um agente autorizado assuma a pendência; I7 recria o rascunho a partir da versão devolvida e libera novamente o salvamento pelo I2.
 - **Resposta e decisão da correção:** P3 lacra a resposta; P4 aceita exatamente esse conteúdo; ou P5 devolve a mesma pendência com motivo e P6 libera outra correção. O novo I3 só cria a Versão 2 quando o rascunho coincide com o lacre aceito.
@@ -664,7 +692,7 @@ Os testes atuais exercitam o motor da PoC com dados fictícios e procuram respon
 - **Participação intersecretarial:** a unidade principal envia uma pendência à fila institucional de outra unidade. Um agente previamente designado assume e responde com entrada, operações, saída, interfaces e evidências; a origem aceita. O destino não edita o FORM 1, o Registro não muda de unidade principal e G5 permanece bloqueado até o aceite.
 - **Flags operacionais:** os avisos da tela inicial são calculados a partir da pendência real. Eles mudam de “Correção solicitada” para “Pendência atribuída a você” sem manter uma segunda verdade no banco.
 
-Esses 179 testes são a cobertura automatizada atual do motor e dos primeiros cortes HTTP. Eles ainda **não substituem** a bateria formal completa POC-TS-001 a POC-TS-009, que exigirá os percursos de aceite e as respectivas evidências; a tela desatualizada exercita o POC-TS-004 e a negação auditada da consulta prepara o POC-TS-007.
+Esses 182 testes são a cobertura automatizada atual do motor e dos primeiros cortes HTTP. Eles ainda **não substituem** a bateria formal completa POC-TS-001 a POC-TS-009, que exigirá os percursos de aceite e as respectivas evidências; a tela desatualizada exercita o POC-TS-004 e a negação auditada da consulta prepara o POC-TS-007.
 
 ### Legenda operacional: agentes e funções
 

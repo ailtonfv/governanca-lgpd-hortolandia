@@ -47,7 +47,24 @@ flowchart LR
     O -. "consulta" .-> K["Canais relacionados"]
 ```
 
-As relações **Secretaria ↔ objeto** e **objeto ↔ contexto permitido** não foram antecipadas no primeiro corte da interface. Elas serão implementadas em incremento próprio, com testes, depois da definição da curadoria e da carga inicial (O-80).
+A relação **Secretaria ↔ objeto** já possui estrutura própria, com papel `RESPONSAVEL` ou `PARTICIPANTE`, fonte e vigência. No corte atual, a tela oferece somente os vínculos fictícios vigentes em que a Secretaria escolhida é responsável, e o G1 repete essa autorização no servidor. A relação **objeto ↔ contexto permitido** continua para um incremento posterior, depois da definição da curadoria e da carga inicial de contextos (O-80).
+
+## Aproveitamento estrutural do inventário existente
+
+Os materiais de referência apresentam o mesmo inventário em três representações: relação de perguntas, formulário renderizado e planilha. Eles fornecem 81 perguntas distribuídas entre identificação, unidades, fluxo, finalidade, dados, titulares, compartilhamentos, segurança, contratos e riscos. A Cartilha organiza o método municipal em quatro momentos: levantamento da realidade, legitimidade, risco e ação/acompanhamento.
+
+O catálogo inicial aproveitará somente metadados estruturais: nome candidato do serviço, processo ou atividade; tipo; Secretaria principal; fonte e data de referência. As respostas não serão importadas automaticamente. Frequência, unidade executora, fontes, meios, finalidade, hipóteses legais, dados, titulares, retenção, eliminação, segurança, contratos e riscos pertencem aos instrumentos e à análise posterior.
+
+```mermaid
+flowchart LR
+    F["FORM recebido"] --> X["Extrair metadados<br/>sem dados pessoais"]
+    X --> C["Curadoria<br/>tipo · Secretaria · duplicidade"]
+    C --> O["Objeto canônico"]
+    O --> U["Vínculo Secretaria ↔ objeto<br/>papel · fonte · vigência"]
+    F -. "conteúdo do tratamento" .-> I["Instrumentos e versões"]
+```
+
+Essa separação impede que nomes, matrículas, CPFs ou respostas livres eventualmente presentes nos inventários sejam copiados para o catálogo operacional.
 
 ## Dados mínimos do agente
 
