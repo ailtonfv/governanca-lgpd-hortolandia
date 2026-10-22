@@ -31,7 +31,7 @@ flowchart LR
 | **POC-TS-006** | Um comando que produziria vários eventos é desfeito por inteiro quando ocorre rollback. | Rollbacks de I3 com G2, I4 com G3, I5 com G4 e I6 com P1 e G3 em `testes/test_submissao.py`. | Extrato do banco antes e depois da falha, demonstrando que nenhum evento do comando permaneceu. | **Parcial:** comportamento coberto; evidência formal pendente. |
 | **POC-TS-007** | Tentar abrir diretamente um Registro de outra Secretaria é negado e deixa auditoria. | `test_acesso_direto_a_registro_de_outra_unidade_e_negado_e_auditado` em `testes/test_interface.py`. | Captura da resposta negada e extrato correspondente do livro de auditoria. | **Parcial:** cenário coberto; evidência formal pendente. |
 | **POC-TS-008** | A massa sintética rejeita a introdução de dado pessoal real durante o carregamento. | `carga_ficticia/seguranca.py` exige marcadores sintéticos nas identidades e recusa CPF, e-mail ou telefone em formato pessoal antes do primeiro `INSERT`. `testes/test_carga_ficticia.py` demonstra a recusa sem usar nem reproduzir dado pessoal real. | Preservar o relatório da rodada identificada, demonstrando a recusa, a ausência de gravação parcial e a omissão do conteúdo suspeito na mensagem. | **Parcial:** barreira e testes implementados; evidência formal pendente. |
-| **POC-TS-009** | Com 1.000 Registros e cerca de 50.000 eventos, todas as cadeias continuam íntegras e uma amostra reconstruída coincide com as projeções. | A suíte verifica cadeias e reconstruções em volumes funcionais menores. | Criar a massa de volume, medir a execução, verificar integralmente as cadeias e comparar a amostra reconstruída com as projeções. | **Pendente.** |
+| **POC-TS-009** | Com 1.000 Registros e cerca de 50.000 eventos, todas as cadeias continuam íntegras e uma amostra reconstruída coincide com as projeções. | O executor separado `demonstracoes/poc_ts_009.py` foi aprovado com 1.000 Registros, 50.000 eventos, 1.000 cadeias íntegras e 25 projeções reconstruídas sem divergência. `testes/test_volume.py` protege o gerador com uma regressão cotidiana pequena. | Associar a execução ao commit do checkpoint e referenciar o [relatório técnico preliminar](RELATORIO_TECNICO_POC_TS_009.md) no pacote formal aplicável. | **Parcial:** ensaio técnico aprovado; consolidação formal pendente. |
 
 ## Evidências e critérios de aceite
 
@@ -53,18 +53,19 @@ Não devem ser copiados nomes, CPF, matrícula funcional real ou qualquer outro 
 
 | Grupo | Quantidade | Leitura |
 |---|---:|---|
-| Testes com cobertura automatizada relevante | 8 de 9 | Falta principalmente transformar a execução em evidência formal. |
-| Testes ainda sem ensaio completo | 1 de 9 | POC-TS-009. |
+| Testes com cobertura técnica relevante | 9 de 9 | Falta transformar e consolidar as execuções nos pacotes formais de evidência. |
+| Testes ainda sem ensaio técnico completo | 0 de 9 | O POC-TS-009 foi executado separadamente por ser um ensaio pesado. |
 | Testes formalmente aceitos | 0 de 9 | O aceite somente será marcado após execução identificada, evidência e conferência. |
 
 Essa contagem não significa que a implementação voltou ao início. Ela separa honestamente três coisas diferentes: **o motor construído**, **o teste automatizado** e **o aceite institucional**.
 
 ## Ordem recomendada para o fechamento
 
-1. Preparar e executar a massa do POC-TS-009.
+1. Associar o POC-TS-009 ao commit do checkpoint e conferir sua evidência técnica preliminar.
 2. Reexecutar POC-TS-001 a POC-TS-008 numa rodada identificada e guardar os resultados.
 3. Organizar os resultados dentro dos pacotes `POC-EV` aplicáveis.
-4. Verificar a cadeia de eventos, registrar defeitos remanescentes e preparar a ata de aceite do M1a.
+4. Verificar a cadeia de eventos, registrar defeitos remanescentes e preencher a minuta da ata disponível no README.
+5. Entregar a ata junto com a apresentação formal à T.I., registrando o aceite e a passagem técnica do M1a.
 
 ## Fontes de verdade
 

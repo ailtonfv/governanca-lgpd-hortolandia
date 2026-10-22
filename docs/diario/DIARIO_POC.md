@@ -300,3 +300,21 @@ Regras deste diário: sem senhas, tokens ou dados pessoais; cada entrada com dat
 - O `POC-TS-003` foi reforçado no ensaio concorrente com duas pessoas: além de uma única assunção e um único evento P2, o teste exige exatamente uma tentativa negada na auditoria, ligada ao comando perdedor e à pendência disputada. O teste específico e a suíte completa de 184 testes foram aprovados.
 - Implementada a barreira do `POC-TS-008` antes das gravações da carga fictícia. Pessoas, matrículas, nomes e contas exigem marcadores sintéticos; toda a massa é examinada contra CPF, e-mail e telefone em formato pessoal. A recusa aponta somente o tipo e a posição do problema, sem reproduzir o conteúdo suspeito.
 - Quatro variações controladas comprovam que uma identidade sem marcadores e valores simulados nos formatos de CPF, e-mail e telefone são recusados antes de qualquer gravação. Nenhum dado pessoal real foi incluído nos testes ou nas evidências. A suíte completa passou a 188 testes aprovados.
+
+### 22/10/2026 — ensaio de volume POC-TS-009
+
+- Criado executor separado e protegido para o ensaio pesado: ele só aceita banco terminado em `_teste`, exige confirmação explícita e usa os mesmos texto canônico e SHA-256 do livro de atos.
+- A prova reduzida passou com 10 Registros, 50 eventos e três reconstruções coincidentes.
+- O ensaio completo foi aprovado com 1.000 Registros sintéticos, 50.000 eventos, cinquenta eventos por cadeia, verificação integral das 1.000 cadeias e reconstrução coincidente de 25 Registros.
+- A carga levou 20,204 segundos; a verificação e a reconstrução, 5,503 segundos; o total foi de 27,298 segundos. Nenhum dado pessoal real foi utilizado.
+- Acrescentado teste cotidiano pequeno para proteger o gerador sem impor o custo do ensaio pesado a cada execução. A suíte completa passou a 189 testes aprovados.
+- Criada evidência técnica preliminar. O ensaio está tecnicamente coberto, mas continua aguardando associação ao commit e incorporação ao pacote formal `POC-EV` antes do aceite institucional do M1a.
+
+### 22/10/2026 — preparação da passagem técnica para a T.I.
+
+- Criada a pasta `11_Cartilha_Apresentacoes` no conjunto dos SADs para reunir a Cartilha e as apresentações institucionais do sistema dirigidas à Tecnologia da Informação.
+- Preparada a primeira lâmina esquemática da evolução do trabalho: base metodológica, PoC nuclear M1a, apresentação e entrega técnica, eventual PoC ampliada, caso piloto e operação.
+- O ciclo de aprendizado liga a coleta realizada pelas Secretarias ao cruzamento com os quatro FORMs e ao aprimoramento futuro do catálogo e dos campos.
+- Confirmado que a PoC ampliada não começa automaticamente depois da apresentação. O Encarregado primeiro fará a leitura do README e decidirá expressamente sobre a etapa seguinte.
+- Mantida a ata formal de aceite. A minuta passou a integrar o README e será preenchida e entregue no dia da apresentação à T.I., junto com as evidências e a referência do commit aceito.
+- A primeira lâmina passou a identificar a responsabilidade por etapa: SENAC no treinamento; Secretaria de Planejamento Urbano e Gestão Estratégica da Cartilha até a PoC ampliada; Secretaria de T.I. na experiência prática, no levantamento de dados, no caso piloto e na operação.

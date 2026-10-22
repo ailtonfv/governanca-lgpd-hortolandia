@@ -640,7 +640,7 @@ flowchart TD
 | ↳ Declaração de transversalidade, só pela governança (DA-39, item 2) | ✔ Implementada |
 | ↳ Alerta estrutural | ⚙️ Parcial: base comum e vínculos fictícios Secretaria → item → contexto ✔; curadoria institucional continua em O-80 |
 | ↳ Semelhança por finalidade, categorias de titulares, categorias de dados e compartilhamentos | ✔ Alerta não bloqueante no I3 (DA-39, item 4) |
-| ↳ Testes automatizados (pytest, base própria) | ✔ 188 aprovados |
+| ↳ Testes automatizados (pytest, base própria) | ✔ 189 aprovados, mais o ensaio de volume separado |
 | Checkpoint externo da cadeia (SAD 08) | a fazer |
 | Rascunho do FORM 1: I1 iniciar preenchimento e I2 salvar, com controle otimista | ✔ |
 | ↳ Testes de I1 e I2 | ✔ 14 testes: estado, lacre, cadeia, idempotência, autorização, concorrência, rollback, migração e POC-TS-004 |
@@ -678,9 +678,9 @@ flowchart TD
 
 ¹ Tentativas negadas ficam registradas na auditoria. O cenário d (substituição) está a fazer.
 ² O início do preenchimento do FORM 1 será um comando posterior ao G1, como no cenário A1 do SAD 04.
-³ Trava determinística por objeto e contexto e exatamente um PRINCIPAL, no próprio banco; um contexto por Registro garantido por chave composta (DA-39, item 1); advertência de família e transversalidade (DA-39, item 2); recusas do banco tratadas pelo nome da regra. A suíte chegou a 188 testes automatizados aprovados em 21/10/2026, inclusive pedidos simultâneos, dezenove testes HTTP, quatro testes específicos de identidade e catálogo institucional e quatro variações da barreira de dados pessoais na carga fictícia. Suspenso e Cancelado continuam testados como regra do banco até a chegada dos atos do M1b.1; Concluído já é alcançado pelos G5 e G6 reais.
+³ Trava determinística por objeto e contexto e exatamente um PRINCIPAL, no próprio banco; um contexto por Registro garantido por chave composta (DA-39, item 1); advertência de família e transversalidade (DA-39, item 2); recusas do banco tratadas pelo nome da regra. A suíte chegou a 189 testes automatizados aprovados em 22/10/2026, inclusive pedidos simultâneos, dezenove testes HTTP, quatro testes específicos de identidade e catálogo institucional, quatro variações da barreira de dados pessoais e uma regressão rápida do gerador de volume. Suspenso e Cancelado continuam testados como regra do banco até a chegada dos atos do M1b.1; Concluído já é alcançado pelos G5 e G6 reais.
 
-### O que os 188 testes garantem, em linguagem simples
+### O que os 189 testes garantem, em linguagem simples
 
 Os testes atuais exercitam o motor da PoC com dados fictícios e procuram responder a perguntas práticas:
 
@@ -707,7 +707,7 @@ Os testes atuais exercitam o motor da PoC com dados fictícios e procuram respon
 - **Participação intersecretarial:** a unidade principal envia uma pendência à fila institucional de outra unidade. Um agente previamente designado assume e responde com entrada, operações, saída, interfaces e evidências; a origem aceita. O destino não edita o FORM 1, o Registro não muda de unidade principal e G5 permanece bloqueado até o aceite.
 - **Flags operacionais:** os avisos da tela inicial são calculados a partir da pendência real. Eles mudam de “Correção solicitada” para “Pendência atribuída a você” sem manter uma segunda verdade no banco.
 
-Esses 188 testes são a cobertura automatizada atual do motor e dos primeiros cortes HTTP. Eles ainda **não substituem** a bateria formal completa POC-TS-001 a POC-TS-009, que exigirá os percursos de aceite e as respectivas evidências; a tela desatualizada exercita o POC-TS-004, a negação auditada da consulta prepara o POC-TS-007 e a barreira da carga cobre o POC-TS-008.
+Esses 189 testes são a cobertura automatizada cotidiana do motor e dos primeiros cortes HTTP. O ensaio pesado do POC-TS-009 fica separado para não tornar lenta cada rodada: em 22/10/2026, ele foi aprovado com 1.000 Registros, 50.000 eventos, verificação integral de 1.000 cadeias e reconstrução coincidente de 25 projeções. Mesmo assim, os testes ainda **não substituem** o pacote formal de evidências e a ata de aceite do M1a.
 
 ### Matriz de aceite da PoC nuclear
 
@@ -721,15 +721,65 @@ flowchart LR
     E --> V["Aceite do M1a"]
 ```
 
-Hoje, **oito dos nove testes formais possuem cobertura automatizada relevante**, mas ainda precisam de uma rodada identificada e das evidências formais. O único ensaio técnico ainda pendente é o volume de 1.000 Registros com cerca de 50.000 eventos (`POC-TS-009`). No `POC-TS-003`, o teste concorrente confirma a assunção única e a auditoria da tentativa perdedora; no `POC-TS-008`, a carga rejeita identidades sem marcadores sintéticos e textos com CPF, e-mail ou telefone em formato pessoal antes do primeiro `INSERT`, sem repetir o conteúdo suspeito no erro.
+Hoje, **os nove testes formais possuem cobertura técnica relevante**. No `POC-TS-003`, o teste concorrente confirma a assunção única e a auditoria da tentativa perdedora; no `POC-TS-008`, a carga rejeita identidades sem marcadores sintéticos e textos com CPF, e-mail ou telefone em formato pessoal antes do primeiro `INSERT`; no `POC-TS-009`, o ensaio de volume verificou todas as 1.000 cadeias e reconstruiu 25 projeções sem divergência. O que falta agora é executar a rodada formal identificada, organizar os resultados nos pacotes `POC-EV` e registrar o aceite institucional.
 
 | Situação | Testes | O que significa |
 |---|---|---|
-| ⚙️ Cobertura existente; aceite parcial | POC-TS-001 a 008 | O comportamento principal já é exercitado, mas a execução e a evidência ainda precisam ser formalizadas. |
-| ⏳ Ensaio pendente | POC-TS-009 | Ainda é necessário preparar e executar o ensaio completo de volume. |
+| ⚙️ Cobertura técnica existente; aceite parcial | POC-TS-001 a 009 | Os comportamentos já foram exercitados; falta consolidar a execução identificada e as evidências formais. |
+| ⏳ Ensaio técnico pendente | Nenhum | O trabalho restante está no fechamento formal, não na criação de outro ensaio técnico. |
 | ✔ Aceite formal concluído | Nenhum ainda | Só será marcado depois da execução identificada, evidência, conferência e registro no aceite. |
 
 > 📋 A correspondência teste por teste, os arquivos que já dão cobertura e as evidências que faltam estão na [Matriz de aceite do M1a](docs/aceite/MATRIZ_ACEITE_M1A.md).
+
+> 📊 Os números, tempos e cuidados do ensaio de 1.000 Registros estão no [Relatório técnico do POC-TS-009](docs/aceite/RELATORIO_TECNICO_POC_TS_009.md). Os artefatos operacionais de evidência continuam fora do Git.
+
+### Minuta da Ata de Aceite e Transferência Técnica do M1a
+
+Esta minuta será preenchida e entregue na apresentação formal à T.I. A apresentação caracteriza a passagem técnica; a ata registra o aceite institucional da PoC nuclear, as evidências conferidas, as limitações conhecidas e as responsabilidades seguintes. O documento **não autoriza automaticamente o início da PoC ampliada**, que dependerá de decisão posterior do Encarregado de Dados.
+
+| Campo | Preenchimento no dia da apresentação |
+|---|---|
+| Data, horário e local | `[preencher]` |
+| Unidade que apresenta | Secretaria de Planejamento Urbano e Gestão Estratégica |
+| Responsável pela apresentação | `[preencher]` |
+| Representantes da T.I. | `[preencher nomes e funções]` |
+| Referência técnica | Commit `[preencher]`, Matriz de Aceite do M1a e pacotes `POC-EV` aplicáveis |
+
+**Objeto.** Registrar a apresentação, o aceite e a transferência técnica da PoC nuclear M1a do Sistema Municipal de Governança LGPD, construída exclusivamente com dados fictícios.
+
+**Evidências conferidas.** Foram apresentados o código da PoC, a arquitetura vigente, o percurso do Registro, os nove testes formais `POC-TS-001` a `POC-TS-009`, os resultados reproduzíveis, a cadeia de eventos e os pacotes `POC-EV` aplicáveis. A relação efetivamente entregue deverá ser registrada abaixo:
+
+`[listar arquivos, relatórios, pacotes de evidência e local de guarda]`
+
+**Resultado do aceite.** Assinalar uma opção:
+
+- [ ] M1a aceito sem ressalvas.
+- [ ] M1a aceito com as ressalvas descritas nesta ata.
+- [ ] M1a não aceito; correções obrigatórias descritas nesta ata.
+
+**Ressalvas, limitações e defeitos remanescentes.** Nenhum defeito crítico ou alto pode permanecer aberto para o aceite. Registrar limitações que não impeçam a finalidade do marco e o tratamento combinado:
+
+`[preencher ou registrar “nenhuma ressalva”]`
+
+**Transferência técnica.** A T.I. recebeu a visão da solução, as instruções de instalação e execução, a localização do código, dos SADs, do README, dos testes e das evidências. A apresentação e esta ata registram a passagem técnica do M1a. A direção funcional, o tratamento do backlog e eventual início da PoC ampliada serão objeto de decisão posterior, sem início automático nesta reunião.
+
+**Encaminhamentos e responsáveis.**
+
+| Encaminhamento | Responsável | Prazo ou condição |
+|---|---|---|
+| Preservar o código, as evidências e a referência do commit aceito | `[preencher]` | `[preencher]` |
+| Registrar dúvidas ou limitações identificadas pela T.I. | `[preencher]` | `[preencher]` |
+| Deliberar sobre eventual PoC ampliada | Encarregado de Dados | Após leitura do README e decisão expressa |
+
+**Registro dos participantes.**
+
+| Nome | Unidade ou função | Ciência ou assinatura |
+|---|---|---|
+| `[preencher]` | `[preencher]` | `[preencher]` |
+| `[preencher]` | `[preencher]` | `[preencher]` |
+| `[preencher]` | `[preencher]` | `[preencher]` |
+
+> A versão preenchida deve receber data, referência do commit e localização das evidências. Se for assinada fora do Git, o README deve registrar apenas a referência e o local de guarda, sem expor assinaturas ou dados pessoais desnecessários.
 
 ### Legenda operacional: agentes e funções
 
@@ -1107,7 +1157,7 @@ Cada marco tem as suas condições de entrada e de saída (SAD 09, seções 4A, 
 **Regras comuns a todos os marcos** (📘 SAD 09, seção 30):
 
 - **Quem aprova:** o operador da PoC executa os testes; o **Encarregado de Dados** aceita o marco e eventuais exceções.
-- **Como se encerra:** aceite registrado em ata da PoC (pasta do SAD 09), referenciado no SAD 10; evidências preservadas até o fim do Piloto.
+- **Como se encerra:** aceite registrado em ata da PoC, apresentada à T.I. junto com a transferência técnica e referenciada no SAD 10; evidências preservadas até o fim do Piloto. A minuta operacional está neste README e a versão preenchida deve indicar seu local de guarda.
 - **O que impede:** nenhum defeito **crítico** (impede a finalidade do marco ou compromete integridade, segregação ou dados) ou **alto** (falha de requisito obrigatório sem contorno) pode estar aberto. O marco é reaberto se um desses defeitos aparecer depois do aceite.
 
 *Na PoC nuclear, operador e aceitante são a mesma pessoa. Por isso as evidências são automatizadas e reproduzíveis: qualquer terceiro, inclusive a TI, pode reexecutá-las.*
@@ -1173,7 +1223,7 @@ M1b — Fluxos de controle
 | 2 | Etapa 2d: correções | Idempotência estrita, tratamento específico das recusas do banco, papéis explícitos no pedido, numeração anual (D4), um contexto por Registro (D1) | M1a |
 | 3 | Etapa 2d: advertência e transversalidade | Resolução da advertência de família e declaração de transversalidade (D2) | M1a |
 | 4 | Concluir o núcleo do workflow | Rascunho, versão, submissão (com a verificação material), retirada da submissão antes da análise (I4, cenário A11), análise com segregação e reatribuição da análise (I14, cenário A14), devolução com pendência (P1 a P4, e P5/P6 no percurso da devolução), validação, conclusão e pendência intersecretarial; ação obrigatória sintética mínima e percurso com medidas (I5 → G4 → Em execução → G6) | M1a |
-| 5 | Formalizar os testes de aceite do M1a | Oito dos nove testes possuem cobertura automatizada relevante; executar o ensaio de volume POC-TS-009 e gerar as evidências POC-EV do marco conforme a [matriz de aceite](docs/aceite/MATRIZ_ACEITE_M1A.md) | M1a |
+| 5 | Formalizar os testes de aceite do M1a | Os nove testes possuem cobertura técnica relevante; consolidar a rodada identificada, associar o POC-TS-009 ao commit do checkpoint e gerar as evidências POC-EV conforme a [matriz de aceite](docs/aceite/MATRIZ_ACEITE_M1A.md) | M1a |
 | 6 | Fechar as decisões normativas pendentes | Competência do item 4 da DA-37 (quadro abaixo) | M1a → M1b |
 | 7 | Executar o M1b em quatro pacotes | M1b.1 a M1b.4, cada um só depois de cumpridas as suas dependências (quadro "Pacotes de implementação do M1b") | M1b |
 
@@ -1216,6 +1266,7 @@ Com o último comando em execução, a tela fica disponível em `http://127.0.0.
 | [Contrato de identidade e contexto inicial](docs/arquitetura/CONTRATO_IDENTIDADE_E_CONTEXTO_INICIAL.md) | Registra matrícula, autenticação futura e o percurso Secretaria responsável → serviço/processo/atividade → contexto → G1 |
 | [docs/arquitetura/MAPA_M1a.md](docs/arquitetura/MAPA_M1a.md) | O percurso de um Registro no M1a, em diagramas (ilustrativo; prevalecem os SADs) |
 | [docs/aceite/MATRIZ_ACEITE_M1A.md](docs/aceite/MATRIZ_ACEITE_M1A.md) | O que cada POC-TS-001 a 009 comprova, a cobertura já existente e as evidências que ainda faltam para o aceite |
+| [docs/aceite/RELATORIO_TECNICO_POC_TS_009.md](docs/aceite/RELATORIO_TECNICO_POC_TS_009.md) | Resultado sintético do ensaio de volume com 1.000 Registros, 50.000 eventos e reconstrução de amostra |
 | [docs/arquitetura/ARQUITETURA_POC.md](docs/arquitetura/ARQUITETURA_POC.md) | Camadas do sistema, responsabilidades e mapa das pastas |
 | [docs/operacao/INSTALACAO.md](docs/operacao/INSTALACAO.md) | Montar o ambiente e rodar a PoC |
 | [docs/diario/DIARIO_POC.md](docs/diario/DIARIO_POC.md) | Registro datado de tudo o que foi feito |
