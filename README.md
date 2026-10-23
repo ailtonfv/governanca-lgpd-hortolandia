@@ -19,6 +19,7 @@ Toda apresentação institucional derivada deste projeto deve utilizar o **bras�
 | Saber o que já funciona e o que falta | [O que já funciona](#o-que-já-funciona) e [Próximos passos](#próximos-passos) |
 | Montar o ambiente e rodar os testes | [Instalação e execução](docs/operacao/INSTALACAO.md) |
 | Entender as camadas do código | [Arquitetura](docs/arquitetura/ARQUITETURA_POC.md) |
+| Dar contexto rápido a uma IA antes de uma tarefa | [Pacote de contexto](docs/contexto/context.md) e [instruções para agentes](AGENTS.md) |
 
 
 ## De onde vem este sistema

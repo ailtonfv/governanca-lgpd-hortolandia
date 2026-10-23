@@ -327,3 +327,11 @@ Regras deste diário: sem senhas, tokens ou dados pessoais; cada entrada com dat
 - Consolidados os resultados dos nove `POC-TS` e dos pacotes `POC-EV-001` a `006`, `009`, `011`, `014` e `015` no relatório formal.
 - Os artefatos operacionais permanecem fora do Git e foram identificados por SHA-256. Nenhum dado pessoal real foi usado.
 - A PoC nuclear ficou tecnicamente pronta para aceite. Permanecem como atos humanos a apresentação à T.I., a conferência das limitações e o preenchimento da ata de aceite e transferência técnica.
+
+### 22/10/2026 — pacote de contexto para agentes de IA
+
+- Criado `AGENTS.md` na raiz com ordem de leitura, invariantes do domínio, segurança, disciplina de testes e critérios de conclusão de tarefas.
+- Criado `docs/contexto/` com resumos curtos de produto, domínio, glossário, arquitetura, testes e sistema visual. Os arquivos apontam para README, contratos e SADs e não criam fonte de verdade paralela.
+- Formalizado o frame mínimo de cada incremento: objetivo, escopo, regra e fonte, atores, estados, dados, aceite, testes, evidências e limitações.
+- Registrado o padrão Arrange–Act–Assert para testes e sua distinção do nível AAA de acessibilidade.
+- Documentada a base visual existente e a proposta de evolução por tokens, componentes e movimento reduzido, sem alterar a interface nesta rodada.
