@@ -15,23 +15,22 @@ flowchart LR
 
 ## Legenda
 
-- **Coberto:** existe teste automatizado diretamente relacionado e aprovado.
-- **Parcial:** existe cobertura relevante, mas falta uma verificação específica ou o pacote formal de evidência.
-- **Pendente:** ainda falta implementar ou executar o ensaio exigido pelo SAD 09.
+- **Aprovado tecnicamente:** o ensaio foi executado numa rodada identificada e o resultado está consolidado.
+- **Aceite institucional pendente:** a evidência está pronta, mas a ata ainda não foi preenchida na apresentação à T.I.
 
 ## Matriz dos testes formais
 
 | Teste formal | O que precisamos provar | Cobertura automatizada localizada | Evidência que falta preservar | Situação para o aceite |
 |---|---|---|---|---|
-| **POC-TS-001** | Repetir o mesmo `comando_id` devolve o resultado original e não cria outro evento. | `testes/test_idempotencia.py` e testes de repetição dos atos G1, I1 a I7, P1 a P6, G5 e G6. | Relatório da execução, resultado das duas chamadas e contagem dos eventos antes e depois da repetição. | **Parcial:** comportamento coberto; evidência formal pendente. |
-| **POC-TS-002** | Dois comandos simultâneos na mesma cadeia não criam lacuna nem repetem a sequência. | Ensaios concorrentes em `testes/test_rascunho.py`, `testes/test_submissao.py`, `testes/test_conclusao.py`, `testes/test_conclusao_medidas.py` e `testes/test_pendencia_intersecretarial.py`. | Execução identificada de uma amostra representativa, relação ordenada dos eventos e verificação da cadeia. | **Parcial:** concorrência coberta; evidência formal pendente. |
-| **POC-TS-003** | Duas pessoas tentando assumir a mesma análise ou pendência resultam em uma única assunção; a segunda tentativa é negada e auditada. | Concorrência de I13 e P2 coberta em `testes/test_submissao.py` e `testes/test_pendencia_intersecretarial.py`; o ensaio com duas pessoas confirma uma única assunção e exatamente uma tentativa negada na auditoria. | Preservar o extrato da execução com o responsável vencedor, o comando perdedor e o respectivo evento de auditoria. | **Parcial:** comportamento completo coberto; evidência formal pendente. |
-| **POC-TS-004** | Uma tela desatualizada não sobrescreve um rascunho mais novo. | `test_poc_ts_004_versao_desatualizada_nao_sobrescreve_rascunho` e `test_i2_recusa_tela_desatualizada_sem_sobrescrever`. | Captura do percurso pela interface, versões lida e vigente e consulta final do rascunho preservado. | **Parcial:** cenário coberto no domínio e na interface; evidência formal pendente. |
-| **POC-TS-005** | Se houver falha entre evento e projeção, a transação não deixa nenhuma gravação parcial. | Testes de atomicidade e rollback nos módulos de rascunho, submissão, conclusão e pendências. | Escolher um percurso representativo, registrar a falha simulada e demonstrar que evento, snapshot e projeção foram desfeitos juntos. | **Parcial:** comportamento coberto; execução formal ainda não empacotada. |
-| **POC-TS-006** | Um comando que produziria vários eventos é desfeito por inteiro quando ocorre rollback. | Rollbacks de I3 com G2, I4 com G3, I5 com G4 e I6 com P1 e G3 em `testes/test_submissao.py`. | Extrato do banco antes e depois da falha, demonstrando que nenhum evento do comando permaneceu. | **Parcial:** comportamento coberto; evidência formal pendente. |
-| **POC-TS-007** | Tentar abrir diretamente um Registro de outra Secretaria é negado e deixa auditoria. | `test_acesso_direto_a_registro_de_outra_unidade_e_negado_e_auditado` em `testes/test_interface.py`. | Captura da resposta negada e extrato correspondente do livro de auditoria. | **Parcial:** cenário coberto; evidência formal pendente. |
-| **POC-TS-008** | A massa sintética rejeita a introdução de dado pessoal real durante o carregamento. | `carga_ficticia/seguranca.py` exige marcadores sintéticos nas identidades e recusa CPF, e-mail ou telefone em formato pessoal antes do primeiro `INSERT`. `testes/test_carga_ficticia.py` demonstra a recusa sem usar nem reproduzir dado pessoal real. | Preservar o relatório da rodada identificada, demonstrando a recusa, a ausência de gravação parcial e a omissão do conteúdo suspeito na mensagem. | **Parcial:** barreira e testes implementados; evidência formal pendente. |
-| **POC-TS-009** | Com 1.000 Registros e cerca de 50.000 eventos, todas as cadeias continuam íntegras e uma amostra reconstruída coincide com as projeções. | O executor separado `demonstracoes/poc_ts_009.py` foi aprovado com 1.000 Registros, 50.000 eventos, 1.000 cadeias íntegras e 25 projeções reconstruídas sem divergência. `testes/test_volume.py` protege o gerador com uma regressão cotidiana pequena. | Associar a execução ao commit do checkpoint e referenciar o [relatório técnico preliminar](RELATORIO_TECNICO_POC_TS_009.md) no pacote formal aplicável. | **Parcial:** ensaio técnico aprovado; consolidação formal pendente. |
+| **POC-TS-001** | Repetir o mesmo `comando_id` devolve o resultado original e não cria outro evento. | `testes/test_idempotencia.py` e testes de repetição dos atos G1, I1 a I7, P1 a P6, G5 e G6. | Rodada `M1A-20261022-001` e [relatório consolidado](RELATORIO_RODADA_FORMAL_M1A_2026-10-22.md). | **Aprovado tecnicamente.** |
+| **POC-TS-002** | Dois comandos simultâneos na mesma cadeia não criam lacuna nem repetem a sequência. | Ensaios concorrentes em `testes/test_rascunho.py`, `testes/test_submissao.py`, `testes/test_conclusao.py`, `testes/test_conclusao_medidas.py` e `testes/test_pendencia_intersecretarial.py`. | Rodada identificada, testes concorrentes e cadeia conferida. | **Aprovado tecnicamente.** |
+| **POC-TS-003** | Duas pessoas tentando assumir a mesma análise ou pendência resultam em uma única assunção; a segunda tentativa é negada e auditada. | Concorrência de I13 e P2 coberta em `testes/test_submissao.py` e `testes/test_pendencia_intersecretarial.py`; o ensaio com duas pessoas confirma uma única assunção e exatamente uma tentativa negada na auditoria. | Rodada identificada com assunção única e auditoria da tentativa perdedora. | **Aprovado tecnicamente.** |
+| **POC-TS-004** | Uma tela desatualizada não sobrescreve um rascunho mais novo. | `test_poc_ts_004_versao_desatualizada_nao_sobrescreve_rascunho` e `test_i2_recusa_tela_desatualizada_sem_sobrescrever`. | Rodada identificada no domínio e na interface. | **Aprovado tecnicamente.** |
+| **POC-TS-005** | Se houver falha entre evento e projeção, a transação não deixa nenhuma gravação parcial. | Testes de atomicidade e rollback nos módulos de rascunho, submissão, conclusão e pendências. | Rodada identificada com falhas simuladas e gravações desfeitas juntas. | **Aprovado tecnicamente.** |
+| **POC-TS-006** | Um comando que produziria vários eventos é desfeito por inteiro quando ocorre rollback. | Rollbacks de I3 com G2, I4 com G3, I5 com G4 e I6 com P1 e G3 em `testes/test_submissao.py`. | Rodada identificada sem evento residual dos comandos desfeitos. | **Aprovado tecnicamente.** |
+| **POC-TS-007** | Tentar abrir diretamente um Registro de outra Secretaria é negado e deixa auditoria. | `test_acesso_direto_a_registro_de_outra_unidade_e_negado_e_auditado` em `testes/test_interface.py`. | Rodada identificada com negação e auditoria confirmadas. | **Aprovado tecnicamente.** |
+| **POC-TS-008** | A massa sintética rejeita a introdução de dado pessoal real durante o carregamento. | `carga_ficticia/seguranca.py` exige marcadores sintéticos nas identidades e recusa CPF, e-mail ou telefone em formato pessoal antes do primeiro `INSERT`. `testes/test_carga_ficticia.py` demonstra a recusa sem usar nem reproduzir dado pessoal real. | Rodada identificada sem gravação parcial nem reprodução do conteúdo suspeito. | **Aprovado tecnicamente.** |
+| **POC-TS-009** | Com 1.000 Registros e cerca de 50.000 eventos, todas as cadeias continuam íntegras e uma amostra reconstruída coincide com as projeções. | O executor separado `demonstracoes/poc_ts_009.py` foi aprovado com 1.000 Registros, 50.000 eventos, 1.000 cadeias íntegras e 25 projeções reconstruídas sem divergência. `testes/test_volume.py` protege o gerador com uma regressão cotidiana pequena. | Commit `df2db0f`, [relatório técnico](RELATORIO_TECNICO_POC_TS_009.md), resultado operacional e hash no relatório consolidado. | **Aprovado tecnicamente.** |
 
 ## Evidências e critérios de aceite
 
@@ -53,19 +52,19 @@ Não devem ser copiados nomes, CPF, matrícula funcional real ou qualquer outro 
 
 | Grupo | Quantidade | Leitura |
 |---|---:|---|
-| Testes com cobertura técnica relevante | 9 de 9 | Falta transformar e consolidar as execuções nos pacotes formais de evidência. |
-| Testes ainda sem ensaio técnico completo | 0 de 9 | O POC-TS-009 foi executado separadamente por ser um ensaio pesado. |
-| Testes formalmente aceitos | 0 de 9 | O aceite somente será marcado após execução identificada, evidência e conferência. |
+| Testes aprovados tecnicamente | 9 de 9 | Rodada `M1A-20261022-001` consolidada e vinculada ao commit `df2db0f`. |
+| Testes ainda sem ensaio técnico completo | 0 de 9 | O POC-TS-009 foi reexecutado separadamente com 50.000 eventos. |
+| Testes com evidência consolidada | 9 de 9 | Resultados e pacotes `POC-EV` aplicáveis estão no relatório da rodada formal. |
+| Testes formalmente aceitos em ata | 0 de 9 | A marcação ocorrerá na apresentação e transferência técnica à T.I. |
 
 Essa contagem não significa que a implementação voltou ao início. Ela separa honestamente três coisas diferentes: **o motor construído**, **o teste automatizado** e **o aceite institucional**.
 
 ## Ordem recomendada para o fechamento
 
-1. Associar o POC-TS-009 ao commit do checkpoint e conferir sua evidência técnica preliminar.
-2. Reexecutar POC-TS-001 a POC-TS-008 numa rodada identificada e guardar os resultados.
-3. Organizar os resultados dentro dos pacotes `POC-EV` aplicáveis.
-4. Verificar a cadeia de eventos, registrar defeitos remanescentes e preencher a minuta da ata disponível no README.
-5. Entregar a ata junto com a apresentação formal à T.I., registrando o aceite e a passagem técnica do M1a.
+1. Apresentar o [relatório da rodada formal](RELATORIO_RODADA_FORMAL_M1A_2026-10-22.md) e os hashes dos artefatos operacionais à T.I.
+2. Conferir as limitações conhecidas e registrar eventuais ressalvas.
+3. Preencher a minuta da ata disponível no README.
+4. Registrar o aceite e a passagem técnica do M1a.
 
 ## Fontes de verdade
 

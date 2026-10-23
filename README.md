@@ -707,7 +707,7 @@ Os testes atuais exercitam o motor da PoC com dados fictícios e procuram respon
 - **Participação intersecretarial:** a unidade principal envia uma pendência à fila institucional de outra unidade. Um agente previamente designado assume e responde com entrada, operações, saída, interfaces e evidências; a origem aceita. O destino não edita o FORM 1, o Registro não muda de unidade principal e G5 permanece bloqueado até o aceite.
 - **Flags operacionais:** os avisos da tela inicial são calculados a partir da pendência real. Eles mudam de “Correção solicitada” para “Pendência atribuída a você” sem manter uma segunda verdade no banco.
 
-Esses 189 testes são a cobertura automatizada cotidiana do motor e dos primeiros cortes HTTP. O ensaio pesado do POC-TS-009 fica separado para não tornar lenta cada rodada: em 22/10/2026, ele foi aprovado com 1.000 Registros, 50.000 eventos, verificação integral de 1.000 cadeias e reconstrução coincidente de 25 projeções. Mesmo assim, os testes ainda **não substituem** o pacote formal de evidências e a ata de aceite do M1a.
+Esses 189 testes são a cobertura automatizada cotidiana do motor e dos primeiros cortes HTTP. Na rodada formal `M1A-20261022-001`, todos foram aprovados, sem falhas, erros ou testes ignorados. O ensaio pesado do POC-TS-009 foi reexecutado com 1.000 Registros, 50.000 eventos, verificação integral de 1.000 cadeias e reconstrução coincidente de 25 projeções. A execução e os pacotes `POC-EV` aplicáveis estão consolidados no relatório formal; resta o aceite institucional em ata.
 
 ### Matriz de aceite da PoC nuclear
 
@@ -721,17 +721,19 @@ flowchart LR
     E --> V["Aceite do M1a"]
 ```
 
-Hoje, **os nove testes formais possuem cobertura técnica relevante**. No `POC-TS-003`, o teste concorrente confirma a assunção única e a auditoria da tentativa perdedora; no `POC-TS-008`, a carga rejeita identidades sem marcadores sintéticos e textos com CPF, e-mail ou telefone em formato pessoal antes do primeiro `INSERT`; no `POC-TS-009`, o ensaio de volume verificou todas as 1.000 cadeias e reconstruiu 25 projeções sem divergência. O que falta agora é executar a rodada formal identificada, organizar os resultados nos pacotes `POC-EV` e registrar o aceite institucional.
+Hoje, **os nove testes formais estão tecnicamente aprovados**. No `POC-TS-003`, o teste concorrente confirmou a assunção única e a auditoria da tentativa perdedora; no `POC-TS-008`, a carga recusou entradas em formatos pessoais antes do primeiro `INSERT`; no `POC-TS-009`, o ensaio de volume verificou todas as 1.000 cadeias e reconstruiu 25 projeções sem divergência. A rodada identificada e os pacotes `POC-EV` estão prontos para a apresentação e o aceite institucional.
 
 | Situação | Testes | O que significa |
 |---|---|---|
-| ⚙️ Cobertura técnica existente; aceite parcial | POC-TS-001 a 009 | Os comportamentos já foram exercitados; falta consolidar a execução identificada e as evidências formais. |
+| ✔ Aprovação técnica | POC-TS-001 a 009 | Rodada identificada concluída e evidências consolidadas. |
 | ⏳ Ensaio técnico pendente | Nenhum | O trabalho restante está no fechamento formal, não na criação de outro ensaio técnico. |
-| ✔ Aceite formal concluído | Nenhum ainda | Só será marcado depois da execução identificada, evidência, conferência e registro no aceite. |
+| ⏳ Aceite institucional | Ata do M1a | Será registrado na apresentação e transferência técnica à T.I. |
 
 > 📋 A correspondência teste por teste, os arquivos que já dão cobertura e as evidências que faltam estão na [Matriz de aceite do M1a](docs/aceite/MATRIZ_ACEITE_M1A.md).
 
 > 📊 Os números, tempos e cuidados do ensaio de 1.000 Registros estão no [Relatório técnico do POC-TS-009](docs/aceite/RELATORIO_TECNICO_POC_TS_009.md). Os artefatos operacionais de evidência continuam fora do Git.
+
+> ✅ A rodada formal completa, o resultado dos nove `POC-TS`, os pacotes `POC-EV`, o ambiente e os hashes dos artefatos estão no [Relatório da rodada formal do M1a](docs/aceite/RELATORIO_RODADA_FORMAL_M1A_2026-10-22.md).
 
 ### Minuta da Ata de Aceite e Transferência Técnica do M1a
 

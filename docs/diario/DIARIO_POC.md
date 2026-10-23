@@ -318,3 +318,12 @@ Regras deste diário: sem senhas, tokens ou dados pessoais; cada entrada com dat
 - Confirmado que a PoC ampliada não começa automaticamente depois da apresentação. O Encarregado primeiro fará a leitura do README e decidirá expressamente sobre a etapa seguinte.
 - Mantida a ata formal de aceite. A minuta passou a integrar o README e será preenchida e entregue no dia da apresentação à T.I., junto com as evidências e a referência do commit aceito.
 - A primeira lâmina passou a identificar a responsabilidade por etapa: SENAC no treinamento; Secretaria de Planejamento Urbano e Gestão Estratégica da Cartilha até a PoC ampliada; Secretaria de T.I. na experiência prática, no levantamento de dados, no caso piloto e na operação.
+
+### 22/10/2026 — rodada formal de encerramento técnico do M1a
+
+- Criado o checkpoint técnico `df2db0f5b49579844eacd6107a633da14176f427` para associar código, matriz e ensaio de volume.
+- Executada a rodada identificada `M1A-20261022-001` no banco exclusivo `lgpd_poc_teste`: 189 de 189 testes aprovados, sem falhas, erros ou testes ignorados.
+- Reexecutado o `POC-TS-009`: 1.000 Registros, 50.000 eventos, 1.000 cadeias íntegras e 25 reconstruções coincidentes; tempo total de 21,092 segundos.
+- Consolidados os resultados dos nove `POC-TS` e dos pacotes `POC-EV-001` a `006`, `009`, `011`, `014` e `015` no relatório formal.
+- Os artefatos operacionais permanecem fora do Git e foram identificados por SHA-256. Nenhum dado pessoal real foi usado.
+- A PoC nuclear ficou tecnicamente pronta para aceite. Permanecem como atos humanos a apresentação à T.I., a conferência das limitações e o preenchimento da ata de aceite e transferência técnica.
