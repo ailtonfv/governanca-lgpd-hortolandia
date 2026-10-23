@@ -58,7 +58,7 @@ python -m demonstracoes.poc_ts_009 --executar
 ## Estado de referência do M1a
 
 - 189 testes automatizados aprovados.
-- 9 de 9 cenários `POC-TS` tecnicamente aprovados.
+- 9 de 9 cenários `POC-TS` tecnicamente aprovados e aceitos no M1a pelo Encarregado de Dados em 22/10/2026, com limitações conhecidas.
 - Relatório: `docs/aceite/RELATORIO_RODADA_FORMAL_M1A_2026-10-22.md`.
 - Matriz: `docs/aceite/MATRIZ_ACEITE_M1A.md`.
 - Commit do código ensaiado: `df2db0f5b49579844eacd6107a633da14176f427`.

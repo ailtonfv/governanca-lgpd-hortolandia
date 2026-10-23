@@ -55,16 +55,15 @@ Não devem ser copiados nomes, CPF, matrícula funcional real ou qualquer outro 
 | Testes aprovados tecnicamente | 9 de 9 | Rodada `M1A-20261022-001` consolidada e vinculada ao commit `df2db0f`. |
 | Testes ainda sem ensaio técnico completo | 0 de 9 | O POC-TS-009 foi reexecutado separadamente com 50.000 eventos. |
 | Testes com evidência consolidada | 9 de 9 | Resultados e pacotes `POC-EV` aplicáveis estão no relatório da rodada formal. |
-| Testes formalmente aceitos em ata | 0 de 9 | A marcação ocorrerá na apresentação e transferência técnica à T.I. |
+| Testes formalmente aceitos no M1a | 9 de 9 | Aceite registrado pelo Encarregado de Dados em 22/10/2026, com limitações conhecidas. |
 
 Essa contagem não significa que a implementação voltou ao início. Ela separa honestamente três coisas diferentes: **o motor construído**, **o teste automatizado** e **o aceite institucional**.
 
 ## Ordem recomendada para o fechamento
 
 1. Apresentar o [relatório da rodada formal](RELATORIO_RODADA_FORMAL_M1A_2026-10-22.md) e os hashes dos artefatos operacionais à T.I.
-2. Conferir as limitações conhecidas e registrar eventuais ressalvas.
-3. Preencher a minuta da ata disponível no README.
-4. Registrar o aceite e a passagem técnica do M1a.
+2. Registrar participantes, dúvidas e encaminhamentos na minuta disponível no README.
+3. Completar a passagem técnica do M1a sem iniciar automaticamente a PoC ampliada.
 
 ## Fontes de verdade
 

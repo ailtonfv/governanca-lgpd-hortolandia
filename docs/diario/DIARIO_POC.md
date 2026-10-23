@@ -335,3 +335,10 @@ Regras deste diário: sem senhas, tokens ou dados pessoais; cada entrada com dat
 - Formalizado o frame mínimo de cada incremento: objetivo, escopo, regra e fonte, atores, estados, dados, aceite, testes, evidências e limitações.
 - Registrado o padrão Arrange–Act–Assert para testes e sua distinção do nível AAA de acessibilidade.
 - Documentada a base visual existente e a proposta de evolução por tokens, componentes e movimento reduzido, sem alterar a interface nesta rodada.
+
+### 22/10/2026 — aceite da PoC nuclear M1a
+
+- O Encarregado de Dados aceitou expressamente o M1a após a rodada formal `M1A-20261022-001`, com 189 de 189 testes e 9 de 9 cenários `POC-TS` aprovados.
+- O aceite preserva as limitações conhecidas: checkpoint externo e custódia institucional no backlog; temporalidade dependente da regra oficial; autenticação, integrações, Piloto e produção fora do M1a.
+- Permanecem pendentes a apresentação, o registro dos participantes e a transferência técnica à T.I.
+- O aceite do M1a não inicia automaticamente a PoC ampliada, que depende de decisão expressa própria.

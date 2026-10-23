@@ -22,11 +22,11 @@ Os SADs completos ficam no conjunto documental de arquitetura mantido separadame
 
 ## Estágio atual
 
-- PoC nuclear M1a: tecnicamente concluída.
+- PoC nuclear M1a: tecnicamente concluída e aceita pelo Encarregado de Dados em 22/10/2026, com limitações conhecidas.
 - Rodada formal: `M1A-20261022-001`.
 - Resultado: 189 de 189 testes automatizados e 9 de 9 cenários `POC-TS` aprovados.
 - Ensaio de volume: 1.000 Registros, 50.000 eventos, 1.000 cadeias íntegras e 25 reconstruções coincidentes.
-- Pendente: apresentação à T.I. e preenchimento da ata de aceite e transferência técnica.
+- Pendente: apresentação, registro dos participantes e transferência técnica à T.I.
 - PoC ampliada: planejada, ainda não iniciada e dependente de decisão expressa.
 
 ## Escopo por camada

@@ -73,8 +73,8 @@ Os hashes permitem conferir que os arquivos apresentados à T.I. são os mesmos 
 
 - O checkpoint externo da cadeia e a custódia institucional correspondente permanecem no backlog. A PoC nuclear demonstra a cadeia interna e a detecção de três classes de adulteração.
 - Temporalidade e descarte dependem da tabela oficial e do grupo municipal responsável. A PoC nuclear não elimina automaticamente dados, além de usar somente massa fictícia.
-- O aceite institucional, a transferência técnica e eventuais ressalvas serão registrados na ata apresentada à T.I.
+- O Encarregado de Dados aceitou o M1a em 22/10/2026 com estas limitações conhecidas. A apresentação e a transferência técnica à T.I. permanecem pendentes.
 
 ## Conclusão técnica
 
-Os nove cenários formais da PoC nuclear estão tecnicamente aprovados. A execução identificada, os resultados consolidados e os hashes dos artefatos estão prontos para conferência. O encerramento institucional do M1a depende somente da apresentação à T.I. e do preenchimento da ata de aceite e transferência técnica.
+Os nove cenários formais da PoC nuclear estão tecnicamente aprovados. A execução identificada, os resultados consolidados e os hashes dos artefatos sustentaram o aceite do M1a pelo Encarregado de Dados em 22/10/2026. Permanecem pendentes a apresentação, o registro dos participantes e a transferência técnica à T.I. O aceite não inicia automaticamente a PoC ampliada.
