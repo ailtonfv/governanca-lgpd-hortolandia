@@ -304,6 +304,9 @@ def test_detalhe_oferece_i1_apenas_ao_elaborador():
         f"/registros/{registro['registro_id']}", params={"conta_id": "CONTA-B1"}
     )
 
+    assert "Objetivo:" in alfa.text
+    assert "registrar, sem identificar pessoas" in alfa.text
+    assert "quais categorias de titulares e dados" in alfa.text
     assert "Iniciar preenchimento (I1)" in alfa.text
     assert "Iniciar preenchimento (I1)" not in beta.text
     assert "não possui o papel de elaborador" in beta.text

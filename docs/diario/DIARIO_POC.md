@@ -353,4 +353,5 @@ Regras deste diário: sem senhas, tokens ou dados pessoais; cada entrada com dat
 - A linguagem do painel foi esclarecida: “flags calculadas” permanece termo técnico, enquanto o servidor vê “Pendências e próximas ações” e “O que precisa da sua atenção”.
 - “Registros ao seu alcance” foi substituído na interface por “Mapeamentos disponíveis para você”, e a criação passou a distinguir a abertura da etapa inicial da confirmação que efetivamente grava o Registro.
 - O painel passou a mostrar a criação somente ao papel de elaborador; analistas e validadores recebem explicação de que podem consultar, analisar ou validar, mas não iniciar Registro.
+- O cabeçalho do FORM 1 passou a declarar seu objetivo ao lado do nome e do estado, esclarecendo que o instrumento registra finalidade, categorias de titulares e dados e compartilhamentos sem identificar pessoas.
 - Registrada como hipótese, ainda sem requisito aprovado, uma futura visão agregada de coordenação distinta da administração técnica da T.I.
