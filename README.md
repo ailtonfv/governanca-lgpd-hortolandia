@@ -1157,6 +1157,39 @@ Em linguagem simples: validar o formulário não finge que a medida já foi cump
 
 O G6 também resiste a duplo clique e pedidos simultâneos. Se houver falha antes do commit, Registro e ciclo continuam Em execução, sem uma conclusão pela metade. A versão validada e a evidência da medida permanecem no histórico.
 
+### Evolução visual planejada para a PoC ampliada
+
+A PoC nuclear aceita permanece como referência funcional e visual estável. A evolução abaixo não altera retroativamente o M1a e não começa automaticamente: deverá constituir incremento próprio da PoC ampliada, depois de decisão expressa, com comparação antes/depois e testes proporcionais.
+
+O objetivo é transformar a base visual já aplicada em um sistema pequeno de decisões reutilizáveis. Em vez de repetir valores em cada página, a interface poderá separar responsabilidades:
+
+```text
+app/estaticos/
+├── tokens.css       cores, tipografia, espaços, raios e sombras
+├── components.css   botões, campos, mensagens, tabelas e indicadores
+├── motion.css       transições e preferência por movimento reduzido
+└── estilo.css       composição específica das páginas
+```
+
+Um token é um nome estável para uma decisão visual. Se `--cor-acao` representar o azul institucional, a eventual alteração desse token poderá atualizar de modo coerente todos os botões, links e seleções que o utilizem. Isso reduz divergências e torna a revisão pela T.I. mais simples. O código vigente já utiliza variáveis CSS para a paleta básica; a divisão acima é uma evolução planejada, ainda não executada.
+
+Antes de adotar biblioteca externa de componentes ou animações, a equipe deverá verificar benefício, acessibilidade, manutenção, segurança, compatibilidade com a identidade municipal e impacto nas dependências. A alternativa preferencial continua sendo HTML semântico e componentes CSS pequenos; uma biblioteca só será incorporada quando resolver problema demonstrável sem impor identidade estranha à Prefeitura.
+
+O incremento poderá utilizar um painel curto de referências visuais aprovado pelo responsável do produto — por exemplo, Cartilha LGPD, páginas oficiais da Prefeitura, apresentação institucional e interfaces administrativas consideradas claras. As referências orientarão contraste, densidade, hierarquia, formas e sensação geral; não autorizam copiar marcas ou telas de terceiros e não substituem o manual oficial de identidade.
+
+Movimento será funcional e discreto: confirmação de salvamento, expansão de seção ou mudança de etapa em aproximadamente 150 a 250 milissegundos. Não serão usados movimento contínuo, piscadas, parallax ou efeitos que atrasem o trabalho. A informação continuará disponível em texto e, quando pertinente, ícone; cor ou animação nunca será o único indicador. A preferência `prefers-reduced-motion` será respeitada.
+
+Cada incremento visual deverá:
+
+1. registrar objetivo, referência e decisão;
+2. comparar a interface antes e depois em desktop e largura reduzida;
+3. testar teclado, foco, contraste, mensagens, erros e estados vazios;
+4. executar os testes HTTP afetados;
+5. confirmar que nenhuma regra de domínio migrou para CSS ou JavaScript;
+6. documentar limitações e dependências introduzidas.
+
+As diretrizes resumidas estão em [`docs/contexto/design-system.md`](docs/contexto/design-system.md). Antes do primeiro incremento visual da PoC ampliada, a especificação completa deverá ser organizada em pasta documental própria e mantida no Git com as demais decisões do sistema.
+
 ## Marcos e critérios de saída
 
 > 🗺️ **Para entender o percurso de um Registro no M1a em cinco minutos, veja o [Mapa do M1a](docs/arquitetura/MAPA_M1a.md)**: estados, percursos (sem medidas, com devolução, com medidas, pendência para outra Secretaria) e regras comuns. O mapa só ilustra; prevalecem o SAD 04 (REV12), o SAD 09 e a DA-39.

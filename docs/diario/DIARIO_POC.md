@@ -342,3 +342,10 @@ Regras deste diário: sem senhas, tokens ou dados pessoais; cada entrada com dat
 - O aceite preserva as limitações conhecidas: checkpoint externo e custódia institucional no backlog; temporalidade dependente da regra oficial; autenticação, integrações, Piloto e produção fora do M1a.
 - Permanecem pendentes a apresentação, o registro dos participantes e a transferência técnica à T.I.
 - O aceite do M1a não inicia automaticamente a PoC ampliada, que depende de decisão expressa própria.
+
+### 23/10/2026 — orientação visual para a futura PoC ampliada
+
+- O README passou a explicar à T.I. a separação proposta entre tokens, componentes, movimento e composição das páginas.
+- A PoC nuclear aceita permanece como referência estável; nenhuma reorganização do CSS, biblioteca ou animação foi introduzida nesta rodada.
+- Bibliotecas externas dependerão de benefício demonstrável, acessibilidade, manutenção, segurança e compatibilidade com a identidade municipal.
+- O primeiro incremento visual futuro exigirá referências aprovadas, comparação antes/depois, testes de teclado, foco, contraste, responsividade e regressão HTTP.
