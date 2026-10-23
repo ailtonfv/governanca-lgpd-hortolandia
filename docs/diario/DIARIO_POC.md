@@ -349,3 +349,8 @@ Regras deste diário: sem senhas, tokens ou dados pessoais; cada entrada com dat
 - A PoC nuclear aceita permanece como referência estável; nenhuma reorganização do CSS, biblioteca ou animação foi introduzida nesta rodada.
 - Bibliotecas externas dependerão de benefício demonstrável, acessibilidade, manutenção, segurança e compatibilidade com a identidade municipal.
 - O primeiro incremento visual futuro exigirá referências aprovadas, comparação antes/depois, testes de teclado, foco, contraste, responsividade e regressão HTTP.
+- Criada `docs/design-system/` para guardar no Git a especificação visual completa, a paleta e o histórico de decisões, mantendo em `docs/contexto/` apenas o resumo inicial para agentes.
+- A linguagem do painel foi esclarecida: “flags calculadas” permanece termo técnico, enquanto o servidor vê “Pendências e próximas ações” e “O que precisa da sua atenção”.
+- “Registros ao seu alcance” foi substituído na interface por “Mapeamentos disponíveis para você”, e a criação passou a distinguir a abertura da etapa inicial da confirmação que efetivamente grava o Registro.
+- O painel passou a mostrar a criação somente ao papel de elaborador; analistas e validadores recebem explicação de que podem consultar, analisar ou validar, mas não iniciar Registro.
+- Registrada como hipótese, ainda sem requisito aprovado, uma futura visão agregada de coordenação distinta da administração técnica da T.I.

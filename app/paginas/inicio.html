@@ -5,7 +5,7 @@
   <div>
     <p class="etiqueta">Agente simulado · matrícula {{ identidade.matricula }}</p>
     <h1>Olá, {{ identidade.nome }}</h1>
-    <p>Esta tela reúne o que está no seu alcance institucional e o que precisa da sua atenção.</p>
+    <p>Esta tela reúne os mapeamentos que você pode consultar e suas pendências ou próximas ações.</p>
   </div>
   <form class="simulador" method="get">
     <label for="conta_id">Simular entrada por matrícula</label>
@@ -19,13 +19,20 @@
   </form>
 </section>
 
-<p class="acao-painel"><a class="botao-link" href="{{ url_for('novo_registro') }}?conta_id={{ conta_id }}">Mapear novo serviço, processo ou atividade</a></p>
+{% if pode_criar_registro %}
+<div class="acao-painel">
+  <a class="botao-link" href="{{ url_for('novo_registro') }}?conta_id={{ conta_id }}">Criar novo Registro LGPD</a>
+  <p class="ajuda">Abre a etapa inicial para mapear um serviço, processo ou atividade. Nada será criado antes da confirmação final.</p>
+</div>
+{% else %}
+<p class="aviso-leitura acao-painel">Seu papel atual permite consultar, analisar ou validar mapeamentos, mas não iniciar um novo Registro LGPD. A criação fica disponível para agentes designados como elaboradores.</p>
+{% endif %}
 
 <section aria-labelledby="titulo-alertas">
   <div class="cabecalho-secao">
     <div>
-      <p class="etiqueta">Flags calculadas</p>
-      <h2 id="titulo-alertas">Atenção agora</h2>
+      <p class="etiqueta">Pendências e próximas ações</p>
+      <h2 id="titulo-alertas">O que precisa da sua atenção</h2>
     </div>
     <span class="contador">{{ alertas|length }}</span>
   </div>
@@ -40,22 +47,22 @@
     {% endfor %}
   </div>
   {% else %}
-  <p class="vazio">Nenhum alerta operacional para este agente.</p>
+  <p class="vazio">Nenhuma pendência ou próxima ação para este agente.</p>
   {% endif %}
 </section>
 
 <section aria-labelledby="titulo-registros">
   <div class="cabecalho-secao">
     <div>
-      <p class="etiqueta">Escopo institucional</p>
-      <h2 id="titulo-registros">Registros ao seu alcance</h2>
+      <p class="etiqueta">Serviços, processos e atividades</p>
+      <h2 id="titulo-registros">Mapeamentos disponíveis para você</h2>
     </div>
     <span class="contador">{{ registros|length }}</span>
   </div>
   {% if registros %}
   <div class="tabela-responsiva">
     <table>
-      <caption>Registros visíveis para {{ identidade.nome }}</caption>
+      <caption>Registros LGPD que {{ identidade.nome }} pode consultar</caption>
       <thead><tr><th>Código</th><th>Objeto</th><th>Unidade</th><th>Situação</th><th></th></tr></thead>
       <tbody>
       {% for registro in registros %}
@@ -71,7 +78,7 @@
     </table>
   </div>
   {% else %}
-  <p class="vazio">Nenhum Registro está no alcance institucional deste agente.</p>
+  <p class="vazio">Nenhum Registro LGPD está disponível para consulta por este agente.</p>
   {% endif %}
 </section>
 {% endblock %}

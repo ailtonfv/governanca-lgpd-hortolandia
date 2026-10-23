@@ -125,7 +125,15 @@ def carregar_painel(sessao, conta_id):
     for alerta in alertas:
         alerta["rotulo"] = ROTULOS_ALERTA.get(alerta["codigo"], alerta["codigo"])
         alerta["codigo_lgpd"] = codigos.get(alerta["registro_id"], "Registro relacionado")
-    return {"identidade": identidade, "registros": registros, "alertas": alertas}
+    pode_criar_registro = any(
+        item["papel"] == "elaborador" for item in identidade["designacoes"]
+    )
+    return {
+        "identidade": identidade,
+        "registros": registros,
+        "alertas": alertas,
+        "pode_criar_registro": pode_criar_registro,
+    }
 
 
 def carregar_opcoes_novo_registro(sessao, conta_id):

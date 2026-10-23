@@ -108,3 +108,9 @@ Para este sistema, as referências devem transmitir:
 6. validar que nenhuma regra migrou para CSS ou JavaScript;
 7. registrar a decisão visual e as limitações.
 
+## Documentação completa
+
+- [`docs/design-system/README.md`](../design-system/README.md) — finalidade, situação e guardrails.
+- [`docs/design-system/CORES_E_TOKENS.md`](../design-system/CORES_E_TOKENS.md) — paleta aplicada e evolução semântica proposta.
+- [`docs/design-system/DECISOES_VISUAIS.md`](../design-system/DECISOES_VISUAIS.md) — histórico e decisões pendentes.
+

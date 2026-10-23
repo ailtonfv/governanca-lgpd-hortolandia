@@ -32,6 +32,11 @@ def test_painel_identifica_agente_e_mostra_apenas_seu_escopo():
     assert "matrícula MAT-FICT-0001" in resposta.text
     assert "Simular entrada por matrícula" in resposta.text
     assert "A PoC não solicita senha" in resposta.text
+    assert "Criar novo Registro LGPD" in resposta.text
+    assert "Nada será criado antes da confirmação final" in resposta.text
+    assert "Pendências e próximas ações" in resposta.text
+    assert "O que precisa da sua atenção" in resposta.text
+    assert "Mapeamentos disponíveis para você" in resposta.text
     assert norte["codigo_lgpd"] in resposta.text
     assert sul["codigo_lgpd"] not in resposta.text
 
@@ -47,6 +52,16 @@ def test_pendencia_intersecretarial_leva_registro_e_flags_ao_destino():
     assert "Providência de outra unidade recebida" in resposta.text
     assert "Conclusão bloqueada" in resposta.text
     assert criada["pendencia_id"] not in resposta.text
+
+
+def test_painel_exibe_criacao_somente_para_elaborador():
+    elaborador = cliente.get("/", params={"conta_id": "CONTA-A1"})
+    analista = cliente.get("/", params={"conta_id": "CONTA-B1"})
+
+    assert "Criar novo Registro LGPD" in elaborador.text
+    assert "Criar novo Registro LGPD" not in analista.text
+    assert "não iniciar um novo Registro LGPD" in analista.text
+    assert "agentes designados como elaboradores" in analista.text
 
 
 def test_acesso_direto_a_registro_de_outra_unidade_e_negado_e_auditado():
@@ -84,7 +99,9 @@ def test_novo_registro_define_tipo_unidade_principal_e_contexto_antes_do_form1()
     assert "Secretaria responsável pelo Registro" in resposta.text
     assert "Planejamento Urbano e Gestão Estratégica" in resposta.text
     assert "Finanças" not in resposta.text
-    assert "O FORM 1 somente começa depois da criação do Registro" in resposta.text
+    assert "Esta tela ainda não cria o Registro" in resposta.text
+    assert "O FORM 1 somente começa depois da confirmação final" in resposta.text
+    assert "Confirmar e criar Registro LGPD" in resposta.text
 
 
 def test_contexto_inicial_diferencia_contexto_e_finalidade_por_exemplo():

@@ -697,7 +697,7 @@ Os testes atuais exercitam o motor da PoC com dados fictícios e procuram respon
 - **Início da análise:** I13 entrega a versão mais recente a um único agente responsável pela análise. Quem submeteu não pode analisar o próprio trabalho, nem mesmo usando outra conta; duas tentativas simultâneas não criam duas análises.
 - **Troca do responsável:** I14 muda somente o agente responsável atual. Quem iniciou e tudo o que já ocorreu continuam no histórico; uma tela desatualizada não consegue desfazer uma reatribuição mais recente.
 - **Validação:** somente o responsável atual da análise pode executar I5. O sistema encerra a análise, torna a versão validada a versão vigente e executa o G4 junto: ação aberta leva a **Em execução**; sem ação aberta, o Registro volta a **Em andamento**.
-- **Primeiras telas:** o painel identifica claramente qual agente fictício está sendo simulado, mostra somente os Registros dentro do alcance institucional e apresenta as flags calculadas. No detalhe, o elaborador pode iniciar e salvar o FORM 1; outro papel apenas consulta. Se alguém tentar abrir diretamente um Registro de outra unidade, o sistema nega a consulta e registra a tentativa na auditoria.
+- **Primeiras telas:** o painel identifica claramente qual agente fictício está sendo simulado, apresenta os mapeamentos que ele pode consultar e destaca suas pendências e próximas ações. Esses avisos são tecnicamente flags calculadas. No detalhe, o elaborador pode iniciar e salvar o FORM 1; outro papel apenas consulta. Se alguém tentar abrir diretamente um Registro de outra unidade, o sistema nega a consulta e registra a tentativa na auditoria.
 - **Identidade e contexto inicial:** cada pessoa fictícia possui matrícula única. Antes do FORM 1, a tela confirma primeiro a Secretaria responsável pelo Registro, dentre aquelas em que o agente seja elaborador; depois exige um serviço, processo ou atividade coerente com o catálogo e um contexto. O G1 cria o Registro e o FORM 1 Não iniciado.
 - **Catálogo por Secretaria e contexto:** a tela não mistura itens de todas as Secretarias nem contextos incompatíveis. Ela apresenta somente os vínculos fictícios vigentes da Secretaria e do item escolhidos; o servidor repete as conferências e recusa um pedido forjado fora da tela.
 - **Devolução:** somente o agente responsável atual pela análise pode executar I6. O sistema preserva a versão, cria uma pendência bloqueante para a unidade elaboradora e executa o G3 junto, sem deixar partes soltas se ocorrer uma falha.
@@ -1000,9 +1000,9 @@ flowchart TD
 
 O P5 não abre outra pendência e não apaga a primeira resposta: tudo permanece no histórico. O P6 apenas devolve a pendência ao agente responsável e libera o rascunho. Se alguém alterar o conteúdo depois do P4, o I3 percebe que o lacre mudou e recusa a submissão; é necessário apresentar e aceitar a correção adequada.
 
-#### Flags da tela inicial
+#### Pendências e próximas ações da tela inicial
 
-As flags não são gravadas como caixas independentes. Elas são calculadas sempre que a tela é carregada:
+Na interface, o servidor vê **O que precisa da sua atenção**. Tecnicamente, esses avisos são flags: não são opções de múltipla escolha nem caixas gravadas separadamente. O sistema as calcula sempre que a tela é carregada, conforme os papéis do agente e o estado real das pendências:
 
 ```mermaid
 flowchart TD
@@ -1032,22 +1032,28 @@ flowchart LR
     C --> G["G1<br/>Registro + FORM 1"]
 ```
 
+Na tela inicial, **Criar novo Registro LGPD** apenas abre essa etapa de preparação. Nenhum Registro é criado pelo primeiro clique. A gravação ocorre somente quando o agente confirma Secretaria, tipo, item do catálogo e contexto no botão **Confirmar e criar Registro LGPD**.
+
 O nome do objeto não é digitado livremente: vem do catálogo oficial. A Secretaria responsável cria e mantém o Registro e aparece primeiro para delimitar o contexto institucional. Na implantação municipal, ela será selecionada em lista fechada das 18 Secretarias; departamentos e setores poderão executar partes do trabalho, e outras Secretarias poderão participar, sem transferência automática da responsabilidade. O contrato completo está em [Identidade do agente e contexto inicial](docs/arquitetura/CONTRATO_IDENTIDADE_E_CONTEXTO_INICIAL.md).
 
 Nesta PoC, o catálogo institucional está limitado às **18 Secretarias da Administração Direta**. O Hortoprev não será tratado: por ser autarquia da Administração Indireta, fica fora do recorte aprovado para esta demonstração.
 
 Os nomes das 18 Secretarias são metadados institucionais públicos e aparecem como no portal municipal; agentes, matrículas, designações, serviços e Registros permanecem fictícios. O catálogo não concede autorização: cada agente visualiza para criação somente as Secretarias em que possui designação vigente de elaborador.
 
-O painel procura os Registros da unidade do agente e também aqueles que chegaram até ele por uma pendência institucional ativa.
+O painel procura os Registros da unidade do agente e também aqueles que chegaram até ele por uma pendência institucional ativa. Na interface, essa seção recebe o nome **Mapeamentos disponíveis para você**. “Disponível” significa que o agente pode consultar o Registro por sua designação institucional ou por participação vigente; não significa que seja proprietário do objeto nem que possa executar qualquer ato.
 
 ```mermaid
 flowchart LR
     A["Conta fictícia escolhida"] --> I["Identifica pessoa,<br/>papéis e unidades"]
     I --> E{"Registro está<br/>no alcance?"}
-    E -- "sim" --> P["Painel mostra Registro<br/>e flags calculadas"]
+    E -- "sim" --> P["Painel mostra mapeamento<br/>e avisos pertinentes"]
     E -- "não" --> N["Consulta negada"]
     N --> U["Tentativa registrada<br/>na auditoria"]
 ```
+
+Se o agente puder consultar dez Registros, os dez aparecerão na lista. Ele abre individualmente o serviço, processo ou atividade que deseja examinar. A lista não é seleção múltipla: situação é calculada pelo workflow; cada Registro possui uma Secretaria responsável e um contexto de atuação. Seleção múltipla ocorre dentro do FORM 1 somente onde a natureza da pergunta admite várias categorias, como titulares, dados e compartilhamentos.
+
+> 💭 **Hipótese para decisão futura — visão de coordenação.** Além do painel operacional de cada servidor, a Prefeitura poderá avaliar um dashboard agregado com cobertura por Secretaria, objetos por situação, FORMs pendentes, validações, pendências intersecretariais, medidas abertas e tempo desde a última revisão. Hospedagem e administração técnica pela T.I. não atribuem automaticamente a ela a coordenação funcional do conteúdo LGPD; papel, indicadores, alcance e permissões desse dashboard ainda precisam de decisão institucional e não são requisito implementado da PoC nuclear.
 
 No detalhe do Registro, o agente com papel de elaborador já pode iniciar o FORM 1 pelo I1 e salvar o rascunho pelo I2. A finalidade possui espaço limitado para uma descrição sem dados pessoais; titulares, dados e compartilhamentos aparecem como opções fechadas, sem campo “Outro”.
 
