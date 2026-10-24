@@ -94,7 +94,7 @@ flowchart LR
     style P fill:#4d3d1e,stroke:#d4a017,color:#fff
 ```
 
-**A PoC nuclear M1a concluiu sua rodada formal de validação técnica em 22/10/2026.** A apresentação do repositório e da solução à T.I. permanece pendente. Essa apresentação funciona como passagem de conhecimento e não produzirá uma ata de aceite da T.I. Eventual formalização institucional seguirá o instrumento próprio definido pela Prefeitura. Este documento descreve também a PoC ampliada, que reaproveita o mesmo código, mas somente começará após decisão expressa própria.
+**A PoC nuclear M1a foi aceita pelo Encarregado de Dados em 22/10/2026.** A apresentação e a transferência técnica à T.I. permanecem pendentes. Este documento descreve também a PoC ampliada, que reaproveita o mesmo código, mas somente começará após decisão expressa própria.
 
 #### PoC nuclear × PoC ampliada
 
@@ -708,7 +708,7 @@ Os testes atuais exercitam o motor da PoC com dados fictícios e procuram respon
 - **Participação intersecretarial:** a unidade principal envia uma pendência à fila institucional de outra unidade. Um agente previamente designado assume e responde com entrada, operações, saída, interfaces e evidências; a origem aceita. O destino não edita o FORM 1, o Registro não muda de unidade principal e G5 permanece bloqueado até o aceite.
 - **Flags operacionais:** os avisos da tela inicial são calculados a partir da pendência real. Eles mudam de “Correção solicitada” para “Pendência atribuída a você” sem manter uma segunda verdade no banco.
 
-Esses 189 testes são a cobertura automatizada cotidiana do motor e dos primeiros cortes HTTP. Na rodada formal `M1A-20261022-001`, todos foram aprovados, sem falhas, erros ou testes ignorados. O ensaio pesado do POC-TS-009 foi reexecutado com 1.000 Registros, 50.000 eventos, verificação integral de 1.000 cadeias e reconstrução coincidente de 25 projeções. A execução e os pacotes `POC-EV` aplicáveis estão consolidados no relatório formal, e o Encarregado de Dados confirmou a validação técnica do M1a em 22/10/2026.
+Esses 189 testes são a cobertura automatizada cotidiana do motor e dos primeiros cortes HTTP. Na rodada formal `M1A-20261022-001`, todos foram aprovados, sem falhas, erros ou testes ignorados. O ensaio pesado do POC-TS-009 foi reexecutado com 1.000 Registros, 50.000 eventos, verificação integral de 1.000 cadeias e reconstrução coincidente de 25 projeções. A execução e os pacotes `POC-EV` aplicáveis estão consolidados no relatório formal, e o Encarregado de Dados aceitou o M1a em 22/10/2026.
 
 ### Matriz de aceite da PoC nuclear
 
@@ -719,17 +719,17 @@ flowchart LR
     R["Regra"] --> C["Cenário POC-TS"]
     C --> A["Teste automatizado"]
     A --> E["Evidência"]
-    E --> V["Validação técnica do M1a"]
+    E --> V["Aceite do M1a"]
 ```
 
-Hoje, **os nove testes formais estão tecnicamente aprovados no M1a**. No `POC-TS-003`, o teste concorrente confirmou a assunção única e a auditoria da tentativa perdedora; no `POC-TS-008`, a carga recusou entradas em formatos pessoais antes do primeiro `INSERT`; no `POC-TS-009`, o ensaio de volume verificou todas as 1.000 cadeias e reconstruiu 25 projeções sem divergência. A rodada identificada e os pacotes `POC-EV` estão prontos para apresentação à T.I.
+Hoje, **os nove testes formais estão tecnicamente aprovados e aceitos no M1a**. No `POC-TS-003`, o teste concorrente confirmou a assunção única e a auditoria da tentativa perdedora; no `POC-TS-008`, a carga recusou entradas em formatos pessoais antes do primeiro `INSERT`; no `POC-TS-009`, o ensaio de volume verificou todas as 1.000 cadeias e reconstruiu 25 projeções sem divergência. A rodada identificada e os pacotes `POC-EV` estão prontos para apresentação e transferência à T.I.
 
 | Situação | Testes | O que significa |
 |---|---|---|
 | ✔ Aprovação técnica | POC-TS-001 a 009 | Rodada identificada concluída e evidências consolidadas. |
 | ⏳ Ensaio técnico pendente | Nenhum | O trabalho restante está no fechamento formal, não na criação de outro ensaio técnico. |
-| ✔ Validação técnica do M1a | POC-TS-001 a 009 | Confirmada pelo Encarregado de Dados em 22/10/2026, com as limitações conhecidas. |
-| ⏳ Apresentação à T.I. | Repositório, solução e limitações | A apresentação mostrará onde estão o código, os documentos, os testes e as instruções de execução. |
+| ✔ Aceite do M1a | POC-TS-001 a 009 | Registrado pelo Encarregado de Dados em 22/10/2026, com as limitações conhecidas. |
+| ⏳ Transferência técnica | Apresentação à T.I. | A apresentação, os participantes e os encaminhamentos serão registrados posteriormente. |
 
 > 📋 A correspondência teste por teste, os arquivos que já dão cobertura e as evidências que faltam estão na [Matriz de aceite do M1a](docs/aceite/MATRIZ_ACEITE_M1A.md).
 
@@ -737,11 +737,58 @@ Hoje, **os nove testes formais estão tecnicamente aprovados no M1a**. No `POC-T
 
 > ✅ A rodada formal completa, o resultado dos nove `POC-TS`, os pacotes `POC-EV`, o ambiente e os hashes dos artefatos estão no [Relatório da rodada formal do M1a](docs/aceite/RELATORIO_RODADA_FORMAL_M1A_2026-10-22.md).
 
-### Passagem técnica à T.I.
+### Minuta da Ata de Aceite e Transferência Técnica do M1a
 
-O M1a possui validação técnica registrada. A apresentação à T.I. mostrará a visão da solução, o repositório, as instruções de instalação, os testes, as evidências e as limitações conhecidas. Dúvidas e encaminhamentos poderão ser registrados pelos meios institucionais adotados pela Prefeitura, sem manter neste README uma minuta de ata ou nomes de participantes. A apresentação não equivale, por si só, a aceite institucional.
+O Encarregado de Dados registrou o aceite do M1a em 22/10/2026, com as limitações conhecidas abaixo. Esta minuta será completada e entregue na apresentação formal à T.I., que caracteriza a passagem técnica e registra participantes, dúvidas e encaminhamentos. O aceite do M1a **não autoriza automaticamente o início da PoC ampliada**, que dependerá de decisão expressa própria.
 
-A apresentação não inicia automaticamente a PoC ampliada. Essa etapa exige decisão expressa própria depois da análise final do M1a.
+| Campo | Preenchimento no dia da apresentação |
+|---|---|
+| Data do aceite do M1a | 22/10/2026 |
+| Horário e local da apresentação à T.I. | `[preencher na apresentação]` |
+| Unidade que apresenta | Secretaria de Planejamento Urbano e Gestão Estratégica |
+| Responsável pelo aceite | Encarregado de Dados |
+| Responsável pela apresentação | `[preencher na apresentação]` |
+| Representantes da T.I. | `[preencher nomes e funções]` |
+| Referência técnica | Commit `df2db0f`, Matriz de Aceite do M1a e Relatório da rodada `M1A-20261022-001` |
+
+**Objeto.** Registrar a apresentação, o aceite e a transferência técnica da PoC nuclear M1a do Sistema Municipal de Governança LGPD, construída exclusivamente com dados fictícios.
+
+**Evidências conferidas.** Foram apresentados o código da PoC, a arquitetura vigente, o percurso do Registro, os nove testes formais `POC-TS-001` a `POC-TS-009`, os resultados reproduzíveis, a cadeia de eventos e os pacotes `POC-EV` aplicáveis. A relação efetivamente entregue deverá ser registrada abaixo:
+
+`[listar arquivos, relatórios, pacotes de evidência e local de guarda]`
+
+**Resultado do aceite.** Assinalar uma opção:
+
+- [ ] M1a aceito sem ressalvas.
+- [x] M1a aceito com as limitações conhecidas descritas nesta ata.
+- [ ] M1a não aceito; correções obrigatórias descritas nesta ata.
+
+**Ressalvas, limitações e defeitos remanescentes.** Nenhum defeito crítico ou alto pode permanecer aberto para o aceite. Registrar limitações que não impeçam a finalidade do marco e o tratamento combinado:
+
+- checkpoint externo da cadeia e sua custódia institucional permanecem no backlog;
+- temporalidade e descarte dependem da tabela oficial e da governança municipal responsável;
+- autenticação institucional, integrações, Piloto e produção não pertencem ao M1a;
+- apresentação e transferência técnica à T.I. permanecem pendentes.
+
+**Transferência técnica.** O M1a está aceito pelo Encarregado de Dados. A passagem à T.I. será completada quando forem apresentados a visão da solução, as instruções de instalação e execução, o código, os SADs, o README, os testes e as evidências. A direção funcional, o tratamento do backlog e eventual início da PoC ampliada serão objeto de decisão posterior, sem início automático.
+
+**Encaminhamentos e responsáveis.**
+
+| Encaminhamento | Responsável | Prazo ou condição |
+|---|---|---|
+| Preservar o código, as evidências e a referência do commit aceito | `[preencher]` | `[preencher]` |
+| Registrar dúvidas ou limitações identificadas pela T.I. | `[preencher]` | `[preencher]` |
+| Deliberar sobre eventual PoC ampliada | Encarregado de Dados | Após leitura do README e decisão expressa |
+
+**Registro dos participantes.**
+
+| Nome | Unidade ou função | Ciência ou assinatura |
+|---|---|---|
+| `[preencher]` | `[preencher]` | `[preencher]` |
+| `[preencher]` | `[preencher]` | `[preencher]` |
+| `[preencher]` | `[preencher]` | `[preencher]` |
+
+> A versão preenchida deve receber data, referência do commit e localização das evidências. Se for assinada fora do Git, o README deve registrar apenas a referência e o local de guarda, sem expor assinaturas ou dados pessoais desnecessários.
 
 ### Legenda operacional: agentes e funções
 
@@ -1164,7 +1211,7 @@ Cada marco tem as suas condições de entrada e de saída (SAD 09, seções 4A, 
 **Regras comuns a todos os marcos** (📘 SAD 09, seção 30):
 
 - **Quem aprova:** o operador da PoC executa os testes; o **Encarregado de Dados** aceita o marco e eventuais exceções.
-- **Como se encerra tecnicamente o M1a:** critérios verificados, rodada identificada e evidências preservadas. A apresentação à T.I. funciona como passagem de conhecimento e não produz uma ata de aceite da T.I. Eventual formalização institucional segue o instrumento próprio definido pela Prefeitura.
+- **Como se encerra:** aceite registrado em ata da PoC, apresentada à T.I. junto com a transferência técnica e referenciada no SAD 10; evidências preservadas até o fim do Piloto. A minuta operacional está neste README e a versão preenchida deve indicar seu local de guarda.
 - **O que impede:** nenhum defeito **crítico** (impede a finalidade do marco ou compromete integridade, segregação ou dados) ou **alto** (falha de requisito obrigatório sem contorno) pode estar aberto. O marco é reaberto se um desses defeitos aparecer depois do aceite.
 
 *Na PoC nuclear, operador e aceitante são a mesma pessoa. Por isso as evidências são automatizadas e reproduzíveis: qualquer terceiro, inclusive a TI, pode reexecutá-las.*
@@ -1265,6 +1312,8 @@ O Agente pode possuir as duas autorizações e abrir e preencher o mesmo Registr
 
 A massa exclusivamente fictícia demonstra esses percursos. A suíte completa posterior ao ajuste aprovou **193 de 193 testes** no banco `lgpd_poc_teste`. Esse resultado é evidência técnica do refinamento; sua incorporação a uma nova rodada formal ou ata, se necessária, continua sendo um ato institucional.
 
+O resultado reproduzível dessa execução está no [Adendo da rodada complementar `M1A-20261024-002`](docs/aceite/ADENDO_RODADA_COMPLEMENTAR_M1A_2026-10-24.md). O adendo não modifica a ata já documentada nem substitui a rodada formal anterior.
+
 ## Instalação e execução
 
 O passo a passo para montar o ambiente (Python, PostgreSQL, `.env`) e rodar a PoC — instalação, migrações, carga fictícia, demonstrações e testes automatizados — está em **[docs/operacao/INSTALACAO.md](docs/operacao/INSTALACAO.md)**.
@@ -1330,10 +1379,11 @@ Os SADs numerados e a Cartilha LGPD continuam como fontes oficiais no pacote ins
 | [docs/arquitetura/MAPA_M1a.md](docs/arquitetura/MAPA_M1a.md) | O percurso de um Registro no M1a, em diagramas (ilustrativo; prevalecem os SADs) |
 | [docs/aceite/MATRIZ_ACEITE_M1A.md](docs/aceite/MATRIZ_ACEITE_M1A.md) | O que cada POC-TS-001 a 009 comprova, a cobertura já existente e as evidências que ainda faltam para o aceite |
 | [docs/aceite/RELATORIO_TECNICO_POC_TS_009.md](docs/aceite/RELATORIO_TECNICO_POC_TS_009.md) | Resultado sintético do ensaio de volume com 1.000 Registros, 50.000 eventos e reconstrução de amostra |
+| [docs/aceite/ADENDO_RODADA_COMPLEMENTAR_M1A_2026-10-24.md](docs/aceite/ADENDO_RODADA_COMPLEMENTAR_M1A_2026-10-24.md) | Registra os 193 testes executados após separar abertura e preenchimento, sem alterar a ata existente |
 | [docs/arquitetura/ARQUITETURA_POC.md](docs/arquitetura/ARQUITETURA_POC.md) | Camadas do sistema, responsabilidades e mapa das pastas |
 | [docs/operacao/INSTALACAO.md](docs/operacao/INSTALACAO.md) | Montar o ambiente e rodar a PoC |
 | [docs/diario/DIARIO_POC.md](docs/diario/DIARIO_POC.md) | Registro datado de tudo o que foi feito |
-| [Apresentação à T.I. — versão 10](docs/apresentacao/Apresentacao_TI_Sistema_LGPD_M1a_v10.pptx) | Expõe a jornada, os FORMs, os SADs e o fluxo de papéis entre Agente, equipe de preenchimento e T.I. |
+| [Apresentação à T.I. — versão 11](docs/apresentacao/Apresentacao_TI_Sistema_LGPD_M1a_v11.pptx) | Expõe a jornada, os FORMs, os SADs, o fluxo de papéis e a árvore do repositório disponível à T.I. |
 | [docs/revisoes/](docs/revisoes/) | Revisões técnicas de etapas (ex.: Etapa 2c) |
 
 **Organização das pastas:** pasta na raiz = código (`app`, `instalacao`, `migracoes`, `carga_ficticia`, `demonstracoes`, `scripts`, `testes`); `docs/` = texto.

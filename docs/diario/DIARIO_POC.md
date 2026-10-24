@@ -336,9 +336,9 @@ Regras deste diário: sem senhas, tokens ou dados pessoais; cada entrada com dat
 - Registrado o padrão Arrange–Act–Assert para testes e sua distinção do nível AAA de acessibilidade.
 - Documentada a base visual existente e a proposta de evolução por tokens, componentes e movimento reduzido, sem alterar a interface nesta rodada.
 
-### 22/10/2026 — validação técnica da PoC nuclear M1a
+### 22/10/2026 — aceite da PoC nuclear M1a
 
-- O Encarregado de Dados confirmou expressamente a validação técnica do M1a após a rodada formal `M1A-20261022-001`, com 189 de 189 testes e 9 de 9 cenários `POC-TS` aprovados.
+- O Encarregado de Dados aceitou expressamente o M1a após a rodada formal `M1A-20261022-001`, com 189 de 189 testes e 9 de 9 cenários `POC-TS` aprovados.
 - O aceite preserva as limitações conhecidas: checkpoint externo e custódia institucional no backlog; temporalidade dependente da regra oficial; autenticação, integrações, Piloto e produção fora do M1a.
 - Permanecem pendentes a apresentação, o registro dos participantes e a transferência técnica à T.I.
 - O aceite do M1a não inicia automaticamente a PoC ampliada, que depende de decisão expressa própria.
@@ -366,11 +366,12 @@ Regras deste diário: sem senhas, tokens ou dados pessoais; cada entrada com dat
 - A Cartilha foi atualizada na revisão `REV30.14`, e a apresentação à T.I. chegou à versão 10 com um fluxograma editável dos papéis e da futura passagem institucional.
 - A apresentação v10 foi validada com 13 lâminas, sem achados de integridade, geometria ou fontes, e incorporada a `docs/apresentacao/`.
 - A suíte completa posterior ao refinamento aprovou **193 de 193 testes** no banco exclusivo `lgpd_poc_teste`.
-- A validação técnica histórica do M1a permanece vinculada à rodada `M1A-20261022-001` e aos 189 testes daquele checkpoint. Este refinamento não inicia a PoC ampliada nem representa, por si só, aceite institucional.
+- O aceite histórico do M1a permanece vinculado à rodada `M1A-20261022-001` e aos 189 testes daquele checkpoint. Este refinamento não inicia a PoC ampliada nem representa, por si só, nova ata de aceite.
 
 ### 24/10/2026 — preparação final do repositório para a T.I.
 
-- Retirada do README a minuta de ata destinada à T.I. A validação técnica do M1a permanece registrada; a apresentação passa a caracterizar uma passagem de conhecimento sobre solução, repositório, execução, testes e limitações.
+- Mantida sem alteração a minuta de ata já documentada. Nesta rodada, o trabalho ficou limitado à preparação do repositório e da apresentação técnica à T.I.
 - Acrescentado ao README um mapa comentado dos diretórios disponíveis no GitHub e um roteiro de leitura recomendado para a equipe técnica.
 - Mantida a distinção entre o repositório executável da PoC e o pacote institucional que contém a Cartilha e a coleção integral dos SADs.
 - A apresentação à T.I. passou a reproduzir a árvore do repositório. A PoC ampliada continua dependente de decisão expressa posterior à análise final.
+- Registrada a execução complementar `M1A-20261024-002`: 193 de 193 testes aprovados no banco `lgpd_poc_teste`, sem falhas, erros ou testes ignorados. O adendo técnico não altera a ata já documentada.

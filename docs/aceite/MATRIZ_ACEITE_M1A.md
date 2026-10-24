@@ -2,7 +2,7 @@
 
 Esta matriz mostra, em linguagem direta, o que cada teste formal da PoC nuclear precisa provar, o que já está coberto pela suíte automatizada e o que ainda falta para transformar essa cobertura em evidência formal de aceite.
 
-O ponto principal é simples: **um teste automatizado aprovado ajuda a demonstrar o requisito, mas não encerra sozinho a formalização institucional**. Para fechar tecnicamente o M1a, a execução deve ser identificada, ter resultado preservado e produzir a evidência aplicável. Eventual aceite institucional seguirá o instrumento próprio definido pela Prefeitura.
+O ponto principal é simples: **um teste automatizado aprovado ajuda a demonstrar o requisito, mas não encerra sozinho o aceite**. Para fechar o M1a, a execução deve ser identificada, ter resultado preservado, produzir a evidência aplicável e integrar a ata de aceite.
 
 ```mermaid
 flowchart LR
@@ -10,13 +10,13 @@ flowchart LR
     C --> A["Teste automatizado"]
     A --> E["Evidência preservada"]
     E --> V["Verificação dos critérios POC-CA"]
-    V --> T["Validação técnica do M1a"]
+    V --> T["Ata de aceite do M1a"]
 ```
 
 ## Legenda
 
 - **Aprovado tecnicamente:** o ensaio foi executado numa rodada identificada e o resultado está consolidado.
-- **Validação técnica registrada:** o Encarregado de Dados confirmou tecnicamente o marco em 22/10/2026. A apresentação à T.I. será uma passagem de conhecimento e não produzirá uma ata de aceite da T.I.; eventual formalização institucional seguirá instrumento próprio.
+- **Aceite institucional pendente:** a evidência está pronta, mas a ata ainda não foi preenchida na apresentação à T.I.
 
 ## Matriz dos testes formais
 
@@ -44,7 +44,7 @@ Cada pacote de evidência deve registrar, no mínimo:
 - resultado esperado e resultado observado;
 - saída dos testes e consultas de conferência necessárias;
 - defeito encontrado, quando houver, e sua situação;
-- responsável pela execução e referência usada na validação técnica.
+- responsável pela execução e referência usada na ata de aceite.
 
 Não devem ser copiados nomes, CPF, matrícula funcional real ou qualquer outro dado pessoal para produzir essas evidências.
 
@@ -55,15 +55,15 @@ Não devem ser copiados nomes, CPF, matrícula funcional real ou qualquer outro 
 | Testes aprovados tecnicamente | 9 de 9 | Rodada `M1A-20261022-001` consolidada e vinculada ao commit `df2db0f`. |
 | Testes ainda sem ensaio técnico completo | 0 de 9 | O POC-TS-009 foi reexecutado separadamente com 50.000 eventos. |
 | Testes com evidência consolidada | 9 de 9 | Resultados e pacotes `POC-EV` aplicáveis estão no relatório da rodada formal. |
-| Testes validados tecnicamente no M1a | 9 de 9 | Validação técnica confirmada pelo Encarregado de Dados em 22/10/2026, com limitações conhecidas. |
+| Testes formalmente aceitos no M1a | 9 de 9 | Aceite registrado pelo Encarregado de Dados em 22/10/2026, com limitações conhecidas. |
 
 Essa contagem não significa que a implementação voltou ao início. Ela separa honestamente três coisas diferentes: **o motor construído**, **o teste automatizado** e **o aceite institucional**.
 
 ## Ordem recomendada para o fechamento
 
 1. Apresentar o [relatório da rodada formal](RELATORIO_RODADA_FORMAL_M1A_2026-10-22.md) e os hashes dos artefatos operacionais à T.I.
-2. Mostrar à T.I. a árvore do repositório, a instalação, os testes e as limitações conhecidas.
-3. Registrar dúvidas e encaminhamentos pelos meios institucionais adotados pela Prefeitura, sem iniciar automaticamente a PoC ampliada.
+2. Registrar participantes, dúvidas e encaminhamentos na minuta disponível no README.
+3. Completar a passagem técnica do M1a sem iniciar automaticamente a PoC ampliada.
 
 ## Fontes de verdade
 

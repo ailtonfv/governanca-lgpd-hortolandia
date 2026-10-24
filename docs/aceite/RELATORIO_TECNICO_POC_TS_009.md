@@ -1,6 +1,6 @@
 # Relatório técnico preliminar do POC TS 009
 
-Este relatório registra a execução técnica do cenário de volume da PoC nuclear. Ele demonstra o comportamento observado com massa totalmente sintética e integra o conjunto associado ao checkpoint e ao pacote formal de evidências do M1a.
+Este relatório registra a execução técnica do cenário de volume da PoC nuclear. Ele demonstra o comportamento observado com massa totalmente sintética, mas ainda deverá ser associado ao commit do checkpoint e referenciado pelo pacote formal de evidências e pela ata de aceite do M1a.
 
 ## Cenário executado
 
