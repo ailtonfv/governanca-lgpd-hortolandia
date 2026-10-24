@@ -65,8 +65,8 @@ def _contexto_do_instrumento(sessao, instrumento_id):
 def _pode_preencher(sessao, conta, pessoa_id, registro):
     if conta is None or not conta.ativa:
         return False, "conta inexistente ou desativada"
-    if not tem_papel(sessao, pessoa_id, registro.unidade_principal_atual_id, {"elaborador"}):
-        return False, "a pessoa não tem papel de elaborador na unidade responsável"
+    if not tem_papel(sessao, pessoa_id, registro.unidade_principal_atual_id, {"preenchedor"}):
+        return False, "a pessoa não está designada como Servidor responsável pelo preenchimento"
     return True, "permitido"
 
 
@@ -978,10 +978,10 @@ def iniciar_ajuste(sessao, *, comando_id, conta_id, instrumento_id, pendencia_id
     if conta is None or not conta.ativa:
         return _negar(sessao, comando, ator_tipo, ator_id, "iniciar_ajuste",
                       conta_id, instrumento_id, "conta inexistente ou desativada")
-    if not tem_papel(sessao, pessoa_id, registro.unidade_principal_atual_id, {"elaborador"}):
+    if not tem_papel(sessao, pessoa_id, registro.unidade_principal_atual_id, {"preenchedor"}):
         return _negar(sessao, comando, ator_tipo, ator_id, "iniciar_ajuste",
                       conta_id, instrumento_id,
-                      "a pessoa não tem papel de elaborador na unidade responsável")
+                      "a pessoa não está designada como Servidor responsável pelo preenchimento")
     if (instrumento.estado_instrumento != "devolvido_para_ajuste"
             or registro.estado_atual != "em_andamento"):
         return _negar(

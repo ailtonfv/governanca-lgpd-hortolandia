@@ -15,6 +15,8 @@ PESSOAS = [
     ("PESSOA-D", "MAT-FICT-0004", "Curador do catálogo (fictício)",  ["CONTA-D1"]),
     ("PESSOA-E", "MAT-FICT-0005", "Encarregado de Dados (fictício)", ["CONTA-E1"]),
     ("PESSOA-F", "MAT-FICT-0006", "Servidor Delta (fictício)",       ["CONTA-F1"]),
+    ("PESSOA-G", "MAT-FICT-0007", "Servidor Épsilon (fictício)",     ["CONTA-G1", "CONTA-G2"]),
+    ("PESSOA-H", "MAT-FICT-0008", "Servidor Zeta (fictício)",        ["CONTA-H1"]),
 ]
 
 SECRETARIAS = [
@@ -43,8 +45,9 @@ UNIDADES = SECRETARIAS + [
 ]
 
 DESIGNACOES = [
-    # A acumula elaborador e validador: é ela que tenta validar o próprio trabalho
-    ("PESSOA-A", "UNID-NORTE", "elaborador"),
+    # A é o ponto focal: abre o Registro e também pode preencher o FORM 1
+    ("PESSOA-A", "UNID-NORTE", "responsavel_registro"),
+    ("PESSOA-A", "UNID-NORTE", "preenchedor"),
     ("PESSOA-A", "UNID-NORTE", "validador"),
     ("PESSOA-A", "UNID-NORTE", "agente_pendencia"),
     # B analisa e valida o trabalho dos outros
@@ -52,9 +55,14 @@ DESIGNACOES = [
     ("PESSOA-B", "UNID-NORTE", "validador"),
     ("PESSOA-B", "UNID-NORTE", "concluidor"),
     ("PESSOA-F", "UNID-NORTE", "analista"),
-    # C elabora em outra unidade
-    ("PESSOA-C", "UNID-SUL", "elaborador"),
+    # G preenche na unidade Norte; a segunda conta prova segregação por pessoa
+    ("PESSOA-G", "UNID-NORTE", "preenchedor"),
+    ("PESSOA-G", "UNID-NORTE", "validador"),
+    # C demonstra a acumulação abertura + preenchimento; H é outro preenchedor
+    ("PESSOA-C", "UNID-SUL", "responsavel_registro"),
+    ("PESSOA-C", "UNID-SUL", "preenchedor"),
     ("PESSOA-C", "UNID-SUL", "agente_pendencia"),
+    ("PESSOA-H", "UNID-SUL", "preenchedor"),
     # D cuida do catálogo; E é a governança de proteção de dados (D2)
     ("PESSOA-D", "UNID-GOV", "curador"),
     ("PESSOA-E", "UNID-GOV", "governanca_protecao_dados"),

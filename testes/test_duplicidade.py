@@ -62,9 +62,14 @@ def test_conta_inativa_e_recusada():
     assert not r["permitido"] and "conta" in r["motivo"]
 
 
-def test_sem_papel_de_elaborador_e_recusado():
+def test_sem_papel_de_responsavel_pelo_registro_e_recusado():
     r = g1("CMD-D-13", CADASTRO, "CTX-TRIB-01", conta="CONTA-B1")
-    assert not r["permitido"] and "elaborador" in r["motivo"]
+    assert not r["permitido"] and "responsável pelo Registro" in r["motivo"]
+
+
+def test_preenchedor_sem_papel_de_responsavel_nao_abre_registro():
+    r = g1("CMD-D-13-PREENCHEDOR", CADASTRO, "CTX-TRIB-01", conta="CONTA-G1")
+    assert not r["permitido"] and "responsável pelo Registro" in r["motivo"]
 
 
 # ------------------------------------------------ verificação 2: família (D2)

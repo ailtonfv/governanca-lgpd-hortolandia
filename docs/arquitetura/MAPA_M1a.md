@@ -168,6 +168,8 @@ Todos os atores humanos abaixo pertencem à mesma categoria institucional — **
 
 Ao criar o Registro ou praticar qualquer outro ato, o agente é identificado pela sessão autenticada. A matrícula poderá ser utilizada como identificador institucional, conforme as regras da Prefeitura, mas deverá ser obtida do cadastro corporativo associado à sessão, sem redigitação. Essa identificação registra **quem realizou o ato**; ela não torna a pessoa, por si só, responsável permanente pelo Registro ou pela etapa.
 
+Na organização institucional acordada, o ponto focal da LGPD será apresentado como **Agente Público Autorizado responsável pelo Registro**. Ele abrirá o Registro e coordenará funcionalmente a equipe de servidores que conhece a rotina e preenche o FORM 1. O próprio Agente pode também preencher quando possuir a autorização correspondente. A coordenação funcional não altera a subordinação administrativa desses servidores. Depois da conclusão da PoC ampliada e da passagem institucional, agentes da Secretaria de T.I. exercerão as funções de análise e validação, com segregação entre quem analisa e quem valida. A Secretaria que executa o objeto permanece responsável pelo conteúdo do Registro.
+
 | Ação em linguagem comum | Função exigida | Código | Efeito automático na mesma transação |
 |---|---|---:|---:|
 | Criar o Registro | Responsável funcional ou gestor da área | G1 | — |
@@ -182,6 +184,8 @@ Ao criar o Registro ou praticar qualquer outro ato, o agente é identificado pel
 | Iniciar o ajuste | Responsável pelo preenchimento | I7 | — |
 | Concluir sem medidas | Papel com permissão Concluir e competência formal | G5 | — |
 | Concluir após as medidas | Papel com permissão Concluir e competência formal | G6 | — |
+
+No M1a executável, G1 exige o papel técnico `responsavel_registro`; os atos I1, I2, I3, I4 e I7 exigem `preenchedor`. A mesma pessoa pode possuir os dois papéis e, assim, abrir e preencher o Registro. A massa fictícia também inclui outro servidor com somente `preenchedor`, demonstrando colaboração sem permissão para abrir novo Registro. Todos os atos preservam autoria individual, controle otimista e auditoria.
 
 Nos diagramas de sequência, cada raia humana indica a **função exercida no ato**, e não uma identidade pessoal fixa. A raia do sistema indica execução automática provocada por um comando ou evento; o sistema não toma iniciativa administrativa nem substitui a decisão do agente.
 

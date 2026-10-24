@@ -94,7 +94,7 @@ flowchart LR
     style P fill:#4d3d1e,stroke:#d4a017,color:#fff
 ```
 
-**A PoC nuclear M1a foi aceita pelo Encarregado de Dados em 22/10/2026.** A apresentação e a transferência técnica à T.I. permanecem pendentes. Este documento descreve também a PoC ampliada, que reaproveita o mesmo código, mas somente começará após decisão expressa própria.
+**A PoC nuclear M1a concluiu sua rodada formal de validação técnica em 22/10/2026.** A apresentação do repositório e da solução à T.I. permanece pendente. Essa apresentação funciona como passagem de conhecimento e não produzirá uma ata de aceite da T.I. Eventual formalização institucional seguirá o instrumento próprio definido pela Prefeitura. Este documento descreve também a PoC ampliada, que reaproveita o mesmo código, mas somente começará após decisão expressa própria.
 
 #### PoC nuclear × PoC ampliada
 
@@ -195,7 +195,7 @@ flowchart LR
 | Referência oficial, quando houver | item da Carta de Serviços ou classe do Plano de Classificação |
 | Situação | ativo ou desativado — um item nunca é apagado |
 
-**O que o catálogo não é:** não é uma cópia importada da Carta de Serviços (que continua sendo referência de consulta, SAD 05, 13.4); não é preenchido pelo elaborador na hora de criar o Registro; e não contém dados pessoais.
+**O que o catálogo não é:** não é uma cópia importada da Carta de Serviços (que continua sendo referência de consulta, SAD 05, 13.4); não é preenchido livremente pelo Agente na hora de criar o Registro; e não contém dados pessoais.
 
 #### Como o catálogo real poderá ser formado
 
@@ -697,10 +697,10 @@ Os testes atuais exercitam o motor da PoC com dados fictícios e procuram respon
 - **Início da análise:** I13 entrega a versão mais recente a um único agente responsável pela análise. Quem submeteu não pode analisar o próprio trabalho, nem mesmo usando outra conta; duas tentativas simultâneas não criam duas análises.
 - **Troca do responsável:** I14 muda somente o agente responsável atual. Quem iniciou e tudo o que já ocorreu continuam no histórico; uma tela desatualizada não consegue desfazer uma reatribuição mais recente.
 - **Validação:** somente o responsável atual da análise pode executar I5. O sistema encerra a análise, torna a versão validada a versão vigente e executa o G4 junto: ação aberta leva a **Em execução**; sem ação aberta, o Registro volta a **Em andamento**.
-- **Primeiras telas:** o painel identifica claramente qual agente fictício está sendo simulado, apresenta os mapeamentos que ele pode consultar e destaca suas pendências e próximas ações. Esses avisos são tecnicamente flags calculadas. No detalhe, o elaborador pode iniciar e salvar o FORM 1; outro papel apenas consulta. Se alguém tentar abrir diretamente um Registro de outra unidade, o sistema nega a consulta e registra a tentativa na auditoria.
-- **Identidade e contexto inicial:** cada pessoa fictícia possui matrícula única. Antes do FORM 1, a tela confirma primeiro a Secretaria responsável pelo Registro, dentre aquelas em que o agente seja elaborador; depois exige um serviço, processo ou atividade coerente com o catálogo e um contexto. O G1 cria o Registro e o FORM 1 Não iniciado.
+- **Primeiras telas:** o painel identifica claramente qual agente fictício está sendo simulado, apresenta os mapeamentos que ele pode consultar e destaca suas pendências e próximas ações. Esses avisos são tecnicamente flags calculadas. No detalhe, quem possui autorização de `preenchedor` pode iniciar e salvar o FORM 1; outro papel apenas consulta. Se alguém tentar abrir diretamente um Registro de outra unidade, o sistema nega a consulta e registra a tentativa na auditoria.
+- **Identidade e contexto inicial:** cada pessoa fictícia possui matrícula única. Antes do FORM 1, a tela confirma primeiro a Secretaria responsável pelo Registro, dentre aquelas em que o Agente possua a designação `responsavel_registro`; depois exige um serviço, processo ou atividade coerente com o catálogo e um contexto. O G1 cria o Registro e o FORM 1 Não iniciado.
 - **Catálogo por Secretaria e contexto:** a tela não mistura itens de todas as Secretarias nem contextos incompatíveis. Ela apresenta somente os vínculos fictícios vigentes da Secretaria e do item escolhidos; o servidor repete as conferências e recusa um pedido forjado fora da tela.
-- **Devolução:** somente o agente responsável atual pela análise pode executar I6. O sistema preserva a versão, cria uma pendência bloqueante para a unidade elaboradora e executa o G3 junto, sem deixar partes soltas se ocorrer uma falha.
+- **Devolução:** somente o agente responsável atual pela análise pode executar I6. O sistema preserva a versão, cria uma pendência bloqueante para a Secretaria responsável e sua equipe de preenchimento e executa o G3 junto, sem deixar partes soltas se ocorrer uma falha.
 - **Assunção e ajuste:** P2 garante que apenas um agente autorizado assuma a pendência; I7 recria o rascunho a partir da versão devolvida e libera novamente o salvamento pelo I2.
 - **Resposta e decisão da correção:** P3 lacra a resposta; P4 aceita exatamente esse conteúdo; ou P5 devolve a mesma pendência com motivo e P6 libera outra correção. O novo I3 só cria a Versão 2 quando o rascunho coincide com o lacre aceito.
 - **Conclusão sem medidas:** G5 somente conclui quando o FORM 1 está validado, não existe pendência aberta nem ação obrigatória no ciclo e o agente possui competência formal para concluir. Registro e ciclo são encerrados juntos, sem apagar a versão validada.
@@ -708,7 +708,7 @@ Os testes atuais exercitam o motor da PoC com dados fictícios e procuram respon
 - **Participação intersecretarial:** a unidade principal envia uma pendência à fila institucional de outra unidade. Um agente previamente designado assume e responde com entrada, operações, saída, interfaces e evidências; a origem aceita. O destino não edita o FORM 1, o Registro não muda de unidade principal e G5 permanece bloqueado até o aceite.
 - **Flags operacionais:** os avisos da tela inicial são calculados a partir da pendência real. Eles mudam de “Correção solicitada” para “Pendência atribuída a você” sem manter uma segunda verdade no banco.
 
-Esses 189 testes são a cobertura automatizada cotidiana do motor e dos primeiros cortes HTTP. Na rodada formal `M1A-20261022-001`, todos foram aprovados, sem falhas, erros ou testes ignorados. O ensaio pesado do POC-TS-009 foi reexecutado com 1.000 Registros, 50.000 eventos, verificação integral de 1.000 cadeias e reconstrução coincidente de 25 projeções. A execução e os pacotes `POC-EV` aplicáveis estão consolidados no relatório formal, e o Encarregado de Dados aceitou o M1a em 22/10/2026.
+Esses 189 testes são a cobertura automatizada cotidiana do motor e dos primeiros cortes HTTP. Na rodada formal `M1A-20261022-001`, todos foram aprovados, sem falhas, erros ou testes ignorados. O ensaio pesado do POC-TS-009 foi reexecutado com 1.000 Registros, 50.000 eventos, verificação integral de 1.000 cadeias e reconstrução coincidente de 25 projeções. A execução e os pacotes `POC-EV` aplicáveis estão consolidados no relatório formal, e o Encarregado de Dados confirmou a validação técnica do M1a em 22/10/2026.
 
 ### Matriz de aceite da PoC nuclear
 
@@ -719,17 +719,17 @@ flowchart LR
     R["Regra"] --> C["Cenário POC-TS"]
     C --> A["Teste automatizado"]
     A --> E["Evidência"]
-    E --> V["Aceite do M1a"]
+    E --> V["Validação técnica do M1a"]
 ```
 
-Hoje, **os nove testes formais estão tecnicamente aprovados e aceitos no M1a**. No `POC-TS-003`, o teste concorrente confirmou a assunção única e a auditoria da tentativa perdedora; no `POC-TS-008`, a carga recusou entradas em formatos pessoais antes do primeiro `INSERT`; no `POC-TS-009`, o ensaio de volume verificou todas as 1.000 cadeias e reconstruiu 25 projeções sem divergência. A rodada identificada e os pacotes `POC-EV` estão prontos para apresentação e transferência à T.I.
+Hoje, **os nove testes formais estão tecnicamente aprovados no M1a**. No `POC-TS-003`, o teste concorrente confirmou a assunção única e a auditoria da tentativa perdedora; no `POC-TS-008`, a carga recusou entradas em formatos pessoais antes do primeiro `INSERT`; no `POC-TS-009`, o ensaio de volume verificou todas as 1.000 cadeias e reconstruiu 25 projeções sem divergência. A rodada identificada e os pacotes `POC-EV` estão prontos para apresentação à T.I.
 
 | Situação | Testes | O que significa |
 |---|---|---|
 | ✔ Aprovação técnica | POC-TS-001 a 009 | Rodada identificada concluída e evidências consolidadas. |
 | ⏳ Ensaio técnico pendente | Nenhum | O trabalho restante está no fechamento formal, não na criação de outro ensaio técnico. |
-| ✔ Aceite do M1a | POC-TS-001 a 009 | Registrado pelo Encarregado de Dados em 22/10/2026, com as limitações conhecidas. |
-| ⏳ Transferência técnica | Apresentação à T.I. | A apresentação, os participantes e os encaminhamentos serão registrados posteriormente. |
+| ✔ Validação técnica do M1a | POC-TS-001 a 009 | Confirmada pelo Encarregado de Dados em 22/10/2026, com as limitações conhecidas. |
+| ⏳ Apresentação à T.I. | Repositório, solução e limitações | A apresentação mostrará onde estão o código, os documentos, os testes e as instruções de execução. |
 
 > 📋 A correspondência teste por teste, os arquivos que já dão cobertura e as evidências que faltam estão na [Matriz de aceite do M1a](docs/aceite/MATRIZ_ACEITE_M1A.md).
 
@@ -737,67 +737,24 @@ Hoje, **os nove testes formais estão tecnicamente aprovados e aceitos no M1a**.
 
 > ✅ A rodada formal completa, o resultado dos nove `POC-TS`, os pacotes `POC-EV`, o ambiente e os hashes dos artefatos estão no [Relatório da rodada formal do M1a](docs/aceite/RELATORIO_RODADA_FORMAL_M1A_2026-10-22.md).
 
-### Minuta da Ata de Aceite e Transferência Técnica do M1a
+### Passagem técnica à T.I.
 
-O Encarregado de Dados registrou o aceite do M1a em 22/10/2026, com as limitações conhecidas abaixo. Esta minuta será completada e entregue na apresentação formal à T.I., que caracteriza a passagem técnica e registra participantes, dúvidas e encaminhamentos. O aceite do M1a **não autoriza automaticamente o início da PoC ampliada**, que dependerá de decisão expressa própria.
+O M1a possui validação técnica registrada. A apresentação à T.I. mostrará a visão da solução, o repositório, as instruções de instalação, os testes, as evidências e as limitações conhecidas. Dúvidas e encaminhamentos poderão ser registrados pelos meios institucionais adotados pela Prefeitura, sem manter neste README uma minuta de ata ou nomes de participantes. A apresentação não equivale, por si só, a aceite institucional.
 
-| Campo | Preenchimento no dia da apresentação |
-|---|---|
-| Data do aceite do M1a | 22/10/2026 |
-| Horário e local da apresentação à T.I. | `[preencher na apresentação]` |
-| Unidade que apresenta | Secretaria de Planejamento Urbano e Gestão Estratégica |
-| Responsável pelo aceite | Encarregado de Dados |
-| Responsável pela apresentação | `[preencher na apresentação]` |
-| Representantes da T.I. | `[preencher nomes e funções]` |
-| Referência técnica | Commit `df2db0f`, Matriz de Aceite do M1a e Relatório da rodada `M1A-20261022-001` |
-
-**Objeto.** Registrar a apresentação, o aceite e a transferência técnica da PoC nuclear M1a do Sistema Municipal de Governança LGPD, construída exclusivamente com dados fictícios.
-
-**Evidências conferidas.** Foram apresentados o código da PoC, a arquitetura vigente, o percurso do Registro, os nove testes formais `POC-TS-001` a `POC-TS-009`, os resultados reproduzíveis, a cadeia de eventos e os pacotes `POC-EV` aplicáveis. A relação efetivamente entregue deverá ser registrada abaixo:
-
-`[listar arquivos, relatórios, pacotes de evidência e local de guarda]`
-
-**Resultado do aceite.** Assinalar uma opção:
-
-- [ ] M1a aceito sem ressalvas.
-- [x] M1a aceito com as limitações conhecidas descritas nesta ata.
-- [ ] M1a não aceito; correções obrigatórias descritas nesta ata.
-
-**Ressalvas, limitações e defeitos remanescentes.** Nenhum defeito crítico ou alto pode permanecer aberto para o aceite. Registrar limitações que não impeçam a finalidade do marco e o tratamento combinado:
-
-- checkpoint externo da cadeia e sua custódia institucional permanecem no backlog;
-- temporalidade e descarte dependem da tabela oficial e da governança municipal responsável;
-- autenticação institucional, integrações, Piloto e produção não pertencem ao M1a;
-- apresentação e transferência técnica à T.I. permanecem pendentes.
-
-**Transferência técnica.** O M1a está aceito pelo Encarregado de Dados. A passagem à T.I. será completada quando forem apresentados a visão da solução, as instruções de instalação e execução, o código, os SADs, o README, os testes e as evidências. A direção funcional, o tratamento do backlog e eventual início da PoC ampliada serão objeto de decisão posterior, sem início automático.
-
-**Encaminhamentos e responsáveis.**
-
-| Encaminhamento | Responsável | Prazo ou condição |
-|---|---|---|
-| Preservar o código, as evidências e a referência do commit aceito | `[preencher]` | `[preencher]` |
-| Registrar dúvidas ou limitações identificadas pela T.I. | `[preencher]` | `[preencher]` |
-| Deliberar sobre eventual PoC ampliada | Encarregado de Dados | Após leitura do README e decisão expressa |
-
-**Registro dos participantes.**
-
-| Nome | Unidade ou função | Ciência ou assinatura |
-|---|---|---|
-| `[preencher]` | `[preencher]` | `[preencher]` |
-| `[preencher]` | `[preencher]` | `[preencher]` |
-| `[preencher]` | `[preencher]` | `[preencher]` |
-
-> A versão preenchida deve receber data, referência do commit e localização das evidências. Se for assinada fora do Git, o README deve registrar apenas a referência e o local de guarda, sem expor assinaturas ou dados pessoais desnecessários.
+A apresentação não inicia automaticamente a PoC ampliada. Essa etapa exige decisão expressa própria depois da análise final do M1a.
 
 ### Legenda operacional: agentes e funções
 
 Todos os atores humanos do fluxo são **Agentes Públicos Autorizados**. A expressão usada ao lado do agente indica a função que ele exerce naquele ato; não representa um tipo diferente de pessoa.
 
+Na organização municipal prevista para o levantamento, o **Agente Público Autorizado responsável pelo Registro** é o ponto focal da LGPD designado pela Secretaria. Ele abre o Registro, coordena o levantamento local, acompanha pendências e encaminha o FORM 1. O próprio Agente pode também integrar a equipe e preencher o formulário quando possuir essa autorização. A **equipe responsável pelo preenchimento** reúne ainda outros servidores que executam ou conhecem o serviço, processo ou atividade e descrevem a rotina real sob a coordenação funcional desse Agente. Essa coordenação não altera a subordinação administrativa existente na Secretaria.
+
 | Função exercida | Atuação principal |
 |---|---|
-| Responsável pelo preenchimento | Inicia, salva, submete e ajusta o FORM 1 |
-| Responsável pela análise | Examina, valida ou devolve a versão |
+| Agente Público Autorizado responsável pelo Registro | Abre o Registro, coordena o levantamento, acompanha pendências e encaminha o FORM 1 |
+| Equipe responsável pelo preenchimento | Inicia, salva e ajusta o FORM 1 com as informações fornecidas pelos servidores que conhecem a rotina |
+| Analista da T.I. | Examina a versão e solicita correções depois da passagem institucional para a T.I. |
+| Validador da T.I. | Decide sobre a validação depois da análise, com segregação de funções |
 | Responsável pela ação | Executa a medida e registra sua evidência |
 | Agente da fila institucional | Assume e responde pendências destinadas à sua unidade; na PoC, usa o papel técnico provisório `agente_pendencia` |
 | Competente para concluir | Executa G5 ou G6; na PoC, a autorização técnica provisória é o papel `concluidor` |
@@ -805,15 +762,17 @@ Todos os atores humanos do fluxo são **Agentes Públicos Autorizados**. A expre
 
 ```mermaid
 flowchart TD
-    A["Agente público"] --> F{"Função<br/>neste ato"}
-    F --> P["Preenchimento"]
-    F --> N["Análise"]
-    F --> M["Ação"]
-    F --> D["Pendência da unidade"]
-    F --> C["Conclusão"]
+    A["Agente Público Autorizado<br/>abre e coordena o Registro"] --> E["Equipe da Secretaria<br/>preenche o FORM 1"]
+    A -. "também pode preencher" .-> E
+    E --> G{"PoC ampliada concluída<br/>e passagem institucional?"}
+    G -- "não" --> P["Planejamento mantém<br/>a condução da PoC"]
+    G -- "sim" --> N["Analista da T.I."]
+    N --> V["Validador da T.I."]
 ```
 
-Uma mesma pessoa pode exercer mais de uma função quando possuir autorização e competência, mas a segregação continua valendo. Por exemplo, quem submeteu uma versão não pode iniciar sua análise, validá-la nem devolvê-la. No código, nomes como `elaborador`, `analista` e `validador` são identificadores técnicos dos papéis usados para conferir essas autorizações.
+Uma mesma pessoa pode exercer mais de uma função quando possuir autorização e competência, mas a segregação continua valendo. Por exemplo, quem submeteu uma versão não pode iniciar sua análise, validá-la nem devolvê-la. No código, nomes como `responsavel_registro`, `preenchedor`, `analista` e `validador` são identificadores técnicos dos papéis usados para conferir essas autorizações.
+
+Na PoC nuclear, as autorizações técnicas `responsavel_registro` e `preenchedor` são distintas, mas podem ser acumuladas pela mesma pessoa. A massa fictícia demonstra os dois percursos: o Agente principal possui ambas as autorizações e pode abrir e preencher; outro servidor possui somente a autorização de preenchimento e pode colaborar no mesmo Registro. Cada ato preserva autoria individual, controle de versão e auditoria. Os papéis de analista e validador da T.I. são simulados na PoC e somente se tornam atribuições operacionais após a conclusão da PoC ampliada e a passagem institucional do trabalho.
 
 ### Como o FORM 1 evita nomes de titulares
 
@@ -871,11 +830,11 @@ flowchart TD
     B -. "I13 Iniciar análise" .-> E
 ```
 
-Enquanto o FORM 1 está **Em preenchimento**, ele é um rascunho: o elaborador pode salvá-lo várias vezes pelo I2. Cada salvamento aumenta o número do rascunho, para que uma tela antiga não sobrescreva silenciosamente um conteúdo mais novo.
+Enquanto o FORM 1 está **Em preenchimento**, ele é um rascunho: uma pessoa autorizada como `preenchedor` pode salvá-lo várias vezes pelo I2. Cada salvamento aumenta o número do rascunho, para que uma tela antiga não sobrescreva silenciosamente um conteúdo mais novo.
 
 Ao acionar o I3 (**Submeter**), o sistema faz o seguinte:
 
-1. Confirma que a conta está ativa e que a pessoa é elaboradora da unidade responsável.
+1. Confirma que a conta está ativa e que a pessoa possui autorização de `preenchedor` na Secretaria responsável.
 2. Confere se o rascunho ainda é a versão que a pessoa leu e se o seu lacre corresponde ao conteúdo guardado.
 3. Verifica os campos mínimos do FORM 1 sintético: finalidade, categorias de titulares, categorias de dados e compartilhamentos; as categorias devem usar códigos conhecidos.
 4. Compara essas informações com as versões mais recentes dos outros Registros. Uma coincidência gera um **alerta para análise humana**, mas não bloqueia automaticamente a submissão.
@@ -887,9 +846,9 @@ Esses passos formam uma única operação: se qualquer parte falhar, nenhuma del
 
 > **Importante:** “submetida” ainda não significa “validada”. Depois do I3, a versão foi preservada para exame, mas `versao_vigente_id` continua vazia. Somente o I5, depois de uma análise ativa, torna essa versão vigente.
 
-#### E se o elaborador perceber um erro antes da análise?
+#### E se o preenchedor perceber um erro antes da análise?
 
-Enquanto ninguém tiver iniciado a análise pelo I13, o elaborador pode usar o I4 (**Retirar da validação**). A Versão 1 permanece intacta no histórico, mas o FORM 1 volta a **Em preenchimento** e o G3 automático devolve o Registro a **Em andamento**. O rascunho pode então ser corrigido pelo I2; ao submeter novamente, o sistema cria a Versão 2, sem substituir nem apagar a anterior.
+Enquanto ninguém tiver iniciado a análise pelo I13, uma pessoa autorizada como `preenchedor` pode usar o I4 (**Retirar da validação**). A Versão 1 permanece intacta no histórico, mas o FORM 1 volta a **Em preenchimento** e o G3 automático devolve o Registro a **Em andamento**. O rascunho pode então ser corrigido pelo I2; ao submeter novamente, o sistema cria a Versão 2, sem substituir nem apagar a anterior.
 
 O I4 também é uma operação única com o G3: os dois eventos e as duas mudanças de estado são gravados juntos ou são desfeitos juntos. Depois que o I13 iniciar a análise, a retirada deixa de ser permitida; qualquer correção deverá seguir o percurso formal de devolução.
 
@@ -1021,7 +980,7 @@ Assim, uma mudança no workflow aparece imediatamente na tela e não existe o ri
 
 Ao abrir a aplicação, escolhemos uma matrícula **fictícia** para simular o agente. Isso ainda não é o login definitivo: é uma maneira transparente de demonstrar os papéis da PoC. Em produção, o servidor deverá informar matrícula e senha individual; a Prefeitura validará a credencial e fornecerá a identidade funcional necessária. A plataforma não armazenará senha na PoC nem improvisará uma integração direta com o banco de pessoal.
 
-Depois da identidade vem o contexto do trabalho. Antes de iniciar o FORM 1, o agente seleciona primeiro a Secretaria responsável pelo Registro dentro de seu alcance institucional. Em seguida, escolhe se mapeará um serviço, processo ou atividade do catálogo e seleciona o contexto de atuação. O G1 então cria o Registro, o ciclo 1 e o FORM 1 **Não iniciado**:
+Depois da identidade vem o contexto do trabalho. Antes de iniciar o FORM 1, o Agente Público Autorizado responsável pelo Registro seleciona primeiro a Secretaria dentro de seu alcance institucional. Em seguida, escolhe se mapeará um serviço, processo ou atividade do catálogo e seleciona o contexto de atuação. O G1 então cria o Registro, o ciclo 1 e o FORM 1 **Não iniciado**:
 
 ```mermaid
 flowchart LR
@@ -1038,7 +997,7 @@ O nome do objeto não é digitado livremente: vem do catálogo oficial. A Secret
 
 Nesta PoC, o catálogo institucional está limitado às **18 Secretarias da Administração Direta**. O Hortoprev não será tratado: por ser autarquia da Administração Indireta, fica fora do recorte aprovado para esta demonstração.
 
-Os nomes das 18 Secretarias são metadados institucionais públicos e aparecem como no portal municipal; agentes, matrículas, designações, serviços e Registros permanecem fictícios. O catálogo não concede autorização: cada agente visualiza para criação somente as Secretarias em que possui designação vigente de elaborador.
+Os nomes das 18 Secretarias são metadados institucionais públicos e aparecem como no portal municipal; agentes, matrículas, designações, serviços e Registros permanecem fictícios. O catálogo não concede autorização: na PoC nuclear, a criação fica disponível a quem possui a designação técnica `responsavel_registro`, enquanto o preenchimento exige `preenchedor`. O Agente Público Autorizado responsável pelo Registro pode possuir ambas; outro servidor autorizado pode possuir somente `preenchedor` e colaborar no FORM 1.
 
 O painel procura os Registros da unidade do agente e também aqueles que chegaram até ele por uma pendência institucional ativa. Na interface, essa seção recebe o nome **Mapeamentos disponíveis para você**. “Disponível” significa que o agente pode consultar o Registro por sua designação institucional ou por participação vigente; não significa que seja proprietário do objeto nem que possa executar qualquer ato.
 
@@ -1055,7 +1014,7 @@ Se o agente puder consultar dez Registros, os dez aparecerão na lista. Ele abre
 
 > 💭 **Hipótese para decisão futura — visão de coordenação.** Além do painel operacional de cada servidor, a Prefeitura poderá avaliar um dashboard agregado com cobertura por Secretaria, objetos por situação, FORMs pendentes, validações, pendências intersecretariais, medidas abertas e tempo desde a última revisão. Hospedagem e administração técnica pela T.I. não atribuem automaticamente a ela a coordenação funcional do conteúdo LGPD; papel, indicadores, alcance e permissões desse dashboard ainda precisam de decisão institucional e não são requisito implementado da PoC nuclear.
 
-No detalhe do Registro, o agente com papel de elaborador já pode iniciar o FORM 1 pelo I1 e salvar o rascunho pelo I2. A finalidade possui espaço limitado para uma descrição sem dados pessoais; titulares, dados e compartilhamentos aparecem como opções fechadas, sem campo “Outro”.
+No detalhe do Registro, o agente com autorização de `preenchedor` já pode iniciar o FORM 1 pelo I1 e salvar o rascunho pelo I2. A finalidade possui espaço limitado para uma descrição sem dados pessoais; titulares, dados e compartilhamentos aparecem como opções fechadas, sem campo “Outro”.
 
 ```mermaid
 flowchart LR
@@ -1106,7 +1065,7 @@ flowchart LR
     E -. "Registro continua em Planejamento" .-> N
 ```
 
-A resposta possui um contrato pequeno e fechado: etapa executada, entrada recebida, operações realizadas, saída produzida, interfaces com a etapa seguinte e referências de evidência. Campos inesperados ou evidência vazia são recusados. Na carga fictícia, `agente_pendencia` representa a designação prévia pela chefia mencionada no SAD; não é sinônimo de elaborador, analista ou validador.
+A resposta possui um contrato pequeno e fechado: etapa executada, entrada recebida, operações realizadas, saída produzida, interfaces com a etapa seguinte e referências de evidência. Campos inesperados ou evidência vazia são recusados. Na carga fictícia, `agente_pendencia` representa a designação prévia pela chefia mencionada no SAD; não é sinônimo de `responsavel_registro`, `preenchedor`, analista ou validador.
 
 Enquanto a participação estiver ativa, a futura tela da unidade destinatária mostra a providência recebida ou atribuída e informa que a conclusão está bloqueada. Depois do P3, a unidade de origem vê a resposta aguardando decisão. O P4 encerra a pendência e libera o portão de conclusão. Duas pessoas tentando assumir ao mesmo tempo não produzem dois responsáveis: somente a primeira confirmação vence.
 
@@ -1205,7 +1164,7 @@ Cada marco tem as suas condições de entrada e de saída (SAD 09, seções 4A, 
 **Regras comuns a todos os marcos** (📘 SAD 09, seção 30):
 
 - **Quem aprova:** o operador da PoC executa os testes; o **Encarregado de Dados** aceita o marco e eventuais exceções.
-- **Como se encerra:** aceite registrado em ata da PoC, apresentada à T.I. junto com a transferência técnica e referenciada no SAD 10; evidências preservadas até o fim do Piloto. A minuta operacional está neste README e a versão preenchida deve indicar seu local de guarda.
+- **Como se encerra tecnicamente o M1a:** critérios verificados, rodada identificada e evidências preservadas. A apresentação à T.I. funciona como passagem de conhecimento e não produz uma ata de aceite da T.I. Eventual formalização institucional segue o instrumento próprio definido pela Prefeitura.
 - **O que impede:** nenhum defeito **crítico** (impede a finalidade do marco ou compromete integridade, segregação ou dados) ou **alto** (falha de requisito obrigatório sem contorno) pode estar aberto. O marco é reaberto se um desses defeitos aparecer depois do aceite.
 
 *Na PoC nuclear, operador e aceitante são a mesma pessoa. Por isso as evidências são automatizadas e reproduzíveis: qualquer terceiro, inclusive a TI, pode reexecutá-las.*
@@ -1293,6 +1252,19 @@ M1b — Fluxos de controle
 
 Python 3.14 · PostgreSQL 18 · SQLAlchemy · psycopg · python-dotenv · pytest · FastAPI · Jinja2
 
+## Refinamento posterior ao aceite do M1a — papéis de abertura e preenchimento
+
+O aceite técnico e institucional registrado em 22/10/2026 permanece associado à rodada `M1A-20261022-001`, ao checkpoint `df2db0f5b49579844eacd6107a633da14176f427` e aos 189 testes então executados. O refinamento posterior não reescreve essa evidência histórica nem constitui um novo aceite institucional.
+
+Em 24/10/2026, a PoC nuclear foi ajustada para explicitar dois papéis que podem ser acumulados pela mesma pessoa:
+
+- o **Agente Público Autorizado responsável pelo Registro**, ponto focal LGPD da Secretaria, abre e coordena o Registro;
+- o **servidor preenchedor** registra e complementa as informações do FORM 1, sempre com autoria individual.
+
+O Agente pode possuir as duas autorizações e abrir e preencher o mesmo Registro. Outros servidores autorizados podem possuir somente a autorização de preenchimento e colaborar sob a coordenação do Agente. O Registro continua pertencendo à Secretaria responsável, e a segregação entre quem submete/preenche e quem analisa ou valida na T.I. continua obrigatória.
+
+A massa exclusivamente fictícia demonstra esses percursos. A suíte completa posterior ao ajuste aprovou **193 de 193 testes** no banco `lgpd_poc_teste`. Esse resultado é evidência técnica do refinamento; sua incorporação a uma nova rodada formal ou ata, se necessária, continua sendo um ato institucional.
+
 ## Instalação e execução
 
 O passo a passo para montar o ambiente (Python, PostgreSQL, `.env`) e rodar a PoC — instalação, migrações, carga fictícia, demonstrações e testes automatizados — está em **[docs/operacao/INSTALACAO.md](docs/operacao/INSTALACAO.md)**.
@@ -1307,6 +1279,49 @@ python -m uvicorn app.main:app --reload
 
 Com o último comando em execução, a tela fica disponível em `http://127.0.0.1:8000`. Ela usa somente as pessoas, contas e Registros fictícios da PoC.
 
+## Guia do repositório para a T.I.
+
+Ao acessar o GitHub, a T.I. encontrará a PoC executável e a documentação necessária para compreender, instalar, testar e revisar este recorte. O ponto de entrada é este `README.md`.
+
+```text
+governanca-lgpd-hortolandia/
+├── README.md                 visão funcional, situação e instruções principais
+├── AGENTS.md                 guardrails para agentes de IA
+├── .env.exemplo              variáveis locais sem senhas reais
+├── requirements.txt          dependências Python
+├── pytest.ini                configuração dos testes
+├── app/                      domínio, workflow, banco e interface web
+├── carga_ficticia/           pessoas, unidades e catálogos exclusivamente fictícios
+├── demonstracoes/            percursos reproduzíveis da PoC
+├── instalacao/               criação das estruturas iniciais
+├── migracoes/                evolução controlada do banco de dados
+├── scripts/                  verificações e ensaios técnicos auxiliares
+├── testes/                   testes automatizados e cenários de regressão
+└── docs/
+    ├── aceite/               matriz, relatórios e evidências consolidadas
+    ├── apresentacao/         material de passagem e seu gerador editável
+    ├── arquitetura/          contratos e mapas técnicos da PoC
+    ├── contexto/             resumos para leitura inicial por agentes de IA
+    ├── design-system/        identidade visual e evolução futura da interface
+    ├── diario/               histórico cronológico das decisões e execuções
+    ├── operacao/             instalação, execução e procedimentos operacionais
+    ├── planejamento/         marcos, backlog e organização dos incrementos
+    └── revisoes/             revisões técnicas realizadas durante a construção
+```
+
+### Roteiro de leitura recomendado para a T.I.
+
+| Ordem | Local | O que a equipe encontrará |
+|---|---|---|
+| 1 | `README.md` | Escopo, regras do domínio, estado do M1a, limitações e comandos principais |
+| 2 | `docs/operacao/` | Passo a passo para preparar o ambiente e executar a PoC |
+| 3 | `docs/arquitetura/` | Contratos técnicos e mapas que ligam a interface ao workflow |
+| 4 | `docs/aceite/` | Cenários formais, rodadas identificadas e resultados dos testes |
+| 5 | `app/` e `testes/` | Implementação das regras e provas automatizadas de seu comportamento |
+| 6 | `docs/diario/` | Decisões, limitações e mudanças registradas ao longo do trabalho |
+
+Os SADs numerados e a Cartilha LGPD continuam como fontes oficiais no pacote institucional `Solution_Architecture_Document_(SAD)_Documento_de_Arquitetura_da_Solução`. O GitHub contém a implementação da PoC, seus contratos de apoio e os materiais de apresentação; não substitui a coleção oficial dos SADs nem a Cartilha.
+
 ## Documentos deste repositório
 
 | Documento | Para que serve |
@@ -1318,6 +1333,7 @@ Com o último comando em execução, a tela fica disponível em `http://127.0.0.
 | [docs/arquitetura/ARQUITETURA_POC.md](docs/arquitetura/ARQUITETURA_POC.md) | Camadas do sistema, responsabilidades e mapa das pastas |
 | [docs/operacao/INSTALACAO.md](docs/operacao/INSTALACAO.md) | Montar o ambiente e rodar a PoC |
 | [docs/diario/DIARIO_POC.md](docs/diario/DIARIO_POC.md) | Registro datado de tudo o que foi feito |
+| [Apresentação à T.I. — versão 10](docs/apresentacao/Apresentacao_TI_Sistema_LGPD_M1a_v10.pptx) | Expõe a jornada, os FORMs, os SADs e o fluxo de papéis entre Agente, equipe de preenchimento e T.I. |
 | [docs/revisoes/](docs/revisoes/) | Revisões técnicas de etapas (ex.: Etapa 2c) |
 
 **Organização das pastas:** pasta na raiz = código (`app`, `instalacao`, `migracoes`, `carga_ficticia`, `demonstracoes`, `scripts`, `testes`); `docs/` = texto.

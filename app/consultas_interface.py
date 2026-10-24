@@ -73,7 +73,7 @@ def _ids_visiveis(sessao, identidade):
     unidades_pendencia = {
         item["unidade_id"]
         for item in identidade["designacoes"]
-        if item["papel"] in {"agente_pendencia", "elaborador", "validador"}
+        if item["papel"] in {"agente_pendencia", "preenchedor", "validador"}
     }
     ids = set(sessao.scalars(
         select(Registro.id).where(Registro.unidade_principal_atual_id.in_(unidades))
@@ -126,7 +126,7 @@ def carregar_painel(sessao, conta_id):
         alerta["rotulo"] = ROTULOS_ALERTA.get(alerta["codigo"], alerta["codigo"])
         alerta["codigo_lgpd"] = codigos.get(alerta["registro_id"], "Registro relacionado")
     pode_criar_registro = any(
-        item["papel"] == "elaborador" for item in identidade["designacoes"]
+        item["papel"] == "responsavel_registro" for item in identidade["designacoes"]
     )
     return {
         "identidade": identidade,
@@ -144,7 +144,7 @@ def carregar_opcoes_novo_registro(sessao, conta_id):
     unidades = []
     vistos = set()
     for item in identidade["designacoes"]:
-        if item["papel"] == "elaborador" and item["unidade_id"] not in vistos:
+        if item["papel"] == "responsavel_registro" and item["unidade_id"] not in vistos:
             vistos.add(item["unidade_id"])
             unidades.append({"id": item["unidade_id"], "nome": item["unidade"]})
     linhas_objetos = sessao.execute(
@@ -221,7 +221,7 @@ def carregar_registro(sessao, conta_id, registro_id):
         autor_salvamento = pessoa.nome if pessoa is not None else rascunho.salvo_por
     pode_preencher = any(
         item["unidade_id"] == registro.unidade_principal_atual_id
-        and item["papel"] == "elaborador"
+        and item["papel"] == "preenchedor"
         for item in identidade["designacoes"]
     )
     resumo["form1"] = {

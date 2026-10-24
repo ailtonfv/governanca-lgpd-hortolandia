@@ -250,7 +250,7 @@ Regras deste diário: sem senhas, tokens ou dados pessoais; cada entrada com dat
 
 ## 2026-10-19 — identidade do agente e contexto antes do FORM 1
 
-- Registrada a decisão institucional informada por servidor da Prefeitura: em Hortolândia, cada servidor, concursado ou não, possui uma única matrícula. Na solução futura, a matrícula será o nome de usuário e a senha será individual, validada pelo mecanismo institucional a confirmar com Ana e Rafael.
+- Registrada a decisão institucional informada por servidor da Prefeitura: em Hortolândia, cada servidor, concursado ou não, possui uma única matrícula. Na solução futura, a matrícula será o nome de usuário e a senha será individual, validada pelo mecanismo institucional a confirmar com as áreas responsáveis.
 - A PoC recebeu matrículas exclusivamente fictícias e únicas. O seletor inicial passou a apresentar a simulação por matrícula e continua sem senha real.
 - Criada a etapa anterior ao FORM 1: o elaborador seleciona primeiro a Secretaria responsável pelo Registro dentro de seu alcance institucional; depois escolhe serviço, processo ou atividade do catálogo e o contexto de atuação. A tela não expõe a classificação técnica “unidade principal”. Na implantação municipal, a Secretaria virá de lista fechada das 18 Secretarias; departamentos e setores são executores, e outras Secretarias poderão participar. O nome oficial do objeto vem do catálogo; o G1 existente cria o Registro, o ciclo 1 e o FORM 1 Não iniciado.
 - Delimitado o catálogo institucional da PoC às 18 Secretarias da Administração Direta. O Hortoprev, autarquia da Administração Indireta, fica fora do recorte e não será apresentado como Secretaria.
@@ -336,9 +336,9 @@ Regras deste diário: sem senhas, tokens ou dados pessoais; cada entrada com dat
 - Registrado o padrão Arrange–Act–Assert para testes e sua distinção do nível AAA de acessibilidade.
 - Documentada a base visual existente e a proposta de evolução por tokens, componentes e movimento reduzido, sem alterar a interface nesta rodada.
 
-### 22/10/2026 — aceite da PoC nuclear M1a
+### 22/10/2026 — validação técnica da PoC nuclear M1a
 
-- O Encarregado de Dados aceitou expressamente o M1a após a rodada formal `M1A-20261022-001`, com 189 de 189 testes e 9 de 9 cenários `POC-TS` aprovados.
+- O Encarregado de Dados confirmou expressamente a validação técnica do M1a após a rodada formal `M1A-20261022-001`, com 189 de 189 testes e 9 de 9 cenários `POC-TS` aprovados.
 - O aceite preserva as limitações conhecidas: checkpoint externo e custódia institucional no backlog; temporalidade dependente da regra oficial; autenticação, integrações, Piloto e produção fora do M1a.
 - Permanecem pendentes a apresentação, o registro dos participantes e a transferência técnica à T.I.
 - O aceite do M1a não inicia automaticamente a PoC ampliada, que depende de decisão expressa própria.
@@ -355,3 +355,22 @@ Regras deste diário: sem senhas, tokens ou dados pessoais; cada entrada com dat
 - O painel passou a mostrar a criação somente ao papel de elaborador; analistas e validadores recebem explicação de que podem consultar, analisar ou validar, mas não iniciar Registro.
 - O cabeçalho do FORM 1 passou a declarar seu objetivo ao lado do nome e do estado, esclarecendo que o instrumento registra finalidade, categorias de titulares e dados e compartilhamentos sem identificar pessoas.
 - Registrada como hipótese, ainda sem requisito aprovado, uma futura visão agregada de coordenação distinta da administração técnica da T.I.
+
+### 24/10/2026 — Agente responsável e equipe de preenchimento
+
+- Explicitado que o **Agente Público Autorizado responsável pelo Registro** é o ponto focal LGPD da Secretaria: abre, coordena e acompanha o Registro em nome da Secretaria responsável.
+- Separada tecnicamente a autorização de abertura (`responsavel_registro`) da autorização de preenchimento (`preenchedor`). Elas podem ser acumuladas: o próprio Agente pode abrir e preencher o FORM 1; outros servidores autorizados podem somente preencher e colaborar.
+- Preservadas a autoria individual, a auditoria, o controle de versão e a responsabilidade institucional da Secretaria. A segregação continua obrigatória entre o preenchimento/submissão e a análise ou validação pela T.I.
+- Ampliada a massa fictícia para demonstrar um Agente com as duas autorizações e um servidor somente preenchedor. Nenhum dado pessoal real foi introduzido.
+- Ajustadas a interface, as permissões, as consultas e as rotas de pendências para usar os papéis explícitos. Acrescentados testes de negação da abertura pelo preenchedor e de colaboração por outro servidor autorizado.
+- A Cartilha foi atualizada na revisão `REV30.14`, e a apresentação à T.I. chegou à versão 10 com um fluxograma editável dos papéis e da futura passagem institucional.
+- A apresentação v10 foi validada com 13 lâminas, sem achados de integridade, geometria ou fontes, e incorporada a `docs/apresentacao/`.
+- A suíte completa posterior ao refinamento aprovou **193 de 193 testes** no banco exclusivo `lgpd_poc_teste`.
+- A validação técnica histórica do M1a permanece vinculada à rodada `M1A-20261022-001` e aos 189 testes daquele checkpoint. Este refinamento não inicia a PoC ampliada nem representa, por si só, aceite institucional.
+
+### 24/10/2026 — preparação final do repositório para a T.I.
+
+- Retirada do README a minuta de ata destinada à T.I. A validação técnica do M1a permanece registrada; a apresentação passa a caracterizar uma passagem de conhecimento sobre solução, repositório, execução, testes e limitações.
+- Acrescentado ao README um mapa comentado dos diretórios disponíveis no GitHub e um roteiro de leitura recomendado para a equipe técnica.
+- Mantida a distinção entre o repositório executável da PoC e o pacote institucional que contém a Cartilha e a coleção integral dos SADs.
+- A apresentação à T.I. passou a reproduzir a árvore do repositório. A PoC ampliada continua dependente de decisão expressa posterior à análise final.

@@ -14,7 +14,7 @@ from app.comandos import abrir_comando, fechar_comando
 
 # Qual papel é exigido para cada ação (provisório da PoC, a partir da matriz do SAD 03)
 PAPEIS_EXIGIDOS = {
-    "submeter": {"elaborador"},
+    "submeter": {"preenchedor"},
     "analisar": {"analista"},
     "devolver": {"analista", "validador"},
     "validar": {"validador"},

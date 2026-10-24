@@ -16,7 +16,7 @@ def test_carga_atribui_uma_matricula_unica_a_cada_pessoa():
         pessoas = sessao.query(Pessoa).order_by(Pessoa.id).all()
 
     matriculas = [pessoa.matricula for pessoa in pessoas]
-    assert matriculas == [f"MAT-FICT-{numero:04d}" for numero in range(1, 7)]
+    assert matriculas == [f"MAT-FICT-{numero:04d}" for numero in range(1, 9)]
     assert len(matriculas) == len(set(matriculas))
 
 

@@ -154,8 +154,9 @@ class Unidade(Base):
 class Designacao(Base):
     """Quem exerce qual papel, em qual unidade (SAD 03).
     O papel é dado à PESSOA (não à conta). Uma pessoa pode ter vários papéis.
-    Papéis usados na PoC nuclear: elaborador, analista, validador, concluidor e
-    agente_pendencia (designação provisória para atuar na fila institucional).
+    Papéis usados na PoC nuclear: responsavel_registro, preenchedor, analista,
+    validador, concluidor e agente_pendencia (designação provisória para atuar
+    na fila institucional).
     """
     __tablename__ = "designacao"
 

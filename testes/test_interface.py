@@ -54,14 +54,21 @@ def test_pendencia_intersecretarial_leva_registro_e_flags_ao_destino():
     assert criada["pendencia_id"] not in resposta.text
 
 
-def test_painel_exibe_criacao_somente_para_elaborador():
-    elaborador = cliente.get("/", params={"conta_id": "CONTA-A1"})
+def test_painel_exibe_criacao_somente_para_responsavel_pelo_registro():
+    responsavel = cliente.get("/", params={"conta_id": "CONTA-A1"})
     analista = cliente.get("/", params={"conta_id": "CONTA-B1"})
 
-    assert "Criar novo Registro LGPD" in elaborador.text
+    assert "Criar novo Registro LGPD" in responsavel.text
     assert "Criar novo Registro LGPD" not in analista.text
-    assert "não iniciar um novo Registro LGPD" in analista.text
-    assert "agentes designados como elaboradores" in analista.text
+    assert "não abrir um novo Registro LGPD" in analista.text
+    assert "Agente Público Autorizado responsável pelo Registro" in analista.text
+
+
+def test_seletor_exibe_agente_que_acumula_funcoes_e_servidor_colaborador():
+    resposta = cliente.get("/", params={"conta_id": "CONTA-A1"})
+
+    assert "Alfa · Agente responsável e preenchedor" in resposta.text
+    assert "Épsilon · Servidor preenchedor" in resposta.text
 
 
 def test_acesso_direto_a_registro_de_outra_unidade_e_negado_e_auditado():
@@ -294,7 +301,7 @@ def _registro_com_form1(prefixo="CMD-UI-FORM"):
         return registro, instrumento.id
 
 
-def test_detalhe_oferece_i1_apenas_ao_elaborador():
+def test_detalhe_oferece_i1_apenas_ao_preenchedor():
     registro, _ = _registro_com_form1("CMD-UI-I1-VISIVEL")
 
     alfa = cliente.get(
@@ -309,7 +316,7 @@ def test_detalhe_oferece_i1_apenas_ao_elaborador():
     assert "quais categorias de titulares e dados" in alfa.text
     assert "Iniciar preenchimento (I1)" in alfa.text
     assert "Iniciar preenchimento (I1)" not in beta.text
-    assert "não possui o papel de elaborador" in beta.text
+    assert "não está designado como Servidor responsável" in beta.text
 
 
 def test_i1_pela_tela_cria_rascunho_e_exibe_formulario():

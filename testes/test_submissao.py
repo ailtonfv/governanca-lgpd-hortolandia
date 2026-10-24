@@ -285,11 +285,11 @@ def test_i3_recusa_codigos_desconhecidos_em_todos_os_catalogos():
     assert len([p for p in resultado["problemas"] if "desconhecido" in p]) == 3
 
 
-def test_i3_exige_elaborador_da_unidade_responsavel():
+def test_i3_exige_preenchedor_da_unidade_responsavel():
     instrumento_id, registro_id, _ = criar_form1()
     preparar(instrumento_id)
     resultado = i3(instrumento_id, conta="CONTA-B1")
-    assert not resultado["permitido"] and "elaborador" in resultado["motivo"]
+    assert not resultado["permitido"] and "responsável pelo preenchimento" in resultado["motivo"]
     with Session(motor) as sessao:
         assert sessao.get(Instrumento, instrumento_id).estado_instrumento == "em_preenchimento"
         assert sessao.get(Registro, registro_id).estado_atual == "em_andamento"
@@ -445,13 +445,13 @@ def test_i4_repetido_e_idempotente():
                              .where(Evento.comando_id == "CMD-S-I4")) == 2
 
 
-def test_i4_exige_elaborador_e_estado_adequado():
+def test_i4_exige_preenchedor_e_estado_adequado():
     instrumento_id, _, _ = criar_form1()
     preparar(instrumento_id)
     assert not i4(instrumento_id, cmd="CMD-S-I4-CEDO")["permitido"]
     i3(instrumento_id)
     negado = i4(instrumento_id, cmd="CMD-S-I4-SEM-PAPEL", conta="CONTA-B1")
-    assert not negado["permitido"] and "elaborador" in negado["motivo"]
+    assert not negado["permitido"] and "responsável pelo preenchimento" in negado["motivo"]
     assert i4(instrumento_id, cmd="CMD-S-I4-OK")["permitido"]
     assert not i4(instrumento_id, cmd="CMD-S-I4-DUPLO")["permitido"]
 
@@ -1219,7 +1219,7 @@ def test_i7_so_pode_ser_executado_por_quem_assumiu_a_pendencia():
     instrumento_id, _, _, _, _, devolucao = preparar_devolucao()
     with Session(motor) as sessao, sessao.begin():
         sessao.add(Designacao(pessoa_id="PESSOA-F", unidade_id="UNID-NORTE",
-                              papel="elaborador", ativa=True))
+                              papel="preenchedor", ativa=True))
     assert p2(devolucao["pendencia_id"])["permitido"]
 
     resultado = i7(instrumento_id, devolucao["pendencia_id"],
@@ -1316,7 +1316,7 @@ def test_p3_so_pode_ser_executado_por_quem_assumiu_a_pendencia():
     instrumento_id, _, _, _, _, devolucao, _ = preparar_correcao()
     with Session(motor) as sessao, sessao.begin():
         sessao.add(Designacao(pessoa_id="PESSOA-F", unidade_id="UNID-NORTE",
-                              papel="elaborador", ativa=True))
+                              papel="preenchedor", ativa=True))
 
     resultado = p3(instrumento_id, devolucao["pendencia_id"], versao=4,
                     cmd="CMD-S-P3-OUTRO", conta="CONTA-F1")
@@ -1499,7 +1499,7 @@ def test_p6_exige_responsavel_e_libera_nova_correcao():
     assert p5(instrumento_id, pendencia_id)["permitido"]
     with Session(motor) as sessao, sessao.begin():
         sessao.add(Designacao(pessoa_id="PESSOA-F", unidade_id="UNID-NORTE",
-                              papel="elaborador", ativa=True))
+                              papel="preenchedor", ativa=True))
 
     outro = p6(instrumento_id, pendencia_id, cmd="CMD-S-P6-OUTRO", conta="CONTA-F1")
     assert not outro["permitido"] and "responsável" in outro["motivo"]

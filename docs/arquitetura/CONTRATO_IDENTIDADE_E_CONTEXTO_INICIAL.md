@@ -11,6 +11,9 @@
 - Antes do FORM 1, o agente seleciona primeiro a Secretaria responsável pelo Registro dentro de seu alcance institucional.
 - Em seguida, define se mapeará um serviço, processo ou atividade do catálogo e escolhe o contexto de atuação.
 - A Prefeitura permanece a controladora; a Secretaria é a responsável interna pelo Registro. Departamentos e setores podem executar partes do objeto sem substituir essa responsabilidade.
+- O ponto focal da LGPD será apresentado como **Agente Público Autorizado responsável pelo Registro**: abre o Registro, coordena o levantamento local, acompanha pendências e encaminha o FORM 1. Quando também autorizado para o preenchimento, pode executar pessoalmente os atos do FORM 1.
+- A equipe de preenchimento é formada pelos servidores que executam ou conhecem a rotina. Ela atua sob coordenação funcional do Agente, sem alteração da subordinação administrativa existente.
+- Analista e validador são funções futuras da Secretaria de T.I., exercidas depois da conclusão da PoC ampliada e da passagem institucional, com a segregação de funções aplicável.
 
 ## Percurso inicial
 
@@ -84,10 +87,10 @@ CPF, endereço, remuneração e demais dados do cadastro de pessoal não integra
 
 ## Limite da PoC
 
-Matrículas, pessoas, designações, objetos, contextos e Registros atuais são fictícios. Somente os nomes públicos das 18 Secretarias são reais; seus identificadores e vínculos internos continuam próprios da PoC. O seletor inicial apenas simula uma entrada por matrícula; nenhuma senha existe na PoC. A autenticação real não será improvisada nem conectada diretamente ao banco de pessoal. Ana e Rafael deverão informar o mecanismo institucional para validar matrícula e senha e fornecer somente os atributos necessários.
+Matrículas, pessoas, designações, objetos, contextos e Registros atuais são fictícios. Somente os nomes públicos das 18 Secretarias são reais; seus identificadores e vínculos internos continuam próprios da PoC. O seletor inicial apenas simula uma entrada por matrícula; nenhuma senha existe na PoC. A autenticação real não será improvisada nem conectada diretamente ao banco de pessoal. As áreas responsáveis deverão informar o mecanismo institucional para validar matrícula e senha e fornecer somente os atributos necessários.
 
-O primeiro corte permite escolher a Secretaria responsável entre aquelas nas quais o agente fictício é elaborador. Na implantação municipal, a seleção deverá vir de uma lista fechada das 18 Secretarias, sem digitação livre. O modelo preserva internamente o identificador técnico `unidade_principal_id`; essa nomenclatura não precisa ser exposta ao agente. O cadastro permanente de Secretarias participantes continua reservado à PoC ampliada; no M1a, a colaboração já é demonstrada pelo percurso de pendência intersecretarial sem transferência da responsabilidade principal.
+O primeiro corte permite escolher a Secretaria responsável entre aquelas nas quais o agente fictício possui `responsavel_registro`. O preenchimento exige a autorização técnica distinta `preenchedor`. O Agente Público Autorizado responsável pelo Registro pode acumular ambas e executar abertura e preenchimento; outro servidor pode possuir somente `preenchedor` e colaborar com autoria individual. A seleção da Secretaria deverá vir de uma lista fechada das 18 Secretarias, sem digitação livre. O modelo preserva internamente o identificador técnico `unidade_principal_id`; essa nomenclatura não precisa ser exposta ao agente. O cadastro permanente de Secretarias participantes continua reservado à PoC ampliada; no M1a, a colaboração intersecretarial também é demonstrada pelo percurso de pendência sem transferência da responsabilidade principal.
 
 O escopo desta PoC está restrito às 18 Secretarias da Administração Direta. O Hortoprev, autarquia da Administração Indireta, não integra o catálogo nem os percursos demonstrados nesta etapa. Uma eventual inclusão futura exigirá decisão própria de escopo e a revisão da denominação apresentada ao agente.
 
-Os nomes das Secretarias são metadados institucionais públicos, conferidos no portal municipal em 19/10/2026. Sua presença no catálogo não equivale a autorização: a lista apresentada a cada agente é a interseção entre as Secretarias ativas e suas designações vigentes de elaborador.
+Os nomes das Secretarias são metadados institucionais públicos, conferidos no portal municipal em 19/10/2026. Sua presença no catálogo não equivale a autorização: a lista apresentada para criação é a interseção entre as Secretarias ativas e as designações vigentes de `responsavel_registro` do agente.

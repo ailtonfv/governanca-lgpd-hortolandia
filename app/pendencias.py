@@ -207,7 +207,7 @@ def assumir_pendencia(sessao, *, comando_id, conta_id, pendencia_id, momento=Non
         return _negar(sessao, comando, ator_tipo, ator_id, "assumir_pendencia",
                       conta_id, pendencia_id,
                       "conta inexistente ou desativada")
-    papeis_destino = ({"elaborador"} if pendencia.tipo_pendencia == "devolucao"
+    papeis_destino = ({"preenchedor"} if pendencia.tipo_pendencia == "devolucao"
                       else {"agente_pendencia"})
     if not tem_papel(sessao, pessoa_id, pendencia.unidade_destino_id, papeis_destino):
         return _negar(
@@ -734,7 +734,7 @@ def retomar_pendencia(sessao, *, comando_id, conta_id, pendencia_id,
             "P6 só pode ser executado pelo agente responsável pela pendência",
             responsavel_atual_id=pendencia.responsavel_atual_id,
         )
-    if not tem_papel(sessao, pessoa_id, pendencia.unidade_destino_id, {"elaborador"}):
+    if not tem_papel(sessao, pessoa_id, pendencia.unidade_destino_id, {"preenchedor"}):
         return _negar(
             sessao, comando, ator_tipo, ator_id, "P6", conta_id, pendencia_id,
             "a pessoa não está autorizada a retomar pendências desta unidade",

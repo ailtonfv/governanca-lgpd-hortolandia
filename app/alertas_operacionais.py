@@ -25,7 +25,7 @@ def listar_alertas_operacionais(sessao, conta_id):
     ).all()
     for pendencia in pendencias:
         intersecretarial = pendencia.tipo_pendencia == "participacao"
-        papel_destino = {"agente_pendencia"} if intersecretarial else {"elaborador"}
+        papel_destino = {"agente_pendencia"} if intersecretarial else {"preenchedor"}
         papel_origem = {"agente_pendencia"} if intersecretarial else {"validador"}
         autorizada_na_unidade = tem_papel(
             sessao, conta.pessoa_id, pendencia.unidade_destino_id, papel_destino

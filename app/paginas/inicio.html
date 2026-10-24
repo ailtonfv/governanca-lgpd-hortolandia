@@ -10,7 +10,7 @@
   <form class="simulador" method="get">
     <label for="conta_id">Simular entrada por matrícula</label>
     <select id="conta_id" name="conta_id" onchange="this.form.submit()">
-      {% for id, nome in [('CONTA-A1', 'MAT-FICT-0001 · Alfa · Planejamento Urbano e Gestão Estratégica'), ('CONTA-B1', 'MAT-FICT-0002 · Beta · Planejamento Urbano e Gestão Estratégica'), ('CONTA-C1', 'MAT-FICT-0003 · Gama · Finanças')] %}
+      {% for id, nome in [('CONTA-A1', 'MAT-FICT-0001 · Alfa · Agente responsável e preenchedor'), ('CONTA-G1', 'MAT-FICT-0007 · Épsilon · Servidor preenchedor'), ('CONTA-B1', 'MAT-FICT-0002 · Beta · Analista e validador'), ('CONTA-C1', 'MAT-FICT-0003 · Gama · Agente responsável e preenchedor')] %}
       <option value="{{ id }}" {% if conta_id == id %}selected{% endif %}>{{ nome }}</option>
       {% endfor %}
     </select>
@@ -25,7 +25,7 @@
   <p class="ajuda">Abre a etapa inicial para mapear um serviço, processo ou atividade. Nada será criado antes da confirmação final.</p>
 </div>
 {% else %}
-<p class="aviso-leitura acao-painel">Seu papel atual permite consultar, analisar ou validar mapeamentos, mas não iniciar um novo Registro LGPD. A criação fica disponível para agentes designados como elaboradores.</p>
+<p class="aviso-leitura acao-painel">Seu papel atual permite consultar ou atuar nos mapeamentos disponíveis, mas não abrir um novo Registro LGPD. A criação fica disponível ao Agente Público Autorizado responsável pelo Registro.</p>
 {% endif %}
 
 <section aria-labelledby="titulo-alertas">

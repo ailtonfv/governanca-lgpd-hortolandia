@@ -36,7 +36,7 @@
       <button class="botao-primario" type="submit">Iniciar preenchimento (I1)</button>
     </form>
     {% else %}
-    <p class="aviso-leitura">Este agente pode consultar o Registro, mas não possui o papel de elaborador necessário para iniciar o FORM 1.</p>
+    <p class="aviso-leitura">Este agente pode consultar o Registro, mas não está designado como Servidor responsável pelo preenchimento do FORM 1.</p>
     {% endif %}
   {% elif registro.form1.estado == 'em_preenchimento' and registro.form1.rascunho %}
     {% set conteudo = registro.form1.rascunho.conteudo %}
@@ -84,7 +84,7 @@
       </div>
     </form>
     {% else %}
-    <p class="aviso-leitura">O FORM 1 está em preenchimento, mas este agente não possui o papel de elaborador da Secretaria responsável.</p>
+    <p class="aviso-leitura">O FORM 1 está em preenchimento, mas este agente não está designado como Servidor responsável pelo preenchimento.</p>
     {% endif %}
   {% else %}
     <p class="aviso-leitura">O FORM 1 está em {{ registro.form1.estado|replace('_', ' ') }}. A edição não está disponível neste estado.</p>

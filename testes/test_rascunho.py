@@ -65,6 +65,21 @@ def test_i1_cria_rascunho_e_evento_na_cadeia_do_instrumento():
         assert verificar_cadeia(sessao, instrumento_id)[0]
 
 
+def test_outro_servidor_autorizado_pode_iniciar_o_preenchimento():
+    instrumento_id = criar_form1("CMD-R-G1-COLABORACAO")
+
+    resultado = i1(
+        instrumento_id,
+        cmd="CMD-R-I1-COLABORACAO",
+        conta="CONTA-G1",
+    )
+
+    assert resultado["permitido"]
+    with Session(motor) as sessao:
+        rascunho = sessao.get(RascunhoInstrumento, instrumento_id)
+        assert rascunho.salvo_por == "PESSOA-G"
+
+
 def test_i1_repetido_e_idempotente():
     instrumento_id = criar_form1()
     original = i1(instrumento_id)
@@ -77,7 +92,7 @@ def test_i1_repetido_e_idempotente():
 
 
 @pytest.mark.parametrize("conta", ["CONTA-B1", "CONTA-C1"])
-def test_i1_exige_elaborador_na_unidade_do_registro(conta):
+def test_i1_exige_preenchedor_na_unidade_do_registro(conta):
     instrumento_id = criar_form1()
     resultado = i1(instrumento_id, cmd=f"CMD-R-SEM-PAPEL-{conta}", conta=conta)
     assert not resultado["permitido"]

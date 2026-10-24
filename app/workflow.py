@@ -25,7 +25,7 @@ from app.comandos import (abrir_comando, fechar_comando, nome_da_restricao,
 
 FUSO_OFICIAL = ZoneInfo("America/Sao_Paulo")
 RESTRICAO_EQUIVALENCIA = "uq_objeto_contexto_assunto_ativo"
-RESOLUCOES_DE_FAMILIA = ("tratamento_autonomo",)   # a do elaborador; a transversalidade vem da governança
+RESOLUCOES_DE_FAMILIA = ("tratamento_autonomo",)   # decisão do agente responsável; transversalidade vem da governança
 
 MENSAGEM_FAMILIA = ("Este objeto está associado a mais de um contexto da mesma família. "
                     "Corrija o contexto, justifique a autonomia do tratamento ou consulte a governança.")
@@ -166,7 +166,7 @@ def criar_registro(sessao, *, comando_id, conta_id, unidade_id, contexto_id, tit
       objetos_abrangidos_ids   -> ABRANGIDO
       objetos_citados          -> {"OBJ-...": "APOIO" | "RELACIONADO"}
     contexto_id: UM contexto de atuação para o Registro (D1).
-    resolucao_familia / justificativa: resposta do elaborador a uma advertência de família (D2).
+    resolucao_familia / justificativa: resposta do agente responsável a uma advertência de família (D2).
     momento: relógio injetável (os testes não dependem da data do computador).
 
     Ordem (DA-38, item 9): barreiras -> 1. equivalência -> 2. família -> 3. alerta estrutural -> resultado.
@@ -235,8 +235,8 @@ def criar_registro(sessao, *, comando_id, conta_id, unidade_id, contexto_id, tit
     ))
     if objetos_do_contexto != set(assunto):
         return negar("contexto de atuação não permitido para o item do catálogo")
-    if not tem_papel(sessao, pessoa_id, unidade_id, {"elaborador"}):
-        return negar("a pessoa não tem papel de elaborador nesta unidade")
+    if not tem_papel(sessao, pessoa_id, unidade_id, {"responsavel_registro"}):
+        return negar("a pessoa não é Agente Público Autorizado responsável pelo Registro nesta unidade")
     if resolucao_familia is not None and resolucao_familia not in RESOLUCOES_DE_FAMILIA:
         return negar("resolução de advertência inválida")
 

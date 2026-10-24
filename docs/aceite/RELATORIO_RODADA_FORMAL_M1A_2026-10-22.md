@@ -11,7 +11,7 @@
 | Banco | `lgpd_poc_teste`, exclusivo para testes |
 | Ambiente | Python 3.14.8; PostgreSQL 18.6; pytest 9.1.1; SQLAlchemy 2.1.4; FastAPI 0.147.0; psycopg 3.3.6 |
 | Executor | Operador da PoC |
-| Aceitante | Encarregado de Dados, mediante registro na ata do M1a |
+| Responsável pela validação técnica | Encarregado de Dados |
 
 Esta rodada transformou a cobertura automatizada da PoC nuclear em uma execução identificada e reproduzível. Os artefatos operacionais permanecem no diretório local ignorado pelo Git `evidencias/M1A-20261022-001/`. Este relatório contém apenas resultados sintéticos e metadados necessários ao aceite.
 
@@ -73,8 +73,8 @@ Os hashes permitem conferir que os arquivos apresentados à T.I. são os mesmos 
 
 - O checkpoint externo da cadeia e a custódia institucional correspondente permanecem no backlog. A PoC nuclear demonstra a cadeia interna e a detecção de três classes de adulteração.
 - Temporalidade e descarte dependem da tabela oficial e do grupo municipal responsável. A PoC nuclear não elimina automaticamente dados, além de usar somente massa fictícia.
-- O Encarregado de Dados aceitou o M1a em 22/10/2026 com estas limitações conhecidas. A apresentação e a transferência técnica à T.I. permanecem pendentes.
+- O Encarregado de Dados confirmou a validação técnica do M1a em 22/10/2026 com estas limitações conhecidas. A apresentação do repositório e da solução à T.I. permanece pendente e não equivale a aceite institucional.
 
 ## Conclusão técnica
 
-Os nove cenários formais da PoC nuclear estão tecnicamente aprovados. A execução identificada, os resultados consolidados e os hashes dos artefatos sustentaram o aceite do M1a pelo Encarregado de Dados em 22/10/2026. Permanecem pendentes a apresentação, o registro dos participantes e a transferência técnica à T.I. O aceite não inicia automaticamente a PoC ampliada.
+Os nove cenários formais da PoC nuclear estão tecnicamente aprovados. A execução identificada, os resultados consolidados e os hashes dos artefatos sustentaram a validação técnica do M1a pelo Encarregado de Dados em 22/10/2026. Permanece pendente a apresentação do repositório e da solução à T.I. A validação técnica não inicia automaticamente a PoC ampliada nem substitui eventual formalização institucional.

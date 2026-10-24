@@ -14,7 +14,7 @@ def declarar(conta, cmd, familia="TRIB", fundamento="Cadastro usado por todas as
 
 
 def test_so_a_governanca_declara():
-    assert not declarar("CONTA-A1", "CMD-T-01")["permitido"]     # elaborador
+    assert not declarar("CONTA-A1", "CMD-T-01")["permitido"]     # responsável/preenchedor
     assert not declarar("CONTA-D1", "CMD-T-02")["permitido"]     # curador
     assert declarar("CONTA-E1", "CMD-T-03")["permitido"]         # governança
 
