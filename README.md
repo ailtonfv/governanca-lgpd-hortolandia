@@ -1,6 +1,6 @@
 # Sistema de Governança Municipal LGPD — Prova de Conceito
 
-**Prefeitura Municipal de Hortolândia** · PoC nuclear M1a aceita e PoC ampliada planejada, ainda não iniciada · repositório privado
+**Prefeitura Municipal de Hortolândia** · PoC nuclear M1a aceita e PoC ampliada iniciada de forma incremental · repositório privado
 
 > ⚠️ **Somente dados fictícios.** Nenhum dado pessoal real, CPF, matrícula, senha ou token entra neste repositório, no código, nos testes ou nos logs.
 
@@ -94,7 +94,7 @@ flowchart LR
     style P fill:#4d3d1e,stroke:#d4a017,color:#fff
 ```
 
-**A PoC nuclear M1a foi aceita pelo Encarregado de Dados em 22/10/2026.** A apresentação e a transferência técnica à T.I. permanecem pendentes. Este documento descreve também a PoC ampliada, que reaproveita o mesmo código, mas somente começará após decisão expressa própria.
+**A PoC nuclear M1a foi aceita pelo Encarregado de Dados em 22/10/2026.** A apresentação e a transferência técnica à T.I. permanecem pendentes. Em 24/10/2026 houve decisão expressa para iniciar a PoC ampliada por incrementos, começando pelo catálogo REV13, pela identificação do ARP e pela estrutura visual do FORM 1 integral. Isso não altera retroativamente o M1a.
 
 #### PoC nuclear × PoC ampliada
 
@@ -227,6 +227,32 @@ flowchart LR
     F --> P["FORMs 2, 3 e 4<br/>etapa posterior"]
     I["Inventários e relatórios"] -. "apoio e contextos candidatos" .-> F
 ```
+
+### Diretriz conceitual — Integração e disponibilidade dos FORMS 1 a 4
+
+Os quatro FORMS permanecem instrumentos distintos e complementares de um **único conjunto de análise e governança LGPD** referente a determinado serviço, processo ou atividade. O conjunto possui um Identificador LGPD único, compartilhado pelos quatro instrumentos; essa integração futura não transforma os FORMS em um formulário único nem altera a estrutura funcional definida pela Cartilha.
+
+| Instrumento | Função no conjunto |
+|---|---|
+| FORM 1 — Levantamento factual | Identificar e descrever como ocorre o tratamento de dados pessoais. |
+| FORM 2 — Validação institucional e jurídica | Examinar conformidade, hipóteses legais e questões institucionais. |
+| FORM 3 — Avaliação de riscos | Identificar e avaliar riscos, impactos e controles. |
+| FORM 4 — Plano de ação | Registrar medidas de adequação, responsáveis, prazos, acompanhamento e evidências. |
+
+O Registro LGPD é aberto por um **Agente Público Autorizado**. Esse agente pode preencher o FORM 1 ou permitir que outro agente devidamente autorizado o faça. A abertura não atribui automaticamente o preenchimento dos demais FORMS; os FORMS 2, 3 e 4 poderão envolver agentes diferentes, conforme competências e autorizações institucionais ainda a definir.
+
+A disponibilidade operacional futura deverá seguir esta sequência, sem criar bloqueios administrativos desnecessários:
+
+1. o FORM 1 fica disponível depois da abertura do Registro LGPD;
+2. após a submissão válida do FORM 1, o FORM 2 é liberado para validação, sem atribuição automática a uma pessoa;
+3. o FORM 3 é liberado quando as informações e validações do FORM 2 forem suficientes para a avaliação de riscos;
+4. o FORM 4 fica disponível quando os FORMS 2 ou 3 identificarem medidas de adequação.
+
+Excepcionalmente, uma providência identificada no FORM 2 poderá ser registrada no FORM 4 antes da conclusão integral do FORM 3, desde que haja justificativa, autorização competente e rastreabilidade.
+
+A futura implementação deverá separar permissões de abertura, preenchimento, análise e validação; identificar a autoria de cada atuação; preservar versões, submissões, decisões e evidências; registrar pendências sem paralisar automaticamente etapas independentes; permitir a reavaliação das etapas afetadas por correções posteriores; e acompanhar as ações do FORM 4 até sua conclusão ou encerramento formal.
+
+> **Limite de escopo:** a integração dos quatro FORMS permanece uma diretriz arquitetural. A PoC nuclear continua inalterada e a PoC ampliada, agora iniciada por incrementos, limita-se ao FORM 1 integral. Os FORMS 2, 3 e 4 continuam reservados para etapa posterior; a atribuição institucional de seus responsáveis e a fronteira entre a validação do FORM 1 e a futura liberação do FORM 2 ainda precisam de definição formal.
 
 Para o catálogo inicial, o inventário oferece somente **candidatos**. Alguns campos ajudam a formar e localizar o item; os demais pertencem ao preenchimento e à análise do tratamento:
 
@@ -681,6 +707,21 @@ flowchart TD
 ² O início do preenchimento do FORM 1 será um comando posterior ao G1, como no cenário A1 do SAD 04.
 ³ Trava determinística por objeto e contexto e exatamente um PRINCIPAL, no próprio banco; um contexto por Registro garantido por chave composta (DA-39, item 1); advertência de família e transversalidade (DA-39, item 2); recusas do banco tratadas pelo nome da regra. A suíte chegou a 189 testes automatizados aprovados em 22/10/2026, inclusive pedidos simultâneos, dezenove testes HTTP, quatro testes específicos de identidade e catálogo institucional, quatro variações da barreira de dados pessoais e uma regressão rápida do gerador de volume. Suspenso e Cancelado continuam testados como regra do banco até a chegada dos atos do M1b.1; Concluído já é alcançado pelos G5 e G6 reais.
 
+### Idempotência, em palavras simples
+
+**Idempotência** é a propriedade de uma operação que produz o mesmo resultado quando executada uma ou várias vezes. Apertar repetidamente o botão do elevador não chama vários elevadores; mandar desligar uma luz já apagada não a desliga outra vez. Em contrapartida, fazer dois depósitos de R$ 100 produz R$ 200 e, portanto, não é uma operação idempotente.
+
+Em Python, `x = 5` é idempotente: repetir a atribuição mantém `x` com o valor 5. Já `x += 5` não é, pois cada execução acrescenta mais 5.
+
+Na PoC, cada pedido recebe internamente um `comando_id`, sem exigir que o agente digite essa chave. Esse mecanismo protege o sistema contra clique duplo, reenvio do navegador, oscilação da rede e pedidos simultâneos. Os testes em `testes/test_idempotencia.py` verificam que:
+
+1. repetir o mesmo pedido devolve o resultado original, sem criar outro Registro;
+2. repetir um pedido negado devolve a mesma negação;
+3. reutilizar a mesma chave com conteúdo diferente é recusado como reutilização indevida; e
+4. dois pedidos simultâneos com a mesma chave produzem um único efeito.
+
+Assim, clicar duas vezes em **Criar Registro LGPD** não deve transformar o mesmo pedido em dois códigos LGPD. Essa proteção é essencial para a confiabilidade da auditoria e da cadeia de eventos.
+
 ### O que os 189 testes garantem, em linguagem simples
 
 Os testes atuais exercitam o motor da PoC com dados fictícios e procuram responder a perguntas práticas:
@@ -820,6 +861,31 @@ flowchart TD
 Uma mesma pessoa pode exercer mais de uma função quando possuir autorização e competência, mas a segregação continua valendo. Por exemplo, quem submeteu uma versão não pode iniciar sua análise, validá-la nem devolvê-la. No código, nomes como `responsavel_registro`, `preenchedor`, `analista` e `validador` são identificadores técnicos dos papéis usados para conferir essas autorizações.
 
 Na PoC nuclear, as autorizações técnicas `responsavel_registro` e `preenchedor` são distintas, mas podem ser acumuladas pela mesma pessoa. A massa fictícia demonstra os dois percursos: o Agente principal possui ambas as autorizações e pode abrir e preencher; outro servidor possui somente a autorização de preenchimento e pode colaborar no mesmo Registro. Cada ato preserva autoria individual, controle de versão e auditoria. Os papéis de analista e validador da T.I. são simulados na PoC e somente se tornam atribuições operacionais após a conclusão da PoC ampliada e a passagem institucional do trabalho.
+
+Na preparação do FORM 1 integral, essas funções recebem nomes explícitos: **APA — Agente Público Autorizado**, que abre o Registro, e **ARP — Agente Responsável pelo Preenchimento**, que executa o levantamento factual. APA e ARP podem ser a mesma pessoa. O APA pode indicar outro ARP somente entre pessoas que já possuam conta ativa e designação vigente de `preenchedor` na Secretaria; a indicação não cria permissão. O sistema mantém o APA de abertura, o ARP atual, o executor de cada ato e, futuramente, o agente que submeter a versão.
+
+O primeiro incremento dessa preparação foi verificado por uma suíte completa de **206 testes** no banco exclusivo `lgpd_poc_teste`. Depois do Bloco 1, a **Etapa visual 1** passou a abranger também a porta de entrada, a execução do fluxo, os ramos próprios de Ouvidoria e e-SIC e participantes registrados em ocorrências independentes. O primeiro incremento da Etapa visual 2 habilita o **Bloco 4**, sempre por categorias de titulares e representantes, sem cadastrar pessoas. Tipo e nome do objeto continuam reaproveitados da abertura; respostas parciais são aceitas; catálogo, autoria, idempotência, controle de versão, atomicidade e cadeia de eventos são protegidos. A regressão completa chegou a **225 testes aprovados**. Os Blocos 5 a 14 e a submissão integral continuam pendentes; o FORM 1 sintético do contrato 2 permanece inalterado.
+
+### Política e Matriz de Obrigatoriedade — FORM 1 Integral
+
+A obrigatoriedade é definida de forma declarativa e campo a campo. A fonte única é a matriz versionada [`MATRIZ-F1-REV13-OBR-v1`](docs/planejamento/MATRIZ_CAMPOS_FORM1_REV13.md), que permite consultar os **128 identificadores**, sua etapa, classificação, condição de exibição e decisões pendentes. O README não reproduz as 128 linhas para evitar duas cópias independentes.
+
+| Classificação | Efeito na futura submissão integral |
+|---|---|
+| Essencial, somente leitura | Deve vir de fonte institucional confiável; não admite digitação livre de identidade. |
+| Obrigatória essencial | Deve estar respondida quando o campo for sempre visível. |
+| Obrigatória condicional | Deve estar respondida somente quando sua condição estiver ativa. |
+| Facultativa | Sua ausência não bloqueia a submissão. |
+
+As três fases aplicam regras diferentes:
+
+1. **Abertura:** cria e identifica o Registro, define a Secretaria e as responsabilidades APA/ARP; não exige o preenchimento dos 128 identificadores.
+2. **Rascunho:** pode permanecer incompleto. Campos vazios e `A confirmar` não impedem salvar e retomar; valores informados continuam sujeitos aos catálogos, à autorização, à idempotência e ao controle de versão.
+3. **Submissão integral:** a futura validação calculará os campos ativos e exigirá todos os essenciais e condicionais ativos. Campo oculto ou condicional inativo e campo facultativo não bloquearão. Essa submissão ainda não está implementada.
+
+`A confirmar` é uma pendência explícita, não ausência de resposta. Somente pode ser usado onde a REV13 o oferece e, na submissão, não satisfará campo essencial ou condicional ativo. Em campo facultativo poderá permanecer, mas deverá ser sinalizado para confirmação. `Não se aplica` também só pode ser usado onde estiver previsto; é resposta conclusiva, satisfaz a obrigatoriedade e desativa dependências, salvo regra expressa em sentido diferente. Em seleção múltipla, não poderá coexistir com alternativa factual nem com `A confirmar`.
+
+Uma alteração futura de obrigatoriedade deverá ser feita primeiro na matriz central, com nova versão e testes. Interface, validações e documentação derivada deverão apontar para a mesma versão. Até o incremento F1-6, essas são regras documentadas para a futura submissão; não se deve confundi-las com bloqueios já implementados no salvamento do rascunho.
 
 ### Como o FORM 1 evita nomes de titulares
 

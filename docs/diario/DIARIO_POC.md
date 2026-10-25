@@ -375,3 +375,38 @@ Regras deste diário: sem senhas, tokens ou dados pessoais; cada entrada com dat
 - Mantida a distinção entre o repositório executável da PoC e o pacote institucional que contém a Cartilha e a coleção integral dos SADs.
 - A apresentação à T.I. passou a reproduzir a árvore do repositório. A PoC ampliada continua dependente de decisão expressa posterior à análise final.
 - Registrada a execução complementar `M1A-20261024-002`: 193 de 193 testes aprovados no banco `lgpd_poc_teste`, sem falhas, erros ou testes ignorados. O adendo técnico não altera a ata já documentada.
+
+### 24/10/2026 — início incremental da PoC ampliada
+
+- Recebida decisão expressa para iniciar a PoC ampliada sem substituir a PoC nuclear.
+- Catalogados os 128 identificadores do FORM 1 REV13 como contrato candidato 3, com verificação de integridade da fonte e sem habilitar submissão.
+- Aprovada a apresentação em quatro etapas: blocos 1–3, 4–8, 9–11 e 12–14; os itens 0.1 a 0.3 permanecem no cabeçalho institucional.
+- Registrada matriz campo a campo com obrigatoriedade essencial, condicional ou facultativa, condições conhecidas e decisões ainda pendentes.
+- Formalizadas as funções APA, responsável pela abertura, e ARP, responsável pelo preenchimento. A mesma pessoa pode exercer ambas, desde que possua as duas autorizações.
+- Implementada a preparação do FORM 1 integral com atribuição do ARP entre pessoas fictícias previamente autorizadas, controle otimista, idempotência, evento encadeado e auditoria de recusas.
+- A indicação não cria designação nem acesso. Rascunho integral, perguntas editáveis, persistência do contrato 3 e submissão integral permanecem fora deste incremento.
+- A suíte completa posterior ao incremento aprovou **206 de 206 testes** no banco exclusivo `lgpd_poc_teste`; o aviso de descontinuação emitido pelo `TestClient` permanece sem impacto funcional nesta rodada.
+
+### 25/10/2026 — primeiro rascunho executável do FORM 1 integral
+
+- Criada a migração 12 e a projeção separada `rascunho_form1_integral`, sem alterar a tabela, os snapshots, as rotas ou as validações do FORM 1 sintético.
+- O ARP atual pode iniciar o envelope REV13 do contrato 3 candidato e salvar o Bloco 1 como rascunho parcial; não existe submissão integral neste incremento.
+- Os itens 1.2 e 1.3 são reaproveitados do tipo e do nome do objeto no Registro. Os itens 1.1, 1.1.1 e 1.4 usam as alternativas da REV13; a interface exibe 1.1.1 condicionalmente.
+- Cargo/função e e-mail institucional continuam indisponíveis na identidade simulada e não são inventados.
+- Cada início e salvamento preserva ARP, executor, lacre, `comando_id`, controle otimista, evento encadeado e transação única. Pessoa diferente do ARP, alternativa forjada, campo fora do recorte e tela desatualizada são recusados e auditados.
+- A migração 12 foi aplicada no banco demonstrativo `lgpd_poc_v2`. Nenhum dado pessoal real foi introduzido.
+- A regressão completa aprovou **215 de 215 testes** no banco exclusivo `lgpd_poc_teste`, incluindo idempotência, concorrência e rollback do novo rascunho.
+
+### 25/10/2026 — conclusão do F1-2 e início controlado do F1-3
+
+- Concluída a Etapa visual 1 do FORM 1 integral: Bloco 2 com porta de entrada, execução, volumes, finalidade operacional e ramos de Ouvidoria/e-SIC; Bloco 3 com participantes individualizados e repetíveis.
+- Todos os salvamentos continuam no envelope REV13 existente, preservando o Bloco 1, o APA/ARP, a autoria do executor, a idempotência, o controle otimista, o lacre e a cadeia de eventos.
+- Iniciada a Etapa visual 2 somente pelo Bloco 4. Titulares e representantes são registrados por categorias; o sistema não cadastra pessoas. O item 4.2.5.1 reutiliza o catálogo do item 5.1 sem antecipar o Bloco 5.
+- O FORM 1 sintético e o contrato 2 não foram modificados. A submissão integral continua indisponível; Blocos 5 a 14 permanecem pendentes.
+- A regressão completa aprovou **225 de 225 testes** no banco exclusivo `lgpd_poc_teste`. Nenhum dado pessoal real foi introduzido.
+
+### 25/10/2026 — política central de obrigatoriedade do FORM 1 integral
+
+- O README passou a registrar as regras de abertura, rascunho e futura submissão, além do tratamento de `A confirmar`, `Não se aplica` e campo vazio.
+- A relação dos 128 identificadores não foi duplicada no README. `docs/planejamento/MATRIZ_CAMPOS_FORM1_REV13.md`, identificada como `MATRIZ-F1-REV13-OBR-v1`, permanece a fonte declarativa, central e versionada das classificações e condições.
+- A política não habilita a submissão do contrato 3 nem altera o comportamento executável do rascunho. Interface e validação somente poderão aplicá-la em incremento próprio, acompanhado de testes.

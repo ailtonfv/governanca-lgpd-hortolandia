@@ -27,7 +27,7 @@ Os SADs completos ficam no conjunto documental de arquitetura mantido separadame
 - Resultado: 189 de 189 testes automatizados e 9 de 9 cenários `POC-TS` aprovados.
 - Ensaio de volume: 1.000 Registros, 50.000 eventos, 1.000 cadeias íntegras e 25 reconstruções coincidentes.
 - Pendente: apresentação, registro dos participantes e transferência técnica à T.I.
-- PoC ampliada: planejada, ainda não iniciada e dependente de decisão expressa.
+- PoC ampliada: iniciada por decisão expressa em 24/10/2026, de forma incremental. O contrato 3 candidato permite iniciar, salvar e retomar os Blocos 1 a 4 no mesmo rascunho; a Etapa visual 1 está implementada e a Etapa visual 2 começou pelo Bloco 4, ainda sem submissão integral.
 
 ## Escopo por camada
 
