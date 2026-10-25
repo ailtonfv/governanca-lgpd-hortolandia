@@ -44,6 +44,20 @@ th { color: #425466; font-size: .8rem; text-transform: uppercase; letter-spacing
 .estado-cancelado { background: #fee2e2; color: #7f1d1d; }
 .vazio, .aviso-leitura { padding: 1rem; background: white; border: 1px dashed var(--borda); border-radius: .6rem; }
 .form1 { margin-top: 1.2rem; padding: 1.25rem; border: 1px solid var(--borda); border-radius: .6rem; background: white; }
+.form1-integral { border-left: .35rem solid var(--verde); }
+.identidades-form1 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin: 1.25rem 0; }
+.identidades-form1 div { padding: .9rem; border: 1px solid var(--borda); border-radius: .45rem; background: #f8fbf9; }
+.form1-integral fieldset .opcao { margin-bottom: .75rem; }
+.form1-integral fieldset > label[for] { margin-top: 1rem; }
+.etapas-form1 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .75rem; padding: 0; margin: 1.4rem 0 0; list-style: none; }
+.etapas-form1 li { display: flex; flex-direction: column; gap: .25rem; padding: .85rem; border: 1px solid var(--borda); border-radius: .45rem; background: #f8fbf9; }
+.etapas-form1 small { color: #526475; }
+.etapas-form1 .etapa-atual { border-color: var(--verde); background: #f0fdf4; }
+.bloco-form1-integral { margin-top: 1.25rem; padding: 1rem; border: 1px solid var(--borda); border-radius: .75rem; background: #fff; }
+.campo-condicional { margin-top: 1rem; }
+.campos-reaproveitados { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: .75rem; margin: 1rem 0; }
+.campos-reaproveitados > div { padding: .75rem; border-left: .25rem solid var(--verde); background: #f0fdf4; }
+.campos-reaproveitados small { display: block; color: #3f5968; margin-top: .25rem; }
 .cabecalho-form1 { display: grid; grid-template-columns: minmax(150px, .45fr) minmax(280px, 1.55fr) auto; gap: 1.25rem; align-items: center; }
 .objetivo-form1 { margin: 0; padding-left: 1.25rem; border-left: 1px solid var(--borda); color: #425466; }
 .formulario > label, fieldset { margin-top: 1.4rem; }
@@ -77,6 +91,7 @@ dd { margin: .25rem 0 0; }
   .rodape-formulario { align-items: stretch; flex-direction: column; }
   .botao-primario { width: 100%; }
   .cabecalho-form1 { grid-template-columns: 1fr; }
+  .identidades-form1, .etapas-form1 { grid-template-columns: 1fr; }
   .objetivo-form1 { padding: .75rem 0 0; border-left: 0; border-top: 1px solid var(--borda); }
   th:nth-child(3), td:nth-child(3) { display: none; }
 }

@@ -206,6 +206,46 @@ class Registro(Base):
     )
 
 
+class AtribuicaoForm1Integral(Base):
+    """Projeção do ARP atual na preparação do FORM 1 integral.
+
+    O APA de abertura continua sendo ``Registro.criado_por``. Esta projeção
+    guarda somente a atribuição vigente; o histórico completo permanece no
+    livro de atos do Registro.
+    """
+    __tablename__ = "atribuicao_form1_integral"
+
+    registro_id = Column(String(36), ForeignKey("registro.id"), primary_key=True)
+    arp_atual_id = Column(String(50), ForeignKey("pessoa.id"), nullable=False)
+    atribuido_por = Column(String(50), ForeignKey("pessoa.id"), nullable=False)
+    atribuido_em = Column(DateTime(timezone=True), nullable=False)
+    versao = Column(Integer, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("versao >= 1", name="ck_atribuicao_form1_integral_versao_positiva"),
+    )
+
+
+class RascunhoForm1Integral(Base):
+    """Projeção editável do contrato 3 candidato, separada do FORM 1 nuclear.
+
+    O conteúdo usa o envelope REV13 e pode permanecer parcial. Submissão e
+    versão imutável ainda não fazem parte deste incremento.
+    """
+    __tablename__ = "rascunho_form1_integral"
+
+    registro_id = Column(String(36), ForeignKey("registro.id"), primary_key=True)
+    conteudo = Column(JSON, nullable=False)
+    versao_rascunho = Column(Integer, nullable=False)
+    salvo_por = Column(String(50), ForeignKey("pessoa.id"), nullable=False)
+    salvo_em = Column(DateTime(timezone=True), nullable=False)
+    lacre_conteudo = Column(String(64), nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("versao_rascunho >= 1", name="ck_rascunho_form1_integral_versao_positiva"),
+    )
+
+
 class ContadorRegistro(Base):
     """Contador anual do código LGPD (D4): LGPD-2026-00041, depois LGPD-2027-00001.
     Atualizado na mesma transação do G1, com INSERT ... ON CONFLICT ... RETURNING:

@@ -5,10 +5,14 @@ from sqlalchemy import select
 from app.alertas_operacionais import listar_alertas_operacionais
 from app.form1_sintetico import (CATEGORIAS_DADOS, CATEGORIAS_TITULARES,
                                  DESTINATARIOS_COMPARTILHAMENTO)
-from app.modelos import (Conta, ContextoAtuacao, Designacao, Instrumento,
+from app.form1_integral import (CONDICOES_BLOCO_2, CONDICOES_BLOCO_4,
+                                FAIXAS_VOLUME_REV13, IDS_BLOCO_2, IDS_BLOCO_4,
+                                IDS_PARTICIPANTE_BLOCO_3,
+                                campos_por_id)
+from app.modelos import (AtribuicaoForm1Integral, Conta, ContextoAtuacao, Designacao, Instrumento,
                          ObjetoCatalogo, ObjetoContextoCatalogo,
                          UnidadeObjetoCatalogo, Pendencia, Pessoa,
-                         RascunhoInstrumento, Registro, Unidade)
+                          RascunhoForm1Integral, RascunhoInstrumento, Registro, Unidade)
 
 
 ROTULOS_ESTADO = {
@@ -224,6 +228,122 @@ def carregar_registro(sessao, conta_id, registro_id):
         and item["papel"] == "preenchedor"
         for item in identidade["designacoes"]
     )
+    pode_atribuir_arp = any(
+        item["unidade_id"] == registro.unidade_principal_atual_id
+        and item["papel"] == "responsavel_registro"
+        for item in identidade["designacoes"]
+    )
+    apa_abertura = sessao.get(Pessoa, registro.criado_por)
+    atribuicao_integral = sessao.get(AtribuicaoForm1Integral, registro.id)
+    arp_atual = (None if atribuicao_integral is None
+                 else sessao.get(Pessoa, atribuicao_integral.arp_atual_id))
+    rascunho_integral = sessao.get(RascunhoForm1Integral, registro.id)
+    autor_integral = None
+    if rascunho_integral is not None:
+        pessoa = sessao.get(Pessoa, rascunho_integral.salvo_por)
+        autor_integral = pessoa.nome if pessoa is not None else rascunho_integral.salvo_por
+    pode_editar_integral = bool(
+        atribuicao_integral is not None
+        and atribuicao_integral.arp_atual_id == identidade["pessoa_id"]
+        and pode_preencher
+    )
+    catalogo_integral = campos_por_id()
+    secretarias_integral = sessao.scalars(
+        select(Unidade).where(
+            Unidade.ativa.is_(True), Unidade.id != "UNID-GOV"
+        ).order_by(Unidade.nome)
+    ).all()
+
+    def metadado_integral(campo_id):
+        campo = catalogo_integral[campo_id]
+        alternativas = campo.alternativas
+        if campo_id in {"2.2", "2.4.1"}:
+            alternativas = tuple((item.id, item.nome) for item in secretarias_integral)
+        elif campo_id in {"2.8", "2.9", "2.10"}:
+            alternativas = tuple((item, item) for item in FAIXAS_VOLUME_REV13)
+        elif campo_id == "4.2.5.1":
+            alternativas = tuple(
+                (item, item) for item in catalogo_integral["5.1"].alternativas
+            )
+        else:
+            alternativas = tuple((item, item) for item in alternativas)
+        return {
+            "id": campo.id,
+            "pergunta": campo.pergunta,
+            "controle": campo.controle,
+            "alternativas": alternativas,
+            "instrucao": campo.instrucao,
+            "condicao": (
+                CONDICOES_BLOCO_2.get(campo_id)
+                or CONDICOES_BLOCO_4.get(campo_id)
+            ),
+        }
+    candidatos_arp = sessao.scalars(
+        select(Pessoa)
+        .join(Designacao, Designacao.pessoa_id == Pessoa.id)
+        .where(
+            Pessoa.ativa.is_(True),
+            Pessoa.id != identidade["pessoa_id"],
+            Designacao.unidade_id == registro.unidade_principal_atual_id,
+            Designacao.papel == "preenchedor",
+            Designacao.ativa.is_(True),
+            Pessoa.contas.any(Conta.ativa.is_(True)),
+        )
+        .order_by(Pessoa.nome)
+    ).unique().all()
+    resumo["form1_integral"] = {
+        "situacao": "rascunho" if rascunho_integral is not None else "nao_iniciado",
+        "pode_atribuir_arp": pode_atribuir_arp,
+        "pode_editar": pode_editar_integral,
+        "apa_abertura": None if apa_abertura is None else {
+            "id": apa_abertura.id,
+            "nome": apa_abertura.nome,
+        },
+        "arp_atual": None if arp_atual is None else {
+            "id": arp_atual.id,
+            "nome": arp_atual.nome,
+        },
+        "versao_atribuicao": (0 if atribuicao_integral is None
+                              else atribuicao_integral.versao),
+        "candidatos_arp": [
+            {"id": pessoa.id, "nome": pessoa.nome}
+            for pessoa in candidatos_arp
+        ],
+        "rascunho": None if rascunho_integral is None else {
+            "conteudo": rascunho_integral.conteudo,
+            "respostas": rascunho_integral.conteudo.get("respostas", {}),
+            "participantes": rascunho_integral.conteudo.get("participantes", []),
+            "versao": rascunho_integral.versao_rascunho,
+            "salvo_por": autor_integral,
+            "salvo_em": rascunho_integral.salvo_em,
+        },
+        "campos_bloco_1": {
+            campo_id: {
+                "id": catalogo_integral[campo_id].id,
+                "pergunta": catalogo_integral[campo_id].pergunta,
+                "alternativas": catalogo_integral[campo_id].alternativas,
+                "instrucao": catalogo_integral[campo_id].instrucao,
+            }
+            for campo_id in ("1.1", "1.1.1", "1.2", "1.3", "1.4")
+        },
+        "campos_bloco_2": {
+            campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_2
+        },
+        "campo_3_1": metadado_integral("3.1"),
+        "campos_participante": {
+            campo_id: metadado_integral(campo_id)
+            for campo_id in IDS_PARTICIPANTE_BLOCO_3
+        },
+        "campos_bloco_4": {
+            campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_4
+        },
+        "etapas": (
+            {"numero": 1, "titulo": "Identificação e funcionamento do serviço", "blocos": "1 a 3"},
+            {"numero": 2, "titulo": "Dados pessoais e operações de tratamento", "blocos": "4 a 8"},
+            {"numero": 3, "titulo": "Acesso, compartilhamento e armazenamento", "blocos": "9 a 11"},
+            {"numero": 4, "titulo": "Guarda, situações observadas e pendências", "blocos": "12 a 14"},
+        ),
+    }
     resumo["form1"] = {
         "id": instrumento.id,
         "estado": instrumento.estado_instrumento,

@@ -12,6 +12,7 @@ from sqlalchemy import select, inspect
 from sqlalchemy.orm import Session
 from app.banco import motor
 from app.modelos import VersaoEsquema
+from migracoes.atribuicao_form1_integral import aplicar as migracao_0011
 from migracoes.acao_obrigatoria import aplicar as migracao_0006
 from migracoes.analise_instrumento import aplicar as migracao_0004
 from migracoes.contrato_form1 import aplicar as migracao_0005
@@ -21,6 +22,7 @@ from migracoes.catalogo_por_secretaria import aplicar as migracao_0009
 from migracoes.contextos_por_objeto import aplicar as migracao_0010
 from migracoes.pendencia import aplicar as migracao_0007
 from migracoes.rascunho_versoes import aplicar as migracao_0002
+from migracoes.rascunho_form1_integral import aplicar as migracao_0012
 
 MIGRACOES = [
     # (número, nome, função que recebe a sessão)
@@ -33,6 +35,8 @@ MIGRACOES = [
     (8, "matrícula funcional única do agente da plataforma", migracao_0008),
     (9, "vínculo entre Secretarias e itens do catálogo operacional", migracao_0009),
     (10, "vínculo entre itens do catálogo e contextos de atuação", migracao_0010),
+    (11, "atribuição do ARP na preparação do FORM 1 integral", migracao_0011),
+    (12, "rascunho do FORM 1 integral — Bloco 1", migracao_0012),
 ]
 
 

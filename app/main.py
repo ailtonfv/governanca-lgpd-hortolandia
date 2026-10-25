@@ -10,14 +10,24 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
+from app.atribuicao_form1_integral import atribuir_arp_form1_integral
 from app.banco import motor
 from app.consultas_interface import (carregar_opcoes_novo_registro, carregar_painel,
                                      carregar_registro)
 from app.eventos import registrar_auditoria
 from app.form1_sintetico import (CATEGORIAS_DADOS, CATEGORIAS_TITULARES,
                                  DESTINATARIOS_COMPARTILHAMENTO)
+from app.form1_integral import (IDS_BLOCO_2, IDS_BLOCO_4, IDS_PARTICIPANTE_BLOCO_3,
+                                campos_por_id)
 from app.instrumentos import iniciar_preenchimento, salvar_rascunho
 from app.modelos import ObjetoCatalogo
+from app.rascunho_form1_integral import (adicionar_participante_form1_integral,
+                                         iniciar_rascunho_form1_integral,
+                                         remover_participante_form1_integral,
+                                         salvar_bloco_1_form1_integral,
+                                         salvar_bloco_2_form1_integral,
+                                         salvar_bloco_4_form1_integral,
+                                         salvar_cabecalho_bloco_3_form1_integral)
 from app.workflow import criar_registro
 
 
@@ -185,6 +195,20 @@ def detalhe_registro(
             "erro": erro,
             "comando_i1": str(uuid.uuid4()),
             "comando_i2": str(uuid.uuid4()),
+            "comando_atribuir_arp": str(uuid.uuid4()),
+            "comando_iniciar_integral": str(uuid.uuid4()),
+            "comando_salvar_integral": str(uuid.uuid4()),
+            "comando_salvar_bloco_2": str(uuid.uuid4()),
+            "comando_salvar_bloco_3": str(uuid.uuid4()),
+            "comando_adicionar_participante": str(uuid.uuid4()),
+            "comando_salvar_bloco_4": str(uuid.uuid4()),
+            "comandos_remover_participante": {
+                participante["id"]: str(uuid.uuid4())
+                for participante in (
+                    registro["form1_integral"]["rascunho"]["participantes"]
+                    if registro["form1_integral"]["rascunho"] else []
+                )
+            },
         },
     )
 
@@ -198,6 +222,212 @@ def _voltar_ao_registro(registro_id, conta_id, resultado, sucesso):
     return RedirectResponse(
         url=f"/registros/{registro_id}?{urlencode(parametros)}",
         status_code=303,
+    )
+
+
+@app.post("/registros/{registro_id}/form1-integral/atribuir-arp")
+def atribuir_arp_integral(
+    registro_id: str,
+    conta_id: str = Form(max_length=50),
+    comando_id: str = Form(max_length=64),
+    modo: str = Form(max_length=20),
+    arp_pessoa_id: str | None = Form(default=None, max_length=50),
+    versao_lida: int = Form(ge=0),
+    sessao: Session = Depends(obter_sessao),
+):
+    _, registro = carregar_registro(sessao, conta_id, registro_id)
+    if not isinstance(registro, dict):
+        return RedirectResponse(url=f"/?{urlencode({'conta_id': conta_id})}", status_code=303)
+    resultado = atribuir_arp_form1_integral(
+        sessao,
+        comando_id=comando_id,
+        conta_id=conta_id,
+        registro_id=registro_id,
+        modo=modo,
+        arp_pessoa_id=arp_pessoa_id,
+        versao_lida=versao_lida,
+    )
+    sessao.commit()
+    return _voltar_ao_registro(
+        registro_id, conta_id, resultado, "Responsável pelo preenchimento do FORM 1 integral definido."
+    )
+
+
+@app.post("/registros/{registro_id}/form1-integral/iniciar")
+def iniciar_form1_integral(
+    registro_id: str,
+    conta_id: str = Form(max_length=50),
+    comando_id: str = Form(max_length=64),
+    sessao: Session = Depends(obter_sessao),
+):
+    _, registro = carregar_registro(sessao, conta_id, registro_id)
+    if not isinstance(registro, dict):
+        return RedirectResponse(url=f"/?{urlencode({'conta_id': conta_id})}", status_code=303)
+    resultado = iniciar_rascunho_form1_integral(
+        sessao,
+        comando_id=comando_id,
+        conta_id=conta_id,
+        registro_id=registro_id,
+    )
+    sessao.commit()
+    return _voltar_ao_registro(
+        registro_id, conta_id, resultado, "Rascunho do FORM 1 integral iniciado."
+    )
+
+
+@app.post("/registros/{registro_id}/form1-integral/bloco-1/salvar")
+def salvar_bloco_1_integral(
+    registro_id: str,
+    conta_id: str = Form(max_length=50),
+    comando_id: str = Form(max_length=64),
+    versao_lida: int = Form(ge=1),
+    referencia_existente: str = Form(default="", max_length=100),
+    referencia_institucional: str = Form(default="", max_length=500),
+    fluxo_recorrente: str = Form(default="", max_length=100),
+    sessao: Session = Depends(obter_sessao),
+):
+    _, registro = carregar_registro(sessao, conta_id, registro_id)
+    if not isinstance(registro, dict):
+        return RedirectResponse(url=f"/?{urlencode({'conta_id': conta_id})}", status_code=303)
+    respostas = {
+        chave: valor.strip()
+        for chave, valor in {
+            "1.1": referencia_existente,
+            "1.1.1": referencia_institucional,
+            "1.4": fluxo_recorrente,
+        }.items()
+        if valor.strip()
+    }
+    resultado = salvar_bloco_1_form1_integral(
+        sessao,
+        comando_id=comando_id,
+        conta_id=conta_id,
+        registro_id=registro_id,
+        versao_lida=versao_lida,
+        respostas=respostas,
+    )
+    sessao.commit()
+    return _voltar_ao_registro(
+        registro_id, conta_id, resultado, "Bloco 1 do FORM 1 integral salvo com segurança."
+    )
+
+
+def _respostas_do_formulario(formulario, campo_ids):
+    catalogo = campos_por_id()
+    respostas = {}
+    for campo_id in campo_ids:
+        nome = f"campo__{campo_id}"
+        if catalogo[campo_id].controle == "seleção múltipla (combo com marcações)":
+            valores = [valor.strip() for valor in formulario.getlist(nome) if valor.strip()]
+            if valores:
+                respostas[campo_id] = valores
+        else:
+            valor = str(formulario.get(nome, "")).strip()
+            if valor:
+                respostas[campo_id] = valor
+    return respostas
+
+
+@app.post("/registros/{registro_id}/form1-integral/bloco-2/salvar")
+async def salvar_bloco_2_integral(
+    registro_id: str, request: Request, sessao: Session = Depends(obter_sessao),
+):
+    formulario = await request.form()
+    conta_id = str(formulario.get("conta_id", ""))[:50]
+    _, registro = carregar_registro(sessao, conta_id, registro_id)
+    if not isinstance(registro, dict):
+        return RedirectResponse(url=f"/?{urlencode({'conta_id': conta_id})}", status_code=303)
+    resultado = salvar_bloco_2_form1_integral(
+        sessao,
+        comando_id=str(formulario.get("comando_id", ""))[:64],
+        conta_id=conta_id,
+        registro_id=registro_id,
+        versao_lida=int(formulario.get("versao_lida", 0)),
+        respostas=_respostas_do_formulario(formulario, IDS_BLOCO_2),
+    )
+    sessao.commit()
+    return _voltar_ao_registro(
+        registro_id, conta_id, resultado, "Bloco 2 do FORM 1 integral salvo com segurança."
+    )
+
+
+@app.post("/registros/{registro_id}/form1-integral/bloco-4/salvar")
+async def salvar_bloco_4_integral(
+    registro_id: str, request: Request, sessao: Session = Depends(obter_sessao),
+):
+    formulario = await request.form()
+    conta_id = str(formulario.get("conta_id", ""))[:50]
+    resultado = salvar_bloco_4_form1_integral(
+        sessao,
+        comando_id=str(formulario.get("comando_id", ""))[:64],
+        conta_id=conta_id,
+        registro_id=registro_id,
+        versao_lida=int(formulario.get("versao_lida", 0)),
+        respostas=_respostas_do_formulario(formulario, IDS_BLOCO_4),
+    )
+    sessao.commit()
+    return _voltar_ao_registro(
+        registro_id, conta_id, resultado, "Bloco 4 do FORM 1 integral salvo com segurança."
+    )
+
+
+@app.post("/registros/{registro_id}/form1-integral/bloco-3/salvar")
+def salvar_bloco_3_integral(
+    registro_id: str,
+    conta_id: str = Form(max_length=50),
+    comando_id: str = Form(max_length=64),
+    versao_lida: int = Form(ge=1),
+    resposta_3_1: str = Form(default="", max_length=50),
+    sessao: Session = Depends(obter_sessao),
+):
+    resultado = salvar_cabecalho_bloco_3_form1_integral(
+        sessao, comando_id=comando_id, conta_id=conta_id,
+        registro_id=registro_id, versao_lida=versao_lida,
+        resposta_3_1=resposta_3_1.strip(),
+    )
+    sessao.commit()
+    return _voltar_ao_registro(
+        registro_id, conta_id, resultado, "Bloco 3 do FORM 1 integral salvo com segurança."
+    )
+
+
+@app.post("/registros/{registro_id}/form1-integral/participantes/adicionar")
+async def adicionar_participante_integral(
+    registro_id: str, request: Request, sessao: Session = Depends(obter_sessao),
+):
+    formulario = await request.form()
+    conta_id = str(formulario.get("conta_id", ""))[:50]
+    resultado = adicionar_participante_form1_integral(
+        sessao,
+        comando_id=str(formulario.get("comando_id", ""))[:64],
+        conta_id=conta_id,
+        registro_id=registro_id,
+        versao_lida=int(formulario.get("versao_lida", 0)),
+        respostas=_respostas_do_formulario(formulario, IDS_PARTICIPANTE_BLOCO_3),
+    )
+    sessao.commit()
+    return _voltar_ao_registro(
+        registro_id, conta_id, resultado, "Participante do Bloco 3 adicionado."
+    )
+
+
+@app.post("/registros/{registro_id}/form1-integral/participantes/{participante_id}/remover")
+def remover_participante_integral(
+    registro_id: str,
+    participante_id: str,
+    conta_id: str = Form(max_length=50),
+    comando_id: str = Form(max_length=64),
+    versao_lida: int = Form(ge=1),
+    sessao: Session = Depends(obter_sessao),
+):
+    resultado = remover_participante_form1_integral(
+        sessao, comando_id=comando_id, conta_id=conta_id,
+        registro_id=registro_id, versao_lida=versao_lida,
+        participante_id=participante_id,
+    )
+    sessao.commit()
+    return _voltar_ao_registro(
+        registro_id, conta_id, resultado, "Participante do Bloco 3 removido."
     )
 
 

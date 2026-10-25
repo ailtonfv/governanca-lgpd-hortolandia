@@ -17,6 +17,313 @@
 <p class="mensagem {% if erro %}mensagem-erro{% else %}mensagem-sucesso{% endif %}" role="status">{{ mensagem }}</p>
 {% endif %}
 
+<section class="form1 form1-integral" aria-labelledby="titulo-form1-integral">
+  <div class="cabecalho-secao cabecalho-form1">
+    <div>
+      <p class="etiqueta">PoC ampliada · contrato 3 candidato</p>
+      <h2 id="titulo-form1-integral">FORM 1 integral</h2>
+    </div>
+    <p class="objetivo-form1"><strong>Objetivo:</strong> descrever de forma factual como ocorre o tratamento de dados pessoais. O Bloco 1 já pode ser salvo como rascunho; a submissão integral ainda não está disponível.</p>
+    <span class="estado">{% if registro.form1_integral.rascunho %}Rascunho {{ registro.form1_integral.rascunho.versao }}{% else %}Não iniciado{% endif %}</span>
+  </div>
+
+  <div class="identidades-form1">
+    <div><strong>APA de abertura</strong><br>{{ registro.form1_integral.apa_abertura.nome if registro.form1_integral.apa_abertura else 'Não identificado' }}</div>
+    <div><strong>ARP atual</strong><br>{{ registro.form1_integral.arp_atual.nome if registro.form1_integral.arp_atual else 'Ainda não atribuído' }}</div>
+  </div>
+  <p class="ajuda">A identidade simulada fornece o nome fictício. Cargo/função e e-mail institucional não são inventados quando não constam do cadastro disponível.</p>
+
+  {% if registro.form1_integral.pode_atribuir_arp %}
+  <form class="formulario" method="post" action="{{ url_for('atribuir_arp_integral', registro_id=registro.id) }}">
+    <input type="hidden" name="conta_id" value="{{ conta_id }}">
+    <input type="hidden" name="comando_id" value="{{ comando_atribuir_arp }}">
+    <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.versao_atribuicao }}">
+    <fieldset>
+      <legend>Quem será responsável pelo preenchimento do FORM 1?</legend>
+      <label class="opcao"><input type="radio" name="modo" value="proprio" required> <span>Eu mesmo preencherei o formulário.</span></label>
+      <label class="opcao"><input type="radio" name="modo" value="outro" required> <span>Desejo indicar outro agente para preencher o formulário.</span></label>
+      <label for="arp_pessoa_id">Agente indicado</label>
+      <select id="arp_pessoa_id" name="arp_pessoa_id">
+        <option value="">Selecione somente para indicar outro agente</option>
+        {% for pessoa in registro.form1_integral.candidatos_arp %}
+        <option value="{{ pessoa.id }}">{{ pessoa.nome }}</option>
+        {% endfor %}
+      </select>
+      <p class="ajuda">A indicação não concede acesso. A pessoa precisa possuir previamente conta ativa e designação de preenchedor nesta Secretaria.</p>
+    </fieldset>
+    <button class="botao-primario" type="submit">Confirmar responsável pelo preenchimento</button>
+  </form>
+  {% else %}
+  <p class="aviso-leitura">Somente um APA responsável pelo Registro nesta Secretaria pode definir ou substituir o ARP.</p>
+  {% endif %}
+
+  <ol class="etapas-form1" aria-label="Etapas previstas do FORM 1 integral">
+    {% for etapa in registro.form1_integral.etapas %}
+    <li{% if etapa.numero in [1, 2] %} class="etapa-atual"{% endif %}><strong>Etapa {{ etapa.numero }} de 4</strong><span>{{ etapa.titulo }}</span><small>Blocos {{ etapa.blocos }}</small></li>
+    {% endfor %}
+  </ol>
+
+  {% if registro.form1_integral.arp_atual and not registro.form1_integral.rascunho %}
+    {% if registro.form1_integral.pode_editar %}
+    <form method="post" action="{{ url_for('iniciar_form1_integral', registro_id=registro.id) }}">
+      <input type="hidden" name="conta_id" value="{{ conta_id }}">
+      <input type="hidden" name="comando_id" value="{{ comando_iniciar_integral }}">
+      <button class="botao-primario" type="submit">Iniciar rascunho integral</button>
+    </form>
+    {% else %}
+    <p class="aviso-leitura">O rascunho ainda não foi iniciado. Somente o ARP atual pode iniciá-lo.</p>
+    {% endif %}
+  {% endif %}
+
+  {% if registro.form1_integral.rascunho %}
+    {% set respostas_integral = registro.form1_integral.rascunho.respostas %}
+    <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-1">
+      <p class="etiqueta">Etapa 1 de 4 · Bloco 1 de 14</p>
+      <h3 id="titulo-bloco-1">Identificação do processo, atividade ou serviço</h3>
+      <p class="ajuda">Rascunho parcial permitido. Não informe nomes, CPF, protocolos de atendimento ou dados de casos concretos.</p>
+
+      {% if registro.form1_integral.pode_editar %}
+      <form class="formulario" method="post" action="{{ url_for('salvar_bloco_1_integral', registro_id=registro.id) }}">
+        <input type="hidden" name="conta_id" value="{{ conta_id }}">
+        <input type="hidden" name="comando_id" value="{{ comando_salvar_integral }}">
+        <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
+
+        {% set campo = registro.form1_integral.campos_bloco_1['1.1'] %}
+        <label for="integral-1-1"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong></label>
+        <select id="integral-1-1" name="referencia_existente" data-controla="integral-1-1-1">
+          <option value="">Ainda não respondido</option>
+          {% for opcao in campo.alternativas %}
+          <option value="{{ opcao }}" {% if respostas_integral.get('1.1') == opcao %}selected{% endif %}>{{ opcao }}</option>
+          {% endfor %}
+        </select>
+
+        {% set campo = registro.form1_integral.campos_bloco_1['1.1.1'] %}
+        <div id="integral-1-1-1" class="campo-condicional" data-visivel-quando="Sim">
+          <label for="integral-referencia"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong></label>
+          <input id="integral-referencia" name="referencia_institucional" maxlength="500" value="{{ respostas_integral.get('1.1.1', '') }}">
+          <p class="ajuda">{{ campo.instrucao }}</p>
+        </div>
+
+        <div class="campos-reaproveitados">
+          <div><strong>1.2 — O que está sendo analisado?</strong><br>{{ respostas_integral.get('1.2') }} <small>Reaproveitado da abertura</small></div>
+          <div><strong>1.3 — Nome do objeto</strong><br>{{ respostas_integral.get('1.3') }} <small>Reaproveitado da abertura</small></div>
+        </div>
+
+        {% set campo = registro.form1_integral.campos_bloco_1['1.4'] %}
+        <label for="integral-1-4"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong></label>
+        <select id="integral-1-4" name="fluxo_recorrente">
+          <option value="">Ainda não respondido</option>
+          {% for opcao in campo.alternativas %}
+          <option value="{{ opcao }}" {% if respostas_integral.get('1.4') == opcao %}selected{% endif %}>{{ opcao }}</option>
+          {% endfor %}
+        </select>
+
+        <div class="rodape-formulario">
+          <p>Rascunho {{ registro.form1_integral.rascunho.versao }} · último salvamento por {{ registro.form1_integral.rascunho.salvo_por }}</p>
+          <button class="botao-primario" type="submit">Salvar Bloco 1</button>
+        </div>
+      </form>
+      {% else %}
+      <p class="aviso-leitura">Este rascunho pode ser consultado, mas somente o ARP atual pode alterá-lo.</p>
+      <dl class="resumo respostas-somente-leitura">
+        {% for campo_id in ['1.1', '1.1.1', '1.2', '1.3', '1.4'] %}
+        <div><dt>{{ campo_id }} — {{ registro.form1_integral.campos_bloco_1[campo_id].pergunta }}</dt><dd>{{ respostas_integral.get(campo_id, 'Ainda não respondido') }}</dd></div>
+        {% endfor %}
+      </dl>
+      {% endif %}
+    </section>
+
+    <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-2">
+      <p class="etiqueta">Etapa 1 de 4 · Bloco 2 de 14</p>
+      <h3 id="titulo-bloco-2">Entrada, recepção e execução</h3>
+      <p class="ajuda">Descreva o fluxo recorrente, sem inserir nomes de munícipes, protocolos ou dados de casos concretos. As perguntas de Ouvidoria e e-SIC aparecem somente quando a porta correspondente é escolhida.</p>
+
+      {% if registro.form1_integral.pode_editar %}
+      <form class="formulario formulario-integral" method="post" action="{{ url_for('salvar_bloco_2_integral', registro_id=registro.id) }}">
+        <input type="hidden" name="conta_id" value="{{ conta_id }}">
+        <input type="hidden" name="comando_id" value="{{ comando_salvar_bloco_2 }}">
+        <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
+        {% for campo in registro.form1_integral.campos_bloco_2.values() %}
+        <div class="campo-integral{% if campo.condicao %} campo-condicional{% endif %}"
+             {% if campo.condicao %}data-depende-de="campo__{{ campo.condicao[0] }}" data-valores="{{ campo.condicao[1] | join('||') }}"{% endif %}>
+          <label><strong>{{ campo.id }} — {{ campo.pergunta }}</strong></label>
+          {% if campo.controle == 'seleção múltipla (combo com marcações)' %}
+          <div class="grade-opcoes">
+            {% for valor, rotulo in campo.alternativas %}
+            <label class="opcao"><input type="checkbox" name="campo__{{ campo.id }}" value="{{ valor }}" {% if valor in respostas_integral.get(campo.id, []) %}checked{% endif %}> <span>{{ rotulo }}</span></label>
+            {% endfor %}
+          </div>
+          {% elif campo.alternativas %}
+          <select name="campo__{{ campo.id }}">
+            <option value="">Ainda não respondido</option>
+            {% for valor, rotulo in campo.alternativas %}
+            <option value="{{ valor }}" {% if respostas_integral.get(campo.id) == valor %}selected{% endif %}>{{ rotulo }}</option>
+            {% endfor %}
+          </select>
+          {% elif campo.controle == 'texto longo, limitado e orientado' %}
+          <textarea name="campo__{{ campo.id }}" rows="4">{{ respostas_integral.get(campo.id, '') }}</textarea>
+          {% else %}
+          <input name="campo__{{ campo.id }}" value="{{ respostas_integral.get(campo.id, '') }}">
+          {% endif %}
+          {% if campo.instrucao %}<p class="ajuda">{{ campo.instrucao }}</p>{% endif %}
+        </div>
+        {% endfor %}
+        <div class="rodape-formulario">
+          <p>O salvamento substitui apenas as respostas deste bloco e preserva os demais blocos.</p>
+          <button class="botao-primario" type="submit">Salvar Bloco 2</button>
+        </div>
+      </form>
+      {% else %}
+      <p class="aviso-leitura">Somente o ARP atual pode alterar este rascunho.</p>
+      <dl class="resumo respostas-somente-leitura">
+        {% for campo in registro.form1_integral.campos_bloco_2.values() %}
+        {% if respostas_integral.get(campo.id) %}<div><dt>{{ campo.id }} — {{ campo.pergunta }}</dt><dd>{{ respostas_integral.get(campo.id) | join(', ') if respostas_integral.get(campo.id) is not string else respostas_integral.get(campo.id) }}</dd></div>{% endif %}
+        {% endfor %}
+      </dl>
+      {% endif %}
+    </section>
+
+    <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-3">
+      <p class="etiqueta">Etapa 1 de 4 · Bloco 3 de 14</p>
+      <h3 id="titulo-bloco-3">Outras unidades, órgãos ou entidades participantes</h3>
+      <p class="ajuda">Cada participante é uma ocorrência independente. Registre a unidade ou entidade, nunca o nome de uma pessoa.</p>
+
+      {% if registro.form1_integral.pode_editar %}
+      <form class="formulario" method="post" action="{{ url_for('salvar_bloco_3_integral', registro_id=registro.id) }}">
+        <input type="hidden" name="conta_id" value="{{ conta_id }}">
+        <input type="hidden" name="comando_id" value="{{ comando_salvar_bloco_3 }}">
+        <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
+        {% set campo = registro.form1_integral.campo_3_1 %}
+        <label for="integral-3-1"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong></label>
+        <select id="integral-3-1" name="resposta_3_1" data-controla="participantes-integral">
+          <option value="">Ainda não respondido</option>
+          {% for valor, rotulo in campo.alternativas %}
+          <option value="{{ valor }}" {% if respostas_integral.get('3.1') == valor %}selected{% endif %}>{{ rotulo }}</option>
+          {% endfor %}
+        </select>
+        <button class="botao-secundario" type="submit">Salvar resposta do Bloco 3</button>
+      </form>
+      {% endif %}
+
+      <div id="participantes-integral" class="campo-condicional" data-visivel-quando="Sim">
+        {% for participante in registro.form1_integral.rascunho.participantes %}
+        <article class="cartao-participante">
+          <h4>Participante {{ loop.index }}</h4>
+          <dl class="resumo respostas-somente-leitura">
+            {% for campo_id, valor in participante.respostas.items() %}
+            <div><dt>{{ campo_id }} — {{ registro.form1_integral.campos_participante[campo_id].pergunta }}</dt><dd>{{ valor | join(', ') if valor is not string else valor }}</dd></div>
+            {% endfor %}
+          </dl>
+          {% if registro.form1_integral.pode_editar %}
+          <form method="post" action="{{ url_for('remover_participante_integral', registro_id=registro.id, participante_id=participante.id) }}">
+            <input type="hidden" name="conta_id" value="{{ conta_id }}">
+            <input type="hidden" name="comando_id" value="{{ comandos_remover_participante[participante.id] }}">
+            <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
+            <button class="botao-secundario" type="submit">Remover participante</button>
+          </form>
+          {% endif %}
+        </article>
+        {% endfor %}
+
+        {% if registro.form1_integral.pode_editar %}
+        <form class="formulario formulario-integral" method="post" action="{{ url_for('adicionar_participante_integral', registro_id=registro.id) }}">
+          <input type="hidden" name="conta_id" value="{{ conta_id }}">
+          <input type="hidden" name="comando_id" value="{{ comando_adicionar_participante }}">
+          <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
+          <fieldset>
+            <legend>Adicionar participante</legend>
+            {% for campo in registro.form1_integral.campos_participante.values() %}
+            <div class="campo-integral{% if campo.id == '3.5.1' %} campo-condicional{% endif %}" {% if campo.id == '3.5.1' %}data-depende-de="campo__3.5" data-valores="Sim"{% endif %}>
+              <label><strong>{{ campo.id }} — {{ campo.pergunta }}</strong></label>
+              {% if campo.controle == 'seleção múltipla (combo com marcações)' %}
+              <div class="grade-opcoes">{% for valor, rotulo in campo.alternativas %}<label class="opcao"><input type="checkbox" name="campo__{{ campo.id }}" value="{{ valor }}"> <span>{{ rotulo }}</span></label>{% endfor %}</div>
+              {% elif campo.alternativas %}
+              <select name="campo__{{ campo.id }}"><option value="">Ainda não respondido</option>{% for valor, rotulo in campo.alternativas %}<option value="{{ valor }}">{{ rotulo }}</option>{% endfor %}</select>
+              {% else %}
+              <input name="campo__{{ campo.id }}">
+              {% endif %}
+              {% if campo.instrucao %}<p class="ajuda">{{ campo.instrucao }}</p>{% endif %}
+            </div>
+            {% endfor %}
+          </fieldset>
+          <button class="botao-primario" type="submit">Adicionar participante</button>
+        </form>
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-4">
+      <p class="etiqueta">Etapa 2 de 4 · Bloco 4 de 14</p>
+      <h3 id="titulo-bloco-4">Pessoas a quem os dados se referem</h3>
+      <p class="ajuda">Informe somente categorias de titulares e de representantes. O sistema de mapeamento não cadastra pessoas titulares.</p>
+      {% if registro.form1_integral.pode_editar %}
+      <form class="formulario formulario-integral" method="post" action="{{ url_for('salvar_bloco_4_integral', registro_id=registro.id) }}">
+        <input type="hidden" name="conta_id" value="{{ conta_id }}">
+        <input type="hidden" name="comando_id" value="{{ comando_salvar_bloco_4 }}">
+        <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
+        {% for campo in registro.form1_integral.campos_bloco_4.values() %}
+        <div class="campo-integral{% if campo.condicao %} campo-condicional{% endif %}"
+             {% if campo.condicao %}data-depende-de="campo__{{ campo.condicao[0] }}" data-valores="{{ campo.condicao[1] | join('||') }}"{% endif %}>
+          <label><strong>{{ campo.id }} — {{ campo.pergunta }}</strong></label>
+          {% if campo.controle == 'seleção múltipla (combo com marcações)' or campo.id == '4.2.5.1' %}
+          <div class="grade-opcoes">
+            {% for valor, rotulo in campo.alternativas %}
+            <label class="opcao"><input type="checkbox" name="campo__{{ campo.id }}" value="{{ valor }}" {% if valor in respostas_integral.get(campo.id, []) %}checked{% endif %}> <span>{{ rotulo }}</span></label>
+            {% endfor %}
+          </div>
+          {% else %}
+          <select name="campo__{{ campo.id }}">
+            <option value="">Ainda não respondido</option>
+            {% for valor, rotulo in campo.alternativas %}<option value="{{ valor }}" {% if respostas_integral.get(campo.id) == valor %}selected{% endif %}>{{ rotulo }}</option>{% endfor %}
+          </select>
+          {% endif %}
+          {% if campo.instrucao %}<p class="ajuda">{{ campo.instrucao }}</p>{% endif %}
+        </div>
+        {% endfor %}
+        <div class="rodape-formulario">
+          <p>Primeiro incremento da Etapa visual 2. Os Blocos 5 a 8 ainda não estão disponíveis.</p>
+          <button class="botao-primario" type="submit">Salvar Bloco 4</button>
+        </div>
+      </form>
+      {% else %}
+      <p class="aviso-leitura">Somente o ARP atual pode alterar este rascunho.</p>
+      {% endif %}
+    </section>
+  {% endif %}
+
+  <p class="ajuda">Os Blocos 5 a 14 e a submissão integral serão liberados em incrementos posteriores. O FORM 1 sintético permanece disponível abaixo sem alterações.</p>
+</section>
+
+<script>
+  document.querySelectorAll('[data-controla]').forEach(function (controle) {
+    var alvo = document.getElementById(controle.dataset.controla);
+    function atualizar() {
+      alvo.hidden = controle.value !== alvo.dataset.visivelQuando;
+    }
+    controle.addEventListener('change', atualizar);
+    atualizar();
+  });
+  function valorDoCampo(nome) {
+    var controles = Array.from(document.getElementsByName(nome));
+    if (!controles.length) return [];
+    if (controles[0].type === 'checkbox' || controles[0].type === 'radio') {
+      return controles.filter(function (item) { return item.checked; }).map(function (item) { return item.value; });
+    }
+    return [controles[0].value];
+  }
+  document.querySelectorAll('[data-depende-de]').forEach(function (alvo) {
+    var nome = alvo.dataset.dependeDe;
+    var aceitos = alvo.dataset.valores.split('||');
+    function atualizarDependencia() {
+      alvo.hidden = !valorDoCampo(nome).some(function (valor) { return aceitos.includes(valor); });
+    }
+    document.getElementsByName(nome).forEach(function (controle) {
+      controle.addEventListener('change', atualizarDependencia);
+    });
+    atualizarDependencia();
+  });
+</script>
+
 <section class="form1" aria-labelledby="titulo-form1">
   <div class="cabecalho-secao cabecalho-form1">
     <div>
