@@ -291,8 +291,41 @@
         </div>
         {% endfor %}
         <div class="rodape-formulario">
-          <p>Primeiro incremento da Etapa visual 2. Os Blocos 5 a 8 ainda não estão disponíveis.</p>
+          <p>Os Blocos 4 e 5 estão disponíveis. Os Blocos 6 a 8 permanecem pendentes.</p>
           <button class="botao-primario" type="submit">Salvar Bloco 4</button>
+        </div>
+      </form>
+      {% else %}
+      <p class="aviso-leitura">Somente o ARP atual pode alterar este rascunho.</p>
+      {% endif %}
+    </section>
+
+    <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-5">
+      <p class="etiqueta">Etapa 2 de 4 · Bloco 5 de 14</p>
+      <h3 id="titulo-bloco-5">Categorias de dados</h3>
+      <p class="ajuda">Marque somente categorias efetivamente tratadas neste fluxo. Não informe nomes, números de documentos, contatos, protocolos ou dados de casos concretos.</p>
+      {% if registro.form1_integral.pode_editar %}
+      {% set campo = registro.form1_integral.campos_bloco_5['5.1'] %}
+      <form class="formulario formulario-integral" method="post" action="{{ url_for('salvar_bloco_5_integral', registro_id=registro.id) }}">
+        <input type="hidden" name="conta_id" value="{{ conta_id }}">
+        <input type="hidden" name="comando_id" value="{{ comando_salvar_bloco_5 }}">
+        <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
+        <fieldset>
+          <legend><strong>{{ campo.id }} — {{ campo.pergunta }}</strong></legend>
+          <div class="grade-opcoes">
+            {% for valor, rotulo in campo.alternativas %}
+            <label class="opcao"><input type="checkbox" name="campo__5.1" value="{{ valor }}" {% if valor in respostas_integral.get('5.1', []) %}checked{% endif %}> <span>{{ rotulo }}</span></label>
+            {% endfor %}
+          </div>
+        </fieldset>
+        <div class="campo-condicional" data-depende-de="campo__5.1" data-valores="Outro">
+          <label for="complemento-outro-5-1"><strong>Complemento de “Outro”</strong></label>
+          <input id="complemento-outro-5-1" name="complemento_outro_5_1" maxlength="200" value="{{ registro.form1_integral.rascunho.conteudo.get('complementos', {}).get('5.1', '') }}">
+          <p class="ajuda">Descreva apenas o nome da categoria, em até 200 caracteres. Não registre nome de pessoa, CPF, matrícula, telefone, e-mail ou outro identificador concreto. Esta orientação reduz o risco, mas não substitui controles institucionais de segurança e revisão.</p>
+        </div>
+        <div class="rodape-formulario">
+          <p>O rascunho pode permanecer incompleto. “A confirmar” não poderá coexistir com outra alternativa.</p>
+          <button class="botao-primario" type="submit">Salvar Bloco 5</button>
         </div>
       </form>
       {% else %}
@@ -308,7 +341,7 @@
     </div>
   {% endif %}
 
-  <p class="ajuda">Os Blocos 5 a 14 e a submissão integral serão liberados em incrementos posteriores. O FORM 1 sintético permanece disponível abaixo sem alterações.</p>
+  <p class="ajuda">Os Blocos 6 a 14 e a submissão integral serão liberados em incrementos posteriores. O FORM 1 sintético permanece disponível abaixo sem alterações.</p>
 </section>
 
 <script>

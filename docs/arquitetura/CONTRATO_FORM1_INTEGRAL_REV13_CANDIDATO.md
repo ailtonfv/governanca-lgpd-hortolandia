@@ -1,6 +1,6 @@
 # Contrato candidato do FORM 1 integral — REV13
 
-**Situação:** candidato a contrato 3; rascunho parcial dos Blocos 1 a 4 implementado, ainda não aprovado para submissão
+**Situação:** candidato a contrato 3; rascunho parcial dos Blocos 1 a 5 implementado, ainda não aprovado para submissão
 **Escopo:** preparação da PoC ampliada
 **Fonte funcional:** FORM 1 do Documento-Mestre REV13, organizado nos três insumos de 23/10/2026
 **Dados permitidos:** exclusivamente fictícios durante toda a PoC
@@ -76,7 +76,9 @@ Essa forma permanece candidata para submissão, mas já é executada no rascunho
 
 No primeiro recorte executável, `1.2` e `1.3` são reaproveitados do tipo e do nome do objeto registrados na abertura. O ARP edita `1.1`, `1.1.1` e `1.4`; valores de seleção precisam pertencer ao catálogo REV13. A condição de `1.1.1` é apresentada na interface quando `1.1 = Sim`, sem converter ou inventar respostas.
 
-O incremento F1-2 acrescenta o Bloco 2, inclusive os ramos condicionais de Ouvidoria e e-SIC, e o Bloco 3. Cada participante do Bloco 3 possui identificador e respostas próprias; adicionar ou remover uma ocorrência gera nova versão do mesmo rascunho e evento próprio. O primeiro recorte de F1-3 acrescenta o Bloco 4 por categorias, reutilizando no item 4.2.5.1 o catálogo do item 5.1 sem antecipar o próprio Bloco 5.
+O incremento F1-2 acrescenta o Bloco 2, inclusive os ramos condicionais de Ouvidoria e e-SIC, e o Bloco 3. Cada participante do Bloco 3 possui identificador e respostas próprias; adicionar ou remover uma ocorrência gera nova versão do mesmo rascunho e evento próprio. O F1-3 acrescenta o Bloco 4 por categorias e o Bloco 5 com as 35 alternativas exatas do item 5.1. O item 4.2.5.1 reutiliza o mesmo catálogo, mas as respostas não são copiadas nem sincronizadas entre os dois campos.
+
+No item 5.1, `A confirmar` é exclusivo em relação às demais alternativas. `Outro` pode receber complemento descritivo de até 200 caracteres, mantido separadamente em `complementos["5.1"]` para preservar o identificador oficial. O rascunho pode permanecer sem complemento; a futura submissão deverá exigi-lo quando `Outro` estiver marcado. A interface orienta o uso exclusivo de categorias e o domínio recusa padrões evidentes de contato ou identificador, mas esses controles não substituem revisão e segurança institucionais.
 
 Os itens 0.1 a 0.3 não autorizam digitação livre de identidade. Nome, função e contato institucional serão apresentados como metadados somente leitura quando existirem na identidade simulada ou na futura integração institucional. Dados indisponíveis não serão inventados.
 
@@ -93,7 +95,7 @@ O contrato 3 não reutilizará silenciosamente os códigos do contrato 2 com sig
 
 ## 6. Validações que já podem ser especificadas
 
-No rascunho implementado dos Blocos 1 a 4 já são verificadas autoria do ARP, designação vigente de `preenchedor`, catálogo fechado, identificadores permitidos, seleções múltiplas sem repetição, Secretaria ativa, idempotência, versão lida, atomicidade e cadeia de eventos. O contrato nuclear 2 continua em tabela, rotas e fluxo próprios.
+No rascunho implementado dos Blocos 1 a 5 já são verificadas autoria do ARP, designação vigente de `preenchedor`, catálogo fechado, identificadores permitidos, seleções múltiplas sem repetição, Secretaria ativa, idempotência, versão lida, atomicidade e cadeia de eventos. O contrato nuclear 2 continua em tabela, rotas e fluxo próprios.
 
 - rejeitar identificador de pergunta desconhecido;
 - rejeitar alternativa que não pertença ao catálogo versionado da pergunta;
@@ -108,10 +110,10 @@ No rascunho implementado dos Blocos 1 a 4 já são verificadas autoria do ARP, d
 
 ## 7. Decisões pendentes antes da submissão integral
 
-1. aprovar códigos e correspondências dos catálogos dos itens 4.1, 5.1 e 10.2;
+1. aprovar códigos e correspondências dos catálogos dos itens 4.1 e 10.2; para 5.1 foi decidido não converter, migrar nem sincronizar automaticamente com o contrato 2;
 2. resolver a condição de WhatsApp, que menciona uso pessoal sem essa alternativa constar no item 8.3;
-3. definir o tratamento controlado da alternativa “Outro” e seus complementos;
-4. validar as combinações excludentes nas demais seleções múltiplas;
+3. definir o tratamento controlado da alternativa “Outro” nas demais perguntas; em 5.1 o complemento possui até 200 caracteres;
+4. validar combinações excludentes nas demais seleções múltiplas; em 5.1 somente `A confirmar` é exclusivo;
 5. definir como função e e-mail institucional serão obtidos sem autenticação real na PoC;
 6. confirmar o marco e o critério de aceite que autorizam a submissão pelo contrato 3.
 

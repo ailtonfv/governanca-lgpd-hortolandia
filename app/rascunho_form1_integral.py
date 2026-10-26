@@ -8,6 +8,7 @@ submissão integral é criada.
 from __future__ import annotations
 
 import json
+import re
 import uuid
 from datetime import datetime, timezone
 
@@ -19,6 +20,7 @@ from app.form1_integral import (CONDICOES_BLOCO_1, CONDICOES_BLOCO_2,
                                 CONDICOES_BLOCO_4,
                                 CONDICOES_PARTICIPANTE_BLOCO_3,
                                 FAIXAS_VOLUME_REV13, IDS_BLOCO_2, IDS_BLOCO_4,
+                                IDS_BLOCO_5,
                                 IDS_PARTICIPANTE_BLOCO_3,
                                 REVISAO_FONTE_FORM1_INTEGRAL,
                                 VERSAO_CONTRATO_FORM1_INTEGRAL_CANDIDATA,
@@ -34,6 +36,7 @@ CAMPOS_EDITAVEIS_BLOCO_2 = frozenset(IDS_BLOCO_2)
 CAMPOS_EDITAVEIS_CABECALHO_BLOCO_3 = frozenset({"3.1"})
 CAMPOS_EDITAVEIS_PARTICIPANTE = frozenset(IDS_PARTICIPANTE_BLOCO_3)
 CAMPOS_EDITAVEIS_BLOCO_4 = frozenset(IDS_BLOCO_4)
+CAMPOS_EDITAVEIS_BLOCO_5 = frozenset(IDS_BLOCO_5)
 CAMPOS_SECRETARIA = frozenset({"2.2", "2.4.1"})
 CAMPOS_VOLUME = frozenset({"2.8", "2.9", "2.10"})
 CONTROLE_MULTIPLO = "seleção múltipla (combo com marcações)"
@@ -42,6 +45,12 @@ MAPA_TIPO_OBJETO = {
     "atividade": "Atividade",
     "servico": "Serviço",
 }
+LIMITE_COMPLEMENTO_OUTRO_5_1 = 200
+PADRAO_IDENTIFICADOR_CONCRETO = re.compile(
+    r"@|\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b|\d{4,}|"
+    r"\b(?:cpf|rg|matr[ií]cula|telefone|e-mail|email)\s*[:#-]",
+    re.IGNORECASE,
+)
 
 
 def _agora_utc():
@@ -303,6 +312,37 @@ def _conteudo_com_respostas_do_bloco(
     return conteudo
 
 
+def _normalizar_complemento_outro_5_1(valor):
+    if not isinstance(valor, str):
+        return None, "5.1: o complemento de Outro deve ser texto"
+    complemento = " ".join(valor.split())
+    if len(complemento) > LIMITE_COMPLEMENTO_OUTRO_5_1:
+        return None, "5.1: o complemento de Outro deve ter até 200 caracteres"
+    if complemento and PADRAO_IDENTIFICADOR_CONCRETO.search(complemento):
+        return None, (
+            "5.1: descreva somente a categoria, sem dado pessoal, contato, "
+            "matrícula ou identificador concreto"
+        )
+    return complemento, None
+
+
+def problemas_submissao_bloco_5(conteudo):
+    """Prepara as travas da submissão futura sem habilitá-la."""
+
+    respostas = conteudo.get("respostas", {}) if isinstance(conteudo, dict) else {}
+    categorias = respostas.get("5.1", [])
+    problemas = []
+    if not isinstance(categorias, list) or not categorias:
+        problemas.append("5.1: informe ao menos uma categoria de dado")
+        return problemas
+    if "A confirmar" in categorias:
+        problemas.append("5.1: A confirmar não satisfaz a submissão integral")
+    complemento = conteudo.get("complementos", {}).get("5.1", "")
+    if "Outro" in categorias and not complemento:
+        problemas.append("5.1: informe o complemento descritivo de Outro")
+    return problemas
+
+
 def _validar_versao(versao_lida):
     if not isinstance(versao_lida, int) or isinstance(versao_lida, bool) or versao_lida < 1:
         return "versao_lida deve ser um inteiro positivo"
@@ -482,6 +522,90 @@ def salvar_bloco_4_form1_integral(
         tipo_evento="salvar_bloco_4_form1_integral",
         motivo="Bloco 4 do FORM 1 integral salvo",
         detalhes={"campos_editados": sorted(respostas)}, momento=momento,
+    )
+
+
+def salvar_bloco_5_form1_integral(
+    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas,
+    complemento_outro="", momento=None,
+):
+    """Salva as categorias de dados sem antecipar a submissão integral."""
+
+    momento = momento or _agora_utc()
+    complemento, problema_complemento = _normalizar_complemento_outro_5_1(
+        complemento_outro
+    )
+    parametros = {
+        "conta_id": conta_id,
+        "registro_id": registro_id,
+        "versao_lida": versao_lida,
+        "respostas": respostas,
+        "complemento_outro": complemento,
+    }
+    conta, pessoa_id, ator_tipo, ator_id = _ator(sessao, conta_id)
+    comando, resposta = abrir_comando(
+        sessao, comando_id, "salvar_bloco_5_form1_integral", parametros,
+        ator_tipo, ator_id, conta_id,
+    )
+    if resposta is not None:
+        return resposta
+    problema = _validar_respostas_catalogadas(
+        sessao, respostas, CAMPOS_EDITAVEIS_BLOCO_5
+    )
+    categorias = respostas.get("5.1", []) if isinstance(respostas, dict) else []
+    if not problema and "A confirmar" in categorias and len(categorias) != 1:
+        problema = "5.1: A confirmar não pode coexistir com outra alternativa"
+    if not problema and complemento and "Outro" not in categorias:
+        problema = "5.1: o complemento somente pode ser usado quando Outro estiver marcado"
+    problema = problema or problema_complemento
+    if problema:
+        return _negar(
+            sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
+            "salvar_bloco_5_form1_integral", problema,
+        )
+    registro, pessoa_id, rascunho, comando, resposta = _preparar_alteracao(
+        sessao, comando_id=comando_id, tipo_comando="salvar_bloco_5_form1_integral",
+        conta_id=conta_id, registro_id=registro_id, versao_lida=versao_lida,
+        parametros=parametros, comando=comando,
+    )
+    if resposta is not None:
+        return resposta
+    conteudo = _conteudo_com_respostas_do_bloco(
+        rascunho,
+        campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_5,
+        respostas=respostas,
+        condicoes={},
+    )
+    complementos = dict(rascunho.conteudo.get("complementos", {}))
+    complemento_anterior = complementos.get("5.1", "")
+    if complemento_anterior and complemento_anterior != complemento:
+        inativos = dict(rascunho.conteudo.get("complementos_inativos", {}))
+        historico = list(inativos.get("5.1", []))
+        historico.append({
+            "valor": complemento_anterior,
+            "motivo": "substituído" if complemento else "removido do rascunho ativo",
+            "desativado_na_versao": versao_lida + 1,
+        })
+        inativos["5.1"] = historico
+        conteudo["complementos_inativos"] = inativos
+    if "Outro" in categorias and complemento:
+        complementos["5.1"] = complemento
+    else:
+        complementos.pop("5.1", None)
+    if complementos:
+        conteudo["complementos"] = complementos
+    else:
+        conteudo.pop("complementos", None)
+    return _salvar_conteudo(
+        sessao, comando=comando, registro=registro, rascunho=rascunho,
+        pessoa_id=pessoa_id, versao_lida=versao_lida, conteudo=conteudo,
+        tipo_evento="salvar_bloco_5_form1_integral",
+        motivo="Bloco 5 do FORM 1 integral salvo",
+        detalhes={
+            "campos_editados": sorted(respostas),
+            "complemento_outro_informado": bool(complemento),
+        },
+        momento=momento,
     )
 
 

@@ -96,7 +96,7 @@ As regras acima descrevem a validação futura da submissão. A interface e o do
 | 4.2.4.1 | Etapa 2 | Obrigatória condicional | 4.2 ativo e 4.2.4 = Sim ou Em alguns casos | F1-D05: complemento de Outro; F1-D06: excludentes |
 | 4.2.5 | Etapa 2 | Obrigatória condicional | 4.2 = Sim ou Em alguns casos | — |
 | 4.2.5.1 | Etapa 2 | Obrigatória condicional | 4.2 ativo e 4.2.5 = Sim | — |
-| 5.1 | Etapa 2 | Obrigatória essencial | Sempre visível | F1-D03: correspondência v2/REV13; F1-D05: complemento de Outro; F1-D06: excludentes |
+| 5.1 | Etapa 2 | Obrigatória essencial | Sempre visível | Sem conversão com contrato 2; `Outro` admite complemento de até 200 caracteres, obrigatório somente na futura submissão; `A confirmar` é exclusivo |
 | 6.1 | Etapa 2 | Obrigatória essencial | Sempre visível | F1-D05: complemento de Outro; F1-D06: excludentes |
 | 6.1.1 | Etapa 2 | Facultativa nesta proposta | Sempre visível | condição exata não explicitada |
 | 6.2 | Etapa 2 | Facultativa nesta proposta | Sempre visível | — |

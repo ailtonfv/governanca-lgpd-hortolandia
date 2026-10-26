@@ -420,3 +420,13 @@ Regras deste diário: sem senhas, tokens ou dados pessoais; cada entrada com dat
 - O desenho candidato de múltiplos canais e de APA titular/substituto foi registrado em `docs/planejamento/PLANO_PRE_BLOCO_5_FORM1.md`, sem criar regra institucional, migração ou permissão.
 - O Bloco 5, a submissão integral, os FORMS 2 a 4, a Cartilha e a apresentação não foram alterados.
 - Os 27 testes direcionados e a regressão completa de **233 de 233 testes** foram aprovados no banco exclusivo `lgpd_poc_teste`; permaneceu somente o aviso conhecido de descontinuação do `TestClient`.
+
+### 26/10/2026 — incremento isolado do Bloco 5
+
+- Implementado o item 5.1 na Etapa visual 2 com as 35 alternativas do catálogo REV13 e salvamento múltiplo no mesmo rascunho integral.
+- `A confirmar` é exclusivo em relação às demais alternativas. `Outro` admite complemento descritivo de até 200 caracteres; a ausência do complemento é aceita no rascunho e já consta como impedimento preparado para a futura submissão, que permanece desabilitada.
+- Não foi criada conversão, migração, cópia ou sincronização automática com o FORM 1 nuclear nem entre os itens 4.2.5.1 e 5.1.
+- O domínio recusa alternativas inexistentes ou repetidas, combinações vedadas e padrões evidentes de contato ou identificador no complemento. A interface orienta o uso exclusivo de categorias e registra que a orientação textual não substitui controles institucionais de segurança.
+- Autoria do ARP, autorização, versão lida, idempotência, atomicidade, lacre e cadeia de eventos foram preservados. Blocos 1 a 4 e o envelope REV13 continuam no mesmo rascunho.
+- Os 13 testes específicos e a regressão completa de **246 de 246 testes** foram aprovados no banco exclusivo `lgpd_poc_teste`; permaneceu somente o aviso conhecido de descontinuação do `TestClient`.
+- Os Blocos 6 a 14 e a submissão integral continuam pendentes. O FORM 1 sintético, o contrato 2, os FORMS 2 a 4, a Cartilha e a apresentação não foram alterados.

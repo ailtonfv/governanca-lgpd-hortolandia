@@ -7,6 +7,7 @@ from app.form1_sintetico import (CATEGORIAS_DADOS, CATEGORIAS_TITULARES,
                                  DESTINATARIOS_COMPARTILHAMENTO)
 from app.form1_integral import (CONDICOES_BLOCO_2, CONDICOES_BLOCO_4,
                                 FAIXAS_VOLUME_REV13, IDS_BLOCO_2, IDS_BLOCO_4,
+                                IDS_BLOCO_5,
                                 IDS_PARTICIPANTE_BLOCO_3,
                                 campos_por_id)
 from app.modelos import (AtribuicaoForm1Integral, Conta, ContextoAtuacao, Designacao, Instrumento,
@@ -336,6 +337,9 @@ def carregar_registro(sessao, conta_id, registro_id):
         },
         "campos_bloco_4": {
             campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_4
+        },
+        "campos_bloco_5": {
+            campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_5
         },
         "etapas": (
             {"numero": 1, "titulo": "Identificação e funcionamento do serviço", "blocos": "1 a 3"},
