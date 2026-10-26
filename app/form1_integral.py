@@ -38,6 +38,10 @@ FAIXAS_VOLUME_REV13 = (
     "Não mensurado", "A confirmar",
 )
 
+CONDICOES_BLOCO_1 = {
+    "1.1.1": ("1.1", ("Sim",)),
+}
+
 IDS_BLOCO_2 = (
     "2.1", "2.2", "2.3", "2.4", "2.4.1", "2.4.2", "2.5", "2.6", "2.7",
     "2.8", "2.8.1", "2.9", "2.9.1", "2.10", "2.10.1", "2.11", "2.12",
@@ -74,6 +78,10 @@ CONDICOES_BLOCO_4 = {
     "4.2.4.1": ("4.2.4", ("Sim", "Em alguns casos")),
     "4.2.5": ("4.2", ("Sim", "Em alguns casos")),
     "4.2.5.1": ("4.2.5", ("Sim",)),
+}
+
+CONDICOES_PARTICIPANTE_BLOCO_3 = {
+    "3.5.1": ("3.5", ("Sim",)),
 }
 
 

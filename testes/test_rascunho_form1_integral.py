@@ -90,6 +90,67 @@ def test_salvar_bloco_1_aceita_rascunho_parcial_e_preserva_reuso(sessao):
     assert respostas["1.3"] == "Cadastro imobiliário fictício"
 
 
+def test_bloco_1_inativa_referencia_que_deixou_de_ser_aplicavel(sessao):
+    registro = _registro_e_arp(sessao, "CMD-F1I-COND")
+    iniciar_rascunho_form1_integral(
+        sessao, comando_id="CMD-F1I-COND-INICIO", conta_id="CONTA-A1",
+        registro_id=registro["registro_id"],
+    )
+    sessao.commit()
+    salvar_bloco_1_form1_integral(
+        sessao, comando_id="CMD-F1I-COND-SIM", conta_id="CONTA-A1",
+        registro_id=registro["registro_id"], versao_lida=1,
+        respostas={"1.1": "Sim", "1.1.1": "Referência institucional fictícia"},
+    )
+    sessao.commit()
+
+    resultado = salvar_bloco_1_form1_integral(
+        sessao, comando_id="CMD-F1I-COND-NAO", conta_id="CONTA-A1",
+        registro_id=registro["registro_id"], versao_lida=2,
+        respostas={"1.1": "Não"},
+    )
+    sessao.commit()
+
+    conteudo = sessao.get(RascunhoForm1Integral, registro["registro_id"]).conteudo
+    assert resultado["permitido"] and "1.1.1" not in conteudo["respostas"]
+    assert conteudo["respostas_inativas"]["1.1.1"][-1]["valor"] == (
+        "Referência institucional fictícia"
+    )
+
+    reativado = salvar_bloco_1_form1_integral(
+        sessao, comando_id="CMD-F1I-COND-REATIVADO", conta_id="CONTA-A1",
+        registro_id=registro["registro_id"], versao_lida=3,
+        respostas={"1.1": "Sim", "1.1.1": "Nova referência institucional fictícia"},
+    )
+    sessao.commit()
+
+    conteudo = sessao.get(RascunhoForm1Integral, registro["registro_id"]).conteudo
+    assert reativado["permitido"]
+    assert conteudo["respostas"]["1.1.1"] == "Nova referência institucional fictícia"
+    assert conteudo["respostas_inativas"]["1.1.1"][-1]["valor"] == (
+        "Referência institucional fictícia"
+    )
+
+
+def test_bloco_1_recusa_referencia_quando_resposta_controladora_nao_e_sim(sessao):
+    registro = _registro_e_arp(sessao, "CMD-F1I-COND-FORJADA")
+    iniciar_rascunho_form1_integral(
+        sessao, comando_id="CMD-F1I-COND-FORJADA-INICIO", conta_id="CONTA-A1",
+        registro_id=registro["registro_id"],
+    )
+    sessao.commit()
+
+    resultado = salvar_bloco_1_form1_integral(
+        sessao, comando_id="CMD-F1I-COND-FORJADA-SALVAR", conta_id="CONTA-A1",
+        registro_id=registro["registro_id"], versao_lida=1,
+        respostas={"1.1": "Não", "1.1.1": "Referência indevida fictícia"},
+    )
+    sessao.commit()
+
+    assert not resultado["permitido"] and "campo condicional inativo" in resultado["motivo"]
+    assert sessao.get(RascunhoForm1Integral, registro["registro_id"]).versao_rascunho == 1
+
+
 def test_alternativa_forjada_e_campo_desconhecido_sao_negados(sessao):
     registro = _registro_e_arp(sessao, "CMD-F1I-FORJADO")
     iniciar_rascunho_form1_integral(

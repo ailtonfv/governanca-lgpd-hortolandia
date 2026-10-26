@@ -50,9 +50,14 @@ th { color: #425466; font-size: .8rem; text-transform: uppercase; letter-spacing
 .form1-integral fieldset .opcao { margin-bottom: .75rem; }
 .form1-integral fieldset > label[for] { margin-top: 1rem; }
 .etapas-form1 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .75rem; padding: 0; margin: 1.4rem 0 0; list-style: none; }
-.etapas-form1 li { display: flex; flex-direction: column; gap: .25rem; padding: .85rem; border: 1px solid var(--borda); border-radius: .45rem; background: #f8fbf9; }
+.etapas-form1 li { display: flex; border: 1px solid var(--borda); border-radius: .45rem; background: #f8fbf9; }
+.etapa-form1-botao { display: flex; flex: 1; flex-direction: column; gap: .25rem; padding: .85rem; border: 0; border-radius: inherit; background: transparent; color: inherit; text-align: left; cursor: pointer; }
+.etapa-form1-botao:focus-visible { outline: .2rem solid var(--azul); outline-offset: .15rem; }
+.etapa-form1-botao:disabled { color: #687684; cursor: not-allowed; opacity: .72; }
 .etapas-form1 small { color: #526475; }
 .etapas-form1 .etapa-atual { border-color: var(--verde); background: #f0fdf4; }
+.estado-navegacao-form1 { margin-top: .5rem; }
+.etapa-indisponivel { margin-top: 1rem; padding: 1rem; border: 1px dashed var(--borda); border-radius: .45rem; background: #f8fbf9; }
 .bloco-form1-integral { margin-top: 1.25rem; padding: 1rem; border: 1px solid var(--borda); border-radius: .75rem; background: #fff; }
 .campo-condicional { margin-top: 1rem; }
 .campos-reaproveitados { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: .75rem; margin: 1rem 0; }

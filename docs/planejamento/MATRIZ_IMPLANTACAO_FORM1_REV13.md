@@ -1,6 +1,6 @@
 # Matriz de implantação do FORM 1 integral — REV13
 
-**Situação:** F1-0, F1-1 e F1-2 concluídos; F1-3 iniciado pelo Bloco 4, sem submissão integral
+**Situação:** F1-0, F1-1 e F1-2 concluídos; F1-3 iniciado pelo Bloco 4 e estabilizado antes do Bloco 5, sem submissão integral
 **Regra de preservação:** cada fatia deve manter aprovados os testes da PoC nuclear e acrescentar testes próprios
 
 ## Sequência de incrementos
@@ -27,7 +27,7 @@
 | Número/faixa | faixa fechada ou inteiro conforme pergunta | recusar formato incompatível | campos 2.8, 2.9 e 2.10 são opcionais |
 | Catálogo de Secretaria | identificador institucional vigente | recusar Secretaria fora do catálogo e do alcance aplicável | reutiliza as 18 Secretarias já disponíveis |
 | Participante | coleção de ocorrências independentes | cada ocorrência mantém identificador, tipo, atuação e instrumento próprios | estrutura executável no rascunho F1-2; obrigatoriedade somente na submissão futura |
-| Condicional | visibilidade derivada de resposta anterior | envio forjado de ramo inaplicável deve ser recusado ou preservado como histórico inativo, conforme decisão | política de preservação a aprovar |
+| Condicional | visibilidade derivada de resposta anterior | envio forjado de ramo inaplicável é recusado; resposta antes ativa que perde aplicabilidade sai do conjunto ativo e é preservada no histórico inativo | política executável nos Blocos 1 a 4; submissão integral permanece pendente |
 
 ## Decisões funcionais registradas em 24/10/2026
 
@@ -46,6 +46,8 @@
 | F1-D06 | Excludentes além do item 13.1 | validação de seleções múltiplas | responsável funcional do produto |
 | F1-D07 | Fonte de função e e-mail institucional | identificação 0.2–0.3 | T.I. e governança de identidade |
 | F1-D08 | Marco que autoriza submissão pelo contrato 3 | ativação da funcionalidade integral | autoridade do cronograma SAD 09 |
+| F1-D09 | Estrutura repetível para múltiplos canais e separação entre dados comuns e dados por ocorrência | evolução dos campos 2.1 e 8.3 sem confundir canal com objeto | governança LGPD e responsável funcional |
+| F1-D10 | APA titular por Secretaria, autoridade e rito de substituição formal | identidade institucional, vigência, autorização e auditoria | autoridade administrativa e governança de identidade |
 
 ## Critério para iniciar código
 

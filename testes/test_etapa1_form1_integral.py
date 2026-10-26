@@ -15,6 +15,7 @@ from app.rascunho_form1_integral import (
     adicionar_participante_form1_integral,
     iniciar_rascunho_form1_integral,
     remover_participante_form1_integral,
+    salvar_bloco_1_form1_integral,
     salvar_bloco_2_form1_integral,
     salvar_bloco_4_form1_integral,
     salvar_cabecalho_bloco_3_form1_integral,
@@ -110,6 +111,42 @@ def test_bloco_2_e_idempotente_e_preserva_outros_blocos(sessao):
     assert sessao.get(RascunhoForm1Integral, registro["registro_id"]).versao_rascunho == 2
 
 
+def test_bloco_2_retira_ramificacao_inaplicavel_e_preserva_historico(sessao):
+    registro = _rascunho_pronto(sessao, "CMD-F12-COND")
+    salvar_bloco_2_form1_integral(
+        sessao, comando_id="CMD-F12-COND-OUV", conta_id="CONTA-A1",
+        registro_id=registro["registro_id"], versao_lida=1,
+        respostas={"2.1": "Ouvidoria", "OUV.1": ["Solicitação"]},
+    )
+    sessao.commit()
+
+    resultado = salvar_bloco_2_form1_integral(
+        sessao, comando_id="CMD-F12-COND-TEL", conta_id="CONTA-A1",
+        registro_id=registro["registro_id"], versao_lida=2,
+        respostas={"2.1": "Telefone"},
+    )
+    sessao.commit()
+
+    conteudo = sessao.get(RascunhoForm1Integral, registro["registro_id"]).conteudo
+    assert resultado["permitido"] and "OUV.1" not in conteudo["respostas"]
+    assert conteudo["respostas_inativas"]["OUV.1"][-1]["valor"] == ["Solicitação"]
+    assert conteudo["respostas_inativas"]["OUV.1"][-1]["desativada_na_versao"] == 3
+
+
+def test_bloco_2_recusa_resposta_de_ramificacao_inativa(sessao):
+    registro = _rascunho_pronto(sessao, "CMD-F12-COND-FORJADA")
+
+    resultado = salvar_bloco_2_form1_integral(
+        sessao, comando_id="CMD-F12-COND-FORJADA-SALVAR", conta_id="CONTA-A1",
+        registro_id=registro["registro_id"], versao_lida=1,
+        respostas={"2.1": "Telefone", "OUV.1": ["Solicitação"]},
+    )
+    sessao.commit()
+
+    assert not resultado["permitido"] and "campo condicional inativo" in resultado["motivo"]
+    assert sessao.get(RascunhoForm1Integral, registro["registro_id"]).versao_rascunho == 1
+
+
 def test_dois_salvamentos_simultaneos_do_bloco_2_nao_se_sobrescrevem(sessao):
     registro = _rascunho_pronto(sessao, "CMD-F12-CONC")
     barreira = threading.Barrier(2)
@@ -193,23 +230,49 @@ def test_bloco_3_mantem_participantes_em_ocorrencias_independentes(sessao):
     ]
 
 
+def test_bloco_3_recusa_participante_quando_nao_ha_participacao(sessao):
+    registro = _rascunho_pronto(sessao, "CMD-F13-SEM-PART")
+    salvar_cabecalho_bloco_3_form1_integral(
+        sessao, comando_id="CMD-F13-SEM-PART-CAB", conta_id="CONTA-A1",
+        registro_id=registro["registro_id"], versao_lida=1, resposta_3_1="Não",
+    )
+    sessao.commit()
+
+    resultado = adicionar_participante_form1_integral(
+        sessao, comando_id="CMD-F13-SEM-PART-ADD", conta_id="CONTA-A1",
+        registro_id=registro["registro_id"], versao_lida=2,
+        respostas={"3.3": "Unidade fictícia indevida"},
+    )
+    sessao.commit()
+
+    assert not resultado["permitido"] and "3.1 = Sim" in resultado["motivo"]
+    assert sessao.get(RascunhoForm1Integral, registro["registro_id"]).conteudo.get(
+        "participantes", []
+    ) == []
+
+
 def test_remocao_de_participante_preserva_as_demais_ocorrencias(sessao):
     registro = _rascunho_pronto(sessao, "CMD-F13-REM")
+    salvar_cabecalho_bloco_3_form1_integral(
+        sessao, comando_id="CMD-F13-REM-CAB", conta_id="CONTA-A1",
+        registro_id=registro["registro_id"], versao_lida=1, resposta_3_1="Sim",
+    )
+    sessao.commit()
     primeiro = adicionar_participante_form1_integral(
         sessao, comando_id="CMD-F13-REM-A", conta_id="CONTA-A1",
-        registro_id=registro["registro_id"], versao_lida=1,
+        registro_id=registro["registro_id"], versao_lida=2,
         respostas={"3.3": "Unidade fictícia A"},
     )
     sessao.commit()
     segundo = adicionar_participante_form1_integral(
         sessao, comando_id="CMD-F13-REM-B", conta_id="CONTA-A1",
-        registro_id=registro["registro_id"], versao_lida=2,
+        registro_id=registro["registro_id"], versao_lida=3,
         respostas={"3.3": "Unidade fictícia B"},
     )
     sessao.commit()
     removido = remover_participante_form1_integral(
         sessao, comando_id="CMD-F13-REMOVER", conta_id="CONTA-A1",
-        registro_id=registro["registro_id"], versao_lida=3,
+        registro_id=registro["registro_id"], versao_lida=4,
         participante_id=primeiro["participante_id"],
     )
     sessao.commit()
@@ -219,6 +282,61 @@ def test_remocao_de_participante_preserva_as_demais_ocorrencias(sessao):
     ).conteudo["participantes"]
     assert removido["permitido"]
     assert [item["id"] for item in participantes] == [segundo["participante_id"]]
+
+
+def test_salvar_bloco_1_preserva_participantes_do_bloco_3(sessao):
+    registro = _rascunho_pronto(sessao, "CMD-F13-PRESERVA")
+    salvar_cabecalho_bloco_3_form1_integral(
+        sessao, comando_id="CMD-F13-PRESERVA-CAB", conta_id="CONTA-A1",
+        registro_id=registro["registro_id"], versao_lida=1, resposta_3_1="Sim",
+    )
+    sessao.commit()
+    participante = adicionar_participante_form1_integral(
+        sessao, comando_id="CMD-F13-PRESERVA-PART", conta_id="CONTA-A1",
+        registro_id=registro["registro_id"], versao_lida=2,
+        respostas={"3.3": "Unidade fictícia preservada"},
+    )
+    sessao.commit()
+
+    resultado = salvar_bloco_1_form1_integral(
+        sessao, comando_id="CMD-F13-PRESERVA-B1", conta_id="CONTA-A1",
+        registro_id=registro["registro_id"], versao_lida=3,
+        respostas={"1.1": "Não", "1.4": "Sim"},
+    )
+    sessao.commit()
+
+    conteudo = sessao.get(RascunhoForm1Integral, registro["registro_id"]).conteudo
+    assert resultado["permitido"]
+    assert conteudo["participantes"] == [{
+        "id": participante["participante_id"],
+        "respostas": {"3.3": "Unidade fictícia preservada"},
+    }]
+    assert conteudo["respostas"]["3.1"] == "Sim"
+
+
+def test_bloco_3_inativa_participantes_sem_apagar_historico(sessao):
+    registro = _rascunho_pronto(sessao, "CMD-F13-INATIVA")
+    salvar_cabecalho_bloco_3_form1_integral(
+        sessao, comando_id="CMD-F13-INATIVA-CAB", conta_id="CONTA-A1",
+        registro_id=registro["registro_id"], versao_lida=1, resposta_3_1="Sim",
+    )
+    sessao.commit()
+    participante = adicionar_participante_form1_integral(
+        sessao, comando_id="CMD-F13-INATIVA-PART", conta_id="CONTA-A1",
+        registro_id=registro["registro_id"], versao_lida=2,
+        respostas={"3.3": "Unidade fictícia inativada"},
+    )
+    sessao.commit()
+
+    resultado = salvar_cabecalho_bloco_3_form1_integral(
+        sessao, comando_id="CMD-F13-INATIVA-NAO", conta_id="CONTA-A1",
+        registro_id=registro["registro_id"], versao_lida=3, resposta_3_1="Não",
+    )
+    sessao.commit()
+
+    conteudo = sessao.get(RascunhoForm1Integral, registro["registro_id"]).conteudo
+    assert resultado["permitido"] and conteudo["participantes"] == []
+    assert conteudo["participantes_inativos"][0]["id"] == participante["participante_id"]
 
 
 def test_interface_exibe_e_salva_etapa_visual_1(sessao):
@@ -238,6 +356,9 @@ def test_interface_exibe_e_salva_etapa_visual_1(sessao):
     assert pagina.status_code == 200
     assert "Bloco 2 de 14" in pagina.text and "Bloco 3 de 14" in pagina.text
     assert "Cada participante é uma ocorrência independente" in pagina.text
+    assert 'data-etapa-alvo="2"' in pagina.text
+    assert 'id="form1-etapa-2"' in pagina.text and 'data-etapa-painel="2"' in pagina.text
+    assert 'data-etapa-alvo="3"' in pagina.text and "disabled" in pagina.text
     assert salvamento.status_code == 200
     assert "Bloco 2 do FORM 1 integral salvo com segurança" in salvamento.text
     assert "Instrumento sintético · contrato 2" in salvamento.text
@@ -279,3 +400,24 @@ def test_bloco_4_recusa_categoria_forjada(sessao):
 
     assert not resultado["permitido"] and "catálogo REV13" in resultado["motivo"]
     assert sessao.get(RascunhoForm1Integral, registro["registro_id"]).versao_rascunho == 1
+
+
+def test_bloco_4_retira_detalhes_inaplicaveis_e_preserva_historico(sessao):
+    registro = _rascunho_pronto(sessao, "CMD-F13-B4-COND")
+    salvar_bloco_4_form1_integral(
+        sessao, comando_id="CMD-F13-B4-COND-SIM", conta_id="CONTA-A1",
+        registro_id=registro["registro_id"], versao_lida=1,
+        respostas={"4.2": "Sim", "4.2.1": ["Responsável legal"]},
+    )
+    sessao.commit()
+
+    resultado = salvar_bloco_4_form1_integral(
+        sessao, comando_id="CMD-F13-B4-COND-NAO", conta_id="CONTA-A1",
+        registro_id=registro["registro_id"], versao_lida=2,
+        respostas={"4.2": "Não"},
+    )
+    sessao.commit()
+
+    conteudo = sessao.get(RascunhoForm1Integral, registro["registro_id"]).conteudo
+    assert resultado["permitido"] and "4.2.1" not in conteudo["respostas"]
+    assert conteudo["respostas_inativas"]["4.2.1"][-1]["valor"] == ["Responsável legal"]

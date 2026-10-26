@@ -410,3 +410,13 @@ Regras deste diário: sem senhas, tokens ou dados pessoais; cada entrada com dat
 - O README passou a registrar as regras de abertura, rascunho e futura submissão, além do tratamento de `A confirmar`, `Não se aplica` e campo vazio.
 - A relação dos 128 identificadores não foi duplicada no README. `docs/planejamento/MATRIZ_CAMPOS_FORM1_REV13.md`, identificada como `MATRIZ-F1-REV13-OBR-v1`, permanece a fonte declarativa, central e versionada das classificações e condições.
 - A política não habilita a submissão do contrato 3 nem altera o comportamento executável do rascunho. Interface e validação somente poderão aplicá-la em incremento próprio, acompanhado de testes.
+
+### 26/10/2026 — estabilização anterior ao Bloco 5
+
+- Corrigida a atualização do Bloco 1 para preservar todo o envelope do rascunho, inclusive respostas dos demais blocos e participantes do Bloco 3.
+- Respostas condicionais que perdem aplicabilidade passam a sair do conjunto ativo e permanecer no histórico inativo, com versão e condição; payload forjado para ramo inativo é recusado.
+- Participantes somente podem ser acrescentados quando o item 3.1 estiver ativo. Mudança posterior preserva as ocorrências como histórico inativo.
+- A interface mantém as quatro etapas visíveis e permite alternar funcionalmente entre as Etapas 1 e 2; as Etapas 3 e 4 permanecem desabilitadas.
+- O desenho candidato de múltiplos canais e de APA titular/substituto foi registrado em `docs/planejamento/PLANO_PRE_BLOCO_5_FORM1.md`, sem criar regra institucional, migração ou permissão.
+- O Bloco 5, a submissão integral, os FORMS 2 a 4, a Cartilha e a apresentação não foram alterados.
+- Os 27 testes direcionados e a regressão completa de **233 de 233 testes** foram aprovados no banco exclusivo `lgpd_poc_teste`; permaneceu somente o aviso conhecido de descontinuação do `TestClient`.

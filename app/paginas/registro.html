@@ -17,7 +17,7 @@
 <p class="mensagem {% if erro %}mensagem-erro{% else %}mensagem-sucesso{% endif %}" role="status">{{ mensagem }}</p>
 {% endif %}
 
-<section class="form1 form1-integral" aria-labelledby="titulo-form1-integral">
+<section class="form1 form1-integral" aria-labelledby="titulo-form1-integral" data-registro-id="{{ registro.id }}">
   <div class="cabecalho-secao cabecalho-form1">
     <div>
       <p class="etiqueta">PoC ampliada · contrato 3 candidato</p>
@@ -57,11 +57,18 @@
   <p class="aviso-leitura">Somente um APA responsável pelo Registro nesta Secretaria pode definir ou substituir o ARP.</p>
   {% endif %}
 
-  <ol class="etapas-form1" aria-label="Etapas previstas do FORM 1 integral">
+  <ol class="etapas-form1" aria-label="Navegação pelas etapas do FORM 1 integral">
     {% for etapa in registro.form1_integral.etapas %}
-    <li{% if etapa.numero in [1, 2] %} class="etapa-atual"{% endif %}><strong>Etapa {{ etapa.numero }} de 4</strong><span>{{ etapa.titulo }}</span><small>Blocos {{ etapa.blocos }}</small></li>
+    <li{% if etapa.numero == 1 %} class="etapa-atual"{% endif %}>
+      <button type="button" class="etapa-form1-botao" data-etapa-alvo="{{ etapa.numero }}"
+              aria-controls="form1-etapa-{{ etapa.numero }}" aria-selected="{{ 'true' if etapa.numero == 1 else 'false' }}"
+              {% if etapa.numero > 2 %}disabled aria-disabled="true"{% endif %}>
+        <strong>Etapa {{ etapa.numero }} de 4</strong><span>{{ etapa.titulo }}</span><small>Blocos {{ etapa.blocos }}</small>
+      </button>
+    </li>
     {% endfor %}
   </ol>
+  <p class="ajuda estado-navegacao-form1" role="status">Etapa 1 exibida. As Etapas 3 e 4 permanecem indisponíveis neste incremento.</p>
 
   {% if registro.form1_integral.arp_atual and not registro.form1_integral.rascunho %}
     {% if registro.form1_integral.pode_editar %}
@@ -77,6 +84,7 @@
 
   {% if registro.form1_integral.rascunho %}
     {% set respostas_integral = registro.form1_integral.rascunho.respostas %}
+    <div id="form1-etapa-1" class="painel-etapa-form1" data-etapa-painel="1">
     <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-1">
       <p class="etiqueta">Etapa 1 de 4 · Bloco 1 de 14</p>
       <h3 id="titulo-bloco-1">Identificação do processo, atividade ou serviço</h3>
@@ -252,6 +260,8 @@
       </div>
     </section>
 
+    </div>
+    <div id="form1-etapa-2" class="painel-etapa-form1" data-etapa-painel="2" hidden>
     <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-4">
       <p class="etiqueta">Etapa 2 de 4 · Bloco 4 de 14</p>
       <h3 id="titulo-bloco-4">Pessoas a quem os dados se referem</h3>
@@ -289,16 +299,31 @@
       <p class="aviso-leitura">Somente o ARP atual pode alterar este rascunho.</p>
       {% endif %}
     </section>
+    </div>
+    <div id="form1-etapa-3" class="painel-etapa-form1 etapa-indisponivel" data-etapa-painel="3" hidden>
+      <p>Etapa 3 ainda não implementada. Nenhum campo dos Blocos 9 a 12 foi antecipado.</p>
+    </div>
+    <div id="form1-etapa-4" class="painel-etapa-form1 etapa-indisponivel" data-etapa-painel="4" hidden>
+      <p>Etapa 4 ainda não implementada. Nenhum campo dos Blocos 13 e 14 foi antecipado.</p>
+    </div>
   {% endif %}
 
   <p class="ajuda">Os Blocos 5 a 14 e a submissão integral serão liberados em incrementos posteriores. O FORM 1 sintético permanece disponível abaixo sem alterações.</p>
 </section>
 
 <script>
+  function sincronizarControlesForm1() {
+    document.querySelectorAll('.form1-integral input, .form1-integral select, .form1-integral textarea, .form1-integral form button').forEach(function (controle) {
+      controle.disabled = Boolean(controle.closest('[data-etapa-oculta="true"], [data-condicional-oculta="true"]'));
+    });
+  }
   document.querySelectorAll('[data-controla]').forEach(function (controle) {
     var alvo = document.getElementById(controle.dataset.controla);
     function atualizar() {
-      alvo.hidden = controle.value !== alvo.dataset.visivelQuando;
+      var oculto = controle.value !== alvo.dataset.visivelQuando;
+      alvo.hidden = oculto;
+      alvo.dataset.condicionalOculta = String(oculto);
+      sincronizarControlesForm1();
     }
     controle.addEventListener('change', atualizar);
     atualizar();
@@ -315,13 +340,52 @@
     var nome = alvo.dataset.dependeDe;
     var aceitos = alvo.dataset.valores.split('||');
     function atualizarDependencia() {
-      alvo.hidden = !valorDoCampo(nome).some(function (valor) { return aceitos.includes(valor); });
+      var oculto = !valorDoCampo(nome).some(function (valor) { return aceitos.includes(valor); });
+      alvo.hidden = oculto;
+      alvo.dataset.condicionalOculta = String(oculto);
+      sincronizarControlesForm1();
     }
     document.getElementsByName(nome).forEach(function (controle) {
       controle.addEventListener('change', atualizarDependencia);
     });
     atualizarDependencia();
   });
+  (function iniciarNavegacaoForm1() {
+    var raiz = document.querySelector('.form1-integral');
+    if (!raiz) return;
+    var botoes = Array.from(raiz.querySelectorAll('[data-etapa-alvo]'));
+    var paineis = Array.from(raiz.querySelectorAll('[data-etapa-painel]'));
+    if (!paineis.length) return;
+    var chave = 'form1-integral-etapa-' + raiz.dataset.registroId;
+    var etapaDaUrl = window.location.hash.match(/^#form1-etapa-([1-4])$/);
+    var etapaInicial = etapaDaUrl ? etapaDaUrl[1] : window.sessionStorage.getItem(chave);
+    if (!botoes.some(function (botao) { return botao.dataset.etapaAlvo === etapaInicial && !botao.disabled; })) etapaInicial = '1';
+
+    function exibirEtapa(numero) {
+      paineis.forEach(function (painel) {
+        var oculto = painel.dataset.etapaPainel !== numero;
+        painel.hidden = oculto;
+        painel.dataset.etapaOculta = String(oculto);
+      });
+      botoes.forEach(function (botao) {
+        var ativo = botao.dataset.etapaAlvo === numero;
+        botao.setAttribute('aria-selected', String(ativo));
+        botao.closest('li').classList.toggle('etapa-atual', ativo);
+      });
+      window.sessionStorage.setItem(chave, numero);
+      window.history.replaceState(null, '', '#form1-etapa-' + numero);
+      var estado = raiz.querySelector('.estado-navegacao-form1');
+      if (estado) estado.textContent = 'Etapa ' + numero + ' exibida. As Etapas 3 e 4 permanecem indisponíveis neste incremento.';
+      sincronizarControlesForm1();
+    }
+
+    botoes.forEach(function (botao) {
+      botao.addEventListener('click', function () {
+        if (!botao.disabled) exibirEtapa(botao.dataset.etapaAlvo);
+      });
+    });
+    exibirEtapa(etapaInicial);
+  })();
 </script>
 
 <section class="form1" aria-labelledby="titulo-form1">

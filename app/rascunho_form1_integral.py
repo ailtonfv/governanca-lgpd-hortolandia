@@ -15,7 +15,10 @@ from sqlalchemy import select
 
 from app.comandos import abrir_comando, fechar_comando
 from app.eventos import lacre, registrar_auditoria, registrar_evento
-from app.form1_integral import (FAIXAS_VOLUME_REV13, IDS_BLOCO_2, IDS_BLOCO_4,
+from app.form1_integral import (CONDICOES_BLOCO_1, CONDICOES_BLOCO_2,
+                                CONDICOES_BLOCO_4,
+                                CONDICOES_PARTICIPANTE_BLOCO_3,
+                                FAIXAS_VOLUME_REV13, IDS_BLOCO_2, IDS_BLOCO_4,
                                 IDS_PARTICIPANTE_BLOCO_3,
                                 REVISAO_FONTE_FORM1_INTEGRAL,
                                 VERSAO_CONTRATO_FORM1_INTEGRAL_CANDIDATA,
@@ -251,6 +254,55 @@ def _validar_respostas_catalogadas(sessao, respostas, campos_permitidos):
     return None
 
 
+def _validar_condicionais(respostas, condicoes):
+    """Recusa resposta enviada para ramo que não está ativo no mesmo recorte."""
+
+    for campo_id, (campo_controlador, valores_ativos) in condicoes.items():
+        if campo_id in respostas and respostas.get(campo_controlador) not in valores_ativos:
+            return (
+                f"{campo_id}: campo condicional inativo para a resposta de "
+                f"{campo_controlador}"
+            )
+    return None
+
+
+def _conteudo_com_respostas_do_bloco(
+    rascunho, *, campos_editaveis, respostas, condicoes,
+):
+    """Substitui um bloco e preserva respostas que perderam aplicabilidade."""
+
+    atuais = dict(rascunho.conteudo.get("respostas", {}))
+    inativas = dict(rascunho.conteudo.get("respostas_inativas", {}))
+    proxima_versao = rascunho.versao_rascunho + 1
+    for campo_id, (campo_controlador, valores_ativos) in condicoes.items():
+        valor_anterior = atuais.get(campo_id)
+        esta_ativo = respostas.get(campo_controlador) in valores_ativos
+        if not esta_ativo and valor_anterior not in (None, "", []):
+            historico = inativas.get(campo_id, [])
+            if isinstance(historico, dict):
+                historico = [historico]
+            historico = list(historico)
+            historico.append({
+                "valor": valor_anterior,
+                "campo_controlador": campo_controlador,
+                "valores_ativos": list(valores_ativos),
+                "desativada_na_versao": proxima_versao,
+            })
+            inativas[campo_id] = historico
+    for campo_id in campos_editaveis:
+        atuais.pop(campo_id, None)
+    atuais.update({
+        campo_id: valor for campo_id, valor in respostas.items()
+        if valor not in (None, "", [])
+    })
+    conteudo = {**rascunho.conteudo, "respostas": atuais}
+    if inativas:
+        conteudo["respostas_inativas"] = inativas
+    else:
+        conteudo.pop("respostas_inativas", None)
+    return conteudo
+
+
 def _validar_versao(versao_lida):
     if not isinstance(versao_lida, int) or isinstance(versao_lida, bool) or versao_lida < 1:
         return "versao_lida deve ser um inteiro positivo"
@@ -359,6 +411,7 @@ def salvar_bloco_2_form1_integral(
     if resposta is not None:
         return resposta
     problema = _validar_respostas_catalogadas(sessao, respostas, CAMPOS_EDITAVEIS_BLOCO_2)
+    problema = problema or _validar_condicionais(respostas, CONDICOES_BLOCO_2)
     if problema:
         return _negar(
             sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
@@ -371,11 +424,12 @@ def salvar_bloco_2_form1_integral(
     )
     if resposta is not None:
         return resposta
-    atuais = dict(rascunho.conteudo.get("respostas", {}))
-    for campo_id in CAMPOS_EDITAVEIS_BLOCO_2:
-        atuais.pop(campo_id, None)
-    atuais.update({campo_id: valor for campo_id, valor in respostas.items() if valor not in (None, "", [])})
-    conteudo = {**rascunho.conteudo, "respostas": atuais}
+    conteudo = _conteudo_com_respostas_do_bloco(
+        rascunho,
+        campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_2,
+        respostas=respostas,
+        condicoes=CONDICOES_BLOCO_2,
+    )
     return _salvar_conteudo(
         sessao, comando=comando, registro=registro, rascunho=rascunho,
         pessoa_id=pessoa_id, versao_lida=versao_lida, conteudo=conteudo,
@@ -403,6 +457,7 @@ def salvar_bloco_4_form1_integral(
     if resposta is not None:
         return resposta
     problema = _validar_respostas_catalogadas(sessao, respostas, CAMPOS_EDITAVEIS_BLOCO_4)
+    problema = problema or _validar_condicionais(respostas, CONDICOES_BLOCO_4)
     if problema:
         return _negar(
             sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
@@ -415,11 +470,12 @@ def salvar_bloco_4_form1_integral(
     )
     if resposta is not None:
         return resposta
-    atuais = dict(rascunho.conteudo.get("respostas", {}))
-    for campo_id in CAMPOS_EDITAVEIS_BLOCO_4:
-        atuais.pop(campo_id, None)
-    atuais.update({campo_id: valor for campo_id, valor in respostas.items() if valor not in (None, "", [])})
-    conteudo = {**rascunho.conteudo, "respostas": atuais}
+    conteudo = _conteudo_com_respostas_do_bloco(
+        rascunho,
+        campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_4,
+        respostas=respostas,
+        condicoes=CONDICOES_BLOCO_4,
+    )
     return _salvar_conteudo(
         sessao, comando=comando, registro=registro, rascunho=rascunho,
         pessoa_id=pessoa_id, versao_lida=versao_lida, conteudo=conteudo,
@@ -466,6 +522,12 @@ def salvar_cabecalho_bloco_3_form1_integral(
     atuais.pop("3.1", None)
     atuais.update(respostas)
     conteudo = {**rascunho.conteudo, "respostas": atuais}
+    participantes = list(conteudo.get("participantes", []))
+    if resposta_3_1 != "Sim" and participantes:
+        participantes_inativos = list(conteudo.get("participantes_inativos", []))
+        participantes_inativos.extend(participantes)
+        conteudo["participantes_inativos"] = participantes_inativos
+        conteudo["participantes"] = []
     return _salvar_conteudo(
         sessao, comando=comando, registro=registro, rascunho=rascunho,
         pessoa_id=pessoa_id, versao_lida=versao_lida, conteudo=conteudo,
@@ -493,6 +555,9 @@ def adicionar_participante_form1_integral(
     if resposta is not None:
         return resposta
     problema = _validar_respostas_catalogadas(sessao, respostas, CAMPOS_EDITAVEIS_PARTICIPANTE)
+    problema = problema or _validar_condicionais(
+        respostas, CONDICOES_PARTICIPANTE_BLOCO_3
+    )
     if not respostas:
         problema = "informe ao menos um dado do participante"
     if problema:
@@ -507,6 +572,12 @@ def adicionar_participante_form1_integral(
     )
     if resposta is not None:
         return resposta
+    if rascunho.conteudo.get("respostas", {}).get("3.1") != "Sim":
+        return _negar(
+            sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
+            "adicionar_participante_form1",
+            "participantes somente podem ser adicionados quando 3.1 = Sim",
+        )
     participante_id = str(uuid.uuid4())
     participantes = list(rascunho.conteudo.get("participantes", []))
     participantes.append({"id": participante_id, "respostas": respostas})
@@ -580,6 +651,7 @@ def salvar_bloco_1_form1_integral(
     if resposta is not None:
         return resposta
     problema = _validar_respostas_bloco_1(respostas)
+    problema = problema or _validar_condicionais(respostas, CONDICOES_BLOCO_1)
     if problema:
         return _negar(
             sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
@@ -618,16 +690,13 @@ def salvar_bloco_1_form1_integral(
             versao_atual=rascunho.versao_rascunho,
         )
 
-    atuais = dict(rascunho.conteudo.get("respostas", {}))
-    for campo_id in CAMPOS_EDITAVEIS_BLOCO_1:
-        atuais.pop(campo_id, None)
-    atuais.update({campo_id: valor for campo_id, valor in respostas.items() if valor not in (None, "")})
-    atuais.update(_respostas_reaproveitadas(registro))
-    conteudo = {
-        "revisao_fonte": REVISAO_FONTE_FORM1_INTEGRAL,
-        "versao_contrato": VERSAO_CONTRATO_FORM1_INTEGRAL_CANDIDATA,
-        "respostas": atuais,
-    }
+    conteudo = _conteudo_com_respostas_do_bloco(
+        rascunho,
+        campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_1,
+        respostas=respostas,
+        condicoes=CONDICOES_BLOCO_1,
+    )
+    conteudo["respostas"].update(_respostas_reaproveitadas(registro))
     nova_versao = rascunho.versao_rascunho + 1
     rascunho.conteudo = conteudo
     rascunho.versao_rascunho = nova_versao
