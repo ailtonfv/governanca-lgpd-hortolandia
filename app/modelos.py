@@ -165,13 +165,70 @@ class Designacao(Base):
     unidade_id = Column(String(50), ForeignKey("unidade.id"), nullable=False)  # onde
     papel = Column(String(30), nullable=False)                                 # qual papel
     ativa = Column(Boolean, nullable=False, default=True)
+    tipo_apa = Column(String(20))                         # titular ou suplente, só para responsavel_registro
+    vigente_de = Column(DateTime(timezone=True))          # vigência administrativa da designação de APA
+    vigente_ate = Column(DateTime(timezone=True))
+    fundamento_administrativo = Column(String(250))       # ato ou justificativa, sem dados pessoais reais
+    autorizado_por_id = Column(String(50), ForeignKey("pessoa.id"))  # quem registrou a autorização
 
-    pessoa = relationship("Pessoa")
+    pessoa = relationship("Pessoa", foreign_keys=[pessoa_id])
     unidade = relationship("Unidade")
 
     __table_args__ = (
         # a mesma pessoa não recebe o mesmo papel duas vezes na mesma unidade
         UniqueConstraint("pessoa_id", "unidade_id", "papel", name="uq_designacao"),
+        CheckConstraint(
+            "tipo_apa IS NULL OR tipo_apa IN ('titular', 'suplente')",
+            name="ck_designacao_tipo_apa",
+        ),
+        CheckConstraint(
+            "vigente_ate IS NULL OR vigente_de IS NULL OR vigente_ate > vigente_de",
+            name="ck_designacao_apa_vigencia",
+        ),
+        Index(
+            "uq_designacao_apa_titular_ativa",
+            "unidade_id",
+            unique=True,
+            postgresql_where=(
+                (papel == "responsavel_registro")
+                & (tipo_apa == "titular")
+                & (ativa.is_(True))
+            ),
+        ),
+    )
+
+
+class SubstituicaoApa(Base):
+    """Exercício temporário da responsabilidade institucional do APA.
+
+    A designação define quem é titular ou suplente. Esta projeção registra
+    somente o período em que um suplente está efetivamente em exercício.
+    O histórico imutável permanece na cadeia de eventos da Secretaria.
+    """
+    __tablename__ = "substituicao_apa"
+
+    id = Column(String(36), primary_key=True)
+    unidade_id = Column(String(50), ForeignKey("unidade.id"), nullable=False)
+    titular_id = Column(String(50), ForeignKey("pessoa.id"), nullable=False)
+    substituto_id = Column(String(50), ForeignKey("pessoa.id"), nullable=False)
+    autorizada_por_id = Column(String(50), ForeignKey("pessoa.id"), nullable=False)
+    motivo = Column(String(250), nullable=False)
+    inicio_em = Column(DateTime(timezone=True), nullable=False)
+    fim_previsto_em = Column(DateTime(timezone=True), nullable=False)
+    encerrada_em = Column(DateTime(timezone=True))
+    encerrada_por_id = Column(String(50), ForeignKey("pessoa.id"))
+    evento_inicio_id = Column(BigInteger, ForeignKey("evento.id"))
+    evento_encerramento_id = Column(BigInteger, ForeignKey("evento.id"))
+
+    __table_args__ = (
+        CheckConstraint("titular_id <> substituto_id", name="ck_substituicao_apa_pessoas_distintas"),
+        CheckConstraint("fim_previsto_em > inicio_em", name="ck_substituicao_apa_periodo"),
+        Index(
+            "uq_substituicao_apa_ativa_unidade",
+            "unidade_id",
+            unique=True,
+            postgresql_where=(encerrada_em.is_(None)),
+        ),
     )
 
 

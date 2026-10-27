@@ -2,6 +2,8 @@
 # 18 Secretarias da Administração Direta de Hortolândia, conferidos no portal municipal em
 # 19/10/2026. O Hortoprev não integra o recorte. Nenhum dado pessoal real, CPF ou senha.
 
+from datetime import datetime, timezone
+
 from sqlalchemy import select
 from app.modelos import Pessoa, Conta, Unidade, Designacao
 from carga_ficticia.seguranca import (validar_ausencia_de_identificadores,
@@ -55,6 +57,7 @@ DESIGNACOES = [
     ("PESSOA-B", "UNID-NORTE", "validador"),
     ("PESSOA-B", "UNID-NORTE", "concluidor"),
     ("PESSOA-F", "UNID-NORTE", "analista"),
+    ("PESSOA-F", "UNID-NORTE", "responsavel_registro"),
     # G preenche na unidade Norte; a segunda conta prova segregação por pessoa
     ("PESSOA-G", "UNID-NORTE", "preenchedor"),
     ("PESSOA-G", "UNID-NORTE", "validador"),
@@ -63,10 +66,20 @@ DESIGNACOES = [
     ("PESSOA-C", "UNID-SUL", "preenchedor"),
     ("PESSOA-C", "UNID-SUL", "agente_pendencia"),
     ("PESSOA-H", "UNID-SUL", "preenchedor"),
+    ("PESSOA-H", "UNID-SUL", "responsavel_registro"),
     # D cuida do catálogo; E é a governança de proteção de dados (D2)
     ("PESSOA-D", "UNID-GOV", "curador"),
     ("PESSOA-E", "UNID-GOV", "governanca_protecao_dados"),
 ]
+
+CONFIGURACAO_APA = [
+    # pessoa, unidade, condição institucional inicial da massa fictícia
+    ("PESSOA-A", "UNID-NORTE", "titular"),
+    ("PESSOA-F", "UNID-NORTE", "suplente"),
+    ("PESSOA-C", "UNID-SUL", "titular"),
+    ("PESSOA-H", "UNID-SUL", "suplente"),
+]
+INICIO_DESIGNACOES_APA = datetime(2026, 1, 1, tzinfo=timezone.utc)
 
 
 def semear(sessao):
@@ -76,7 +89,12 @@ def semear(sessao):
     validar_identidades(PESSOAS)
     validar_ausencia_de_identificadores(
         "estrutura institucional",
-        {"secretarias": SECRETARIAS, "unidades": UNIDADES, "designacoes": DESIGNACOES},
+        {
+            "secretarias": SECRETARIAS,
+            "unidades": UNIDADES,
+            "designacoes": DESIGNACOES,
+            "configuracao_apa": CONFIGURACAO_APA,
+        },
     )
     novos = 0
     for pid, matricula, nome, contas in PESSOAS:
@@ -103,5 +121,17 @@ def semear(sessao):
         if existe is None:
             sessao.add(Designacao(pessoa_id=pid, unidade_id=uid, papel=papel))
             novos += 1
+    sessao.flush()
+    for pid, uid, tipo_apa in CONFIGURACAO_APA:
+        designacao = sessao.scalars(select(Designacao).where(
+            Designacao.pessoa_id == pid,
+            Designacao.unidade_id == uid,
+            Designacao.papel == "responsavel_registro",
+        )).one()
+        if designacao.tipo_apa is None:
+            designacao.tipo_apa = tipo_apa
+            designacao.vigente_de = INICIO_DESIGNACOES_APA
+            designacao.fundamento_administrativo = "designação fictícia inicial da PoC"
+            designacao.autorizado_por_id = "PESSOA-E"
     sessao.flush()
     return novos

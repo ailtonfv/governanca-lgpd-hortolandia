@@ -29,6 +29,7 @@
 
   <div class="identidades-form1">
     <div><strong>APA de abertura</strong><br>{{ registro.form1_integral.apa_abertura.nome if registro.form1_integral.apa_abertura else 'Não identificado' }}</div>
+    <div><strong>APA em exercício</strong><br>{{ registro.form1_integral.apa_atual.nome if registro.form1_integral.apa_atual else 'Não configurado' }}{% if registro.form1_integral.apa_atual and registro.form1_integral.apa_atual.modalidade == 'substituicao_temporaria' %}<br><span class="ajuda">Substituição temporária</span>{% endif %}</div>
     <div><strong>ARP atual</strong><br>{{ registro.form1_integral.arp_atual.nome if registro.form1_integral.arp_atual else 'Ainda não atribuído' }}</div>
   </div>
   <p class="ajuda">A identidade simulada fornece o nome fictício. Cargo/função e e-mail institucional não são inventados quando não constam do cadastro disponível.</p>

@@ -22,6 +22,7 @@ from app.eventos import registrar_evento, registrar_auditoria
 from app.permissoes import tem_papel
 from app.comandos import (abrir_comando, fechar_comando, nome_da_restricao,
                           ErroDeIntegridadeInesperado)
+from app.continuidade_apa import pessoa_e_apa_em_exercicio
 
 FUSO_OFICIAL = ZoneInfo("America/Sao_Paulo")
 RESTRICAO_EQUIVALENCIA = "uq_objeto_contexto_assunto_ativo"
@@ -235,8 +236,12 @@ def criar_registro(sessao, *, comando_id, conta_id, unidade_id, contexto_id, tit
     ))
     if objetos_do_contexto != set(assunto):
         return negar("contexto de atuação não permitido para o item do catálogo")
-    if not tem_papel(sessao, pessoa_id, unidade_id, {"responsavel_registro"}):
-        return negar("a pessoa não é Agente Público Autorizado responsável pelo Registro nesta unidade")
+    exercicio_apa = pessoa_e_apa_em_exercicio(sessao, pessoa_id, unidade_id, momento)
+    if exercicio_apa is None:
+        return negar(
+            "a pessoa não é o Agente Público Autorizado responsável pelo Registro "
+            "em exercício nesta unidade"
+        )
     if resolucao_familia is not None and resolucao_familia not in RESOLUCOES_DE_FAMILIA:
         return negar("resolução de advertência inválida")
 
@@ -281,7 +286,8 @@ def criar_registro(sessao, *, comando_id, conta_id, unidade_id, contexto_id, tit
     try:
         with sessao.begin_nested():
             registro, evento = _nascer_registro(sessao, comando, conta_id, unidade_id, objetos, papeis,
-                                                contexto, titulo_objeto, advertencia, alertas, momento)
+                                                contexto, titulo_objeto, advertencia, alertas,
+                                                exercicio_apa, momento)
     except IntegrityError as erro:
         if nome_da_restricao(erro) != RESTRICAO_EQUIVALENCIA:
             raise                                    # defeito: precisa aparecer, não ser mascarado
@@ -305,7 +311,7 @@ def criar_registro(sessao, *, comando_id, conta_id, unidade_id, contexto_id, tit
 
 
 def _nascer_registro(sessao, comando, conta_id, unidade_id, objetos, papeis, contexto,
-                     titulo_objeto, advertencia, alertas, momento):
+                     titulo_objeto, advertencia, alertas, exercicio_apa, momento):
     """Cria o Registro (com o número do ano), o ciclo 1, o FORM 1, os vínculos e o ato G1."""
     ano = ano_administrativo(momento)
     numero = proximo_numero_do_ano(sessao, ano)
@@ -328,14 +334,18 @@ def _nascer_registro(sessao, comando, conta_id, unidade_id, objetos, papeis, con
 
     conteudo = {"objetos": [{"id": o, "papel": p} for o, p in papeis.items()],
                 "contexto_atuacao": contexto.id, "titulo_objeto": titulo_objeto,
-                "unidade_principal": unidade_id, "conta_id": conta_id}
+                "unidade_principal": unidade_id, "conta_id": conta_id,
+                "apa_em_exercicio_id": exercicio_apa["pessoa_id"],
+                "apa_titular_id": exercicio_apa["titular_id"],
+                "modalidade_exercicio_apa": exercicio_apa["modalidade"]}
     if advertencia:
         conteudo["advertencia_familia"] = advertencia
     if alertas:
         conteudo["alertas"] = alertas
     evento = registrar_evento(sessao, comando, "registro", registro.codigo_lgpd, "criar_registro",
                               conteudo, codigo_evento="G1", registro_id=registro.id,
-                              ciclo_id=ciclo.id, versao_esquema_evento=2)
+                              ciclo_id=ciclo.id, em_nome_de=exercicio_apa["em_nome_de"],
+                              versao_esquema_evento=2)
     ciclo.evento_inicio_id = evento.id
     registro.sequencia_atual = evento.sequencia_cadeia
     sessao.flush()

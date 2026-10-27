@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from sqlalchemy import select
 
 from app.comandos import abrir_comando, fechar_comando
+from app.continuidade_apa import pessoa_e_apa_em_exercicio
 from app.eventos import registrar_auditoria, registrar_evento
 from app.modelos import AtribuicaoForm1Integral, Ciclo, Conta, Pessoa, Registro
 from app.permissoes import tem_papel
@@ -90,11 +91,12 @@ def atribuir_arp_form1_integral(
     if registro is None:
         return _negar(sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
                       "Registro inexistente")
-    if not tem_papel(
-        sessao, pessoa_id, registro.unidade_principal_atual_id, {"responsavel_registro"}
-    ):
+    exercicio_apa = pessoa_e_apa_em_exercicio(
+        sessao, pessoa_id, registro.unidade_principal_atual_id, momento
+    )
+    if exercicio_apa is None:
         return _negar(sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
-                      "a pessoa não possui função de APA responsável pelo Registro nesta Secretaria")
+                      "a pessoa não possui a função de APA em exercício nesta Secretaria")
 
     alvo_id = pessoa_id if modo == "proprio" else arp_pessoa_id
     if not alvo_id:
@@ -163,6 +165,8 @@ def atribuir_arp_form1_integral(
         {
             "registro_id": registro.id,
             "apa_abertura_id": registro.criado_por,
+            "apa_titular_id": exercicio_apa["titular_id"],
+            "apa_em_exercicio_id": exercicio_apa["pessoa_id"],
             "arp_anterior_id": arp_anterior_id,
             "arp_atual_id": alvo_id,
             "atribuido_por": pessoa_id,
@@ -171,6 +175,7 @@ def atribuir_arp_form1_integral(
         },
         registro_id=registro.id,
         ciclo_id=ciclo.id,
+        em_nome_de=exercicio_apa["em_nome_de"],
         versao_esquema_evento=2,
     )
     registro.sequencia_atual = evento.sequencia_cadeia

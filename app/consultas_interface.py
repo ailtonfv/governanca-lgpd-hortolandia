@@ -3,6 +3,7 @@
 from sqlalchemy import select
 
 from app.alertas_operacionais import listar_alertas_operacionais
+from app.continuidade_apa import apa_em_exercicio, unidades_em_que_e_apa_atual
 from app.form1_sintetico import (CATEGORIAS_DADOS, CATEGORIAS_TITULARES,
                                  DESTINATARIOS_COMPARTILHAMENTO)
 from app.form1_integral import (CONDICOES_BLOCO_2, CONDICOES_BLOCO_4,
@@ -130,8 +131,8 @@ def carregar_painel(sessao, conta_id):
     for alerta in alertas:
         alerta["rotulo"] = ROTULOS_ALERTA.get(alerta["codigo"], alerta["codigo"])
         alerta["codigo_lgpd"] = codigos.get(alerta["registro_id"], "Registro relacionado")
-    pode_criar_registro = any(
-        item["papel"] == "responsavel_registro" for item in identidade["designacoes"]
+    pode_criar_registro = bool(
+        unidades_em_que_e_apa_atual(sessao, identidade["pessoa_id"])
     )
     return {
         "identidade": identidade,
@@ -146,10 +147,11 @@ def carregar_opcoes_novo_registro(sessao, conta_id):
     identidade = _identidade(sessao, conta_id)
     if identidade is None:
         return None
+    unidades_apa = unidades_em_que_e_apa_atual(sessao, identidade["pessoa_id"])
     unidades = []
     vistos = set()
     for item in identidade["designacoes"]:
-        if item["papel"] == "responsavel_registro" and item["unidade_id"] not in vistos:
+        if item["unidade_id"] in unidades_apa and item["unidade_id"] not in vistos:
             vistos.add(item["unidade_id"])
             unidades.append({"id": item["unidade_id"], "nome": item["unidade"]})
     linhas_objetos = sessao.execute(
@@ -229,12 +231,16 @@ def carregar_registro(sessao, conta_id, registro_id):
         and item["papel"] == "preenchedor"
         for item in identidade["designacoes"]
     )
-    pode_atribuir_arp = any(
-        item["unidade_id"] == registro.unidade_principal_atual_id
-        and item["papel"] == "responsavel_registro"
-        for item in identidade["designacoes"]
+    exercicio_apa = apa_em_exercicio(sessao, registro.unidade_principal_atual_id)
+    pode_atribuir_arp = bool(
+        exercicio_apa is not None
+        and exercicio_apa["pessoa_id"] == identidade["pessoa_id"]
     )
     apa_abertura = sessao.get(Pessoa, registro.criado_por)
+    apa_atual = (
+        None if exercicio_apa is None
+        else sessao.get(Pessoa, exercicio_apa["pessoa_id"])
+    )
     atribuicao_integral = sessao.get(AtribuicaoForm1Integral, registro.id)
     arp_atual = (None if atribuicao_integral is None
                  else sessao.get(Pessoa, atribuicao_integral.arp_atual_id))
@@ -299,6 +305,12 @@ def carregar_registro(sessao, conta_id, registro_id):
         "apa_abertura": None if apa_abertura is None else {
             "id": apa_abertura.id,
             "nome": apa_abertura.nome,
+        },
+        "apa_atual": None if apa_atual is None else {
+            "id": apa_atual.id,
+            "nome": apa_atual.nome,
+            "modalidade": exercicio_apa["modalidade"],
+            "titular_id": exercicio_apa["titular_id"],
         },
         "arp_atual": None if arp_atual is None else {
             "id": arp_atual.id,
