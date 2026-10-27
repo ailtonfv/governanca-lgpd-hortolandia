@@ -157,7 +157,27 @@
     <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-2">
       <p class="etiqueta">Etapa 1 de 4 · Bloco 2 de 14</p>
       <h3 id="titulo-bloco-2">Entrada, recepção e execução</h3>
-      <p class="ajuda">Descreva o fluxo recorrente, sem inserir nomes de munícipes, protocolos ou dados de casos concretos. As perguntas de Ouvidoria e e-SIC aparecem somente quando a porta correspondente é escolhida.</p>
+      <p class="ajuda">Descreva o fluxo recorrente, sem inserir nomes de munícipes, protocolos ou dados de casos concretos. A confirmação histórica de canais é exibida em consulta; sua integração com as ramificações de Ouvidoria e e-SIC será realizada em incremento posterior.</p>
+
+      {% set leitura_2_1 = registro.form1_integral.leitura_2_1 %}
+      {% set campo_2_1 = registro.form1_integral.campos_bloco_2['2.1'] %}
+      {% if leitura_2_1.somente_leitura or not registro.form1_integral.pode_editar %}
+      <div class="campo-integral respostas-somente-leitura" data-canais-2-1-estado="{{ leitura_2_1.estado }}">
+        <p><strong>{{ campo_2_1.id }} — {{ campo_2_1.pergunta }}</strong></p>
+        {% if leitura_2_1.estado == 'canais_confirmados' %}
+        <p>Canais habituais confirmados pelo APA na abertura:</p>
+        <ul>{% for canal in leitura_2_1.canais %}<li>{{ canal.nome }} <span class="ajuda">({{ canal.id }})</span></li>{% endfor %}</ul>
+        <p class="ajuda">Confirmação de {{ leitura_2_1.confirmado_por }} em {{ leitura_2_1.confirmado_em }}.</p>
+        {% elif leitura_2_1.estado == 'ausencia_confirmada' %}
+        <p>Nenhum canal habitual foi confirmado pelo APA na abertura.</p>
+        <p class="ajuda">Confirmação de {{ leitura_2_1.confirmado_por }} em {{ leitura_2_1.confirmado_em }}.</p>
+        {% else %}
+        <p>Este Registro é anterior à confirmação histórica de canais. Não há retrato do APA para recuperar automaticamente.</p>
+        {% endif %}
+        {% if leitura_2_1.resposta_legada %}<p><strong>Resposta legada preservada:</strong> {{ leitura_2_1.resposta_legada }}</p>{% endif %}
+        <p class="ajuda">A REV13 pergunta pela porta pela qual a demanda chega inicialmente. O retrato do APA registra canais habituais e pode conter mais de um; por isso ele é apresentado sem conversão artificial para uma escolha única e sem alteração pelo ARP.</p>
+      </div>
+      {% endif %}
 
       {% if registro.form1_integral.pode_editar %}
       <form class="formulario formulario-integral" method="post" action="{{ url_for('salvar_bloco_2_integral', registro_id=registro.id) }}">
@@ -165,6 +185,7 @@
         <input type="hidden" name="comando_id" value="{{ comando_salvar_bloco_2 }}">
         <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
         {% for campo in registro.form1_integral.campos_bloco_2.values() %}
+        {% if campo.id != '2.1' or not leitura_2_1.somente_leitura %}
         <div class="campo-integral{% if campo.condicao %} campo-condicional{% endif %}"
              {% if campo.condicao %}data-depende-de="campo__{{ campo.condicao[0] }}" data-valores="{{ campo.condicao[1] | join('||') }}"{% endif %}>
           <label><strong>{{ campo.id }} — {{ campo.pergunta }}</strong></label>
@@ -188,6 +209,7 @@
           {% endif %}
           {% if campo.instrucao %}<p class="ajuda">{{ campo.instrucao }}</p>{% endif %}
         </div>
+        {% endif %}
         {% endfor %}
         <div class="rodape-formulario">
           <p>O salvamento substitui apenas as respostas deste bloco e preserva os demais blocos.</p>
@@ -198,7 +220,7 @@
       <p class="aviso-leitura">Somente o ARP atual pode alterar este rascunho.</p>
       <dl class="resumo respostas-somente-leitura">
         {% for campo in registro.form1_integral.campos_bloco_2.values() %}
-        {% if respostas_integral.get(campo.id) %}<div><dt>{{ campo.id }} — {{ campo.pergunta }}</dt><dd>{{ respostas_integral.get(campo.id) | join(', ') if respostas_integral.get(campo.id) is not string else respostas_integral.get(campo.id) }}</dd></div>{% endif %}
+        {% if campo.id != '2.1' and respostas_integral.get(campo.id) %}<div><dt>{{ campo.id }} — {{ campo.pergunta }}</dt><dd>{{ respostas_integral.get(campo.id) | join(', ') if respostas_integral.get(campo.id) is not string else respostas_integral.get(campo.id) }}</dd></div>{% endif %}
         {% endfor %}
       </dl>
       {% endif %}

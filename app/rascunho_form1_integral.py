@@ -20,12 +20,13 @@ from app.form1_integral import (CONDICOES_BLOCO_1, CONDICOES_BLOCO_2,
                                 CONDICOES_BLOCO_4,
                                 CONDICOES_PARTICIPANTE_BLOCO_3,
                                 FAIXAS_VOLUME_REV13, IDS_BLOCO_2, IDS_BLOCO_4,
-                                IDS_BLOCO_5,
+                                IDS_BLOCO_2_SEM_PORTA_ENTRADA, IDS_BLOCO_5,
                                 IDS_PARTICIPANTE_BLOCO_3,
                                 REVISAO_FONTE_FORM1_INTEGRAL,
                                 VERSAO_CONTRATO_FORM1_INTEGRAL_CANDIDATA,
                                 campos_por_id)
-from app.modelos import (AtribuicaoForm1Integral, Ciclo, Conta, Pessoa,
+from app.modelos import (AtribuicaoForm1Integral, Ciclo, ConfirmacaoCanaisRegistro,
+                          Conta, Pessoa,
                           RascunhoForm1Integral, Registro, Unidade)
 from app.permissoes import tem_papel
 
@@ -450,7 +451,20 @@ def salvar_bloco_2_form1_integral(
     )
     if resposta is not None:
         return resposta
-    problema = _validar_respostas_catalogadas(sessao, respostas, CAMPOS_EDITAVEIS_BLOCO_2)
+    confirmacao_canais = sessao.get(ConfirmacaoCanaisRegistro, registro_id)
+    campos_editaveis = (
+        CAMPOS_EDITAVEIS_BLOCO_2
+        if confirmacao_canais is None
+        else frozenset(IDS_BLOCO_2_SEM_PORTA_ENTRADA)
+    )
+    problema = None
+    if confirmacao_canais is not None and "2.1" in respostas:
+        problema = (
+            "2.1: os canais confirmados pelo APA são históricos e somente para consulta"
+        )
+    problema = problema or _validar_respostas_catalogadas(
+        sessao, respostas, campos_editaveis
+    )
     problema = problema or _validar_condicionais(respostas, CONDICOES_BLOCO_2)
     if problema:
         return _negar(
@@ -466,7 +480,7 @@ def salvar_bloco_2_form1_integral(
         return resposta
     conteudo = _conteudo_com_respostas_do_bloco(
         rascunho,
-        campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_2,
+        campos_editaveis=campos_editaveis,
         respostas=respostas,
         condicoes=CONDICOES_BLOCO_2,
     )

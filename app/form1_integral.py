@@ -49,6 +49,13 @@ IDS_BLOCO_2 = (
     "OUV.4", "ESIC.1", "ESIC.2",
 )
 
+# O identificador 2.1 permanece na posição canônica do Bloco 2. Quando o
+# Registro possui a confirmação histórica de canais feita pelo APA, a pergunta
+# é projetada em modo de consulta e deixa de integrar o recorte editável do ARP.
+IDS_BLOCO_2_SEM_PORTA_ENTRADA = tuple(
+    campo_id for campo_id in IDS_BLOCO_2 if campo_id != "2.1"
+)
+
 IDS_PARTICIPANTE_BLOCO_3 = ("3.2", "3.3", "3.4", "3.4.1", "3.5", "3.5.1")
 
 CONDICOES_BLOCO_2 = {

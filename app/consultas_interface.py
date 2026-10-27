@@ -240,11 +240,20 @@ def carregar_registro(sessao, conta_id, registro_id):
         .where(RegistroCanal.registro_id == registro.id)
         .order_by(RegistroCanal.canal_nome_snapshot)
     ).all() if confirmacao_canais is not None else []
+    confirmador_canais = (
+        None if confirmacao_canais is None
+        else sessao.get(Pessoa, confirmacao_canais.confirmado_por_id)
+    )
     resumo["confirmacao_canais"] = (
         None if confirmacao_canais is None else {
             "objeto_id": confirmacao_canais.objeto_id,
             "confirmado_por_id": confirmacao_canais.confirmado_por_id,
             "confirmado_em": confirmacao_canais.confirmado_em,
+            "confirmado_por_nome": (
+                confirmador_canais.nome
+                if confirmador_canais is not None
+                else confirmacao_canais.confirmado_por_id
+            ),
             "canais": [
                 {"id": item.canal_id_snapshot, "nome": item.canal_nome_snapshot}
                 for item in canais_registro
@@ -285,6 +294,34 @@ def carregar_registro(sessao, conta_id, registro_id):
     if rascunho_integral is not None:
         pessoa = sessao.get(Pessoa, rascunho_integral.salvo_por)
         autor_integral = pessoa.nome if pessoa is not None else rascunho_integral.salvo_por
+    resposta_legada_2_1 = (
+        None if rascunho_integral is None
+        else rascunho_integral.conteudo.get("respostas", {}).get("2.1")
+    )
+    if confirmacao_canais is None:
+        leitura_2_1 = {
+            "estado": "sem_confirmacao_historica",
+            "somente_leitura": False,
+            "canais": [],
+            "resposta_legada": resposta_legada_2_1,
+            "confirmado_por": None,
+            "confirmado_em": None,
+        }
+    else:
+        leitura_2_1 = {
+            "estado": (
+                "canais_confirmados" if canais_registro
+                else "ausencia_confirmada"
+            ),
+            "somente_leitura": True,
+            "canais": [
+                {"id": item.canal_id_snapshot, "nome": item.canal_nome_snapshot}
+                for item in canais_registro
+            ],
+            "resposta_legada": resposta_legada_2_1,
+            "confirmado_por": resumo["confirmacao_canais"]["confirmado_por_nome"],
+            "confirmado_em": confirmacao_canais.confirmado_em,
+        }
     pode_editar_integral = bool(
         atribuicao_integral is not None
         and atribuicao_integral.arp_atual_id == identidade["pessoa_id"]
@@ -378,6 +415,7 @@ def carregar_registro(sessao, conta_id, registro_id):
         "campos_bloco_2": {
             campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_2
         },
+        "leitura_2_1": leitura_2_1,
         "campo_3_1": metadado_integral("3.1"),
         "campos_participante": {
             campo_id: metadado_integral(campo_id)
