@@ -11,6 +11,18 @@
     <div><dt>Secretaria responsável</dt><dd>{{ registro.unidade }}</dd></div>
     <div><dt>Contexto de atuação</dt><dd>{{ registro.contexto_id }}</dd></div>
   </dl>
+  <div class="canais-confirmados">
+    <strong>Canais habituais confirmados na abertura</strong>
+    {% if registro.confirmacao_canais is none %}
+    <p class="ajuda">Não houve confirmação de canais neste Registro, criado antes deste incremento.</p>
+    {% elif registro.confirmacao_canais.canais %}
+    <ul>
+      {% for canal in registro.confirmacao_canais.canais %}<li>{{ canal.nome }}</li>{% endfor %}
+    </ul>
+    {% else %}
+    <p class="ajuda">Nenhum canal foi confirmado como aplicável.</p>
+    {% endif %}
+  </div>
 </section>
 
 {% if mensagem %}

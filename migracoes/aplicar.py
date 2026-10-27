@@ -25,6 +25,7 @@ from migracoes.rascunho_versoes import aplicar as migracao_0002
 from migracoes.rascunho_form1_integral import aplicar as migracao_0012
 from migracoes.continuidade_apa import aplicar as migracao_0013
 from migracoes.objeto_canal import aplicar as migracao_0014
+from migracoes.canais_registro import aplicar as migracao_0015
 
 MIGRACOES = [
     # (número, nome, função que recebe a sessão)
@@ -41,6 +42,7 @@ MIGRACOES = [
     (12, "rascunho do FORM 1 integral — Bloco 1", migracao_0012),
     (13, "continuidade institucional do APA titular e suplentes", migracao_0013),
     (14, "vínculo de canais com serviços, processos e atividades", migracao_0014),
+    (15, "retrato dos canais confirmados na abertura do Registro", migracao_0015),
 ]
 
 

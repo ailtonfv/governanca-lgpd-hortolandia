@@ -102,6 +102,7 @@ def criar_registro_pela_tela(
     objeto_principal_id: str = Form(max_length=50),
     unidade_id: str = Form(max_length=50),
     contexto_id: str = Form(max_length=20),
+    canais_ids: list[str] | None = Form(default=None),
     sessao: Session = Depends(obter_sessao),
 ):
     objeto = sessao.get(ObjetoCatalogo, objeto_principal_id)
@@ -123,6 +124,7 @@ def criar_registro_pela_tela(
         contexto_id=contexto_id,
         titulo_objeto=objeto.nome_canonico,
         objeto_principal_id=objeto.id,
+        canais_confirmados_ids=[] if canais_ids is None else canais_ids,
     )
     sessao.commit()
     if resultado["permitido"]:

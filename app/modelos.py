@@ -726,3 +726,44 @@ class ObjetoCanal(Base):
         Index("uq_objeto_canal_vigente", "objeto_id", "canal_id", unique=True,
               postgresql_where=(vigente_ate.is_(None))),
     )
+
+
+class ConfirmacaoCanaisRegistro(Base):
+    """Projeção da confirmação feita pelo APA durante a abertura.
+
+    Existe uma linha mesmo quando nenhum canal foi confirmado. Registros
+    anteriores à funcionalidade permanecem sem esta projeção e não são
+    reinterpretados silenciosamente.
+    """
+    __tablename__ = "confirmacao_canais_registro"
+
+    registro_id = Column(String(36), ForeignKey("registro.id"), primary_key=True)
+    objeto_id = Column(String(50), ForeignKey("objeto_catalogo.id"), nullable=False)
+    confirmado_por_id = Column(String(50), ForeignKey("pessoa.id"), nullable=False)
+    confirmado_em = Column(DateTime(timezone=True), nullable=False)
+
+
+class RegistroCanal(Base):
+    """Canal confirmado na abertura, com referência e retrato históricos.
+
+    O vínculo original pode ser encerrado e o nome canônico pode evoluir sem
+    alterar o que o APA confirmou para um Registro já existente.
+    """
+    __tablename__ = "registro_canal"
+
+    id = Column(Integer, primary_key=True)
+    registro_id = Column(
+        String(36), ForeignKey("confirmacao_canais_registro.registro_id"), nullable=False
+    )
+    objeto_canal_id = Column(Integer, ForeignKey("objeto_canal.id"), nullable=False)
+    objeto_id_snapshot = Column(String(50), nullable=False)
+    canal_id_snapshot = Column(String(50), nullable=False)
+    canal_nome_snapshot = Column(String(200), nullable=False)
+    confirmado_por_id = Column(String(50), ForeignKey("pessoa.id"), nullable=False)
+    confirmado_em = Column(DateTime(timezone=True), nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint(
+            "registro_id", "canal_id_snapshot", name="uq_registro_canal_confirmado"
+        ),
+    )

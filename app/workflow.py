@@ -10,13 +10,14 @@
 import uuid
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import IntegrityError
 from app.modelos import (AcaoObrigatoria, Conta, Designacao, Registro, Ciclo, Instrumento,
                          ObjetoCatalogo, ObjetoContextoCatalogo, UnidadeObjetoCatalogo,
                          Pendencia, RegistroObjeto, ContextoAtuacao,
                          FamiliaContexto, ObjetoBase, Transversalidade, ContadorRegistro,
+                         Canal, ObjetoCanal, ConfirmacaoCanaisRegistro, RegistroCanal,
                          PAPEIS_ASSUNTO, PAPEIS_CITADOS)
 from app.eventos import registrar_evento, registrar_auditoria
 from app.permissoes import tem_papel
@@ -159,7 +160,8 @@ def acoes_para(sessao, pessoa_id, registro_id):
 
 def criar_registro(sessao, *, comando_id, conta_id, unidade_id, contexto_id, titulo_objeto,
                    objeto_principal_id, objetos_abrangidos_ids=(), objetos_citados=None,
-                   resolucao_familia=None, justificativa=None, momento=None):
+                   resolucao_familia=None, justificativa=None, momento=None,
+                   canais_confirmados_ids=None):
     """Ato G1 — Criar Registro (SAD 04, seção 7), com a prevenção de duplicidade (DA-36, DA-38, D1, D2).
 
     Papéis EXPLÍCITOS (nunca pela ordem de uma lista):
@@ -169,6 +171,9 @@ def criar_registro(sessao, *, comando_id, conta_id, unidade_id, contexto_id, tit
     contexto_id: UM contexto de atuação para o Registro (D1).
     resolucao_familia / justificativa: resposta do agente responsável a uma advertência de família (D2).
     momento: relógio injetável (os testes não dependem da data do computador).
+    canais_confirmados_ids: quando diferente de ``None``, confirmação explícita
+      dos canais habituais do objeto principal; uma lista vazia confirma nenhum.
+      ``None`` preserva integralmente o percurso legado da PoC nuclear.
 
     Ordem (DA-38, item 9): barreiras -> 1. equivalência -> 2. família -> 3. alerta estrutural -> resultado.
     Devolve o RESULTADO (dicionário). Numa repetição do pedido, o mesmo resultado com reexecutado = True.
@@ -176,10 +181,14 @@ def criar_registro(sessao, *, comando_id, conta_id, unidade_id, contexto_id, tit
     momento = momento or agora_utc()
     citados = dict(objetos_citados or {})
     abrangidos = list(objetos_abrangidos_ids)
+    canais_informados = (None if canais_confirmados_ids is None
+                         else list(canais_confirmados_ids))
     parametros = {"conta_id": conta_id, "unidade_id": unidade_id, "contexto_id": contexto_id,
                   "titulo_objeto": titulo_objeto, "objeto_principal_id": objeto_principal_id,
                   "objetos_abrangidos_ids": abrangidos, "objetos_citados": citados,
                   "resolucao_familia": resolucao_familia, "justificativa": justificativa}
+    if canais_informados is not None:
+        parametros["canais_confirmados_ids"] = sorted(canais_informados)
 
     conta = sessao.get(Conta, conta_id)
     pessoa_id = conta.pessoa_id if conta is not None else None
@@ -245,6 +254,37 @@ def criar_registro(sessao, *, comando_id, conta_id, unidade_id, contexto_id, tit
     if resolucao_familia is not None and resolucao_familia not in RESOLUCOES_DE_FAMILIA:
         return negar("resolução de advertência inválida")
 
+    # A confirmação ampliada é opcional para preservar o contrato nuclear. Quando
+    # usada, aceita um subconjunto (inclusive vazio) dos vínculos vigentes do objeto
+    # principal. Código repetido, inativo, encerrado ou forjado é recusado.
+    canais_confirmados = None
+    if canais_informados is not None:
+        if len(canais_informados) != len(set(canais_informados)):
+            return negar("o mesmo canal foi informado mais de uma vez")
+        linhas_canais = sessao.execute(
+            select(ObjetoCanal, Canal)
+            .join(Canal, Canal.id == ObjetoCanal.canal_id)
+            .where(
+                ObjetoCanal.objeto_id == objeto_principal_id,
+                ObjetoCanal.canal_id.in_(canais_informados),
+                ObjetoCanal.vigente_de <= momento,
+                or_(ObjetoCanal.vigente_ate.is_(None), ObjetoCanal.vigente_ate > momento),
+                Canal.ativo.is_(True),
+            )
+            .order_by(ObjetoCanal.canal_id)
+        ).all() if canais_informados else []
+        if {vinculo.canal_id for vinculo, _ in linhas_canais} != set(canais_informados):
+            return negar("canal fora dos vínculos habituais vigentes do objeto")
+        canais_confirmados = [
+            {
+                "objeto_canal_id": vinculo.id,
+                "objeto_id": vinculo.objeto_id,
+                "canal_id": vinculo.canal_id,
+                "canal_nome": canal.nome_canonico,
+            }
+            for vinculo, canal in linhas_canais
+        ]
+
     # 2. verificação 1 — equivalência bloqueadora (todos os conflitos)
     conflitos = conflitos_de_equivalencia(sessao, assunto, contexto.id)
     if conflitos:
@@ -287,7 +327,7 @@ def criar_registro(sessao, *, comando_id, conta_id, unidade_id, contexto_id, tit
         with sessao.begin_nested():
             registro, evento = _nascer_registro(sessao, comando, conta_id, unidade_id, objetos, papeis,
                                                 contexto, titulo_objeto, advertencia, alertas,
-                                                exercicio_apa, momento)
+                                                exercicio_apa, momento, canais_confirmados)
     except IntegrityError as erro:
         if nome_da_restricao(erro) != RESTRICAO_EQUIVALENCIA:
             raise                                    # defeito: precisa aparecer, não ser mascarado
@@ -302,16 +342,22 @@ def criar_registro(sessao, *, comando_id, conta_id, unidade_id, contexto_id, tit
     motivo = {None: "criado", "tratamento_autonomo": "criado com justificativa",
               "objeto_transversal": "criado — advertência resolvida por transversalidade vigente"}[
         advertencia and advertencia["resolucao"]]
-    resultado = fechar_comando(comando, {"permitido": True, "motivo": motivo,
-                                         "registro_id": registro.id, "codigo_lgpd": registro.codigo_lgpd,
-                                         "evento_g1": evento.sequencia_cadeia,
-                                         "advertencia": advertencia, "alertas": alertas})
+    conteudo_resultado = {"permitido": True, "motivo": motivo,
+                          "registro_id": registro.id, "codigo_lgpd": registro.codigo_lgpd,
+                          "evento_g1": evento.sequencia_cadeia,
+                          "advertencia": advertencia, "alertas": alertas}
+    if canais_confirmados is not None:
+        conteudo_resultado["canais_confirmados"] = [
+            item["canal_id"] for item in canais_confirmados
+        ]
+    resultado = fechar_comando(comando, conteudo_resultado)
     sessao.flush()
     return resultado
 
 
 def _nascer_registro(sessao, comando, conta_id, unidade_id, objetos, papeis, contexto,
-                     titulo_objeto, advertencia, alertas, exercicio_apa, momento):
+                     titulo_objeto, advertencia, alertas, exercicio_apa, momento,
+                     canais_confirmados=None):
     """Cria o Registro (com o número do ano), o ciclo 1, o FORM 1, os vínculos e o ato G1."""
     ano = ano_administrativo(momento)
     numero = proximo_numero_do_ano(sessao, ano)
@@ -330,6 +376,25 @@ def _nascer_registro(sessao, comando, conta_id, unidade_id, objetos, papeis, con
     for objeto_id, papel in papeis.items():         # a reserva dos objetos: aqui a trava do banco atua
         sessao.add(RegistroObjeto(registro_id=registro.id, objeto_id=objeto_id, papel=papel,
                                   contexto_atuacao_id=contexto.id if papel in PAPEIS_ASSUNTO else None))
+    if canais_confirmados is not None:
+        principal_id = principal.id
+        sessao.add(ConfirmacaoCanaisRegistro(
+            registro_id=registro.id,
+            objeto_id=principal_id,
+            confirmado_por_id=comando.ator_id,
+            confirmado_em=momento,
+        ))
+        sessao.flush()
+        for canal in canais_confirmados:
+            sessao.add(RegistroCanal(
+                registro_id=registro.id,
+                objeto_canal_id=canal["objeto_canal_id"],
+                objeto_id_snapshot=canal["objeto_id"],
+                canal_id_snapshot=canal["canal_id"],
+                canal_nome_snapshot=canal["canal_nome"],
+                confirmado_por_id=comando.ator_id,
+                confirmado_em=momento,
+            ))
     sessao.flush()
 
     conteudo = {"objetos": [{"id": o, "papel": p} for o, p in papeis.items()],
@@ -342,10 +407,20 @@ def _nascer_registro(sessao, comando, conta_id, unidade_id, objetos, papeis, con
         conteudo["advertencia_familia"] = advertencia
     if alertas:
         conteudo["alertas"] = alertas
+    if canais_confirmados is not None:
+        conteudo["canais_habituais_confirmados"] = [
+            {
+                "objeto_canal_id": canal["objeto_canal_id"],
+                "objeto_id": canal["objeto_id"],
+                "canal_id": canal["canal_id"],
+                "canal_nome_snapshot": canal["canal_nome"],
+            }
+            for canal in canais_confirmados
+        ]
     evento = registrar_evento(sessao, comando, "registro", registro.codigo_lgpd, "criar_registro",
                               conteudo, codigo_evento="G1", registro_id=registro.id,
                               ciclo_id=ciclo.id, em_nome_de=exercicio_apa["em_nome_de"],
-                              versao_esquema_evento=2)
+                              versao_esquema_evento=(3 if canais_confirmados is not None else 2))
     ciclo.evento_inicio_id = evento.id
     registro.sequencia_atual = evento.sequencia_cadeia
     sessao.flush()

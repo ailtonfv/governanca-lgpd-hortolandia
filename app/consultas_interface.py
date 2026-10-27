@@ -1,6 +1,6 @@
 """Consultas preparadas para a interface, sem regras de negócio nos templates."""
 
-from sqlalchemy import select
+from sqlalchemy import func, or_, select
 
 from app.alertas_operacionais import listar_alertas_operacionais
 from app.continuidade_apa import apa_em_exercicio, unidades_em_que_e_apa_atual
@@ -12,7 +12,8 @@ from app.form1_integral import (CONDICOES_BLOCO_2, CONDICOES_BLOCO_4,
                                 IDS_PARTICIPANTE_BLOCO_3,
                                 campos_por_id)
 from app.modelos import (AtribuicaoForm1Integral, Conta, ContextoAtuacao, Designacao, Instrumento,
-                         ObjetoCatalogo, ObjetoContextoCatalogo,
+                         Canal, ConfirmacaoCanaisRegistro, ObjetoCanal,
+                         ObjetoCatalogo, ObjetoContextoCatalogo, RegistroCanal,
                          UnidadeObjetoCatalogo, Pendencia, Pessoa,
                           RascunhoForm1Integral, RascunhoInstrumento, Registro, Unidade)
 
@@ -176,6 +177,24 @@ def carregar_opcoes_novo_registro(sessao, conta_id):
         item["unidades"].append(unidade_id)
     objetos = list(objetos_por_id.values())
     ids_objetos = set(objetos_por_id)
+    linhas_canais = sessao.execute(
+        select(ObjetoCanal, Canal)
+        .join(Canal, Canal.id == ObjetoCanal.canal_id)
+        .where(
+            ObjetoCanal.objeto_id.in_(ids_objetos),
+            ObjetoCanal.vigente_de <= func.now(),
+            or_(ObjetoCanal.vigente_ate.is_(None), ObjetoCanal.vigente_ate > func.now()),
+            Canal.ativo.is_(True),
+        )
+        .order_by(ObjetoCanal.objeto_id, Canal.nome_canonico)
+    ).all() if ids_objetos else []
+    for vinculo, canal in linhas_canais:
+        objetos_por_id[vinculo.objeto_id].setdefault("canais", []).append({
+            "id": canal.id,
+            "nome": canal.nome_canonico,
+        })
+    for objeto in objetos:
+        objeto.setdefault("canais", [])
     linhas_contextos = sessao.execute(
         select(ContextoAtuacao, ObjetoContextoCatalogo.objeto_id)
         .join(ObjetoContextoCatalogo,
@@ -215,6 +234,23 @@ def carregar_registro(sessao, conta_id, registro_id):
         return identidade, False
     unidade = sessao.get(Unidade, registro.unidade_principal_atual_id)
     resumo = _resumo_registro(registro, unidade)
+    confirmacao_canais = sessao.get(ConfirmacaoCanaisRegistro, registro.id)
+    canais_registro = sessao.scalars(
+        select(RegistroCanal)
+        .where(RegistroCanal.registro_id == registro.id)
+        .order_by(RegistroCanal.canal_nome_snapshot)
+    ).all() if confirmacao_canais is not None else []
+    resumo["confirmacao_canais"] = (
+        None if confirmacao_canais is None else {
+            "objeto_id": confirmacao_canais.objeto_id,
+            "confirmado_por_id": confirmacao_canais.confirmado_por_id,
+            "confirmado_em": confirmacao_canais.confirmado_em,
+            "canais": [
+                {"id": item.canal_id_snapshot, "nome": item.canal_nome_snapshot}
+                for item in canais_registro
+            ],
+        }
+    )
     instrumento = sessao.scalars(
         select(Instrumento).where(
             Instrumento.registro_id == registro.id,

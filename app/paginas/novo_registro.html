@@ -45,7 +45,29 @@
     </select>
     <p class="ajuda">O nome oficial vem do catálogo; não é digitado livremente.</p>
 
-    <label for="contexto_id">4. Contexto de atuação</label>
+    <fieldset id="canais-habituais" aria-describedby="ajuda-canais">
+      <legend>4. Canais habituais aplicáveis</legend>
+      <p class="ajuda" id="ajuda-canais">Confirme somente os meios habituais pelos quais a demanda chega a este objeto. Eles não representam cidadãos, telefonemas nem protocolos individuais. Desmarcar todas as opções confirma que nenhum canal se aplica.</p>
+      {% for objeto in objetos %}
+        {% if objeto.canais %}
+        <div class="grupo-canais" data-objeto-canais="{{ objeto.id }}" hidden>
+          <p><strong>{{ objeto.nome_canonico }}</strong></p>
+          <div class="grade-opcoes">
+            {% for canal in objeto.canais %}
+            <label class="opcao" for="canal-{{ objeto.id }}-{{ canal.id }}">
+              <input id="canal-{{ objeto.id }}-{{ canal.id }}" type="checkbox"
+                     name="canais_ids" value="{{ canal.id }}" checked disabled>
+              <span>{{ canal.nome }}</span>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      {% endfor %}
+      <p id="canais-sem-vinculo" class="aviso-leitura" hidden>Este item não possui canais habituais vigentes no catálogo. A confirmação será registrada sem canais.</p>
+    </fieldset>
+
+    <label for="contexto_id">5. Contexto de atuação</label>
     <select id="contexto_id" name="contexto_id" aria-describedby="exemplo-contexto" required>
       <option value="">Selecione o contexto</option>
       {% for contexto in contextos %}<option value="{{ contexto.id }}" data-objetos="{{ contexto.objetos|join(',') }}">{{ contexto.nome }}</option>{% endfor %}
@@ -67,12 +89,27 @@
   const unidade = document.getElementById('unidade_id');
   const objeto = document.getElementById('objeto_principal_id');
   const contexto = document.getElementById('contexto_id');
+  const gruposCanais = document.querySelectorAll('[data-objeto-canais]');
+  const canaisSemVinculo = document.getElementById('canais-sem-vinculo');
+  function filtrarCanais() {
+    let quantidadeVisivel = 0;
+    for (const grupo of gruposCanais) {
+      const ativo = Boolean(objeto.value && grupo.dataset.objetoCanais === objeto.value);
+      grupo.hidden = !ativo;
+      for (const campo of grupo.querySelectorAll('input[name="canais_ids"]')) {
+        campo.disabled = !ativo;
+        if (ativo) quantidadeVisivel += 1;
+      }
+    }
+    canaisSemVinculo.hidden = !objeto.value || quantidadeVisivel > 0;
+  }
   function filtrarContextos() {
     for (const opcao of contexto.options) {
       const objetos = (opcao.dataset.objetos || '').split(',');
       opcao.hidden = Boolean(opcao.value && !objetos.includes(objeto.value));
     }
     contexto.value = '';
+    filtrarCanais();
   }
   function filtrarObjetos() {
     const tipo = document.querySelector('input[name="tipo_objeto"]:checked')?.value;
