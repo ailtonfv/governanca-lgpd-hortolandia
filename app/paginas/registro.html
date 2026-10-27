@@ -157,7 +157,7 @@
     <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-2">
       <p class="etiqueta">Etapa 1 de 4 · Bloco 2 de 14</p>
       <h3 id="titulo-bloco-2">Entrada, recepção e execução</h3>
-      <p class="ajuda">Descreva o fluxo recorrente, sem inserir nomes de munícipes, protocolos ou dados de casos concretos. A confirmação histórica de canais é exibida em consulta; sua integração com as ramificações de Ouvidoria e e-SIC será realizada em incremento posterior.</p>
+      <p class="ajuda">Descreva o fluxo recorrente, sem inserir nomes de munícipes, protocolos ou dados de casos concretos. As ramificações de Ouvidoria e e-SIC são apresentadas independentemente, conforme a classificação dos canais confirmados pelo APA.</p>
 
       {% set leitura_2_1 = registro.form1_integral.leitura_2_1 %}
       {% set campo_2_1 = registro.form1_integral.campos_bloco_2['2.1'] %}
@@ -185,9 +185,9 @@
         <input type="hidden" name="comando_id" value="{{ comando_salvar_bloco_2 }}">
         <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
         {% for campo in registro.form1_integral.campos_bloco_2.values() %}
-        {% if campo.id != '2.1' or not leitura_2_1.somente_leitura %}
-        <div class="campo-integral{% if campo.condicao %} campo-condicional{% endif %}"
-             {% if campo.condicao %}data-depende-de="campo__{{ campo.condicao[0] }}" data-valores="{{ campo.condicao[1] | join('||') }}"{% endif %}>
+        {% if (campo.id != '2.1' or not leitura_2_1.somente_leitura) and campo.condicao_canal_ativa is not sameas false %}
+        <div class="campo-integral{% if campo.condicao and campo.condicao_canal_ativa is none %} campo-condicional{% endif %}"
+             {% if campo.condicao and campo.condicao_canal_ativa is none %}data-depende-de="campo__{{ campo.condicao[0] }}" data-valores="{{ campo.condicao[1] | join('||') }}"{% endif %}>
           <label><strong>{{ campo.id }} — {{ campo.pergunta }}</strong></label>
           {% if campo.controle == 'seleção múltipla (combo com marcações)' %}
           <div class="grade-opcoes">
@@ -220,7 +220,7 @@
       <p class="aviso-leitura">Somente o ARP atual pode alterar este rascunho.</p>
       <dl class="resumo respostas-somente-leitura">
         {% for campo in registro.form1_integral.campos_bloco_2.values() %}
-        {% if campo.id != '2.1' and respostas_integral.get(campo.id) %}<div><dt>{{ campo.id }} — {{ campo.pergunta }}</dt><dd>{{ respostas_integral.get(campo.id) | join(', ') if respostas_integral.get(campo.id) is not string else respostas_integral.get(campo.id) }}</dd></div>{% endif %}
+        {% if campo.id != '2.1' and campo.condicao_canal_ativa is not sameas false and respostas_integral.get(campo.id) %}<div><dt>{{ campo.id }} — {{ campo.pergunta }}</dt><dd>{{ respostas_integral.get(campo.id) | join(', ') if respostas_integral.get(campo.id) is not string else respostas_integral.get(campo.id) }}</dd></div>{% endif %}
         {% endfor %}
       </dl>
       {% endif %}

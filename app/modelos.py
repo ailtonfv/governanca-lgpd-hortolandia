@@ -701,7 +701,15 @@ class Canal(Base):
 
     id = Column(String(50), primary_key=True)                 # identificador canônico (ex.: CNL-001)
     nome_canonico = Column(String(200), nullable=False)       # ex.: Balcão de atendimento
+    classificacao_form1 = Column(String(20))                  # Ouvidoria/e-SIC; vazio nos canais genéricos
     ativo = Column(Boolean, nullable=False, default=True)     # desativado, nunca apagado
+
+    __table_args__ = (
+        CheckConstraint(
+            "classificacao_form1 IS NULL OR classificacao_form1 IN ('Ouvidoria', 'e-SIC')",
+            name="ck_canal_classificacao_form1",
+        ),
+    )
 
 
 class ObjetoCanal(Base):
@@ -759,11 +767,17 @@ class RegistroCanal(Base):
     objeto_id_snapshot = Column(String(50), nullable=False)
     canal_id_snapshot = Column(String(50), nullable=False)
     canal_nome_snapshot = Column(String(200), nullable=False)
+    classificacao_form1_snapshot = Column(String(20))
     confirmado_por_id = Column(String(50), ForeignKey("pessoa.id"), nullable=False)
     confirmado_em = Column(DateTime(timezone=True), nullable=False)
 
     __table_args__ = (
         UniqueConstraint(
             "registro_id", "canal_id_snapshot", name="uq_registro_canal_confirmado"
+        ),
+        CheckConstraint(
+            "classificacao_form1_snapshot IS NULL OR "
+            "classificacao_form1_snapshot IN ('Ouvidoria', 'e-SIC')",
+            name="ck_registro_canal_classificacao_form1",
         ),
     )

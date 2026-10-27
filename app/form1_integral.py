@@ -72,6 +72,15 @@ CONDICOES_BLOCO_2 = {
     "ESIC.2": ("2.1", ("e-SIC",)),
 }
 
+CONDICOES_CANAIS_BLOCO_2 = {
+    "OUV.1": "Ouvidoria",
+    "OUV.2": "Ouvidoria",
+    "OUV.3": "Ouvidoria",
+    "OUV.4": "Ouvidoria",
+    "ESIC.1": "e-SIC",
+    "ESIC.2": "e-SIC",
+}
+
 IDS_BLOCO_4 = (
     "4.1", "4.2", "4.2.1", "4.2.2", "4.2.3", "4.2.4", "4.2.4.1",
     "4.2.5", "4.2.5.1",

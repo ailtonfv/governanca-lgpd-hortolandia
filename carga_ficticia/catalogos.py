@@ -37,9 +37,12 @@ OBJETOS_POR_UNIDADE = [
 ]
 
 CANAIS = [
-    ("CNL-001", "Balcão de atendimento (fictício)"),
-    ("CNL-002", "Portal da Prefeitura (fictício)"),
-    ("CNL-003", "Telefone (fictício)"),
+    # id, nome, classificação exata na REV13 quando aplicável
+    ("CNL-001", "Balcão de atendimento (fictício)", None),
+    ("CNL-002", "Portal da Prefeitura (fictício)", None),
+    ("CNL-003", "Telefone (fictício)", None),
+    ("CNL-004", "Ouvidoria (fictícia)", "Ouvidoria"),
+    ("CNL-005", "e-SIC (fictício)", "e-SIC"),
 ]
 
 # (objeto, canal): vínculos legados de serviços, preservados sem inventar novas associações
@@ -155,9 +158,17 @@ def semear(sessao):
                 fonte="carga fictícia da PoC",
             ))
             novos += 1
-    for cid, nome in CANAIS:
-        if sessao.get(Canal, cid) is None:
-            sessao.add(Canal(id=cid, nome_canonico=nome)); novos += 1
+    for cid, nome, classificacao_form1 in CANAIS:
+        canal = sessao.get(Canal, cid)
+        if canal is None:
+            sessao.add(Canal(
+                id=cid,
+                nome_canonico=nome,
+                classificacao_form1=classificacao_form1,
+            ))
+            novos += 1
+        elif canal.classificacao_form1 != classificacao_form1:
+            canal.classificacao_form1 = classificacao_form1
     for fid, nome in FAMILIAS:
         if sessao.get(FamiliaContexto, fid) is None:
             sessao.add(FamiliaContexto(id=fid, nome=nome, mutuamente_exclusiva=False)); novos += 1

@@ -281,6 +281,7 @@ def criar_registro(sessao, *, comando_id, conta_id, unidade_id, contexto_id, tit
                 "objeto_id": vinculo.objeto_id,
                 "canal_id": vinculo.canal_id,
                 "canal_nome": canal.nome_canonico,
+                "classificacao_form1": canal.classificacao_form1,
             }
             for vinculo, canal in linhas_canais
         ]
@@ -392,6 +393,7 @@ def _nascer_registro(sessao, comando, conta_id, unidade_id, objetos, papeis, con
                 objeto_id_snapshot=canal["objeto_id"],
                 canal_id_snapshot=canal["canal_id"],
                 canal_nome_snapshot=canal["canal_nome"],
+                classificacao_form1_snapshot=canal["classificacao_form1"],
                 confirmado_por_id=comando.ator_id,
                 confirmado_em=momento,
             ))
@@ -414,6 +416,10 @@ def _nascer_registro(sessao, comando, conta_id, unidade_id, objetos, papeis, con
                 "objeto_id": canal["objeto_id"],
                 "canal_id": canal["canal_id"],
                 "canal_nome_snapshot": canal["canal_nome"],
+                **(
+                    {"classificacao_form1_snapshot": canal["classificacao_form1"]}
+                    if canal["classificacao_form1"] is not None else {}
+                ),
             }
             for canal in canais_confirmados
         ]

@@ -7,6 +7,7 @@ from app.continuidade_apa import apa_em_exercicio, unidades_em_que_e_apa_atual
 from app.form1_sintetico import (CATEGORIAS_DADOS, CATEGORIAS_TITULARES,
                                  DESTINATARIOS_COMPARTILHAMENTO)
 from app.form1_integral import (CONDICOES_BLOCO_2, CONDICOES_BLOCO_4,
+                                CONDICOES_CANAIS_BLOCO_2,
                                 FAIXAS_VOLUME_REV13, IDS_BLOCO_2, IDS_BLOCO_4,
                                 IDS_BLOCO_5,
                                 IDS_PARTICIPANTE_BLOCO_3,
@@ -356,6 +357,14 @@ def carregar_registro(sessao, conta_id, registro_id):
             "condicao": (
                 CONDICOES_BLOCO_2.get(campo_id)
                 or CONDICOES_BLOCO_4.get(campo_id)
+            ),
+            "condicao_canal_ativa": (
+                None
+                if confirmacao_canais is None
+                or campo_id not in CONDICOES_CANAIS_BLOCO_2
+                else CONDICOES_CANAIS_BLOCO_2[campo_id] in {
+                    item.classificacao_form1_snapshot for item in canais_registro
+                }
             ),
         }
     candidatos_arp = sessao.scalars(

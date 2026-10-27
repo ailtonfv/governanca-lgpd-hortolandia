@@ -17,6 +17,7 @@ from sqlalchemy import select
 from app.comandos import abrir_comando, fechar_comando
 from app.eventos import lacre, registrar_auditoria, registrar_evento
 from app.form1_integral import (CONDICOES_BLOCO_1, CONDICOES_BLOCO_2,
+                                CONDICOES_CANAIS_BLOCO_2,
                                 CONDICOES_BLOCO_4,
                                 CONDICOES_PARTICIPANTE_BLOCO_3,
                                 FAIXAS_VOLUME_REV13, IDS_BLOCO_2, IDS_BLOCO_4,
@@ -27,7 +28,7 @@ from app.form1_integral import (CONDICOES_BLOCO_1, CONDICOES_BLOCO_2,
                                 campos_por_id)
 from app.modelos import (AtribuicaoForm1Integral, Ciclo, ConfirmacaoCanaisRegistro,
                           Conta, Pessoa,
-                          RascunhoForm1Integral, Registro, Unidade)
+                          RascunhoForm1Integral, Registro, RegistroCanal, Unidade)
 from app.permissoes import tem_papel
 
 
@@ -264,11 +265,15 @@ def _validar_respostas_catalogadas(sessao, respostas, campos_permitidos):
     return None
 
 
-def _validar_condicionais(respostas, condicoes):
+def _validar_condicionais(respostas, condicoes, ativacao_externa=None):
     """Recusa resposta enviada para ramo que não está ativo no mesmo recorte."""
 
+    ativacao_externa = ativacao_externa or {}
     for campo_id, (campo_controlador, valores_ativos) in condicoes.items():
-        if campo_id in respostas and respostas.get(campo_controlador) not in valores_ativos:
+        esta_ativo = ativacao_externa.get(
+            campo_id, respostas.get(campo_controlador) in valores_ativos
+        )
+        if campo_id in respostas and not esta_ativo:
             return (
                 f"{campo_id}: campo condicional inativo para a resposta de "
                 f"{campo_controlador}"
@@ -277,16 +282,19 @@ def _validar_condicionais(respostas, condicoes):
 
 
 def _conteudo_com_respostas_do_bloco(
-    rascunho, *, campos_editaveis, respostas, condicoes,
+    rascunho, *, campos_editaveis, respostas, condicoes, ativacao_externa=None,
 ):
     """Substitui um bloco e preserva respostas que perderam aplicabilidade."""
 
     atuais = dict(rascunho.conteudo.get("respostas", {}))
     inativas = dict(rascunho.conteudo.get("respostas_inativas", {}))
+    ativacao_externa = ativacao_externa or {}
     proxima_versao = rascunho.versao_rascunho + 1
     for campo_id, (campo_controlador, valores_ativos) in condicoes.items():
         valor_anterior = atuais.get(campo_id)
-        esta_ativo = respostas.get(campo_controlador) in valores_ativos
+        esta_ativo = ativacao_externa.get(
+            campo_id, respostas.get(campo_controlador) in valores_ativos
+        )
         if not esta_ativo and valor_anterior not in (None, "", []):
             historico = inativas.get(campo_id, [])
             if isinstance(historico, dict):
@@ -452,6 +460,21 @@ def salvar_bloco_2_form1_integral(
     if resposta is not None:
         return resposta
     confirmacao_canais = sessao.get(ConfirmacaoCanaisRegistro, registro_id)
+    classificacoes_canais = frozenset()
+    ativacao_canais = None
+    if confirmacao_canais is not None:
+        classificacoes_canais = frozenset(
+            item for item in sessao.scalars(
+                select(RegistroCanal.classificacao_form1_snapshot).where(
+                    RegistroCanal.registro_id == registro_id,
+                    RegistroCanal.classificacao_form1_snapshot.is_not(None),
+                )
+            )
+        )
+        ativacao_canais = {
+            campo_id: classificacao in classificacoes_canais
+            for campo_id, classificacao in CONDICOES_CANAIS_BLOCO_2.items()
+        }
     campos_editaveis = (
         CAMPOS_EDITAVEIS_BLOCO_2
         if confirmacao_canais is None
@@ -465,7 +488,9 @@ def salvar_bloco_2_form1_integral(
     problema = problema or _validar_respostas_catalogadas(
         sessao, respostas, campos_editaveis
     )
-    problema = problema or _validar_condicionais(respostas, CONDICOES_BLOCO_2)
+    problema = problema or _validar_condicionais(
+        respostas, CONDICOES_BLOCO_2, ativacao_canais
+    )
     if problema:
         return _negar(
             sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
@@ -483,6 +508,7 @@ def salvar_bloco_2_form1_integral(
         campos_editaveis=campos_editaveis,
         respostas=respostas,
         condicoes=CONDICOES_BLOCO_2,
+        ativacao_externa=ativacao_canais,
     )
     return _salvar_conteudo(
         sessao, comando=comando, registro=registro, rascunho=rascunho,
