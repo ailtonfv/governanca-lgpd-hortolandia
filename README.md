@@ -126,7 +126,7 @@ Cada **Registro LGPD** documenta um **tratamento de dados pessoais**. Serviços,
 
 ### Canais: uma dimensão transversal
 
-Serviços, processos e atividades formam a **estrutura operacional**: os serviços **são realizados por** processos (um serviço pode ser realizado por vários processos, e um processo pode realizar vários serviços), e os processos são compostos por atividades. A expressão "depende de" fica reservada para dependência efetiva (técnica, organizacional, informacional ou operacional). Os **canais** constituem uma **dimensão transversal de atendimento** e se relacionam com os serviços em associação muitos para muitos (o serviço *é atendido pelo* canal; o canal *atende* o serviço — é uma única relação, vista dos dois lados). O canal somente possui Registro LGPD próprio quando realiza tratamento autônomo. Caso funcione apenas como meio de acesso ou encaminhamento, aparece como APOIO nos Registros dos serviços atendidos.
+Serviços, processos e atividades formam a **estrutura operacional**: os serviços **são realizados por** processos (um serviço pode ser realizado por vários processos, e um processo pode realizar vários serviços), e os processos são compostos por atividades. A expressão "depende de" fica reservada para dependência efetiva (técnica, organizacional, informacional ou operacional). Os **canais** constituem uma **dimensão transversal de atendimento** e se associam diretamente a qualquer objeto do catálogo: um Serviço, Processo ou Atividade pode possuir nenhum, um ou vários canais habituais. Cada vínculo pertence somente ao objeto informado — não há herança automática entre eles — e não representa atendimento individual, cidadão, telefonema ou protocolo. A existência de vários canais não multiplica Registros LGPD. O canal somente possui Registro próprio quando realiza tratamento autônomo; como simples meio de acesso ou encaminhamento, permanece uma informação de apoio do tratamento inventariado.
 
 ```mermaid
 flowchart TB
@@ -658,7 +658,7 @@ flowchart TD
 | Pessoas, contas, unidades e designações de papéis | ✔ dados fictícios |
 | Segregação de funções, comparando a pessoa e nunca a conta (O-66) | ✔ cenários a, b, c, e, f ¹ |
 | Criação do Registro pelo G1, com ciclo 1 e FORM 1 Não iniciado | ✔ ² |
-| Catálogo operacional e catálogo de canais, com a relação "atendido por" (DA-36, item 6) | ✔ fictícios |
+| Catálogo operacional e catálogo de canais, com vínculo vigente `ObjetoCanal` para Serviço, Processo ou Atividade (DA-36, item 6) | ✔ fictícios; sem herança automática e sem atendimentos individuais |
 | **Prevenção de duplicidade** (geral) | ✔ Etapa 2d concluída ³ |
 | ↳ Catálogos fictícios de contextos (com famílias) e de bases e conjuntos de dados, com a relação "utiliza" | ✔ Implementado |
 | ↳ Trava determinística objeto + contexto, no próprio banco | ✔ Implementada |
@@ -876,7 +876,7 @@ Essas mudanças não transferem nem reabrem Registros. `Registro.criado_por` con
 
 Após este incremento, a regressão completa aprovou **257 de 257 testes** no banco exclusivo `lgpd_poc_teste`, incluindo titular em exercício, suplente dentro e fora da vigência, retorno, sucessão definitiva, preservação do Registro, ARP e rascunho, recusas, trilha de eventos, idempotência, concorrência, rollback e migração. O contrato nuclear 2 e os Blocos 1 a 5 do FORM 1 integral permanecem preservados.
 
-O desenho candidato para **múltiplos canais** continua registrado no [Plano de estabilização antes do Bloco 5](docs/planejamento/PLANO_PRE_BLOCO_5_FORM1.md). O campo `2.1` permanece de escolha única: nenhuma mudança de canais transversais foi antecipada neste incremento.
+A associação catalogal de canais foi generalizada de `ServicoCanal` para `ObjetoCanal`, preservando os vínculos anteriores, suas vigências e a unicidade de cada par vigente. A migração 14 renomeia a estrutura e sua chave, sem copiar ou apagar linhas; no banco de demonstração, os três vínculos fictícios anteriores foram preservados, com as duas chaves estrangeiras e o índice único parcial íntegros. A regressão completa aprovou **267 de 267 testes**, incluindo a continuidade institucional do APA e dez cenários específicos de canais. Essa preparação estrutural ainda não seleciona canais na abertura nem os transporta para o formulário. O desenho funcional de **múltiplos canais** continua registrado no [Plano de estabilização antes do Bloco 5](docs/planejamento/PLANO_PRE_BLOCO_5_FORM1.md), e o campo `2.1` permanece de escolha única até incremento posterior.
 
 ### Política e Matriz de Obrigatoriedade — FORM 1 Integral
 

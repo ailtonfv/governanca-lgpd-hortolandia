@@ -704,21 +704,25 @@ class Canal(Base):
     ativo = Column(Boolean, nullable=False, default=True)     # desativado, nunca apagado
 
 
-class ServicoCanal(Base):
-    """Relação muitos para muitos entre serviço e canal (DA-36, item 6).
-    Lida de um lado: o serviço É ATENDIDO PELO canal. Do outro: o canal ATENDE o serviço.
-    Uma única relação, com vigência: encerrar é preencher vigente_ate, nunca apagar."""
-    __tablename__ = "servico_canal"
+class ObjetoCanal(Base):
+    """Relação muitos para muitos entre objeto do catálogo e canal.
+
+    Serviço, processo ou atividade pode possuir nenhum, um ou vários canais
+    habituais. O vínculo descreve o objeto, não um atendimento individual, e
+    não é herdado por outros objetos. Com vigência: encerrar é preencher
+    ``vigente_ate``; nunca apagar.
+    """
+    __tablename__ = "objeto_canal"
 
     id = Column(Integer, primary_key=True)
-    servico_id = Column(String(50), ForeignKey("objeto_catalogo.id"), nullable=False)
+    objeto_id = Column(String(50), ForeignKey("objeto_catalogo.id"), nullable=False)
     canal_id = Column(String(50), ForeignKey("canal.id"), nullable=False)
     vigente_de = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
     vigente_ate = Column(DateTime(timezone=True))             # vazio = ainda vigente
     observacao = Column(String(200))
 
     __table_args__ = (
-        # o mesmo par serviço–canal não pode estar vigente duas vezes
-        Index("uq_servico_canal_vigente", "servico_id", "canal_id", unique=True,
+        # o mesmo par objeto–canal não pode estar vigente duas vezes
+        Index("uq_objeto_canal_vigente", "objeto_id", "canal_id", unique=True,
               postgresql_where=(vigente_ate.is_(None))),
     )

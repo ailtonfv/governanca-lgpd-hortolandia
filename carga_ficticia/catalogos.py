@@ -5,7 +5,7 @@
 
 from sqlalchemy import select
 from app.modelos import (ObjetoCatalogo, UnidadeObjetoCatalogo, ObjetoContextoCatalogo,
-                         Canal, ServicoCanal, FamiliaContexto, ContextoAtuacao,
+                         Canal, ObjetoCanal, FamiliaContexto, ContextoAtuacao,
                          BaseDados, ObjetoBase)
 from carga_ficticia.seguranca import validar_ausencia_de_identificadores
 
@@ -42,8 +42,8 @@ CANAIS = [
     ("CNL-003", "Telefone (fictício)"),
 ]
 
-# (serviço, canal): o serviço é atendido pelo canal
-ATENDIMENTOS = [
+# (objeto, canal): vínculos legados de serviços, preservados sem inventar novas associações
+CANAIS_POR_OBJETO = [
     ("OBJ-SRV-001", "CNL-001"),   # 2ª via do IPTU — balcão
     ("OBJ-SRV-001", "CNL-002"),   # 2ª via do IPTU — portal
     ("OBJ-SRV-002", "CNL-001"),   # Certidão de débitos — balcão
@@ -128,7 +128,7 @@ def semear(sessao):
             "objetos": OBJETOS,
             "objetos_por_unidade": OBJETOS_POR_UNIDADE,
             "canais": CANAIS,
-            "atendimentos": ATENDIMENTOS,
+            "canais_por_objeto": CANAIS_POR_OBJETO,
             "familias": FAMILIAS,
             "contextos": CONTEXTOS,
             "contextos_por_objeto": CONTEXTOS_POR_OBJETO,
@@ -183,10 +183,13 @@ def semear(sessao):
                 fonte="carga fictícia da PoC",
             ))
             novos += 1
-    for sid, cid in ATENDIMENTOS:
-        if sessao.scalars(select(ServicoCanal).where(ServicoCanal.servico_id == sid, ServicoCanal.canal_id == cid,
-                                                     ServicoCanal.vigente_ate.is_(None))).first() is None:
-            sessao.add(ServicoCanal(servico_id=sid, canal_id=cid)); novos += 1
+    for objeto_id, canal_id in CANAIS_POR_OBJETO:
+        if sessao.scalars(select(ObjetoCanal).where(
+            ObjetoCanal.objeto_id == objeto_id,
+            ObjetoCanal.canal_id == canal_id,
+            ObjetoCanal.vigente_ate.is_(None),
+        )).first() is None:
+            sessao.add(ObjetoCanal(objeto_id=objeto_id, canal_id=canal_id)); novos += 1
     for oid, bid in USOS:
         if sessao.scalars(select(ObjetoBase).where(ObjetoBase.objeto_id == oid, ObjetoBase.base_id == bid,
                                                    ObjetoBase.vigente_ate.is_(None))).first() is None:
