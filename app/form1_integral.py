@@ -88,6 +88,13 @@ IDS_BLOCO_4 = (
 
 IDS_BLOCO_5 = ("5.1",)
 
+IDS_BLOCO_6 = ("6.1", "6.1.1", "6.2", "6.2.1", "6.2.2")
+
+CONDICOES_BLOCO_6 = {
+    "6.2.1": ("6.2", ("Sim",)),
+    "6.2.2": ("6.2", ("Sim",)),
+}
+
 CONDICOES_BLOCO_4 = {
     "4.2.1": ("4.2", ("Sim", "Em alguns casos")),
     "4.2.2": ("4.2", ("Sim", "Em alguns casos")),

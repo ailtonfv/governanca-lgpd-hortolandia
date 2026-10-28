@@ -18,10 +18,11 @@ from app.comandos import abrir_comando, fechar_comando
 from app.eventos import lacre, registrar_auditoria, registrar_evento
 from app.form1_integral import (CONDICOES_BLOCO_1, CONDICOES_BLOCO_2,
                                 CONDICOES_CANAIS_BLOCO_2,
-                                CONDICOES_BLOCO_4,
+                                CONDICOES_BLOCO_4, CONDICOES_BLOCO_6,
                                 CONDICOES_PARTICIPANTE_BLOCO_3,
                                 FAIXAS_VOLUME_REV13, IDS_BLOCO_2, IDS_BLOCO_4,
                                 IDS_BLOCO_2_SEM_PORTA_ENTRADA, IDS_BLOCO_5,
+                                IDS_BLOCO_6,
                                 IDS_PARTICIPANTE_BLOCO_3,
                                 REVISAO_FONTE_FORM1_INTEGRAL,
                                 VERSAO_CONTRATO_FORM1_INTEGRAL_CANDIDATA,
@@ -39,6 +40,7 @@ CAMPOS_EDITAVEIS_CABECALHO_BLOCO_3 = frozenset({"3.1"})
 CAMPOS_EDITAVEIS_PARTICIPANTE = frozenset(IDS_PARTICIPANTE_BLOCO_3)
 CAMPOS_EDITAVEIS_BLOCO_4 = frozenset(IDS_BLOCO_4)
 CAMPOS_EDITAVEIS_BLOCO_5 = frozenset(IDS_BLOCO_5)
+CAMPOS_EDITAVEIS_BLOCO_6 = frozenset(IDS_BLOCO_6)
 CAMPOS_SECRETARIA = frozenset({"2.2", "2.4.1"})
 CAMPOS_VOLUME = frozenset({"2.8", "2.9", "2.10"})
 CONTROLE_MULTIPLO = "seleção múltipla (combo com marcações)"
@@ -246,13 +248,14 @@ def _validar_respostas_catalogadas(sessao, respostas, campos_permitidos):
         elif campo_id in CAMPOS_VOLUME:
             if valor not in FAIXAS_VOLUME_REV13:
                 return f"{campo_id}: faixa fora do catálogo REV13"
-        elif campo.controle == CONTROLE_MULTIPLO or campo_id == "4.2.5.1":
+        elif campo.controle == CONTROLE_MULTIPLO or campo_id in {"4.2.5.1", "6.2.2"}:
             if not isinstance(valor, list):
                 return f"{campo_id}: a resposta deve ser uma lista"
             if len(valor) != len(set(valor)):
                 return f"{campo_id}: a seleção contém opção repetida"
             alternativas = (
-                catalogo["5.1"].alternativas if campo_id == "4.2.5.1"
+                catalogo["5.1"].alternativas
+                if campo_id in {"4.2.5.1", "6.2.2"}
                 else campo.alternativas
             )
             if any(item not in alternativas for item in valor):
@@ -646,6 +649,55 @@ def salvar_bloco_5_form1_integral(
             "complemento_outro_informado": bool(complemento),
         },
         momento=momento,
+    )
+
+
+def salvar_bloco_6_form1_integral(
+    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas, momento=None
+):
+    """Salva origem e eventual relação entre fonte e categorias de dados."""
+
+    momento = momento or _agora_utc()
+    tipo_comando = "salvar_bloco_6_form1_integral"
+    parametros = {
+        "conta_id": conta_id, "registro_id": registro_id,
+        "versao_lida": versao_lida, "respostas": respostas,
+    }
+    conta, pessoa_id, ator_tipo, ator_id = _ator(sessao, conta_id)
+    comando, resposta = abrir_comando(
+        sessao, comando_id, tipo_comando, parametros,
+        ator_tipo, ator_id, conta_id,
+    )
+    if resposta is not None:
+        return resposta
+    problema = _validar_respostas_catalogadas(
+        sessao, respostas, CAMPOS_EDITAVEIS_BLOCO_6
+    )
+    problema = problema or _validar_condicionais(respostas, CONDICOES_BLOCO_6)
+    if problema:
+        return _negar(
+            sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
+            tipo_comando, problema,
+        )
+    registro, pessoa_id, rascunho, comando, resposta = _preparar_alteracao(
+        sessao, comando_id=comando_id, tipo_comando=tipo_comando,
+        conta_id=conta_id, registro_id=registro_id, versao_lida=versao_lida,
+        parametros=parametros, comando=comando,
+    )
+    if resposta is not None:
+        return resposta
+    conteudo = _conteudo_com_respostas_do_bloco(
+        rascunho,
+        campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_6,
+        respostas=respostas,
+        condicoes=CONDICOES_BLOCO_6,
+    )
+    return _salvar_conteudo(
+        sessao, comando=comando, registro=registro, rascunho=rascunho,
+        pessoa_id=pessoa_id, versao_lida=versao_lida, conteudo=conteudo,
+        tipo_evento=tipo_comando,
+        motivo="Bloco 6 do FORM 1 integral salvo",
+        detalhes={"campos_editados": sorted(respostas)}, momento=momento,
     )
 
 

@@ -367,6 +367,48 @@
       <p class="aviso-leitura">Somente o ARP atual pode alterar este rascunho.</p>
       {% endif %}
     </section>
+
+    <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-6">
+      <p class="etiqueta">Etapa 2 de 4 · Bloco 6 de 14</p>
+      <h3 id="titulo-bloco-6">Origem dos dados</h3>
+      <p class="ajuda">Informe categorias de fontes. Evite nomes ou identificadores de pessoas concretas.</p>
+      {% if registro.form1_integral.pode_editar %}
+      <form class="formulario formulario-integral" method="post" action="{{ url_for('salvar_bloco_6_integral', registro_id=registro.id) }}">
+        <input type="hidden" name="conta_id" value="{{ conta_id }}">
+        <input type="hidden" name="comando_id" value="{{ comando_salvar_bloco_6 }}">
+        <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
+        {% for campo in registro.form1_integral.campos_bloco_6.values() %}
+        <div class="campo-integral{% if campo.condicao %} campo-condicional{% endif %}"
+             {% if campo.condicao %}data-depende-de="campo__{{ campo.condicao[0] }}" data-valores="{{ campo.condicao[1] | join('||') }}"{% endif %}>
+          <label><strong>{{ campo.id }} — {{ campo.pergunta }}</strong></label>
+          {% if campo.controle == 'seleção múltipla (combo com marcações)' or campo.id == '6.2.2' %}
+          <div class="grade-opcoes">
+            {% for valor, rotulo in campo.alternativas %}
+            <label class="opcao"><input type="checkbox" name="campo__{{ campo.id }}" value="{{ valor }}" {% if valor in respostas_integral.get(campo.id, []) %}checked{% endif %}> <span>{{ rotulo }}</span></label>
+            {% endfor %}
+          </div>
+          {% elif campo.alternativas %}
+          <select name="campo__{{ campo.id }}">
+            <option value="">Ainda não respondido</option>
+            {% for valor, rotulo in campo.alternativas %}<option value="{{ valor }}" {% if respostas_integral.get(campo.id) == valor %}selected{% endif %}>{{ rotulo }}</option>{% endfor %}
+          </select>
+          {% elif campo.controle == 'texto longo, limitado e orientado' %}
+          <textarea name="campo__{{ campo.id }}" maxlength="2000">{{ respostas_integral.get(campo.id, '') }}</textarea>
+          {% else %}
+          <input name="campo__{{ campo.id }}" maxlength="500" value="{{ respostas_integral.get(campo.id, '') }}">
+          {% endif %}
+          {% if campo.instrucao %}<p class="ajuda">{{ campo.instrucao }}</p>{% endif %}
+        </div>
+        {% endfor %}
+        <div class="rodape-formulario">
+          <p>O rascunho pode permanecer incompleto; as validações de submissão integral continuam desabilitadas.</p>
+          <button class="botao-primario" type="submit">Salvar Bloco 6</button>
+        </div>
+      </form>
+      {% else %}
+      <p class="aviso-leitura">Somente o ARP atual pode alterar este rascunho.</p>
+      {% endif %}
+    </section>
     </div>
     <div id="form1-etapa-3" class="painel-etapa-form1 etapa-indisponivel" data-etapa-painel="3" hidden>
       <p>Etapa 3 ainda não implementada. Nenhum campo dos Blocos 9 a 12 foi antecipado.</p>
@@ -376,7 +418,7 @@
     </div>
   {% endif %}
 
-  <p class="ajuda">Os Blocos 6 a 14 e a submissão integral serão liberados em incrementos posteriores. O FORM 1 sintético permanece disponível abaixo sem alterações.</p>
+  <p class="ajuda">Os Blocos 7 a 14 e a submissão integral serão liberados em incrementos posteriores. O FORM 1 sintético permanece disponível abaixo sem alterações.</p>
 </section>
 
 <script>

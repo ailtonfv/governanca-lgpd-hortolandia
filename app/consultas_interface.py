@@ -6,10 +6,10 @@ from app.alertas_operacionais import listar_alertas_operacionais
 from app.continuidade_apa import apa_em_exercicio, unidades_em_que_e_apa_atual
 from app.form1_sintetico import (CATEGORIAS_DADOS, CATEGORIAS_TITULARES,
                                  DESTINATARIOS_COMPARTILHAMENTO)
-from app.form1_integral import (CONDICOES_BLOCO_2, CONDICOES_BLOCO_4,
+from app.form1_integral import (CONDICOES_BLOCO_2, CONDICOES_BLOCO_4, CONDICOES_BLOCO_6,
                                 CONDICOES_CANAIS_BLOCO_2,
                                 FAIXAS_VOLUME_REV13, IDS_BLOCO_2, IDS_BLOCO_4,
-                                IDS_BLOCO_5,
+                                IDS_BLOCO_5, IDS_BLOCO_6,
                                 IDS_PARTICIPANTE_BLOCO_3,
                                 campos_por_id)
 from app.modelos import (AtribuicaoForm1Integral, Conta, ContextoAtuacao, Designacao, Instrumento,
@@ -342,7 +342,7 @@ def carregar_registro(sessao, conta_id, registro_id):
             alternativas = tuple((item.id, item.nome) for item in secretarias_integral)
         elif campo_id in {"2.8", "2.9", "2.10"}:
             alternativas = tuple((item, item) for item in FAIXAS_VOLUME_REV13)
-        elif campo_id == "4.2.5.1":
+        elif campo_id in {"4.2.5.1", "6.2.2"}:
             alternativas = tuple(
                 (item, item) for item in catalogo_integral["5.1"].alternativas
             )
@@ -357,6 +357,7 @@ def carregar_registro(sessao, conta_id, registro_id):
             "condicao": (
                 CONDICOES_BLOCO_2.get(campo_id)
                 or CONDICOES_BLOCO_4.get(campo_id)
+                or CONDICOES_BLOCO_6.get(campo_id)
             ),
             "condicao_canal_ativa": (
                 None
@@ -435,6 +436,9 @@ def carregar_registro(sessao, conta_id, registro_id):
         },
         "campos_bloco_5": {
             campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_5
+        },
+        "campos_bloco_6": {
+            campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_6
         },
         "etapas": (
             {"numero": 1, "titulo": "Identificação e funcionamento do serviço", "blocos": "1 a 3"},
