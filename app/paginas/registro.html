@@ -434,6 +434,13 @@
       </form>
       {% else %}<p class="aviso-leitura">Somente o ARP atual pode alterar este rascunho.</p>{% endif %}
     </section>
+    {% set numero_bloco = 8 %}
+    {% set etapa_bloco = 2 %}
+    {% set titulo_bloco = 'Sistemas, canais e suporte' %}
+    {% set campos_bloco = registro.form1_integral.campos_bloco_8 %}
+    {% set comando_bloco = comando_salvar_bloco_8 %}
+    {% set rota_bloco = 'salvar_bloco_8_integral' %}
+    {% include '_bloco_catalogado_form1.html' %}
     </div>
     <div id="form1-etapa-3" class="painel-etapa-form1 etapa-indisponivel" data-etapa-painel="3" hidden>
       <p>Etapa 3 ainda não implementada. Nenhum campo dos Blocos 9 a 12 foi antecipado.</p>
@@ -443,7 +450,7 @@
     </div>
   {% endif %}
 
-  <p class="ajuda">Os Blocos 8 a 14 e a submissão integral serão liberados em incrementos posteriores. O FORM 1 sintético permanece disponível abaixo sem alterações.</p>
+  <p class="ajuda">Os Blocos 9 a 14 e a submissão integral serão liberados em incrementos posteriores. O FORM 1 sintético permanece disponível abaixo sem alterações.</p>
 </section>
 
 <script>
@@ -484,6 +491,24 @@
       controle.addEventListener('change', atualizarDependencia);
     });
     atualizarDependencia();
+  });
+  document.querySelectorAll('[data-condicoes]').forEach(function (alvo) {
+    var condicoes = JSON.parse(alvo.dataset.condicoes);
+    function atualizarCondicoes() {
+      var oculto = !condicoes.every(function (condicao) {
+        var nome = 'campo__' + condicao[0];
+        return valorDoCampo(nome).some(function (valor) { return condicao[1].includes(valor); });
+      });
+      alvo.hidden = oculto;
+      alvo.dataset.condicionalOculta = String(oculto);
+      sincronizarControlesForm1();
+    }
+    condicoes.forEach(function (condicao) {
+      document.getElementsByName('campo__' + condicao[0]).forEach(function (controle) {
+        controle.addEventListener('change', atualizarCondicoes);
+      });
+    });
+    atualizarCondicoes();
   });
   (function iniciarNavegacaoForm1() {
     var raiz = document.querySelector('.form1-integral');

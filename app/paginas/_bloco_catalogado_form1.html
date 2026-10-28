@@ -1,0 +1,38 @@
+<section class="bloco-form1-integral" aria-labelledby="titulo-bloco-{{ numero_bloco }}">
+  <p class="etiqueta">Etapa {{ etapa_bloco }} de 4 · Bloco {{ numero_bloco }} de 14</p>
+  <h3 id="titulo-bloco-{{ numero_bloco }}">{{ titulo_bloco }}</h3>
+  {% if registro.form1_integral.pode_editar %}
+  <form class="formulario formulario-integral" method="post" action="{{ url_for(rota_bloco, registro_id=registro.id) }}">
+    <input type="hidden" name="conta_id" value="{{ conta_id }}">
+    <input type="hidden" name="comando_id" value="{{ comando_bloco }}">
+    <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
+    {% for campo in campos_bloco.values() %}
+    <div class="campo-integral{% if campo.condicoes %} campo-condicional{% endif %}"
+         {% if campo.condicoes %}data-condicoes='{{ campo.condicoes | tojson }}'{% endif %}>
+      <label><strong>{{ campo.id }} — {{ campo.pergunta }}</strong></label>
+      {% if campo.controle in ('seleção múltipla (combo com marcações)', 'reuso do catálogo de referência (ver campo indicado)') %}
+      <div class="grade-opcoes">
+        {% for valor, rotulo in campo.alternativas %}
+        <label class="opcao"><input type="checkbox" name="campo__{{ campo.id }}" value="{{ valor }}" {% if valor in respostas_integral.get(campo.id, []) %}checked{% endif %}> <span>{{ rotulo }}</span></label>
+        {% endfor %}
+      </div>
+      {% elif campo.alternativas %}
+      <select name="campo__{{ campo.id }}">
+        <option value="">Ainda não respondido</option>
+        {% for valor, rotulo in campo.alternativas %}<option value="{{ valor }}" {% if respostas_integral.get(campo.id) == valor %}selected{% endif %}>{{ rotulo }}</option>{% endfor %}
+      </select>
+      {% elif campo.controle == 'texto longo, limitado e orientado' %}
+      <textarea name="campo__{{ campo.id }}" maxlength="2000">{{ respostas_integral.get(campo.id, '') }}</textarea>
+      {% else %}
+      <input name="campo__{{ campo.id }}" maxlength="500" value="{{ respostas_integral.get(campo.id, '') }}">
+      {% endif %}
+      {% if campo.instrucao %}<p class="ajuda">{{ campo.instrucao }}</p>{% endif %}
+    </div>
+    {% endfor %}
+    <div class="rodape-formulario">
+      <p>O rascunho admite respostas parciais. Campos condicionais inativos são preservados somente no histórico.</p>
+      <button class="botao-primario" type="submit">Salvar Bloco {{ numero_bloco }}</button>
+    </div>
+  </form>
+  {% else %}<p class="aviso-leitura">Somente o ARP atual pode alterar este rascunho.</p>{% endif %}
+</section>

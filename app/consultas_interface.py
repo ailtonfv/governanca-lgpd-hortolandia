@@ -6,10 +6,10 @@ from app.alertas_operacionais import listar_alertas_operacionais
 from app.continuidade_apa import apa_em_exercicio, unidades_em_que_e_apa_atual
 from app.form1_sintetico import (CATEGORIAS_DADOS, CATEGORIAS_TITULARES,
                                  DESTINATARIOS_COMPARTILHAMENTO)
-from app.form1_integral import (CONDICOES_BLOCO_2, CONDICOES_BLOCO_4, CONDICOES_BLOCO_6,
+from app.form1_integral import (CONDICOES_BLOCO_2, CONDICOES_BLOCO_4, CONDICOES_BLOCO_6, CONDICOES_BLOCO_8,
                                 CONDICOES_CANAIS_BLOCO_2,
                                 FAIXAS_VOLUME_REV13, IDS_BLOCO_2, IDS_BLOCO_4,
-                                IDS_BLOCO_5, IDS_BLOCO_6, IDS_BLOCO_7,
+                                IDS_BLOCO_5, IDS_BLOCO_6, IDS_BLOCO_7, IDS_BLOCO_8,
                                 IDS_PARTICIPANTE_BLOCO_3,
                                 campos_por_id)
 from app.modelos import (AtribuicaoForm1Integral, Conta, ContextoAtuacao, Designacao, Instrumento,
@@ -348,17 +348,23 @@ def carregar_registro(sessao, conta_id, registro_id):
             )
         else:
             alternativas = tuple((item, item) for item in alternativas)
+        condicao = (
+            CONDICOES_BLOCO_2.get(campo_id)
+            or CONDICOES_BLOCO_4.get(campo_id)
+            or CONDICOES_BLOCO_6.get(campo_id)
+            or CONDICOES_BLOCO_8.get(campo_id)
+        )
+        condicoes = () if not condicao else (
+            (condicao,) if isinstance(condicao[0], str) else condicao
+        )
         return {
             "id": campo.id,
             "pergunta": campo.pergunta,
             "controle": campo.controle,
             "alternativas": alternativas,
             "instrucao": campo.instrucao,
-            "condicao": (
-                CONDICOES_BLOCO_2.get(campo_id)
-                or CONDICOES_BLOCO_4.get(campo_id)
-                or CONDICOES_BLOCO_6.get(campo_id)
-            ),
+            "condicao": condicao if condicao and isinstance(condicao[0], str) else None,
+            "condicoes": condicoes,
             "condicao_canal_ativa": (
                 None
                 if confirmacao_canais is None
@@ -442,6 +448,9 @@ def carregar_registro(sessao, conta_id, registro_id):
         },
         "campos_bloco_7": {
             campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_7
+        },
+        "campos_bloco_8": {
+            campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_8
         },
         "etapas": (
             {"numero": 1, "titulo": "Identificação e funcionamento do serviço", "blocos": "1 a 3"},

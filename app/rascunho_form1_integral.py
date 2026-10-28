@@ -18,11 +18,11 @@ from app.comandos import abrir_comando, fechar_comando
 from app.eventos import lacre, registrar_auditoria, registrar_evento
 from app.form1_integral import (CONDICOES_BLOCO_1, CONDICOES_BLOCO_2,
                                 CONDICOES_CANAIS_BLOCO_2,
-                                CONDICOES_BLOCO_4, CONDICOES_BLOCO_6,
+                                CONDICOES_BLOCO_4, CONDICOES_BLOCO_6, CONDICOES_BLOCO_8,
                                 CONDICOES_PARTICIPANTE_BLOCO_3,
                                 FAIXAS_VOLUME_REV13, IDS_BLOCO_2, IDS_BLOCO_4,
                                 IDS_BLOCO_2_SEM_PORTA_ENTRADA, IDS_BLOCO_5,
-                                IDS_BLOCO_6, IDS_BLOCO_7,
+                                IDS_BLOCO_6, IDS_BLOCO_7, IDS_BLOCO_8,
                                 IDS_PARTICIPANTE_BLOCO_3,
                                 REVISAO_FONTE_FORM1_INTEGRAL,
                                 VERSAO_CONTRATO_FORM1_INTEGRAL_CANDIDATA,
@@ -42,6 +42,7 @@ CAMPOS_EDITAVEIS_BLOCO_4 = frozenset(IDS_BLOCO_4)
 CAMPOS_EDITAVEIS_BLOCO_5 = frozenset(IDS_BLOCO_5)
 CAMPOS_EDITAVEIS_BLOCO_6 = frozenset(IDS_BLOCO_6)
 CAMPOS_EDITAVEIS_BLOCO_7 = frozenset(IDS_BLOCO_7)
+CAMPOS_EDITAVEIS_BLOCO_8 = frozenset(IDS_BLOCO_8)
 CAMPOS_SECRETARIA = frozenset({"2.2", "2.4.1"})
 CAMPOS_VOLUME = frozenset({"2.8", "2.9", "2.10"})
 CONTROLE_MULTIPLO = "seleção múltipla (combo com marcações)"
@@ -273,14 +274,21 @@ def _validar_condicionais(respostas, condicoes, ativacao_externa=None):
     """Recusa resposta enviada para ramo que não está ativo no mesmo recorte."""
 
     ativacao_externa = ativacao_externa or {}
-    for campo_id, (campo_controlador, valores_ativos) in condicoes.items():
-        esta_ativo = ativacao_externa.get(
-            campo_id, respostas.get(campo_controlador) in valores_ativos
+    for campo_id, condicao in condicoes.items():
+        clausulas = (
+            (condicao,) if condicao and isinstance(condicao[0], str) else condicao
         )
+        esta_ativo = all(
+            any(item in valores_ativos for item in valor)
+            if isinstance((valor := respostas.get(campo_controlador)), list)
+            else valor in valores_ativos
+            for campo_controlador, valores_ativos in clausulas
+        )
+        esta_ativo = ativacao_externa.get(campo_id, esta_ativo)
         if campo_id in respostas and not esta_ativo:
             return (
                 f"{campo_id}: campo condicional inativo para a resposta de "
-                f"{campo_controlador}"
+                + ", ".join(item[0] for item in clausulas)
             )
     return None
 
@@ -294,11 +302,18 @@ def _conteudo_com_respostas_do_bloco(
     inativas = dict(rascunho.conteudo.get("respostas_inativas", {}))
     ativacao_externa = ativacao_externa or {}
     proxima_versao = rascunho.versao_rascunho + 1
-    for campo_id, (campo_controlador, valores_ativos) in condicoes.items():
-        valor_anterior = atuais.get(campo_id)
-        esta_ativo = ativacao_externa.get(
-            campo_id, respostas.get(campo_controlador) in valores_ativos
+    for campo_id, condicao in condicoes.items():
+        clausulas = (
+            (condicao,) if condicao and isinstance(condicao[0], str) else condicao
         )
+        valor_anterior = atuais.get(campo_id)
+        esta_ativo = all(
+            any(item in valores_ativos for item in valor)
+            if isinstance((valor := respostas.get(campo_controlador)), list)
+            else valor in valores_ativos
+            for campo_controlador, valores_ativos in clausulas
+        )
+        esta_ativo = ativacao_externa.get(campo_id, esta_ativo)
         if not esta_ativo and valor_anterior not in (None, "", []):
             historico = inativas.get(campo_id, [])
             if isinstance(historico, dict):
@@ -306,8 +321,10 @@ def _conteudo_com_respostas_do_bloco(
             historico = list(historico)
             historico.append({
                 "valor": valor_anterior,
-                "campo_controlador": campo_controlador,
-                "valores_ativos": list(valores_ativos),
+                "condicoes": [
+                    {"campo_controlador": controlador, "valores_ativos": list(valores)}
+                    for controlador, valores in clausulas
+                ],
                 "desativada_na_versao": proxima_versao,
             })
             inativas[campo_id] = historico
@@ -756,6 +773,19 @@ def salvar_bloco_7_form1_integral(
         sessao, numero_bloco=7, comando_id=comando_id, conta_id=conta_id,
         registro_id=registro_id, versao_lida=versao_lida, respostas=respostas,
         campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_7, condicoes={}, momento=momento,
+    )
+
+
+def salvar_bloco_8_form1_integral(
+    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas, momento=None
+):
+    """Salva meios, ambientes, suportes e contingências do Bloco 8."""
+
+    return _salvar_bloco_catalogado_form1_integral(
+        sessao, numero_bloco=8, comando_id=comando_id, conta_id=conta_id,
+        registro_id=registro_id, versao_lida=versao_lida, respostas=respostas,
+        campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_8,
+        condicoes=CONDICOES_BLOCO_8, momento=momento,
     )
 
 
