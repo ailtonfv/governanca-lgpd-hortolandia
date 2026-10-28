@@ -97,6 +97,33 @@
 
   {% if registro.form1_integral.rascunho %}
     {% set respostas_integral = registro.form1_integral.rascunho.respostas %}
+    {% set pre_validacao = registro.form1_integral.pre_validacao %}
+    <section class="bloco-form1-integral" aria-labelledby="titulo-pre-validacao-form1">
+      <p class="etiqueta">Verificação consultiva · não submete o formulário</p>
+      <h3 id="titulo-pre-validacao-form1">Pendências antes da futura submissão</h3>
+      <p>A verificação encontrou <strong>{{ pre_validacao.quantidades.incompletos }}</strong> campo(s) obrigatório(s) ativo(s) ainda incompleto(s), <strong>{{ pre_validacao.quantidades.nao_aplicaveis }}</strong> campo(s) condicional(is) não aplicável(is) neste rascunho e <strong>{{ pre_validacao.quantidades.regras_pendentes }}</strong> regra(s) ou integração(ões) dependentes de governança.</p>
+      <p class="ajuda">O rascunho continua podendo ser salvo. Esta consulta não altera respostas, não cria versão submetida e não declara adequação à LGPD.</p>
+      {% if pre_validacao.por_bloco %}
+      {% for grupo in pre_validacao.por_bloco %}
+      <details>
+        <summary><strong>Bloco {{ grupo.bloco }}</strong> — {{ grupo.itens | length }} pendência(s)</summary>
+        <ul>
+          {% for item in grupo.itens %}
+          <li><a href="#titulo-bloco-{{ item.bloco }}"><strong>{{ item.campo_id }}</strong></a> — {{ item.pergunta }}{% if item.ocorrencia %} (participante {{ item.ocorrencia }}){% endif %}</li>
+          {% endfor %}
+        </ul>
+      </details>
+      {% endfor %}
+      {% else %}<p>Nenhum campo obrigatório ativo está incompleto, mas as decisões de governança abaixo ainda impedem a submissão.</p>{% endif %}
+      <details>
+        <summary><strong>Integrações e regras pendentes</strong></summary>
+        <ul>
+          {% for item in pre_validacao.regras_pendentes %}
+          <li>{% if item.campo_id %}<strong>{{ item.campo_id }}</strong> — {% endif %}{{ item.descricao if item.descricao else item.detalhe }}</li>
+          {% endfor %}
+        </ul>
+      </details>
+    </section>
     <div id="form1-etapa-1" class="painel-etapa-form1" data-etapa-painel="1">
     <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-1">
       <p class="etiqueta">Etapa 1 de 4 · Bloco 1 de 14</p>

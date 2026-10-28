@@ -22,6 +22,7 @@ from app.form1_integral import (CONDICOES_BLOCO_2, CONDICOES_BLOCO_4, CONDICOES_
                                 IDS_BLOCO_14,
                                 IDS_PARTICIPANTE_BLOCO_3,
                                 campos_por_id)
+from app.pre_validacao_form1_integral import pre_validar_form1_integral
 from app.modelos import (AtribuicaoForm1Integral, Conta, ContextoAtuacao, Designacao, Instrumento,
                          Canal, ConfirmacaoCanaisRegistro, ObjetoCanal,
                          ObjetoCatalogo, ObjetoContextoCatalogo, RegistroCanal,
@@ -434,6 +435,23 @@ def carregar_registro(sessao, conta_id, registro_id):
             "salvo_por": autor_integral,
             "salvo_em": rascunho_integral.salvo_em,
         },
+        "pre_validacao": (
+            None if rascunho_integral is None else pre_validar_form1_integral(
+                rascunho_integral.conteudo,
+                nome_institucional=None if arp_atual is None else arp_atual.nome,
+                cargo_funcao=None,
+                email_institucional=None,
+                respostas_somente_leitura=(
+                    {} if confirmacao_canais is None else {
+                        "2.1": [
+                            item.classificacao_form1_snapshot
+                            for item in canais_registro
+                            if item.classificacao_form1_snapshot
+                        ]
+                    }
+                ),
+            )
+        ),
         "campos_bloco_1": {
             campo_id: {
                 "id": catalogo_integral[campo_id].id,
