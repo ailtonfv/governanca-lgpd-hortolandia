@@ -30,6 +30,7 @@ from app.form1_integral import (CONDICOES_BLOCO_1, CONDICOES_BLOCO_2,
                                 IDS_BLOCO_10,
                                 IDS_BLOCO_11,
                                 IDS_BLOCO_12,
+                                IDS_BLOCO_13,
                                 IDS_PARTICIPANTE_BLOCO_3,
                                 REVISAO_FONTE_FORM1_INTEGRAL,
                                 VERSAO_CONTRATO_FORM1_INTEGRAL_CANDIDATA,
@@ -54,6 +55,7 @@ CAMPOS_EDITAVEIS_BLOCO_9 = frozenset(IDS_BLOCO_9)
 CAMPOS_EDITAVEIS_BLOCO_10 = frozenset(IDS_BLOCO_10)
 CAMPOS_EDITAVEIS_BLOCO_11 = frozenset(IDS_BLOCO_11)
 CAMPOS_EDITAVEIS_BLOCO_12 = frozenset(IDS_BLOCO_12)
+CAMPOS_EDITAVEIS_BLOCO_13 = frozenset(IDS_BLOCO_13)
 CAMPOS_SECRETARIA = frozenset({"2.2", "2.4.1"})
 CAMPOS_VOLUME = frozenset({"2.8", "2.9", "2.10"})
 CONTROLE_MULTIPLO = "seleção múltipla (combo com marcações)"
@@ -273,6 +275,10 @@ def _validar_respostas_catalogadas(sessao, respostas, campos_permitidos):
             )
             if any(item not in alternativas for item in valor):
                 return f"{campo_id}: opção fora do catálogo REV13"
+            if campo_id == "13.1":
+                excludentes = {"Nenhuma das situações acima", "A confirmar", "Não se aplica"}
+                if excludentes.intersection(valor) and len(valor) != 1:
+                    return "13.1: a alternativa excludente deve ser selecionada isoladamente"
         elif campo.alternativas:
             if valor not in campo.alternativas:
                 return f"{campo_id}: opção fora do catálogo REV13"
@@ -852,6 +858,18 @@ def salvar_bloco_12_form1_integral(
         registro_id=registro_id, versao_lida=versao_lida, respostas=respostas,
         campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_12,
         condicoes=CONDICOES_BLOCO_12, momento=momento,
+    )
+
+
+def salvar_bloco_13_form1_integral(
+    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas, momento=None
+):
+    """Salva situações de exposição física ou visual do Bloco 13."""
+
+    return _salvar_bloco_catalogado_form1_integral(
+        sessao, numero_bloco=13, comando_id=comando_id, conta_id=conta_id,
+        registro_id=registro_id, versao_lida=versao_lida, respostas=respostas,
+        campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_13, condicoes={}, momento=momento,
     )
 
 
