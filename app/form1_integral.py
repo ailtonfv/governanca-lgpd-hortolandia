@@ -145,6 +145,14 @@ CONDICOES_BLOCO_10 = {
     "10.8.1": (_CONDICAO_SAIDA_10, ("10.8", ("Sim", "Em alguns casos"))),
 }
 
+IDS_BLOCO_11 = ("11.1", "11.2", "11.2.1", "11.2.2", "11.2.3", "11.2.4", "11.3", "11.3.1")
+
+CONDICOES_BLOCO_11 = {
+    campo_id: (("11.2", ("Infraestrutura de terceiro", "Ambas", "A confirmar")),)
+    for campo_id in ("11.2.1", "11.2.2", "11.2.3", "11.2.4")
+}
+CONDICOES_BLOCO_11["11.3.1"] = (("11.3", ("Sim", "Em alguns casos")),)
+
 CONDICOES_BLOCO_6 = {
     "6.2.1": ("6.2", ("Sim",)),
     "6.2.2": ("6.2", ("Sim",)),

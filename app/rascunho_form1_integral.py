@@ -21,11 +21,13 @@ from app.form1_integral import (CONDICOES_BLOCO_1, CONDICOES_BLOCO_2,
                                 CONDICOES_BLOCO_4, CONDICOES_BLOCO_6, CONDICOES_BLOCO_8,
                                 CONDICOES_BLOCO_9,
                                 CONDICOES_BLOCO_10,
+                                CONDICOES_BLOCO_11,
                                 CONDICOES_PARTICIPANTE_BLOCO_3,
                                 FAIXAS_VOLUME_REV13, IDS_BLOCO_2, IDS_BLOCO_4,
                                 IDS_BLOCO_2_SEM_PORTA_ENTRADA, IDS_BLOCO_5,
                                 IDS_BLOCO_6, IDS_BLOCO_7, IDS_BLOCO_8, IDS_BLOCO_9,
                                 IDS_BLOCO_10,
+                                IDS_BLOCO_11,
                                 IDS_PARTICIPANTE_BLOCO_3,
                                 REVISAO_FONTE_FORM1_INTEGRAL,
                                 VERSAO_CONTRATO_FORM1_INTEGRAL_CANDIDATA,
@@ -48,6 +50,7 @@ CAMPOS_EDITAVEIS_BLOCO_7 = frozenset(IDS_BLOCO_7)
 CAMPOS_EDITAVEIS_BLOCO_8 = frozenset(IDS_BLOCO_8)
 CAMPOS_EDITAVEIS_BLOCO_9 = frozenset(IDS_BLOCO_9)
 CAMPOS_EDITAVEIS_BLOCO_10 = frozenset(IDS_BLOCO_10)
+CAMPOS_EDITAVEIS_BLOCO_11 = frozenset(IDS_BLOCO_11)
 CAMPOS_SECRETARIA = frozenset({"2.2", "2.4.1"})
 CAMPOS_VOLUME = frozenset({"2.8", "2.9", "2.10"})
 CONTROLE_MULTIPLO = "seleção múltipla (combo com marcações)"
@@ -817,6 +820,19 @@ def salvar_bloco_10_form1_integral(
         registro_id=registro_id, versao_lida=versao_lida, respostas=respostas,
         campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_10,
         condicoes=CONDICOES_BLOCO_10, momento=momento,
+    )
+
+
+def salvar_bloco_11_form1_integral(
+    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas, momento=None
+):
+    """Salva repositórios, infraestrutura e dependência de terceiro."""
+
+    return _salvar_bloco_catalogado_form1_integral(
+        sessao, numero_bloco=11, comando_id=comando_id, conta_id=conta_id,
+        registro_id=registro_id, versao_lida=versao_lida, respostas=respostas,
+        campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_11,
+        condicoes=CONDICOES_BLOCO_11, momento=momento,
     )
 
 
