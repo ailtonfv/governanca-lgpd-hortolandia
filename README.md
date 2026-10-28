@@ -921,6 +921,8 @@ As três fases aplicam regras diferentes:
 
 Uma alteração futura de obrigatoriedade deverá ser feita primeiro na matriz central, com nova versão e testes. Interface, validações e documentação derivada deverão apontar para a mesma versão. Até o incremento F1-6, essas são regras documentadas para a futura submissão; não se deve confundi-las com bloqueios já implementados no salvamento do rascunho.
 
+**Auditoria do Incremento 7.** A conferência entre catálogo, matriz e implementação encontrou correspondência dos 128 identificadores: 3 essenciais somente leitura, 25 obrigatórios essenciais, 69 obrigatórios condicionais, 4 facultativos pela REV13 e 27 facultativos nesta proposta. A implementação da submissão não foi iniciada porque `0.2` e `0.3` ainda não possuem fonte institucional confiável e permanecem abertas as decisões F1-D04, F1-D05 e F1-D06, além do marco formal de liberação. O relatório completo está em [`AUDITORIA_MATRIZ_F1_REV13_INCREMENTO_7.md`](docs/planejamento/AUDITORIA_MATRIZ_F1_REV13_INCREMENTO_7.md). Os rascunhos continuam operacionais e incompletos; nenhum comportamento do contrato 2 foi alterado.
+
 ### Como o FORM 1 evita nomes de titulares
 
 O FORM 1 sintético descreve o tratamento, não as pessoas. Em vez de digitar nomes, o servidor seleciona categorias como **Contribuinte**, **Servidor público** ou **Estudante**. O mesmo vale para categorias de dados e destinatários de compartilhamento.
