@@ -17,7 +17,7 @@ from app.consultas_interface import (carregar_opcoes_novo_registro, carregar_pai
 from app.eventos import registrar_auditoria
 from app.form1_sintetico import (CATEGORIAS_DADOS, CATEGORIAS_TITULARES,
                                  DESTINATARIOS_COMPARTILHAMENTO)
-from app.form1_integral import (IDS_BLOCO_2, IDS_BLOCO_4, IDS_BLOCO_5, IDS_BLOCO_6, IDS_BLOCO_7, IDS_BLOCO_8,
+from app.form1_integral import (IDS_BLOCO_2, IDS_BLOCO_4, IDS_BLOCO_5, IDS_BLOCO_6, IDS_BLOCO_7, IDS_BLOCO_8, IDS_BLOCO_9,
                                 IDS_PARTICIPANTE_BLOCO_3,
                                 campos_por_id)
 from app.instrumentos import iniciar_preenchimento, salvar_rascunho
@@ -32,6 +32,7 @@ from app.rascunho_form1_integral import (adicionar_participante_form1_integral,
                                          salvar_bloco_6_form1_integral,
                                          salvar_bloco_7_form1_integral,
                                          salvar_bloco_8_form1_integral,
+                                         salvar_bloco_9_form1_integral,
                                          salvar_cabecalho_bloco_3_form1_integral)
 from app.workflow import criar_registro
 
@@ -213,6 +214,7 @@ def detalhe_registro(
             "comando_salvar_bloco_6": str(uuid.uuid4()),
             "comando_salvar_bloco_7": str(uuid.uuid4()),
             "comando_salvar_bloco_8": str(uuid.uuid4()),
+            "comando_salvar_bloco_9": str(uuid.uuid4()),
             "comandos_remover_participante": {
                 participante["id"]: str(uuid.uuid4())
                 for participante in (
@@ -459,6 +461,24 @@ async def salvar_bloco_8_integral(
     sessao.commit()
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, "Bloco 8 do FORM 1 integral salvo com segurança."
+    )
+
+
+@app.post("/registros/{registro_id}/form1-integral/bloco-9/salvar")
+async def salvar_bloco_9_integral(
+    registro_id: str, request: Request, sessao: Session = Depends(obter_sessao),
+):
+    formulario = await request.form()
+    conta_id = str(formulario.get("conta_id", ""))[:50]
+    resultado = salvar_bloco_9_form1_integral(
+        sessao, comando_id=str(formulario.get("comando_id", ""))[:64],
+        conta_id=conta_id, registro_id=registro_id,
+        versao_lida=int(formulario.get("versao_lida", 0)),
+        respostas=_respostas_do_formulario(formulario, IDS_BLOCO_9),
+    )
+    sessao.commit()
+    return _voltar_ao_registro(
+        registro_id, conta_id, resultado, "Bloco 9 do FORM 1 integral salvo com segurança."
     )
 
 
