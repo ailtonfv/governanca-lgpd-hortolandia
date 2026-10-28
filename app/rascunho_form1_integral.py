@@ -23,6 +23,7 @@ from app.form1_integral import (CONDICOES_BLOCO_1, CONDICOES_BLOCO_2,
                                 CONDICOES_BLOCO_10,
                                 CONDICOES_BLOCO_11,
                                 CONDICOES_BLOCO_12,
+                                CONDICOES_BLOCO_14,
                                 CONDICOES_PARTICIPANTE_BLOCO_3,
                                 FAIXAS_VOLUME_REV13, IDS_BLOCO_2, IDS_BLOCO_4,
                                 IDS_BLOCO_2_SEM_PORTA_ENTRADA, IDS_BLOCO_5,
@@ -31,6 +32,7 @@ from app.form1_integral import (CONDICOES_BLOCO_1, CONDICOES_BLOCO_2,
                                 IDS_BLOCO_11,
                                 IDS_BLOCO_12,
                                 IDS_BLOCO_13,
+                                IDS_BLOCO_14,
                                 IDS_PARTICIPANTE_BLOCO_3,
                                 REVISAO_FONTE_FORM1_INTEGRAL,
                                 VERSAO_CONTRATO_FORM1_INTEGRAL_CANDIDATA,
@@ -56,6 +58,7 @@ CAMPOS_EDITAVEIS_BLOCO_10 = frozenset(IDS_BLOCO_10)
 CAMPOS_EDITAVEIS_BLOCO_11 = frozenset(IDS_BLOCO_11)
 CAMPOS_EDITAVEIS_BLOCO_12 = frozenset(IDS_BLOCO_12)
 CAMPOS_EDITAVEIS_BLOCO_13 = frozenset(IDS_BLOCO_13)
+CAMPOS_EDITAVEIS_BLOCO_14 = frozenset(IDS_BLOCO_14)
 CAMPOS_SECRETARIA = frozenset({"2.2", "2.4.1"})
 CAMPOS_VOLUME = frozenset({"2.8", "2.9", "2.10"})
 CONTROLE_MULTIPLO = "seleção múltipla (combo com marcações)"
@@ -870,6 +873,19 @@ def salvar_bloco_13_form1_integral(
         sessao, numero_bloco=13, comando_id=comando_id, conta_id=conta_id,
         registro_id=registro_id, versao_lida=versao_lida, respostas=respostas,
         campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_13, condicoes={}, momento=momento,
+    )
+
+
+def salvar_bloco_14_form1_integral(
+    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas, momento=None
+):
+    """Salva confirmações pendentes e achados factuais do Bloco 14."""
+
+    return _salvar_bloco_catalogado_form1_integral(
+        sessao, numero_bloco=14, comando_id=comando_id, conta_id=conta_id,
+        registro_id=registro_id, versao_lida=versao_lida, respostas=respostas,
+        campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_14,
+        condicoes=CONDICOES_BLOCO_14, momento=momento,
     )
 
 

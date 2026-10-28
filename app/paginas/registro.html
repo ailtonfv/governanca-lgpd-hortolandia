@@ -480,11 +480,17 @@
       {% set comando_bloco = comando_salvar_bloco_13 %}
       {% set rota_bloco = 'salvar_bloco_13_integral' %}
       {% include '_bloco_catalogado_form1.html' %}
-      <p class="ajuda">O Bloco 14 permanece pendente nesta etapa.</p>
+      {% set numero_bloco = 14 %}
+      {% set etapa_bloco = 4 %}
+      {% set titulo_bloco = 'Achados e pendências' %}
+      {% set campos_bloco = registro.form1_integral.campos_bloco_14 %}
+      {% set comando_bloco = comando_salvar_bloco_14 %}
+      {% set rota_bloco = 'salvar_bloco_14_integral' %}
+      {% include '_bloco_catalogado_form1.html' %}
     </div>
   {% endif %}
 
-  <p class="ajuda">O Bloco 14 e a submissão integral serão liberados em incremento posterior. O FORM 1 sintético permanece disponível abaixo sem alterações.</p>
+  <p class="ajuda">Os 14 blocos do rascunho integral estão disponíveis. A submissão integral permanece desabilitada e será tratada em incremento próprio. O FORM 1 sintético permanece disponível abaixo sem alterações.</p>
 </section>
 
 <script>
