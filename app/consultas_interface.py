@@ -8,9 +8,11 @@ from app.form1_sintetico import (CATEGORIAS_DADOS, CATEGORIAS_TITULARES,
                                  DESTINATARIOS_COMPARTILHAMENTO)
 from app.form1_integral import (CONDICOES_BLOCO_2, CONDICOES_BLOCO_4, CONDICOES_BLOCO_6, CONDICOES_BLOCO_8,
                                 CONDICOES_BLOCO_9,
+                                CONDICOES_BLOCO_10,
                                 CONDICOES_CANAIS_BLOCO_2,
                                 FAIXAS_VOLUME_REV13, IDS_BLOCO_2, IDS_BLOCO_4,
                                 IDS_BLOCO_5, IDS_BLOCO_6, IDS_BLOCO_7, IDS_BLOCO_8, IDS_BLOCO_9,
+                                IDS_BLOCO_10,
                                 IDS_PARTICIPANTE_BLOCO_3,
                                 campos_por_id)
 from app.modelos import (AtribuicaoForm1Integral, Conta, ContextoAtuacao, Designacao, Instrumento,
@@ -343,7 +345,7 @@ def carregar_registro(sessao, conta_id, registro_id):
             alternativas = tuple((item.id, item.nome) for item in secretarias_integral)
         elif campo_id in {"2.8", "2.9", "2.10"}:
             alternativas = tuple((item, item) for item in FAIXAS_VOLUME_REV13)
-        elif campo_id in {"4.2.5.1", "6.2.2", "9.2.2"}:
+        elif campo_id in {"4.2.5.1", "6.2.2", "9.2.2", "10.4"}:
             alternativas = tuple(
                 (item, item) for item in catalogo_integral["5.1"].alternativas
             )
@@ -355,6 +357,7 @@ def carregar_registro(sessao, conta_id, registro_id):
             or CONDICOES_BLOCO_6.get(campo_id)
             or CONDICOES_BLOCO_8.get(campo_id)
             or CONDICOES_BLOCO_9.get(campo_id)
+            or CONDICOES_BLOCO_10.get(campo_id)
         )
         condicoes = () if not condicao else (
             (condicao,) if isinstance(condicao[0], str) else condicao
@@ -456,6 +459,9 @@ def carregar_registro(sessao, conta_id, registro_id):
         },
         "campos_bloco_9": {
             campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_9
+        },
+        "campos_bloco_10": {
+            campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_10
         },
         "etapas": (
             {"numero": 1, "titulo": "Identificação e funcionamento do serviço", "blocos": "1 a 3"},

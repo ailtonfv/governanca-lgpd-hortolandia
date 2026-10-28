@@ -126,6 +126,25 @@ CONDICOES_BLOCO_9 = {
     "9.2.2": (("9.2", ("Não",)), ("9.2.1", ("Sim",))),
 }
 
+IDS_BLOCO_10 = (
+    "10.1", "10.2", "10.2.1", "10.3", "10.4", "10.5", "10.6", "10.7",
+    "10.7.1", "10.8", "10.8.1", "10.9",
+)
+
+_CONDICAO_SAIDA_10 = ("10.1", ("Sim", "Em alguns casos"))
+CONDICOES_BLOCO_10 = {
+    "10.2": (_CONDICAO_SAIDA_10,),
+    "10.2.1": (_CONDICAO_SAIDA_10,),
+    "10.3": (_CONDICAO_SAIDA_10,),
+    "10.4": (_CONDICAO_SAIDA_10,),
+    "10.5": (_CONDICAO_SAIDA_10,),
+    "10.6": (_CONDICAO_SAIDA_10,),
+    "10.7": (_CONDICAO_SAIDA_10,),
+    "10.7.1": (_CONDICAO_SAIDA_10, ("10.7", ("Sim", "Em alguns casos"))),
+    "10.8": (_CONDICAO_SAIDA_10,),
+    "10.8.1": (_CONDICAO_SAIDA_10, ("10.8", ("Sim", "Em alguns casos"))),
+}
+
 CONDICOES_BLOCO_6 = {
     "6.2.1": ("6.2", ("Sim",)),
     "6.2.2": ("6.2", ("Sim",)),
