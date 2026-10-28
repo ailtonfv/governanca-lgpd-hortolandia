@@ -153,6 +153,17 @@ CONDICOES_BLOCO_11 = {
 }
 CONDICOES_BLOCO_11["11.3.1"] = (("11.3", ("Sim", "Em alguns casos")),)
 
+IDS_BLOCO_12 = ("12.1", "12.1.1", "12.1.2", "12.1.3", "12.2", "12.3", "12.4", "12.4.1", "12.5", "12.5.1")
+
+CONDICOES_BLOCO_12 = {
+    campo_id: (("12.1", ("Sim",)),)
+    for campo_id in ("12.1.1", "12.1.2", "12.1.3")
+}
+CONDICOES_BLOCO_12.update({
+    "12.4.1": (("12.4", ("Sim", "Em alguns casos")),),
+    "12.5.1": (("12.5", ("Sim",)),),
+})
+
 CONDICOES_BLOCO_6 = {
     "6.2.1": ("6.2", ("Sim",)),
     "6.2.2": ("6.2", ("Sim",)),

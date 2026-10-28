@@ -465,12 +465,19 @@
       {% set rota_bloco = 'salvar_bloco_11_integral' %}
       {% include '_bloco_catalogado_form1.html' %}
     </div>
-    <div id="form1-etapa-4" class="painel-etapa-form1 etapa-indisponivel" data-etapa-painel="4" hidden>
-      <p>Etapa 4 ainda não implementada. Nenhum campo dos Blocos 13 e 14 foi antecipado.</p>
+    <div id="form1-etapa-4" class="painel-etapa-form1" data-etapa-painel="4" hidden>
+      {% set numero_bloco = 12 %}
+      {% set etapa_bloco = 4 %}
+      {% set titulo_bloco = 'Guarda e destinação' %}
+      {% set campos_bloco = registro.form1_integral.campos_bloco_12 %}
+      {% set comando_bloco = comando_salvar_bloco_12 %}
+      {% set rota_bloco = 'salvar_bloco_12_integral' %}
+      {% include '_bloco_catalogado_form1.html' %}
+      <p class="ajuda">Os Blocos 13 e 14 permanecem pendentes nesta etapa.</p>
     </div>
   {% endif %}
 
-  <p class="ajuda">Os Blocos 12 a 14 e a submissão integral serão liberados em incrementos posteriores. O FORM 1 sintético permanece disponível abaixo sem alterações.</p>
+  <p class="ajuda">Os Blocos 13 e 14 e a submissão integral serão liberados em incrementos posteriores. O FORM 1 sintético permanece disponível abaixo sem alterações.</p>
 </section>
 
 <script>
