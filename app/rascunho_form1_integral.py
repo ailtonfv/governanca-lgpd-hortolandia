@@ -22,7 +22,7 @@ from app.form1_integral import (CONDICOES_BLOCO_1, CONDICOES_BLOCO_2,
                                 CONDICOES_PARTICIPANTE_BLOCO_3,
                                 FAIXAS_VOLUME_REV13, IDS_BLOCO_2, IDS_BLOCO_4,
                                 IDS_BLOCO_2_SEM_PORTA_ENTRADA, IDS_BLOCO_5,
-                                IDS_BLOCO_6,
+                                IDS_BLOCO_6, IDS_BLOCO_7,
                                 IDS_PARTICIPANTE_BLOCO_3,
                                 REVISAO_FONTE_FORM1_INTEGRAL,
                                 VERSAO_CONTRATO_FORM1_INTEGRAL_CANDIDATA,
@@ -41,6 +41,7 @@ CAMPOS_EDITAVEIS_PARTICIPANTE = frozenset(IDS_PARTICIPANTE_BLOCO_3)
 CAMPOS_EDITAVEIS_BLOCO_4 = frozenset(IDS_BLOCO_4)
 CAMPOS_EDITAVEIS_BLOCO_5 = frozenset(IDS_BLOCO_5)
 CAMPOS_EDITAVEIS_BLOCO_6 = frozenset(IDS_BLOCO_6)
+CAMPOS_EDITAVEIS_BLOCO_7 = frozenset(IDS_BLOCO_7)
 CAMPOS_SECRETARIA = frozenset({"2.2", "2.4.1"})
 CAMPOS_VOLUME = frozenset({"2.8", "2.9", "2.10"})
 CONTROLE_MULTIPLO = "seleção múltipla (combo com marcações)"
@@ -698,6 +699,63 @@ def salvar_bloco_6_form1_integral(
         tipo_evento=tipo_comando,
         motivo="Bloco 6 do FORM 1 integral salvo",
         detalhes={"campos_editados": sorted(respostas)}, momento=momento,
+    )
+
+
+def _salvar_bloco_catalogado_form1_integral(
+    sessao, *, numero_bloco, comando_id, conta_id, registro_id, versao_lida,
+    respostas, campos_editaveis, condicoes, momento=None,
+):
+    """Executa o padrão atômico dos blocos catalogados do rascunho REV13."""
+
+    momento = momento or _agora_utc()
+    tipo_comando = f"salvar_bloco_{numero_bloco}_form1_integral"
+    parametros = {
+        "conta_id": conta_id, "registro_id": registro_id,
+        "versao_lida": versao_lida, "respostas": respostas,
+    }
+    conta, pessoa_id, ator_tipo, ator_id = _ator(sessao, conta_id)
+    comando, resposta = abrir_comando(
+        sessao, comando_id, tipo_comando, parametros, ator_tipo, ator_id, conta_id,
+    )
+    if resposta is not None:
+        return resposta
+    problema = _validar_respostas_catalogadas(sessao, respostas, campos_editaveis)
+    problema = problema or _validar_condicionais(respostas, condicoes)
+    if problema:
+        return _negar(
+            sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
+            tipo_comando, problema,
+        )
+    registro, pessoa_id, rascunho, comando, resposta = _preparar_alteracao(
+        sessao, comando_id=comando_id, tipo_comando=tipo_comando,
+        conta_id=conta_id, registro_id=registro_id, versao_lida=versao_lida,
+        parametros=parametros, comando=comando,
+    )
+    if resposta is not None:
+        return resposta
+    conteudo = _conteudo_com_respostas_do_bloco(
+        rascunho, campos_editaveis=campos_editaveis, respostas=respostas,
+        condicoes=condicoes,
+    )
+    return _salvar_conteudo(
+        sessao, comando=comando, registro=registro, rascunho=rascunho,
+        pessoa_id=pessoa_id, versao_lida=versao_lida, conteudo=conteudo,
+        tipo_evento=tipo_comando,
+        motivo=f"Bloco {numero_bloco} do FORM 1 integral salvo",
+        detalhes={"campos_editados": sorted(respostas)}, momento=momento,
+    )
+
+
+def salvar_bloco_7_form1_integral(
+    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas, momento=None
+):
+    """Salva as operações de tratamento do Bloco 7."""
+
+    return _salvar_bloco_catalogado_form1_integral(
+        sessao, numero_bloco=7, comando_id=comando_id, conta_id=conta_id,
+        registro_id=registro_id, versao_lida=versao_lida, respostas=respostas,
+        campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_7, condicoes={}, momento=momento,
     )
 
 

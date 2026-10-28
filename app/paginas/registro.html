@@ -409,6 +409,31 @@
       <p class="aviso-leitura">Somente o ARP atual pode alterar este rascunho.</p>
       {% endif %}
     </section>
+
+    <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-7">
+      <p class="etiqueta">Etapa 2 de 4 · Bloco 7 de 14</p>
+      <h3 id="titulo-bloco-7">Operações de tratamento</h3>
+      {% if registro.form1_integral.pode_editar %}
+      {% set campo = registro.form1_integral.campos_bloco_7['7.1'] %}
+      <form class="formulario formulario-integral" method="post" action="{{ url_for('salvar_bloco_7_integral', registro_id=registro.id) }}">
+        <input type="hidden" name="conta_id" value="{{ conta_id }}">
+        <input type="hidden" name="comando_id" value="{{ comando_salvar_bloco_7 }}">
+        <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
+        <fieldset>
+          <legend><strong>{{ campo.id }} — {{ campo.pergunta }}</strong></legend>
+          <div class="grade-opcoes">
+          {% for valor, rotulo in campo.alternativas %}
+            <label class="opcao"><input type="checkbox" name="campo__7.1" value="{{ valor }}" {% if valor in respostas_integral.get('7.1', []) %}checked{% endif %}> <span>{{ rotulo }}</span></label>
+          {% endfor %}
+          </div>
+        </fieldset>
+        <div class="rodape-formulario">
+          <p>O rascunho admite respostas parciais e “A confirmar”.</p>
+          <button class="botao-primario" type="submit">Salvar Bloco 7</button>
+        </div>
+      </form>
+      {% else %}<p class="aviso-leitura">Somente o ARP atual pode alterar este rascunho.</p>{% endif %}
+    </section>
     </div>
     <div id="form1-etapa-3" class="painel-etapa-form1 etapa-indisponivel" data-etapa-painel="3" hidden>
       <p>Etapa 3 ainda não implementada. Nenhum campo dos Blocos 9 a 12 foi antecipado.</p>
@@ -418,7 +443,7 @@
     </div>
   {% endif %}
 
-  <p class="ajuda">Os Blocos 7 a 14 e a submissão integral serão liberados em incrementos posteriores. O FORM 1 sintético permanece disponível abaixo sem alterações.</p>
+  <p class="ajuda">Os Blocos 8 a 14 e a submissão integral serão liberados em incrementos posteriores. O FORM 1 sintético permanece disponível abaixo sem alterações.</p>
 </section>
 
 <script>

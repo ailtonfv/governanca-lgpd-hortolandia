@@ -17,7 +17,7 @@ from app.consultas_interface import (carregar_opcoes_novo_registro, carregar_pai
 from app.eventos import registrar_auditoria
 from app.form1_sintetico import (CATEGORIAS_DADOS, CATEGORIAS_TITULARES,
                                  DESTINATARIOS_COMPARTILHAMENTO)
-from app.form1_integral import (IDS_BLOCO_2, IDS_BLOCO_4, IDS_BLOCO_5, IDS_BLOCO_6,
+from app.form1_integral import (IDS_BLOCO_2, IDS_BLOCO_4, IDS_BLOCO_5, IDS_BLOCO_6, IDS_BLOCO_7,
                                 IDS_PARTICIPANTE_BLOCO_3,
                                 campos_por_id)
 from app.instrumentos import iniciar_preenchimento, salvar_rascunho
@@ -30,6 +30,7 @@ from app.rascunho_form1_integral import (adicionar_participante_form1_integral,
                                          salvar_bloco_4_form1_integral,
                                          salvar_bloco_5_form1_integral,
                                          salvar_bloco_6_form1_integral,
+                                         salvar_bloco_7_form1_integral,
                                          salvar_cabecalho_bloco_3_form1_integral)
 from app.workflow import criar_registro
 
@@ -209,6 +210,7 @@ def detalhe_registro(
             "comando_salvar_bloco_4": str(uuid.uuid4()),
             "comando_salvar_bloco_5": str(uuid.uuid4()),
             "comando_salvar_bloco_6": str(uuid.uuid4()),
+            "comando_salvar_bloco_7": str(uuid.uuid4()),
             "comandos_remover_participante": {
                 participante["id"]: str(uuid.uuid4())
                 for participante in (
@@ -324,7 +326,10 @@ def _respostas_do_formulario(formulario, campo_ids):
     respostas = {}
     for campo_id in campo_ids:
         nome = f"campo__{campo_id}"
-        if catalogo[campo_id].controle == "seleção múltipla (combo com marcações)":
+        if catalogo[campo_id].controle in {
+            "seleção múltipla (combo com marcações)",
+            "reuso do catálogo de referência (ver campo indicado)",
+        }:
             valores = [valor.strip() for valor in formulario.getlist(nome) if valor.strip()]
             if valores:
                 respostas[campo_id] = valores
@@ -416,6 +421,24 @@ async def salvar_bloco_6_integral(
     sessao.commit()
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, "Bloco 6 do FORM 1 integral salvo com segurança."
+    )
+
+
+@app.post("/registros/{registro_id}/form1-integral/bloco-7/salvar")
+async def salvar_bloco_7_integral(
+    registro_id: str, request: Request, sessao: Session = Depends(obter_sessao),
+):
+    formulario = await request.form()
+    conta_id = str(formulario.get("conta_id", ""))[:50]
+    resultado = salvar_bloco_7_form1_integral(
+        sessao, comando_id=str(formulario.get("comando_id", ""))[:64],
+        conta_id=conta_id, registro_id=registro_id,
+        versao_lida=int(formulario.get("versao_lida", 0)),
+        respostas=_respostas_do_formulario(formulario, IDS_BLOCO_7),
+    )
+    sessao.commit()
+    return _voltar_ao_registro(
+        registro_id, conta_id, resultado, "Bloco 7 do FORM 1 integral salvo com segurança."
     )
 
 
