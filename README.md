@@ -931,6 +931,8 @@ Uma alteração futura de obrigatoriedade deverá ser feita primeiro na matriz c
 
 **Navegação integral — Incremento 8A.** As quatro etapas visuais estão habilitadas para consulta e, conforme as permissões existentes, edição dos 14 blocos no mesmo rascunho. A mudança de etapa preserva o conteúdo já carregado, a etapa escolhida na sessão do navegador e todas as regras de autorização e condicionamento no servidor. A pré-validação continua apenas consultiva e não existe ação de submissão integral. A regressão aprovou **399 de 399 testes**, sem migração de banco ou alteração dos contratos 2 e 3.
 
+**Ensaio funcional e preparação da submissão — Incremento 8B.** Uma jornada reproduzível com massa exclusivamente fictícia exercita abertura pelo APA, confirmação de continuidade institucional, designação de ARP distinto, preenchimento e retomada dos 14 blocos, condições, participantes e destinatários repetíveis, canais históricos, autoria e pré-validação consultiva. O ensaio confirma que fechar e reabrir a interface preserva o mesmo rascunho e que nenhuma ação de submissão integral está disponível. O desenho técnico da futura submissão, ainda bloqueada, está em [`docs/planejamento/ESPECIFICACAO_SUBMISSAO_FORM1_INTEGRAL.md`](docs/planejamento/ESPECIFICACAO_SUBMISSAO_FORM1_INTEGRAL.md); ele separa os componentes técnicos das decisões institucionais sobre identidade funcional, matriz, liberação e competência de validação.
+
 ### Como o FORM 1 evita nomes de titulares
 
 O FORM 1 sintético descreve o tratamento, não as pessoas. Em vez de digitar nomes, o servidor seleciona categorias como **Contribuinte**, **Servidor público** ou **Estudante**. O mesmo vale para categorias de dados e destinatários de compartilhamento.
