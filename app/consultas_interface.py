@@ -3,6 +3,10 @@
 from sqlalchemy import func, or_, select
 
 from app.alertas_operacionais import listar_alertas_operacionais
+from app.classificacao_catalogo_5_1 import (
+    CLASSIFICACOES_CATALOGO_5_1,
+    VERSAO_CLASSIFICACAO_CATALOGO_5_1,
+)
 from app.continuidade_apa import apa_em_exercicio, unidades_em_que_e_apa_atual
 from app.form1_sintetico import (CATEGORIAS_DADOS, CATEGORIAS_TITULARES,
                                  DESTINATARIOS_COMPARTILHAMENTO)
@@ -374,6 +378,9 @@ def carregar_registro(sessao, conta_id, registro_id):
         condicoes = () if not condicao else (
             (condicao,) if isinstance(condicao[0], str) else condicao
         )
+        usa_catalogo_5_1 = campo_id == "5.1" or campo_id in {
+            "4.2.5.1", "6.2.2", "9.2.2", "10.4"
+        }
         return {
             "id": campo.id,
             "pergunta": campo.pergunta,
@@ -381,6 +388,12 @@ def carregar_registro(sessao, conta_id, registro_id):
             "alternativas": alternativas,
             "instrucao": campo.instrucao,
             "alternativa_outro": alternativas_outro.get(campo_id),
+            "classificacoes_dados": (
+                CLASSIFICACOES_CATALOGO_5_1 if usa_catalogo_5_1 else {}
+            ),
+            "versao_classificacao_dados": (
+                VERSAO_CLASSIFICACAO_CATALOGO_5_1 if usa_catalogo_5_1 else None
+            ),
             "condicao": condicao if condicao and isinstance(condicao[0], str) else None,
             "condicoes": condicoes,
             "condicao_canal_ativa": (

@@ -13,7 +13,7 @@
       {% if campo.controle in ('seleção múltipla (combo com marcações)', 'reuso do catálogo de referência (ver campo indicado)') %}
       <div class="grade-opcoes">
         {% for valor, rotulo in campo.alternativas %}
-        <label class="opcao"><input type="checkbox" name="campo__{{ campo.id }}" value="{{ valor }}" {% if valor in respostas_integral.get(campo.id, []) %}checked{% endif %}> <span>{{ rotulo }}</span></label>
+        <label class="opcao"><input type="checkbox" name="campo__{{ campo.id }}" value="{{ valor }}" {% if valor in respostas_integral.get(campo.id, []) %}checked{% endif %}> {% include '_alternativa_form1.html' %}</label>
         {% endfor %}
       </div>
       {% elif campo.alternativas %}

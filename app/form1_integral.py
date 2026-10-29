@@ -13,6 +13,8 @@ from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 
+from app.classificacao_catalogo_5_1 import validar_classificacoes_catalogo_5_1
+
 
 REVISAO_FONTE_FORM1_INTEGRAL = "REV13-2026-09-20"
 VERSAO_CONTRATO_FORM1_INTEGRAL_CANDIDATA = 3
@@ -269,6 +271,9 @@ def validar_catalogo_form1_integral(
             problemas.append(f"controle desconhecido em {campo.id}: {campo.controle}")
         if len(campo.alternativas) != len(set(campo.alternativas)):
             problemas.append(f"alternativa repetida em {campo.id}")
+    campo_5_1 = next((campo for campo in campos if campo.id == "5.1"), None)
+    if campo_5_1 is not None:
+        problemas.extend(validar_classificacoes_catalogo_5_1(campo_5_1.alternativas))
     return problemas
 
 

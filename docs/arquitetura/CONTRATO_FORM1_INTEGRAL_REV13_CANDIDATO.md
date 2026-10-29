@@ -82,6 +82,14 @@ Nos 38 contextos catalogados com `Outro`, `Outra` ou alternativa equivalente, o 
 
 No item 5.1, `A confirmar` é exclusivo em relação às demais alternativas tanto no domínio quanto no comportamento imediato da interface. Essa exclusividade não foi generalizada para outras perguntas. No item 2.1, o retrato de canais confirmado pelo APA permanece somente leitura para o ARP; portanto, o ARP não edita nem complementa essa resposta.
 
+### Classificação informativa do catálogo 5.1
+
+A matriz fixa `F1-CLASS-5.1-v1` classifica as 35 alternativas em 19 `PESSOAL_COMUM`, 9 `SENSIVEL` e 7 `AVALIAR_CONTEXTO`. A fonte técnica versionada é `app/classificacao_catalogo_5_1.py`; ela deve corresponder exatamente ao catálogo REV13 e é projetada somente para leitura no item 5.1 e nos itens `4.2.5.1`, `6.2.2`, `9.2.2` e `10.4`. O servidor não envia nem altera essa classificação.
+
+Os rótulos apresentados são `Pessoal comum`, `Dado pessoal sensível` e `Depende do contexto`. Para `Outro` e `A confirmar`, os rótulos são respectivamente `Pendente de avaliação` e `Pendente de identificação`; essas alternativas não são apresentadas como categorias juridicamente classificadas. Alertas destacam que dados comuns podem exigir proteção reforçada e que imagem, vídeo, voz, documentos e combinações de informações podem revelar indiretamente dados sensíveis.
+
+`Pertencimento a comunidade tradicional, quando efetivamente tratado` recebe indicação sensível pela possível revelação de origem racial ou étnica. `Pertencimento a povos ciganos / Roma, quando efetivamente tratado` permanece em `AVALIAR_CONTEXTO`, com aviso expresso de validação jurídica. A matriz não calcula risco, não realiza análise contextual automática, não define hipótese legal e não substitui os FORMS 2 e 3.
+
 Os itens 0.1 a 0.3 não autorizam digitação livre de identidade. Nome, função e contato institucional serão apresentados como metadados somente leitura quando existirem na identidade simulada ou na futura integração institucional. Dados indisponíveis não serão inventados.
 
 ## 5. Relação com o núcleo do contrato 2

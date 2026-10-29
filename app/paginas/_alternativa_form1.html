@@ -1,0 +1,9 @@
+<span class="opcao-conteudo">
+  <span>{{ rotulo }}</span>
+  {% set classificacao = campo.classificacoes_dados.get(valor) %}
+  {% if classificacao %}
+  <span class="classificacao-dado classificacao-dado-{{ classificacao.codigo | lower }}">{{ classificacao.rotulo }}</span>
+  <small class="explicacao-classificacao">{{ classificacao.explicacao }}</small>
+  {% if classificacao.alerta %}<small class="alerta-classificacao">{{ classificacao.alerta }}</small>{% endif %}
+  {% endif %}
+</span>

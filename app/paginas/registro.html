@@ -220,7 +220,7 @@
           {% if campo.controle == 'seleção múltipla (combo com marcações)' %}
           <div class="grade-opcoes">
             {% for valor, rotulo in campo.alternativas %}
-            <label class="opcao"><input type="checkbox" name="campo__{{ campo.id }}" value="{{ valor }}" {% if valor in respostas_integral.get(campo.id, []) %}checked{% endif %}> <span>{{ rotulo }}</span></label>
+            <label class="opcao"><input type="checkbox" name="campo__{{ campo.id }}" value="{{ valor }}" {% if valor in respostas_integral.get(campo.id, []) %}checked{% endif %}> {% include '_alternativa_form1.html' %}</label>
             {% endfor %}
           </div>
           {% elif campo.alternativas %}
@@ -344,7 +344,7 @@
           {% if campo.controle == 'seleção múltipla (combo com marcações)' or campo.id == '4.2.5.1' %}
           <div class="grade-opcoes">
             {% for valor, rotulo in campo.alternativas %}
-            <label class="opcao"><input type="checkbox" name="campo__{{ campo.id }}" value="{{ valor }}" {% if valor in respostas_integral.get(campo.id, []) %}checked{% endif %}> <span>{{ rotulo }}</span></label>
+            <label class="opcao"><input type="checkbox" name="campo__{{ campo.id }}" value="{{ valor }}" {% if valor in respostas_integral.get(campo.id, []) %}checked{% endif %}> {% include '_alternativa_form1.html' %}</label>
             {% endfor %}
           </div>
           {% else %}
@@ -373,6 +373,7 @@
       <p class="ajuda">Marque somente categorias efetivamente tratadas neste fluxo. Não informe nomes, números de documentos, contatos, protocolos ou dados de casos concretos.</p>
       {% if registro.form1_integral.pode_editar %}
       {% set campo = registro.form1_integral.campos_bloco_5['5.1'] %}
+      <p class="aviso-classificacao"><strong>Classificação informativa · {{ campo.versao_classificacao_dados }}</strong> — é fixa e somente para leitura. Ela não define risco, hipótese legal ou conformidade e não substitui as análises dos FORMS 2 e 3.</p>
       <form class="formulario formulario-integral" method="post" action="{{ url_for('salvar_bloco_5_integral', registro_id=registro.id) }}">
         <input type="hidden" name="conta_id" value="{{ conta_id }}">
         <input type="hidden" name="comando_id" value="{{ comando_salvar_bloco_5 }}">
@@ -381,7 +382,7 @@
           <legend><strong>{{ campo.id }} — {{ campo.pergunta }}</strong></legend>
           <div class="grade-opcoes">
             {% for valor, rotulo in campo.alternativas %}
-            <label class="opcao"><input type="checkbox" name="campo__5.1" value="{{ valor }}" {% if valor in respostas_integral.get('5.1', []) %}checked{% endif %}> <span>{{ rotulo }}</span></label>
+            <label class="opcao"><input type="checkbox" name="campo__5.1" value="{{ valor }}" {% if valor in respostas_integral.get('5.1', []) %}checked{% endif %}> {% include '_alternativa_form1.html' %}</label>
             {% endfor %}
           </div>
         </fieldset>
@@ -416,7 +417,7 @@
           {% if campo.controle == 'seleção múltipla (combo com marcações)' or campo.id == '6.2.2' %}
           <div class="grade-opcoes">
             {% for valor, rotulo in campo.alternativas %}
-            <label class="opcao"><input type="checkbox" name="campo__{{ campo.id }}" value="{{ valor }}" {% if valor in respostas_integral.get(campo.id, []) %}checked{% endif %}> <span>{{ rotulo }}</span></label>
+            <label class="opcao"><input type="checkbox" name="campo__{{ campo.id }}" value="{{ valor }}" {% if valor in respostas_integral.get(campo.id, []) %}checked{% endif %}> {% include '_alternativa_form1.html' %}</label>
             {% endfor %}
           </div>
           {% elif campo.alternativas %}

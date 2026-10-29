@@ -71,6 +71,13 @@ legend { padding: 0 .4rem; color: var(--azul-escuro); font-weight: 800; }
 .grade-opcoes { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: .65rem 1rem; }
 .opcao { display: flex; align-items: start; gap: .55rem; margin: 0; font-weight: 500; }
 .opcao input { margin-top: .3rem; accent-color: var(--azul); }
+.opcao-conteudo { display: flex; flex-direction: column; align-items: flex-start; gap: .18rem; }
+.classificacao-dado { display: inline-block; border: 1px solid #9fb6c4; border-radius: 999px; padding: .08rem .45rem; background: #eef6fa; color: #27485b; font-size: .75rem; font-weight: 800; }
+.classificacao-dado-sensivel { border-color: #c99b9b; background: #fff1f2; color: #7f1d1d; }
+.classificacao-dado-avaliar_contexto { border-color: #d4ae78; background: #fffbeb; color: #78350f; }
+.explicacao-classificacao, .alerta-classificacao { display: block; color: #526475; font-size: .78rem; line-height: 1.35; }
+.alerta-classificacao { color: #78350f; font-weight: 650; }
+.aviso-classificacao { padding: .75rem; border-left: .25rem solid #b45309; background: #fffbeb; color: #5f370e; }
 .ajuda { margin-top: .35rem; color: #526475; font-size: .9rem; }
 .rodape-formulario { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-top: 1.4rem; }
 .rodape-formulario p { margin: 0; color: #526475; }
