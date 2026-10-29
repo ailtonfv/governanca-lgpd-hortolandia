@@ -15,7 +15,7 @@ def test_bloco_10_salva_fluxo_de_saida_e_ramos_aninhados(sessao):
     registro = _rascunho(sessao, "F110-OK")
     respostas = {
         "10.1": "Em alguns casos", "10.2": ["Outra Secretaria"],
-        "10.2.1": "Secretaria fictícia", "10.3": ["Sistema", "Protocolo"],
+        "10.3": ["Sistema", "Protocolo"],
         "10.4": ["Nome", "Número de protocolo, processo ou cadastro"],
         "10.5": "Sob demanda", "10.6": "Atendimento institucional fictício",
         "10.7": "Sim", "10.7.1": "Protocolo fictício", "10.8": "Sim",

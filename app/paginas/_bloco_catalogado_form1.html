@@ -10,7 +10,9 @@
     <div class="campo-integral{% if campo.condicoes %} campo-condicional{% endif %}"
          {% if campo.condicoes %}data-condicoes='{{ campo.condicoes | tojson }}'{% endif %}>
       <label><strong>{{ campo.id }} — {{ campo.pergunta }}</strong></label>
-      {% if campo.controle in ('seleção múltipla (combo com marcações)', 'reuso do catálogo de referência (ver campo indicado)') %}
+      {% if campo.estrutura_destinatarios %}
+      <p class="ajuda">Os destinatários são registrados abaixo, em ocorrências estruturadas e repetíveis. Respostas textuais antigas são preservadas somente para consulta.</p>
+      {% elif campo.controle in ('seleção múltipla (combo com marcações)', 'reuso do catálogo de referência (ver campo indicado)') %}
       <div class="grade-opcoes">
         {% for valor, rotulo in campo.alternativas %}
         <label class="opcao"><input type="checkbox" name="campo__{{ campo.id }}" value="{{ valor }}" {% if valor in respostas_integral.get(campo.id, []) %}checked{% endif %}> {% include '_alternativa_form1.html' %}</label>
@@ -35,5 +37,6 @@
       <button class="botao-primario" type="submit">Salvar Bloco {{ numero_bloco }}</button>
     </div>
   </form>
+  {% if numero_bloco == 10 %}{% include '_destinatarios_10_2_1.html' %}{% endif %}
   {% else %}<p class="aviso-leitura">Somente o ARP atual pode alterar este rascunho.</p>{% endif %}
 </section>

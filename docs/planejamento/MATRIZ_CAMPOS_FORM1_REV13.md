@@ -139,7 +139,7 @@ As regras acima descrevem a validação futura da submissão. A interface e o do
 | 9.3 | Etapa 3 | Facultativa nesta proposta | Sempre visível | — |
 | 10.1 | Etapa 3 | Obrigatória essencial | Sempre visível | — |
 | 10.2 | Etapa 3 | Obrigatória condicional | 10.1 = Sim ou Em alguns casos | F1-D03: correspondência v2/REV13; F1-D05: complemento de Outro; F1-D06: excludentes |
-| 10.2.1 | Etapa 3 | Obrigatória condicional | 10.1 = Sim ou Em alguns casos | condição exata não explicitada |
+| 10.2.1 | Etapa 3 | Obrigatória condicional | 10.1 = Sim ou Em alguns casos; para cada categoria concreta selecionada em 10.2 | ocorrências estruturadas e repetíveis; admite rascunho incompleto; “A confirmar” não exige destinatário fictício; texto legado não é convertido automaticamente |
 | 10.3 | Etapa 3 | Obrigatória condicional | 10.1 = Sim ou Em alguns casos | F1-D05: complemento de Outro; F1-D06: excludentes |
 | 10.4 | Etapa 3 | Obrigatória condicional | 10.1 = Sim ou Em alguns casos | — |
 | 10.5 | Etapa 3 | Obrigatória condicional | 10.1 = Sim ou Em alguns casos | — |

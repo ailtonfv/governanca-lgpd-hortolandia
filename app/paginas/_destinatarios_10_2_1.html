@@ -1,0 +1,36 @@
+{% set itens = registro.form1_integral.rascunho.destinatarios_10_2_1 %}
+<div class="colecao-destinatarios" aria-labelledby="titulo-destinatarios-10-2-1">
+  <h4 id="titulo-destinatarios-10-2-1">Destinatários identificados — 10.2.1</h4>
+  <p class="ajuda">Use somente dados institucionais fictícios nesta PoC. Não informe nomes de cidadãos, contatos pessoais ou protocolos individuais.</p>
+  {% if registro.form1_integral.rascunho.destinatario_legado_10_2_1 %}
+  <div class="aviso-leitura"><strong>Resposta textual legada preservada:</strong> {{ registro.form1_integral.rascunho.destinatario_legado_10_2_1 }}. Ela não foi convertida automaticamente.</div>
+  {% endif %}
+  {% for item in itens %}
+  <details class="cartao-destinatario">
+    <summary><strong>{{ item.categoria }}</strong> · {{ item.modalidade }}</summary>
+    <form class="formulario formulario-integral" method="post" action="{{ url_for('atualizar_destinatario_10_2_1_integral', registro_id=registro.id, destinatario_id=item.id) }}">
+      <input type="hidden" name="conta_id" value="{{ conta_id }}">
+      <input type="hidden" name="comando_id" value="{{ comandos_atualizar_destinatario[item.id] }}">
+      <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
+      {% set destinatario = item %}{% include '_campos_destinatario_10_2_1.html' %}
+      <button class="botao-primario" type="submit">Atualizar ocorrência</button>
+    </form>
+    <form method="post" action="{{ url_for('remover_destinatario_10_2_1_integral', registro_id=registro.id, destinatario_id=item.id) }}">
+      <input type="hidden" name="conta_id" value="{{ conta_id }}">
+      <input type="hidden" name="comando_id" value="{{ comandos_remover_destinatario[item.id] }}">
+      <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
+      <button type="submit">Remover da visão ativa</button>
+    </form>
+  </details>
+  {% else %}<p>Nenhum destinatário estruturado informado.</p>{% endfor %}
+  <details class="cartao-destinatario">
+    <summary><strong>Adicionar destinatário</strong></summary>
+    <form class="formulario formulario-integral" method="post" action="{{ url_for('adicionar_destinatario_10_2_1_integral', registro_id=registro.id) }}">
+      <input type="hidden" name="conta_id" value="{{ conta_id }}">
+      <input type="hidden" name="comando_id" value="{{ comando_adicionar_destinatario }}">
+      <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
+      {% set destinatario = {} %}{% include '_campos_destinatario_10_2_1.html' %}
+      <button class="botao-primario" type="submit">Adicionar ocorrência</button>
+    </form>
+  </details>
+</div>

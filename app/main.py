@@ -23,7 +23,10 @@ from app.form1_integral import (IDS_BLOCO_2, IDS_BLOCO_4, IDS_BLOCO_5, IDS_BLOCO
 from app.instrumentos import iniciar_preenchimento, salvar_rascunho
 from app.modelos import ObjetoCatalogo
 from app.rascunho_form1_integral import (adicionar_participante_form1_integral,
+                                         adicionar_destinatario_10_2_1_form1_integral,
+                                         atualizar_destinatario_10_2_1_form1_integral,
                                          iniciar_rascunho_form1_integral,
+                                         remover_destinatario_10_2_1_form1_integral,
                                          remover_participante_form1_integral,
                                          salvar_bloco_1_form1_integral,
                                          salvar_bloco_2_form1_integral,
@@ -221,6 +224,19 @@ def detalhe_registro(
             "comando_salvar_bloco_8": str(uuid.uuid4()),
             "comando_salvar_bloco_9": str(uuid.uuid4()),
             "comando_salvar_bloco_10": str(uuid.uuid4()),
+            "comando_adicionar_destinatario": str(uuid.uuid4()),
+            "comandos_atualizar_destinatario": {
+                item["id"]: str(uuid.uuid4()) for item in (
+                    registro["form1_integral"]["rascunho"]["destinatarios_10_2_1"]
+                    if registro["form1_integral"]["rascunho"] else []
+                )
+            },
+            "comandos_remover_destinatario": {
+                item["id"]: str(uuid.uuid4()) for item in (
+                    registro["form1_integral"]["rascunho"]["destinatarios_10_2_1"]
+                    if registro["form1_integral"]["rascunho"] else []
+                )
+            },
             "comando_salvar_bloco_11": str(uuid.uuid4()),
             "comando_salvar_bloco_12": str(uuid.uuid4()),
             "comando_salvar_bloco_13": str(uuid.uuid4()),
@@ -523,6 +539,69 @@ async def salvar_bloco_10_integral(
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, "Bloco 10 do FORM 1 integral salvo com segurança."
     )
+
+
+def _dados_destinatario_formulario(formulario):
+    campos = (
+        "categoria", "modalidade", "identificacao", "unidade_id", "cnpj",
+        "instrumento", "classe_orgao_requisitante", "hipotese_requisicao",
+        "meio_publicacao", "natureza_destinatario", "justificativa",
+    )
+    return {campo: str(formulario.get(f"destinatario__{campo}", ""))
+            for campo in campos}
+
+
+@app.post("/registros/{registro_id}/form1-integral/bloco-10/destinatarios/adicionar")
+async def adicionar_destinatario_10_2_1_integral(
+    registro_id: str, request: Request, sessao: Session = Depends(obter_sessao),
+):
+    formulario = await request.form()
+    conta_id = str(formulario.get("conta_id", ""))[:50]
+    resultado = adicionar_destinatario_10_2_1_form1_integral(
+        sessao, comando_id=str(formulario.get("comando_id", ""))[:64],
+        conta_id=conta_id, registro_id=registro_id,
+        versao_lida=int(formulario.get("versao_lida", 0)),
+        dados=_dados_destinatario_formulario(formulario),
+    )
+    sessao.commit()
+    return _voltar_ao_registro(registro_id, conta_id, resultado,
+                               "Destinatário incluído no rascunho com segurança.")
+
+
+@app.post("/registros/{registro_id}/form1-integral/bloco-10/destinatarios/{destinatario_id}/atualizar")
+async def atualizar_destinatario_10_2_1_integral(
+    registro_id: str, destinatario_id: str, request: Request,
+    sessao: Session = Depends(obter_sessao),
+):
+    formulario = await request.form()
+    conta_id = str(formulario.get("conta_id", ""))[:50]
+    resultado = atualizar_destinatario_10_2_1_form1_integral(
+        sessao, comando_id=str(formulario.get("comando_id", ""))[:64],
+        conta_id=conta_id, registro_id=registro_id,
+        versao_lida=int(formulario.get("versao_lida", 0)),
+        destinatario_id=destinatario_id, dados=_dados_destinatario_formulario(formulario),
+    )
+    sessao.commit()
+    return _voltar_ao_registro(registro_id, conta_id, resultado,
+                               "Destinatário atualizado no rascunho com segurança.")
+
+
+@app.post("/registros/{registro_id}/form1-integral/bloco-10/destinatarios/{destinatario_id}/remover")
+async def remover_destinatario_10_2_1_integral(
+    registro_id: str, destinatario_id: str, request: Request,
+    sessao: Session = Depends(obter_sessao),
+):
+    formulario = await request.form()
+    conta_id = str(formulario.get("conta_id", ""))[:50]
+    resultado = remover_destinatario_10_2_1_form1_integral(
+        sessao, comando_id=str(formulario.get("comando_id", ""))[:64],
+        conta_id=conta_id, registro_id=registro_id,
+        versao_lida=int(formulario.get("versao_lida", 0)),
+        destinatario_id=destinatario_id,
+    )
+    sessao.commit()
+    return _voltar_ao_registro(registro_id, conta_id, resultado,
+                               "Destinatário removido da visão ativa; histórico preservado.")
 
 
 @app.post("/registros/{registro_id}/form1-integral/bloco-11/salvar")

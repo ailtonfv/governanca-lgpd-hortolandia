@@ -30,7 +30,6 @@ CLASSE_CONDICIONAL = "Obrigatória condicional"
 REGRAS_PENDENTES_GLOBAIS = (
     {"codigo": "F1-D04-DOC", "descricao": "formalizar na próxima Cartilha que o ramo de WhatsApp usa somente a alternativa canônica ‘WhatsApp corporativo’", "campos": ("8.3", "8.7", "8.8", "8.8.1", "8.9")},
     {"codigo": "F1-D06", "descricao": "definir exclusividades ainda não formalizadas em seleções múltiplas", "campos": ()},
-    {"codigo": "COND-10.2.1", "descricao": "confirmar a condição exata de exibição e obrigatoriedade de 10.2.1", "campos": ("10.2.1",)},
     {"codigo": "APROVACAO-MATRIZ", "descricao": "aprovar institucionalmente a matriz e o marco de liberação da submissão", "campos": ()},
 )
 
@@ -40,9 +39,15 @@ _CONDICOES = {
     **CONDICOES_BLOCO_10, **CONDICOES_BLOCO_11, **CONDICOES_BLOCO_12,
     **CONDICOES_BLOCO_14,
 }
-for _campo_pendente in ("10.2.1",):
-    _CONDICOES.pop(_campo_pendente, None)
-_CAMPOS_CONDICAO_PENDENTE = frozenset({"10.2.1"})
+_CAMPOS_CONDICAO_PENDENTE = frozenset()
+
+_CATEGORIAS_ENTIDADES_10_2 = frozenset({
+    "Empresa contratada", "OSC / entidade parceira", "Consórcio",
+    "Concessionária ou PPP", "Prestador de serviço",
+})
+_CATEGORIAS_MUNICIPAIS_10_2 = frozenset({
+    "Outra unidade da mesma Secretaria", "Outra Secretaria", "Ouvidoria", "e-SIC",
+})
 
 
 @dataclass(frozen=True, slots=True)
@@ -120,6 +125,63 @@ def _condicao_participante_ativa(campo_id: str, respostas: dict) -> bool:
     return not condicao or _corresponde(respostas.get(condicao[0]), condicao[1])
 
 
+def _pre_validar_destinatarios_10_2_1(conteudo, respostas, incompletos, regras_pendentes):
+    if respostas.get("10.1") not in {"Sim", "Em alguns casos"}:
+        return
+    categorias = [item for item in respostas.get("10.2", []) if item != "A confirmar"]
+    destinatarios = conteudo.get("destinatarios_10_2_1", [])
+    destinatarios = destinatarios if isinstance(destinatarios, list) else []
+    legado = respostas.get("10.2.1")
+    if legado:
+        regras_pendentes.append(_item(
+            "10.2.1", "compatibilidade_legada",
+            "resposta textual legada preservada sem conversão automática; requer revisão humana",
+        ))
+    for categoria in categorias:
+        ocorrencias = [item for item in destinatarios if item.get("categoria") == categoria]
+        if not ocorrencias:
+            incompletos.append(_item(
+                "10.2.1", "incompleto",
+                f"categoria ‘{categoria}’: informe ao menos um destinatário ou justificativa controlada",
+            ))
+        for indice, item in enumerate(ocorrencias, start=1):
+            modalidade = item.get("modalidade")
+            exigidos = []
+            if modalidade == "nao_determinavel":
+                exigidos = ["justificativa"]
+            elif modalidade == "requisicao_eventual":
+                exigidos = ["classe_orgao_requisitante", "hipotese_requisicao"]
+            elif modalidade == "identificado":
+                if categoria in _CATEGORIAS_MUNICIPAIS_10_2:
+                    exigidos = ["unidade_id", "instrumento"]
+                elif categoria in _CATEGORIAS_ENTIDADES_10_2:
+                    exigidos = ["identificacao", "cnpj", "instrumento"]
+                elif categoria == "Outro órgão público":
+                    exigidos = ["identificacao", "instrumento"]
+                elif categoria == "Público em geral":
+                    exigidos = ["meio_publicacao", "instrumento"]
+                elif categoria == "Outro":
+                    exigidos = ["identificacao", "natureza_destinatario", "instrumento"]
+            else:
+                exigidos = ["modalidade"]
+            for campo in exigidos:
+                if not _respondido(item.get(campo)):
+                    pendencia = _item(
+                        "10.2.1", "incompleto",
+                        f"categoria ‘{categoria}’, ocorrência {indice}: falta {campo.replace('_', ' ')}",
+                    )
+                    pendencia["ocorrencia"] = item.get("id", indice)
+                    pendencia["categoria_destinatario"] = categoria
+                    incompletos.append(pendencia)
+            if modalidade == "nao_determinavel" and _respondido(item.get("justificativa")):
+                pendencia = _item(
+                    "10.2.1", "validacao_humana",
+                    f"categoria ‘{categoria}’, ocorrência {indice}: justificativa requer avaliação humana",
+                )
+                pendencia["ocorrencia"] = item.get("id", indice)
+                regras_pendentes.append(pendencia)
+
+
 def pre_validar_form1_integral(conteudo: dict, *, nome_institucional: str | None,
                                cargo_funcao: str | None = None,
                                email_institucional: str | None = None,
@@ -142,7 +204,8 @@ def pre_validar_form1_integral(conteudo: dict, *, nome_institucional: str | None
             ))
 
     for campo_id, regra in regras.items():
-        if campo_id.startswith("0.") or (campo_id.startswith("3.") and campo_id != "3.1"):
+        if (campo_id.startswith("0.") or campo_id == "10.2.1"
+                or (campo_id.startswith("3.") and campo_id != "3.1")):
             continue
         if regra.classe not in {CLASSE_ESSENCIAL, CLASSE_CONDICIONAL}:
             continue
@@ -208,6 +271,10 @@ def pre_validar_form1_integral(conteudo: dict, *, nome_institucional: str | None
     else:
         for campo_id in ("3.2", "3.3", "3.4", "3.4.1", "3.5", "3.5.1"):
             nao_aplicaveis.append(_item(campo_id, "nao_aplicavel", "3.1 não ativa participantes neste rascunho"))
+
+    _pre_validar_destinatarios_10_2_1(
+        conteudo, respostas, incompletos, regras_pendentes
+    )
 
     regras_pendentes.extend({**pendencia, "tipo": "governanca"}
                             for pendencia in REGRAS_PENDENTES_GLOBAIS)

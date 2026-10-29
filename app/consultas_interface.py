@@ -404,6 +404,7 @@ def carregar_registro(sessao, conta_id, registro_id):
                     item.classificacao_form1_snapshot for item in canais_registro
                 }
             ),
+            "estrutura_destinatarios": campo_id == "10.2.1",
         }
     candidatos_arp = sessao.scalars(
         select(Pessoa)
@@ -446,6 +447,8 @@ def carregar_registro(sessao, conta_id, registro_id):
             "conteudo": rascunho_integral.conteudo,
             "respostas": rascunho_integral.conteudo.get("respostas", {}),
             "participantes": rascunho_integral.conteudo.get("participantes", []),
+            "destinatarios_10_2_1": rascunho_integral.conteudo.get("destinatarios_10_2_1", []),
+            "destinatario_legado_10_2_1": rascunho_integral.conteudo.get("respostas", {}).get("10.2.1"),
             "versao": rascunho_integral.versao_rascunho,
             "salvo_por": autor_integral,
             "salvo_em": rascunho_integral.salvo_em,
@@ -506,6 +509,9 @@ def carregar_registro(sessao, conta_id, registro_id):
         "campos_bloco_10": {
             campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_10
         },
+        "unidades_destinatarios": [
+            {"id": item.id, "nome": item.nome} for item in secretarias_integral
+        ],
         "campos_bloco_11": {
             campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_11
         },

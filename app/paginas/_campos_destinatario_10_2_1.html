@@ -1,0 +1,27 @@
+<label>Categoria selecionada em 10.2
+  <select name="destinatario__categoria" required>
+    <option value="">Selecione</option>
+    {% for categoria in respostas_integral.get('10.2', []) if categoria != 'A confirmar' %}
+    <option value="{{ categoria }}" {% if destinatario.get('categoria') == categoria %}selected{% endif %}>{{ categoria }}</option>
+    {% endfor %}
+  </select>
+</label>
+<label>Modo de identificação
+  <select name="destinatario__modalidade" required>
+    {% for valor, rotulo in [('identificado','Destinatário identificado'),('requisicao_eventual','Requisição eventual'),('nao_determinavel','Não determinável neste momento')] %}
+    <option value="{{ valor }}" {% if destinatario.get('modalidade') == valor %}selected{% endif %}>{{ rotulo }}</option>
+    {% endfor %}
+  </select>
+</label>
+<label>Unidade municipal
+  <select name="destinatario__unidade_id"><option value="">Não informado</option>
+    {% for unidade in registro.form1_integral.unidades_destinatarios %}<option value="{{ unidade.id }}" {% if destinatario.get('unidade_id') == unidade.id %}selected{% endif %}>{{ unidade.nome }}</option>{% endfor %}
+  </select>
+</label>
+{% for campo, rotulo in [
+  ('identificacao','Identificação institucional do destinatário'),('cnpj','CNPJ da entidade (somente dado fictício na PoC)'),
+  ('instrumento','Contrato, convênio, norma ou instrumento pertinente'),
+  ('classe_orgao_requisitante','Classe do órgão requisitante'),('hipotese_requisicao','Hipótese da requisição eventual'),
+  ('meio_publicacao','Meio de publicação'),('natureza_destinatario','Natureza do destinatário')
+] %}<label>{{ rotulo }}<input name="destinatario__{{ campo }}" maxlength="500" value="{{ destinatario.get(campo, '') }}"></label>{% endfor %}
+<label>Justificativa controlada<textarea name="destinatario__justificativa" maxlength="2000">{{ destinatario.get('justificativa', '') }}</textarea></label>

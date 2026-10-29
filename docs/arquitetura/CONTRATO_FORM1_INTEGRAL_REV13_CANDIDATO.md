@@ -103,9 +103,17 @@ Os itens 0.1 a 0.3 não autorizam digitação livre de identidade. Nome, funçã
 
 O contrato 3 não reutilizará silenciosamente os códigos do contrato 2 com significado diferente. Qualquer ponte entre versões será explícita e testada.
 
+### Destinatários estruturados do item 10.2.1
+
+O identificador canônico `10.2.1` é preservado, mas sua resposta nova deixa de ser um texto curto único e passa a ser uma coleção repetível no envelope JSON do contrato candidato 3. Cada categoria concreta marcada em `10.2` deve possuir ao menos uma ocorrência ou uma justificativa controlada de que o destinatário ainda não é determinável. `A confirmar` não provoca a criação de destinatário fictício.
+
+Cada ocorrência registra categoria, modalidade (`identificado`, `requisicao_eventual` ou `nao_determinavel`) e os atributos institucionais aplicáveis. Unidades municipais são escolhidas do catálogo institucional; entidades podem registrar identificação, CNPJ fictício e instrumento; órgãos externos registram identificação e fundamento; público em geral representa o meio de publicação, nunca uma pessoa; requisições eventuais registram classe requisitante e hipótese, sem inventar destino nominal; e `Outro` exige identificação e natureza. Instrumentos ausentes aparecem como pendência explícita na pré-validação consultiva.
+
+Ocorrências podem ser incluídas, alteradas e retiradas da visão ativa com versão lida, idempotência, evento e lacre. A versão anterior permanece no histórico inativo. Respostas textuais legadas de `10.2.1` são preservadas somente para consulta e revisão humana, sem conversão automática. Acesso eventual de fornecedor para suporte pode ser representado sem presumir transferência de arquivo nem classificar automaticamente a entidade como operadora. A futura aprovação humana continua fora desta etapa, e a submissão integral permanece bloqueada.
+
 ## 6. Validações que já podem ser especificadas
 
-No rascunho implementado dos Blocos 1 a 5 já são verificadas autoria do ARP, designação vigente de `preenchedor`, catálogo fechado, identificadores permitidos, seleções múltiplas sem repetição, Secretaria ativa, idempotência, versão lida, atomicidade e cadeia de eventos. O contrato nuclear 2 continua em tabela, rotas e fluxo próprios.
+No rascunho implementado dos Blocos 1 a 14 já são verificadas autoria do ARP, designação vigente de `preenchedor`, catálogo fechado, identificadores permitidos, seleções múltiplas sem repetição, Secretaria ativa, idempotência, versão lida, atomicidade e cadeia de eventos. O contrato nuclear 2 continua em tabela, rotas e fluxo próprios.
 
 - rejeitar identificador de pergunta desconhecido;
 - rejeitar alternativa que não pertença ao catálogo versionado da pergunta;
@@ -124,7 +132,7 @@ No rascunho implementado dos Blocos 1 a 5 já são verificadas autoria do ARP, d
 2. formalizar na próxima Cartilha que, no contrato REV13 vigente, o ramo de WhatsApp usa somente a alternativa canônica `WhatsApp corporativo`; nenhuma alternativa pessoal foi inventada;
 3. validar combinações excludentes nas demais seleções múltiplas; em 5.1 somente `A confirmar` é exclusivo;
 4. definir como função e e-mail institucional serão obtidos sem autenticação real na PoC;
-5. confirmar a condição exata do item 10.2.1;
+5. definir o fluxo institucional de revisão humana das justificativas e dos instrumentos do item 10.2.1;
 6. confirmar o marco e o critério de aceite que autorizam a submissão pelo contrato 3.
 
 A obrigatoriedade candidata está detalhada em `docs/planejamento/MATRIZ_CAMPOS_FORM1_REV13.md`: campos essenciais, condicionais e facultativos. Rascunhos incompletos e navegação permanecem permitidos; somente a submissão integral futura aplicará bloqueios aos campos obrigatórios ativos.

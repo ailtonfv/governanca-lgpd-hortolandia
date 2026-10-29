@@ -54,7 +54,7 @@ CAMPOS_EDITAVEIS_BLOCO_6 = frozenset(IDS_BLOCO_6)
 CAMPOS_EDITAVEIS_BLOCO_7 = frozenset(IDS_BLOCO_7)
 CAMPOS_EDITAVEIS_BLOCO_8 = frozenset(IDS_BLOCO_8)
 CAMPOS_EDITAVEIS_BLOCO_9 = frozenset(IDS_BLOCO_9)
-CAMPOS_EDITAVEIS_BLOCO_10 = frozenset(IDS_BLOCO_10)
+CAMPOS_EDITAVEIS_BLOCO_10 = frozenset(IDS_BLOCO_10) - {"10.2.1"}
 CAMPOS_EDITAVEIS_BLOCO_11 = frozenset(IDS_BLOCO_11)
 CAMPOS_EDITAVEIS_BLOCO_12 = frozenset(IDS_BLOCO_12)
 CAMPOS_EDITAVEIS_BLOCO_13 = frozenset(IDS_BLOCO_13)
@@ -73,6 +73,24 @@ PADRAO_IDENTIFICADOR_CONCRETO = re.compile(
     r"\b(?:cpf|rg|matr[ií]cula|telefone|e-mail|email)\s*[:#-]",
     re.IGNORECASE,
 )
+
+CATEGORIAS_DESTINATARIOS_10_2 = frozenset(campos_por_id()["10.2"].alternativas)
+CATEGORIAS_MUNICIPAIS_10_2 = frozenset({
+    "Outra unidade da mesma Secretaria", "Outra Secretaria", "Ouvidoria", "e-SIC",
+})
+CATEGORIAS_ENTIDADES_10_2 = frozenset({
+    "Empresa contratada", "OSC / entidade parceira", "Consórcio",
+    "Concessionária ou PPP", "Prestador de serviço",
+})
+MODALIDADES_DESTINATARIO_10_2_1 = frozenset({
+    "identificado", "requisicao_eventual", "nao_determinavel",
+})
+CAMPOS_DESTINATARIO_10_2_1 = frozenset({
+    "categoria", "modalidade", "identificacao", "unidade_id", "cnpj",
+    "instrumento", "classe_orgao_requisitante", "hipotese_requisicao",
+    "meio_publicacao", "natureza_destinatario", "justificativa",
+})
+LIMITE_TEXTO_DESTINATARIO_10_2_1 = 2000
 
 
 def _agora_utc():
@@ -547,6 +565,150 @@ def _preparar_alteracao(
     return registro, pessoa_id, rascunho, comando, None
 
 
+def _normalizar_destinatario_10_2_1(sessao, dados):
+    """Valida a estrutura do rascunho sem antecipar a obrigatoriedade da submissão."""
+
+    if not isinstance(dados, dict):
+        return None, "10.2.1: o destinatário deve formar um objeto"
+    desconhecidos = set(dados) - CAMPOS_DESTINATARIO_10_2_1
+    if desconhecidos:
+        return None, "10.2.1: campo desconhecido: " + ", ".join(sorted(desconhecidos))
+    normalizado = {}
+    for campo in CAMPOS_DESTINATARIO_10_2_1:
+        valor = dados.get(campo)
+        if valor in (None, ""):
+            continue
+        if not isinstance(valor, str):
+            return None, f"10.2.1: {campo} deve ser texto"
+        valor = valor.strip()
+        if len(valor) > LIMITE_TEXTO_DESTINATARIO_10_2_1:
+            return None, f"10.2.1: {campo} excede o limite técnico"
+        if valor:
+            normalizado[campo] = valor
+    categoria = normalizado.get("categoria")
+    modalidade = normalizado.get("modalidade")
+    if categoria not in CATEGORIAS_DESTINATARIOS_10_2 or categoria == "A confirmar":
+        return None, "10.2.1: categoria inexistente ou ainda não identificada"
+    if modalidade not in MODALIDADES_DESTINATARIO_10_2_1:
+        return None, "10.2.1: modalidade inexistente"
+    if "unidade_id" in normalizado:
+        unidade = sessao.get(Unidade, normalizado["unidade_id"])
+        if unidade is None or not unidade.ativa or unidade.id == "UNID-GOV":
+            return None, "10.2.1: unidade municipal fora do catálogo institucional ativo"
+    if modalidade == "requisicao_eventual" and normalizado.get("identificacao"):
+        return None, "10.2.1: requisição eventual não deve inventar destinatário nominal"
+    return normalizado, None
+
+
+def _destinatarios_ativos_10_2_1(conteudo):
+    itens = conteudo.get("destinatarios_10_2_1", []) if isinstance(conteudo, dict) else []
+    return list(itens) if isinstance(itens, list) else []
+
+
+def _arquivar_destinatarios_inativos(conteudo, respostas, proxima_versao):
+    """Retira somente da visão ativa ocorrências cujo ramo deixou de ser aplicável."""
+
+    ativos = _destinatarios_ativos_10_2_1(conteudo)
+    categorias = set(respostas.get("10.2", [])) if respostas.get("10.1") in {"Sim", "Em alguns casos"} else set()
+    mantidos, arquivados = [], []
+    for item in ativos:
+        if item.get("categoria") in categorias:
+            mantidos.append(item)
+        else:
+            arquivados.append({**item, "desativada_na_versao": proxima_versao,
+                               "motivo_desativacao": "categoria ou ramo 10.2 deixou de estar ativo"})
+    historico = list(conteudo.get("destinatarios_10_2_1_inativos", []))
+    return {**conteudo, "destinatarios_10_2_1": mantidos,
+            "destinatarios_10_2_1_inativos": [*historico, *arquivados]}
+
+
+def _alterar_destinatario_10_2_1(
+    sessao, *, operacao, comando_id, conta_id, registro_id, versao_lida,
+    dados=None, destinatario_id=None, momento=None,
+):
+    momento = momento or _agora_utc()
+    tipo_comando = f"{operacao}_destinatario_10_2_1_form1_integral"
+    normalizado, problema = (None, None)
+    if operacao != "remover":
+        normalizado, problema = _normalizar_destinatario_10_2_1(sessao, dados)
+    parametros = {
+        "conta_id": conta_id, "registro_id": registro_id, "versao_lida": versao_lida,
+        # A ocorrência recebida integra o hash idempotente inclusive quando é
+        # inválida; reutilizar a chave com outro conteúdo continua sendo abuso.
+        "destinatario_id": destinatario_id, "dados": dados,
+    }
+    conta, pessoa_id, ator_tipo, ator_id = _ator(sessao, conta_id)
+    comando, resposta = abrir_comando(
+        sessao, comando_id, tipo_comando, parametros, ator_tipo, ator_id, conta_id,
+    )
+    if resposta is not None:
+        return resposta
+    if problema:
+        return _negar(sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
+                      tipo_comando, problema)
+    registro, pessoa_id, rascunho, comando, resposta = _preparar_alteracao(
+        sessao, comando_id=comando_id, tipo_comando=tipo_comando,
+        conta_id=conta_id, registro_id=registro_id, versao_lida=versao_lida,
+        parametros=parametros, comando=comando,
+    )
+    if resposta is not None:
+        return resposta
+    respostas = rascunho.conteudo.get("respostas", {})
+    if respostas.get("10.1") not in {"Sim", "Em alguns casos"}:
+        return _negar(sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
+                      tipo_comando, "10.2.1: o ramo de saída de dados não está ativo")
+    ativos = _destinatarios_ativos_10_2_1(rascunho.conteudo)
+    indice = next((i for i, item in enumerate(ativos)
+                   if item.get("id") == destinatario_id), None)
+    if operacao == "adicionar":
+        if normalizado["categoria"] not in respostas.get("10.2", []):
+            return _negar(sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
+                          tipo_comando, "10.2.1: categoria não selecionada em 10.2")
+        destinatario_id = str(uuid.uuid4())
+        ativos.append({"id": destinatario_id, **normalizado,
+                       "criada_na_versao": versao_lida + 1})
+    elif indice is None:
+        return _negar(sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
+                      tipo_comando, "10.2.1: ocorrência inexistente")
+    elif operacao == "atualizar":
+        if normalizado["categoria"] not in respostas.get("10.2", []):
+            return _negar(sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
+                          tipo_comando, "10.2.1: categoria não selecionada em 10.2")
+        anterior = ativos[indice]
+        historico = list(rascunho.conteudo.get("destinatarios_10_2_1_inativos", []))
+        historico.append({**anterior, "desativada_na_versao": versao_lida + 1,
+                          "motivo_desativacao": "ocorrência substituída por atualização"})
+        ativos[indice] = {"id": destinatario_id, **normalizado,
+                          "criada_na_versao": versao_lida + 1}
+    else:
+        anterior = ativos.pop(indice)
+        historico = list(rascunho.conteudo.get("destinatarios_10_2_1_inativos", []))
+        historico.append({**anterior, "desativada_na_versao": versao_lida + 1,
+                          "motivo_desativacao": "ocorrência removida pelo ARP"})
+    conteudo = {**rascunho.conteudo, "destinatarios_10_2_1": ativos}
+    if 'historico' in locals():
+        conteudo["destinatarios_10_2_1_inativos"] = historico
+    return _salvar_conteudo(
+        sessao, comando=comando, registro=registro, rascunho=rascunho,
+        pessoa_id=pessoa_id, versao_lida=versao_lida, conteudo=conteudo,
+        tipo_evento=tipo_comando, motivo=f"Destinatário 10.2.1 {operacao} com segurança",
+        detalhes={"campo_id": "10.2.1", "destinatario_id": destinatario_id,
+                  "operacao": operacao}, momento=momento,
+    )
+
+
+def adicionar_destinatario_10_2_1_form1_integral(sessao, **parametros):
+    return _alterar_destinatario_10_2_1(sessao, operacao="adicionar", **parametros)
+
+
+def atualizar_destinatario_10_2_1_form1_integral(sessao, **parametros):
+    return _alterar_destinatario_10_2_1(sessao, operacao="atualizar", **parametros)
+
+
+def remover_destinatario_10_2_1_form1_integral(sessao, **parametros):
+    return _alterar_destinatario_10_2_1(sessao, operacao="remover", **parametros)
+
+
 def salvar_bloco_2_form1_integral(
     sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas,
     complementos_outro=None, momento=None,
@@ -827,6 +989,7 @@ def salvar_bloco_6_form1_integral(
 def _salvar_bloco_catalogado_form1_integral(
     sessao, *, numero_bloco, comando_id, conta_id, registro_id, versao_lida,
     respostas, campos_editaveis, condicoes, complementos_outro=None, momento=None,
+    transformar_conteudo=None,
 ):
     """Executa o padrão atômico dos blocos catalogados do rascunho REV13."""
 
@@ -869,6 +1032,8 @@ def _salvar_bloco_catalogado_form1_integral(
         respostas=respostas, complementos_outro=complementos_outro,
         versao_lida=versao_lida,
     )
+    if transformar_conteudo is not None:
+        conteudo = transformar_conteudo(conteudo, respostas, versao_lida + 1)
     return _salvar_conteudo(
         sessao, comando=comando, registro=registro, rascunho=rascunho,
         pessoa_id=pessoa_id, versao_lida=versao_lida, conteudo=conteudo,
@@ -933,7 +1098,7 @@ def salvar_bloco_10_form1_integral(
         registro_id=registro_id, versao_lida=versao_lida, respostas=respostas,
         campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_10,
         condicoes=CONDICOES_BLOCO_10, complementos_outro=complementos_outro,
-        momento=momento,
+        momento=momento, transformar_conteudo=_arquivar_destinatarios_inativos,
     )
 
 
