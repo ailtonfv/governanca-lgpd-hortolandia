@@ -168,6 +168,8 @@ IDS_BLOCO_13 = ("13.1", "13.2", "13.3", "13.4")
 
 IDS_BLOCO_14 = ("14.1", "14.1.1", "14.1.2", "14.2", "14.2.1", "14.2.2", "14.2.3", "14.2.4")
 
+IDS_REUSO_CATALOGO_5_1 = frozenset({"4.2.5.1", "6.2.2", "9.2.2", "10.4"})
+
 CONDICOES_BLOCO_14 = {
     "14.1.1": (("14.1", ("Sim",)),),
     "14.1.2": (("14.1", ("Sim",)),),
@@ -274,3 +276,24 @@ def campos_por_id() -> dict[str, CampoForm1Integral]:
     """Índice somente leitura para os incrementos posteriores."""
 
     return {campo.id: campo for campo in carregar_catalogo_form1_integral()}
+
+
+@lru_cache(maxsize=1)
+def alternativas_outro_por_campo() -> dict[str, str]:
+    """Mapeia os contextos que admitem complemento sem criar novos IDs REV13."""
+
+    catalogo = campos_por_id()
+    resultado = {}
+    for campo_id, campo in catalogo.items():
+        alternativas = (
+            catalogo["5.1"].alternativas
+            if campo_id in IDS_REUSO_CATALOGO_5_1
+            else campo.alternativas
+        )
+        alternativa = next(
+            (item for item in alternativas if item.strip().casefold() in {"outro", "outra"}),
+            None,
+        )
+        if alternativa:
+            resultado[campo_id] = alternativa
+    return resultado

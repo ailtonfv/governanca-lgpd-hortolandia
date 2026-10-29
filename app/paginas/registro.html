@@ -97,6 +97,7 @@
 
   {% if registro.form1_integral.rascunho %}
     {% set respostas_integral = registro.form1_integral.rascunho.respostas %}
+    {% set complementos_integral = registro.form1_integral.rascunho.conteudo.get('complementos', {}) %}
     {% set pre_validacao = registro.form1_integral.pre_validacao %}
     <section class="bloco-form1-integral" aria-labelledby="titulo-pre-validacao-form1">
       <p class="etiqueta">Verificação consultiva · não submete o formulário</p>
@@ -235,6 +236,7 @@
           <input name="campo__{{ campo.id }}" value="{{ respostas_integral.get(campo.id, '') }}">
           {% endif %}
           {% if campo.instrucao %}<p class="ajuda">{{ campo.instrucao }}</p>{% endif %}
+          {% include '_complemento_outro_form1.html' %}
         </div>
         {% endif %}
         {% endfor %}
@@ -281,7 +283,7 @@
           <h4>Participante {{ loop.index }}</h4>
           <dl class="resumo respostas-somente-leitura">
             {% for campo_id, valor in participante.respostas.items() %}
-            <div><dt>{{ campo_id }} — {{ registro.form1_integral.campos_participante[campo_id].pergunta }}</dt><dd>{{ valor | join(', ') if valor is not string else valor }}</dd></div>
+            <div><dt>{{ campo_id }} — {{ registro.form1_integral.campos_participante[campo_id].pergunta }}</dt><dd>{{ valor | join(', ') if valor is not string else valor }}{% if participante.get('complementos', {}).get(campo_id) %}<br><span class="ajuda">Complemento: {{ participante.complementos[campo_id] }}</span>{% endif %}</dd></div>
             {% endfor %}
           </dl>
           {% if registro.form1_integral.pode_editar %}
@@ -313,6 +315,8 @@
               <input name="campo__{{ campo.id }}">
               {% endif %}
               {% if campo.instrucao %}<p class="ajuda">{{ campo.instrucao }}</p>{% endif %}
+              {% set valor_complemento = '' %}
+              {% include '_complemento_outro_form1.html' %}
             </div>
             {% endfor %}
           </fieldset>
@@ -350,6 +354,7 @@
           </select>
           {% endif %}
           {% if campo.instrucao %}<p class="ajuda">{{ campo.instrucao }}</p>{% endif %}
+          {% include '_complemento_outro_form1.html' %}
         </div>
         {% endfor %}
         <div class="rodape-formulario">
@@ -425,6 +430,7 @@
           <input name="campo__{{ campo.id }}" maxlength="500" value="{{ respostas_integral.get(campo.id, '') }}">
           {% endif %}
           {% if campo.instrucao %}<p class="ajuda">{{ campo.instrucao }}</p>{% endif %}
+          {% include '_complemento_outro_form1.html' %}
         </div>
         {% endfor %}
         <div class="rodape-formulario">
@@ -454,6 +460,7 @@
           {% endfor %}
           </div>
         </fieldset>
+        {% include '_complemento_outro_form1.html' %}
         <div class="rodape-formulario">
           <p>O rascunho admite respostas parciais e “A confirmar”.</p>
           <button class="botao-primario" type="submit">Salvar Bloco 7</button>
@@ -577,6 +584,31 @@
     });
     atualizarCondicoes();
   });
+  (function aplicarExclusividadeAConfirmarNoBloco5() {
+    var opcoes = Array.from(document.getElementsByName('campo__5.1'));
+    var aConfirmar = opcoes.find(function (opcao) { return opcao.value === 'A confirmar'; });
+    if (!aConfirmar) return;
+    opcoes.forEach(function (opcao) {
+      opcao.addEventListener('change', function () {
+        if (!opcao.checked) return;
+        var alteradas = [];
+        if (opcao === aConfirmar) {
+          opcoes.forEach(function (outra) {
+            if (outra !== aConfirmar && outra.checked) {
+              outra.checked = false;
+              alteradas.push(outra);
+            }
+          });
+        } else if (aConfirmar.checked) {
+          aConfirmar.checked = false;
+          alteradas.push(aConfirmar);
+        }
+        alteradas.forEach(function (item) {
+          item.dispatchEvent(new Event('change', { bubbles: false }));
+        });
+      });
+    });
+  })();
   (function iniciarNavegacaoForm1() {
     var raiz = document.querySelector('.form1-integral');
     if (!raiz) return;

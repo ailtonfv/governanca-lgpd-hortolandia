@@ -16,7 +16,8 @@ from app.form1_integral import (
     CONDICOES_BLOCO_1, CONDICOES_BLOCO_2, CONDICOES_BLOCO_4,
     CONDICOES_BLOCO_6, CONDICOES_BLOCO_8, CONDICOES_BLOCO_9,
     CONDICOES_BLOCO_10, CONDICOES_BLOCO_11, CONDICOES_BLOCO_12,
-    CONDICOES_BLOCO_14, CONDICOES_PARTICIPANTE_BLOCO_3, campos_por_id,
+    CONDICOES_BLOCO_14, CONDICOES_PARTICIPANTE_BLOCO_3,
+    alternativas_outro_por_campo, campos_por_id,
 )
 
 
@@ -27,8 +28,7 @@ CLASSE_ESSENCIAL = "Obrigatória essencial"
 CLASSE_CONDICIONAL = "Obrigatória condicional"
 
 REGRAS_PENDENTES_GLOBAIS = (
-    {"codigo": "F1-D04", "descricao": "definir WhatsApp pessoal e corporativo no item 8.3 e em seus campos dependentes", "campos": ("8.3", "8.7", "8.8", "8.8.1", "8.9")},
-    {"codigo": "F1-D05", "descricao": "definir complementos de ‘Outro’ fora do item 5.1, campo a campo", "campos": ()},
+    {"codigo": "F1-D04-DOC", "descricao": "formalizar na próxima Cartilha que o ramo de WhatsApp usa somente a alternativa canônica ‘WhatsApp corporativo’", "campos": ("8.3", "8.7", "8.8", "8.8.1", "8.9")},
     {"codigo": "F1-D06", "descricao": "definir exclusividades ainda não formalizadas em seleções múltiplas", "campos": ()},
     {"codigo": "COND-10.2.1", "descricao": "confirmar a condição exata de exibição e obrigatoriedade de 10.2.1", "campos": ("10.2.1",)},
     {"codigo": "APROVACAO-MATRIZ", "descricao": "aprovar institucionalmente a matriz e o marco de liberação da submissão", "campos": ()},
@@ -40,9 +40,9 @@ _CONDICOES = {
     **CONDICOES_BLOCO_10, **CONDICOES_BLOCO_11, **CONDICOES_BLOCO_12,
     **CONDICOES_BLOCO_14,
 }
-for _campo_pendente in ("8.7", "8.8", "8.8.1", "8.9", "10.2.1"):
+for _campo_pendente in ("10.2.1",):
     _CONDICOES.pop(_campo_pendente, None)
-_CAMPOS_CONDICAO_PENDENTE = frozenset({"8.7", "8.8", "8.8.1", "8.9", "10.2.1"})
+_CAMPOS_CONDICAO_PENDENTE = frozenset({"10.2.1"})
 
 
 @dataclass(frozen=True, slots=True)
@@ -162,19 +162,27 @@ def pre_validar_form1_integral(conteudo: dict, *, nome_institucional: str | None
                 campo_id, "incompleto", "campo obrigatório ativo ainda não respondido conclusivamente"
             ))
 
-    # F1-D05 está decidida somente para 5.1: "Outro" exige complemento na
-    # futura submissão. A consulta antecipa essa pendência sem bloquear o rascunho.
-    if ("Outro" in respostas.get("5.1", [])
-            and not _respondido(conteudo.get("complementos", {}).get("5.1"))):
-        incompletos.append(_item(
-            "5.1", "incompleto", "a alternativa ‘Outro’ requer complemento descritivo"
-        ))
+    # A política F1-D05 passou a abranger todos os 38 contextos catalogados.
+    # A consulta antecipa a pendência sem impedir que o rascunho seja salvo.
+    complementos = conteudo.get("complementos", {})
+    for campo_id, alternativa_outro in alternativas_outro_por_campo().items():
+        if campo_id.startswith("3."):
+            continue
+        valor = respostas.get(campo_id)
+        selecionado = (alternativa_outro in valor if isinstance(valor, list)
+                       else valor == alternativa_outro)
+        if selecionado and not _respondido(complementos.get(campo_id)):
+            incompletos.append(_item(
+                campo_id, "incompleto",
+                f"a alternativa ‘{alternativa_outro}’ requer complemento descritivo",
+            ))
 
     if respostas.get("3.1") == "Sim":
         if not participantes:
             incompletos.append(_item("3.2", "incompleto", "informe ao menos uma unidade participante"))
         for indice, participante in enumerate(participantes, start=1):
             valores = participante.get("respostas", participante)
+            complementos_participante = participante.get("complementos", {})
             for campo_id in ("3.2", "3.3", "3.4", "3.4.1", "3.5"):
                 if not _respondido(valores.get(campo_id)):
                     item = _item(campo_id, "incompleto", f"participante {indice}: resposta obrigatória ausente")
@@ -185,6 +193,18 @@ def pre_validar_form1_integral(conteudo: dict, *, nome_institucional: str | None
                 item = _item("3.5.1", "incompleto", f"participante {indice}: resposta condicional ausente")
                 item["ocorrencia"] = indice
                 incompletos.append(item)
+            for campo_id in ("3.2", "3.4", "3.5.1"):
+                alternativa_outro = alternativas_outro_por_campo()[campo_id]
+                valor = valores.get(campo_id)
+                selecionado = (alternativa_outro in valor if isinstance(valor, list)
+                               else valor == alternativa_outro)
+                if selecionado and not _respondido(complementos_participante.get(campo_id)):
+                    item = _item(
+                        campo_id, "incompleto",
+                        f"participante {indice}: a alternativa ‘{alternativa_outro}’ requer complemento descritivo",
+                    )
+                    item["ocorrencia"] = indice
+                    incompletos.append(item)
     else:
         for campo_id in ("3.2", "3.3", "3.4", "3.4.1", "3.5", "3.5.1"):
             nao_aplicaveis.append(_item(campo_id, "nao_aplicavel", "3.1 não ativa participantes neste rascunho"))

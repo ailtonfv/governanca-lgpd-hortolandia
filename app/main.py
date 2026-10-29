@@ -19,7 +19,7 @@ from app.form1_sintetico import (CATEGORIAS_DADOS, CATEGORIAS_TITULARES,
                                  DESTINATARIOS_COMPARTILHAMENTO)
 from app.form1_integral import (IDS_BLOCO_2, IDS_BLOCO_4, IDS_BLOCO_5, IDS_BLOCO_6, IDS_BLOCO_7, IDS_BLOCO_8, IDS_BLOCO_9, IDS_BLOCO_10, IDS_BLOCO_11, IDS_BLOCO_12, IDS_BLOCO_13, IDS_BLOCO_14,
                                 IDS_PARTICIPANTE_BLOCO_3,
-                                campos_por_id)
+                                alternativas_outro_por_campo, campos_por_id)
 from app.instrumentos import iniciar_preenchimento, salvar_rascunho
 from app.modelos import ObjetoCatalogo
 from app.rascunho_form1_integral import (adicionar_participante_form1_integral,
@@ -354,6 +354,14 @@ def _respostas_do_formulario(formulario, campo_ids):
     return respostas
 
 
+def _complementos_outro_do_formulario(formulario, campo_ids):
+    elegiveis = set(alternativas_outro_por_campo()) & set(campo_ids)
+    return {
+        campo_id: str(formulario.get(f"complemento_outro__{campo_id}", ""))
+        for campo_id in elegiveis
+    }
+
+
 @app.post("/registros/{registro_id}/form1-integral/bloco-2/salvar")
 async def salvar_bloco_2_integral(
     registro_id: str, request: Request, sessao: Session = Depends(obter_sessao),
@@ -370,6 +378,7 @@ async def salvar_bloco_2_integral(
         registro_id=registro_id,
         versao_lida=int(formulario.get("versao_lida", 0)),
         respostas=_respostas_do_formulario(formulario, IDS_BLOCO_2),
+        complementos_outro=_complementos_outro_do_formulario(formulario, IDS_BLOCO_2),
     )
     sessao.commit()
     return _voltar_ao_registro(
@@ -390,6 +399,7 @@ async def salvar_bloco_4_integral(
         registro_id=registro_id,
         versao_lida=int(formulario.get("versao_lida", 0)),
         respostas=_respostas_do_formulario(formulario, IDS_BLOCO_4),
+        complementos_outro=_complementos_outro_do_formulario(formulario, IDS_BLOCO_4),
     )
     sessao.commit()
     return _voltar_ao_registro(
@@ -431,6 +441,7 @@ async def salvar_bloco_6_integral(
         registro_id=registro_id,
         versao_lida=int(formulario.get("versao_lida", 0)),
         respostas=_respostas_do_formulario(formulario, IDS_BLOCO_6),
+        complementos_outro=_complementos_outro_do_formulario(formulario, IDS_BLOCO_6),
     )
     sessao.commit()
     return _voltar_ao_registro(
@@ -449,6 +460,7 @@ async def salvar_bloco_7_integral(
         conta_id=conta_id, registro_id=registro_id,
         versao_lida=int(formulario.get("versao_lida", 0)),
         respostas=_respostas_do_formulario(formulario, IDS_BLOCO_7),
+        complementos_outro=_complementos_outro_do_formulario(formulario, IDS_BLOCO_7),
     )
     sessao.commit()
     return _voltar_ao_registro(
@@ -467,6 +479,7 @@ async def salvar_bloco_8_integral(
         conta_id=conta_id, registro_id=registro_id,
         versao_lida=int(formulario.get("versao_lida", 0)),
         respostas=_respostas_do_formulario(formulario, IDS_BLOCO_8),
+        complementos_outro=_complementos_outro_do_formulario(formulario, IDS_BLOCO_8),
     )
     sessao.commit()
     return _voltar_ao_registro(
@@ -485,6 +498,7 @@ async def salvar_bloco_9_integral(
         conta_id=conta_id, registro_id=registro_id,
         versao_lida=int(formulario.get("versao_lida", 0)),
         respostas=_respostas_do_formulario(formulario, IDS_BLOCO_9),
+        complementos_outro=_complementos_outro_do_formulario(formulario, IDS_BLOCO_9),
     )
     sessao.commit()
     return _voltar_ao_registro(
@@ -503,6 +517,7 @@ async def salvar_bloco_10_integral(
         conta_id=conta_id, registro_id=registro_id,
         versao_lida=int(formulario.get("versao_lida", 0)),
         respostas=_respostas_do_formulario(formulario, IDS_BLOCO_10),
+        complementos_outro=_complementos_outro_do_formulario(formulario, IDS_BLOCO_10),
     )
     sessao.commit()
     return _voltar_ao_registro(
@@ -520,6 +535,7 @@ async def salvar_bloco_11_integral(
         sessao, comando_id=str(formulario.get("comando_id", ""))[:64], conta_id=conta_id,
         registro_id=registro_id, versao_lida=int(formulario.get("versao_lida", 0)),
         respostas=_respostas_do_formulario(formulario, IDS_BLOCO_11),
+        complementos_outro=_complementos_outro_do_formulario(formulario, IDS_BLOCO_11),
     )
     sessao.commit()
     return _voltar_ao_registro(registro_id, conta_id, resultado, "Bloco 11 do FORM 1 integral salvo com segurança.")
@@ -535,6 +551,7 @@ async def salvar_bloco_12_integral(
         sessao, comando_id=str(formulario.get("comando_id", ""))[:64], conta_id=conta_id,
         registro_id=registro_id, versao_lida=int(formulario.get("versao_lida", 0)),
         respostas=_respostas_do_formulario(formulario, IDS_BLOCO_12),
+        complementos_outro=_complementos_outro_do_formulario(formulario, IDS_BLOCO_12),
     )
     sessao.commit()
     return _voltar_ao_registro(registro_id, conta_id, resultado, "Bloco 12 do FORM 1 integral salvo com segurança.")
@@ -550,6 +567,7 @@ async def salvar_bloco_13_integral(
         sessao, comando_id=str(formulario.get("comando_id", ""))[:64], conta_id=conta_id,
         registro_id=registro_id, versao_lida=int(formulario.get("versao_lida", 0)),
         respostas=_respostas_do_formulario(formulario, IDS_BLOCO_13),
+        complementos_outro=_complementos_outro_do_formulario(formulario, IDS_BLOCO_13),
     )
     sessao.commit()
     return _voltar_ao_registro(registro_id, conta_id, resultado, "Bloco 13 do FORM 1 integral salvo com segurança.")
@@ -565,6 +583,7 @@ async def salvar_bloco_14_integral(
         sessao, comando_id=str(formulario.get("comando_id", ""))[:64], conta_id=conta_id,
         registro_id=registro_id, versao_lida=int(formulario.get("versao_lida", 0)),
         respostas=_respostas_do_formulario(formulario, IDS_BLOCO_14),
+        complementos_outro=_complementos_outro_do_formulario(formulario, IDS_BLOCO_14),
     )
     sessao.commit()
     return _voltar_ao_registro(registro_id, conta_id, resultado, "Bloco 14 do FORM 1 integral salvo com segurança.")
@@ -603,6 +622,9 @@ async def adicionar_participante_integral(
         registro_id=registro_id,
         versao_lida=int(formulario.get("versao_lida", 0)),
         respostas=_respostas_do_formulario(formulario, IDS_PARTICIPANTE_BLOCO_3),
+        complementos_outro=_complementos_outro_do_formulario(
+            formulario, IDS_PARTICIPANTE_BLOCO_3
+        ),
     )
     sessao.commit()
     return _voltar_ao_registro(

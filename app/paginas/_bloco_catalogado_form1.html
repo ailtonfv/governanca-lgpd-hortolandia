@@ -27,6 +27,7 @@
       <input name="campo__{{ campo.id }}" maxlength="500" value="{{ respostas_integral.get(campo.id, '') }}">
       {% endif %}
       {% if campo.instrucao %}<p class="ajuda">{{ campo.instrucao }}</p>{% endif %}
+      {% include '_complemento_outro_form1.html' %}
     </div>
     {% endfor %}
     <div class="rodape-formulario">

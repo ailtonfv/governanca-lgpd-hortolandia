@@ -78,7 +78,9 @@ No primeiro recorte executável, `1.2` e `1.3` são reaproveitados do tipo e do 
 
 O incremento F1-2 acrescenta o Bloco 2, inclusive os ramos condicionais de Ouvidoria e e-SIC, e o Bloco 3. Cada participante do Bloco 3 possui identificador e respostas próprias; adicionar ou remover uma ocorrência gera nova versão do mesmo rascunho e evento próprio. O F1-3 acrescenta o Bloco 4 por categorias e o Bloco 5 com as 35 alternativas exatas do item 5.1. O item 4.2.5.1 reutiliza o mesmo catálogo, mas as respostas não são copiadas nem sincronizadas entre os dois campos.
 
-No item 5.1, `A confirmar` é exclusivo em relação às demais alternativas. `Outro` pode receber complemento descritivo de até 200 caracteres, mantido separadamente em `complementos["5.1"]` para preservar o identificador oficial. O rascunho pode permanecer sem complemento; a futura submissão deverá exigi-lo quando `Outro` estiver marcado. A interface orienta o uso exclusivo de categorias e o domínio recusa padrões evidentes de contato ou identificador, mas esses controles não substituem revisão e segurança institucionais.
+Nos 38 contextos catalogados com `Outro`, `Outra` ou alternativa equivalente, o complemento descritivo possui até 200 caracteres e é mantido separadamente em `complementos[campo_id]`, preservando o identificador oficial. Perguntas comuns, ocorrências repetíveis de participantes e perguntas que reutilizam o catálogo 5.1 mantêm complementos independentes. O rascunho pode permanecer sem complemento; a futura submissão deverá exigi-lo quando a alternativa estiver ativa. Se ela for desmarcada, o complemento deixa o conteúdo ativo, mas permanece no histórico inativo versionado. A interface orienta o uso exclusivo de categorias e o domínio recusa padrões evidentes de contato ou identificador, mas esses controles não substituem revisão e segurança institucionais.
+
+No item 5.1, `A confirmar` é exclusivo em relação às demais alternativas tanto no domínio quanto no comportamento imediato da interface. Essa exclusividade não foi generalizada para outras perguntas. No item 2.1, o retrato de canais confirmado pelo APA permanece somente leitura para o ARP; portanto, o ARP não edita nem complementa essa resposta.
 
 Os itens 0.1 a 0.3 não autorizam digitação livre de identidade. Nome, função e contato institucional serão apresentados como metadados somente leitura quando existirem na identidade simulada ou na futura integração institucional. Dados indisponíveis não serão inventados.
 
@@ -111,10 +113,10 @@ No rascunho implementado dos Blocos 1 a 5 já são verificadas autoria do ARP, d
 ## 7. Decisões pendentes antes da submissão integral
 
 1. aprovar códigos e correspondências dos catálogos dos itens 4.1 e 10.2; para 5.1 foi decidido não converter, migrar nem sincronizar automaticamente com o contrato 2;
-2. resolver a condição de WhatsApp, que menciona uso pessoal sem essa alternativa constar no item 8.3;
-3. definir o tratamento controlado da alternativa “Outro” nas demais perguntas; em 5.1 o complemento possui até 200 caracteres;
-4. validar combinações excludentes nas demais seleções múltiplas; em 5.1 somente `A confirmar` é exclusivo;
-5. definir como função e e-mail institucional serão obtidos sem autenticação real na PoC;
+2. formalizar na próxima Cartilha que, no contrato REV13 vigente, o ramo de WhatsApp usa somente a alternativa canônica `WhatsApp corporativo`; nenhuma alternativa pessoal foi inventada;
+3. validar combinações excludentes nas demais seleções múltiplas; em 5.1 somente `A confirmar` é exclusivo;
+4. definir como função e e-mail institucional serão obtidos sem autenticação real na PoC;
+5. confirmar a condição exata do item 10.2.1;
 6. confirmar o marco e o critério de aceite que autorizam a submissão pelo contrato 3.
 
 A obrigatoriedade candidata está detalhada em `docs/planejamento/MATRIZ_CAMPOS_FORM1_REV13.md`: campos essenciais, condicionais e facultativos. Rascunhos incompletos e navegação permanecem permitidos; somente a submissão integral futura aplicará bloqueios aos campos obrigatórios ativos.

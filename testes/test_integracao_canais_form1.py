@@ -135,6 +135,25 @@ def test_arp_nao_pode_sobrescrever_confirmacao_historica_em_2_1(sessao):
     assert [item.canal_id_snapshot for item in canais] == ["CNL-001"]
 
 
+def test_arp_nao_pode_acrescentar_complemento_a_2_1_somente_leitura(sessao):
+    registro = _registro_integral(
+        sessao, "CMD-F1-CANAIS-COMPLEMENTO", canais=["CNL-001"]
+    )
+
+    resultado = salvar_bloco_2_form1_integral(
+        sessao, comando_id="CMD-F1-CANAIS-COMPLEMENTO-SALVAR",
+        conta_id="CONTA-A1", registro_id=registro["registro_id"],
+        versao_lida=1, respostas={"2.2": "Unidade fictícia"},
+        complementos_outro={"2.1": "Canal complementar fictício"},
+    )
+    sessao.commit()
+
+    rascunho = sessao.get(RascunhoForm1Integral, registro["registro_id"])
+    assert not resultado["permitido"]
+    assert "somente pode ser usado" in resultado["motivo"]
+    assert "2.1" not in rascunho.conteudo.get("complementos", {})
+
+
 def test_leitura_2_1_usa_snapshot_e_nao_nome_posterior_do_catalogo(sessao):
     # Arrange
     registro = _registro_integral(

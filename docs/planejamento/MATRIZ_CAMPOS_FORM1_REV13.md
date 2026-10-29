@@ -29,6 +29,12 @@ Esta tabela é a fonte única das classificações e condições dos 128 identif
 - **`Não se aplica`:** somente pode ser utilizado quando constar expressamente no catálogo da pergunta. É uma resposta conclusiva e satisfaz a obrigatoriedade do campo. Em seleção múltipla, não deve coexistir com alternativa factual nem com `A confirmar`. Seus campos dependentes ficam inativos, salvo condição diferente expressamente registrada nesta matriz.
 - **Campo sem resposta:** é diferente de `A confirmar` e de `Não se aplica`. É aceito no rascunho, mas bloqueia a submissão quando o campo for essencial ou condicional ativo.
 
+### Complementos de “Outro” — decisão F1-D05
+
+Os 38 contextos catalogados com `Outro`, `Outra` ou alternativa equivalente adotam uma única política: complemento descritivo de até **200 caracteres**, armazenado separadamente pelo identificador canônico. O complemento é independente entre perguntas comuns, ocorrências repetíveis de participantes e perguntas que reutilizam o catálogo 5.1. Ele pode faltar no rascunho, mas será exigido pela futura submissão quando a alternativa correspondente estiver ativa. Ao desmarcá-la, o valor deixa de ser ativo sem ser apagado do histórico versionado. A política não se aplica às justificativas de destinatários do item `10.2.1`.
+
+O item `2.1` permanece sob responsabilidade do APA quando existe confirmação histórica de canais; nesse caso, a resposta e qualquer complemento são somente leitura para o ARP. As referências F1-D05 nas linhas abaixo identificam os campos alcançados por esta política já decidida, e não uma decisão ainda aberta.
+
 As regras acima descrevem a validação futura da submissão. A interface e o domínio já implementados não devem ser apresentados como se aplicassem integralmente essa política antes dos testes específicos do incremento F1-6.
 
 ## Etapas visuais

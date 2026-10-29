@@ -1,0 +1,10 @@
+{% if campo.alternativa_outro %}
+<div class="campo-condicional complemento-outro-form1"
+     data-depende-de="campo__{{ campo.id }}" data-valores="{{ campo.alternativa_outro }}">
+  <label for="complemento-outro-{{ campo.id | replace('.', '-') }}"><strong>Complemento de “{{ campo.alternativa_outro }}”</strong></label>
+  <input id="complemento-outro-{{ campo.id | replace('.', '-') }}"
+         name="complemento_outro__{{ campo.id }}" maxlength="200"
+         value="{{ valor_complemento | default(complementos_integral.get(campo.id, '')) }}">
+  <p class="ajuda">Descreva somente a categoria ou situação complementar, em até 200 caracteres. Não informe dados pessoais, contatos, protocolos ou identificadores de casos concretos.</p>
+</div>
+{% endif %}

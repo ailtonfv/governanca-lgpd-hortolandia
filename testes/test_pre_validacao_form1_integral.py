@@ -62,15 +62,16 @@ def test_nao_se_aplica_satisfaz_e_a_confirmar_nao_satisfaz_obrigatorio():
     assert "5.1" in _ids(provisoria["incompletos"])
 
 
-def test_regras_reservadas_nao_sao_convertidas_em_condicionais_definitivas():
+def test_whatsapp_corporativo_usa_condicionais_canônicas_e_10_2_1_fica_reservada():
     resultado = pre_validar_form1_integral(
         {"respostas": {"8.3": ["WhatsApp corporativo"], "10.1": "Sim"}},
         nome_institucional="Agente Fictício",
     )
 
     pendentes = _ids(resultado["regras_pendentes"])
-    assert {"8.7", "8.8", "8.8.1", "8.9", "10.2.1"} <= pendentes
-    assert not ({"8.7", "8.8", "8.8.1", "8.9", "10.2.1"} & _ids(resultado["incompletos"]))
+    assert "10.2.1" in pendentes
+    assert {"8.7", "8.8", "8.9"} <= _ids(resultado["incompletos"])
+    assert "8.8.1" in _ids(resultado["nao_aplicaveis"])
 
 
 def test_retrato_historico_de_canais_satisfaz_2_1_sem_alterar_rascunho():

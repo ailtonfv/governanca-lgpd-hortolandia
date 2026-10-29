@@ -36,7 +36,7 @@ from app.form1_integral import (CONDICOES_BLOCO_1, CONDICOES_BLOCO_2,
                                 IDS_PARTICIPANTE_BLOCO_3,
                                 REVISAO_FONTE_FORM1_INTEGRAL,
                                 VERSAO_CONTRATO_FORM1_INTEGRAL_CANDIDATA,
-                                campos_por_id)
+                                alternativas_outro_por_campo, campos_por_id)
 from app.modelos import (AtribuicaoForm1Integral, Ciclo, ConfirmacaoCanaisRegistro,
                           Conta, Pessoa,
                           RascunhoForm1Integral, Registro, RegistroCanal, Unidade)
@@ -67,7 +67,7 @@ MAPA_TIPO_OBJETO = {
     "atividade": "Atividade",
     "servico": "Serviço",
 }
-LIMITE_COMPLEMENTO_OUTRO_5_1 = 200
+LIMITE_COMPLEMENTO_OUTRO = 200
 PADRAO_IDENTIFICADOR_CONCRETO = re.compile(
     r"@|\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b|\d{4,}|"
     r"\b(?:cpf|rg|matr[ií]cula|telefone|e-mail|email)\s*[:#-]",
@@ -365,18 +365,79 @@ def _conteudo_com_respostas_do_bloco(
     return conteudo
 
 
-def _normalizar_complemento_outro_5_1(valor):
+def _normalizar_complemento_outro(campo_id, valor):
     if not isinstance(valor, str):
-        return None, "5.1: o complemento de Outro deve ser texto"
+        return None, f"{campo_id}: o complemento de Outro deve ser texto"
     complemento = " ".join(valor.split())
-    if len(complemento) > LIMITE_COMPLEMENTO_OUTRO_5_1:
-        return None, "5.1: o complemento de Outro deve ter até 200 caracteres"
+    if len(complemento) > LIMITE_COMPLEMENTO_OUTRO:
+        return None, f"{campo_id}: o complemento de Outro deve ter até 200 caracteres"
     if complemento and PADRAO_IDENTIFICADOR_CONCRETO.search(complemento):
         return None, (
-            "5.1: descreva somente a categoria, sem dado pessoal, contato, "
+            f"{campo_id}: descreva somente a categoria, sem dado pessoal, contato, "
             "matrícula ou identificador concreto"
         )
     return complemento, None
+
+
+def _validar_complementos_outro(respostas, complementos_outro, campos_permitidos):
+    if complementos_outro is None:
+        complementos_outro = {}
+    if not isinstance(complementos_outro, dict):
+        return None, "os complementos de Outro devem formar um objeto"
+    elegiveis = alternativas_outro_por_campo()
+    desconhecidos = set(complementos_outro) - (set(campos_permitidos) & set(elegiveis))
+    if desconhecidos:
+        return None, "complemento não permitido: " + ", ".join(sorted(desconhecidos))
+    normalizados = {}
+    for campo_id, valor in complementos_outro.items():
+        complemento, problema = _normalizar_complemento_outro(campo_id, valor)
+        if problema:
+            return None, problema
+        selecionado = respostas.get(campo_id)
+        alternativa = elegiveis[campo_id]
+        contem_outro = alternativa in selecionado if isinstance(selecionado, list) else selecionado == alternativa
+        if complemento and not contem_outro:
+            return None, f"{campo_id}: o complemento somente pode ser usado quando {alternativa} estiver selecionado"
+        normalizados[campo_id] = complemento
+    return normalizados, None
+
+
+def _conteudo_com_complementos_outro(
+    rascunho, conteudo, *, campos_editaveis, respostas, complementos_outro, versao_lida,
+):
+    """Atualiza complementos ativos e preserva os desativados no histórico."""
+
+    elegiveis = alternativas_outro_por_campo()
+    complementos = dict(rascunho.conteudo.get("complementos", {}))
+    inativos = dict(rascunho.conteudo.get("complementos_inativos", {}))
+    for campo_id in set(campos_editaveis) & set(elegiveis):
+        anterior = complementos.get(campo_id, "")
+        valor = respostas.get(campo_id)
+        alternativa = elegiveis[campo_id]
+        contem_outro = alternativa in valor if isinstance(valor, list) else valor == alternativa
+        novo = complementos_outro.get(campo_id, "") if contem_outro else ""
+        if anterior and anterior != novo:
+            historico = inativos.get(campo_id, [])
+            historico = list(historico) if isinstance(historico, list) else [historico]
+            historico.append({
+                "valor": anterior,
+                "motivo": "substituído" if novo else "alternativa Outro desativada",
+                "desativado_na_versao": versao_lida + 1,
+            })
+            inativos[campo_id] = historico
+        if novo:
+            complementos[campo_id] = novo
+        else:
+            complementos.pop(campo_id, None)
+    if complementos:
+        conteudo["complementos"] = complementos
+    else:
+        conteudo.pop("complementos", None)
+    if inativos:
+        conteudo["complementos_inativos"] = inativos
+    else:
+        conteudo.pop("complementos_inativos", None)
+    return conteudo
 
 
 def problemas_submissao_bloco_5(conteudo):
@@ -487,14 +548,20 @@ def _preparar_alteracao(
 
 
 def salvar_bloco_2_form1_integral(
-    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas, momento=None
+    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas,
+    complementos_outro=None, momento=None,
 ):
     """Salva o Bloco 2 como rascunho, inclusive ramificações OUV/e-SIC."""
 
     momento = momento or _agora_utc()
+    campos_editaveis = CAMPOS_EDITAVEIS_BLOCO_2
+    complementos_outro, problema_complemento = _validar_complementos_outro(
+        respostas, complementos_outro, campos_editaveis
+    )
     parametros = {
         "conta_id": conta_id, "registro_id": registro_id,
         "versao_lida": versao_lida, "respostas": respostas,
+        "complementos_outro": complementos_outro,
     }
     conta, pessoa_id, ator_tipo, ator_id = _ator(sessao, conta_id)
     comando, resposta = abrir_comando(
@@ -524,7 +591,11 @@ def salvar_bloco_2_form1_integral(
         if confirmacao_canais is None
         else frozenset(IDS_BLOCO_2_SEM_PORTA_ENTRADA)
     )
-    problema = None
+    # 2.1 e seu eventual complemento pertencem ao retrato do APA quando a
+    # confirmação histórica existe; o ARP não pode sobrescrevê-los.
+    if confirmacao_canais is not None and complementos_outro:
+        complementos_outro.pop("2.1", None)
+    problema = problema_complemento
     if confirmacao_canais is not None and "2.1" in respostas:
         problema = (
             "2.1: os canais confirmados pelo APA são históricos e somente para consulta"
@@ -554,6 +625,11 @@ def salvar_bloco_2_form1_integral(
         condicoes=CONDICOES_BLOCO_2,
         ativacao_externa=ativacao_canais,
     )
+    conteudo = _conteudo_com_complementos_outro(
+        rascunho, conteudo, campos_editaveis=campos_editaveis,
+        respostas=respostas, complementos_outro=complementos_outro,
+        versao_lida=versao_lida,
+    )
     return _salvar_conteudo(
         sessao, comando=comando, registro=registro, rascunho=rascunho,
         pessoa_id=pessoa_id, versao_lida=versao_lida, conteudo=conteudo,
@@ -564,14 +640,19 @@ def salvar_bloco_2_form1_integral(
 
 
 def salvar_bloco_4_form1_integral(
-    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas, momento=None
+    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas,
+    complementos_outro=None, momento=None,
 ):
     """Primeiro incremento da Etapa visual 2: titulares e representação."""
 
     momento = momento or _agora_utc()
+    complementos_outro, problema_complemento = _validar_complementos_outro(
+        respostas, complementos_outro, CAMPOS_EDITAVEIS_BLOCO_4
+    )
     parametros = {
         "conta_id": conta_id, "registro_id": registro_id,
         "versao_lida": versao_lida, "respostas": respostas,
+        "complementos_outro": complementos_outro,
     }
     conta, pessoa_id, ator_tipo, ator_id = _ator(sessao, conta_id)
     comando, resposta = abrir_comando(
@@ -580,7 +661,7 @@ def salvar_bloco_4_form1_integral(
     )
     if resposta is not None:
         return resposta
-    problema = _validar_respostas_catalogadas(sessao, respostas, CAMPOS_EDITAVEIS_BLOCO_4)
+    problema = problema_complemento or _validar_respostas_catalogadas(sessao, respostas, CAMPOS_EDITAVEIS_BLOCO_4)
     problema = problema or _validar_condicionais(respostas, CONDICOES_BLOCO_4)
     if problema:
         return _negar(
@@ -600,6 +681,11 @@ def salvar_bloco_4_form1_integral(
         respostas=respostas,
         condicoes=CONDICOES_BLOCO_4,
     )
+    conteudo = _conteudo_com_complementos_outro(
+        rascunho, conteudo, campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_4,
+        respostas=respostas, complementos_outro=complementos_outro,
+        versao_lida=versao_lida,
+    )
     return _salvar_conteudo(
         sessao, comando=comando, registro=registro, rascunho=rascunho,
         pessoa_id=pessoa_id, versao_lida=versao_lida, conteudo=conteudo,
@@ -616,9 +702,10 @@ def salvar_bloco_5_form1_integral(
     """Salva as categorias de dados sem antecipar a submissão integral."""
 
     momento = momento or _agora_utc()
-    complemento, problema_complemento = _normalizar_complemento_outro_5_1(
-        complemento_outro
+    complementos_outro, problema_complemento = _validar_complementos_outro(
+        respostas, {"5.1": complemento_outro}, CAMPOS_EDITAVEIS_BLOCO_5
     )
+    complemento = None if complementos_outro is None else complementos_outro.get("5.1", "")
     parametros = {
         "conta_id": conta_id,
         "registro_id": registro_id,
@@ -660,26 +747,11 @@ def salvar_bloco_5_form1_integral(
         respostas=respostas,
         condicoes={},
     )
-    complementos = dict(rascunho.conteudo.get("complementos", {}))
-    complemento_anterior = complementos.get("5.1", "")
-    if complemento_anterior and complemento_anterior != complemento:
-        inativos = dict(rascunho.conteudo.get("complementos_inativos", {}))
-        historico = list(inativos.get("5.1", []))
-        historico.append({
-            "valor": complemento_anterior,
-            "motivo": "substituído" if complemento else "removido do rascunho ativo",
-            "desativado_na_versao": versao_lida + 1,
-        })
-        inativos["5.1"] = historico
-        conteudo["complementos_inativos"] = inativos
-    if "Outro" in categorias and complemento:
-        complementos["5.1"] = complemento
-    else:
-        complementos.pop("5.1", None)
-    if complementos:
-        conteudo["complementos"] = complementos
-    else:
-        conteudo.pop("complementos", None)
+    conteudo = _conteudo_com_complementos_outro(
+        rascunho, conteudo, campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_5,
+        respostas=respostas, complementos_outro=complementos_outro,
+        versao_lida=versao_lida,
+    )
     return _salvar_conteudo(
         sessao, comando=comando, registro=registro, rascunho=rascunho,
         pessoa_id=pessoa_id, versao_lida=versao_lida, conteudo=conteudo,
@@ -694,15 +766,20 @@ def salvar_bloco_5_form1_integral(
 
 
 def salvar_bloco_6_form1_integral(
-    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas, momento=None
+    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas,
+    complementos_outro=None, momento=None,
 ):
     """Salva origem e eventual relação entre fonte e categorias de dados."""
 
     momento = momento or _agora_utc()
     tipo_comando = "salvar_bloco_6_form1_integral"
+    complementos_outro, problema_complemento = _validar_complementos_outro(
+        respostas, complementos_outro, CAMPOS_EDITAVEIS_BLOCO_6
+    )
     parametros = {
         "conta_id": conta_id, "registro_id": registro_id,
         "versao_lida": versao_lida, "respostas": respostas,
+        "complementos_outro": complementos_outro,
     }
     conta, pessoa_id, ator_tipo, ator_id = _ator(sessao, conta_id)
     comando, resposta = abrir_comando(
@@ -711,7 +788,7 @@ def salvar_bloco_6_form1_integral(
     )
     if resposta is not None:
         return resposta
-    problema = _validar_respostas_catalogadas(
+    problema = problema_complemento or _validar_respostas_catalogadas(
         sessao, respostas, CAMPOS_EDITAVEIS_BLOCO_6
     )
     problema = problema or _validar_condicionais(respostas, CONDICOES_BLOCO_6)
@@ -733,6 +810,11 @@ def salvar_bloco_6_form1_integral(
         respostas=respostas,
         condicoes=CONDICOES_BLOCO_6,
     )
+    conteudo = _conteudo_com_complementos_outro(
+        rascunho, conteudo, campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_6,
+        respostas=respostas, complementos_outro=complementos_outro,
+        versao_lida=versao_lida,
+    )
     return _salvar_conteudo(
         sessao, comando=comando, registro=registro, rascunho=rascunho,
         pessoa_id=pessoa_id, versao_lida=versao_lida, conteudo=conteudo,
@@ -744,15 +826,19 @@ def salvar_bloco_6_form1_integral(
 
 def _salvar_bloco_catalogado_form1_integral(
     sessao, *, numero_bloco, comando_id, conta_id, registro_id, versao_lida,
-    respostas, campos_editaveis, condicoes, momento=None,
+    respostas, campos_editaveis, condicoes, complementos_outro=None, momento=None,
 ):
     """Executa o padrão atômico dos blocos catalogados do rascunho REV13."""
 
     momento = momento or _agora_utc()
     tipo_comando = f"salvar_bloco_{numero_bloco}_form1_integral"
+    complementos_outro, problema_complemento = _validar_complementos_outro(
+        respostas, complementos_outro, campos_editaveis
+    )
     parametros = {
         "conta_id": conta_id, "registro_id": registro_id,
         "versao_lida": versao_lida, "respostas": respostas,
+        "complementos_outro": complementos_outro,
     }
     conta, pessoa_id, ator_tipo, ator_id = _ator(sessao, conta_id)
     comando, resposta = abrir_comando(
@@ -760,7 +846,7 @@ def _salvar_bloco_catalogado_form1_integral(
     )
     if resposta is not None:
         return resposta
-    problema = _validar_respostas_catalogadas(sessao, respostas, campos_editaveis)
+    problema = problema_complemento or _validar_respostas_catalogadas(sessao, respostas, campos_editaveis)
     problema = problema or _validar_condicionais(respostas, condicoes)
     if problema:
         return _negar(
@@ -778,6 +864,11 @@ def _salvar_bloco_catalogado_form1_integral(
         rascunho, campos_editaveis=campos_editaveis, respostas=respostas,
         condicoes=condicoes,
     )
+    conteudo = _conteudo_com_complementos_outro(
+        rascunho, conteudo, campos_editaveis=campos_editaveis,
+        respostas=respostas, complementos_outro=complementos_outro,
+        versao_lida=versao_lida,
+    )
     return _salvar_conteudo(
         sessao, comando=comando, registro=registro, rascunho=rascunho,
         pessoa_id=pessoa_id, versao_lida=versao_lida, conteudo=conteudo,
@@ -788,19 +879,22 @@ def _salvar_bloco_catalogado_form1_integral(
 
 
 def salvar_bloco_7_form1_integral(
-    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas, momento=None
+    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas,
+    complementos_outro=None, momento=None,
 ):
     """Salva as operações de tratamento do Bloco 7."""
 
     return _salvar_bloco_catalogado_form1_integral(
         sessao, numero_bloco=7, comando_id=comando_id, conta_id=conta_id,
         registro_id=registro_id, versao_lida=versao_lida, respostas=respostas,
-        campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_7, condicoes={}, momento=momento,
+        campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_7, condicoes={},
+        complementos_outro=complementos_outro, momento=momento,
     )
 
 
 def salvar_bloco_8_form1_integral(
-    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas, momento=None
+    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas,
+    complementos_outro=None, momento=None,
 ):
     """Salva meios, ambientes, suportes e contingências do Bloco 8."""
 
@@ -808,12 +902,14 @@ def salvar_bloco_8_form1_integral(
         sessao, numero_bloco=8, comando_id=comando_id, conta_id=conta_id,
         registro_id=registro_id, versao_lida=versao_lida, respostas=respostas,
         campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_8,
-        condicoes=CONDICOES_BLOCO_8, momento=momento,
+        condicoes=CONDICOES_BLOCO_8, complementos_outro=complementos_outro,
+        momento=momento,
     )
 
 
 def salvar_bloco_9_form1_integral(
-    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas, momento=None
+    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas,
+    complementos_outro=None, momento=None,
 ):
     """Salva perfis e diferenciação de acesso do Bloco 9."""
 
@@ -821,12 +917,14 @@ def salvar_bloco_9_form1_integral(
         sessao, numero_bloco=9, comando_id=comando_id, conta_id=conta_id,
         registro_id=registro_id, versao_lida=versao_lida, respostas=respostas,
         campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_9,
-        condicoes=CONDICOES_BLOCO_9, momento=momento,
+        condicoes=CONDICOES_BLOCO_9, complementos_outro=complementos_outro,
+        momento=momento,
     )
 
 
 def salvar_bloco_10_form1_integral(
-    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas, momento=None
+    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas,
+    complementos_outro=None, momento=None,
 ):
     """Salva envio, disponibilização e saída de dados do Bloco 10."""
 
@@ -834,12 +932,14 @@ def salvar_bloco_10_form1_integral(
         sessao, numero_bloco=10, comando_id=comando_id, conta_id=conta_id,
         registro_id=registro_id, versao_lida=versao_lida, respostas=respostas,
         campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_10,
-        condicoes=CONDICOES_BLOCO_10, momento=momento,
+        condicoes=CONDICOES_BLOCO_10, complementos_outro=complementos_outro,
+        momento=momento,
     )
 
 
 def salvar_bloco_11_form1_integral(
-    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas, momento=None
+    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas,
+    complementos_outro=None, momento=None,
 ):
     """Salva repositórios, infraestrutura e dependência de terceiro."""
 
@@ -847,12 +947,14 @@ def salvar_bloco_11_form1_integral(
         sessao, numero_bloco=11, comando_id=comando_id, conta_id=conta_id,
         registro_id=registro_id, versao_lida=versao_lida, respostas=respostas,
         campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_11,
-        condicoes=CONDICOES_BLOCO_11, momento=momento,
+        condicoes=CONDICOES_BLOCO_11, complementos_outro=complementos_outro,
+        momento=momento,
     )
 
 
 def salvar_bloco_12_form1_integral(
-    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas, momento=None
+    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas,
+    complementos_outro=None, momento=None,
 ):
     """Salva prazo de guarda, destinação e evidências do Bloco 12."""
 
@@ -860,24 +962,28 @@ def salvar_bloco_12_form1_integral(
         sessao, numero_bloco=12, comando_id=comando_id, conta_id=conta_id,
         registro_id=registro_id, versao_lida=versao_lida, respostas=respostas,
         campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_12,
-        condicoes=CONDICOES_BLOCO_12, momento=momento,
+        condicoes=CONDICOES_BLOCO_12, complementos_outro=complementos_outro,
+        momento=momento,
     )
 
 
 def salvar_bloco_13_form1_integral(
-    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas, momento=None
+    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas,
+    complementos_outro=None, momento=None,
 ):
     """Salva situações de exposição física ou visual do Bloco 13."""
 
     return _salvar_bloco_catalogado_form1_integral(
         sessao, numero_bloco=13, comando_id=comando_id, conta_id=conta_id,
         registro_id=registro_id, versao_lida=versao_lida, respostas=respostas,
-        campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_13, condicoes={}, momento=momento,
+        campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_13, condicoes={},
+        complementos_outro=complementos_outro, momento=momento,
     )
 
 
 def salvar_bloco_14_form1_integral(
-    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas, momento=None
+    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas,
+    complementos_outro=None, momento=None,
 ):
     """Salva confirmações pendentes e achados factuais do Bloco 14."""
 
@@ -885,7 +991,8 @@ def salvar_bloco_14_form1_integral(
         sessao, numero_bloco=14, comando_id=comando_id, conta_id=conta_id,
         registro_id=registro_id, versao_lida=versao_lida, respostas=respostas,
         campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_14,
-        condicoes=CONDICOES_BLOCO_14, momento=momento,
+        condicoes=CONDICOES_BLOCO_14, complementos_outro=complementos_outro,
+        momento=momento,
     )
 
 
@@ -942,14 +1049,19 @@ def salvar_cabecalho_bloco_3_form1_integral(
 
 
 def adicionar_participante_form1_integral(
-    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas, momento=None
+    sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas,
+    complementos_outro=None, momento=None,
 ):
     """Acrescenta uma ocorrência individualizada de participante ao Bloco 3."""
 
     momento = momento or _agora_utc()
+    complementos_outro, problema_complemento = _validar_complementos_outro(
+        respostas, complementos_outro, CAMPOS_EDITAVEIS_PARTICIPANTE
+    )
     parametros = {
         "conta_id": conta_id, "registro_id": registro_id,
         "versao_lida": versao_lida, "respostas": respostas,
+        "complementos_outro": complementos_outro,
     }
     conta, pessoa_id, ator_tipo, ator_id = _ator(sessao, conta_id)
     comando, resposta = abrir_comando(
@@ -958,7 +1070,9 @@ def adicionar_participante_form1_integral(
     )
     if resposta is not None:
         return resposta
-    problema = _validar_respostas_catalogadas(sessao, respostas, CAMPOS_EDITAVEIS_PARTICIPANTE)
+    problema = problema_complemento or _validar_respostas_catalogadas(
+        sessao, respostas, CAMPOS_EDITAVEIS_PARTICIPANTE
+    )
     problema = problema or _validar_condicionais(
         respostas, CONDICOES_PARTICIPANTE_BLOCO_3
     )
@@ -984,7 +1098,13 @@ def adicionar_participante_form1_integral(
         )
     participante_id = str(uuid.uuid4())
     participantes = list(rascunho.conteudo.get("participantes", []))
-    participantes.append({"id": participante_id, "respostas": respostas})
+    participante = {"id": participante_id, "respostas": respostas}
+    complementos_ativos = {
+        campo_id: valor for campo_id, valor in complementos_outro.items() if valor
+    }
+    if complementos_ativos:
+        participante["complementos"] = complementos_ativos
+    participantes.append(participante)
     conteudo = {**rascunho.conteudo, "participantes": participantes}
     resultado = _salvar_conteudo(
         sessao, comando=comando, registro=registro, rascunho=rascunho,
@@ -1018,6 +1138,7 @@ def remover_participante_form1_integral(
     if resposta is not None:
         return resposta
     participantes = list(rascunho.conteudo.get("participantes", []))
+    removidos = [item for item in participantes if item.get("id") == participante_id]
     filtrados = [item for item in participantes if item.get("id") != participante_id]
     if len(filtrados) == len(participantes):
         _, _, ator_tipo, ator_id = _ator(sessao, conta_id)
@@ -1025,7 +1146,17 @@ def remover_participante_form1_integral(
             sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
             "remover_participante_form1", "participante inexistente neste rascunho",
         )
-    conteudo = {**rascunho.conteudo, "participantes": filtrados}
+    inativos = list(rascunho.conteudo.get("participantes_inativos", []))
+    inativos.extend({
+        **item,
+        "motivo_inativacao": "participante removido do rascunho ativo",
+        "desativado_na_versao": versao_lida + 1,
+    } for item in removidos)
+    conteudo = {
+        **rascunho.conteudo,
+        "participantes": filtrados,
+        "participantes_inativos": inativos,
+    }
     return _salvar_conteudo(
         sessao, comando=comando, registro=registro, rascunho=rascunho,
         pessoa_id=pessoa_id, versao_lida=versao_lida, conteudo=conteudo,

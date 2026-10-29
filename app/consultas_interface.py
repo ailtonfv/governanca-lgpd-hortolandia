@@ -21,7 +21,7 @@ from app.form1_integral import (CONDICOES_BLOCO_2, CONDICOES_BLOCO_4, CONDICOES_
                                 IDS_BLOCO_13,
                                 IDS_BLOCO_14,
                                 IDS_PARTICIPANTE_BLOCO_3,
-                                campos_por_id)
+                                alternativas_outro_por_campo, campos_por_id)
 from app.pre_validacao_form1_integral import pre_validar_form1_integral
 from app.modelos import (AtribuicaoForm1Integral, Conta, ContextoAtuacao, Designacao, Instrumento,
                          Canal, ConfirmacaoCanaisRegistro, ObjetoCanal,
@@ -340,6 +340,7 @@ def carregar_registro(sessao, conta_id, registro_id):
         and pode_preencher
     )
     catalogo_integral = campos_por_id()
+    alternativas_outro = alternativas_outro_por_campo()
     secretarias_integral = sessao.scalars(
         select(Unidade).where(
             Unidade.ativa.is_(True), Unidade.id != "UNID-GOV"
@@ -379,6 +380,7 @@ def carregar_registro(sessao, conta_id, registro_id):
             "controle": campo.controle,
             "alternativas": alternativas,
             "instrucao": campo.instrucao,
+            "alternativa_outro": alternativas_outro.get(campo_id),
             "condicao": condicao if condicao and isinstance(condicao[0], str) else None,
             "condicoes": condicoes,
             "condicao_canal_ativa": (

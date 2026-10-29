@@ -55,3 +55,5 @@ Antes de habilitar ou implementar uma submissão integral capaz de concluir com 
 ## Decisão deste incremento
 
 O Checkpoint B não foi iniciado. Os bloqueios acima impedem uma submissão integral tecnicamente fiel à política, especialmente pela ausência de fonte confiável para dois campos essenciais somente leitura. O rascunho dos 14 blocos permanece íntegro, e a PoC nuclear continua inalterada.
+
+> **Nota posterior — Incremento 7C/B:** a decisão F1-D05 foi aprovada e implementada de forma uniforme nos 38 contextos catalogados, com limite de 200 caracteres e preservação histórica. Para o ramo de WhatsApp, a implementação continua usando somente a alternativa canônica `WhatsApp corporativo`; a atualização da Cartilha foi reservada para tarefa própria. Permanecem abertas F1-D06, a condição de `10.2.1`, a integração institucional de `0.2` e `0.3` e o marco de liberação da submissão.
