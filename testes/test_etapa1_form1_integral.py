@@ -339,7 +339,7 @@ def test_bloco_3_inativa_participantes_sem_apagar_historico(sessao):
     assert conteudo["participantes_inativos"][0]["id"] == participante["participante_id"]
 
 
-def test_interface_exibe_e_salva_etapa_visual_1(sessao):
+def test_interface_libera_as_quatro_etapas_e_mantem_submissao_bloqueada(sessao):
     registro = _rascunho_pronto(sessao, "CMD-F12-HTTP")
     pagina = cliente.get(
         f"/registros/{registro['registro_id']}?conta_id=CONTA-A1"
@@ -356,12 +356,37 @@ def test_interface_exibe_e_salva_etapa_visual_1(sessao):
     assert pagina.status_code == 200
     assert "Bloco 2 de 14" in pagina.text and "Bloco 3 de 14" in pagina.text
     assert "Cada participante é uma ocorrência independente" in pagina.text
-    assert 'data-etapa-alvo="2"' in pagina.text
-    assert 'id="form1-etapa-2"' in pagina.text and 'data-etapa-painel="2"' in pagina.text
-    assert 'data-etapa-alvo="3"' in pagina.text and "disabled" in pagina.text
+    for numero in range(1, 5):
+        marcador_botao = f'data-etapa-alvo="{numero}"'
+        inicio_botao = pagina.text.index("<button", pagina.text.index(marcador_botao) - 100)
+        fim_botao = pagina.text.index(">", pagina.text.index(marcador_botao))
+        assert "disabled" not in pagina.text[inicio_botao:fim_botao]
+        assert f'id="form1-etapa-{numero}"' in pagina.text
+        assert f'data-etapa-painel="{numero}"' in pagina.text
+    for numero in range(1, 15):
+        assert f"Bloco {numero} de 14" in pagina.text
+    assert "As quatro etapas do rascunho estão disponíveis" in pagina.text
+    assert "/form1-integral/submeter" not in pagina.text
+    assert "A submissão integral permanece desabilitada" in pagina.text
+    assert "Pendências antes da futura submissão" in pagina.text
+    assert "window.sessionStorage.setItem(chave, numero)" in pagina.text
     assert salvamento.status_code == 200
     assert "Bloco 2 do FORM 1 integral salvo com segurança" in salvamento.text
     assert "Instrumento sintético · contrato 2" in salvamento.text
+
+
+def test_navegacao_integral_nao_concede_edicao_a_outro_agente(sessao):
+    registro = _rascunho_pronto(sessao, "CMD-F18A-LEITURA")
+
+    pagina = cliente.get(
+        f"/registros/{registro['registro_id']}?conta_id=CONTA-B1"
+    )
+
+    assert pagina.status_code == 200
+    assert 'data-etapa-alvo="3"' in pagina.text
+    assert 'data-etapa-alvo="4"' in pagina.text
+    assert "Somente o ARP atual pode alterar este rascunho" in pagina.text
+    assert f'/registros/{registro["registro_id"]}/form1-integral/bloco-14/salvar' not in pagina.text
 
 
 def test_primeiro_incremento_da_etapa_2_salva_categorias_sem_pessoas(sessao):

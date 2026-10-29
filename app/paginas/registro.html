@@ -74,14 +74,13 @@
     {% for etapa in registro.form1_integral.etapas %}
     <li{% if etapa.numero == 1 %} class="etapa-atual"{% endif %}>
       <button type="button" class="etapa-form1-botao" data-etapa-alvo="{{ etapa.numero }}"
-              aria-controls="form1-etapa-{{ etapa.numero }}" aria-selected="{{ 'true' if etapa.numero == 1 else 'false' }}"
-              {% if etapa.numero > 2 %}disabled aria-disabled="true"{% endif %}>
+              aria-controls="form1-etapa-{{ etapa.numero }}" aria-selected="{{ 'true' if etapa.numero == 1 else 'false' }}">
         <strong>Etapa {{ etapa.numero }} de 4</strong><span>{{ etapa.titulo }}</span><small>Blocos {{ etapa.blocos }}</small>
       </button>
     </li>
     {% endfor %}
   </ol>
-  <p class="ajuda estado-navegacao-form1" role="status">Etapa 1 exibida. As Etapas 3 e 4 permanecem indisponíveis neste incremento.</p>
+  <p class="ajuda estado-navegacao-form1" role="status">Etapa 1 exibida. As quatro etapas do rascunho estão disponíveis.</p>
 
   {% if registro.form1_integral.arp_atual and not registro.form1_integral.rascunho %}
     {% if registro.form1_integral.pode_editar %}
@@ -635,7 +634,7 @@
       window.sessionStorage.setItem(chave, numero);
       window.history.replaceState(null, '', '#form1-etapa-' + numero);
       var estado = raiz.querySelector('.estado-navegacao-form1');
-      if (estado) estado.textContent = 'Etapa ' + numero + ' exibida. As Etapas 3 e 4 permanecem indisponíveis neste incremento.';
+      if (estado) estado.textContent = 'Etapa ' + numero + ' exibida. As quatro etapas do rascunho estão disponíveis.';
       sincronizarControlesForm1();
     }
 

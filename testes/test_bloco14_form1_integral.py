@@ -72,3 +72,5 @@ def test_interface_exibe_e_salva_bloco_14(sessao):
               "campo__14.1": "Não", "campo__14.2": "Não"})
     assert pagina.status_code == 200 and "14.2.4" in pagina.text
     assert resposta.status_code == 200 and "Bloco 14" in resposta.text
+    assert '<option value="Não" selected>Não</option>' in resposta.text
+    assert resposta.text.count('<option value="Não" selected>Não</option>') >= 2
