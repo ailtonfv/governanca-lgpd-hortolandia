@@ -303,6 +303,50 @@ class RascunhoForm1Integral(Base):
     )
 
 
+class VersaoForm1Integral(Base):
+    """Snapshot técnico e imutável do contrato candidato 3.
+
+    A linha prepara a infraestrutura de versionamento sem representar
+    submissão, aprovação ou mudança de estado do Registro. O contrato nuclear
+    2 continua usando ``VersaoInstrumento`` de forma independente.
+    """
+    __tablename__ = "versao_form1_integral"
+
+    id = Column(String(36), primary_key=True)
+    registro_id = Column(String(36), ForeignKey("registro.id"), nullable=False)
+    numero = Column(Integer, nullable=False)
+    versao_rascunho = Column(Integer, nullable=False)
+    versao_contrato = Column(Integer, nullable=False)
+    revisao_fonte = Column(String(30), nullable=False)
+    conteudo = Column(JSON, nullable=False)
+    conteudo_canonico = Column(Text, nullable=False)
+    lacre = Column(String(64), nullable=False)
+    preparado_por = Column(String(50), ForeignKey("pessoa.id"), nullable=False)
+    preparado_em = Column(DateTime(timezone=True), nullable=False)
+    evento_preparacao_id = Column(BigInteger, ForeignKey("evento.id"), nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint(
+            "registro_id", "numero", name="uq_versao_form1_integral_numero"
+        ),
+        UniqueConstraint(
+            "registro_id", "versao_rascunho",
+            name="uq_versao_form1_integral_rascunho",
+        ),
+        CheckConstraint(
+            "numero >= 1", name="ck_versao_form1_integral_numero_positivo"
+        ),
+        CheckConstraint(
+            "versao_rascunho >= 1",
+            name="ck_versao_form1_integral_rascunho_positivo",
+        ),
+        CheckConstraint(
+            "versao_contrato = 3",
+            name="ck_versao_form1_integral_contrato_candidato",
+        ),
+    )
+
+
 class ContadorRegistro(Base):
     """Contador anual do código LGPD (D4): LGPD-2026-00041, depois LGPD-2027-00001.
     Atualizado na mesma transação do G1, com INSERT ... ON CONFLICT ... RETURNING:

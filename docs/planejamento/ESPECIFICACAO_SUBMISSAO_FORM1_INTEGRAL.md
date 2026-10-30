@@ -39,3 +39,9 @@ Sem essas decisões, o sistema pode calcular e exibir pendências, mas não deve
 Os testes deverão cobrir: sucesso com massa totalmente fictícia; matriz e condicionais; pendências sem mutação; ARP não autorizado; versão desatualizada; lacre inválido; repetição idempotente; reutilização indevida da chave; concorrência; rollback; snapshot imutável; preservação de rascunho e histórico; ausência da ação quando a liberação estiver fechada; e regressão integral do contrato nuclear 2.
 
 Não se prevê migração no Incremento 8B. Antes de uma implementação futura, deverá ser decidido se a versão integral reutilizará, com discriminação explícita de contrato, as tabelas genéricas de Instrumento e Versão ou se exigirá projeção própria não destrutiva.
+
+## 5. Infraestrutura preparada no Incremento 8C
+
+O contrato candidato 3 passou a possuir uma projeção própria de versões técnicas, separada de `VersaoInstrumento`, porque esta última atende à submissão do FORM 1 sintético do contrato 2. O comando interno congela o envelope REV13, a origem do rascunho e o retrato histórico dos canais, registra autoria, texto canônico, lacre, evento e auditoria na mesma transação e impede dois snapshots da mesma versão do rascunho.
+
+Essa preparação **não é submissão**: não possui rota ou botão, não altera estado do Registro ou do Instrumento, não cria versão nuclear e declara `submissao_habilitada: false`. A migração 17 cria somente a tabela separada e a proteção de imutabilidade; no ambiente de desenvolvimento ela possui reversão explícita. As dependências institucionais da seção 3 permanecem bloqueadoras da liberação.
