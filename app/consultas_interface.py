@@ -438,12 +438,13 @@ def carregar_registro(sessao, conta_id, registro_id):
         },
         "arp_atual": None if arp_atual is None else {
             "id": arp_atual.id,
+            "matricula": arp_atual.matricula,
             "nome": arp_atual.nome,
         },
         "versao_atribuicao": (0 if atribuicao_integral is None
                               else atribuicao_integral.versao),
         "candidatos_arp": [
-            {"id": pessoa.id, "nome": pessoa.nome}
+            {"id": pessoa.id, "matricula": pessoa.matricula, "nome": pessoa.nome}
             for pessoa in candidatos_arp
         ],
         "rascunho": None if rascunho_integral is None else {

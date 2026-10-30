@@ -26,7 +26,8 @@
 </section>
 
 {% if mensagem %}
-<p class="mensagem {% if erro %}mensagem-erro{% else %}mensagem-sucesso{% endif %}" role="status">{{ mensagem }}</p>
+<p id="mensagem-registro" class="mensagem mensagem-registro {% if erro %}mensagem-erro{% else %}mensagem-sucesso{% endif %}"
+   role="status" aria-live="polite">{{ mensagem }}</p>
 {% endif %}
 
 <section class="form1 form1-integral" aria-labelledby="titulo-form1-integral" data-registro-id="{{ registro.id }}">
@@ -42,7 +43,7 @@
   <div class="identidades-form1">
     <div><strong>APA de abertura</strong><br>{{ registro.form1_integral.apa_abertura.nome if registro.form1_integral.apa_abertura else 'Não identificado' }}</div>
     <div><strong>APA em exercício</strong><br>{{ registro.form1_integral.apa_atual.nome if registro.form1_integral.apa_atual else 'Não configurado' }}{% if registro.form1_integral.apa_atual and registro.form1_integral.apa_atual.modalidade == 'substituicao_temporaria' %}<br><span class="ajuda">Substituição temporária</span>{% endif %}</div>
-    <div><strong>ARP atual</strong><br>{{ registro.form1_integral.arp_atual.nome if registro.form1_integral.arp_atual else 'Ainda não atribuído' }}</div>
+    <div><strong>ARP atual</strong><br>{% if registro.form1_integral.arp_atual %}Matrícula {{ registro.form1_integral.arp_atual.matricula }} · {{ registro.form1_integral.arp_atual.nome }}{% else %}Ainda não atribuído{% endif %}</div>
   </div>
   <p class="ajuda">A identidade simulada fornece o nome fictício. Cargo/função e e-mail institucional não são inventados quando não constam do cadastro disponível.</p>
 
@@ -59,7 +60,7 @@
       <select id="arp_pessoa_id" name="arp_pessoa_id">
         <option value="">Selecione somente para indicar outro agente</option>
         {% for pessoa in registro.form1_integral.candidatos_arp %}
-        <option value="{{ pessoa.id }}">{{ pessoa.nome }}</option>
+        <option value="{{ pessoa.id }}">Matrícula {{ pessoa.matricula }} · {{ pessoa.nome }}</option>
         {% endfor %}
       </select>
       <p class="ajuda">A indicação não concede acesso. A pessoa precisa possuir previamente conta ativa e designação de preenchedor nesta Secretaria.</p>
@@ -673,10 +674,16 @@
     if (!paineis.length) return;
     var chave = 'form1-integral-etapa-' + raiz.dataset.registroId;
     var etapaDaUrl = window.location.hash.match(/^#form1-etapa-([1-4])$/);
-    var etapaInicial = etapaDaUrl ? etapaDaUrl[1] : window.sessionStorage.getItem(chave);
+    var blocoDaUrl = window.location.hash.match(/^#titulo-bloco-(\d{1,2})$/);
+    var numeroBloco = blocoDaUrl ? Number(blocoDaUrl[1]) : null;
+    var etapaDoBloco = numeroBloco === null ? null
+      : numeroBloco <= 3 ? '1'
+      : numeroBloco <= 8 ? '2'
+      : numeroBloco <= 11 ? '3' : '4';
+    var etapaInicial = etapaDaUrl ? etapaDaUrl[1] : etapaDoBloco || window.sessionStorage.getItem(chave);
     if (!botoes.some(function (botao) { return botao.dataset.etapaAlvo === etapaInicial && !botao.disabled; })) etapaInicial = '1';
 
-    function exibirEtapa(numero) {
+    function exibirEtapa(numero, destinoInicial) {
       paineis.forEach(function (painel) {
         var oculto = painel.dataset.etapaPainel !== numero;
         painel.hidden = oculto;
@@ -688,7 +695,7 @@
         botao.closest('li').classList.toggle('etapa-atual', ativo);
       });
       window.sessionStorage.setItem(chave, numero);
-      window.history.replaceState(null, '', '#form1-etapa-' + numero);
+      window.history.replaceState(null, '', destinoInicial || '#form1-etapa-' + numero);
       var estado = raiz.querySelector('.estado-navegacao-form1');
       if (estado) estado.textContent = 'Etapa ' + numero + ' exibida. As quatro etapas do rascunho estão disponíveis.';
       sincronizarControlesForm1();
@@ -748,7 +755,13 @@
     raiz.querySelectorAll('[data-pendencia-etapa]').forEach(function (botao) {
       botao.addEventListener('click', function () { focarPendencia(botao); });
     });
-    exibirEtapa(etapaInicial);
+    var destinoInicial = blocoDaUrl ? document.getElementById('titulo-bloco-' + numeroBloco) : null;
+    exibirEtapa(etapaInicial, destinoInicial ? window.location.hash : null);
+    if (destinoInicial) {
+      window.requestAnimationFrame(function () {
+        destinoInicial.scrollIntoView({ block: 'start' });
+      });
+    }
   })();
 </script>
 

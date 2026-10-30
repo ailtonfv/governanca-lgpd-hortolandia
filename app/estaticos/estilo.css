@@ -109,6 +109,7 @@ legend { padding: 0 .4rem; color: var(--azul-escuro); font-weight: 800; }
 .acao-painel { margin: -1rem 0 2rem; }
 .grade-tipos .opcao { padding: .75rem; border: 1px solid var(--borda); border-radius: .45rem; }
 .mensagem { padding: 1rem; border-radius: .55rem; font-weight: 700; }
+.mensagem-registro { position: sticky; top: .75rem; z-index: 20; box-shadow: 0 .35rem 1rem rgba(12,59,90,.16); }
 .mensagem-sucesso { border: 1px solid #86b99a; background: #ecfdf3; color: #14532d; }
 .mensagem-erro { border: 1px solid #e5a3a3; background: #fff1f2; color: #881337; }
 .voltar { display: inline-block; margin-bottom: 1rem; }

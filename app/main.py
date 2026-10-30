@@ -21,7 +21,7 @@ from app.form1_integral import (IDS_BLOCO_2, IDS_BLOCO_4, IDS_BLOCO_5, IDS_BLOCO
                                 IDS_PARTICIPANTE_BLOCO_3,
                                 alternativas_outro_por_campo, campos_por_id)
 from app.instrumentos import iniciar_preenchimento, salvar_rascunho
-from app.modelos import ObjetoCatalogo
+from app.modelos import ObjetoCatalogo, Pessoa
 from app.rascunho_form1_integral import (adicionar_participante_form1_integral,
                                          adicionar_destinatario_10_2_1_form1_integral,
                                          atualizar_destinatario_10_2_1_form1_integral,
@@ -252,14 +252,15 @@ def detalhe_registro(
     )
 
 
-def _voltar_ao_registro(registro_id, conta_id, resultado, sucesso):
+def _voltar_ao_registro(registro_id, conta_id, resultado, sucesso, *, ancora=None):
     parametros = {
         "conta_id": conta_id,
         "mensagem": sucesso if resultado["permitido"] else resultado["motivo"],
         "erro": "0" if resultado["permitido"] else "1",
     }
+    fragmento = f"#{ancora}" if ancora else ""
     return RedirectResponse(
-        url=f"/registros/{registro_id}?{urlencode(parametros)}",
+        url=f"/registros/{registro_id}?{urlencode(parametros)}{fragmento}",
         status_code=303,
     )
 
@@ -287,8 +288,17 @@ def atribuir_arp_integral(
         versao_lida=versao_lida,
     )
     sessao.commit()
+    arp = sessao.get(Pessoa, resultado.get("arp_pessoa_id")) if resultado["permitido"] else None
+    if arp is None:
+        sucesso = "Responsável pelo preenchimento do FORM 1 integral definido."
+    elif resultado.get("reexecutado"):
+        sucesso = f"Confirmação do responsável pelo preenchimento já processada. ARP atual: matrícula {arp.matricula} · {arp.nome}."
+    elif resultado.get("alterado"):
+        sucesso = f"Responsável pelo preenchimento alterado. ARP atual: matrícula {arp.matricula} · {arp.nome}."
+    else:
+        sucesso = f"Nenhuma alteração no responsável pelo preenchimento: matrícula {arp.matricula} · {arp.nome} já é o ARP atual."
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Responsável pelo preenchimento do FORM 1 integral definido."
+        registro_id, conta_id, resultado, sucesso, ancora="titulo-form1-integral"
     )
 
 
@@ -310,7 +320,8 @@ def iniciar_form1_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Rascunho do FORM 1 integral iniciado."
+        registro_id, conta_id, resultado, "Rascunho do FORM 1 integral iniciado.",
+        ancora="titulo-form1-integral",
     )
 
 
@@ -347,7 +358,8 @@ def salvar_bloco_1_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Bloco 1 do FORM 1 integral salvo com segurança."
+        registro_id, conta_id, resultado, "Bloco 1 do FORM 1 integral salvo com segurança.",
+        ancora="titulo-bloco-1",
     )
 
 
@@ -398,7 +410,8 @@ async def salvar_bloco_2_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Bloco 2 do FORM 1 integral salvo com segurança."
+        registro_id, conta_id, resultado, "Bloco 2 do FORM 1 integral salvo com segurança.",
+        ancora="titulo-bloco-2",
     )
 
 
@@ -419,7 +432,8 @@ async def salvar_bloco_4_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Bloco 4 do FORM 1 integral salvo com segurança."
+        registro_id, conta_id, resultado, "Bloco 4 do FORM 1 integral salvo com segurança.",
+        ancora="titulo-bloco-4",
     )
 
 
@@ -440,7 +454,8 @@ async def salvar_bloco_5_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Bloco 5 do FORM 1 integral salvo com segurança."
+        registro_id, conta_id, resultado, "Bloco 5 do FORM 1 integral salvo com segurança.",
+        ancora="titulo-bloco-5",
     )
 
 
@@ -461,7 +476,8 @@ async def salvar_bloco_6_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Bloco 6 do FORM 1 integral salvo com segurança."
+        registro_id, conta_id, resultado, "Bloco 6 do FORM 1 integral salvo com segurança.",
+        ancora="titulo-bloco-6",
     )
 
 
@@ -480,7 +496,8 @@ async def salvar_bloco_7_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Bloco 7 do FORM 1 integral salvo com segurança."
+        registro_id, conta_id, resultado, "Bloco 7 do FORM 1 integral salvo com segurança.",
+        ancora="titulo-bloco-7",
     )
 
 
@@ -499,7 +516,8 @@ async def salvar_bloco_8_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Bloco 8 do FORM 1 integral salvo com segurança."
+        registro_id, conta_id, resultado, "Bloco 8 do FORM 1 integral salvo com segurança.",
+        ancora="titulo-bloco-8",
     )
 
 
@@ -518,7 +536,8 @@ async def salvar_bloco_9_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Bloco 9 do FORM 1 integral salvo com segurança."
+        registro_id, conta_id, resultado, "Bloco 9 do FORM 1 integral salvo com segurança.",
+        ancora="titulo-bloco-9",
     )
 
 
@@ -537,7 +556,8 @@ async def salvar_bloco_10_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Bloco 10 do FORM 1 integral salvo com segurança."
+        registro_id, conta_id, resultado, "Bloco 10 do FORM 1 integral salvo com segurança.",
+        ancora="titulo-bloco-10",
     )
 
 
@@ -565,7 +585,8 @@ async def adicionar_destinatario_10_2_1_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(registro_id, conta_id, resultado,
-                               "Destinatário incluído no rascunho com segurança.")
+                               "Destinatário incluído no rascunho com segurança.",
+                               ancora="titulo-bloco-10")
 
 
 @app.post("/registros/{registro_id}/form1-integral/bloco-10/destinatarios/{destinatario_id}/atualizar")
@@ -583,7 +604,8 @@ async def atualizar_destinatario_10_2_1_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(registro_id, conta_id, resultado,
-                               "Destinatário atualizado no rascunho com segurança.")
+                               "Destinatário atualizado no rascunho com segurança.",
+                               ancora="titulo-bloco-10")
 
 
 @app.post("/registros/{registro_id}/form1-integral/bloco-10/destinatarios/{destinatario_id}/remover")
@@ -601,7 +623,8 @@ async def remover_destinatario_10_2_1_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(registro_id, conta_id, resultado,
-                               "Destinatário removido da visão ativa; histórico preservado.")
+                               "Destinatário removido da visão ativa; histórico preservado.",
+                               ancora="titulo-bloco-10")
 
 
 @app.post("/registros/{registro_id}/form1-integral/bloco-11/salvar")
@@ -617,7 +640,10 @@ async def salvar_bloco_11_integral(
         complementos_outro=_complementos_outro_do_formulario(formulario, IDS_BLOCO_11),
     )
     sessao.commit()
-    return _voltar_ao_registro(registro_id, conta_id, resultado, "Bloco 11 do FORM 1 integral salvo com segurança.")
+    return _voltar_ao_registro(
+        registro_id, conta_id, resultado,
+        "Bloco 11 do FORM 1 integral salvo com segurança.", ancora="titulo-bloco-11"
+    )
 
 
 @app.post("/registros/{registro_id}/form1-integral/bloco-12/salvar")
@@ -633,7 +659,10 @@ async def salvar_bloco_12_integral(
         complementos_outro=_complementos_outro_do_formulario(formulario, IDS_BLOCO_12),
     )
     sessao.commit()
-    return _voltar_ao_registro(registro_id, conta_id, resultado, "Bloco 12 do FORM 1 integral salvo com segurança.")
+    return _voltar_ao_registro(
+        registro_id, conta_id, resultado,
+        "Bloco 12 do FORM 1 integral salvo com segurança.", ancora="titulo-bloco-12"
+    )
 
 
 @app.post("/registros/{registro_id}/form1-integral/bloco-13/salvar")
@@ -649,7 +678,10 @@ async def salvar_bloco_13_integral(
         complementos_outro=_complementos_outro_do_formulario(formulario, IDS_BLOCO_13),
     )
     sessao.commit()
-    return _voltar_ao_registro(registro_id, conta_id, resultado, "Bloco 13 do FORM 1 integral salvo com segurança.")
+    return _voltar_ao_registro(
+        registro_id, conta_id, resultado,
+        "Bloco 13 do FORM 1 integral salvo com segurança.", ancora="titulo-bloco-13"
+    )
 
 
 @app.post("/registros/{registro_id}/form1-integral/bloco-14/salvar")
@@ -665,7 +697,10 @@ async def salvar_bloco_14_integral(
         complementos_outro=_complementos_outro_do_formulario(formulario, IDS_BLOCO_14),
     )
     sessao.commit()
-    return _voltar_ao_registro(registro_id, conta_id, resultado, "Bloco 14 do FORM 1 integral salvo com segurança.")
+    return _voltar_ao_registro(
+        registro_id, conta_id, resultado,
+        "Bloco 14 do FORM 1 integral salvo com segurança.", ancora="titulo-bloco-14"
+    )
 
 
 @app.post("/registros/{registro_id}/form1-integral/bloco-3/salvar")
@@ -684,7 +719,8 @@ def salvar_bloco_3_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Bloco 3 do FORM 1 integral salvo com segurança."
+        registro_id, conta_id, resultado, "Bloco 3 do FORM 1 integral salvo com segurança.",
+        ancora="titulo-bloco-3",
     )
 
 
@@ -707,7 +743,8 @@ async def adicionar_participante_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Participante do Bloco 3 adicionado."
+        registro_id, conta_id, resultado, "Participante do Bloco 3 adicionado.",
+        ancora="titulo-bloco-3",
     )
 
 
@@ -727,7 +764,8 @@ def remover_participante_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Participante do Bloco 3 removido."
+        registro_id, conta_id, resultado, "Participante do Bloco 3 removido.",
+        ancora="titulo-bloco-3",
     )
 
 
@@ -749,7 +787,8 @@ def iniciar_form1(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "FORM 1 iniciado. O rascunho está pronto para preenchimento."
+        registro_id, conta_id, resultado, "FORM 1 iniciado. O rascunho está pronto para preenchimento.",
+        ancora="titulo-form1",
     )
 
 
@@ -796,7 +835,8 @@ def salvar_form1(
     )
     if problema:
         return _voltar_ao_registro(
-            registro_id, conta_id, {"permitido": False, "motivo": problema}, ""
+            registro_id, conta_id, {"permitido": False, "motivo": problema}, "",
+            ancora="titulo-form1",
         )
     resultado = salvar_rascunho(
         sessao,
@@ -808,5 +848,6 @@ def salvar_form1(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Rascunho salvo com segurança."
+        registro_id, conta_id, resultado, "Rascunho salvo com segurança.",
+        ancora="titulo-form1",
     )
