@@ -98,6 +98,16 @@
     {% set respostas_integral = registro.form1_integral.rascunho.respostas %}
     {% set complementos_integral = registro.form1_integral.rascunho.conteudo.get('complementos', {}) %}
     {% set pre_validacao = registro.form1_integral.pre_validacao %}
+    <aside class="legenda-form1-integral" aria-labelledby="titulo-legenda-form1">
+      <h3 id="titulo-legenda-form1">Como ler as sinalizações</h3>
+      <ul class="lista-legenda-obrigatoriedade">
+        <li><span class="amostra-obrigatoriedade obrigatorio">*</span> <strong>Obrigatório</strong></li>
+        <li><span class="amostra-obrigatoriedade condicional">**</span> <strong>Obrigatório em alguns casos</strong> — passa a <span class="amostra-obrigatoriedade obrigatorio">*</span> quando a condição estiver ativa.</li>
+        <li><span class="amostra-obrigatoriedade recomendado">***</span> <strong>Recomendado</strong> — categoria reservada; nenhum campo possui essa classificação na matriz vigente.</li>
+        <li><span class="amostra-obrigatoriedade facultativo">****</span> <strong>Facultativo</strong></li>
+      </ul>
+      <p class="ajuda">Perguntas condicionais inativas permanecem ocultas e são contabilizadas como não aplicáveis. <strong>DP</strong> e <strong>DPS</strong> identificam categorias de dados pessoais e não indicam obrigatoriedade da pergunta.</p>
+    </aside>
     <section class="bloco-form1-integral" aria-labelledby="titulo-pre-validacao-form1">
       <p class="etiqueta">Verificação consultiva · não submete o formulário</p>
       <h3 id="titulo-pre-validacao-form1">Pendências antes da futura submissão</h3>
@@ -166,7 +176,7 @@
         <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
 
         {% set campo = registro.form1_integral.campos_bloco_1['1.1'] %}
-        <label for="integral-1-1"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong></label>
+        <label for="integral-1-1"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</label>
         <select id="integral-1-1" name="referencia_existente" data-controla="integral-1-1-1">
           <option value="">Ainda não respondido</option>
           {% for opcao in campo.alternativas %}
@@ -176,18 +186,18 @@
 
         {% set campo = registro.form1_integral.campos_bloco_1['1.1.1'] %}
         <div id="integral-1-1-1" class="campo-condicional" data-visivel-quando="Sim">
-          <label for="integral-referencia"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong></label>
+          <label for="integral-referencia"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</label>
           <input id="integral-referencia" name="referencia_institucional" maxlength="500" value="{{ respostas_integral.get('1.1.1', '') }}">
           <p class="ajuda">{{ campo.instrucao }}</p>
         </div>
 
         <div class="campos-reaproveitados">
-          <div><strong>1.2 — O que está sendo analisado?</strong><br>{{ respostas_integral.get('1.2') }} <small>Reaproveitado da abertura</small></div>
-          <div><strong>1.3 — Nome do objeto</strong><br>{{ respostas_integral.get('1.3') }} <small>Reaproveitado da abertura</small></div>
+          {% set campo = registro.form1_integral.campos_bloco_1['1.2'] %}<div><strong>1.2 — O que está sendo analisado?</strong> {% include '_obrigatoriedade_form1.html' %}<br>{{ respostas_integral.get('1.2') }} <small>Reaproveitado da abertura</small></div>
+          {% set campo = registro.form1_integral.campos_bloco_1['1.3'] %}<div><strong>1.3 — Nome do objeto</strong> {% include '_obrigatoriedade_form1.html' %}<br>{{ respostas_integral.get('1.3') }} <small>Reaproveitado da abertura</small></div>
         </div>
 
         {% set campo = registro.form1_integral.campos_bloco_1['1.4'] %}
-        <label for="integral-1-4"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong></label>
+        <label for="integral-1-4"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</label>
         <select id="integral-1-4" name="fluxo_recorrente">
           <option value="">Ainda não respondido</option>
           {% for opcao in campo.alternativas %}
@@ -219,7 +229,7 @@
       {% set campo_2_1 = registro.form1_integral.campos_bloco_2['2.1'] %}
       {% if leitura_2_1.somente_leitura or not registro.form1_integral.pode_editar %}
       <div class="campo-integral respostas-somente-leitura" data-canais-2-1-estado="{{ leitura_2_1.estado }}">
-        <p><strong>{{ campo_2_1.id }} — {{ campo_2_1.pergunta }}</strong></p>
+        {% set campo = campo_2_1 %}<p><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</p>
         {% if leitura_2_1.estado == 'canais_confirmados' %}
         <p>Canais habituais confirmados pelo APA na abertura:</p>
         <ul>{% for canal in leitura_2_1.canais %}<li>{{ canal.nome }} <span class="ajuda">({{ canal.id }})</span></li>{% endfor %}</ul>
@@ -244,7 +254,7 @@
         {% if (campo.id != '2.1' or not leitura_2_1.somente_leitura) and campo.condicao_canal_ativa is not sameas false %}
         <div class="campo-integral{% if campo.condicao and campo.condicao_canal_ativa is none %} campo-condicional{% endif %}"
              {% if campo.condicao and campo.condicao_canal_ativa is none %}data-depende-de="campo__{{ campo.condicao[0] }}" data-valores="{{ campo.condicao[1] | join('||') }}"{% endif %}>
-          <label><strong>{{ campo.id }} — {{ campo.pergunta }}</strong></label>
+          <label><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</label>
           {% if campo.controle == 'seleção múltipla (combo com marcações)' %}
           <div class="grade-opcoes">
             {% for valor, rotulo in campo.alternativas %}
@@ -294,7 +304,7 @@
         <input type="hidden" name="comando_id" value="{{ comando_salvar_bloco_3 }}">
         <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
         {% set campo = registro.form1_integral.campo_3_1 %}
-        <label for="integral-3-1"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong></label>
+        <label for="integral-3-1"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</label>
         <select id="integral-3-1" name="resposta_3_1" data-controla="participantes-integral">
           <option value="">Ainda não respondido</option>
           {% for valor, rotulo in campo.alternativas %}
@@ -334,7 +344,7 @@
             <legend>Adicionar participante</legend>
             {% for campo in registro.form1_integral.campos_participante.values() %}
             <div class="campo-integral{% if campo.id == '3.5.1' %} campo-condicional{% endif %}" {% if campo.id == '3.5.1' %}data-depende-de="campo__3.5" data-valores="Sim"{% endif %}>
-              <label><strong>{{ campo.id }} — {{ campo.pergunta }}</strong></label>
+              <label><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</label>
               {% if campo.controle == 'seleção múltipla (combo com marcações)' %}
               <div class="grade-opcoes">{% for valor, rotulo in campo.alternativas %}<label class="opcao"><input type="checkbox" name="campo__{{ campo.id }}" value="{{ valor }}"> <span>{{ rotulo }}</span></label>{% endfor %}</div>
               {% elif campo.alternativas %}
@@ -368,7 +378,7 @@
         {% for campo in registro.form1_integral.campos_bloco_4.values() %}
         <div class="campo-integral{% if campo.condicao %} campo-condicional{% endif %}"
              {% if campo.condicao %}data-depende-de="campo__{{ campo.condicao[0] }}" data-valores="{{ campo.condicao[1] | join('||') }}"{% endif %}>
-          <label><strong>{{ campo.id }} — {{ campo.pergunta }}</strong></label>
+          <label><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</label>
           {% if campo.controle == 'seleção múltipla (combo com marcações)' or campo.id == '4.2.5.1' %}
           <div class="grade-opcoes">
             {% for valor, rotulo in campo.alternativas %}
@@ -407,7 +417,7 @@
         <input type="hidden" name="comando_id" value="{{ comando_salvar_bloco_5 }}">
         <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
         <fieldset>
-          <legend><strong>{{ campo.id }} — {{ campo.pergunta }}</strong></legend>
+          <legend><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</legend>
           <div class="grade-opcoes">
             {% for valor, rotulo in campo.alternativas %}
             <label class="opcao"><input type="checkbox" name="campo__5.1" value="{{ valor }}" {% if valor in respostas_integral.get('5.1', []) %}checked{% endif %}> {% include '_alternativa_form1.html' %}</label>
@@ -441,7 +451,7 @@
         {% for campo in registro.form1_integral.campos_bloco_6.values() %}
         <div class="campo-integral{% if campo.condicao %} campo-condicional{% endif %}"
              {% if campo.condicao %}data-depende-de="campo__{{ campo.condicao[0] }}" data-valores="{{ campo.condicao[1] | join('||') }}"{% endif %}>
-          <label><strong>{{ campo.id }} — {{ campo.pergunta }}</strong></label>
+          <label><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</label>
           {% if campo.controle == 'seleção múltipla (combo com marcações)' or campo.id == '6.2.2' %}
           <div class="grade-opcoes">
             {% for valor, rotulo in campo.alternativas %}
@@ -482,7 +492,7 @@
         <input type="hidden" name="comando_id" value="{{ comando_salvar_bloco_7 }}">
         <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
         <fieldset>
-          <legend><strong>{{ campo.id }} — {{ campo.pergunta }}</strong></legend>
+          <legend><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</legend>
           <div class="grade-opcoes">
           {% for valor, rotulo in campo.alternativas %}
             <label class="opcao"><input type="checkbox" name="campo__7.1" value="{{ valor }}" {% if valor in respostas_integral.get('7.1', []) %}checked{% endif %}> <span>{{ rotulo }}</span></label>
@@ -557,10 +567,27 @@
 </section>
 
 <script>
+  function sincronizarSinalizacaoObrigatoriedade() {
+    document.querySelectorAll('[data-obrigatoriedade-condicional="true"]').forEach(function (indicador) {
+      var recipiente = indicador.closest('.campo-integral, .campo-condicional');
+      var ativo = !recipiente || recipiente.dataset.condicionalOculta !== 'true';
+      var marcador = indicador.querySelector('.marcador-obrigatoriedade');
+      var texto = indicador.querySelector('.texto-obrigatoriedade');
+      var tomAnterior = ativo ? indicador.dataset.tomBase : indicador.dataset.tomAtivo;
+      var tomAtual = ativo ? indicador.dataset.tomAtivo : indicador.dataset.tomBase;
+      indicador.classList.remove('indicador-obrigatoriedade-' + tomAnterior);
+      indicador.classList.add('indicador-obrigatoriedade-' + tomAtual);
+      marcador.textContent = ativo ? indicador.dataset.marcadorAtivo : indicador.dataset.marcadorBase;
+      texto.textContent = ativo ? indicador.dataset.rotuloAtivo : indicador.dataset.rotuloBase;
+      indicador.setAttribute('aria-label', texto.textContent);
+      indicador.title = texto.textContent;
+    });
+  }
   function sincronizarControlesForm1() {
     document.querySelectorAll('.form1-integral input, .form1-integral select, .form1-integral textarea, .form1-integral form button').forEach(function (controle) {
       controle.disabled = Boolean(controle.closest('[data-etapa-oculta="true"], [data-condicional-oculta="true"]'));
     });
+    sincronizarSinalizacaoObrigatoriedade();
   }
   document.querySelectorAll('[data-controla]').forEach(function (controle) {
     var alvo = document.getElementById(controle.dataset.controla);

@@ -1,0 +1,14 @@
+{% set obrigatoriedade = campo.obrigatoriedade %}
+<span class="indicador-obrigatoriedade indicador-obrigatoriedade-{{ obrigatoriedade.tom }}"
+      data-obrigatoriedade-classe="{{ obrigatoriedade.classe }}"
+      data-obrigatoriedade-condicional="{{ 'true' if obrigatoriedade.condicional else 'false' }}"
+      data-marcador-base="{{ obrigatoriedade.marcador }}"
+      data-rotulo-base="{{ obrigatoriedade.rotulo }}"
+      data-tom-base="{{ obrigatoriedade.tom }}"
+      data-marcador-ativo="{{ obrigatoriedade.marcador_ativo }}"
+      data-rotulo-ativo="{{ obrigatoriedade.rotulo_ativo }}"
+      data-tom-ativo="{{ obrigatoriedade.tom_ativo }}"
+      aria-label="{{ obrigatoriedade.rotulo }}" title="{{ obrigatoriedade.rotulo }}">
+  <span class="marcador-obrigatoriedade" aria-hidden="true">{{ obrigatoriedade.marcador }}</span>
+  <span class="texto-obrigatoriedade">{{ obrigatoriedade.rotulo }}</span>
+</span>

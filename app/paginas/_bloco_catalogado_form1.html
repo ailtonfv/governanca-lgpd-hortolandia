@@ -9,7 +9,7 @@
     {% for campo in campos_bloco.values() %}
     <div class="campo-integral{% if campo.condicoes %} campo-condicional{% endif %}"
          {% if campo.condicoes %}data-condicoes='{{ campo.condicoes | tojson }}'{% endif %}>
-      <label><strong>{{ campo.id }} — {{ campo.pergunta }}</strong></label>
+      <label><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</label>
       {% if campo.estrutura_destinatarios %}
       <p class="ajuda">Os destinatários são registrados abaixo, em ocorrências estruturadas e repetíveis. Respostas textuais antigas são preservadas somente para consulta.</p>
       {% elif campo.controle in ('seleção múltipla (combo com marcações)', 'reuso do catálogo de referência (ver campo indicado)') %}

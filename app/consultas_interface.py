@@ -26,7 +26,9 @@ from app.form1_integral import (CONDICOES_BLOCO_2, CONDICOES_BLOCO_4, CONDICOES_
                                 IDS_BLOCO_14,
                                 IDS_PARTICIPANTE_BLOCO_3,
                                 alternativas_outro_por_campo, campos_por_id)
-from app.pre_validacao_form1_integral import pre_validar_form1_integral
+from app.pre_validacao_form1_integral import (
+    metadado_visual_obrigatoriedade, pre_validar_form1_integral,
+)
 from app.modelos import (AtribuicaoForm1Integral, Conta, ContextoAtuacao, Designacao, Instrumento,
                          Canal, ConfirmacaoCanaisRegistro, ObjetoCanal,
                          ObjetoCatalogo, ObjetoContextoCatalogo, RegistroCanal,
@@ -405,6 +407,7 @@ def carregar_registro(sessao, conta_id, registro_id):
                 }
             ),
             "estrutura_destinatarios": campo_id == "10.2.1",
+            "obrigatoriedade": metadado_visual_obrigatoriedade(campo_id),
         }
     candidatos_arp = sessao.scalars(
         select(Pessoa)
@@ -476,6 +479,7 @@ def carregar_registro(sessao, conta_id, registro_id):
                 "pergunta": catalogo_integral[campo_id].pergunta,
                 "alternativas": catalogo_integral[campo_id].alternativas,
                 "instrucao": catalogo_integral[campo_id].instrucao,
+                "obrigatoriedade": metadado_visual_obrigatoriedade(campo_id),
             }
             for campo_id in ("1.1", "1.1.1", "1.2", "1.3", "1.4")
         },

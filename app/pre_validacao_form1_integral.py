@@ -26,6 +26,9 @@ CAMINHO_MATRIZ = (Path(__file__).resolve().parents[1] / "docs" / "planejamento"
 ID_CANONICO = re.compile(r"(?:\d+(?:\.\d+)*|OUV\.\d+|ESIC\.\d+)")
 CLASSE_ESSENCIAL = "Obrigatória essencial"
 CLASSE_CONDICIONAL = "Obrigatória condicional"
+CLASSE_SOMENTE_LEITURA = "Essencial, somente leitura"
+CLASSE_FACULTATIVA_REV13 = "Facultativa (REV13)"
+CLASSE_FACULTATIVA_PROPOSTA = "Facultativa nesta proposta"
 
 REGRAS_PENDENTES_GLOBAIS = (
     {"codigo": "F1-D04-DOC", "descricao": "formalizar na próxima Cartilha que o ramo de WhatsApp usa somente a alternativa canônica ‘WhatsApp corporativo’", "campos": ("8.3", "8.7", "8.8", "8.8.1", "8.9")},
@@ -77,6 +80,42 @@ def carregar_matriz_obrigatoriedade() -> dict[str, RegraObrigatoriedade]:
     if len(regras) != 128 or set(regras) != set(campos_por_id()):
         raise ValueError("a matriz de obrigatoriedade não cobre exatamente o catálogo REV13")
     return regras
+
+
+def metadado_visual_obrigatoriedade(campo_id: str) -> dict:
+    """Projeta a matriz canônica em rótulos visuais, sem criar regra funcional."""
+
+    regra = carregar_matriz_obrigatoriedade()[campo_id]
+    apresentacoes = {
+        CLASSE_ESSENCIAL: ("*", "Obrigatório", "obrigatorio", False),
+        CLASSE_SOMENTE_LEITURA: (
+            "*", "Obrigatório · somente leitura", "obrigatorio", False
+        ),
+        CLASSE_CONDICIONAL: (
+            "**", "Obrigatório em alguns casos", "condicional", True
+        ),
+        CLASSE_FACULTATIVA_REV13: (
+            "****", "Facultativo (REV13)", "facultativo", False
+        ),
+        CLASSE_FACULTATIVA_PROPOSTA: (
+            "****", "Facultativo (classificação provisória)", "facultativo", False
+        ),
+    }
+    if regra.classe not in apresentacoes:
+        raise ValueError(
+            f"classe de obrigatoriedade sem apresentação definida: {regra.classe}"
+        )
+    marcador, rotulo, tom, condicional = apresentacoes[regra.classe]
+    return {
+        "classe": regra.classe,
+        "marcador": marcador,
+        "rotulo": rotulo,
+        "tom": tom,
+        "condicional": condicional,
+        "marcador_ativo": "*" if condicional else marcador,
+        "rotulo_ativo": "Obrigatório neste caso" if condicional else rotulo,
+        "tom_ativo": "obrigatorio" if condicional else tom,
+    }
 
 
 def _bloco(campo_id: str) -> str:
