@@ -321,7 +321,7 @@ def iniciar_form1_integral(
     sessao.commit()
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, "Rascunho do FORM 1 integral iniciado.",
-        ancora="titulo-form1-integral",
+        ancora="titulo-bloco-1",
     )
 
 

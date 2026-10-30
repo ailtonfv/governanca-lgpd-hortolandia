@@ -47,6 +47,34 @@
   </div>
   <p class="ajuda">A identidade simulada fornece o nome fictício. Cargo/função e e-mail institucional não são inventados quando não constam do cadastro disponível.</p>
 
+  {% set proxima = registro.form1_integral.proxima_providencia %}
+  <section class="proxima-providencia" aria-labelledby="titulo-proxima-providencia">
+    <p class="etiqueta">Orientação conforme o estado e as permissões atuais</p>
+    <h3 id="titulo-proxima-providencia">Próxima providência</h3>
+    <p>{{ proxima.descricao }}</p>
+    {% if proxima.tipo == 'iniciar' %}
+    <form method="post" action="{{ url_for('iniciar_form1_integral', registro_id=registro.id) }}">
+      <input type="hidden" name="conta_id" value="{{ conta_id }}">
+      <input type="hidden" name="comando_id" value="{{ comando_iniciar_integral }}">
+      <button class="botao-primario" type="submit">{{ proxima.rotulo }}</button>
+    </form>
+    {% elif proxima.tipo == 'continuar' %}
+      {% if proxima.retomada %}
+      <button type="button" class="botao-primario"
+              data-pendencia-campo="{{ proxima.retomada.campo_id }}"
+              data-pendencia-bloco="{{ proxima.retomada.bloco }}"
+              data-pendencia-etapa="{{ proxima.retomada.etapa }}"
+              data-pendencia-destino="{{ proxima.retomada.destino_tipo }}">
+        {{ proxima.rotulo }}
+      </button>
+      {% else %}
+      <button type="button" class="botao-primario" data-continuar-revisao>
+        {{ proxima.rotulo }}
+      </button>
+      {% endif %}
+    {% endif %}
+  </section>
+
   {% if registro.form1_integral.pode_atribuir_arp %}
   <form class="formulario" method="post" action="{{ url_for('atribuir_arp_integral', registro_id=registro.id) }}">
     <input type="hidden" name="conta_id" value="{{ conta_id }}">
@@ -71,29 +99,19 @@
   <p class="aviso-leitura">Somente um APA responsável pelo Registro nesta Secretaria pode definir ou substituir o ARP.</p>
   {% endif %}
 
-  <ol class="etapas-form1" aria-label="Navegação pelas etapas do FORM 1 integral">
+  <h3 id="titulo-etapas-form1">Etapas do FORM 1</h3>
+  <ol class="etapas-form1" aria-labelledby="titulo-etapas-form1">
     {% for etapa in registro.form1_integral.etapas %}
     <li{% if etapa.numero == 1 %} class="etapa-atual"{% endif %}>
       <button type="button" class="etapa-form1-botao" data-etapa-alvo="{{ etapa.numero }}"
-              aria-controls="form1-etapa-{{ etapa.numero }}" aria-selected="{{ 'true' if etapa.numero == 1 else 'false' }}">
+              aria-controls="form1-etapa-{{ etapa.numero }}" aria-selected="{{ 'true' if etapa.numero == 1 else 'false' }}"
+              {% if not registro.form1_integral.rascunho %}disabled aria-disabled="true"{% endif %}>
         <strong>Etapa {{ etapa.numero }} de 4</strong><span>{{ etapa.titulo }}</span><small>Blocos {{ etapa.blocos }}</small>
       </button>
     </li>
     {% endfor %}
   </ol>
   <p class="ajuda estado-navegacao-form1" role="status">Etapa 1 exibida. As quatro etapas do rascunho estão disponíveis.</p>
-
-  {% if registro.form1_integral.arp_atual and not registro.form1_integral.rascunho %}
-    {% if registro.form1_integral.pode_editar %}
-    <form method="post" action="{{ url_for('iniciar_form1_integral', registro_id=registro.id) }}">
-      <input type="hidden" name="conta_id" value="{{ conta_id }}">
-      <input type="hidden" name="comando_id" value="{{ comando_iniciar_integral }}">
-      <button class="botao-primario" type="submit">Iniciar rascunho integral</button>
-    </form>
-    {% else %}
-    <p class="aviso-leitura">O rascunho ainda não foi iniciado. Somente o ARP atual pode iniciá-lo.</p>
-    {% endif %}
-  {% endif %}
 
   {% if registro.form1_integral.rascunho %}
     {% set respostas_integral = registro.form1_integral.rascunho.respostas %}
@@ -111,7 +129,7 @@
     </aside>
     <section class="bloco-form1-integral" aria-labelledby="titulo-pre-validacao-form1">
       <p class="etiqueta">Verificação consultiva · não submete o formulário</p>
-      <h3 id="titulo-pre-validacao-form1">Pendências antes da futura submissão</h3>
+      <h3 id="titulo-pre-validacao-form1" tabindex="-1">Pendências antes da futura submissão</h3>
       <p>A verificação encontrou <strong>{{ pre_validacao.quantidades.incompletos }}</strong> campo(s) obrigatório(s) ativo(s) ainda incompleto(s), <strong>{{ pre_validacao.quantidades.nao_aplicaveis }}</strong> campo(s) condicional(is) não aplicável(is) neste rascunho e <strong>{{ pre_validacao.quantidades.regras_pendentes }}</strong> regra(s) ou integração(ões) dependentes de governança.</p>
       <p class="ajuda">O rascunho continua podendo ser salvo. Esta consulta não altera respostas, não cria versão submetida e não declara adequação à LGPD.</p>
       {% if pre_validacao.por_bloco %}
@@ -755,10 +773,21 @@
     raiz.querySelectorAll('[data-pendencia-etapa]').forEach(function (botao) {
       botao.addEventListener('click', function () { focarPendencia(botao); });
     });
+    raiz.querySelectorAll('[data-continuar-revisao]').forEach(function (botao) {
+      botao.addEventListener('click', function () {
+        var destino = document.getElementById('titulo-pre-validacao-form1');
+        if (!destino) return;
+        window.history.replaceState(null, '', '#titulo-pre-validacao-form1');
+        destino.focus({ preventScroll: true });
+        destino.scrollIntoView({ block: 'center' });
+      });
+    });
     var destinoInicial = blocoDaUrl ? document.getElementById('titulo-bloco-' + numeroBloco) : null;
     exibirEtapa(etapaInicial, destinoInicial ? window.location.hash : null);
     if (destinoInicial) {
       window.requestAnimationFrame(function () {
+        destinoInicial.setAttribute('tabindex', '-1');
+        destinoInicial.focus({ preventScroll: true });
         destinoInicial.scrollIntoView({ block: 'start' });
       });
     }

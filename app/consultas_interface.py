@@ -66,6 +66,71 @@ ROTULOS_ALERTA = {
 }
 
 
+def _projetar_proxima_providencia_form1_integral(
+    *, identidade, arp_atual, pode_editar, rascunho, pre_validacao
+):
+    """Orienta a interface usando somente autorização e estado já projetados."""
+
+    if pode_editar and rascunho is None:
+        return {
+            "tipo": "iniciar",
+            "rotulo": "Iniciar FORM 1",
+            "descricao": (
+                "Você é o ARP atual e possui autorização vigente. "
+                "Inicie o rascunho para acessar a primeira pergunta."
+            ),
+            "retomada": None,
+        }
+    if pode_editar:
+        retomada = next(
+            (
+                {
+                    "campo_id": item["campo_id"],
+                    "bloco": item["bloco"],
+                    "etapa": item["etapa"],
+                    "destino_tipo": item["destino_tipo"],
+                }
+                for item in pre_validacao["incompletos"]
+                if item["destino_navegavel"]
+            ),
+            None,
+        )
+        descricao = (
+            f"Retome pela primeira pendência ativa: pergunta {retomada['campo_id']} "
+            f"do Bloco {retomada['bloco']}."
+            if retomada is not None
+            else "Revise o rascunho e as pendências consultivas antes da futura submissão."
+        )
+        return {
+            "tipo": "continuar",
+            "rotulo": "Continuar FORM 1",
+            "descricao": descricao,
+            "retomada": retomada,
+        }
+    if arp_atual is None:
+        descricao = (
+            "Nenhum ARP está indicado. O APA em exercício deve definir o responsável "
+            "antes que o rascunho possa ser iniciado."
+        )
+    elif arp_atual.id != identidade["pessoa_id"]:
+        descricao = (
+            f"O ARP atual é a matrícula {arp_atual.matricula} · {arp_atual.nome}. "
+            "Somente essa pessoa, com designação vigente de preenchedor, pode iniciar "
+            "ou continuar o FORM 1."
+        )
+    else:
+        descricao = (
+            "Você está indicado como ARP, mas não possui designação vigente de "
+            "preenchedor nesta Secretaria. Nenhuma ação de preenchimento está disponível."
+        )
+    return {
+        "tipo": "indisponivel",
+        "rotulo": None,
+        "descricao": descricao,
+        "retomada": None,
+    }
+
+
 def _identidade(sessao, conta_id):
     conta = sessao.get(Conta, conta_id)
     if conta is None or not conta.ativa:
@@ -422,6 +487,23 @@ def carregar_registro(sessao, conta_id, registro_id):
         )
         .order_by(Pessoa.nome)
     ).unique().all()
+    pre_validacao_integral = (
+        None if rascunho_integral is None else pre_validar_form1_integral(
+            rascunho_integral.conteudo,
+            nome_institucional=None if arp_atual is None else arp_atual.nome,
+            cargo_funcao=None,
+            email_institucional=None,
+            respostas_somente_leitura=(
+                {} if confirmacao_canais is None else {
+                    "2.1": [
+                        item.classificacao_form1_snapshot
+                        for item in canais_registro
+                        if item.classificacao_form1_snapshot
+                    ]
+                }
+            ),
+        )
+    )
     resumo["form1_integral"] = {
         "situacao": "rascunho" if rascunho_integral is not None else "nao_iniciado",
         "pode_atribuir_arp": pode_atribuir_arp,
@@ -457,22 +539,13 @@ def carregar_registro(sessao, conta_id, registro_id):
             "salvo_por": autor_integral,
             "salvo_em": rascunho_integral.salvo_em,
         },
-        "pre_validacao": (
-            None if rascunho_integral is None else pre_validar_form1_integral(
-                rascunho_integral.conteudo,
-                nome_institucional=None if arp_atual is None else arp_atual.nome,
-                cargo_funcao=None,
-                email_institucional=None,
-                respostas_somente_leitura=(
-                    {} if confirmacao_canais is None else {
-                        "2.1": [
-                            item.classificacao_form1_snapshot
-                            for item in canais_registro
-                            if item.classificacao_form1_snapshot
-                        ]
-                    }
-                ),
-            )
+        "pre_validacao": pre_validacao_integral,
+        "proxima_providencia": _projetar_proxima_providencia_form1_integral(
+            identidade=identidade,
+            arp_atual=arp_atual,
+            pode_editar=pode_editar_integral,
+            rascunho=rascunho_integral,
+            pre_validacao=pre_validacao_integral,
         ),
         "campos_bloco_1": {
             campo_id: {

@@ -50,6 +50,9 @@ th { color: #425466; font-size: .8rem; text-transform: uppercase; letter-spacing
 .form1-integral { border-left: .35rem solid var(--verde); }
 .identidades-form1 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin: 1.25rem 0; }
 .identidades-form1 div { padding: .9rem; border: 1px solid var(--borda); border-radius: .45rem; background: #f8fbf9; }
+.proxima-providencia { margin: 1.25rem 0; padding: 1rem; border: 1px solid #86b99a; border-left: .35rem solid var(--verde); border-radius: .6rem; background: #f0fdf4; }
+.proxima-providencia h3 { margin: .25rem 0 .5rem; }
+.proxima-providencia form { margin: .85rem 0 0; }
 .form1-integral fieldset .opcao { margin-bottom: .75rem; }
 .form1-integral fieldset > label[for] { margin-top: 1rem; }
 .etapas-form1 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .75rem; padding: 0; margin: 1.4rem 0 0; list-style: none; }
