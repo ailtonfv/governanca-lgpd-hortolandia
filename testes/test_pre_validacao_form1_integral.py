@@ -1,9 +1,12 @@
 """Pré-validação consultiva do contrato candidato 3 — Arrange, Act, Assert."""
 
+from copy import deepcopy
+
 from fastapi.testclient import TestClient
 
 from app.form1_integral import campos_por_id
 from app.main import app
+from app.modelos import RascunhoForm1Integral
 from app.pre_validacao_form1_integral import (
     carregar_matriz_obrigatoriedade,
     pre_validar_form1_integral,
@@ -36,6 +39,24 @@ def test_pre_validacao_e_consultiva_e_preserva_o_conteudo():
     assert conteudo == original
     assert "0.2" in _ids(resultado["regras_pendentes"])
     assert "0.3" in _ids(resultado["regras_pendentes"])
+
+
+def test_pendencias_identificam_etapa_e_tipo_de_destino_sem_inventar_destino_institucional():
+    resultado = pre_validar_form1_integral(
+        {"respostas": {"3.1": "Sim", "10.1": "Sim", "10.2": ["Outra Secretaria"]}},
+        nome_institucional="Agente Fictício",
+    )
+    itens = {item["campo_id"]: item for item in resultado["incompletos"]}
+    institucionais = {item["campo_id"]: item for item in resultado["regras_pendentes"] if item.get("campo_id")}
+
+    assert itens["2.2"]["etapa"] == 1 and itens["2.2"]["destino_tipo"] == "campo"
+    assert itens["5.1"]["etapa"] == 2
+    assert itens["9.1"]["etapa"] == 3
+    assert itens["12.1"]["etapa"] == 4
+    assert itens["3.2"]["destino_tipo"] == "secao"
+    assert itens["10.2.1"]["destino_tipo"] == "secao"
+    assert institucionais["0.2"]["destino_navegavel"] is False
+    assert institucionais["0.3"]["etapa"] is None
 
 
 def test_condicional_inequivoca_distingue_inativo_de_incompleto():
@@ -131,3 +152,27 @@ def test_interface_apresenta_resumo_consultivo_sem_acao_de_submissao(sessao):
     assert "não submete o formulário" in pagina.text
     assert "0.2" in pagina.text and "0.3" in pagina.text
     assert "Submeter FORM 1 integral" not in pagina.text
+
+
+def test_interface_oferece_navegacao_assistida_sem_alterar_rascunho(sessao):
+    registro = _rascunho(sessao, "F1-PRE-NAVEGACAO")
+    rascunho = sessao.get(RascunhoForm1Integral, registro["registro_id"])
+    conteudo_antes = deepcopy(rascunho.conteudo)
+    versao_antes = rascunho.versao_rascunho
+
+    pagina = cliente.get(f"/registros/{registro['registro_id']}?conta_id=CONTA-A1")
+
+    assert pagina.status_code == 200
+    assert 'type="button" class="botao-pendencia-form1"' in pagina.text
+    assert 'data-pendencia-campo="2.2"' in pagina.text
+    assert 'data-pendencia-etapa="1"' in pagina.text
+    assert 'data-pendencia-campo="12.1"' in pagina.text
+    assert 'data-pendencia-etapa="4"' in pagina.text
+    assert 'data-pendencia-campo="0.2"' not in pagina.text
+    assert "Sem destino editável neste formulário" in pagina.text
+    assert "focarPendencia(botao)" in pagina.text
+    assert "data-condicional-oculta" in pagina.text
+    assert "/form1-integral/submeter" not in pagina.text
+    sessao.refresh(rascunho)
+    assert rascunho.conteudo == conteudo_antes
+    assert rascunho.versao_rascunho == versao_antes

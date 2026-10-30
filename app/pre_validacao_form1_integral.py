@@ -85,6 +85,23 @@ def _bloco(campo_id: str) -> str:
     return campo_id.split(".", 1)[0]
 
 
+def _etapa(bloco: str) -> int | None:
+    """Localiza o bloco nas quatro etapas visuais sem criar regra funcional."""
+
+    if not bloco.isdigit():
+        return None
+    numero = int(bloco)
+    if 1 <= numero <= 3:
+        return 1
+    if 4 <= numero <= 8:
+        return 2
+    if 9 <= numero <= 11:
+        return 3
+    if 12 <= numero <= 14:
+        return 4
+    return None
+
+
 def _respondido(valor) -> bool:
     if valor is None:
         return False
@@ -116,8 +133,23 @@ def _condicao_ativa(campo_id: str, respostas: dict) -> bool:
 
 def _item(campo_id: str, tipo: str, detalhe: str) -> dict:
     campo = campos_por_id()[campo_id]
-    return {"campo_id": campo_id, "bloco": _bloco(campo_id),
-            "pergunta": campo.pergunta, "tipo": tipo, "detalhe": detalhe}
+    bloco = _bloco(campo_id)
+    etapa = _etapa(bloco)
+    destino_tipo = (
+        "secao" if (campo_id.startswith("3.") and campo_id != "3.1")
+        or campo_id == "10.2.1"
+        else "campo"
+    )
+    return {
+        "campo_id": campo_id,
+        "bloco": bloco,
+        "etapa": etapa,
+        "destino_navegavel": etapa is not None,
+        "destino_tipo": destino_tipo if etapa is not None else None,
+        "pergunta": campo.pergunta,
+        "tipo": tipo,
+        "detalhe": detalhe,
+    }
 
 
 def _condicao_participante_ativa(campo_id: str, respostas: dict) -> bool:

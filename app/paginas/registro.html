@@ -109,7 +109,21 @@
         <summary><strong>Bloco {{ grupo.bloco }}</strong> — {{ grupo.itens | length }} pendência(s)</summary>
         <ul>
           {% for item in grupo.itens %}
-          <li><a href="#titulo-bloco-{{ item.bloco }}"><strong>{{ item.campo_id }}</strong></a> — {{ item.pergunta }}{% if item.ocorrencia %} (participante {{ item.ocorrencia }}){% endif %}</li>
+          <li>
+            {% if item.destino_navegavel %}
+            <button type="button" class="botao-pendencia-form1"
+                    data-pendencia-campo="{{ item.campo_id }}"
+                    data-pendencia-bloco="{{ item.bloco }}"
+                    data-pendencia-etapa="{{ item.etapa }}"
+                    data-pendencia-destino="{{ item.destino_tipo }}"
+                    aria-label="Ir para {{ 'a seção relacionada à' if item.destino_tipo == 'secao' else 'a pergunta' }} {{ item.campo_id }} no Bloco {{ item.bloco }}">
+              <strong>{{ item.campo_id }}</strong> — {{ item.pergunta }}{% if item.ocorrencia %} (participante {{ item.ocorrencia }}){% endif %}
+              <span class="rotulo-destino-pendencia">{{ 'Ir à seção relacionada' if item.destino_tipo == 'secao' else 'Ir à pergunta' }}</span>
+            </button>
+            {% else %}
+            <strong>{{ item.campo_id }}</strong> — {{ item.pergunta }} <span class="ajuda">Sem destino editável neste formulário.</span>
+            {% endif %}
+          </li>
           {% endfor %}
         </ul>
       </details>
@@ -119,7 +133,22 @@
         <summary><strong>Integrações e regras pendentes</strong></summary>
         <ul>
           {% for item in pre_validacao.regras_pendentes %}
-          <li>{% if item.campo_id %}<strong>{{ item.campo_id }}</strong> — {% endif %}{{ item.descricao if item.descricao else item.detalhe }}</li>
+          <li>
+            {% if item.destino_navegavel %}
+            <button type="button" class="botao-pendencia-form1"
+                    data-pendencia-campo="{{ item.campo_id }}"
+                    data-pendencia-bloco="{{ item.bloco }}"
+                    data-pendencia-etapa="{{ item.etapa }}"
+                    data-pendencia-destino="{{ item.destino_tipo }}"
+                    aria-label="Ir para {{ 'a seção relacionada à' if item.destino_tipo == 'secao' else 'a pergunta' }} {{ item.campo_id }} no Bloco {{ item.bloco }}">
+              <strong>{{ item.campo_id }}</strong> — {{ item.descricao if item.descricao else item.detalhe }}
+              <span class="rotulo-destino-pendencia">{{ 'Ir à seção relacionada' if item.destino_tipo == 'secao' else 'Ir à pergunta' }}</span>
+            </button>
+            {% else %}
+            {% if item.campo_id %}<strong>{{ item.campo_id }}</strong> — {% endif %}{{ item.descricao if item.descricao else item.detalhe }}
+            <span class="ajuda">Sem destino editável neste formulário.</span>
+            {% endif %}
+          </li>
           {% endfor %}
         </ul>
       </details>
@@ -638,10 +667,59 @@
       sincronizarControlesForm1();
     }
 
+    function controleDoCampo(campoId) {
+      if (campoId === '2.1') return raiz.querySelector('[data-canais-2-1-estado]');
+      var nomesEspeciais = {
+        '1.1': 'referencia_existente',
+        '1.1.1': 'referencia_institucional',
+        '1.4': 'fluxo_recorrente',
+        '3.1': 'resposta_3_1'
+      };
+      var nome = nomesEspeciais[campoId] || 'campo__' + campoId;
+      return Array.from(raiz.querySelectorAll('[name]')).find(function (controle) {
+        return controle.name === nome;
+      });
+    }
+
+    function destinoDaPendencia(botao) {
+      var campoId = botao.dataset.pendenciaCampo;
+      if (botao.dataset.pendenciaDestino === 'secao') {
+        if (campoId === '10.2.1') return document.getElementById('titulo-destinatarios-10-2-1');
+        if (campoId.indexOf('3.') === 0) return document.getElementById('participantes-integral');
+      }
+      return controleDoCampo(campoId) || document.getElementById('titulo-bloco-' + botao.dataset.pendenciaBloco);
+    }
+
+    function focarPendencia(botao) {
+      exibirEtapa(botao.dataset.pendenciaEtapa);
+      var destino = destinoDaPendencia(botao);
+      var estado = raiz.querySelector('.estado-navegacao-form1');
+      if (!destino || destino.closest('[data-condicional-oculta="true"]')) {
+        destino = document.getElementById('titulo-bloco-' + botao.dataset.pendenciaBloco);
+        if (estado) estado.textContent = 'Etapa exibida. A pergunta ' + botao.dataset.pendenciaCampo + ' depende de uma condição ativa; revise o Bloco ' + botao.dataset.pendenciaBloco + '.';
+      } else if (estado) {
+        estado.textContent = 'Etapa exibida. Foco posicionado na pendência ' + botao.dataset.pendenciaCampo + '.';
+      }
+      if (!destino) return;
+      var destaque = destino.closest('.campo-integral, fieldset, .colecao-destinatarios') || destino.closest('.bloco-form1-integral') || destino;
+      raiz.querySelectorAll('.destino-pendencia-ativo').forEach(function (item) {
+        item.classList.remove('destino-pendencia-ativo');
+      });
+      destaque.classList.add('destino-pendencia-ativo');
+      if (!/^(INPUT|SELECT|TEXTAREA|BUTTON)$/.test(destino.tagName)) destino.setAttribute('tabindex', '-1');
+      destino.focus({ preventScroll: true });
+      var reduzirMovimento = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      destaque.scrollIntoView({ behavior: reduzirMovimento ? 'auto' : 'smooth', block: 'center' });
+      window.setTimeout(function () { destaque.classList.remove('destino-pendencia-ativo'); }, 3500);
+    }
+
     botoes.forEach(function (botao) {
       botao.addEventListener('click', function () {
         if (!botao.disabled) exibirEtapa(botao.dataset.etapaAlvo);
       });
+    });
+    raiz.querySelectorAll('[data-pendencia-etapa]').forEach(function (botao) {
+      botao.addEventListener('click', function () { focarPendencia(botao); });
     });
     exibirEtapa(etapaInicial);
   })();

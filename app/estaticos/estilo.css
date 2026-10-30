@@ -57,6 +57,11 @@ th { color: #425466; font-size: .8rem; text-transform: uppercase; letter-spacing
 .etapas-form1 small { color: #526475; }
 .etapas-form1 .etapa-atual { border-color: var(--verde); background: #f0fdf4; }
 .estado-navegacao-form1 { margin-top: .5rem; }
+.botao-pendencia-form1 { width: 100%; padding: .5rem .65rem; border: 0; background: transparent; color: var(--azul); text-align: left; cursor: pointer; }
+.botao-pendencia-form1:hover { background: #eef6fa; }
+.botao-pendencia-form1:focus-visible { outline: .2rem solid var(--azul); outline-offset: .1rem; }
+.rotulo-destino-pendencia { display: block; margin-top: .2rem; color: #526475; font-size: .8rem; font-weight: 700; }
+.destino-pendencia-ativo { border-color: var(--azul); box-shadow: 0 0 0 .2rem rgba(7, 89, 133, .18); transition: border-color 180ms ease, box-shadow 180ms ease; }
 .etapa-indisponivel { margin-top: 1rem; padding: 1rem; border: 1px dashed var(--borda); border-radius: .45rem; background: #f8fbf9; }
 .bloco-form1-integral { margin-top: 1.25rem; padding: 1rem; border: 1px solid var(--borda); border-radius: .75rem; background: #fff; }
 .campo-condicional { margin-top: 1rem; }
@@ -106,4 +111,7 @@ dd { margin: .25rem 0 0; }
   .identidades-form1, .etapas-form1 { grid-template-columns: 1fr; }
   .objetivo-form1 { padding: .75rem 0 0; border-left: 0; border-top: 1px solid var(--borda); }
   th:nth-child(3), td:nth-child(3) { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .destino-pendencia-ativo { transition: none; }
 }
