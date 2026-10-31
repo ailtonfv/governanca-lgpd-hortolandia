@@ -450,12 +450,18 @@ def carregar_registro(sessao, conta_id, registro_id):
         usa_catalogo_5_1 = campo_id == "5.1" or campo_id in {
             "4.2.5.1", "6.2.2", "9.2.2", "10.4"
         }
+        ajudas_contextuais = {
+            "2.8": "Atendimentos: quantidade de atendimentos realizados em um período.",
+            "2.9": "Registros: estoque de registros administrativos existente em uma data de referência.",
+            "2.10": "Ocorrências: eventos que geram atuações, em determinado período.",
+        }
         return {
             "id": campo.id,
             "pergunta": campo.pergunta,
             "controle": campo.controle,
             "alternativas": alternativas,
             "instrucao": campo.instrucao,
+            "ajuda_contextual": ajudas_contextuais.get(campo_id),
             "alternativa_outro": alternativas_outro.get(campo_id),
             "classificacoes_dados": (
                 CLASSIFICACOES_CATALOGO_5_1 if usa_catalogo_5_1 else {}

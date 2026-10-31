@@ -1,5 +1,5 @@
 <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-{{ numero_bloco }}">
-  <p class="etiqueta">Etapa {{ etapa_bloco }} de 4 · Bloco {{ numero_bloco }} de 14</p>
+  <p class="etiqueta">FORM 1 — Etapa {{ etapa_bloco }} de 4 — Bloco {{ numero_bloco }} de 14</p>
   <h3 id="titulo-bloco-{{ numero_bloco }}">{{ titulo_bloco }}</h3>
   {% if registro.form1_integral.pode_editar %}
   <form class="formulario formulario-integral" method="post" action="{{ url_for(rota_bloco, registro_id=registro.id) }}">
@@ -34,7 +34,7 @@
     {% endfor %}
     <div class="rodape-formulario">
       <p>O rascunho admite respostas parciais. Campos condicionais inativos são preservados somente no histórico.</p>
-      <button class="botao-primario" type="submit">Salvar Bloco {{ numero_bloco }}</button>
+      {% include '_acoes_salvar_bloco_form1.html' %}
     </div>
   </form>
   {% if numero_bloco == 10 %}{% include '_destinatarios_10_2_1.html' %}{% endif %}

@@ -73,6 +73,9 @@ th { color: #425466; font-size: .8rem; text-transform: uppercase; letter-spacing
 .legenda-form1-integral { margin: 1.25rem 0; padding: 1rem; border: 1px solid var(--borda); border-left: .3rem solid var(--azul); border-radius: .6rem; background: #f8fbfd; }
 .legenda-form1-integral h3 { margin-top: 0; }
 .lista-legenda-obrigatoriedade { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: .65rem 1rem; margin: .75rem 0; padding: 0; list-style: none; }
+.lista-legenda-dados { display: grid; gap: .55rem; margin: .75rem 0 0; padding-left: 1.25rem; }
+.sigla-dado-legenda { display: inline-block; min-width: 2.8rem; margin-right: .25rem; padding: .08rem .45rem; border: 1px solid #9fb6c4; border-radius: 999px; background: #eef6fa; color: #27485b; font-size: .75rem; text-align: center; }
+.sigla-dado-legenda-dps { border-color: #c99b9b; background: #fff1f2; color: #7f1d1d; }
 .amostra-obrigatoriedade, .marcador-obrigatoriedade { font-weight: 900; }
 .amostra-obrigatoriedade.obrigatorio { color: #991b1b; }
 .amostra-obrigatoriedade.condicional { color: #92400e; }
@@ -105,6 +108,12 @@ legend { padding: 0 .4rem; color: var(--azul-escuro); font-weight: 800; }
 .ajuda { margin-top: .35rem; color: #526475; font-size: .9rem; }
 .rodape-formulario { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-top: 1.4rem; }
 .rodape-formulario p { margin: 0; color: #526475; }
+.acoes-salvamento-bloco { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .65rem; }
+.botao-secundario { width: auto; border-color: var(--azul); background: white; color: var(--azul); font-weight: 800; cursor: pointer; }
+.botao-secundario:hover { background: #eef6fa; }
+.ajuda-volume { padding-left: .75rem; border-left: .2rem solid var(--azul); }
+.separador-instrumentos { margin: 1.5rem 0; padding: 1rem 1.25rem; border: 1px solid var(--borda); border-left: .35rem solid var(--azul-escuro); border-radius: .6rem; background: #eef6fa; }
+.separador-instrumentos p { margin: .25rem 0; }
 .botao-primario { width: auto; min-width: 220px; border-color: var(--azul); background: var(--azul); color: white; font-weight: 800; cursor: pointer; }
 .botao-primario:hover { background: var(--azul-escuro); }
 .botao-link { display: inline-block; padding: .75rem 1rem; border-radius: .45rem; background: var(--azul); color: white; text-decoration: none; }
@@ -126,7 +135,8 @@ dd { margin: .25rem 0 0; }
   .simulador { min-width: 0; }
   dl { grid-template-columns: 1fr; }
   .rodape-formulario { align-items: stretch; flex-direction: column; }
-  .botao-primario { width: 100%; }
+  .botao-primario, .botao-secundario { width: 100%; }
+  .acoes-salvamento-bloco { width: 100%; }
   .cabecalho-form1 { grid-template-columns: 1fr; }
   .identidades-form1, .etapas-form1 { grid-template-columns: 1fr; }
   .objetivo-form1 { padding: .75rem 0 0; border-left: 0; border-top: 1px solid var(--borda); }

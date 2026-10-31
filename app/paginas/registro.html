@@ -126,7 +126,11 @@
         <li><span class="amostra-obrigatoriedade recomendado">***</span> <strong>Recomendado</strong> — categoria reservada; nenhum campo possui essa classificação na matriz vigente.</li>
         <li><span class="amostra-obrigatoriedade facultativo">****</span> <strong>Facultativo</strong></li>
       </ul>
-      <p class="ajuda">Perguntas condicionais inativas permanecem ocultas e são contabilizadas como não aplicáveis. <strong>DP</strong> e <strong>DPS</strong> identificam categorias de dados pessoais e não indicam obrigatoriedade da pergunta.</p>
+      <p class="ajuda">Perguntas condicionais inativas permanecem ocultas e são contabilizadas como não aplicáveis. DP e DPS identificam categorias de dados pessoais e não indicam obrigatoriedade da pergunta.</p>
+      <ul class="lista-legenda-dados">
+        <li><span class="sigla-dado-legenda sigla-dado-legenda-dp"><strong>DP</strong></span> <strong>Dado Pessoal:</strong> informação relativa a pessoa identificada ou identificável.</li>
+        <li><span class="sigla-dado-legenda sigla-dado-legenda-dps"><strong>DPS</strong></span> <strong>Dado Pessoal Sensível:</strong> categorias definidas no art. 5º, II, da LGPD, incluindo dados de saúde e convicção religiosa.</li>
+      </ul>
     </aside>
     <section class="bloco-form1-integral" aria-labelledby="titulo-pre-validacao-form1">
       <p class="etiqueta">Verificação consultiva · não submete o formulário</p>
@@ -185,7 +189,7 @@
     </section>
     <div id="form1-etapa-1" class="painel-etapa-form1" data-etapa-painel="1">
     <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-1">
-      <p class="etiqueta">Etapa 1 de 4 · Bloco 1 de 14</p>
+      <p class="etiqueta">FORM 1 — Etapa 1 de 4 — Bloco 1 de 14</p>
       <h3 id="titulo-bloco-1">Identificação do processo, atividade ou serviço</h3>
       <p class="ajuda">Rascunho parcial permitido. Não informe nomes, CPF, protocolos de atendimento ou dados de casos concretos.</p>
 
@@ -227,7 +231,7 @@
 
         <div class="rodape-formulario">
           <p>Rascunho {{ registro.form1_integral.rascunho.versao }} · último salvamento por {{ registro.form1_integral.rascunho.salvo_por }}</p>
-          <button class="botao-primario" type="submit">Salvar Bloco 1</button>
+          {% set numero_bloco = 1 %}{% include '_acoes_salvar_bloco_form1.html' %}
         </div>
       </form>
       {% else %}
@@ -241,7 +245,7 @@
     </section>
 
     <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-2">
-      <p class="etiqueta">Etapa 1 de 4 · Bloco 2 de 14</p>
+      <p class="etiqueta">FORM 1 — Etapa 1 de 4 — Bloco 2 de 14</p>
       <h3 id="titulo-bloco-2">Entrada, recepção e execução</h3>
       <p class="ajuda">Descreva o fluxo recorrente, sem inserir nomes de munícipes, protocolos ou dados de casos concretos. As ramificações de Ouvidoria e e-SIC são apresentadas independentemente, conforme a classificação dos canais confirmados pelo APA.</p>
 
@@ -294,13 +298,14 @@
           <input name="campo__{{ campo.id }}" value="{{ respostas_integral.get(campo.id, '') }}">
           {% endif %}
           {% if campo.instrucao %}<p class="ajuda">{{ campo.instrucao }}</p>{% endif %}
+          {% if campo.ajuda_contextual %}<p class="ajuda ajuda-volume"><strong>{{ campo.ajuda_contextual }}</strong></p>{% endif %}
           {% include '_complemento_outro_form1.html' %}
         </div>
         {% endif %}
         {% endfor %}
         <div class="rodape-formulario">
           <p>O salvamento substitui apenas as respostas deste bloco e preserva os demais blocos.</p>
-          <button class="botao-primario" type="submit">Salvar Bloco 2</button>
+          {% set numero_bloco = 2 %}{% include '_acoes_salvar_bloco_form1.html' %}
         </div>
       </form>
       {% else %}
@@ -314,7 +319,7 @@
     </section>
 
     <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-3">
-      <p class="etiqueta">Etapa 1 de 4 · Bloco 3 de 14</p>
+      <p class="etiqueta">FORM 1 — Etapa 1 de 4 — Bloco 3 de 14</p>
       <h3 id="titulo-bloco-3">Outras unidades, órgãos ou entidades participantes</h3>
       <p class="ajuda">Cada participante é uma ocorrência independente. Registre a unidade ou entidade, nunca o nome de uma pessoa.</p>
 
@@ -331,7 +336,7 @@
           <option value="{{ valor }}" {% if respostas_integral.get('3.1') == valor %}selected{% endif %}>{{ rotulo }}</option>
           {% endfor %}
         </select>
-        <button class="botao-secundario" type="submit">Salvar resposta do Bloco 3</button>
+        {% set numero_bloco = 3 %}{% include '_acoes_salvar_bloco_form1.html' %}
       </form>
       {% endif %}
 
@@ -387,7 +392,7 @@
     </div>
     <div id="form1-etapa-2" class="painel-etapa-form1" data-etapa-painel="2" hidden>
     <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-4">
-      <p class="etiqueta">Etapa 2 de 4 · Bloco 4 de 14</p>
+      <p class="etiqueta">FORM 1 — Etapa 2 de 4 — Bloco 4 de 14</p>
       <h3 id="titulo-bloco-4">Pessoas a quem os dados se referem</h3>
       <p class="ajuda">Informe somente categorias de titulares e de representantes. O sistema de mapeamento não cadastra pessoas titulares.</p>
       {% if registro.form1_integral.pode_editar %}
@@ -417,7 +422,7 @@
         {% endfor %}
         <div class="rodape-formulario">
           <p>Os Blocos 4 e 5 estão disponíveis. Os Blocos 6 a 8 permanecem pendentes.</p>
-          <button class="botao-primario" type="submit">Salvar Bloco 4</button>
+          {% set numero_bloco = 4 %}{% include '_acoes_salvar_bloco_form1.html' %}
         </div>
       </form>
       {% else %}
@@ -426,7 +431,7 @@
     </section>
 
     <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-5">
-      <p class="etiqueta">Etapa 2 de 4 · Bloco 5 de 14</p>
+      <p class="etiqueta">FORM 1 — Etapa 2 de 4 — Bloco 5 de 14</p>
       <h3 id="titulo-bloco-5">Categorias de dados</h3>
       <p class="ajuda">Marque somente categorias efetivamente tratadas neste fluxo. Não informe nomes, números de documentos, contatos, protocolos ou dados de casos concretos.</p>
       {% if registro.form1_integral.pode_editar %}
@@ -451,7 +456,7 @@
         </div>
         <div class="rodape-formulario">
           <p>O rascunho pode permanecer incompleto. “A confirmar” não poderá coexistir com outra alternativa.</p>
-          <button class="botao-primario" type="submit">Salvar Bloco 5</button>
+          {% set numero_bloco = 5 %}{% include '_acoes_salvar_bloco_form1.html' %}
         </div>
       </form>
       {% else %}
@@ -460,7 +465,7 @@
     </section>
 
     <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-6">
-      <p class="etiqueta">Etapa 2 de 4 · Bloco 6 de 14</p>
+      <p class="etiqueta">FORM 1 — Etapa 2 de 4 — Bloco 6 de 14</p>
       <h3 id="titulo-bloco-6">Origem dos dados</h3>
       <p class="ajuda">Informe categorias de fontes. Evite nomes ou identificadores de pessoas concretas.</p>
       {% if registro.form1_integral.pode_editar %}
@@ -494,7 +499,7 @@
         {% endfor %}
         <div class="rodape-formulario">
           <p>O rascunho pode permanecer incompleto; as validações de submissão integral continuam desabilitadas.</p>
-          <button class="botao-primario" type="submit">Salvar Bloco 6</button>
+          {% set numero_bloco = 6 %}{% include '_acoes_salvar_bloco_form1.html' %}
         </div>
       </form>
       {% else %}
@@ -503,7 +508,7 @@
     </section>
 
     <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-7">
-      <p class="etiqueta">Etapa 2 de 4 · Bloco 7 de 14</p>
+      <p class="etiqueta">FORM 1 — Etapa 2 de 4 — Bloco 7 de 14</p>
       <h3 id="titulo-bloco-7">Operações de tratamento</h3>
       {% if registro.form1_integral.pode_editar %}
       {% set campo = registro.form1_integral.campos_bloco_7['7.1'] %}
@@ -522,7 +527,7 @@
         {% include '_complemento_outro_form1.html' %}
         <div class="rodape-formulario">
           <p>O rascunho admite respostas parciais e “A confirmar”.</p>
-          <button class="botao-primario" type="submit">Salvar Bloco 7</button>
+          {% set numero_bloco = 7 %}{% include '_acoes_salvar_bloco_form1.html' %}
         </div>
       </form>
       {% else %}<p class="aviso-leitura">Somente o ARP atual pode alterar este rascunho.</p>{% endif %}
@@ -585,6 +590,11 @@
 
   <p class="ajuda">Os 14 blocos do rascunho integral estão disponíveis. A submissão integral permanece desabilitada e será tratada em incremento próprio. O FORM 1 sintético permanece disponível abaixo sem alterações.</p>
 </section>
+
+<aside class="separador-instrumentos" aria-label="Separação entre os instrumentos">
+  <p class="etiqueta">Fim das quatro etapas do FORM 1</p>
+  <p><strong>O instrumento sintético da PoC nuclear começa abaixo.</strong> Ele é uma referência separada e não integra os 14 blocos acima.</p>
+</aside>
 
 <script>
   function sincronizarSinalizacaoObrigatoriedade() {
@@ -694,6 +704,7 @@
     var chave = 'form1-integral-etapa-' + raiz.dataset.registroId;
     var etapaDaUrl = window.location.hash.match(/^#form1-etapa-([1-4])$/);
     var blocoDaUrl = window.location.hash.match(/^#titulo-bloco-(\d{1,2})$/);
+    var preValidacaoDaUrl = window.location.hash === '#titulo-pre-validacao-form1';
     var numeroBloco = blocoDaUrl ? Number(blocoDaUrl[1]) : null;
     var etapaDoBloco = numeroBloco === null ? null
       : numeroBloco <= 3 ? '1'
@@ -783,13 +794,14 @@
         destino.scrollIntoView({ block: 'center' });
       });
     });
-    var destinoInicial = blocoDaUrl ? document.getElementById('titulo-bloco-' + numeroBloco) : null;
+    var destinoInicial = blocoDaUrl ? document.getElementById('titulo-bloco-' + numeroBloco)
+      : preValidacaoDaUrl ? document.getElementById('titulo-pre-validacao-form1') : null;
     exibirEtapa(etapaInicial, destinoInicial ? window.location.hash : null);
     if (destinoInicial) {
       window.requestAnimationFrame(function () {
         destinoInicial.setAttribute('tabindex', '-1');
         destinoInicial.focus({ preventScroll: true });
-        destinoInicial.scrollIntoView({ block: 'start' });
+        destinoInicial.scrollIntoView({ block: preValidacaoDaUrl ? 'center' : 'start' });
       });
     }
   })();

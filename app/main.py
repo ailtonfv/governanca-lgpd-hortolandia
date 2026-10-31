@@ -265,6 +265,17 @@ def _voltar_ao_registro(registro_id, conta_id, resultado, sucesso, *, ancora=Non
     )
 
 
+def _ancora_apos_salvar_bloco(
+    numero_bloco: int, acao_pos_salvar: str | None, salvamento_permitido: bool,
+) -> str:
+    """Escolhe somente o destino visual; o comando de domínio continua único."""
+    if not salvamento_permitido or acao_pos_salvar != "proximo":
+        return f"titulo-bloco-{numero_bloco}"
+    if numero_bloco < 14:
+        return f"titulo-bloco-{numero_bloco + 1}"
+    return "titulo-pre-validacao-form1"
+
+
 @app.post("/registros/{registro_id}/form1-integral/atribuir-arp")
 def atribuir_arp_integral(
     registro_id: str,
@@ -334,6 +345,7 @@ def salvar_bloco_1_integral(
     referencia_existente: str = Form(default="", max_length=100),
     referencia_institucional: str = Form(default="", max_length=500),
     fluxo_recorrente: str = Form(default="", max_length=100),
+    acao_pos_salvar: str = Form(default="permanecer", max_length=20),
     sessao: Session = Depends(obter_sessao),
 ):
     _, registro = carregar_registro(sessao, conta_id, registro_id)
@@ -359,7 +371,7 @@ def salvar_bloco_1_integral(
     sessao.commit()
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, "Bloco 1 do FORM 1 integral salvo com segurança.",
-        ancora="titulo-bloco-1",
+        ancora=_ancora_apos_salvar_bloco(1, acao_pos_salvar, resultado["permitido"]),
     )
 
 
@@ -395,6 +407,7 @@ async def salvar_bloco_2_integral(
     registro_id: str, request: Request, sessao: Session = Depends(obter_sessao),
 ):
     formulario = await request.form()
+    acao_pos_salvar = str(formulario.get("acao_pos_salvar", "permanecer"))
     conta_id = str(formulario.get("conta_id", ""))[:50]
     _, registro = carregar_registro(sessao, conta_id, registro_id)
     if not isinstance(registro, dict):
@@ -411,7 +424,7 @@ async def salvar_bloco_2_integral(
     sessao.commit()
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, "Bloco 2 do FORM 1 integral salvo com segurança.",
-        ancora="titulo-bloco-2",
+        ancora=_ancora_apos_salvar_bloco(2, acao_pos_salvar, resultado["permitido"]),
     )
 
 
@@ -420,6 +433,7 @@ async def salvar_bloco_4_integral(
     registro_id: str, request: Request, sessao: Session = Depends(obter_sessao),
 ):
     formulario = await request.form()
+    acao_pos_salvar = str(formulario.get("acao_pos_salvar", "permanecer"))
     conta_id = str(formulario.get("conta_id", ""))[:50]
     resultado = salvar_bloco_4_form1_integral(
         sessao,
@@ -433,7 +447,7 @@ async def salvar_bloco_4_integral(
     sessao.commit()
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, "Bloco 4 do FORM 1 integral salvo com segurança.",
-        ancora="titulo-bloco-4",
+        ancora=_ancora_apos_salvar_bloco(4, acao_pos_salvar, resultado["permitido"]),
     )
 
 
@@ -442,6 +456,7 @@ async def salvar_bloco_5_integral(
     registro_id: str, request: Request, sessao: Session = Depends(obter_sessao),
 ):
     formulario = await request.form()
+    acao_pos_salvar = str(formulario.get("acao_pos_salvar", "permanecer"))
     conta_id = str(formulario.get("conta_id", ""))[:50]
     resultado = salvar_bloco_5_form1_integral(
         sessao,
@@ -455,7 +470,7 @@ async def salvar_bloco_5_integral(
     sessao.commit()
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, "Bloco 5 do FORM 1 integral salvo com segurança.",
-        ancora="titulo-bloco-5",
+        ancora=_ancora_apos_salvar_bloco(5, acao_pos_salvar, resultado["permitido"]),
     )
 
 
@@ -464,6 +479,7 @@ async def salvar_bloco_6_integral(
     registro_id: str, request: Request, sessao: Session = Depends(obter_sessao),
 ):
     formulario = await request.form()
+    acao_pos_salvar = str(formulario.get("acao_pos_salvar", "permanecer"))
     conta_id = str(formulario.get("conta_id", ""))[:50]
     resultado = salvar_bloco_6_form1_integral(
         sessao,
@@ -477,7 +493,7 @@ async def salvar_bloco_6_integral(
     sessao.commit()
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, "Bloco 6 do FORM 1 integral salvo com segurança.",
-        ancora="titulo-bloco-6",
+        ancora=_ancora_apos_salvar_bloco(6, acao_pos_salvar, resultado["permitido"]),
     )
 
 
@@ -486,6 +502,7 @@ async def salvar_bloco_7_integral(
     registro_id: str, request: Request, sessao: Session = Depends(obter_sessao),
 ):
     formulario = await request.form()
+    acao_pos_salvar = str(formulario.get("acao_pos_salvar", "permanecer"))
     conta_id = str(formulario.get("conta_id", ""))[:50]
     resultado = salvar_bloco_7_form1_integral(
         sessao, comando_id=str(formulario.get("comando_id", ""))[:64],
@@ -497,7 +514,7 @@ async def salvar_bloco_7_integral(
     sessao.commit()
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, "Bloco 7 do FORM 1 integral salvo com segurança.",
-        ancora="titulo-bloco-7",
+        ancora=_ancora_apos_salvar_bloco(7, acao_pos_salvar, resultado["permitido"]),
     )
 
 
@@ -506,6 +523,7 @@ async def salvar_bloco_8_integral(
     registro_id: str, request: Request, sessao: Session = Depends(obter_sessao),
 ):
     formulario = await request.form()
+    acao_pos_salvar = str(formulario.get("acao_pos_salvar", "permanecer"))
     conta_id = str(formulario.get("conta_id", ""))[:50]
     resultado = salvar_bloco_8_form1_integral(
         sessao, comando_id=str(formulario.get("comando_id", ""))[:64],
@@ -517,7 +535,7 @@ async def salvar_bloco_8_integral(
     sessao.commit()
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, "Bloco 8 do FORM 1 integral salvo com segurança.",
-        ancora="titulo-bloco-8",
+        ancora=_ancora_apos_salvar_bloco(8, acao_pos_salvar, resultado["permitido"]),
     )
 
 
@@ -526,6 +544,7 @@ async def salvar_bloco_9_integral(
     registro_id: str, request: Request, sessao: Session = Depends(obter_sessao),
 ):
     formulario = await request.form()
+    acao_pos_salvar = str(formulario.get("acao_pos_salvar", "permanecer"))
     conta_id = str(formulario.get("conta_id", ""))[:50]
     resultado = salvar_bloco_9_form1_integral(
         sessao, comando_id=str(formulario.get("comando_id", ""))[:64],
@@ -537,7 +556,7 @@ async def salvar_bloco_9_integral(
     sessao.commit()
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, "Bloco 9 do FORM 1 integral salvo com segurança.",
-        ancora="titulo-bloco-9",
+        ancora=_ancora_apos_salvar_bloco(9, acao_pos_salvar, resultado["permitido"]),
     )
 
 
@@ -546,6 +565,7 @@ async def salvar_bloco_10_integral(
     registro_id: str, request: Request, sessao: Session = Depends(obter_sessao),
 ):
     formulario = await request.form()
+    acao_pos_salvar = str(formulario.get("acao_pos_salvar", "permanecer"))
     conta_id = str(formulario.get("conta_id", ""))[:50]
     resultado = salvar_bloco_10_form1_integral(
         sessao, comando_id=str(formulario.get("comando_id", ""))[:64],
@@ -557,7 +577,7 @@ async def salvar_bloco_10_integral(
     sessao.commit()
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, "Bloco 10 do FORM 1 integral salvo com segurança.",
-        ancora="titulo-bloco-10",
+        ancora=_ancora_apos_salvar_bloco(10, acao_pos_salvar, resultado["permitido"]),
     )
 
 
@@ -632,6 +652,7 @@ async def salvar_bloco_11_integral(
     registro_id: str, request: Request, sessao: Session = Depends(obter_sessao),
 ):
     formulario = await request.form()
+    acao_pos_salvar = str(formulario.get("acao_pos_salvar", "permanecer"))
     conta_id = str(formulario.get("conta_id", ""))[:50]
     resultado = salvar_bloco_11_form1_integral(
         sessao, comando_id=str(formulario.get("comando_id", ""))[:64], conta_id=conta_id,
@@ -642,7 +663,8 @@ async def salvar_bloco_11_integral(
     sessao.commit()
     return _voltar_ao_registro(
         registro_id, conta_id, resultado,
-        "Bloco 11 do FORM 1 integral salvo com segurança.", ancora="titulo-bloco-11"
+        "Bloco 11 do FORM 1 integral salvo com segurança.",
+        ancora=_ancora_apos_salvar_bloco(11, acao_pos_salvar, resultado["permitido"]),
     )
 
 
@@ -651,6 +673,7 @@ async def salvar_bloco_12_integral(
     registro_id: str, request: Request, sessao: Session = Depends(obter_sessao),
 ):
     formulario = await request.form()
+    acao_pos_salvar = str(formulario.get("acao_pos_salvar", "permanecer"))
     conta_id = str(formulario.get("conta_id", ""))[:50]
     resultado = salvar_bloco_12_form1_integral(
         sessao, comando_id=str(formulario.get("comando_id", ""))[:64], conta_id=conta_id,
@@ -661,7 +684,8 @@ async def salvar_bloco_12_integral(
     sessao.commit()
     return _voltar_ao_registro(
         registro_id, conta_id, resultado,
-        "Bloco 12 do FORM 1 integral salvo com segurança.", ancora="titulo-bloco-12"
+        "Bloco 12 do FORM 1 integral salvo com segurança.",
+        ancora=_ancora_apos_salvar_bloco(12, acao_pos_salvar, resultado["permitido"]),
     )
 
 
@@ -670,6 +694,7 @@ async def salvar_bloco_13_integral(
     registro_id: str, request: Request, sessao: Session = Depends(obter_sessao),
 ):
     formulario = await request.form()
+    acao_pos_salvar = str(formulario.get("acao_pos_salvar", "permanecer"))
     conta_id = str(formulario.get("conta_id", ""))[:50]
     resultado = salvar_bloco_13_form1_integral(
         sessao, comando_id=str(formulario.get("comando_id", ""))[:64], conta_id=conta_id,
@@ -680,7 +705,8 @@ async def salvar_bloco_13_integral(
     sessao.commit()
     return _voltar_ao_registro(
         registro_id, conta_id, resultado,
-        "Bloco 13 do FORM 1 integral salvo com segurança.", ancora="titulo-bloco-13"
+        "Bloco 13 do FORM 1 integral salvo com segurança.",
+        ancora=_ancora_apos_salvar_bloco(13, acao_pos_salvar, resultado["permitido"]),
     )
 
 
@@ -689,6 +715,7 @@ async def salvar_bloco_14_integral(
     registro_id: str, request: Request, sessao: Session = Depends(obter_sessao),
 ):
     formulario = await request.form()
+    acao_pos_salvar = str(formulario.get("acao_pos_salvar", "permanecer"))
     conta_id = str(formulario.get("conta_id", ""))[:50]
     resultado = salvar_bloco_14_form1_integral(
         sessao, comando_id=str(formulario.get("comando_id", ""))[:64], conta_id=conta_id,
@@ -699,7 +726,8 @@ async def salvar_bloco_14_integral(
     sessao.commit()
     return _voltar_ao_registro(
         registro_id, conta_id, resultado,
-        "Bloco 14 do FORM 1 integral salvo com segurança.", ancora="titulo-bloco-14"
+        "Bloco 14 do FORM 1 integral salvo com segurança.",
+        ancora=_ancora_apos_salvar_bloco(14, acao_pos_salvar, resultado["permitido"]),
     )
 
 
@@ -710,6 +738,7 @@ def salvar_bloco_3_integral(
     comando_id: str = Form(max_length=64),
     versao_lida: int = Form(ge=1),
     resposta_3_1: str = Form(default="", max_length=50),
+    acao_pos_salvar: str = Form(default="permanecer", max_length=20),
     sessao: Session = Depends(obter_sessao),
 ):
     resultado = salvar_cabecalho_bloco_3_form1_integral(
@@ -720,7 +749,7 @@ def salvar_bloco_3_integral(
     sessao.commit()
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, "Bloco 3 do FORM 1 integral salvo com segurança.",
-        ancora="titulo-bloco-3",
+        ancora=_ancora_apos_salvar_bloco(3, acao_pos_salvar, resultado["permitido"]),
     )
 
 
