@@ -184,6 +184,44 @@ def _projetar_proxima_providencia_form1_integral(
     }
 
 
+def _pode_editar_form1_integral(identidade, atribuicao, registro):
+    """Reutiliza a autorização vigente sem criar uma permissão de painel."""
+
+    return bool(
+        atribuicao is not None
+        and atribuicao.arp_atual_id == identidade["pessoa_id"]
+        and any(
+            item["unidade_id"] == registro.unidade_principal_atual_id
+            and item["papel"] == "preenchedor"
+            for item in identidade["designacoes"]
+        )
+    )
+
+
+def _pre_validar_rascunho_integral(
+    rascunho, *, arp_atual, confirmacao_canais, canais_registro
+):
+    """Mantém painel e detalhe sobre a mesma pré-validação consultiva."""
+
+    if rascunho is None:
+        return None
+    return pre_validar_form1_integral(
+        rascunho.conteudo,
+        nome_institucional=None if arp_atual is None else arp_atual.nome,
+        cargo_funcao=None,
+        email_institucional=None,
+        respostas_somente_leitura=(
+            {} if confirmacao_canais is None else {
+                "2.1": [
+                    item.classificacao_form1_snapshot
+                    for item in canais_registro
+                    if item.classificacao_form1_snapshot
+                ]
+            }
+        ),
+    )
+
+
 def _identidade(sessao, conta_id):
     conta = sessao.get(Conta, conta_id)
     if conta is None or not conta.ativa:
@@ -263,6 +301,48 @@ def carregar_painel(sessao, conta_id):
     ).all() if ids else []
     registros = [_resumo_registro(registro, unidade) for registro, unidade in linhas]
 
+    proximas_providencias_form1 = []
+    for registro, unidade in linhas:
+        atribuicao = sessao.get(AtribuicaoForm1Integral, registro.id)
+        if not _pode_editar_form1_integral(identidade, atribuicao, registro):
+            continue
+        rascunho = sessao.get(RascunhoForm1Integral, registro.id)
+        if rascunho is None:
+            continue
+        arp_atual = sessao.get(Pessoa, atribuicao.arp_atual_id)
+        confirmacao_canais = sessao.get(ConfirmacaoCanaisRegistro, registro.id)
+        canais_registro = sessao.scalars(
+            select(RegistroCanal)
+            .where(RegistroCanal.registro_id == registro.id)
+            .order_by(RegistroCanal.canal_nome_snapshot)
+        ).all() if confirmacao_canais is not None else []
+        pre_validacao = _pre_validar_rascunho_integral(
+            rascunho,
+            arp_atual=arp_atual,
+            confirmacao_canais=confirmacao_canais,
+            canais_registro=canais_registro,
+        )
+        proxima = _projetar_proxima_providencia_form1_integral(
+            identidade=identidade,
+            arp_atual=arp_atual,
+            pode_editar=True,
+            rascunho=rascunho,
+            pre_validacao=pre_validacao,
+        )
+        retomada = proxima["retomada"]
+        proximas_providencias_form1.append({
+            "registro_id": registro.id,
+            "codigo_lgpd": registro.codigo_lgpd,
+            "tipo": registro.tipo_objeto.capitalize(),
+            "titulo": registro.titulo_objeto,
+            "situacao": "Em preenchimento",
+            "quantidade_pendencias": pre_validacao["quantidades"]["incompletos"],
+            "ancora": (
+                f"titulo-bloco-{retomada['bloco']}"
+                if retomada is not None else "titulo-pre-validacao-form1"
+            ),
+        })
+
     codigos = {item["id"]: item["codigo_lgpd"] for item in registros}
     alertas = listar_alertas_operacionais(sessao, conta_id)
     for alerta in alertas:
@@ -275,6 +355,7 @@ def carregar_painel(sessao, conta_id):
         "identidade": identidade,
         "registros": registros,
         "alertas": alertas,
+        "proximas_providencias_form1": proximas_providencias_form1,
         "pode_criar_registro": pode_criar_registro,
     }
 
@@ -460,10 +541,8 @@ def carregar_registro(sessao, conta_id, registro_id):
             "confirmado_por": resumo["confirmacao_canais"]["confirmado_por_nome"],
             "confirmado_em": confirmacao_canais.confirmado_em,
         }
-    pode_editar_integral = bool(
-        atribuicao_integral is not None
-        and atribuicao_integral.arp_atual_id == identidade["pessoa_id"]
-        and pode_preencher
+    pode_editar_integral = _pode_editar_form1_integral(
+        identidade, atribuicao_integral, registro
     )
     catalogo_integral = campos_por_id()
     alternativas_outro = alternativas_outro_por_campo()
@@ -548,22 +627,11 @@ def carregar_registro(sessao, conta_id, registro_id):
         )
         .order_by(Pessoa.nome)
     ).unique().all()
-    pre_validacao_integral = (
-        None if rascunho_integral is None else pre_validar_form1_integral(
-            rascunho_integral.conteudo,
-            nome_institucional=None if arp_atual is None else arp_atual.nome,
-            cargo_funcao=None,
-            email_institucional=None,
-            respostas_somente_leitura=(
-                {} if confirmacao_canais is None else {
-                    "2.1": [
-                        item.classificacao_form1_snapshot
-                        for item in canais_registro
-                        if item.classificacao_form1_snapshot
-                    ]
-                }
-            ),
-        )
+    pre_validacao_integral = _pre_validar_rascunho_integral(
+        rascunho_integral,
+        arp_atual=arp_atual,
+        confirmacao_canais=confirmacao_canais,
+        canais_registro=canais_registro,
     )
     painel_progresso_integral = (
         None if pre_validacao_integral is None else

@@ -34,19 +34,46 @@
       <p class="etiqueta">Pendências e próximas ações</p>
       <h2 id="titulo-alertas">O que precisa da sua atenção</h2>
     </div>
-    <span class="contador">{{ alertas|length }}</span>
+    <span class="contador">{{ (proximas_providencias_form1|length) + (alertas|length) }}</span>
   </div>
+  {% if proximas_providencias_form1 %}
+  <div class="grupo-atencao-painel" aria-labelledby="titulo-providencias-form1">
+    <h3 id="titulo-providencias-form1">Preenchimento do FORM 1</h3>
+    <p class="ajuda">Próximas providências derivadas da atribuição vigente do ARP e do rascunho. Não são pendências institucionais formalmente atribuídas.</p>
+    <div class="grade-alertas">
+      {% for providencia in proximas_providencias_form1 %}
+      <article class="alerta alerta-proxima_acao">
+        <p class="etiqueta">{{ providencia.codigo_lgpd }}</p>
+        <h3>Continuar FORM 1</h3>
+        <p><strong>{{ providencia.tipo }}:</strong> {{ providencia.titulo }}</p>
+        <p><strong>Situação do FORM 1:</strong> {{ providencia.situacao }}</p>
+        {% if providencia.quantidade_pendencias > 0 %}
+        <p><strong>{{ providencia.quantidade_pendencias }}</strong> campo(s) obrigatório(s) ativo(s) incompleto(s).</p>
+        {% else %}
+        <p>Nenhum campo obrigatório ativo incompleto; revise a pré-validação consultiva.</p>
+        {% endif %}
+        <a class="botao-link" href="{{ url_for('detalhe_registro', registro_id=providencia.registro_id) }}?conta_id={{ conta_id }}#{{ providencia.ancora }}">Continuar FORM 1</a>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
   {% if alertas %}
-  <div class="grade-alertas">
-    {% for alerta in alertas %}
-    <article class="alerta alerta-{{ alerta.nivel }}">
-      <p class="etiqueta">{{ alerta.codigo_lgpd }}</p>
-      <h3>{{ alerta.rotulo }}</h3>
-      <p>Próxima ação: {{ alerta.proxima_acao|replace('_', ' ') }}.</p>
-    </article>
-    {% endfor %}
+  <div class="grupo-atencao-painel" aria-labelledby="titulo-pendencias-institucionais">
+    <h3 id="titulo-pendencias-institucionais">Pendências e ações institucionais</h3>
+    <p class="ajuda">Tarefas formalmente atribuídas pelos fluxos de pendência e decisão.</p>
+    <div class="grade-alertas">
+      {% for alerta in alertas %}
+      <article class="alerta alerta-{{ alerta.nivel }}">
+        <p class="etiqueta">{{ alerta.codigo_lgpd }}</p>
+        <h3>{{ alerta.rotulo }}</h3>
+        <p>Próxima ação: {{ alerta.proxima_acao|replace('_', ' ') }}.</p>
+      </article>
+      {% endfor %}
+    </div>
   </div>
-  {% else %}
+  {% endif %}
+  {% if not proximas_providencias_form1 and not alertas %}
   <p class="vazio">Nenhuma pendência ou próxima ação para este agente.</p>
   {% endif %}
 </section>
