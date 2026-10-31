@@ -137,6 +137,7 @@
     } %}
     <section class="painel-progresso-form1" data-painel-progresso data-total-blocos="14"
              data-blocos-salvos="{{ progresso.blocos_salvos | join(',') }}"
+             data-blocos-com-respostas="{{ progresso.blocos_com_respostas_salvas | join(',') }}"
              aria-labelledby="titulo-painel-progresso-form1">
       <h3 id="titulo-painel-progresso-form1">Progresso e pendências do FORM 1</h3>
       <p class="ajuda">O painel descreve o rascunho salvo e a navegação desta sessão. Ele não mede conformidade com a LGPD.</p>
@@ -157,27 +158,15 @@
           </div>
           <p class="resumo-jornada-form1" aria-live="polite">
             <strong data-gauge-posicao>Etapa 1 de 4 · Bloco 1 de 14</strong><br>
-            <span><strong>{{ progresso.quantidade_salvos }}</strong> bloco(s) com salvamento registrado · <strong data-gauge-restantes>14</strong> ainda não visitado(s) nesta sessão.</span>
+            <span><strong>{{ progresso.quantidade_com_respostas_salvas }}</strong> bloco(s) com respostas salvas · <strong>{{ progresso.quantidade_salvos }}</strong> bloco(s) com evento de salvamento · <strong data-gauge-restantes>14</strong> ainda não visitado(s) nesta sessão.</span>
           </p>
-          <p class="ajuda ajuda-ponteiro-form1">O ponteiro indica somente a posição atual entre os 14 blocos; não representa conclusão do formulário.</p>
+          <p class="ajuda ajuda-ponteiro-form1">O ponteiro indica somente a posição atual entre os 14 blocos. Visitar um bloco ou salvar um bloco vazio não representa conclusão do trabalho.</p>
           <p class="legenda-estados-bloco">
             <span class="estado-bloco visitado">Visitado nesta sessão</span>
-            <span class="estado-bloco salvo">Salvo</span>
+            <span class="estado-bloco salvo">Respostas salvas</span>
+            <span class="estado-bloco a-percorrer">Ainda não preenchido</span>
             <span class="estado-bloco sem-pendencias">Sem pendências obrigatórias ativas</span>
           </p>
-          <ol class="mapa-blocos-form1" aria-label="Situação dos 14 blocos">
-            {% for bloco in range(1, 15) %}
-            <li>
-              <button type="button" data-painel-bloco="{{ bloco }}" aria-label="Ir ao Bloco {{ bloco }}">
-                <strong>Bloco {{ bloco }}</strong>
-                {% if bloco in progresso.blocos_salvos %}<small class="estado-bloco salvo">Salvo</small>{% endif %}
-                {% if bloco in progresso.blocos_sem_pendencias %}<small class="estado-bloco sem-pendencias">Sem pendências obrigatórias ativas</small>{% endif %}
-                <small class="estado-bloco visitado" data-bloco-visitado hidden>Visitado nesta sessão</small>
-                {% if bloco not in progresso.blocos_salvos and bloco not in progresso.blocos_sem_pendencias %}<small class="estado-bloco a-percorrer">A percorrer</small>{% endif %}
-              </button>
-            </li>
-            {% endfor %}
-          </ol>
         </article>
 
         <article class="cartao-progresso-form1 pendencias-form1">
@@ -221,6 +210,24 @@
           </div>
         </article>
       </div>
+      {% set blocos_pendentes = progresso.pendencias_por_bloco | map(attribute='bloco') | list %}
+      <nav class="regua-navegacao-blocos" aria-label="Navegação horizontal pelos 14 blocos do FORM 1">
+        <ol class="mapa-blocos-form1">
+          {% for bloco in range(1, 15) %}
+          <li>
+            <button type="button" data-painel-bloco="{{ bloco }}"
+                    class="{% if bloco in progresso.blocos_com_respostas_salvas %}bloco-com-respostas{% else %}bloco-sem-respostas{% endif %}{% if bloco in blocos_pendentes %} bloco-com-pendencias{% endif %}{% if bloco in progresso.blocos_sem_pendencias %} bloco-sem-pendencias{% endif %}"
+                    aria-label="Ir ao Bloco {{ bloco }} — {{ titulos_blocos_navegacao[bloco] }}">
+              <strong class="numero-bloco">{{ bloco }}</strong>
+              {% if bloco in progresso.blocos_com_respostas_salvas %}<small class="estado-bloco salvo">Respostas salvas</small>{% else %}<small class="estado-bloco a-percorrer">Ainda não preenchido</small>{% endif %}
+              {% if bloco in blocos_pendentes %}<small class="estado-bloco com-pendencias">Com pendências</small>{% endif %}
+              {% if bloco in progresso.blocos_sem_pendencias %}<small class="estado-bloco sem-pendencias">Sem pendências obrigatórias ativas</small>{% endif %}
+              <small class="estado-bloco visitado" data-bloco-visitado hidden>Visitado nesta sessão</small>
+            </button>
+          </li>
+          {% endfor %}
+        </ol>
+      </nav>
     </section>
     <aside class="legenda-form1-integral" aria-labelledby="titulo-legenda-form1">
       <h3 id="titulo-legenda-form1">Como ler as sinalizações</h3>
@@ -521,6 +528,7 @@
           </select>
           {% endif %}
           {% if campo.instrucao %}<p class="ajuda">{{ campo.instrucao }}</p>{% endif %}
+          {% if campo.ajuda_contextual %}<p class="ajuda">{{ campo.ajuda_contextual }}</p>{% endif %}
           {% include '_complemento_outro_form1.html' %}
         </div>
         {% endfor %}
@@ -598,6 +606,7 @@
           <input name="campo__{{ campo.id }}" maxlength="500" value="{{ respostas_integral.get(campo.id, '') }}">
           {% endif %}
           {% if campo.instrucao %}<p class="ajuda">{{ campo.instrucao }}</p>{% endif %}
+          {% if campo.ajuda_contextual %}<p class="ajuda">{{ campo.ajuda_contextual }}</p>{% endif %}
           {% include '_complemento_outro_form1.html' %}
         </div>
         {% endfor %}
@@ -696,8 +705,8 @@
 </section>
 
 <aside class="separador-instrumentos" aria-label="Separação entre os instrumentos">
-  <p class="etiqueta">Fim das quatro etapas do FORM 1</p>
-  <p><strong>O instrumento sintético da PoC nuclear começa abaixo.</strong> Ele é uma referência separada e não integra os 14 blocos acima.</p>
+  <p class="etiqueta">Separação entre instrumentos</p>
+  <p><strong>O FORM 1 Integral continua disponível acima para preenchimento e revisão.</strong> O instrumento sintético da PoC nuclear começa abaixo. Ele é uma referência separada e não integra os 14 blocos.</p>
 </aside>
 
 <script>
@@ -809,6 +818,33 @@
     var chaveBloco = 'form1-integral-bloco-' + raiz.dataset.registroId;
     var chaveVisitados = 'form1-integral-visitados-' + raiz.dataset.registroId;
     var painelProgresso = raiz.querySelector('[data-painel-progresso]');
+    var alteracoesNaoSalvas = false;
+    var navegacaoComAlteracoesConfirmada = false;
+    var mensagemAlteracoesNaoSalvas = 'Há alterações não salvas neste bloco. Elas continuarão visíveis nesta página, mas ainda não foram registradas. Deseja mudar de bloco?';
+    raiz.querySelectorAll('.formulario-integral').forEach(function (formulario) {
+      formulario.addEventListener('input', function () {
+        alteracoesNaoSalvas = true;
+        navegacaoComAlteracoesConfirmada = false;
+      });
+      formulario.addEventListener('change', function () {
+        alteracoesNaoSalvas = true;
+        navegacaoComAlteracoesConfirmada = false;
+      });
+      formulario.addEventListener('submit', function () {
+        alteracoesNaoSalvas = false;
+        navegacaoComAlteracoesConfirmada = false;
+      });
+    });
+    window.addEventListener('beforeunload', function (evento) {
+      if (!alteracoesNaoSalvas) return;
+      evento.preventDefault();
+      evento.returnValue = '';
+    });
+    function confirmarNavegacaoComAlteracoes() {
+      if (!alteracoesNaoSalvas || navegacaoComAlteracoesConfirmada) return true;
+      navegacaoComAlteracoesConfirmada = window.confirm(mensagemAlteracoesNaoSalvas);
+      return navegacaoComAlteracoesConfirmada;
+    }
     var visitados = new Set();
     try {
       JSON.parse(window.sessionStorage.getItem(chaveVisitados) || '[]').forEach(function (bloco) {
@@ -863,6 +899,7 @@
         var visitado = visitados.has(botao.dataset.painelBloco);
         var marcador = botao.querySelector('[data-bloco-visitado]');
         if (marcador) marcador.hidden = !visitado;
+        botao.classList.toggle('bloco-visitado', visitado);
         if (Number(botao.dataset.painelBloco) === numero) botao.setAttribute('aria-current', 'step');
         else botao.removeAttribute('aria-current');
       });
@@ -941,7 +978,7 @@
 
     botoes.forEach(function (botao) {
       botao.addEventListener('click', function () {
-        if (!botao.disabled) {
+        if (!botao.disabled && confirmarNavegacaoComAlteracoes()) {
           var primeiroBloco = primeiroBlocoDaEtapa(botao.dataset.etapaAlvo);
           exibirEtapa(botao.dataset.etapaAlvo, null, primeiroBloco);
           atualizarPainelJornada(primeiroBloco);
@@ -950,6 +987,7 @@
     });
     raiz.querySelectorAll('[data-painel-bloco]').forEach(function (botao) {
       botao.addEventListener('click', function () {
+        if (!confirmarNavegacaoComAlteracoes()) return;
         var numero = Number(botao.dataset.painelBloco);
         var destino = document.getElementById('titulo-bloco-' + numero);
         exibirEtapa(etapaDoNumeroDoBloco(numero), '#titulo-bloco-' + numero, numero);
@@ -966,10 +1004,13 @@
       if (titulo) atualizarPainelJornada(titulo.id.replace('titulo-bloco-', ''));
     });
     raiz.querySelectorAll('[data-pendencia-etapa]').forEach(function (botao) {
-      botao.addEventListener('click', function () { focarPendencia(botao); });
+      botao.addEventListener('click', function () {
+        if (confirmarNavegacaoComAlteracoes()) focarPendencia(botao);
+      });
     });
     raiz.querySelectorAll('[data-continuar-revisao]').forEach(function (botao) {
       botao.addEventListener('click', function () {
+        if (!confirmarNavegacaoComAlteracoes()) return;
         var destino = document.getElementById('titulo-pre-validacao-form1');
         if (!destino) return;
         window.history.replaceState(null, '', '#titulo-pre-validacao-form1');

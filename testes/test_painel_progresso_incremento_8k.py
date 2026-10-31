@@ -37,10 +37,13 @@ def test_painel_distingue_salvamento_pendencias_e_dependencias(sessao):
     # Assert
     assert progresso["blocos_salvos"] == [5]
     assert progresso["quantidade_salvos"] == 1
+    assert progresso["blocos_com_respostas_salvas"] == [1, 5]
+    assert progresso["quantidade_com_respostas_salvas"] == 2
     assert progresso["quantidade_incompletos"] > 0
     assert progresso["quantidade_governanca"] > 0
     assert 'data-blocos-salvos="5"' in pagina.text
-    assert "<strong>1</strong> bloco(s) com salvamento registrado" in pagina.text
+    assert "<strong>2</strong> bloco(s) com respostas salvas" in pagina.text
+    assert "<strong>1</strong> bloco(s) com evento de salvamento" in pagina.text
     assert "dependência(s) institucional(is) ou regra(s) de governança" in pagina.text
     assert "Pendências a resolver" in pagina.text
     assert 'class="gauge-form1 gauge-pendencias-form1 com-pendencias"' in pagina.text
@@ -107,7 +110,7 @@ def test_mapa_distingue_visitado_salvo_e_sem_pendencia_sem_declarar_conclusao(se
     assert "Visitado nesta sessão" in pagina.text
     assert "Salvo" in pagina.text or 'data-blocos-salvos=""' in pagina.text
     assert "Sem pendências obrigatórias ativas" in pagina.text
-    assert "A percorrer" in pagina.text
+    assert "Ainda não preenchido" in pagina.text
     trecho = pagina.text[
         pagina.text.index('class="painel-progresso-form1"'):
         pagina.text.index('class="legenda-form1-integral"')

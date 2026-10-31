@@ -99,12 +99,19 @@ th { color: #425466; font-size: .8rem; text-transform: uppercase; letter-spacing
 .ajuda-ponteiro-form1 { max-width: 34rem; margin: .45rem auto .75rem; text-align: center; }
 .legenda-estados-bloco { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem .8rem; margin: .75rem 0; }
 .legenda-estados-bloco .estado-bloco { display: inline-block; margin: 0; }
-.mapa-blocos-form1 { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .4rem; margin: 1rem 0 0; padding: 0; list-style: none; }
-.mapa-blocos-form1 button { min-height: 4.2rem; padding: .45rem; background: white; color: var(--texto); cursor: pointer; text-align: center; }
+.regua-navegacao-blocos { margin-top: 1rem; padding: .55rem; overflow-x: auto; border: 1px solid var(--borda); border-radius: .6rem; background: #f8fbfd; scrollbar-gutter: stable; }
+.mapa-blocos-form1 { display: flex; gap: .4rem; min-width: max-content; margin: 0; padding: 0; list-style: none; }
+.mapa-blocos-form1 button { width: 4.65rem; min-height: 5.2rem; padding: .4rem .3rem; background: white; color: var(--texto); cursor: pointer; text-align: center; }
+.mapa-blocos-form1 .numero-bloco { display: block; font-size: 1.05rem; }
 .mapa-blocos-form1 button[aria-current="step"] { border-color: var(--azul); box-shadow: 0 0 0 .15rem rgba(7, 89, 133, .16); }
+.mapa-blocos-form1 button.bloco-com-respostas { border-bottom: .3rem solid var(--azul); }
+.mapa-blocos-form1 button.bloco-com-pendencias { background: #fffbeb; }
+.mapa-blocos-form1 button.bloco-sem-pendencias { box-shadow: inset 0 -.2rem 0 #86b99a; }
+.mapa-blocos-form1 button.bloco-visitado { outline: 1px dashed #526475; outline-offset: -.25rem; }
 .estado-bloco { display: block; margin-top: .15rem; font-size: .68rem; line-height: 1.2; }
 .estado-bloco.salvo { color: var(--azul-escuro); font-weight: 800; }
 .estado-bloco.sem-pendencias { color: var(--verde); font-weight: 800; }
+.estado-bloco.com-pendencias { color: #78350f; font-weight: 800; }
 .estado-bloco.visitado { color: #425466; font-weight: 800; }
 .estado-bloco.a-percorrer { color: #526475; }
 .numero-pendencias-form1 { color: #78350f; font-size: 1.7rem; }
@@ -195,7 +202,7 @@ dd { margin: .25rem 0 0; }
   .cabecalho-form1 { grid-template-columns: 1fr; }
   .identidades-form1, .etapas-form1 { grid-template-columns: 1fr; }
   .grade-progresso-form1 { grid-template-columns: 1fr; }
-  .mapa-blocos-form1 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .regua-navegacao-blocos { margin-inline: -.25rem; }
   .objetivo-form1 { padding: .75rem 0 0; border-left: 0; border-top: 1px solid var(--borda); }
   th:nth-child(3), td:nth-child(3) { display: none; }
 }

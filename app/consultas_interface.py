@@ -84,7 +84,27 @@ EVENTOS_SALVAMENTO_BLOCO_FORM1_INTEGRAL = {
 }
 
 
-def _projetar_painel_progresso_form1_integral(sessao, registro_id, pre_validacao):
+def _blocos_com_respostas_salvas(conteudo):
+    """Distingue conteúdo registrado de mero evento de salvamento vazio."""
+
+    respostas = conteudo.get("respostas", {}) if isinstance(conteudo, dict) else {}
+    blocos = set()
+    for campo_id, valor in respostas.items():
+        prefixo = campo_id.split(".", 1)[0]
+        if prefixo.isdigit() and 1 <= int(prefixo) <= 14 and valor not in (None, "", [], {}):
+            blocos.add(int(prefixo))
+        elif prefixo in {"OUV", "ESIC"} and valor not in (None, "", [], {}):
+            blocos.add(2)
+    if conteudo.get("participantes"):
+        blocos.add(3)
+    if conteudo.get("destinatarios_10_2_1"):
+        blocos.add(10)
+    return sorted(blocos)
+
+
+def _projetar_painel_progresso_form1_integral(
+    sessao, registro_id, pre_validacao, conteudo
+):
     """Projeta fatos verificáveis sem criar estado de conclusão ou conformidade."""
     tipos_encontrados = set(sessao.scalars(
         select(Evento.tipo_evento).where(
@@ -102,11 +122,14 @@ def _projetar_painel_progresso_form1_integral(sessao, registro_id, pre_validacao
     blocos_sem_pendencias = [
         bloco for bloco in range(1, 15) if bloco not in blocos_com_pendencias
     ]
+    blocos_com_respostas = _blocos_com_respostas_salvas(conteudo)
     proxima_pendencia = next(iter(pre_validacao["incompletos"]), None)
     return {
         "total_blocos": 14,
         "blocos_salvos": blocos_salvos,
         "quantidade_salvos": len(blocos_salvos),
+        "blocos_com_respostas_salvas": blocos_com_respostas,
+        "quantidade_com_respostas_salvas": len(blocos_com_respostas),
         "blocos_sem_pendencias": blocos_sem_pendencias,
         "quantidade_sem_pendencias": len(blocos_sem_pendencias),
         "pendencias_por_bloco": [
@@ -608,14 +631,22 @@ def carregar_registro(sessao, conta_id, registro_id):
         usa_catalogo_5_1 = campo_id == "5.1" or campo_id in {
             "4.2.5.1", "6.2.2", "9.2.2", "10.4"
         }
+        perguntas_interface = {
+            "6.1.1": "Qual é a origem dos dados pessoais utilizados neste fluxo?",
+        }
         ajudas_contextuais = {
             "2.8": "Atendimentos: quantidade de atendimentos realizados em um período.",
             "2.9": "Registros: estoque de registros administrativos existente em uma data de referência.",
             "2.10": "Ocorrências: eventos que geram atuações, em determinado período.",
+            "6.1.1": (
+                "Informe a categoria de quem fornece os dados ou identifique a unidade, "
+                "órgão, entidade, sistema ou base de origem. Não registre nomes, CPF ou "
+                "identificadores de cidadãos."
+            ),
         }
         return {
             "id": campo.id,
-            "pergunta": campo.pergunta,
+            "pergunta": perguntas_interface.get(campo_id, campo.pergunta),
             "controle": campo.controle,
             "alternativas": alternativas,
             "instrucao": campo.instrucao,
@@ -662,7 +693,7 @@ def carregar_registro(sessao, conta_id, registro_id):
     painel_progresso_integral = (
         None if pre_validacao_integral is None else
         _projetar_painel_progresso_form1_integral(
-            sessao, registro.id, pre_validacao_integral
+            sessao, registro.id, pre_validacao_integral, rascunho_integral.conteudo
         )
     )
     resumo["form1_integral"] = {
