@@ -29,7 +29,7 @@ from app.form1_integral import (CONDICOES_BLOCO_2, CONDICOES_BLOCO_4, CONDICOES_
 from app.pre_validacao_form1_integral import (
     metadado_visual_obrigatoriedade, pre_validar_form1_integral,
 )
-from app.modelos import (AtribuicaoForm1Integral, Conta, ContextoAtuacao, Designacao, Instrumento,
+from app.modelos import (AtribuicaoForm1Integral, Conta, ContextoAtuacao, Designacao, Evento, Instrumento,
                          Canal, ConfirmacaoCanaisRegistro, ObjetoCanal,
                          ObjetoCatalogo, ObjetoContextoCatalogo, RegistroCanal,
                          UnidadeObjetoCatalogo, Pendencia, Pessoa,
@@ -64,6 +64,59 @@ ROTULOS_ALERTA = {
     "RESPOSTA_INTERSECRETARIAL_AGUARDANDO_DECISAO": "Resposta de outra unidade aguardando decisão",
     "CONCLUSAO_BLOQUEADA": "Conclusão bloqueada",
 }
+
+
+EVENTOS_SALVAMENTO_BLOCO_FORM1_INTEGRAL = {
+    1: "salvar_bloco_1_form1_integral",
+    2: "salvar_bloco_2_form1_integral",
+    3: "salvar_cabecalho_bloco_3",
+    4: "salvar_bloco_4_form1_integral",
+    5: "salvar_bloco_5_form1_integral",
+    6: "salvar_bloco_6_form1_integral",
+    7: "salvar_bloco_7_form1_integral",
+    8: "salvar_bloco_8_form1_integral",
+    9: "salvar_bloco_9_form1_integral",
+    10: "salvar_bloco_10_form1_integral",
+    11: "salvar_bloco_11_form1_integral",
+    12: "salvar_bloco_12_form1_integral",
+    13: "salvar_bloco_13_form1_integral",
+    14: "salvar_bloco_14_form1_integral",
+}
+
+
+def _projetar_painel_progresso_form1_integral(sessao, registro_id, pre_validacao):
+    """Projeta fatos verificáveis sem criar estado de conclusão ou conformidade."""
+    tipos_encontrados = set(sessao.scalars(
+        select(Evento.tipo_evento).where(
+            Evento.registro_id == registro_id,
+            Evento.tipo_evento.in_(EVENTOS_SALVAMENTO_BLOCO_FORM1_INTEGRAL.values()),
+        )
+    ).all())
+    blocos_salvos = [
+        bloco for bloco, tipo in EVENTOS_SALVAMENTO_BLOCO_FORM1_INTEGRAL.items()
+        if tipo in tipos_encontrados
+    ]
+    blocos_com_pendencias = {
+        int(grupo["bloco"]) for grupo in pre_validacao["por_bloco"]
+    }
+    blocos_sem_pendencias = [
+        bloco for bloco in range(1, 15) if bloco not in blocos_com_pendencias
+    ]
+    proxima_pendencia = next(iter(pre_validacao["incompletos"]), None)
+    return {
+        "total_blocos": 14,
+        "blocos_salvos": blocos_salvos,
+        "quantidade_salvos": len(blocos_salvos),
+        "blocos_sem_pendencias": blocos_sem_pendencias,
+        "quantidade_sem_pendencias": len(blocos_sem_pendencias),
+        "pendencias_por_bloco": [
+            {"bloco": int(grupo["bloco"]), "quantidade": len(grupo["itens"])}
+            for grupo in pre_validacao["por_bloco"]
+        ],
+        "proxima_pendencia": proxima_pendencia,
+        "quantidade_incompletos": pre_validacao["quantidades"]["incompletos"],
+        "quantidade_governanca": pre_validacao["quantidades"]["regras_pendentes"],
+    }
 
 
 def _projetar_proxima_providencia_form1_integral(
@@ -512,6 +565,12 @@ def carregar_registro(sessao, conta_id, registro_id):
             ),
         )
     )
+    painel_progresso_integral = (
+        None if pre_validacao_integral is None else
+        _projetar_painel_progresso_form1_integral(
+            sessao, registro.id, pre_validacao_integral
+        )
+    )
     resumo["form1_integral"] = {
         "situacao": "rascunho" if rascunho_integral is not None else "nao_iniciado",
         "pode_atribuir_arp": pode_atribuir_arp,
@@ -550,6 +609,7 @@ def carregar_registro(sessao, conta_id, registro_id):
             "salvo_em": rascunho_integral.salvo_em,
         },
         "pre_validacao": pre_validacao_integral,
+        "painel_progresso": painel_progresso_integral,
         "proxima_providencia": _projetar_proxima_providencia_form1_integral(
             identidade=identidade,
             arp_atual=arp_atual,

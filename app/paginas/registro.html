@@ -118,6 +118,89 @@
     {% set respostas_integral = registro.form1_integral.rascunho.respostas %}
     {% set complementos_integral = registro.form1_integral.rascunho.conteudo.get('complementos', {}) %}
     {% set pre_validacao = registro.form1_integral.pre_validacao %}
+    {% set progresso = registro.form1_integral.painel_progresso %}
+    <section class="painel-progresso-form1" data-painel-progresso data-total-blocos="14"
+             data-blocos-salvos="{{ progresso.blocos_salvos | join(',') }}"
+             aria-labelledby="titulo-painel-progresso-form1">
+      <h3 id="titulo-painel-progresso-form1">Progresso e pendências do FORM 1</h3>
+      <p class="ajuda">O painel descreve o rascunho salvo e a navegação desta sessão. Ele não mede conformidade com a LGPD.</p>
+      <div class="grade-progresso-form1">
+        <article class="cartao-progresso-form1 jornada-form1">
+          <h4>Jornada percorrida</h4>
+          <div class="gauge-form1" role="progressbar" aria-label="Blocos visitados nesta sessão"
+               aria-valuemin="0" aria-valuemax="14" aria-valuenow="0">
+            <svg viewBox="0 0 120 66" aria-hidden="true" focusable="false">
+              <path class="gauge-form1-trilho" pathLength="100" d="M10 60 A50 50 0 0 1 110 60"></path>
+              <path class="gauge-form1-progresso" pathLength="100" d="M10 60 A50 50 0 0 1 110 60"></path>
+            </svg>
+            <p><strong data-gauge-visitados>0</strong> de 14 blocos visitados nesta sessão</p>
+          </div>
+          <p class="resumo-jornada-form1" aria-live="polite">
+            <strong data-gauge-posicao>Etapa 1 de 4 · Bloco 1 de 14</strong><br>
+            <span><strong>{{ progresso.quantidade_salvos }}</strong> bloco(s) com salvamento registrado · <strong data-gauge-restantes>14</strong> ainda não visitado(s) nesta sessão.</span>
+          </p>
+          <p class="legenda-estados-bloco">
+            <span class="estado-bloco visitado">Visitado nesta sessão</span>
+            <span class="estado-bloco salvo">Salvo</span>
+            <span class="estado-bloco sem-pendencias">Sem pendências obrigatórias ativas</span>
+          </p>
+          <ol class="mapa-blocos-form1" aria-label="Situação dos 14 blocos">
+            {% for bloco in range(1, 15) %}
+            <li>
+              <button type="button" data-painel-bloco="{{ bloco }}" aria-label="Ir ao Bloco {{ bloco }}">
+                <strong>Bloco {{ bloco }}</strong>
+                {% if bloco in progresso.blocos_salvos %}<small class="estado-bloco salvo">Salvo</small>{% endif %}
+                {% if bloco in progresso.blocos_sem_pendencias %}<small class="estado-bloco sem-pendencias">Sem pendências obrigatórias ativas</small>{% endif %}
+                <small class="estado-bloco visitado" data-bloco-visitado hidden>Visitado nesta sessão</small>
+                {% if bloco not in progresso.blocos_salvos and bloco not in progresso.blocos_sem_pendencias %}<small class="estado-bloco a-percorrer">A percorrer</small>{% endif %}
+              </button>
+            </li>
+            {% endfor %}
+          </ol>
+        </article>
+
+        <article class="cartao-progresso-form1 pendencias-form1">
+          <h4>Pendências a resolver</h4>
+          <div class="gauge-form1 gauge-pendencias-form1 {{ 'sem-pendencias' if progresso.quantidade_incompletos == 0 else 'com-pendencias' }}"
+               role="status" aria-label="{{ progresso.quantidade_incompletos }} campos obrigatórios ativos incompletos">
+            <svg viewBox="0 0 120 66" aria-hidden="true" focusable="false">
+              <path class="gauge-form1-trilho" d="M10 60 A50 50 0 0 1 110 60"></path>
+              <path class="gauge-pendencias-arco" d="M10 60 A50 50 0 0 1 110 60"></path>
+            </svg>
+            <p><strong class="numero-pendencias-form1">{{ progresso.quantidade_incompletos }}</strong><br><span>campo(s) obrigatório(s) ativo(s) incompleto(s)</span></p>
+          </div>
+          {% if progresso.quantidade_incompletos == 0 %}
+          <p class="situacao-pendencias-form1 sem-pendencias"><strong>Nenhuma pendência obrigatória ativa no estado salvo.</strong></p>
+          {% else %}
+          <p class="situacao-pendencias-form1 com-pendencias"><strong>Há informações obrigatórias a resolver.</strong></p>
+          {% endif %}
+          {% if progresso.pendencias_por_bloco %}
+          <ul class="distribuicao-pendencias-form1" aria-label="Pendências por bloco">
+            {% for grupo in progresso.pendencias_por_bloco %}
+            <li><strong>Bloco {{ grupo.bloco }}</strong><span>{{ grupo.quantidade }}</span></li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <p>Nenhum campo obrigatório ativo está incompleto no estado salvo.</p>
+          {% endif %}
+          {% set proxima_pendencia = progresso.proxima_pendencia %}
+          {% if proxima_pendencia %}
+          <button type="button" class="botao-pendencia-form1 proxima-pendencia-form1"
+                  data-pendencia-campo="{{ proxima_pendencia.campo_id }}"
+                  data-pendencia-bloco="{{ proxima_pendencia.bloco }}"
+                  data-pendencia-etapa="{{ proxima_pendencia.etapa }}"
+                  data-pendencia-destino="{{ proxima_pendencia.destino_tipo }}">
+            <span>Próxima pergunta pendente</span>
+            <strong>{{ proxima_pendencia.campo_id }} — {{ proxima_pendencia.pergunta }}</strong>
+            <span class="rotulo-destino-pendencia">Ir à pergunta</span>
+          </button>
+          {% endif %}
+          <div class="dependencias-governanca-form1">
+            <strong>{{ progresso.quantidade_governanca }}</strong> dependência(s) institucional(is) ou regra(s) de governança separada(s) das respostas faltantes.
+          </div>
+        </article>
+      </div>
+    </section>
     <aside class="legenda-form1-integral" aria-labelledby="titulo-legenda-form1">
       <h3 id="titulo-legenda-form1">Como ler as sinalizações</h3>
       <ul class="lista-legenda-obrigatoriedade">
@@ -702,6 +785,17 @@
     var paineis = Array.from(raiz.querySelectorAll('[data-etapa-painel]'));
     if (!paineis.length) return;
     var chave = 'form1-integral-etapa-' + raiz.dataset.registroId;
+    var chaveBloco = 'form1-integral-bloco-' + raiz.dataset.registroId;
+    var chaveVisitados = 'form1-integral-visitados-' + raiz.dataset.registroId;
+    var painelProgresso = raiz.querySelector('[data-painel-progresso]');
+    var visitados = new Set();
+    try {
+      JSON.parse(window.sessionStorage.getItem(chaveVisitados) || '[]').forEach(function (bloco) {
+        if (Number(bloco) >= 1 && Number(bloco) <= 14) visitados.add(String(bloco));
+      });
+    } catch (erro) {
+      visitados = new Set();
+    }
     var etapaDaUrl = window.location.hash.match(/^#form1-etapa-([1-4])$/);
     var blocoDaUrl = window.location.hash.match(/^#titulo-bloco-(\d{1,2})$/);
     var preValidacaoDaUrl = window.location.hash === '#titulo-pre-validacao-form1';
@@ -712,6 +806,41 @@
       : numeroBloco <= 11 ? '3' : '4';
     var etapaInicial = etapaDaUrl ? etapaDaUrl[1] : etapaDoBloco || window.sessionStorage.getItem(chave);
     if (!botoes.some(function (botao) { return botao.dataset.etapaAlvo === etapaInicial && !botao.disabled; })) etapaInicial = '1';
+
+    function etapaDoNumeroDoBloco(numero) {
+      return numero <= 3 ? '1' : numero <= 8 ? '2' : numero <= 11 ? '3' : '4';
+    }
+
+    function primeiroBlocoDaEtapa(etapa) {
+      return { '1': 1, '2': 4, '3': 9, '4': 12 }[etapa] || 1;
+    }
+
+    function atualizarPainelJornada(numero) {
+      numero = Number(numero);
+      if (!painelProgresso || numero < 1 || numero > 14) return;
+      visitados.add(String(numero));
+      window.sessionStorage.setItem(chaveBloco, String(numero));
+      window.sessionStorage.setItem(chaveVisitados, JSON.stringify(Array.from(visitados)));
+      var quantidade = visitados.size;
+      var percentual = (quantidade / 14) * 100;
+      var gauge = painelProgresso.querySelector('.gauge-form1');
+      var arco = painelProgresso.querySelector('.gauge-form1-progresso');
+      if (gauge) gauge.setAttribute('aria-valuenow', String(quantidade));
+      if (arco) arco.style.strokeDasharray = percentual + ' 100';
+      var valorVisitados = painelProgresso.querySelector('[data-gauge-visitados]');
+      var valorRestantes = painelProgresso.querySelector('[data-gauge-restantes]');
+      var valorPosicao = painelProgresso.querySelector('[data-gauge-posicao]');
+      if (valorVisitados) valorVisitados.textContent = String(quantidade);
+      if (valorRestantes) valorRestantes.textContent = String(14 - quantidade);
+      if (valorPosicao) valorPosicao.textContent = 'Etapa ' + etapaDoNumeroDoBloco(numero) + ' de 4 · Bloco ' + numero + ' de 14';
+      painelProgresso.querySelectorAll('[data-painel-bloco]').forEach(function (botao) {
+        var visitado = visitados.has(botao.dataset.painelBloco);
+        var marcador = botao.querySelector('[data-bloco-visitado]');
+        if (marcador) marcador.hidden = !visitado;
+        if (Number(botao.dataset.painelBloco) === numero) botao.setAttribute('aria-current', 'step');
+        else botao.removeAttribute('aria-current');
+      });
+    }
 
     function exibirEtapa(numero, destinoInicial) {
       paineis.forEach(function (painel) {
@@ -756,6 +885,7 @@
 
     function focarPendencia(botao) {
       exibirEtapa(botao.dataset.pendenciaEtapa);
+      atualizarPainelJornada(botao.dataset.pendenciaBloco);
       var destino = destinoDaPendencia(botao);
       var estado = raiz.querySelector('.estado-navegacao-form1');
       if (!destino || destino.closest('[data-condicional-oculta="true"]')) {
@@ -779,8 +909,28 @@
 
     botoes.forEach(function (botao) {
       botao.addEventListener('click', function () {
-        if (!botao.disabled) exibirEtapa(botao.dataset.etapaAlvo);
+        if (!botao.disabled) {
+          exibirEtapa(botao.dataset.etapaAlvo);
+          atualizarPainelJornada(primeiroBlocoDaEtapa(botao.dataset.etapaAlvo));
+        }
       });
+    });
+    raiz.querySelectorAll('[data-painel-bloco]').forEach(function (botao) {
+      botao.addEventListener('click', function () {
+        var numero = Number(botao.dataset.painelBloco);
+        var destino = document.getElementById('titulo-bloco-' + numero);
+        exibirEtapa(etapaDoNumeroDoBloco(numero), '#titulo-bloco-' + numero);
+        atualizarPainelJornada(numero);
+        if (!destino) return;
+        destino.setAttribute('tabindex', '-1');
+        destino.focus({ preventScroll: true });
+        destino.scrollIntoView({ block: 'start' });
+      });
+    });
+    raiz.addEventListener('focusin', function (evento) {
+      var bloco = evento.target.closest('.bloco-form1-integral');
+      var titulo = bloco && bloco.querySelector('h3[id^="titulo-bloco-"]');
+      if (titulo) atualizarPainelJornada(titulo.id.replace('titulo-bloco-', ''));
     });
     raiz.querySelectorAll('[data-pendencia-etapa]').forEach(function (botao) {
       botao.addEventListener('click', function () { focarPendencia(botao); });
@@ -797,6 +947,8 @@
     var destinoInicial = blocoDaUrl ? document.getElementById('titulo-bloco-' + numeroBloco)
       : preValidacaoDaUrl ? document.getElementById('titulo-pre-validacao-form1') : null;
     exibirEtapa(etapaInicial, destinoInicial ? window.location.hash : null);
+    var blocoGuardado = Number(window.sessionStorage.getItem(chaveBloco));
+    atualizarPainelJornada(numeroBloco || (blocoGuardado >= 1 && blocoGuardado <= 14 ? blocoGuardado : primeiroBlocoDaEtapa(etapaInicial)));
     if (destinoInicial) {
       window.requestAnimationFrame(function () {
         destinoInicial.setAttribute('tabindex', '-1');
