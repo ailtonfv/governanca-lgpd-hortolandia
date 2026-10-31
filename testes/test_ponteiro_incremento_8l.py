@@ -26,6 +26,7 @@ def test_acao_principal_avanca_e_ponteiro_existe_somente_na_jornada(sessao):
     assert pagina.text.count(
         'class="botao-secundario" type="submit" name="acao_pos_salvar" value="permanecer"'
     ) == 14
+    assert pagina.text.count("Salvar e avançar ao Bloco") == 13
     assert pagina.text.count(
         'class="gauge-form1-ponteiro" data-gauge-ponteiro'
     ) == 1

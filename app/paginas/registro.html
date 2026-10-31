@@ -119,6 +119,22 @@
     {% set complementos_integral = registro.form1_integral.rascunho.conteudo.get('complementos', {}) %}
     {% set pre_validacao = registro.form1_integral.pre_validacao %}
     {% set progresso = registro.form1_integral.painel_progresso %}
+    {% set titulos_blocos_navegacao = {
+      1: 'Identificação do processo, atividade ou serviço',
+      2: 'Entrada, recepção e execução',
+      3: 'Outras unidades, órgãos ou entidades participantes',
+      4: 'Pessoas a quem os dados se referem',
+      5: 'Categorias de dados',
+      6: 'Origem dos dados',
+      7: 'Operações de tratamento',
+      8: 'Sistemas, canais e suporte',
+      9: 'Acesso',
+      10: 'Envio, disponibilização ou saída',
+      11: 'Armazenamento e dependência de terceiro',
+      12: 'Guarda e destinação',
+      13: 'Exposição física ou visual',
+      14: 'Achados e pendências'
+    } %}
     <section class="painel-progresso-form1" data-painel-progresso data-total-blocos="14"
              data-blocos-salvos="{{ progresso.blocos_salvos | join(',') }}"
              aria-labelledby="titulo-painel-progresso-form1">
@@ -278,7 +294,7 @@
     <div id="form1-etapa-1" class="painel-etapa-form1" data-etapa-painel="1">
     <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-1">
       <p class="etiqueta">FORM 1 — Etapa 1 de 4 — Bloco 1 de 14</p>
-      <h3 id="titulo-bloco-1">Identificação do processo, atividade ou serviço</h3>
+      <h3 id="titulo-bloco-1">{{ titulos_blocos_navegacao[1] }}</h3>
       <p class="ajuda">Rascunho parcial permitido. Não informe nomes, CPF, protocolos de atendimento ou dados de casos concretos.</p>
 
       {% if registro.form1_integral.pode_editar %}
@@ -334,7 +350,7 @@
 
     <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-2">
       <p class="etiqueta">FORM 1 — Etapa 1 de 4 — Bloco 2 de 14</p>
-      <h3 id="titulo-bloco-2">Entrada, recepção e execução</h3>
+      <h3 id="titulo-bloco-2">{{ titulos_blocos_navegacao[2] }}</h3>
       <p class="ajuda">Descreva o fluxo recorrente, sem inserir nomes de munícipes, protocolos ou dados de casos concretos. As ramificações de Ouvidoria e e-SIC são apresentadas independentemente, conforme a classificação dos canais confirmados pelo APA.</p>
 
       {% set leitura_2_1 = registro.form1_integral.leitura_2_1 %}
@@ -408,7 +424,7 @@
 
     <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-3">
       <p class="etiqueta">FORM 1 — Etapa 1 de 4 — Bloco 3 de 14</p>
-      <h3 id="titulo-bloco-3">Outras unidades, órgãos ou entidades participantes</h3>
+      <h3 id="titulo-bloco-3">{{ titulos_blocos_navegacao[3] }}</h3>
       <p class="ajuda">Cada participante é uma ocorrência independente. Registre a unidade ou entidade, nunca o nome de uma pessoa.</p>
 
       {% if registro.form1_integral.pode_editar %}
@@ -481,7 +497,7 @@
     <div id="form1-etapa-2" class="painel-etapa-form1" data-etapa-painel="2" hidden>
     <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-4">
       <p class="etiqueta">FORM 1 — Etapa 2 de 4 — Bloco 4 de 14</p>
-      <h3 id="titulo-bloco-4">Pessoas a quem os dados se referem</h3>
+      <h3 id="titulo-bloco-4">{{ titulos_blocos_navegacao[4] }}</h3>
       <p class="ajuda">Informe somente categorias de titulares e de representantes. O sistema de mapeamento não cadastra pessoas titulares.</p>
       {% if registro.form1_integral.pode_editar %}
       <form class="formulario formulario-integral" method="post" action="{{ url_for('salvar_bloco_4_integral', registro_id=registro.id) }}">
@@ -520,7 +536,7 @@
 
     <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-5">
       <p class="etiqueta">FORM 1 — Etapa 2 de 4 — Bloco 5 de 14</p>
-      <h3 id="titulo-bloco-5">Categorias de dados</h3>
+      <h3 id="titulo-bloco-5">{{ titulos_blocos_navegacao[5] }}</h3>
       <p class="ajuda">Marque somente categorias efetivamente tratadas neste fluxo. Não informe nomes, números de documentos, contatos, protocolos ou dados de casos concretos.</p>
       {% if registro.form1_integral.pode_editar %}
       {% set campo = registro.form1_integral.campos_bloco_5['5.1'] %}
@@ -554,7 +570,7 @@
 
     <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-6">
       <p class="etiqueta">FORM 1 — Etapa 2 de 4 — Bloco 6 de 14</p>
-      <h3 id="titulo-bloco-6">Origem dos dados</h3>
+      <h3 id="titulo-bloco-6">{{ titulos_blocos_navegacao[6] }}</h3>
       <p class="ajuda">Informe categorias de fontes. Evite nomes ou identificadores de pessoas concretas.</p>
       {% if registro.form1_integral.pode_editar %}
       <form class="formulario formulario-integral" method="post" action="{{ url_for('salvar_bloco_6_integral', registro_id=registro.id) }}">
@@ -597,7 +613,7 @@
 
     <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-7">
       <p class="etiqueta">FORM 1 — Etapa 2 de 4 — Bloco 7 de 14</p>
-      <h3 id="titulo-bloco-7">Operações de tratamento</h3>
+      <h3 id="titulo-bloco-7">{{ titulos_blocos_navegacao[7] }}</h3>
       {% if registro.form1_integral.pode_editar %}
       {% set campo = registro.form1_integral.campos_bloco_7['7.1'] %}
       <form class="formulario formulario-integral" method="post" action="{{ url_for('salvar_bloco_7_integral', registro_id=registro.id) }}">
@@ -622,7 +638,7 @@
     </section>
     {% set numero_bloco = 8 %}
     {% set etapa_bloco = 2 %}
-    {% set titulo_bloco = 'Sistemas, canais e suporte' %}
+    {% set titulo_bloco = titulos_blocos_navegacao[8] %}
     {% set campos_bloco = registro.form1_integral.campos_bloco_8 %}
     {% set comando_bloco = comando_salvar_bloco_8 %}
     {% set rota_bloco = 'salvar_bloco_8_integral' %}
@@ -631,21 +647,21 @@
     <div id="form1-etapa-3" class="painel-etapa-form1" data-etapa-painel="3" hidden>
       {% set numero_bloco = 9 %}
       {% set etapa_bloco = 3 %}
-      {% set titulo_bloco = 'Acesso' %}
+      {% set titulo_bloco = titulos_blocos_navegacao[9] %}
       {% set campos_bloco = registro.form1_integral.campos_bloco_9 %}
       {% set comando_bloco = comando_salvar_bloco_9 %}
       {% set rota_bloco = 'salvar_bloco_9_integral' %}
       {% include '_bloco_catalogado_form1.html' %}
       {% set numero_bloco = 10 %}
       {% set etapa_bloco = 3 %}
-      {% set titulo_bloco = 'Envio, disponibilização ou saída' %}
+      {% set titulo_bloco = titulos_blocos_navegacao[10] %}
       {% set campos_bloco = registro.form1_integral.campos_bloco_10 %}
       {% set comando_bloco = comando_salvar_bloco_10 %}
       {% set rota_bloco = 'salvar_bloco_10_integral' %}
       {% include '_bloco_catalogado_form1.html' %}
       {% set numero_bloco = 11 %}
       {% set etapa_bloco = 3 %}
-      {% set titulo_bloco = 'Armazenamento e dependência de terceiro' %}
+      {% set titulo_bloco = titulos_blocos_navegacao[11] %}
       {% set campos_bloco = registro.form1_integral.campos_bloco_11 %}
       {% set comando_bloco = comando_salvar_bloco_11 %}
       {% set rota_bloco = 'salvar_bloco_11_integral' %}
@@ -654,21 +670,21 @@
     <div id="form1-etapa-4" class="painel-etapa-form1" data-etapa-painel="4" hidden>
       {% set numero_bloco = 12 %}
       {% set etapa_bloco = 4 %}
-      {% set titulo_bloco = 'Guarda e destinação' %}
+      {% set titulo_bloco = titulos_blocos_navegacao[12] %}
       {% set campos_bloco = registro.form1_integral.campos_bloco_12 %}
       {% set comando_bloco = comando_salvar_bloco_12 %}
       {% set rota_bloco = 'salvar_bloco_12_integral' %}
       {% include '_bloco_catalogado_form1.html' %}
       {% set numero_bloco = 13 %}
       {% set etapa_bloco = 4 %}
-      {% set titulo_bloco = 'Exposição física ou visual' %}
+      {% set titulo_bloco = titulos_blocos_navegacao[13] %}
       {% set campos_bloco = registro.form1_integral.campos_bloco_13 %}
       {% set comando_bloco = comando_salvar_bloco_13 %}
       {% set rota_bloco = 'salvar_bloco_13_integral' %}
       {% include '_bloco_catalogado_form1.html' %}
       {% set numero_bloco = 14 %}
       {% set etapa_bloco = 4 %}
-      {% set titulo_bloco = 'Achados e pendências' %}
+      {% set titulo_bloco = titulos_blocos_navegacao[14] %}
       {% set campos_bloco = registro.form1_integral.campos_bloco_14 %}
       {% set comando_bloco = comando_salvar_bloco_14 %}
       {% set rota_bloco = 'salvar_bloco_14_integral' %}
@@ -852,11 +868,17 @@
       });
     }
 
-    function exibirEtapa(numero, destinoInicial) {
+    function exibirEtapa(numero, destinoInicial, blocoAlvo) {
+      var numeroBlocoAlvo = Number(blocoAlvo || primeiroBlocoDaEtapa(numero));
       paineis.forEach(function (painel) {
         var oculto = painel.dataset.etapaPainel !== numero;
         painel.hidden = oculto;
         painel.dataset.etapaOculta = String(oculto);
+        painel.querySelectorAll('.bloco-form1-integral').forEach(function (bloco) {
+          var titulo = bloco.querySelector('h3[id^="titulo-bloco-"]');
+          var numeroDoBloco = titulo ? Number(titulo.id.replace('titulo-bloco-', '')) : null;
+          bloco.hidden = oculto || numeroDoBloco !== numeroBlocoAlvo;
+        });
       });
       botoes.forEach(function (botao) {
         var ativo = botao.dataset.etapaAlvo === numero;
@@ -866,7 +888,7 @@
       window.sessionStorage.setItem(chave, numero);
       window.history.replaceState(null, '', destinoInicial || '#form1-etapa-' + numero);
       var estado = raiz.querySelector('.estado-navegacao-form1');
-      if (estado) estado.textContent = 'Etapa ' + numero + ' exibida. As quatro etapas do rascunho estão disponíveis.';
+      if (estado) estado.textContent = 'Etapa ' + numero + ' exibida, Bloco ' + numeroBlocoAlvo + ' de 14. Use o mapa da jornada para consultar ou editar qualquer outro bloco.';
       sincronizarControlesForm1();
     }
 
@@ -894,7 +916,7 @@
     }
 
     function focarPendencia(botao) {
-      exibirEtapa(botao.dataset.pendenciaEtapa);
+      exibirEtapa(botao.dataset.pendenciaEtapa, null, botao.dataset.pendenciaBloco);
       atualizarPainelJornada(botao.dataset.pendenciaBloco);
       var destino = destinoDaPendencia(botao);
       var estado = raiz.querySelector('.estado-navegacao-form1');
@@ -920,8 +942,9 @@
     botoes.forEach(function (botao) {
       botao.addEventListener('click', function () {
         if (!botao.disabled) {
-          exibirEtapa(botao.dataset.etapaAlvo);
-          atualizarPainelJornada(primeiroBlocoDaEtapa(botao.dataset.etapaAlvo));
+          var primeiroBloco = primeiroBlocoDaEtapa(botao.dataset.etapaAlvo);
+          exibirEtapa(botao.dataset.etapaAlvo, null, primeiroBloco);
+          atualizarPainelJornada(primeiroBloco);
         }
       });
     });
@@ -929,7 +952,7 @@
       botao.addEventListener('click', function () {
         var numero = Number(botao.dataset.painelBloco);
         var destino = document.getElementById('titulo-bloco-' + numero);
-        exibirEtapa(etapaDoNumeroDoBloco(numero), '#titulo-bloco-' + numero);
+        exibirEtapa(etapaDoNumeroDoBloco(numero), '#titulo-bloco-' + numero, numero);
         atualizarPainelJornada(numero);
         if (!destino) return;
         destino.setAttribute('tabindex', '-1');
@@ -956,9 +979,10 @@
     });
     var destinoInicial = blocoDaUrl ? document.getElementById('titulo-bloco-' + numeroBloco)
       : preValidacaoDaUrl ? document.getElementById('titulo-pre-validacao-form1') : null;
-    exibirEtapa(etapaInicial, destinoInicial ? window.location.hash : null);
     var blocoGuardado = Number(window.sessionStorage.getItem(chaveBloco));
-    atualizarPainelJornada(numeroBloco || (blocoGuardado >= 1 && blocoGuardado <= 14 ? blocoGuardado : primeiroBlocoDaEtapa(etapaInicial)));
+    var blocoInicial = numeroBloco || (blocoGuardado >= 1 && blocoGuardado <= 14 ? blocoGuardado : primeiroBlocoDaEtapa(etapaInicial));
+    exibirEtapa(etapaInicial, destinoInicial ? window.location.hash : null, blocoInicial);
+    atualizarPainelJornada(blocoInicial);
     if (destinoInicial) {
       window.requestAnimationFrame(function () {
         destinoInicial.setAttribute('tabindex', '-1');

@@ -125,7 +125,7 @@ def test_interface_orienta_os_14_blocos_dados_volumes_e_instrumentos(sessao):
     # Assert
     assert pagina.status_code == 200
     assert pagina.text.count('name="acao_pos_salvar" value="proximo"') == 14
-    assert pagina.text.count("Salvar e avançar para o próximo bloco") == 13
+    assert pagina.text.count("Salvar e avançar ao Bloco") == 13
     assert "Salvar e acessar a pré-validação" in pagina.text
     assert pagina.text.count("Salvar e permanecer neste bloco") == 14
     assert "FORM 1 — Etapa 1 de 4 — Bloco 1 de 14" in pagina.text

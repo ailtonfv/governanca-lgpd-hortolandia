@@ -1,6 +1,10 @@
 <div class="acoes-salvamento-bloco">
   <button class="botao-primario" type="submit" name="acao_pos_salvar" value="proximo">
-    {% if numero_bloco == 14 %}Salvar e acessar a pré-validação{% else %}Salvar e avançar para o próximo bloco{% endif %}
+    {% if numero_bloco == 14 %}
+      Salvar e acessar a pré-validação
+    {% else %}
+      Salvar e avançar ao Bloco {{ numero_bloco + 1 }} — {{ titulos_blocos_navegacao[numero_bloco + 1] }}
+    {% endif %}
   </button>
   <button class="botao-secundario" type="submit" name="acao_pos_salvar" value="permanecer">Salvar e permanecer neste bloco</button>
 </div>
