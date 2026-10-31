@@ -73,6 +73,8 @@ th { color: #425466; font-size: .8rem; text-transform: uppercase; letter-spacing
 .gauge-form1 path { fill: none; stroke-width: 10; stroke-linecap: round; }
 .gauge-form1-trilho { stroke: #d6e0e6; }
 .gauge-form1-progresso { stroke: var(--azul); stroke-dasharray: 0 100; }
+.gauge-form1-ponteiro line { stroke: var(--azul-escuro); stroke-width: 2.5; stroke-linecap: round; }
+.gauge-form1-ponteiro circle { fill: var(--azul-escuro); stroke: white; stroke-width: 1.5; }
 .gauge-form1 p { margin: -.25rem 0 .5rem; }
 .gauge-form1 [data-gauge-visitados] { color: var(--azul-escuro); font-size: 1.7rem; }
 .gauge-pendencias-form1 .gauge-pendencias-arco { stroke: #b45309; }
@@ -84,6 +86,7 @@ th { color: #425466; font-size: .8rem; text-transform: uppercase; letter-spacing
 .situacao-pendencias-form1.com-pendencias { color: #78350f; }
 .situacao-pendencias-form1.sem-pendencias { color: var(--verde); }
 .resumo-jornada-form1 { text-align: center; }
+.ajuda-ponteiro-form1 { max-width: 34rem; margin: .45rem auto .75rem; text-align: center; }
 .legenda-estados-bloco { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem .8rem; margin: .75rem 0; }
 .legenda-estados-bloco .estado-bloco { display: inline-block; margin: 0; }
 .mapa-blocos-form1 { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .4rem; margin: 1rem 0 0; padding: 0; list-style: none; }

@@ -27,7 +27,7 @@
 
 {% if mensagem %}
 <p id="mensagem-registro" class="mensagem mensagem-registro {% if erro %}mensagem-erro{% else %}mensagem-sucesso{% endif %}"
-   role="status" aria-live="polite">{{ mensagem }}</p>
+   role="{{ 'alert' if erro else 'status' }}" aria-live="{{ 'assertive' if erro else 'polite' }}">{{ mensagem }}</p>
 {% endif %}
 
 <section class="form1 form1-integral" aria-labelledby="titulo-form1-integral" data-registro-id="{{ registro.id }}">
@@ -132,6 +132,10 @@
             <svg viewBox="0 0 120 66" aria-hidden="true" focusable="false">
               <path class="gauge-form1-trilho" pathLength="100" d="M10 60 A50 50 0 0 1 110 60"></path>
               <path class="gauge-form1-progresso" pathLength="100" d="M10 60 A50 50 0 0 1 110 60"></path>
+              <g class="gauge-form1-ponteiro" data-gauge-ponteiro transform="rotate(-90 60 60)">
+                <line x1="60" y1="60" x2="60" y2="18"></line>
+                <circle cx="60" cy="60" r="4"></circle>
+              </g>
             </svg>
             <p><strong data-gauge-visitados>0</strong> de 14 blocos visitados nesta sessão</p>
           </div>
@@ -139,6 +143,7 @@
             <strong data-gauge-posicao>Etapa 1 de 4 · Bloco 1 de 14</strong><br>
             <span><strong>{{ progresso.quantidade_salvos }}</strong> bloco(s) com salvamento registrado · <strong data-gauge-restantes>14</strong> ainda não visitado(s) nesta sessão.</span>
           </p>
+          <p class="ajuda ajuda-ponteiro-form1">O ponteiro indica somente a posição atual entre os 14 blocos; não representa conclusão do formulário.</p>
           <p class="legenda-estados-bloco">
             <span class="estado-bloco visitado">Visitado nesta sessão</span>
             <span class="estado-bloco salvo">Salvo</span>
@@ -825,8 +830,13 @@
       var percentual = (quantidade / 14) * 100;
       var gauge = painelProgresso.querySelector('.gauge-form1');
       var arco = painelProgresso.querySelector('.gauge-form1-progresso');
+      var ponteiro = painelProgresso.querySelector('[data-gauge-ponteiro]');
       if (gauge) gauge.setAttribute('aria-valuenow', String(quantidade));
       if (arco) arco.style.strokeDasharray = percentual + ' 100';
+      if (ponteiro) {
+        var anguloPosicao = -90 + ((numero - 1) / 13) * 180;
+        ponteiro.setAttribute('transform', 'rotate(' + anguloPosicao + ' 60 60)');
+      }
       var valorVisitados = painelProgresso.querySelector('[data-gauge-visitados]');
       var valorRestantes = painelProgresso.querySelector('[data-gauge-restantes]');
       var valorPosicao = painelProgresso.querySelector('[data-gauge-posicao]');

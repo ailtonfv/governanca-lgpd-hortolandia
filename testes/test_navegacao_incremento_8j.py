@@ -84,6 +84,9 @@ def test_falha_de_validacao_nao_avanca_para_o_proximo_bloco(sessao):
     # Assert
     assert resposta.status_code == 303
     assert unquote(resposta.headers["location"]).endswith("#titulo-bloco-5")
+    pagina = cliente.get(resposta.headers["location"])
+    assert 'class="mensagem mensagem-registro mensagem-erro"' in pagina.text
+    assert 'role="alert" aria-live="assertive"' in pagina.text
     with Session(motor) as verificacao:
         rascunho = verificacao.get(RascunhoForm1Integral, registro["registro_id"])
         assert rascunho.versao_rascunho == 1
@@ -122,8 +125,9 @@ def test_interface_orienta_os_14_blocos_dados_volumes_e_instrumentos(sessao):
     # Assert
     assert pagina.status_code == 200
     assert pagina.text.count('name="acao_pos_salvar" value="proximo"') == 14
-    assert "Salvar e ir para o próximo bloco" in pagina.text
-    assert "Salvar e revisar pré-validação" in pagina.text
+    assert pagina.text.count("Salvar e avançar para o próximo bloco") == 13
+    assert "Salvar e acessar a pré-validação" in pagina.text
+    assert pagina.text.count("Salvar e permanecer neste bloco") == 14
     assert "FORM 1 — Etapa 1 de 4 — Bloco 1 de 14" in pagina.text
     assert "FORM 1 — Etapa 4 de 4 — Bloco 14 de 14" in pagina.text
     assert "Dado Pessoal:" in pagina.text
