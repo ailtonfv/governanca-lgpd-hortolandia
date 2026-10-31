@@ -9,7 +9,7 @@
   <dl>
     <div><dt>Situação</dt><dd>{{ registro.estado }}</dd></div>
     <div><dt>Secretaria responsável</dt><dd>{{ registro.unidade }}</dd></div>
-    <div><dt>Contexto de atuação</dt><dd>{{ registro.contexto_id }}</dd></div>
+    <div><dt>Contexto de atuação</dt><dd>{% if registro.contexto_nome %}{{ registro.contexto_nome }} ({{ registro.contexto_id }}){% else %}{{ registro.contexto_id }}{% endif %}</dd></div>
   </dl>
   <div class="canais-confirmados">
     <strong>Canais habituais confirmados na abertura</strong>
@@ -33,16 +33,17 @@
 <section class="form1 form1-integral" aria-labelledby="titulo-form1-integral" data-registro-id="{{ registro.id }}">
   <div class="cabecalho-secao cabecalho-form1">
     <div>
-      <p class="etiqueta">PoC ampliada · contrato 3 candidato</p>
-      <h2 id="titulo-form1-integral">FORM 1 integral</h2>
+      <p class="etiqueta">Ambiente de demonstração · somente dados fictícios</p>
+      <h2 id="titulo-form1-integral">FORM 1 — Levantamento Inicial do Tratamento de Dados Pessoais</h2>
     </div>
-    <p class="objetivo-form1"><strong>Objetivo:</strong> descrever de forma factual como ocorre o tratamento de dados pessoais. O Bloco 1 já pode ser salvo como rascunho; a submissão integral ainda não está disponível.</p>
+    <p class="objetivo-form1"><strong>Objetivo:</strong> Descreva como este serviço, processo ou atividade coleta, utiliza, compartilha, armazena e protege dados pessoais.</p>
     <span class="estado">{% if registro.form1_integral.rascunho %}Rascunho {{ registro.form1_integral.rascunho.versao }}{% else %}Não iniciado{% endif %}</span>
   </div>
+  <p class="aviso-leitura status-submissao-form1"><strong>Situação operacional:</strong> a submissão ainda não está disponível neste ambiente de demonstração. O rascunho pode ser salvo e retomado mesmo incompleto.</p>
 
   <div class="identidades-form1">
-    <div><strong>APA de abertura</strong><br>{{ registro.form1_integral.apa_abertura.nome if registro.form1_integral.apa_abertura else 'Não identificado' }}</div>
-    <div><strong>APA em exercício</strong><br>{{ registro.form1_integral.apa_atual.nome if registro.form1_integral.apa_atual else 'Não configurado' }}{% if registro.form1_integral.apa_atual and registro.form1_integral.apa_atual.modalidade == 'substituicao_temporaria' %}<br><span class="ajuda">Substituição temporária</span>{% endif %}</div>
+    <div><strong>APA de abertura</strong><br>{% if registro.form1_integral.apa_abertura %}Matrícula {{ registro.form1_integral.apa_abertura.matricula }} · {{ registro.form1_integral.apa_abertura.nome }}{% else %}Não identificado{% endif %}</div>
+    <div><strong>APA em exercício</strong><br>{% if registro.form1_integral.apa_atual %}Matrícula {{ registro.form1_integral.apa_atual.matricula }} · {{ registro.form1_integral.apa_atual.nome }}{% else %}Não configurado{% endif %}{% if registro.form1_integral.apa_atual and registro.form1_integral.apa_atual.modalidade == 'substituicao_temporaria' %}<br><span class="ajuda">Substituição temporária</span>{% endif %}</div>
     <div><strong>ARP atual</strong><br>{% if registro.form1_integral.arp_atual %}Matrícula {{ registro.form1_integral.arp_atual.matricula }} · {{ registro.form1_integral.arp_atual.nome }}{% else %}Ainda não atribuído{% endif %}</div>
   </div>
   <p class="ajuda">A identidade simulada fornece o nome fictício. Cargo/função e e-mail institucional não são inventados quando não constam do cadastro disponível.</p>

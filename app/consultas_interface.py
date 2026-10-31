@@ -317,6 +317,8 @@ def carregar_registro(sessao, conta_id, registro_id):
         return identidade, False
     unidade = sessao.get(Unidade, registro.unidade_principal_atual_id)
     resumo = _resumo_registro(registro, unidade)
+    contexto = sessao.get(ContextoAtuacao, registro.contexto_atuacao_id)
+    resumo["contexto_nome"] = None if contexto is None else contexto.nome
     confirmacao_canais = sessao.get(ConfirmacaoCanaisRegistro, registro.id)
     canais_registro = sessao.scalars(
         select(RegistroCanal)
@@ -510,10 +512,12 @@ def carregar_registro(sessao, conta_id, registro_id):
         "pode_editar": pode_editar_integral,
         "apa_abertura": None if apa_abertura is None else {
             "id": apa_abertura.id,
+            "matricula": apa_abertura.matricula,
             "nome": apa_abertura.nome,
         },
         "apa_atual": None if apa_atual is None else {
             "id": apa_atual.id,
+            "matricula": apa_atual.matricula,
             "nome": apa_atual.nome,
             "modalidade": exercicio_apa["modalidade"],
             "titular_id": exercicio_apa["titular_id"],

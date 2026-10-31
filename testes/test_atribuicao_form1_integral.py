@@ -197,8 +197,8 @@ def test_interface_distingue_form_integral_e_permite_indicar_arp():
         },
     )
 
-    assert "PoC ampliada · contrato 3 candidato" in antes.text
-    assert "FORM 1 integral" in antes.text
+    assert "Ambiente de demonstração · somente dados fictícios" in antes.text
+    assert "FORM 1 — Levantamento Inicial do Tratamento de Dados Pessoais" in antes.text
     assert "Quem será responsável pelo preenchimento" in antes.text
     assert "Servidor Épsilon (fictício)" in antes.text
     assert '<option value="PESSOA-A">' not in antes.text
