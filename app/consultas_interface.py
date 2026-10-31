@@ -343,11 +343,36 @@ def carregar_painel(sessao, conta_id):
             ),
         })
 
-    codigos = {item["id"]: item["codigo_lgpd"] for item in registros}
+    resumos_por_id = {item["id"]: item for item in registros}
     alertas = listar_alertas_operacionais(sessao, conta_id)
     for alerta in alertas:
+        resumo = resumos_por_id.get(alerta["registro_id"])
+        instrumento = (
+            sessao.get(Instrumento, alerta["instrumento_id"])
+            if alerta["instrumento_id"] is not None else None
+        )
         alerta["rotulo"] = ROTULOS_ALERTA.get(alerta["codigo"], alerta["codigo"])
-        alerta["codigo_lgpd"] = codigos.get(alerta["registro_id"], "Registro relacionado")
+        alerta["codigo_lgpd"] = (
+            resumo["codigo_lgpd"] if resumo is not None else "Registro relacionado"
+        )
+        alerta["tipo"] = resumo["tipo"] if resumo is not None else "Objeto"
+        alerta["titulo"] = resumo["titulo"] if resumo is not None else "Mapeamento relacionado"
+        alerta["formulario"] = (
+            f"FORM {instrumento.tipo_instrumento.removeprefix('FORM')}"
+            if instrumento is not None else "Providência institucional"
+        )
+        alerta["situacao"] = (
+            ROTULOS_ESTADO_FORM1.get(
+                instrumento.estado_instrumento,
+                instrumento.estado_instrumento.replace("_", " ").capitalize(),
+            )
+            if instrumento is not None else "Ação institucional pendente"
+        )
+    quantidade_registros_com_providencias = len({
+        item["registro_id"] for item in proximas_providencias_form1
+    } | {
+        item["registro_id"] for item in alertas
+    })
     pode_criar_registro = bool(
         unidades_em_que_e_apa_atual(sessao, identidade["pessoa_id"])
     )
@@ -356,6 +381,7 @@ def carregar_painel(sessao, conta_id):
         "registros": registros,
         "alertas": alertas,
         "proximas_providencias_form1": proximas_providencias_form1,
+        "quantidade_registros_com_providencias": quantidade_registros_com_providencias,
         "pode_criar_registro": pode_criar_registro,
     }
 

@@ -28,84 +28,86 @@
 <p class="aviso-leitura acao-painel">Seu papel atual permite consultar ou atuar nos mapeamentos disponíveis, mas não abrir um novo Registro LGPD. A criação fica disponível ao Agente Público Autorizado responsável pelo Registro.</p>
 {% endif %}
 
-<section aria-labelledby="titulo-alertas">
-  <div class="cabecalho-secao">
-    <div>
-      <p class="etiqueta">Pendências e próximas ações</p>
-      <h2 id="titulo-alertas">O que precisa da sua atenção</h2>
+<div class="grade-painel-inicial">
+  <section class="painel-inicial painel-atencao" aria-labelledby="titulo-alertas">
+    <div class="cabecalho-secao">
+      <div>
+        <p class="etiqueta">Pendências e próximas ações</p>
+        <h2 id="titulo-alertas">O que precisa da sua atenção</h2>
+      </div>
+      <span class="contador contador-providencias" aria-label="{{ quantidade_registros_com_providencias }} Registro(s) com providências">{{ quantidade_registros_com_providencias }}</span>
     </div>
-    <span class="contador">{{ (proximas_providencias_form1|length) + (alertas|length) }}</span>
-  </div>
-  {% if proximas_providencias_form1 %}
-  <div class="grupo-atencao-painel" aria-labelledby="titulo-providencias-form1">
-    <h3 id="titulo-providencias-form1">Preenchimento do FORM 1</h3>
-    <p class="ajuda">Próximas providências derivadas da atribuição vigente do ARP e do rascunho. Não são pendências institucionais formalmente atribuídas.</p>
-    <div class="grade-alertas">
-      {% for providencia in proximas_providencias_form1 %}
-      <article class="alerta alerta-proxima_acao">
-        <p class="etiqueta">{{ providencia.codigo_lgpd }}</p>
-        <h3>Continuar FORM 1</h3>
-        <p><strong>{{ providencia.tipo }}:</strong> {{ providencia.titulo }}</p>
-        <p><strong>Situação do FORM 1:</strong> {{ providencia.situacao }}</p>
-        {% if providencia.quantidade_pendencias > 0 %}
-        <p><strong>{{ providencia.quantidade_pendencias }}</strong> campo(s) obrigatório(s) ativo(s) incompleto(s).</p>
-        {% else %}
-        <p>Nenhum campo obrigatório ativo incompleto; revise a pré-validação consultiva.</p>
-        {% endif %}
-        <a class="botao-link" href="{{ url_for('detalhe_registro', registro_id=providencia.registro_id) }}?conta_id={{ conta_id }}#{{ providencia.ancora }}">Continuar FORM 1</a>
-      </article>
-      {% endfor %}
+    {% if proximas_providencias_form1 %}
+    <div class="grupo-atencao-painel" aria-labelledby="titulo-providencias-form1">
+      <h3 id="titulo-providencias-form1">Preenchimento do FORM 1</h3>
+      <div class="lista-providencias-painel">
+        {% for providencia in proximas_providencias_form1 %}
+        <article class="alerta alerta-proxima_acao">
+          <p class="etiqueta">{{ providencia.codigo_lgpd }}</p>
+          <h3>{{ providencia.tipo }} · {{ providencia.titulo }}</h3>
+          <p><strong>FORM que exige atuação:</strong> FORM 1</p>
+          <p><strong>Situação do FORM 1:</strong> {{ providencia.situacao }}</p>
+          {% if providencia.quantidade_pendencias > 0 %}
+          <p><strong>{{ providencia.quantidade_pendencias }}</strong> campo(s) obrigatório(s) ativo(s) incompleto(s).</p>
+          {% else %}
+          <p>Nenhum campo obrigatório ativo incompleto; revise a pré-validação consultiva.</p>
+          {% endif %}
+          <a class="botao-link" aria-label="Continuar FORM 1 do Registro {{ providencia.codigo_lgpd }}" href="{{ url_for('detalhe_registro', registro_id=providencia.registro_id) }}?conta_id={{ conta_id }}#{{ providencia.ancora }}">Continuar FORM 1</a>
+        </article>
+        {% endfor %}
+      </div>
     </div>
-  </div>
-  {% endif %}
-  {% if alertas %}
-  <div class="grupo-atencao-painel" aria-labelledby="titulo-pendencias-institucionais">
-    <h3 id="titulo-pendencias-institucionais">Pendências e ações institucionais</h3>
-    <p class="ajuda">Tarefas formalmente atribuídas pelos fluxos de pendência e decisão.</p>
-    <div class="grade-alertas">
-      {% for alerta in alertas %}
-      <article class="alerta alerta-{{ alerta.nivel }}">
-        <p class="etiqueta">{{ alerta.codigo_lgpd }}</p>
-        <h3>{{ alerta.rotulo }}</h3>
-        <p>Próxima ação: {{ alerta.proxima_acao|replace('_', ' ') }}.</p>
-      </article>
-      {% endfor %}
+    {% endif %}
+    {% if alertas %}
+    <div class="grupo-atencao-painel" aria-labelledby="titulo-pendencias-institucionais">
+      <h3 id="titulo-pendencias-institucionais">Pendências e ações institucionais</h3>
+      <div class="lista-providencias-painel">
+        {% for alerta in alertas %}
+        <article class="alerta alerta-{{ alerta.nivel }}">
+          <p class="etiqueta">{{ alerta.codigo_lgpd }}</p>
+          <h3>{{ alerta.tipo }} · {{ alerta.titulo }}</h3>
+          <p><strong>{{ alerta.formulario }}:</strong> {{ alerta.situacao }}</p>
+          <p><strong>Próxima ação:</strong> {{ alerta.rotulo }}.</p>
+          <a class="botao-link" aria-label="Ver providência do Registro {{ alerta.codigo_lgpd }}" href="{{ url_for('detalhe_registro', registro_id=alerta.registro_id) }}?conta_id={{ conta_id }}">Ver providência no Registro</a>
+        </article>
+        {% endfor %}
+      </div>
     </div>
-  </div>
-  {% endif %}
-  {% if not proximas_providencias_form1 and not alertas %}
-  <p class="vazio">Nenhuma pendência ou próxima ação para este agente.</p>
-  {% endif %}
-</section>
+    {% endif %}
+    {% if not proximas_providencias_form1 and not alertas %}
+    <p class="vazio">Nenhuma providência pendente para seu perfil neste momento.</p>
+    {% endif %}
+  </section>
 
-<section aria-labelledby="titulo-registros">
-  <div class="cabecalho-secao">
-    <div>
-      <p class="etiqueta">Serviços, processos e atividades</p>
-      <h2 id="titulo-registros">Mapeamentos disponíveis para você</h2>
+  <section class="painel-inicial painel-mapeamentos" aria-labelledby="titulo-registros">
+    <div class="cabecalho-secao">
+      <div>
+        <p class="etiqueta">Serviços, processos e atividades</p>
+        <h2 id="titulo-registros">Mapeamentos disponíveis para você</h2>
+      </div>
+      <span class="contador">{{ registros|length }}</span>
     </div>
-    <span class="contador">{{ registros|length }}</span>
-  </div>
-  {% if registros %}
-  <div class="tabela-responsiva">
-    <table>
-      <caption>Registros LGPD que {{ identidade.nome }} pode consultar</caption>
-      <thead><tr><th>Código</th><th>Objeto</th><th>Unidade</th><th>Situação</th><th></th></tr></thead>
-      <tbody>
-      {% for registro in registros %}
-      <tr>
-        <td><strong>{{ registro.codigo_lgpd }}</strong></td>
-        <td>{{ registro.titulo }}</td>
-        <td>{{ registro.unidade }}</td>
-        <td><span class="estado estado-{{ registro.estado_codigo }}">{{ registro.estado }}</span></td>
-        <td><a href="{{ url_for('detalhe_registro', registro_id=registro.id) }}?conta_id={{ conta_id }}">Abrir</a></td>
-      </tr>
-      {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  {% else %}
-  <p class="vazio">Nenhum Registro LGPD está disponível para consulta por este agente.</p>
-  {% endif %}
-</section>
+    {% if registros %}
+    <div class="tabela-responsiva">
+      <table>
+        <caption>Registros LGPD que {{ identidade.nome }} pode consultar</caption>
+        <thead><tr><th scope="col">Código</th><th scope="col">Objeto</th><th scope="col">Unidade</th><th scope="col">Situação</th><th scope="col">Ação</th></tr></thead>
+        <tbody>
+        {% for registro in registros %}
+        <tr>
+          <td><strong>{{ registro.codigo_lgpd }}</strong></td>
+          <td>{{ registro.titulo }}</td>
+          <td>{{ registro.unidade }}</td>
+          <td><span class="estado estado-{{ registro.estado_codigo }}">{{ registro.estado }}</span></td>
+          <td><a class="botao-link-secundario" aria-label="Ver detalhes do Registro {{ registro.codigo_lgpd }}" href="{{ url_for('detalhe_registro', registro_id=registro.id) }}?conta_id={{ conta_id }}">Ver detalhes do Registro</a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="vazio">Nenhum Registro LGPD está disponível para consulta por este agente.</p>
+    {% endif %}
+  </section>
+</div>
 {% endblock %}
