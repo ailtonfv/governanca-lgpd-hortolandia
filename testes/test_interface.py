@@ -27,11 +27,11 @@ def test_painel_identifica_agente_e_mostra_apenas_seu_escopo():
 
     assert resposta.status_code == 200
     assert 'lang="pt-BR"' in resposta.text
-    assert "PoC · somente dados fictícios" in resposta.text
+    assert "Ambiente de demonstração · somente dados fictícios" in resposta.text
     assert "Servidor Alfa (fictício)" in resposta.text
     assert "matrícula MAT-FICT-0001" in resposta.text
     assert "Simular entrada por matrícula" in resposta.text
-    assert "A PoC não solicita senha" in resposta.text
+    assert "Este ambiente de demonstração não solicita senha" in resposta.text
     assert "Criar novo Registro LGPD" in resposta.text
     assert "Nada será criado antes da confirmação final" in resposta.text
     assert "Pendências e próximas ações" in resposta.text
@@ -317,8 +317,8 @@ def test_detalhe_oferece_i1_apenas_ao_preenchedor():
     assert "Objetivo:" in alfa.text
     assert "registrar, sem identificar pessoas" in alfa.text
     assert "quais categorias de titulares e dados" in alfa.text
-    assert "Iniciar preenchimento (I1)" in alfa.text
-    assert "Iniciar preenchimento (I1)" not in beta.text
+    assert ">Iniciar preenchimento</button>" in alfa.text
+    assert ">Iniciar preenchimento</button>" not in beta.text
     assert "não está designado como Servidor responsável" in beta.text
 
 
@@ -332,7 +332,7 @@ def test_i1_pela_tela_cria_rascunho_e_exibe_formulario():
 
     assert resposta.status_code == 200
     assert "FORM 1 iniciado" in resposta.text
-    assert "Salvar rascunho (I2)" in resposta.text
+    assert ">Salvar rascunho</button>" in resposta.text
     with Session(motor) as sessao:
         assert sessao.get(RascunhoInstrumento, instrumento_id).versao_rascunho == 1
 

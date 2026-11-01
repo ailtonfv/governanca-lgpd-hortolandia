@@ -148,8 +148,9 @@ def test_separacao_nao_anuncia_fim_prematuro_do_form_integral(sessao):
 
     # Assert
     assert "Fim das quatro etapas do FORM 1" not in pagina.text
-    assert "Separação entre instrumentos" in pagina.text
-    assert "O FORM 1 Integral continua disponível acima para preenchimento e revisão." in pagina.text
-    assert pagina.text.index("Separação entre instrumentos") < pagina.text.index(
-        "Instrumento sintético · contrato 2"
+    assert "Separação entre instrumentos" not in pagina.text
+    assert "Outros recursos do ambiente de demonstração" in pagina.text
+    assert "Questionário resumido de demonstração" in pagina.text
+    assert pagina.text.index("Outros recursos do ambiente de demonstração") < pagina.text.index(
+        "Questionário resumido de demonstração"
     )

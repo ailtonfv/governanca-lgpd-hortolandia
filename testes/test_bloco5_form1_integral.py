@@ -195,7 +195,7 @@ def test_interface_exibe_35_alternativas_e_salva_bloco_5(sessao):
     assert pagina.text.count('name="campo__5.1"') == 35
     assert "Esta orientação reduz o risco" in pagina.text
     assert salvamento.status_code == 200
-    assert "Bloco 5 do FORM 1 integral salvo com segurança" in salvamento.text
+    assert "Bloco 5 do FORM 1 salvo com segurança" in salvamento.text
 
 
 def test_regras_preparadas_para_submissao_nao_sao_ativadas_no_rascunho():

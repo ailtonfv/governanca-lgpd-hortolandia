@@ -203,9 +203,9 @@ def test_interface_distingue_form_integral_e_permite_indicar_arp():
     assert "Servidor Épsilon (fictício)" in antes.text
     assert '<option value="PESSOA-A">' not in antes.text
     assert "Etapa 4 de 4" in antes.text
-    assert "Instrumento sintético · contrato 2" in antes.text
+    assert "Questionário resumido de demonstração" in antes.text
     assert resposta.status_code == 200
-    assert "Responsável pelo preenchimento" in resposta.text
+    assert "Designação do ARP confirmada" in resposta.text
     assert "Servidor Épsilon (fictício)" in resposta.text
 
 
@@ -217,7 +217,7 @@ def test_interface_nao_oferece_atribuicao_a_quem_nao_e_apa():
     )
 
     assert resposta.status_code == 200
-    assert "Confirmar responsável pelo preenchimento" not in resposta.text
+    assert "Confirmar designação do ARP" not in resposta.text
     assert "Somente um APA responsável" in resposta.text
 
 

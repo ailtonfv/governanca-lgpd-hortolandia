@@ -36,7 +36,11 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 .painel-inicial { min-width: 0; }
 .painel-mapeamentos { grid-area: mapeamentos; }
 .painel-atencao { grid-area: atencao; }
-.painel-inicial .cabecalho-secao { min-height: 4.8rem; }
+.painel-inicial .cabecalho-secao { min-height: 4.8rem; gap: .75rem; align-items: flex-start; }
+.painel-inicial .contador { flex: 0 0 auto; }
+.painel-inicial .vazio { margin: .75rem 0 0; padding: .75rem; }
+.painel-mapeamentos table { table-layout: fixed; }
+.painel-mapeamentos th, .painel-mapeamentos td { overflow-wrap: anywhere; }
 .grade-alertas { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1rem; margin-top: 1rem; }
 .grupo-atencao-painel { margin-top: 1.25rem; }
 .grupo-atencao-painel > h3 { margin-bottom: .15rem; }
@@ -183,6 +187,12 @@ legend { padding: 0 .4rem; color: var(--azul-escuro); font-weight: 800; }
 .ajuda-volume { padding-left: .75rem; border-left: .2rem solid var(--azul); }
 .separador-instrumentos { margin: 1.5rem 0; padding: 1rem 1.25rem; border: 1px solid var(--borda); border-left: .35rem solid var(--azul-escuro); border-radius: .6rem; background: #eef6fa; }
 .separador-instrumentos p { margin: .25rem 0; }
+.controle-designacao-arp { display: grid; grid-template-columns: minmax(18rem, 1fr) auto; gap: 1rem; align-items: end; }
+.controle-designacao-arp .botao-primario { min-width: 15rem; margin-bottom: 0; }
+.recursos-demonstracao { margin: 1.5rem 0; border: 1px solid var(--borda); border-radius: .65rem; background: #fff; }
+.recursos-demonstracao > summary { cursor: pointer; padding: 1rem 1.25rem; color: var(--azul-escuro); font-weight: 700; }
+.recursos-demonstracao[open] > summary { border-bottom: 1px solid var(--borda); }
+.recursos-demonstracao > .form1 { margin: 0; border: 0; }
 .botao-primario { width: auto; min-width: 220px; border-color: var(--azul); background: var(--azul); color: white; font-weight: 800; cursor: pointer; }
 .botao-primario:hover { background: var(--azul-escuro); }
 .botao-link { display: inline-block; padding: .75rem 1rem; border-radius: .45rem; background: var(--azul); color: white; text-decoration: none; }
@@ -205,6 +215,8 @@ dd { margin: .25rem 0 0; }
   .topo, .abertura { align-items: stretch; flex-direction: column; }
   .grade-painel-inicial { grid-template-columns: 1fr; grid-template-areas: "atencao" "mapeamentos"; }
   .painel-inicial .cabecalho-secao { min-height: 0; }
+  .controle-designacao-arp { grid-template-columns: 1fr; }
+  .controle-designacao-arp .botao-primario { width: 100%; min-width: 0; }
   .simulador { min-width: 0; }
   dl { grid-template-columns: 1fr; }
   .rodape-formulario { align-items: stretch; flex-direction: column; }

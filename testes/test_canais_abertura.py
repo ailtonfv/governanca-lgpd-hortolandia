@@ -274,15 +274,15 @@ def test_tela_apresenta_canais_habituais_depois_do_objeto():
     resposta = cliente.get("/registros/novo", params={"conta_id": "CONTA-A1"})
 
     assert resposta.status_code == 200
-    assert resposta.text.index("3. Item do catálogo oficial") < resposta.text.index(
-        "4. Canais habituais aplicáveis"
+    assert resposta.text.index("3. Item do catálogo da demonstração") < resposta.text.index(
+        "4. Por quais canais as demandas chegam habitualmente?"
     )
     assert "Balcão de atendimento (fictício)" in resposta.text
     assert "Portal da Prefeitura (fictício)" in resposta.text
     assert 'data-objeto-canais="OBJ-SRV-001"' in resposta.text
     assert "A ausência de canais no catálogo não significa automaticamente" in resposta.text
-    assert "Nenhum canal habitual se aplica" in resposta.text
-    assert "O catálogo não possui informação suficiente" in resposta.text
+    assert "Nenhum canal de entrada se aplica ao objeto" in resposta.text
+    assert "Ainda não foi possível confirmar os canais utilizados" in resposta.text
     assert "cidadãos, telefonemas nem protocolos individuais" in resposta.text
 
 

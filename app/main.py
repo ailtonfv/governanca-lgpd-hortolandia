@@ -396,13 +396,13 @@ def atribuir_arp_integral(
     sessao.commit()
     arp = sessao.get(Pessoa, resultado.get("arp_pessoa_id")) if resultado["permitido"] else None
     if arp is None:
-        sucesso = "Responsável pelo preenchimento do FORM 1 integral definido."
+        sucesso = "Designação do ARP confirmada."
     elif resultado.get("reexecutado"):
-        sucesso = f"Confirmação do responsável pelo preenchimento já processada. ARP atual: matrícula {arp.matricula} · {arp.nome}."
+        sucesso = f"A designação do ARP já foi processada. ARP atual: matrícula {arp.matricula} · {arp.nome}."
     elif resultado.get("alterado"):
-        sucesso = f"Responsável pelo preenchimento alterado. ARP atual: matrícula {arp.matricula} · {arp.nome}."
+        sucesso = f"Designação do ARP confirmada. ARP atual: matrícula {arp.matricula} · {arp.nome}."
     else:
-        sucesso = f"Nenhuma alteração no responsável pelo preenchimento: matrícula {arp.matricula} · {arp.nome} já é o ARP atual."
+        sucesso = f"Nenhuma alteração: matrícula {arp.matricula} · {arp.nome} já é o ARP atual."
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, sucesso, ancora="titulo-form1-integral"
     )
@@ -426,7 +426,7 @@ def iniciar_form1_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Rascunho do FORM 1 integral iniciado.",
+        registro_id, conta_id, resultado, "Rascunho do FORM 1 iniciado.",
         ancora="titulo-bloco-1",
     )
 
@@ -465,7 +465,7 @@ def salvar_bloco_1_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Bloco 1 do FORM 1 integral salvo com segurança.",
+        registro_id, conta_id, resultado, "Bloco 1 do FORM 1 salvo com segurança.",
         ancora=_ancora_apos_salvar_bloco(1, acao_pos_salvar, resultado["permitido"]),
     )
 
@@ -518,7 +518,7 @@ async def salvar_bloco_2_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Bloco 2 do FORM 1 integral salvo com segurança.",
+        registro_id, conta_id, resultado, "Bloco 2 do FORM 1 salvo com segurança.",
         ancora=_ancora_apos_salvar_bloco(2, acao_pos_salvar, resultado["permitido"]),
     )
 
@@ -541,7 +541,7 @@ async def salvar_bloco_4_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Bloco 4 do FORM 1 integral salvo com segurança.",
+        registro_id, conta_id, resultado, "Bloco 4 do FORM 1 salvo com segurança.",
         ancora=_ancora_apos_salvar_bloco(4, acao_pos_salvar, resultado["permitido"]),
     )
 
@@ -564,7 +564,7 @@ async def salvar_bloco_5_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Bloco 5 do FORM 1 integral salvo com segurança.",
+        registro_id, conta_id, resultado, "Bloco 5 do FORM 1 salvo com segurança.",
         ancora=_ancora_apos_salvar_bloco(5, acao_pos_salvar, resultado["permitido"]),
     )
 
@@ -587,7 +587,7 @@ async def salvar_bloco_6_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Bloco 6 do FORM 1 integral salvo com segurança.",
+        registro_id, conta_id, resultado, "Bloco 6 do FORM 1 salvo com segurança.",
         ancora=_ancora_apos_salvar_bloco(6, acao_pos_salvar, resultado["permitido"]),
     )
 
@@ -608,7 +608,7 @@ async def salvar_bloco_7_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Bloco 7 do FORM 1 integral salvo com segurança.",
+        registro_id, conta_id, resultado, "Bloco 7 do FORM 1 salvo com segurança.",
         ancora=_ancora_apos_salvar_bloco(7, acao_pos_salvar, resultado["permitido"]),
     )
 
@@ -629,7 +629,7 @@ async def salvar_bloco_8_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Bloco 8 do FORM 1 integral salvo com segurança.",
+        registro_id, conta_id, resultado, "Bloco 8 do FORM 1 salvo com segurança.",
         ancora=_ancora_apos_salvar_bloco(8, acao_pos_salvar, resultado["permitido"]),
     )
 
@@ -650,7 +650,7 @@ async def salvar_bloco_9_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Bloco 9 do FORM 1 integral salvo com segurança.",
+        registro_id, conta_id, resultado, "Bloco 9 do FORM 1 salvo com segurança.",
         ancora=_ancora_apos_salvar_bloco(9, acao_pos_salvar, resultado["permitido"]),
     )
 
@@ -671,7 +671,7 @@ async def salvar_bloco_10_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Bloco 10 do FORM 1 integral salvo com segurança.",
+        registro_id, conta_id, resultado, "Bloco 10 do FORM 1 salvo com segurança.",
         ancora=_ancora_apos_salvar_bloco(10, acao_pos_salvar, resultado["permitido"]),
     )
 
@@ -758,7 +758,7 @@ async def salvar_bloco_11_integral(
     sessao.commit()
     return _voltar_ao_registro(
         registro_id, conta_id, resultado,
-        "Bloco 11 do FORM 1 integral salvo com segurança.",
+        "Bloco 11 do FORM 1 salvo com segurança.",
         ancora=_ancora_apos_salvar_bloco(11, acao_pos_salvar, resultado["permitido"]),
     )
 
@@ -779,7 +779,7 @@ async def salvar_bloco_12_integral(
     sessao.commit()
     return _voltar_ao_registro(
         registro_id, conta_id, resultado,
-        "Bloco 12 do FORM 1 integral salvo com segurança.",
+        "Bloco 12 do FORM 1 salvo com segurança.",
         ancora=_ancora_apos_salvar_bloco(12, acao_pos_salvar, resultado["permitido"]),
     )
 
@@ -800,7 +800,7 @@ async def salvar_bloco_13_integral(
     sessao.commit()
     return _voltar_ao_registro(
         registro_id, conta_id, resultado,
-        "Bloco 13 do FORM 1 integral salvo com segurança.",
+        "Bloco 13 do FORM 1 salvo com segurança.",
         ancora=_ancora_apos_salvar_bloco(13, acao_pos_salvar, resultado["permitido"]),
     )
 
@@ -821,7 +821,7 @@ async def salvar_bloco_14_integral(
     sessao.commit()
     return _voltar_ao_registro(
         registro_id, conta_id, resultado,
-        "Bloco 14 do FORM 1 integral salvo com segurança.",
+        "Bloco 14 do FORM 1 salvo com segurança.",
         ancora=_ancora_apos_salvar_bloco(14, acao_pos_salvar, resultado["permitido"]),
     )
 
@@ -843,7 +843,7 @@ def salvar_bloco_3_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Bloco 3 do FORM 1 integral salvo com segurança.",
+        registro_id, conta_id, resultado, "Bloco 3 do FORM 1 salvo com segurança.",
         ancora=_ancora_apos_salvar_bloco(3, acao_pos_salvar, resultado["permitido"]),
     )
 

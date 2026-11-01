@@ -138,9 +138,9 @@ def test_interface_orienta_os_14_blocos_dados_volumes_e_instrumentos(sessao):
     assert "Registros: estoque de registros administrativos existente em uma data de referência." in pagina.text
     assert "Ocorrências: eventos que geram atuações, em determinado período." in pagina.text
     assert "Fim das quatro etapas do FORM 1" not in pagina.text
-    assert "Separação entre instrumentos" in pagina.text
-    assert "O FORM 1 Integral continua disponível acima" in pagina.text
-    assert "O instrumento sintético da PoC nuclear começa abaixo." in pagina.text
-    assert pagina.text.index("Separação entre instrumentos") < pagina.text.index(
-        "Instrumento sintético · contrato 2"
+    assert "Separação entre instrumentos" not in pagina.text
+    assert "Outros recursos do ambiente de demonstração" in pagina.text
+    assert "Questionário resumido de demonstração" in pagina.text
+    assert pagina.text.index("Outros recursos do ambiente de demonstração") < pagina.text.index(
+        "Questionário resumido de demonstração"
     )

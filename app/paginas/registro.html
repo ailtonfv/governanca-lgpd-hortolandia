@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block titulo %}{{ registro.codigo_lgpd }} · PoC LGPD{% endblock %}
+{% block titulo %}{{ registro.codigo_lgpd }} · Governança LGPD{% endblock %}
 {% block conteudo %}
 <p><a class="voltar" href="/?conta_id={{ conta_id }}">← Voltar ao painel</a></p>
 <section class="detalhe">
@@ -79,7 +79,7 @@
     {% endif %}
   </section>
 
-  <h3 id="titulo-atribuicao-arp">Responsável pelo preenchimento do FORM 1</h3>
+  <h3 id="titulo-atribuicao-arp">Designação do ARP</h3>
   {% if registro.form1_integral.pode_atribuir_arp %}
   <form class="formulario" method="post" action="{{ url_for('atribuir_arp_integral', registro_id=registro.id) }}">
     <input type="hidden" name="conta_id" value="{{ conta_id }}">
@@ -89,16 +89,20 @@
       <legend>Quem preencherá o FORM 1?</legend>
       <label class="opcao"><input type="radio" name="modo" value="proprio" required> <span>Eu mesmo, APA atual.</span></label>
       <label class="opcao"><input type="radio" name="modo" value="outro" required> <span>Designar outro agente público autorizado para o preenchimento.</span></label>
-      <label for="arp_pessoa_id">Agente indicado</label>
-      <select id="arp_pessoa_id" name="arp_pessoa_id">
-        <option value="">Selecione somente para indicar outro agente</option>
-        {% for pessoa in registro.form1_integral.candidatos_arp %}
-        <option value="{{ pessoa.id }}">Matrícula {{ pessoa.matricula }} · {{ pessoa.nome }}</option>
-        {% endfor %}
-      </select>
-      <p class="ajuda">A indicação não concede acesso. A pessoa precisa possuir previamente conta ativa e designação de preenchedor nesta Secretaria.</p>
+      <div class="controle-designacao-arp">
+        <div>
+          <label for="arp_pessoa_id">ARP selecionado para designação</label>
+          <select id="arp_pessoa_id" name="arp_pessoa_id">
+            <option value="">Selecione somente para designar outro agente</option>
+            {% for pessoa in registro.form1_integral.candidatos_arp %}
+            <option value="{{ pessoa.id }}">Matrícula {{ pessoa.matricula }} · {{ pessoa.nome }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button class="botao-primario" type="submit">Confirmar designação do ARP</button>
+      </div>
+      <p class="ajuda">Selecionar uma pessoa não confirma a designação. A confirmação também não concede acesso: o agente precisa possuir previamente conta ativa e autorização de preenchimento nesta Secretaria.</p>
     </fieldset>
-    <button class="botao-primario" type="submit">Confirmar responsável pelo preenchimento</button>
   </form>
   {% else %}
   <p class="aviso-leitura">Somente um APA responsável pelo Registro nesta Secretaria pode definir ou substituir o ARP.</p>
@@ -620,7 +624,7 @@
         </div>
         {% endfor %}
         <div class="rodape-formulario">
-          <p>O rascunho pode permanecer incompleto; as validações de submissão integral continuam desabilitadas.</p>
+          <p>O rascunho pode permanecer incompleto; as validações para envio do FORM 1 continuam desabilitadas.</p>
           {% set numero_bloco = 6 %}{% include '_acoes_salvar_bloco_form1.html' %}
         </div>
       </form>
@@ -711,13 +715,8 @@
     </div>
   {% endif %}
 
-  <p class="ajuda">Os 14 blocos do rascunho integral estão disponíveis. A submissão integral permanece desabilitada e será tratada em incremento próprio. O FORM 1 sintético permanece disponível abaixo sem alterações.</p>
+  <p class="ajuda">Os 14 blocos estão disponíveis para preenchimento e revisão. O envio do FORM 1 permanece desabilitado neste ambiente de demonstração.</p>
 </section>
-
-<aside class="separador-instrumentos" aria-label="Separação entre os instrumentos">
-  <p class="etiqueta">Separação entre instrumentos</p>
-  <p><strong>O FORM 1 Integral continua disponível acima para preenchimento e revisão.</strong> O instrumento sintético da PoC nuclear começa abaixo. Ele é uma referência separada e não integra os 14 blocos.</p>
-</aside>
 
 <script>
   function sincronizarSinalizacaoObrigatoriedade() {
@@ -1060,23 +1059,25 @@
   })();
 </script>
 
-<section class="form1" aria-labelledby="titulo-form1">
+<details class="recursos-demonstracao">
+  <summary>Outros recursos do ambiente de demonstração</summary>
+<section class="form1" aria-labelledby="titulo-form1" data-instrumento-regressao="form1-resumido">
   <div class="cabecalho-secao cabecalho-form1">
     <div>
-      <p class="etiqueta">Instrumento sintético · contrato 2</p>
-      <h2 id="titulo-form1">FORM 1</h2>
+      <p class="etiqueta">Questionário resumido de demonstração</p>
+      <h2 id="titulo-form1">Questionário resumido</h2>
     </div>
     <p class="objetivo-form1"><strong>Objetivo:</strong> registrar, sem identificar pessoas, para que os dados pessoais são utilizados, quais categorias de titulares e dados participam do tratamento e se existe compartilhamento.</p>
     <span class="estado">{{ registro.form1.estado_rotulo }}</span>
   </div>
 
   {% if registro.form1.estado == 'nao_iniciado' %}
-    <p>O preenchimento ainda não começou. I1 criará um rascunho vazio e registrará o início no livro de atos.</p>
+    <p>O preenchimento resumido ainda não começou. Ao iniciar, o sistema criará um rascunho vazio e registrará o ato.</p>
     {% if registro.form1.pode_preencher %}
     <form method="post" action="{{ url_for('iniciar_form1', registro_id=registro.id) }}">
       <input type="hidden" name="conta_id" value="{{ conta_id }}">
       <input type="hidden" name="comando_id" value="{{ comando_i1 }}">
-      <button class="botao-primario" type="submit">Iniciar preenchimento (I1)</button>
+      <button class="botao-primario" type="submit">Iniciar preenchimento</button>
     </form>
     {% else %}
     <p class="aviso-leitura">Este agente pode consultar o Registro, mas não está designado como Servidor responsável pelo preenchimento do FORM 1.</p>
@@ -1123,7 +1124,7 @@
 
       <div class="rodape-formulario">
         <p>Rascunho {{ registro.form1.rascunho.versao }} · último salvamento por {{ registro.form1.rascunho.salvo_por }}</p>
-        <button class="botao-primario" type="submit">Salvar rascunho (I2)</button>
+        <button class="botao-primario" type="submit">Salvar rascunho</button>
       </div>
     </form>
     {% else %}
@@ -1133,4 +1134,5 @@
     <p class="aviso-leitura">O FORM 1 está em {{ registro.form1.estado|replace('_', ' ') }}. A edição não está disponível neste estado.</p>
   {% endif %}
 </section>
+</details>
 {% endblock %}

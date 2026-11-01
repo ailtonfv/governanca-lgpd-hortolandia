@@ -367,12 +367,12 @@ def test_interface_libera_as_quatro_etapas_e_mantem_submissao_bloqueada(sessao):
         assert f"Bloco {numero} de 14" in pagina.text
     assert "As quatro etapas do rascunho estão disponíveis" in pagina.text
     assert "/form1-integral/submeter" not in pagina.text
-    assert "A submissão integral permanece desabilitada" in pagina.text
+    assert "O envio do FORM 1 permanece desabilitado" in pagina.text
     assert "Pendências antes da futura submissão" in pagina.text
     assert "window.sessionStorage.setItem(chave, numero)" in pagina.text
     assert salvamento.status_code == 200
-    assert "Bloco 2 do FORM 1 integral salvo com segurança" in salvamento.text
-    assert "Instrumento sintético · contrato 2" in salvamento.text
+    assert "Bloco 2 do FORM 1 salvo com segurança" in salvamento.text
+    assert "Questionário resumido de demonstração" in salvamento.text
 
 
 def test_navegacao_integral_nao_concede_edicao_a_outro_agente(sessao):

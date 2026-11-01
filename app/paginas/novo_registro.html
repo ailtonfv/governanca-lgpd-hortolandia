@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block titulo %}Novo mapeamento · PoC LGPD{% endblock %}
+{% block titulo %}Novo mapeamento · Governança LGPD{% endblock %}
 {% block conteudo %}
 <p><a class="voltar" href="/?conta_id={{ conta_id }}">← Voltar ao painel</a></p>
 
@@ -40,7 +40,7 @@
       {% if 'tipo_objeto' in erros_campos %}<p class="erro-campo">Escolha Serviço, Processo ou Atividade.</p>{% endif %}
     </fieldset>
 
-    <label for="objeto_principal_id">3. Item do catálogo oficial <span class="marcador-obrigatorio" aria-label="obrigatório">*</span></label>
+    <label for="objeto_principal_id">3. Item do catálogo da demonstração <span class="marcador-obrigatorio" aria-label="obrigatório">*</span></label>
     <select id="objeto_principal_id" name="objeto_principal_id" required
             {% if 'objeto_principal_id' in erros_campos %}aria-invalid="true" aria-describedby="erro-objeto_principal_id"{% endif %}>
       <option value="">Selecione depois de escolher o tipo</option>
@@ -48,11 +48,12 @@
       <option value="{{ objeto.id }}" data-tipo="{{ objeto.tipo_objeto }}" data-unidades="{{ objeto.unidades|join(',') }}" {% if valores.objeto_principal_id == objeto.id %}selected{% endif %}>{{ objeto.tipo_objeto|capitalize }} · {{ objeto.nome_canonico }}</option>
       {% endfor %}
     </select>
-    {% if 'objeto_principal_id' in erros_campos %}<p id="erro-objeto_principal_id" class="erro-campo">Selecione um item oficial coerente com a Secretaria e o tipo escolhidos.</p>{% endif %}
-    <p class="ajuda">O nome oficial vem do catálogo; não é digitado livremente.</p>
+    {% if 'objeto_principal_id' in erros_campos %}<p id="erro-objeto_principal_id" class="erro-campo">Selecione um item cadastrado para a Secretaria e o tipo escolhidos.</p>{% endif %}
+    <p class="ajuda">A lista contém somente vínculos cadastrados para a Secretaria e o tipo escolhidos. Nesta demonstração, objetos e vínculos são fictícios e não representam inventário municipal homologado. Se o item adequado não aparecer, solicite revisão cadastral; não escolha outro por aproximação.</p>
+    <p id="sem-itens-catalogo" class="aviso-leitura" hidden>Nenhum item do tipo escolhido está vinculado a esta Secretaria no catálogo da demonstração. Solicite revisão cadastral.</p>
 
     <fieldset id="canais-habituais" aria-describedby="ajuda-canais" {% if 'situacao_canais' in erros_campos %}aria-invalid="true"{% endif %}>
-      <legend>4. Canais habituais aplicáveis <span class="marcador-obrigatorio" aria-label="obrigatório">*</span></legend>
+      <legend>4. Por quais canais as demandas chegam habitualmente? <span class="marcador-obrigatorio" aria-label="obrigatório">*</span></legend>
       <p class="ajuda" id="ajuda-canais">Confirme somente os meios habituais pelos quais a demanda chega a este objeto. Eles não representam cidadãos, telefonemas nem protocolos individuais. A ausência de canais no catálogo não significa automaticamente que nenhum canal se aplica.</p>
       {% for objeto in objetos %}
         {% if objeto.canais %}
@@ -60,7 +61,7 @@
           <label class="opcao opcao-situacao-canal">
             <input type="radio" name="situacao_canais" value="identificados" required
                    {% if valores.situacao_canais == 'identificados' %}checked{% endif %} disabled>
-            <span><strong>Confirmo os canais habituais identificados abaixo</strong><br>Revise e mantenha marcados somente os canais aplicáveis.</span>
+            <span><strong>Existem canais habituais</strong><br>Revise e mantenha marcados somente os canais efetivamente utilizados.</span>
           </label>
           <p><strong>{{ objeto.nome_canonico }}</strong></p>
           <div class="grade-opcoes">
@@ -76,16 +77,16 @@
         </div>
         {% endif %}
       {% endfor %}
-      <p id="canais-sem-vinculo" class="aviso-leitura" hidden>O catálogo não apresenta canais habituais vigentes para este item. Confirme expressamente uma das situações abaixo; o sistema não interpretará essa ausência como “nenhum canal”.</p>
+      <p id="canais-sem-vinculo" class="aviso-leitura" hidden>O item ainda não possui canais habituais vinculados no catálogo. Se você conhece os canais utilizados, marque a informação como pendente e solicite a revisão cadastral; o sistema não interpretará a ausência como “nenhum canal”.</p>
       <label class="opcao opcao-situacao-canal">
         <input type="radio" name="situacao_canais" value="nenhum" required
                {% if valores.situacao_canais == 'nenhum' %}checked{% endif %}>
-        <span><strong>Nenhum canal habitual se aplica</strong><br>Confirmação expressa do APA para este objeto.</span>
+        <span><strong>Nenhum canal de entrada se aplica ao objeto</strong><br>Confirmação expressa do APA para este objeto.</span>
       </label>
       <label class="opcao opcao-situacao-canal">
         <input type="radio" name="situacao_canais" value="informacao_insuficiente" required
                {% if valores.situacao_canais == 'informacao_insuficiente' %}checked{% endif %}>
-        <span><strong>O catálogo não possui informação suficiente</strong><br>Não é possível afirmar que nenhum canal se aplica; a criação aguardará revisão cadastral.</span>
+        <span><strong>Ainda não foi possível confirmar os canais utilizados</strong><br>Informação pendente: a criação aguardará revisão cadastral.</span>
       </label>
       {% if 'situacao_canais' in erros_campos %}<p class="erro-campo">Confirme os canais identificados, a inexistência aplicável ou a insuficiência cadastral.</p>{% endif %}
     </fieldset>
@@ -98,10 +99,11 @@
       {% for contexto in contextos %}<option value="{{ contexto.id }}" data-objetos="{{ contexto.objetos|join(',') }}" {% if valores.contexto_id == contexto.id %}selected{% endif %}>{{ contexto.nome }}</option>{% endfor %}
     </select>
     {% if 'contexto_id' in erros_campos %}<p id="erro-contexto_id" class="erro-campo">Selecione um contexto permitido para o item do catálogo.</p>{% endif %}
+    <p id="sem-contextos-catalogo" class="aviso-leitura" hidden>Nenhum contexto está vinculado a este item no catálogo da demonstração. Solicite revisão cadastral; não informe um contexto livre nem escolha uma opção incompatível.</p>
     <p class="ajuda" id="exemplo-contexto"><strong>Ajuda sobre contexto de atuação</strong><br>O contexto descreve a frente institucional em que o objeto atua. Ele não é a finalidade do tratamento. A finalidade — para que os dados pessoais são utilizados — será descrita no FORM 1.</p>
 
     <div class="rodape-formulario">
-      <p>Ao confirmar, o G1 criará o Registro e o FORM 1 no estado “Não iniciado”.</p>
+      <p>Ao confirmar, o sistema criará o Registro LGPD e deixará o FORM 1 no estado “Não iniciado”.</p>
       <button class="botao-primario" type="submit">Confirmar e criar Registro LGPD</button>
     </div>
   </form>
@@ -117,6 +119,8 @@
   const contexto = document.getElementById('contexto_id');
   const gruposCanais = document.querySelectorAll('[data-objeto-canais]');
   const canaisSemVinculo = document.getElementById('canais-sem-vinculo');
+  const semItensCatalogo = document.getElementById('sem-itens-catalogo');
+  const semContextosCatalogo = document.getElementById('sem-contextos-catalogo');
   const ajudaContexto = document.getElementById('exemplo-contexto');
   const situacoesCanais = document.querySelectorAll('input[name="situacao_canais"]');
   function atualizarAjudaContexto() {
@@ -149,21 +153,27 @@
     canaisSemVinculo.hidden = !objeto.value || quantidadeVisivel > 0;
   }
   function filtrarContextos(limpar = true) {
+    let quantidadeVisivel = 0;
     for (const opcao of contexto.options) {
       const objetos = (opcao.dataset.objetos || '').split(',');
       opcao.hidden = Boolean(opcao.value && !objetos.includes(objeto.value));
+      if (opcao.value && !opcao.hidden) quantidadeVisivel += 1;
     }
     if (limpar || contexto.selectedOptions[0]?.hidden) contexto.value = '';
+    semContextosCatalogo.hidden = !objeto.value || quantidadeVisivel > 0;
     atualizarAjudaContexto();
     filtrarCanais(limpar);
   }
   function filtrarObjetos(limpar = true) {
     const tipo = document.querySelector('input[name="tipo_objeto"]:checked')?.value;
+    let quantidadeVisivel = 0;
     for (const opcao of objeto.options) {
       const unidades = (opcao.dataset.unidades || '').split(',');
       opcao.hidden = Boolean(opcao.value && (opcao.dataset.tipo !== tipo || !unidades.includes(unidade.value)));
+      if (opcao.value && !opcao.hidden) quantidadeVisivel += 1;
     }
     if (limpar || objeto.selectedOptions[0]?.hidden) objeto.value = '';
+    semItensCatalogo.hidden = !unidade.value || !tipo || quantidadeVisivel > 0;
     filtrarContextos(limpar);
   }
   tipos.forEach((item) => item.addEventListener('change', () => filtrarObjetos(true)));

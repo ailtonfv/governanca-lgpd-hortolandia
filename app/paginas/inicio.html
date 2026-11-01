@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block titulo %}Painel inicial · PoC LGPD{% endblock %}
+{% block titulo %}Painel inicial · Governança LGPD{% endblock %}
 {% block conteudo %}
 <section class="abertura">
   <div>
@@ -14,7 +14,7 @@
       <option value="{{ id }}" {% if conta_id == id %}selected{% endif %}>{{ nome }}</option>
       {% endfor %}
     </select>
-    <p class="ajuda">A PoC não solicita senha. Na solução futura, a Prefeitura validará matrícula e senha individual antes de liberar o painel.</p>
+    <p class="ajuda">Este ambiente de demonstração não solicita senha. Na solução futura, a Prefeitura validará matrícula e senha individual antes de liberar o painel.</p>
     <noscript><button type="submit">Trocar</button></noscript>
   </form>
 </section>

@@ -50,7 +50,7 @@ def test_campos_essenciais_sao_sinalizados_e_escolhas_permanecem_apos_erro():
     [
         ("unidade_id", "Selecione uma Secretaria em que você seja o APA"),
         ("tipo_objeto", "Escolha Serviço, Processo ou Atividade"),
-        ("objeto_principal_id", "Selecione um item oficial coerente"),
+        ("objeto_principal_id", "Selecione um item cadastrado para a Secretaria"),
         ("contexto_id", "Selecione um contexto permitido"),
     ],
 )
