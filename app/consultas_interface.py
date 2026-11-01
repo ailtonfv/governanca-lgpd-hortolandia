@@ -3,6 +3,10 @@
 from sqlalchemy import func, or_, select
 
 from app.alertas_operacionais import listar_alertas_operacionais
+from app.ajudas_cartilha_form1 import (
+    AJUDAS_CARTILHA_FORM1,
+    VERSAO_CARTILHA_AJUDAS_FORM1,
+)
 from app.classificacao_catalogo_5_1 import (
     CLASSIFICACOES_CATALOGO_5_1,
     VERSAO_CLASSIFICACAO_CATALOGO_5_1,
@@ -651,6 +655,14 @@ def carregar_registro(sessao, conta_id, registro_id):
             "alternativas": alternativas,
             "instrucao": campo.instrucao,
             "ajuda_contextual": ajudas_contextuais.get(campo_id),
+            "ajuda_cartilha": (
+                None
+                if campo_id not in AJUDAS_CARTILHA_FORM1
+                else {
+                    **AJUDAS_CARTILHA_FORM1[campo_id],
+                    "versao": VERSAO_CARTILHA_AJUDAS_FORM1,
+                }
+            ),
             "alternativa_outro": alternativas_outro.get(campo_id),
             "classificacoes_dados": (
                 CLASSIFICACOES_CATALOGO_5_1 if usa_catalogo_5_1 else {}

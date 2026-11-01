@@ -365,6 +365,7 @@
       {% if leitura_2_1.somente_leitura or not registro.form1_integral.pode_editar %}
       <div class="campo-integral respostas-somente-leitura" data-canais-2-1-estado="{{ leitura_2_1.estado }}">
         {% set campo = campo_2_1 %}<p><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</p>
+        {% include '_ajuda_cartilha_form1.html' %}
         {% if leitura_2_1.estado == 'canais_confirmados' %}
         <p>Canais habituais confirmados pelo APA na abertura:</p>
         <ul>{% for canal in leitura_2_1.canais %}<li>{{ canal.nome }} <span class="ajuda">({{ canal.id }})</span></li>{% endfor %}</ul>
@@ -390,6 +391,7 @@
         <div class="campo-integral{% if campo.condicao and campo.condicao_canal_ativa is none %} campo-condicional{% endif %}"
              {% if campo.condicao and campo.condicao_canal_ativa is none %}data-depende-de="campo__{{ campo.condicao[0] }}" data-valores="{{ campo.condicao[1] | join('||') }}"{% endif %}>
           <label><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</label>
+          {% include '_ajuda_cartilha_form1.html' %}
           {% if campo.controle == 'seleção múltipla (combo com marcações)' %}
           <div class="grade-opcoes">
             {% for valor, rotulo in campo.alternativas %}
@@ -515,6 +517,7 @@
         <div class="campo-integral{% if campo.condicao %} campo-condicional{% endif %}"
              {% if campo.condicao %}data-depende-de="campo__{{ campo.condicao[0] }}" data-valores="{{ campo.condicao[1] | join('||') }}"{% endif %}>
           <label><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</label>
+          {% include '_ajuda_cartilha_form1.html' %}
           {% if campo.controle == 'seleção múltipla (combo com marcações)' or campo.id == '4.2.5.1' %}
           <div class="grade-opcoes">
             {% for valor, rotulo in campo.alternativas %}
@@ -555,6 +558,7 @@
         <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
         <fieldset>
           <legend><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</legend>
+          {% include '_ajuda_cartilha_form1.html' %}
           <div class="grade-opcoes">
             {% for valor, rotulo in campo.alternativas %}
             <label class="opcao"><input type="checkbox" name="campo__5.1" value="{{ valor }}" {% if valor in respostas_integral.get('5.1', []) %}checked{% endif %}> {% include '_alternativa_form1.html' %}</label>
@@ -589,6 +593,7 @@
         <div class="campo-integral{% if campo.condicao %} campo-condicional{% endif %}"
              {% if campo.condicao %}data-depende-de="campo__{{ campo.condicao[0] }}" data-valores="{{ campo.condicao[1] | join('||') }}"{% endif %}>
           <label><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</label>
+          {% include '_ajuda_cartilha_form1.html' %}
           {% if campo.controle == 'seleção múltipla (combo com marcações)' or campo.id == '6.2.2' %}
           <div class="grade-opcoes">
             {% for valor, rotulo in campo.alternativas %}
@@ -631,6 +636,7 @@
         <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
         <fieldset>
           <legend><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</legend>
+          {% include '_ajuda_cartilha_form1.html' %}
           <div class="grade-opcoes">
           {% for valor, rotulo in campo.alternativas %}
             <label class="opcao"><input type="checkbox" name="campo__7.1" value="{{ valor }}" {% if valor in respostas_integral.get('7.1', []) %}checked{% endif %}> <span>{{ rotulo }}</span></label>

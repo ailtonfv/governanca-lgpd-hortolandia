@@ -1,0 +1,10 @@
+{% if campo.ajuda_cartilha %}
+<details class="ajuda-cartilha-form1">
+  <summary>Entenda esta pergunta</summary>
+  <div class="conteudo-ajuda-cartilha-form1">
+    <p>{{ campo.ajuda_cartilha.texto }}</p>
+    <p>{{ campo.ajuda_cartilha.limite }}</p>
+    <p class="referencia-cartilha-form1"><strong>Referência:</strong> Cartilha LGPD {{ campo.ajuda_cartilha.versao }} — seção {{ campo.ajuda_cartilha.secao }}.</p>
+  </div>
+</details>
+{% endif %}

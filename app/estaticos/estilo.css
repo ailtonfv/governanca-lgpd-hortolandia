@@ -164,6 +164,13 @@ legend { padding: 0 .4rem; color: var(--azul-escuro); font-weight: 800; }
 .alerta-classificacao { color: #78350f; font-weight: 650; }
 .aviso-classificacao { padding: .75rem; border-left: .25rem solid #b45309; background: #fffbeb; color: #5f370e; }
 .ajuda { margin-top: .35rem; color: #526475; font-size: .9rem; }
+.ajuda-cartilha-form1 { margin: .55rem 0 .85rem; border: 1px solid #9fb6c4; border-radius: .45rem; background: #f8fbfd; }
+.ajuda-cartilha-form1 summary { padding: .55rem .7rem; color: var(--azul); font-weight: 800; cursor: pointer; }
+.ajuda-cartilha-form1 summary:hover { background: #eef6fa; }
+.ajuda-cartilha-form1 summary:focus-visible { outline: .2rem solid var(--azul); outline-offset: .12rem; }
+.conteudo-ajuda-cartilha-form1 { padding: 0 .75rem .7rem; color: #334155; }
+.conteudo-ajuda-cartilha-form1 p { margin: .45rem 0 0; }
+.referencia-cartilha-form1 { color: #526475; font-size: .85rem; }
 .rodape-formulario { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-top: 1.4rem; }
 .rodape-formulario p { margin: 0; color: #526475; }
 .acoes-salvamento-bloco { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .65rem; }
