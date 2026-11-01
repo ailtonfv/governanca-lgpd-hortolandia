@@ -30,7 +30,7 @@ def _abrir_sem_vinculos(**alteracoes):
         "objeto_principal_id": "OBJ-SRV-900",
         "contexto_id": "CTX-TRIB-01",
         "situacao_canais": "identificados",
-        "canais_ids": ["CNL-001", "CNL-002", "CNL-003"],
+        "canais_ids": ["CNL-001", "CNL-003", "CNL-007"],
     }
     dados.update(alteracoes)
     return cliente.post("/registros", data=dados)
@@ -51,7 +51,7 @@ def test_objeto_sem_vinculos_aceita_varios_canais_do_catalogo_geral(sessao):
         .where(RegistroCanal.registro_id == registro.id)
         .order_by(RegistroCanal.canal_id_snapshot)
     ).all()
-    assert [item.canal_id_snapshot for item in itens] == ["CNL-001", "CNL-002", "CNL-003"]
+    assert [item.canal_id_snapshot for item in itens] == ["CNL-001", "CNL-003", "CNL-007"]
     assert {item.origem_confirmacao for item in itens} == {"DECLARACAO_APA"}
     assert all(item.objeto_canal_id is None for item in itens)
     assert sessao.scalar(select(func.count()).select_from(ObjetoCanal)) == vinculos_antes
@@ -105,9 +105,9 @@ def test_consulta_recupera_canais_declarados_sem_confundir_com_catalogo(sessao):
     # Assert
     assert resposta_abertura.status_code == 200
     assert pagina.status_code == 200
-    assert "Balcão de atendimento (fictício)" in pagina.text
-    assert "Portal da Prefeitura (fictício)" in pagina.text
-    assert "Telefone (fictício)" in pagina.text
+    assert "Presencial / balcão de atendimento" in pagina.text
+    assert "Telefone" in pagina.text
+    assert "WhatsApp corporativo" in pagina.text
     assert pagina.text.count("informado pelo APA para este Registro") == 3
 
 

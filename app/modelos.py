@@ -740,7 +740,7 @@ class ObjetoBase(Base):
 class Canal(Base):
     """Catálogo de CANAIS: as portas por onde o cidadão chega aos serviços (DA-36, item 6).
     O canal não faz parte da hierarquia serviço → processo → atividade: é uma dimensão transversal.
-    Na PoC, somente canais fictícios."""
+    As modalidades institucionais podem ser reais; vínculos com objetos e Registros da PoC são fictícios."""
     __tablename__ = "canal"
 
     id = Column(String(50), primary_key=True)                 # identificador canônico (ex.: CNL-001)

@@ -71,6 +71,8 @@ O retrato histórico do Registro guarda a situação, a versão do contrato, aut
 
 O 8AA cobre a declaração no ato de abertura. Uma correção futura deverá ser um novo comando auditável: acrescentará evento com executor, data e versão, atualizará a projeção corrente e preservará o evento G1 e a autoria anteriores. Não existe neste incremento interface nem comando para corrigir os canais depois da abertura; a projeção não deve ser editada diretamente.
 
+O catálogo geral usa identificadores estáveis para oito modalidades reconhecidas institucionalmente: Presencial / balcão de atendimento (`CNL-001`), Portal da Prefeitura (`CNL-002`), Telefone (`CNL-003`), Ouvidoria (`CNL-004`), e-SIC (`CNL-005`), Central 156 (`CNL-006`), WhatsApp corporativo (`CNL-007`) e E-mail institucional (`CNL-008`). A existência do canal não cria vínculo com qualquer objeto. Os vínculos da PoC permanecem demonstrativos e somente `ObjetoCanal` pode afirmar uma sugestão prévia. A migração cadastral 19 preserva IDs e snapshots históricos e não cria novos vínculos.
+
 A migração 18 acrescenta esses metadados sem apagar vínculos existentes: confirmações anteriores com itens são classificadas como `identificados`, confirmações vazias como `nenhum`, e seus itens recebem a origem `VINCULO_OBJETO`. A reversão estrutural é possível apenas enquanto não existirem declarações diretas ou confirmações pendentes, porque esses conteúdos não podem ser representados com segurança pelo esquema anterior.
 
 ## Aproveitamento estrutural do inventário existente

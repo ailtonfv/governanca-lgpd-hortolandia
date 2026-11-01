@@ -69,7 +69,7 @@ def test_apa_confirma_um_canal_habitual(sessao):
     assert resultado["canais_confirmados"] == ["CNL-001"]
     assert len(canais) == 1
     assert canais[0].canal_id_snapshot == "CNL-001"
-    assert canais[0].canal_nome_snapshot == "Balcão de atendimento (fictício)"
+    assert canais[0].canal_nome_snapshot == "Presencial / balcão de atendimento"
 
 
 def test_apa_confirma_varios_canais_sem_criar_varios_registros(sessao):
@@ -201,7 +201,7 @@ def test_evento_g1_audita_retrato_e_mantem_cadeia_integra(sessao):
     assert retrato[0]["origem_confirmacao"] == "VINCULO_OBJETO"
     assert retrato[0]["objeto_id"] == "OBJ-SRV-002"
     assert retrato[0]["canal_id"] == "CNL-001"
-    assert retrato[0]["canal_nome_snapshot"] == "Balcão de atendimento (fictício)"
+    assert retrato[0]["canal_nome_snapshot"] == "Presencial / balcão de atendimento"
     assert verificar_cadeia(sessao, resultado["codigo_lgpd"])[0]
 
 
@@ -226,7 +226,7 @@ def test_catalogo_futuro_nao_altera_retrato_do_registro(sessao):
 
     # Assert
     retrato = _canais_do_registro(sessao, resultado["registro_id"])[0]
-    assert retrato.canal_nome_snapshot == "Balcão de atendimento (fictício)"
+    assert retrato.canal_nome_snapshot == "Presencial / balcão de atendimento"
     assert retrato.objeto_id_snapshot == "OBJ-SRV-002"
     assert sessao.get(Registro, resultado["registro_id"]).codigo_lgpd == codigo_antes
 
@@ -290,8 +290,8 @@ def test_tela_apresenta_canais_habituais_depois_do_objeto():
     assert resposta.text.index("3. Item do catálogo da demonstração") < resposta.text.index(
         "4. Por quais canais as demandas chegam habitualmente?"
     )
-    assert "Balcão de atendimento (fictício)" in resposta.text
-    assert "Portal da Prefeitura (fictício)" in resposta.text
+    assert "Presencial / balcão de atendimento" in resposta.text
+    assert "Portal da Prefeitura" in resposta.text
     assert 'data-objetos-sugeridos="OBJ-SRV-001"' in resposta.text
     assert "não altera o catálogo mestre" in resposta.text
     assert "Nenhum canal de entrada se aplica ao objeto" in resposta.text
@@ -316,7 +316,7 @@ def test_tela_confirma_canal_e_exibe_retrato_no_registro(sessao):
 
     assert resposta.status_code == 200
     assert "Canais habituais confirmados na abertura" in resposta.text
-    assert "Balcão de atendimento (fictício)" in resposta.text
+    assert "Presencial / balcão de atendimento" in resposta.text
     registro = sessao.scalars(select(Registro).where(
         Registro.titulo_objeto == "Certidão de débitos (fictício)"
     )).one()

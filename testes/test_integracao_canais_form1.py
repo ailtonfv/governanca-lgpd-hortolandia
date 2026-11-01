@@ -53,12 +53,12 @@ def test_arp_consulta_um_ou_varios_canais_historicos_na_pergunta_2_1(sessao):
     leitura = resumo["form1_integral"]["leitura_2_1"]
     assert list(resumo["form1_integral"]["campos_bloco_2"])[0] == "2.1"
     assert leitura["estado"] == "canais_confirmados"
-    assert [item["id"] for item in leitura["canais"]] == ["CNL-001", "CNL-002"]
+    assert {item["id"] for item in leitura["canais"]} == {"CNL-001", "CNL-002"}
     assert leitura["somente_leitura"] is True
     assert pagina.status_code == 200
     assert 'data-canais-2-1-estado="canais_confirmados"' in pagina.text
-    assert "Balcão de atendimento (fictício)" in pagina.text
-    assert "Portal da Prefeitura (fictício)" in pagina.text
+    assert "Presencial / balcão de atendimento" in pagina.text
+    assert "Portal da Prefeitura" in pagina.text
     assert 'name="campo__2.1"' not in pagina.text
 
 
@@ -171,7 +171,7 @@ def test_leitura_2_1_usa_snapshot_e_nao_nome_posterior_do_catalogo(sessao):
 
     # Assert
     assert resumo["form1_integral"]["leitura_2_1"]["canais"] == [{
-        "id": "CNL-001", "nome": "Balcão de atendimento (fictício)"
+        "id": "CNL-001", "nome": "Presencial / balcão de atendimento"
     }]
 
 

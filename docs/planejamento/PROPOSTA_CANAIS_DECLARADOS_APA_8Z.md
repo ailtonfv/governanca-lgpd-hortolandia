@@ -76,4 +76,4 @@ A migração 18 executa de modo não destrutivo:
 ## Limitações e decisões posteriores
 
 - definição de eventual fila de curadoria para declarações recorrentes;
-- tratamento institucional definitivo do WhatsApp.
+- a presença de WhatsApp corporativo no catálogo registra somente a modalidade factual; regularidade jurídica, dispositivo utilizado, repositório oficial, permanência de arquivos e backups continuam sujeitos à governança própria.
