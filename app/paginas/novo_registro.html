@@ -12,6 +12,26 @@
 {% if mensagem %}
 <p class="mensagem {% if erro %}mensagem-erro{% else %}mensagem-sucesso{% endif %}" role="status">{{ mensagem }}</p>
 {% endif %}
+{% if conflitos_duplicidade %}
+<section class="conflitos-duplicidade" aria-labelledby="titulo-conflitos-duplicidade">
+  <h2 id="titulo-conflitos-duplicidade">Registro já existente</h2>
+  <p>Para evitar duplicidade, consulte o mapeamento existente antes de tentar uma nova abertura.</p>
+  <div class="lista-conflitos-duplicidade">
+    {% for conflito in conflitos_duplicidade %}
+    <article class="cartao-conflito">
+      <p class="etiqueta">{{ conflito.codigo_lgpd }}</p>
+      <h3>{{ conflito.tipo }} · {{ conflito.titulo }}</h3>
+      <dl>
+        <div><dt>Secretaria</dt><dd>{{ conflito.unidade }}</dd></div>
+        <div><dt>Contexto</dt><dd>{{ conflito.contexto_nome }} ({{ conflito.contexto_id }})</dd></div>
+        <div><dt>Situação</dt><dd>{{ conflito.estado }}</dd></div>
+      </dl>
+      <a class="botao-link" href="{{ url_for('detalhe_registro', registro_id=conflito.id) }}?conta_id={{ conta_id }}">Consultar este Registro</a>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
 
 <section class="form1" aria-labelledby="titulo-contexto">
   <h2 id="titulo-contexto">Contexto inicial</h2>
@@ -49,6 +69,7 @@
       {% endfor %}
     </select>
     {% if 'objeto_principal_id' in erros_campos %}<p id="erro-objeto_principal_id" class="erro-campo">Selecione um item cadastrado para a Secretaria e o tipo escolhidos.</p>{% endif %}
+    {% if objeto_invalidado %}<p class="aviso-leitura">A seleção anterior foi removida porque o item não pertence mais à Secretaria e ao tipo informados.</p>{% endif %}
     <p class="ajuda">A lista contém somente vínculos cadastrados para a Secretaria e o tipo escolhidos. Nesta demonstração, objetos e vínculos são fictícios e não representam inventário municipal homologado. Se o item adequado não aparecer, solicite revisão cadastral; não escolha outro por aproximação.</p>
     <p id="sem-itens-catalogo" class="aviso-leitura" hidden>Nenhum item do tipo escolhido está vinculado a esta Secretaria no catálogo da demonstração. Solicite revisão cadastral.</p>
 
@@ -99,6 +120,7 @@
       {% for contexto in contextos %}<option value="{{ contexto.id }}" data-objetos="{{ contexto.objetos|join(',') }}" {% if valores.contexto_id == contexto.id %}selected{% endif %}>{{ contexto.nome }}</option>{% endfor %}
     </select>
     {% if 'contexto_id' in erros_campos %}<p id="erro-contexto_id" class="erro-campo">Selecione um contexto permitido para o item do catálogo.</p>{% endif %}
+    {% if contexto_invalidado %}<p class="aviso-leitura">A seleção anterior foi removida porque esse contexto não é permitido para o item escolhido.</p>{% endif %}
     <p id="sem-contextos-catalogo" class="aviso-leitura" hidden>Nenhum contexto está vinculado a este item no catálogo da demonstração. Solicite revisão cadastral; não informe um contexto livre nem escolha uma opção incompatível.</p>
     <p class="ajuda" id="exemplo-contexto"><strong>Ajuda sobre contexto de atuação</strong><br>O contexto descreve a frente institucional em que o objeto atua. Ele não é a finalidade do tratamento. A finalidade — para que os dados pessoais são utilizados — será descrita no FORM 1.</p>
 

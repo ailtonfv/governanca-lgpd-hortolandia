@@ -413,6 +413,34 @@ def carregar_painel(sessao, conta_id):
     }
 
 
+def carregar_conflitos_duplicidade_visiveis(sessao, conta_id, codigos):
+    """Projeta somente Registros conflitantes que a identidade pode consultar."""
+
+    identidade = _identidade(sessao, conta_id)
+    if identidade is None or not codigos:
+        return []
+    ids_visiveis = _ids_visiveis(sessao, identidade)
+    if not ids_visiveis:
+        return []
+    linhas = sessao.execute(
+        select(Registro, Unidade, ContextoAtuacao)
+        .join(Unidade, Unidade.id == Registro.unidade_principal_atual_id)
+        .join(ContextoAtuacao, ContextoAtuacao.id == Registro.contexto_atuacao_id)
+        .where(
+            Registro.id.in_(ids_visiveis),
+            Registro.codigo_lgpd.in_(set(codigos)),
+        )
+        .order_by(Registro.codigo_lgpd)
+    ).all()
+    return [
+        {
+            **_resumo_registro(registro, unidade),
+            "contexto_nome": contexto.nome,
+        }
+        for registro, unidade, contexto in linhas
+    ]
+
+
 def carregar_opcoes_novo_registro(sessao, conta_id):
     """Catálogos e unidades em que a pessoa pode criar um Registro pelo G1."""
     identidade = _identidade(sessao, conta_id)

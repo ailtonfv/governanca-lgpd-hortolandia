@@ -88,22 +88,19 @@
       <span class="contador">{{ registros|length }}</span>
     </div>
     {% if registros %}
-    <div class="tabela-responsiva">
-      <table>
-        <caption>Registros LGPD que {{ identidade.nome }} pode consultar</caption>
-        <thead><tr><th scope="col">Código</th><th scope="col">Objeto</th><th scope="col">Unidade</th><th scope="col">Situação</th><th scope="col">Ação</th></tr></thead>
-        <tbody>
-        {% for registro in registros %}
-        <tr>
-          <td><strong>{{ registro.codigo_lgpd }}</strong></td>
-          <td>{{ registro.titulo }}</td>
-          <td>{{ registro.unidade }}</td>
-          <td><span class="estado estado-{{ registro.estado_codigo }}">{{ registro.estado }}</span></td>
-          <td><a class="botao-link-secundario" aria-label="Ver detalhes do Registro {{ registro.codigo_lgpd }}" href="{{ url_for('detalhe_registro', registro_id=registro.id) }}?conta_id={{ conta_id }}">Ver detalhes do Registro</a></td>
-        </tr>
-        {% endfor %}
-        </tbody>
-      </table>
+    <p class="sr-apenas">Registros LGPD que {{ identidade.nome }} pode consultar</p>
+    <div class="lista-mapeamentos-painel">
+      {% for registro in registros %}
+      <article class="cartao-mapeamento">
+        <div class="cartao-mapeamento-conteudo">
+          <p class="etiqueta codigo-registro">{{ registro.codigo_lgpd }}</p>
+          <h3>{{ registro.tipo }} · {{ registro.titulo }}</h3>
+          <p class="unidade-registro"><strong>Secretaria:</strong> {{ registro.unidade }}</p>
+          <span class="estado estado-{{ registro.estado_codigo }}">{{ registro.estado }}</span>
+        </div>
+        <a class="botao-link-secundario" aria-label="Ver detalhes do Registro {{ registro.codigo_lgpd }}" href="{{ url_for('detalhe_registro', registro_id=registro.id) }}?conta_id={{ conta_id }}">Ver detalhes do Registro</a>
+      </article>
+      {% endfor %}
     </div>
     {% else %}
     <p class="vazio">Nenhum Registro LGPD está disponível para consulta por este agente.</p>

@@ -12,7 +12,8 @@ from sqlalchemy.orm import Session
 
 from app.atribuicao_form1_integral import atribuir_arp_form1_integral
 from app.banco import motor
-from app.consultas_interface import (carregar_opcoes_novo_registro, carregar_painel,
+from app.consultas_interface import (carregar_conflitos_duplicidade_visiveis,
+                                     carregar_opcoes_novo_registro, carregar_painel,
                                      carregar_registro)
 from app.eventos import registrar_auditoria
 from app.form1_sintetico import (CATEGORIAS_DADOS, CATEGORIAS_TITULARES,
@@ -49,6 +50,43 @@ PASTA_APP = Path(__file__).resolve().parent
 app = FastAPI(title="PoC LGPD Hortolândia", docs_url=None, redoc_url=None)
 app.mount("/estaticos", StaticFiles(directory=PASTA_APP / "estaticos"), name="estaticos")
 paginas = Jinja2Templates(directory=PASTA_APP / "paginas")
+
+
+def _normalizar_cascata_abertura(opcoes, valores):
+    """Limpa escolhas dependentes que já não pertencem à cascata exibida."""
+
+    valores = {**valores, "canais_ids": list(valores.get("canais_ids", []))}
+    unidades_permitidas = {item["id"] for item in opcoes["unidades"]}
+    objeto = next(
+        (
+            item for item in opcoes["objetos"]
+            if item["id"] == valores["objeto_principal_id"]
+            and item["tipo_objeto"] == valores["tipo_objeto"]
+            and valores["unidade_id"] in item["unidades"]
+        ),
+        None,
+    )
+    objeto_invalidado = bool(valores["objeto_principal_id"] and objeto is None)
+    if valores["unidade_id"] not in unidades_permitidas or objeto_invalidado:
+        valores.update({
+            "objeto_principal_id": "",
+            "contexto_id": "",
+            "situacao_canais": "",
+            "canais_ids": [],
+        })
+        return valores, objeto_invalidado, False
+
+    contextos_permitidos = {
+        item["id"] for item in opcoes["contextos"]
+        if objeto is not None and objeto["id"] in item["objetos"]
+    }
+    contexto_invalidado = bool(
+        valores["contexto_id"]
+        and valores["contexto_id"] not in contextos_permitidos
+    )
+    if contexto_invalidado:
+        valores["contexto_id"] = ""
+    return valores, objeto_invalidado, contexto_invalidado
 
 
 def obter_sessao():
@@ -90,6 +128,7 @@ def novo_registro(
     situacao_canais: str = Query(default="", max_length=30),
     canais_ids: list[str] | None = Query(default=None),
     campos_erro: list[str] | None = Query(default=None),
+    conflitos_codigos: list[str] | None = Query(default=None),
     sessao: Session = Depends(obter_sessao),
 ):
     opcoes = carregar_opcoes_novo_registro(sessao, conta_id)
@@ -100,6 +139,20 @@ def novo_registro(
             context={"titulo": "Conta indisponível", "mensagem": "A identidade fictícia não existe ou está inativa."},
             status_code=404,
         )
+    valores, objeto_invalidado, contexto_invalidado = _normalizar_cascata_abertura(
+        opcoes,
+        {
+            "unidade_id": unidade_id,
+            "tipo_objeto": tipo_objeto,
+            "objeto_principal_id": objeto_principal_id,
+            "contexto_id": contexto_id,
+            "situacao_canais": situacao_canais,
+            "canais_ids": canais_ids or [],
+        },
+    )
+    conflitos = carregar_conflitos_duplicidade_visiveis(
+        sessao, conta_id, conflitos_codigos or [],
+    )
     return paginas.TemplateResponse(
         request=request,
         name="novo_registro.html",
@@ -109,21 +162,17 @@ def novo_registro(
             "mensagem": mensagem,
             "erro": erro,
             "comando_g1": str(uuid.uuid4()),
-            "valores": {
-                "unidade_id": unidade_id,
-                "tipo_objeto": tipo_objeto,
-                "objeto_principal_id": objeto_principal_id,
-                "contexto_id": contexto_id,
-                "situacao_canais": situacao_canais,
-                "canais_ids": canais_ids or [],
-            },
+            "valores": valores,
             "erros_campos": set(campos_erro or []),
+            "objeto_invalidado": objeto_invalidado,
+            "contexto_invalidado": contexto_invalidado,
+            "conflitos_duplicidade": conflitos,
         },
     )
 
 
 def _voltar_novo_registro(
-    *, conta_id, mensagem, valores, campos_erro=(), status_code=303,
+    *, conta_id, mensagem, valores, campos_erro=(), conflitos_codigos=(), status_code=303,
 ):
     parametros = {
         "conta_id": conta_id,
@@ -136,6 +185,7 @@ def _voltar_novo_registro(
         "situacao_canais": valores.get("situacao_canais", ""),
         "canais_ids": valores.get("canais_ids", []),
         "campos_erro": list(campos_erro),
+        "conflitos_codigos": list(conflitos_codigos),
     }
     return RedirectResponse(
         url=f"/registros/novo?{urlencode(parametros, doseq=True)}",
@@ -243,8 +293,25 @@ def criar_registro_pela_tela(
         campo = "situacao_canais"
     elif "Agente Público Autorizado" in motivo or "Secretaria" in motivo:
         campo = "unidade_id"
+    conflitos_codigos = []
+    if resultado.get("conflitos"):
+        codigos_detectados = [
+            item["registro_existente"] for item in resultado["conflitos"]
+        ]
+        conflitos_visiveis = carregar_conflitos_duplicidade_visiveis(
+            sessao, conta_id, codigos_detectados,
+        )
+        conflitos_codigos = [item["codigo_lgpd"] for item in conflitos_visiveis]
+        motivo = (
+            "Já existe Registro LGPD para este item e contexto. "
+            "Consulte abaixo o mapeamento já disponível."
+            if conflitos_visiveis else
+            "Já existe Registro LGPD para este item e contexto, mas seu perfil não "
+            "possui acesso aos detalhes. Solicite orientação à governança responsável."
+        )
     return _voltar_novo_registro(
         conta_id=conta_id, mensagem=motivo, valores=valores, campos_erro=[campo],
+        conflitos_codigos=conflitos_codigos,
     )
 
 
