@@ -783,27 +783,43 @@
     });
     atualizarCondicoes();
   });
-  (function aplicarExclusividadeAConfirmarNoBloco5() {
-    var opcoes = Array.from(document.getElementsByName('campo__5.1'));
-    var aConfirmar = opcoes.find(function (opcao) { return opcao.value === 'A confirmar'; });
-    if (!aConfirmar) return;
-    opcoes.forEach(function (opcao) {
-      opcao.addEventListener('change', function () {
-        if (!opcao.checked) return;
-        var alteradas = [];
-        if (opcao === aConfirmar) {
-          opcoes.forEach(function (outra) {
-            if (outra !== aConfirmar && outra.checked) {
-              outra.checked = false;
-              alteradas.push(outra);
+  (function aplicarExclusividadesMultisselecao8V() {
+    var raiz = document.querySelector('.form1-integral');
+    if (!raiz) return;
+    raiz.querySelectorAll('form').forEach(function (formulario) {
+      var nomes = new Set(Array.from(formulario.querySelectorAll('input[type="checkbox"][name]'))
+        .map(function (opcao) { return opcao.name; }));
+      nomes.forEach(function (nome) {
+        var opcoes = Array.from(formulario.querySelectorAll('input[type="checkbox"]'))
+          .filter(function (opcao) { return opcao.name === nome; });
+        var excludentes = opcoes.filter(function (opcao) {
+          return opcao.value === 'A confirmar' || opcao.value === 'Não se aplica'
+            || (nome === 'campo__13.1' && opcao.value === 'Nenhuma das situações acima');
+        });
+        if (!excludentes.length) return;
+        opcoes.forEach(function (opcao) {
+          opcao.addEventListener('change', function () {
+            if (!opcao.checked) return;
+            var alteradas = [];
+            if (excludentes.includes(opcao)) {
+              opcoes.forEach(function (outra) {
+                if (outra !== opcao && outra.checked) {
+                  outra.checked = false;
+                  alteradas.push(outra);
+                }
+              });
+            } else {
+              excludentes.forEach(function (excludente) {
+                if (excludente.checked) {
+                  excludente.checked = false;
+                  alteradas.push(excludente);
+                }
+              });
             }
+            alteradas.forEach(function (item) {
+              item.dispatchEvent(new Event('change', { bubbles: false }));
+            });
           });
-        } else if (aConfirmar.checked) {
-          aConfirmar.checked = false;
-          alteradas.push(aConfirmar);
-        }
-        alteradas.forEach(function (item) {
-          item.dispatchEvent(new Event('change', { bubbles: false }));
         });
       });
     });

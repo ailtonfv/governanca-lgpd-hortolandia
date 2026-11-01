@@ -37,8 +37,9 @@ def test_pre_validacao_e_consultiva_e_preserva_o_conteudo():
     assert resultado["consultiva"] is True
     assert resultado["submissao_habilitada"] is False
     assert conteudo == original
-    assert "0.2" in _ids(resultado["regras_pendentes"])
-    assert "0.3" in _ids(resultado["regras_pendentes"])
+    assert resultado["versao_politica"] == "POLITICA-F1-REV13-P0-8V-v1"
+    assert resultado["matriz_base"] == "MATRIZ-F1-REV13-OBR-v1"
+    assert {"0.2", "0.3"}.isdisjoint(_ids(resultado["regras_pendentes"]))
 
 
 def test_pendencias_identificam_etapa_e_tipo_de_destino_sem_inventar_destino_institucional():
@@ -47,7 +48,6 @@ def test_pendencias_identificam_etapa_e_tipo_de_destino_sem_inventar_destino_ins
         nome_institucional="Agente Fictício",
     )
     itens = {item["campo_id"]: item for item in resultado["incompletos"]}
-    institucionais = {item["campo_id"]: item for item in resultado["regras_pendentes"] if item.get("campo_id")}
 
     assert itens["2.2"]["etapa"] == 1 and itens["2.2"]["destino_tipo"] == "campo"
     assert itens["5.1"]["etapa"] == 2
@@ -55,8 +55,7 @@ def test_pendencias_identificam_etapa_e_tipo_de_destino_sem_inventar_destino_ins
     assert itens["12.1"]["etapa"] == 4
     assert itens["3.2"]["destino_tipo"] == "secao"
     assert itens["10.2.1"]["destino_tipo"] == "secao"
-    assert institucionais["0.2"]["destino_navegavel"] is False
-    assert institucionais["0.3"]["etapa"] is None
+    assert {"0.2", "0.3"}.isdisjoint(_ids(resultado["regras_pendentes"]))
 
 
 def test_condicional_inequivoca_distingue_inativo_de_incompleto():
@@ -150,7 +149,7 @@ def test_interface_apresenta_resumo_consultivo_sem_acao_de_submissao(sessao):
     assert pagina.status_code == 200
     assert "Pendências antes da futura submissão" in pagina.text
     assert "não submete o formulário" in pagina.text
-    assert "0.2" in pagina.text and "0.3" in pagina.text
+    assert "metadado obrigatório somente leitura sem fonte" not in pagina.text
     assert "Submeter FORM 1 integral" not in pagina.text
 
 

@@ -19,6 +19,11 @@ from app.form1_integral import (
     CONDICOES_BLOCO_14, CONDICOES_PARTICIPANTE_BLOCO_3,
     alternativas_outro_por_campo, campos_por_id,
 )
+from app.politica_form1_integral_8v import (
+    METADADOS_INSTITUCIONAIS_NAO_BLOQUEANTES,
+    VERSAO_MATRIZ_BASE_FORM1_8V,
+    VERSAO_POLITICA_FORM1_8V,
+)
 
 
 CAMINHO_MATRIZ = (Path(__file__).resolve().parents[1] / "docs" / "planejamento"
@@ -27,12 +32,12 @@ ID_CANONICO = re.compile(r"(?:\d+(?:\.\d+)*|OUV\.\d+|ESIC\.\d+)")
 CLASSE_ESSENCIAL = "Obrigatória essencial"
 CLASSE_CONDICIONAL = "Obrigatória condicional"
 CLASSE_SOMENTE_LEITURA = "Essencial, somente leitura"
+CLASSE_METADADO_NAO_BLOQUEANTE = "Metadado institucional não bloqueante, somente leitura"
 CLASSE_FACULTATIVA_REV13 = "Facultativa (REV13)"
 CLASSE_FACULTATIVA_PROPOSTA = "Facultativa nesta proposta"
 
 REGRAS_PENDENTES_GLOBAIS = (
     {"codigo": "F1-D04-DOC", "descricao": "formalizar na próxima Cartilha que o ramo de WhatsApp usa somente a alternativa canônica ‘WhatsApp corporativo’", "campos": ("8.3", "8.7", "8.8", "8.8.1", "8.9")},
-    {"codigo": "F1-D06", "descricao": "definir exclusividades ainda não formalizadas em seleções múltiplas", "campos": ()},
     {"codigo": "APROVACAO-MATRIZ", "descricao": "aprovar institucionalmente a matriz e o marco de liberação da submissão", "campos": ()},
 )
 
@@ -64,7 +69,7 @@ class RegraObrigatoriedade:
 
 @lru_cache(maxsize=1)
 def carregar_matriz_obrigatoriedade() -> dict[str, RegraObrigatoriedade]:
-    """Carrega a única matriz versionada, recusando cobertura incompleta."""
+    """Carrega a matriz vigente e aplica somente o recorte versionado do 8V."""
 
     regras: dict[str, RegraObrigatoriedade] = {}
     for linha in CAMINHO_MATRIZ.read_text(encoding="utf-8").splitlines():
@@ -79,6 +84,18 @@ def carregar_matriz_obrigatoriedade() -> dict[str, RegraObrigatoriedade]:
         )
     if len(regras) != 128 or set(regras) != set(campos_por_id()):
         raise ValueError("a matriz de obrigatoriedade não cobre exatamente o catálogo REV13")
+    for campo_id in METADADOS_INSTITUCIONAIS_NAO_BLOQUEANTES:
+        regra = regras[campo_id]
+        regras[campo_id] = RegraObrigatoriedade(
+            campo_id=regra.campo_id,
+            etapa=regra.etapa,
+            classe=CLASSE_METADADO_NAO_BLOQUEANTE,
+            condicao=regra.condicao,
+            observacao=(
+                f"{regra.observacao}; {VERSAO_POLITICA_FORM1_8V}: não bloqueante, "
+                "somente leitura quando houver fonte institucional confiável"
+            ),
+        )
     return regras
 
 
@@ -90,6 +107,9 @@ def metadado_visual_obrigatoriedade(campo_id: str) -> dict:
         CLASSE_ESSENCIAL: ("*", "Obrigatório", "obrigatorio", False),
         CLASSE_SOMENTE_LEITURA: (
             "*", "Obrigatório · somente leitura", "obrigatorio", False
+        ),
+        CLASSE_METADADO_NAO_BLOQUEANTE: (
+            "****", "Facultativo · somente leitura", "facultativo", False
         ),
         CLASSE_CONDICIONAL: (
             "**", "Obrigatório em alguns casos", "condicional", True
@@ -268,7 +288,7 @@ def pre_validar_form1_integral(conteudo: dict, *, nome_institucional: str | None
 
     identidade = {"0.1": nome_institucional, "0.2": cargo_funcao, "0.3": email_institucional}
     for campo_id, valor in identidade.items():
-        if not _respondido(valor):
+        if not _respondido(valor) and campo_id not in METADADOS_INSTITUCIONAIS_NAO_BLOQUEANTES:
             regras_pendentes.append(_item(
                 campo_id, "integracao_institucional",
                 "metadado obrigatório somente leitura sem fonte institucional autenticada",
@@ -355,6 +375,8 @@ def pre_validar_form1_integral(conteudo: dict, *, nome_institucional: str | None
 
     return {
         "consultiva": True, "submissao_habilitada": False,
+        "versao_politica": VERSAO_POLITICA_FORM1_8V,
+        "matriz_base": VERSAO_MATRIZ_BASE_FORM1_8V,
         "incompletos": incompletos, "nao_aplicaveis": nao_aplicaveis,
         "regras_pendentes": regras_pendentes,
         "por_bloco": [{"bloco": bloco, "itens": itens} for bloco, itens in

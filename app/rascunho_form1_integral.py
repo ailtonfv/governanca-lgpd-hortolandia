@@ -41,6 +41,7 @@ from app.modelos import (AtribuicaoForm1Integral, Ciclo, ConfirmacaoCanaisRegist
                           Conta, Pessoa,
                           RascunhoForm1Integral, Registro, RegistroCanal, Unidade)
 from app.permissoes import tem_papel
+from app.politica_form1_integral_8v import problema_exclusividade_multisselecao
 
 
 CAMPOS_EDITAVEIS_BLOCO_1 = frozenset({"1.1", "1.1.1", "1.4"})
@@ -296,10 +297,11 @@ def _validar_respostas_catalogadas(sessao, respostas, campos_permitidos):
             )
             if any(item not in alternativas for item in valor):
                 return f"{campo_id}: opção fora do catálogo REV13"
-            if campo_id == "13.1":
-                excludentes = {"Nenhuma das situações acima", "A confirmar", "Não se aplica"}
-                if excludentes.intersection(valor) and len(valor) != 1:
-                    return "13.1: a alternativa excludente deve ser selecionada isoladamente"
+            problema = problema_exclusividade_multisselecao(
+                campo_id, valor, alternativas
+            )
+            if problema:
+                return problema
         elif campo.alternativas:
             if valor not in campo.alternativas:
                 return f"{campo_id}: opção fora do catálogo REV13"

@@ -155,5 +155,5 @@ def test_interface_exibe_complementos_genericos_e_exclusividade_visual(sessao):
     assert pagina.status_code == 200
     assert 'name="complemento_outro__8.3"' in pagina.text
     assert 'name="complemento_outro__6.2.2"' in pagina.text
-    assert "aplicarExclusividadeAConfirmarNoBloco5" in pagina.text
+    assert "aplicarExclusividadesMultisselecao8V" in pagina.text
     assert "opcao.value === 'A confirmar'" in pagina.text
