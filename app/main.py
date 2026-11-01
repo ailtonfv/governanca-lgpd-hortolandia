@@ -83,6 +83,13 @@ def novo_registro(
     conta_id: str = Query(default="CONTA-A1", max_length=50),
     mensagem: str | None = Query(default=None, max_length=500),
     erro: bool = Query(default=False),
+    unidade_id: str = Query(default="", max_length=50),
+    tipo_objeto: str = Query(default="", max_length=20),
+    objeto_principal_id: str = Query(default="", max_length=50),
+    contexto_id: str = Query(default="", max_length=20),
+    situacao_canais: str = Query(default="", max_length=30),
+    canais_ids: list[str] | None = Query(default=None),
+    campos_erro: list[str] | None = Query(default=None),
     sessao: Session = Depends(obter_sessao),
 ):
     opcoes = carregar_opcoes_novo_registro(sessao, conta_id)
@@ -102,7 +109,37 @@ def novo_registro(
             "mensagem": mensagem,
             "erro": erro,
             "comando_g1": str(uuid.uuid4()),
+            "valores": {
+                "unidade_id": unidade_id,
+                "tipo_objeto": tipo_objeto,
+                "objeto_principal_id": objeto_principal_id,
+                "contexto_id": contexto_id,
+                "situacao_canais": situacao_canais,
+                "canais_ids": canais_ids or [],
+            },
+            "erros_campos": set(campos_erro or []),
         },
+    )
+
+
+def _voltar_novo_registro(
+    *, conta_id, mensagem, valores, campos_erro=(), status_code=303,
+):
+    parametros = {
+        "conta_id": conta_id,
+        "mensagem": mensagem,
+        "erro": "1",
+        "unidade_id": valores.get("unidade_id", ""),
+        "tipo_objeto": valores.get("tipo_objeto", ""),
+        "objeto_principal_id": valores.get("objeto_principal_id", ""),
+        "contexto_id": valores.get("contexto_id", ""),
+        "situacao_canais": valores.get("situacao_canais", ""),
+        "canais_ids": valores.get("canais_ids", []),
+        "campos_erro": list(campos_erro),
+    }
+    return RedirectResponse(
+        url=f"/registros/novo?{urlencode(parametros, doseq=True)}",
+        status_code=status_code,
     )
 
 
@@ -110,24 +147,70 @@ def novo_registro(
 def criar_registro_pela_tela(
     conta_id: str = Form(max_length=50),
     comando_id: str = Form(max_length=64),
-    tipo_objeto: str = Form(max_length=20),
-    objeto_principal_id: str = Form(max_length=50),
-    unidade_id: str = Form(max_length=50),
-    contexto_id: str = Form(max_length=20),
+    tipo_objeto: str = Form(default="", max_length=20),
+    objeto_principal_id: str = Form(default="", max_length=50),
+    unidade_id: str = Form(default="", max_length=50),
+    contexto_id: str = Form(default="", max_length=20),
+    situacao_canais: str = Form(default="", max_length=30),
     canais_ids: list[str] | None = Form(default=None),
     sessao: Session = Depends(obter_sessao),
 ):
+    valores = {
+        "unidade_id": unidade_id,
+        "tipo_objeto": tipo_objeto,
+        "objeto_principal_id": objeto_principal_id,
+        "contexto_id": contexto_id,
+        "situacao_canais": situacao_canais,
+        "canais_ids": canais_ids or [],
+    }
+    faltantes = []
+    if not unidade_id:
+        faltantes.append("unidade_id")
+    if tipo_objeto not in {"servico", "processo", "atividade"}:
+        faltantes.append("tipo_objeto")
+    if not objeto_principal_id:
+        faltantes.append("objeto_principal_id")
+    if not situacao_canais:
+        faltantes.append("situacao_canais")
+    if not contexto_id:
+        faltantes.append("contexto_id")
+    if faltantes:
+        return _voltar_novo_registro(
+            conta_id=conta_id,
+            mensagem="Revise os campos obrigatórios destacados antes de criar o Registro.",
+            valores=valores,
+            campos_erro=faltantes,
+        )
+    if situacao_canais == "informacao_insuficiente":
+        return _voltar_novo_registro(
+            conta_id=conta_id,
+            mensagem=("O catálogo ainda não permite confirmar os canais habituais deste item. "
+                      "Solicite a revisão cadastral antes de criar o Registro."),
+            valores=valores,
+            campos_erro=["situacao_canais"],
+        )
+    if situacao_canais not in {"identificados", "nenhum"}:
+        return _voltar_novo_registro(
+            conta_id=conta_id,
+            mensagem="A confirmação dos canais habituais é inválida.",
+            valores=valores,
+            campos_erro=["situacao_canais"],
+        )
     objeto = sessao.get(ObjetoCatalogo, objeto_principal_id)
     if objeto is None or not objeto.ativo or tipo_objeto not in {"servico", "processo", "atividade"}:
-        parametros = {"conta_id": conta_id, "mensagem": "Objeto ou tipo fora do catálogo ativo.", "erro": "1"}
-        return RedirectResponse(url=f"/registros/novo?{urlencode(parametros)}", status_code=303)
+        return _voltar_novo_registro(
+            conta_id=conta_id,
+            mensagem=("Objeto ou tipo fora do catálogo ativo. Se o item ainda não existe, "
+                      "solicite revisão cadastral; não escolha outro item por aproximação."),
+            valores=valores, campos_erro=["objeto_principal_id"],
+        )
     if objeto.tipo_objeto != tipo_objeto:
-        parametros = {
-            "conta_id": conta_id,
-            "mensagem": "O tipo escolhido não corresponde ao item do catálogo.",
-            "erro": "1",
-        }
-        return RedirectResponse(url=f"/registros/novo?{urlencode(parametros)}", status_code=303)
+        return _voltar_novo_registro(
+            conta_id=conta_id,
+            mensagem="O tipo escolhido não corresponde ao item do catálogo.",
+            valores=valores,
+            campos_erro=["tipo_objeto", "objeto_principal_id"],
+        )
     resultado = criar_registro(
         sessao,
         comando_id=comando_id,
@@ -136,21 +219,33 @@ def criar_registro_pela_tela(
         contexto_id=contexto_id,
         titulo_objeto=objeto.nome_canonico,
         objeto_principal_id=objeto.id,
-        canais_confirmados_ids=[] if canais_ids is None else canais_ids,
+        canais_confirmados_ids=canais_ids or [],
+        situacao_canais=situacao_canais,
     )
     sessao.commit()
     if resultado["permitido"]:
         parametros = {
             "conta_id": conta_id,
-            "mensagem": "Registro criado. Confirme o contexto antes de iniciar o FORM 1.",
+            "mensagem": ("Registro criado. Agora confirme quem será o responsável pelo "
+                         "preenchimento do FORM 1."),
             "erro": "0",
         }
         return RedirectResponse(
-            url=f"/registros/{resultado['registro_id']}?{urlencode(parametros)}",
+            url=(f"/registros/{resultado['registro_id']}?{urlencode(parametros)}"
+                 "#titulo-atribuicao-arp"),
             status_code=303,
         )
-    parametros = {"conta_id": conta_id, "mensagem": resultado["motivo"], "erro": "1"}
-    return RedirectResponse(url=f"/registros/novo?{urlencode(parametros)}", status_code=303)
+    motivo = resultado["motivo"]
+    campo = "objeto_principal_id"
+    if "contexto" in motivo:
+        campo = "contexto_id"
+    elif "canal" in motivo:
+        campo = "situacao_canais"
+    elif "Agente Público Autorizado" in motivo or "Secretaria" in motivo:
+        campo = "unidade_id"
+    return _voltar_novo_registro(
+        conta_id=conta_id, mensagem=motivo, valores=valores, campos_erro=[campo],
+    )
 
 
 @app.get("/registros/{registro_id}", response_class=HTMLResponse)

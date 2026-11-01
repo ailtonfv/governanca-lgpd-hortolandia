@@ -280,7 +280,9 @@ def test_tela_apresenta_canais_habituais_depois_do_objeto():
     assert "Balcão de atendimento (fictício)" in resposta.text
     assert "Portal da Prefeitura (fictício)" in resposta.text
     assert 'data-objeto-canais="OBJ-SRV-001"' in resposta.text
-    assert "Desmarcar todas as opções confirma que nenhum canal se aplica" in resposta.text
+    assert "A ausência de canais no catálogo não significa automaticamente" in resposta.text
+    assert "Nenhum canal habitual se aplica" in resposta.text
+    assert "O catálogo não possui informação suficiente" in resposta.text
     assert "cidadãos, telefonemas nem protocolos individuais" in resposta.text
 
 
@@ -294,6 +296,7 @@ def test_tela_confirma_canal_e_exibe_retrato_no_registro(sessao):
             "objeto_principal_id": "OBJ-SRV-002",
             "unidade_id": "UNID-NORTE",
             "contexto_id": "CTX-TRIB-03",
+            "situacao_canais": "identificados",
             "canais_ids": "CNL-001",
         },
     )
@@ -319,6 +322,7 @@ def test_tela_nao_aceita_canal_forjado(sessao):
             "objeto_principal_id": "OBJ-SRV-002",
             "unidade_id": "UNID-NORTE",
             "contexto_id": "CTX-TRIB-03",
+            "situacao_canais": "identificados",
             "canais_ids": "CNL-003",
         },
     )

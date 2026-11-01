@@ -135,6 +135,7 @@ th { color: #425466; font-size: .8rem; text-transform: uppercase; letter-spacing
 .sigla-dado-legenda { display: inline-block; min-width: 2.8rem; margin-right: .25rem; padding: .08rem .45rem; border: 1px solid #9fb6c4; border-radius: 999px; background: #eef6fa; color: #27485b; font-size: .75rem; text-align: center; }
 .sigla-dado-legenda-dps { border-color: #c99b9b; background: #fff1f2; color: #7f1d1d; }
 .amostra-obrigatoriedade, .marcador-obrigatoriedade { font-weight: 900; }
+.marcador-obrigatorio { color: #991b1b; font-weight: 900; }
 .amostra-obrigatoriedade.obrigatorio { color: #991b1b; }
 .amostra-obrigatoriedade.condicional { color: #92400e; }
 .amostra-obrigatoriedade.recomendado, .amostra-obrigatoriedade.facultativo { color: var(--texto); }
@@ -156,6 +157,9 @@ legend { padding: 0 .4rem; color: var(--azul-escuro); font-weight: 800; }
 .grade-opcoes { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: .65rem 1rem; }
 .opcao { display: flex; align-items: start; gap: .55rem; margin: 0; font-weight: 500; }
 .opcao input { margin-top: .3rem; accent-color: var(--azul); }
+.opcao-situacao-canal { margin-top: .75rem; padding: .7rem; border: 1px solid var(--borda); border-radius: .45rem; background: #fbfdfe; }
+.erro-campo { margin: .35rem 0 0; color: #881337; font-size: .9rem; font-weight: 700; }
+[aria-invalid="true"] { border-color: #b91c1c; box-shadow: 0 0 0 .12rem rgba(185, 28, 28, .12); }
 .opcao-conteudo { display: flex; flex-direction: column; align-items: flex-start; gap: .18rem; }
 .classificacao-dado { display: inline-block; border: 1px solid #9fb6c4; border-radius: 999px; padding: .08rem .45rem; background: #eef6fa; color: #27485b; font-size: .75rem; font-weight: 800; }
 .classificacao-dado-sensivel { border-color: #c99b9b; background: #fff1f2; color: #7f1d1d; }

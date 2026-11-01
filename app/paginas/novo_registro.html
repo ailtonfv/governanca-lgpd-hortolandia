@@ -20,43 +20,55 @@
     <input type="hidden" name="conta_id" value="{{ conta_id }}">
     <input type="hidden" name="comando_id" value="{{ comando_g1 }}">
 
-    <label for="unidade_id">1. Secretaria responsável pelo Registro</label>
-    <select id="unidade_id" name="unidade_id" required>
-      {% for unidade in unidades %}<option value="{{ unidade.id }}">{{ unidade.nome }}</option>{% endfor %}
+    <label for="unidade_id">1. Secretaria responsável pelo Registro <span class="marcador-obrigatorio" aria-label="obrigatório">*</span></label>
+    <select id="unidade_id" name="unidade_id" required
+            {% if 'unidade_id' in erros_campos %}aria-invalid="true" aria-describedby="erro-unidade_id"{% endif %}>
+      <option value="">Selecione a Secretaria</option>
+      {% for unidade in unidades %}<option value="{{ unidade.id }}" {% if valores.unidade_id == unidade.id %}selected{% endif %}>{{ unidade.nome }}</option>{% endfor %}
     </select>
+    {% if 'unidade_id' in erros_campos %}<p id="erro-unidade_id" class="erro-campo">Selecione uma Secretaria em que você seja o APA autorizado.</p>{% endif %}
     <p class="ajuda">Selecione a Secretaria que coordena e mantém este mapeamento. A lista é fechada e respeita o alcance institucional do agente; outras Secretarias poderão participar posteriormente.</p>
 
     <fieldset>
-      <legend>2. O que será mapeado?</legend>
+      <legend>2. O que será mapeado? <span class="marcador-obrigatorio" aria-label="obrigatório">*</span></legend>
       <p class="ajuda">Escolha a natureza do item que será documentado.</p>
       <div class="grade-opcoes grade-tipos">
-        <label class="opcao"><input type="radio" name="tipo_objeto" value="servico" required> <span><strong>Serviço</strong><br>O que é entregue ao cidadão.</span></label>
-        <label class="opcao"><input type="radio" name="tipo_objeto" value="processo" required> <span><strong>Processo</strong><br>Sequência que produz um resultado.</span></label>
-        <label class="opcao"><input type="radio" name="tipo_objeto" value="atividade" required> <span><strong>Atividade</strong><br>Etapa concreta de execução.</span></label>
+        <label class="opcao"><input type="radio" name="tipo_objeto" value="servico" required {% if valores.tipo_objeto == 'servico' %}checked{% endif %}> <span><strong>Serviço</strong><br>O que é entregue ao cidadão.</span></label>
+        <label class="opcao"><input type="radio" name="tipo_objeto" value="processo" required {% if valores.tipo_objeto == 'processo' %}checked{% endif %}> <span><strong>Processo</strong><br>Sequência que produz um resultado.</span></label>
+        <label class="opcao"><input type="radio" name="tipo_objeto" value="atividade" required {% if valores.tipo_objeto == 'atividade' %}checked{% endif %}> <span><strong>Atividade</strong><br>Etapa concreta de execução.</span></label>
       </div>
+      {% if 'tipo_objeto' in erros_campos %}<p class="erro-campo">Escolha Serviço, Processo ou Atividade.</p>{% endif %}
     </fieldset>
 
-    <label for="objeto_principal_id">3. Item do catálogo oficial</label>
-    <select id="objeto_principal_id" name="objeto_principal_id" required>
+    <label for="objeto_principal_id">3. Item do catálogo oficial <span class="marcador-obrigatorio" aria-label="obrigatório">*</span></label>
+    <select id="objeto_principal_id" name="objeto_principal_id" required
+            {% if 'objeto_principal_id' in erros_campos %}aria-invalid="true" aria-describedby="erro-objeto_principal_id"{% endif %}>
       <option value="">Selecione depois de escolher o tipo</option>
       {% for objeto in objetos %}
-      <option value="{{ objeto.id }}" data-tipo="{{ objeto.tipo_objeto }}" data-unidades="{{ objeto.unidades|join(',') }}">{{ objeto.tipo_objeto|capitalize }} · {{ objeto.nome_canonico }}</option>
+      <option value="{{ objeto.id }}" data-tipo="{{ objeto.tipo_objeto }}" data-unidades="{{ objeto.unidades|join(',') }}" {% if valores.objeto_principal_id == objeto.id %}selected{% endif %}>{{ objeto.tipo_objeto|capitalize }} · {{ objeto.nome_canonico }}</option>
       {% endfor %}
     </select>
+    {% if 'objeto_principal_id' in erros_campos %}<p id="erro-objeto_principal_id" class="erro-campo">Selecione um item oficial coerente com a Secretaria e o tipo escolhidos.</p>{% endif %}
     <p class="ajuda">O nome oficial vem do catálogo; não é digitado livremente.</p>
 
-    <fieldset id="canais-habituais" aria-describedby="ajuda-canais">
-      <legend>4. Canais habituais aplicáveis</legend>
-      <p class="ajuda" id="ajuda-canais">Confirme somente os meios habituais pelos quais a demanda chega a este objeto. Eles não representam cidadãos, telefonemas nem protocolos individuais. Desmarcar todas as opções confirma que nenhum canal se aplica.</p>
+    <fieldset id="canais-habituais" aria-describedby="ajuda-canais" {% if 'situacao_canais' in erros_campos %}aria-invalid="true"{% endif %}>
+      <legend>4. Canais habituais aplicáveis <span class="marcador-obrigatorio" aria-label="obrigatório">*</span></legend>
+      <p class="ajuda" id="ajuda-canais">Confirme somente os meios habituais pelos quais a demanda chega a este objeto. Eles não representam cidadãos, telefonemas nem protocolos individuais. A ausência de canais no catálogo não significa automaticamente que nenhum canal se aplica.</p>
       {% for objeto in objetos %}
         {% if objeto.canais %}
         <div class="grupo-canais" data-objeto-canais="{{ objeto.id }}" hidden>
+          <label class="opcao opcao-situacao-canal">
+            <input type="radio" name="situacao_canais" value="identificados" required
+                   {% if valores.situacao_canais == 'identificados' %}checked{% endif %} disabled>
+            <span><strong>Confirmo os canais habituais identificados abaixo</strong><br>Revise e mantenha marcados somente os canais aplicáveis.</span>
+          </label>
           <p><strong>{{ objeto.nome_canonico }}</strong></p>
           <div class="grade-opcoes">
             {% for canal in objeto.canais %}
             <label class="opcao" for="canal-{{ objeto.id }}-{{ canal.id }}">
               <input id="canal-{{ objeto.id }}-{{ canal.id }}" type="checkbox"
-                     name="canais_ids" value="{{ canal.id }}" checked disabled>
+                     name="canais_ids" value="{{ canal.id }}"
+                     {% if canal.id in valores.canais_ids %}checked{% endif %} disabled>
               <span>{{ canal.nome }}</span>
             </label>
             {% endfor %}
@@ -64,15 +76,29 @@
         </div>
         {% endif %}
       {% endfor %}
-      <p id="canais-sem-vinculo" class="aviso-leitura" hidden>Este item não possui canais habituais vigentes no catálogo. A confirmação será registrada sem canais.</p>
+      <p id="canais-sem-vinculo" class="aviso-leitura" hidden>O catálogo não apresenta canais habituais vigentes para este item. Confirme expressamente uma das situações abaixo; o sistema não interpretará essa ausência como “nenhum canal”.</p>
+      <label class="opcao opcao-situacao-canal">
+        <input type="radio" name="situacao_canais" value="nenhum" required
+               {% if valores.situacao_canais == 'nenhum' %}checked{% endif %}>
+        <span><strong>Nenhum canal habitual se aplica</strong><br>Confirmação expressa do APA para este objeto.</span>
+      </label>
+      <label class="opcao opcao-situacao-canal">
+        <input type="radio" name="situacao_canais" value="informacao_insuficiente" required
+               {% if valores.situacao_canais == 'informacao_insuficiente' %}checked{% endif %}>
+        <span><strong>O catálogo não possui informação suficiente</strong><br>Não é possível afirmar que nenhum canal se aplica; a criação aguardará revisão cadastral.</span>
+      </label>
+      {% if 'situacao_canais' in erros_campos %}<p class="erro-campo">Confirme os canais identificados, a inexistência aplicável ou a insuficiência cadastral.</p>{% endif %}
     </fieldset>
 
-    <label for="contexto_id">5. Contexto de atuação</label>
-    <select id="contexto_id" name="contexto_id" aria-describedby="exemplo-contexto" required>
+    <label for="contexto_id">5. Contexto de atuação <span class="marcador-obrigatorio" aria-label="obrigatório">*</span></label>
+    <select id="contexto_id" name="contexto_id" required
+            aria-describedby="exemplo-contexto{% if 'contexto_id' in erros_campos %} erro-contexto_id{% endif %}"
+            {% if 'contexto_id' in erros_campos %}aria-invalid="true"{% endif %}>
       <option value="">Selecione o contexto</option>
-      {% for contexto in contextos %}<option value="{{ contexto.id }}" data-objetos="{{ contexto.objetos|join(',') }}">{{ contexto.nome }}</option>{% endfor %}
+      {% for contexto in contextos %}<option value="{{ contexto.id }}" data-objetos="{{ contexto.objetos|join(',') }}" {% if valores.contexto_id == contexto.id %}selected{% endif %}>{{ contexto.nome }}</option>{% endfor %}
     </select>
-    <p class="ajuda" id="exemplo-contexto"><strong>Exemplo — fornecimento de medicamento de alto custo</strong><br><strong>Contexto:</strong> Assistência farmacêutica.<br><strong>Finalidade no FORM 1:</strong> utilizar somente os dados de identificação, contato e saúde necessários para verificar os requisitos, fornecer o medicamento e acompanhar o tratamento.<br><strong>Pergunta-chave:</strong> para que os dados pessoais são utilizados?</p>
+    {% if 'contexto_id' in erros_campos %}<p id="erro-contexto_id" class="erro-campo">Selecione um contexto permitido para o item do catálogo.</p>{% endif %}
+    <p class="ajuda" id="exemplo-contexto"><strong>Ajuda sobre contexto de atuação</strong><br>O contexto descreve a frente institucional em que o objeto atua. Ele não é a finalidade do tratamento. A finalidade — para que os dados pessoais são utilizados — será descrita no FORM 1.</p>
 
     <div class="rodape-formulario">
       <p>Ao confirmar, o G1 criará o Registro e o FORM 1 no estado “Não iniciado”.</p>
@@ -91,38 +117,70 @@
   const contexto = document.getElementById('contexto_id');
   const gruposCanais = document.querySelectorAll('[data-objeto-canais]');
   const canaisSemVinculo = document.getElementById('canais-sem-vinculo');
-  function filtrarCanais() {
+  const ajudaContexto = document.getElementById('exemplo-contexto');
+  const situacoesCanais = document.querySelectorAll('input[name="situacao_canais"]');
+  function atualizarAjudaContexto() {
+    const selecionado = contexto.options[contexto.selectedIndex];
+    if (selecionado?.value) {
+      ajudaContexto.innerHTML = `<strong>Contexto selecionado:</strong> ${selecionado.textContent}.<br>O contexto descreve a frente institucional em que o objeto atua. Ele não é a finalidade do tratamento. A finalidade — para que os dados pessoais são utilizados — será descrita no FORM 1.`;
+    } else {
+      ajudaContexto.innerHTML = '<strong>Ajuda sobre contexto de atuação</strong><br>O contexto descreve a frente institucional em que o objeto atua. Ele não é a finalidade do tratamento. A finalidade — para que os dados pessoais são utilizados — será descrita no FORM 1.';
+    }
+  }
+  function filtrarCanais(limpar = true) {
     let quantidadeVisivel = 0;
+    if (limpar) {
+      situacoesCanais.forEach((campo) => { campo.checked = false; });
+    }
     for (const grupo of gruposCanais) {
       const ativo = Boolean(objeto.value && grupo.dataset.objetoCanais === objeto.value);
       grupo.hidden = !ativo;
+      const confirmacao = grupo.querySelector('input[name="situacao_canais"]');
+      confirmacao.disabled = !ativo;
+      if (ativo && limpar) confirmacao.checked = true;
       for (const campo of grupo.querySelectorAll('input[name="canais_ids"]')) {
-        campo.disabled = !ativo;
-        if (ativo) quantidadeVisivel += 1;
+        campo.disabled = !ativo || !confirmacao.checked;
+        if (ativo) {
+          quantidadeVisivel += 1;
+          if (limpar) campo.checked = true;
+        }
       }
     }
     canaisSemVinculo.hidden = !objeto.value || quantidadeVisivel > 0;
   }
-  function filtrarContextos() {
+  function filtrarContextos(limpar = true) {
     for (const opcao of contexto.options) {
       const objetos = (opcao.dataset.objetos || '').split(',');
       opcao.hidden = Boolean(opcao.value && !objetos.includes(objeto.value));
     }
-    contexto.value = '';
-    filtrarCanais();
+    if (limpar || contexto.selectedOptions[0]?.hidden) contexto.value = '';
+    atualizarAjudaContexto();
+    filtrarCanais(limpar);
   }
-  function filtrarObjetos() {
+  function filtrarObjetos(limpar = true) {
     const tipo = document.querySelector('input[name="tipo_objeto"]:checked')?.value;
     for (const opcao of objeto.options) {
       const unidades = (opcao.dataset.unidades || '').split(',');
       opcao.hidden = Boolean(opcao.value && (opcao.dataset.tipo !== tipo || !unidades.includes(unidade.value)));
     }
-    objeto.value = '';
-    filtrarContextos();
+    if (limpar || objeto.selectedOptions[0]?.hidden) objeto.value = '';
+    filtrarContextos(limpar);
   }
-  tipos.forEach((item) => item.addEventListener('change', filtrarObjetos));
-  unidade.addEventListener('change', filtrarObjetos);
-  objeto.addEventListener('change', filtrarContextos);
-  filtrarContextos();
+  tipos.forEach((item) => item.addEventListener('change', () => filtrarObjetos(true)));
+  unidade.addEventListener('change', () => filtrarObjetos(true));
+  objeto.addEventListener('change', () => filtrarContextos(true));
+  contexto.addEventListener('change', atualizarAjudaContexto);
+  situacoesCanais.forEach((situacao) => situacao.addEventListener('change', () => {
+    const identificados = situacao.value === 'identificados' && situacao.checked;
+    for (const grupo of gruposCanais) {
+      if (!grupo.hidden) {
+        for (const campo of grupo.querySelectorAll('input[name="canais_ids"]')) {
+          campo.disabled = !identificados;
+          if (!identificados) campo.checked = false;
+        }
+      }
+    }
+  }));
+  filtrarObjetos(false);
 </script>
 {% endblock %}

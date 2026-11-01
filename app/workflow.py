@@ -161,7 +161,7 @@ def acoes_para(sessao, pessoa_id, registro_id):
 def criar_registro(sessao, *, comando_id, conta_id, unidade_id, contexto_id, titulo_objeto,
                    objeto_principal_id, objetos_abrangidos_ids=(), objetos_citados=None,
                    resolucao_familia=None, justificativa=None, momento=None,
-                   canais_confirmados_ids=None):
+                   canais_confirmados_ids=None, situacao_canais=None):
     """Ato G1 — Criar Registro (SAD 04, seção 7), com a prevenção de duplicidade (DA-36, DA-38, D1, D2).
 
     Papéis EXPLÍCITOS (nunca pela ordem de uma lista):
@@ -174,6 +174,9 @@ def criar_registro(sessao, *, comando_id, conta_id, unidade_id, contexto_id, tit
     canais_confirmados_ids: quando diferente de ``None``, confirmação explícita
       dos canais habituais do objeto principal; uma lista vazia confirma nenhum.
       ``None`` preserva integralmente o percurso legado da PoC nuclear.
+    situacao_canais: no percurso ampliado da abertura, explicita se o APA
+      confirmou canais identificados ou confirmou que nenhum se aplica. O valor
+      ``None`` preserva as chamadas anteriores e o contrato nuclear.
 
     Ordem (DA-38, item 9): barreiras -> 1. equivalência -> 2. família -> 3. alerta estrutural -> resultado.
     Devolve o RESULTADO (dicionário). Numa repetição do pedido, o mesmo resultado com reexecutado = True.
@@ -189,6 +192,8 @@ def criar_registro(sessao, *, comando_id, conta_id, unidade_id, contexto_id, tit
                   "resolucao_familia": resolucao_familia, "justificativa": justificativa}
     if canais_informados is not None:
         parametros["canais_confirmados_ids"] = sorted(canais_informados)
+    if situacao_canais is not None:
+        parametros["situacao_canais"] = situacao_canais
 
     conta = sessao.get(Conta, conta_id)
     pessoa_id = conta.pessoa_id if conta is not None else None
@@ -253,6 +258,20 @@ def criar_registro(sessao, *, comando_id, conta_id, unidade_id, contexto_id, tit
         )
     if resolucao_familia is not None and resolucao_familia not in RESOLUCOES_DE_FAMILIA:
         return negar("resolução de advertência inválida")
+
+    # A interface ampliada precisa registrar uma decisão inequívoca do APA.
+    # Chamadas anteriores continuam compatíveis: a lista vazia já significava
+    # confirmação explícita de nenhum canal, e uma lista preenchida significava
+    # confirmação dos canais selecionados.
+    situacao_efetiva = situacao_canais
+    if situacao_efetiva is None and canais_informados is not None:
+        situacao_efetiva = "nenhum" if not canais_informados else "identificados"
+    if situacao_efetiva not in {None, "identificados", "nenhum"}:
+        return negar("situação de confirmação dos canais inválida")
+    if situacao_efetiva == "identificados" and not canais_informados:
+        return negar("selecione ao menos um canal habitual identificado")
+    if situacao_efetiva == "nenhum" and canais_informados:
+        return negar("a confirmação de nenhum canal não aceita canais selecionados")
 
     # A confirmação ampliada é opcional para preservar o contrato nuclear. Quando
     # usada, aceita um subconjunto (inclusive vazio) dos vínculos vigentes do objeto

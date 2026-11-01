@@ -111,17 +111,15 @@ def test_novo_registro_define_tipo_unidade_principal_e_contexto_antes_do_form1()
     assert "Confirmar e criar Registro LGPD" in resposta.text
 
 
-def test_contexto_inicial_diferencia_contexto_e_finalidade_por_exemplo():
+def test_contexto_inicial_diferencia_contexto_e_finalidade_sem_exemplo_incoerente():
     resposta = cliente.get("/registros/novo", params={"conta_id": "CONTA-A1"})
 
     assert resposta.status_code == 200
     assert 'aria-describedby="exemplo-contexto"' in resposta.text
-    assert "fornecimento de medicamento de alto custo" in resposta.text
-    assert "Assistência farmacêutica" in resposta.text
-    assert "somente os dados de identificação, contato e saúde necessários" in resposta.text
-    assert "verificar os requisitos, fornecer o medicamento" in resposta.text
-    assert "Pergunta-chave:" in resposta.text
-    assert "para que os dados pessoais são utilizados?" in resposta.text
+    assert "Ajuda sobre contexto de atuação" in resposta.text
+    assert "O contexto descreve a frente institucional" in resposta.text
+    assert "Ele não é a finalidade do tratamento" in resposta.text
+    assert "fornecimento de medicamento de alto custo" not in resposta.text
 
 
 def test_catalogo_da_tela_respeita_a_secretaria_do_agente():
@@ -147,6 +145,7 @@ def test_g1_recusa_item_de_outra_secretaria_mesmo_se_forjado():
             "objeto_principal_id": "OBJ-SRV-902",
             "unidade_id": "UNID-NORTE",
             "contexto_id": "CTX-TRIB-03",
+            "situacao_canais": "nenhum",
         },
     )
 
@@ -175,6 +174,7 @@ def test_g1_recusa_contexto_incompativel_mesmo_se_forjado():
             "objeto_principal_id": "OBJ-SRV-002",
             "unidade_id": "UNID-NORTE",
             "contexto_id": "CTX-URB-01",
+            "situacao_canais": "nenhum",
         },
     )
 
@@ -194,11 +194,12 @@ def test_g1_pela_tela_cria_registro_contextualizado_e_form1_nao_iniciado():
             "objeto_principal_id": "OBJ-SRV-002",
             "unidade_id": "UNID-NORTE",
             "contexto_id": "CTX-TRIB-03",
+            "situacao_canais": "nenhum",
         },
     )
 
     assert resposta.status_code == 200
-    assert "Registro criado. Confirme o contexto antes de iniciar o FORM 1." in resposta.text
+    assert "Registro criado. Agora confirme quem será o responsável pelo preenchimento" in resposta.text
     assert "ciclo 1" in resposta.text
     assert "Certidão de débitos (fictício)" in resposta.text
     assert "Planejamento Urbano e Gestão Estratégica" in resposta.text
@@ -227,6 +228,7 @@ def test_tela_recusa_tipo_diferente_do_item_do_catalogo():
             "objeto_principal_id": "OBJ-ATV-020",
             "unidade_id": "UNID-NORTE",
             "contexto_id": "CTX-TRIB-01",
+            "situacao_canais": "nenhum",
         },
     )
 
@@ -246,6 +248,7 @@ def test_percurso_completo_contexto_g1_i1_i2_pela_interface():
             "objeto_principal_id": "OBJ-ATV-001",
             "unidade_id": "UNID-NORTE",
             "contexto_id": "CTX-TRIB-02",
+            "situacao_canais": "nenhum",
         },
         follow_redirects=False,
     )

@@ -10,6 +10,7 @@
 - Os dados funcionais do agente têm outro propósito: autenticação, autorização, autoria e auditoria.
 - Antes do FORM 1, o agente seleciona primeiro a Secretaria responsável pelo Registro dentro de seu alcance institucional.
 - Em seguida, define se mapeará um serviço, processo ou atividade do catálogo e escolhe o contexto de atuação.
+- Antes da criação, confirma expressamente os canais habituais identificados ou que nenhum canal se aplica. Catálogo sem informação não é interpretado como ausência de canal e exige revisão cadastral.
 - A Prefeitura permanece a controladora; a Secretaria é a responsável interna pelo Registro. Departamentos e setores podem executar partes do objeto sem substituir essa responsabilidade.
 - O ponto focal da LGPD será apresentado como **Agente Público Autorizado responsável pelo Registro**: abre o Registro, coordena o levantamento local, acompanha pendências e encaminha o FORM 1. Quando também autorizado para o preenchimento, pode executar pessoalmente os atos do FORM 1.
 - Na PoC ampliada, a forma curta **APA — Agente Público Autorizado** identifica essa função de abertura. **ARP — Agente Responsável pelo Preenchimento** identifica a pessoa designada para executar o levantamento factual do FORM 1 integral. APA e ARP podem ser a mesma pessoa.
@@ -31,8 +32,14 @@ flowchart TD
     S --> C["Item do catálogo oficial"]
     P --> C
     V --> C
-    C --> X["Contexto de atuação"]
+    C --> K{"Canais habituais<br/>confirmáveis?"}
+    K -- "identificados" --> X["Contexto de atuação"]
+    K -- "nenhum aplicável<br/>confirmado pelo APA" --> X
+    K -- "informação insuficiente" --> R["Revisão cadastral<br/>sem criar Registro"]
     X --> G["G1 cria Registro + ciclo 1<br/>FORM 1 Não iniciado"]
+    G --> D{"Quem preencherá<br/>o FORM 1?"}
+    D --> A["O próprio APA autorizado"]
+    D --> O["Outro agente elegível<br/>matrícula + nome"]
 ```
 
 ## Catálogos que condicionam o percurso
@@ -40,16 +47,17 @@ flowchart TD
 - A lista de objetos não deverá ser global: depois da Secretaria e do tipo, a tela mostrará somente itens relacionados àquela Secretaria.
 - A Carta de Serviços e o portal municipal poderão iniciar a relação de serviços; os FORMs recebidos das Secretarias serão fonte de candidatos a serviços, processos e atividades.
 - Um item informado no FORM não se torna oficial automaticamente. A curadoria deverá verificar se há tratamento de dados pessoais, classificar o tipo, normalizar duplicidades, vincular as Secretarias responsáveis ou participantes e atribuir identificador canônico.
-- Após o objeto, a tela deverá oferecer apenas contextos de atuação compatíveis. Se nenhum servir, o agente solicitará revisão do catálogo, sem digitação livre.
-- Canal de atendimento — inclusive o 156 — não é um quarto tipo de objeto. Será apresentado como relação informativa do catálogo. Só terá Registro próprio quando realizar tratamento autônomo de dados pessoais; quando apenas encaminhar, será apoio do Registro principal.
+- Após o objeto, a tela oferece os canais habituais catalogados e exige decisão expressa do APA. O APA pode confirmar um ou vários canais identificados ou confirmar que nenhum se aplica. Se o catálogo não possuir informação suficiente, a abertura é interrompida para revisão cadastral; a ausência de vínculo nunca é convertida automaticamente em “nenhum”.
+- Depois dos canais, a tela oferece apenas contextos de atuação compatíveis. Se nenhum servir, o agente solicitará revisão do catálogo, sem digitação livre. A ajuda identifica o contexto selecionado e o distingue da finalidade do tratamento, que será descrita no FORM 1.
+- Canal de atendimento — inclusive o 156 — não é um quarto tipo de objeto. Só terá Registro próprio quando realizar tratamento autônomo de dados pessoais; quando apenas encaminhar, será apoio do Registro principal.
 
 ```mermaid
 flowchart LR
     U["Secretaria responsável"] --> T["Serviço · processo · atividade"]
     T --> O["Objeto ligado à Secretaria"]
-    O --> X["Contexto permitido"]
+    O --> K["Canais habituais<br/>confirmação explícita"]
+    K --> X["Contexto permitido"]
     X --> G["G1"]
-    O -. "consulta" .-> K["Canais relacionados"]
 ```
 
 As relações **Secretaria ↔ objeto** e **objeto ↔ contexto permitido** possuem estruturas próprias, com fonte e vigência; a primeira também distingue os papéis `RESPONSAVEL` e `PARTICIPANTE`. No corte atual, a tela oferece somente os vínculos fictícios vigentes da Secretaria e do item escolhidos, e o G1 repete as duas autorizações no servidor. A curadoria e a carga institucional dos vínculos continuam pendentes (O-80), mas não exigirão mudança no percurso da interface.
@@ -94,6 +102,8 @@ Matrículas, pessoas, designações, objetos, contextos e Registros atuais são 
 O primeiro corte permite escolher a Secretaria responsável entre aquelas nas quais o agente fictício possui `responsavel_registro`. O preenchimento exige a autorização técnica distinta `preenchedor`. O Agente Público Autorizado responsável pelo Registro pode acumular ambas e executar abertura e preenchimento; outro servidor pode possuir somente `preenchedor` e colaborar com autoria individual. A seleção da Secretaria deverá vir de uma lista fechada das 18 Secretarias, sem digitação livre. O modelo preserva internamente o identificador técnico `unidade_principal_id`; essa nomenclatura não precisa ser exposta ao agente. O cadastro permanente de Secretarias participantes continua reservado à PoC ampliada; no M1a, a colaboração intersecretarial também é demonstrada pelo percurso de pendência sem transferência da responsabilidade principal.
 
 O primeiro incremento da PoC ampliada acrescenta uma projeção do ARP atual vinculada ao Registro e preserva o APA de abertura em `Registro.criado_por`. Cada atribuição autorizada entra no livro de atos; a projeção mantém somente a situação vigente. Nome, função e e-mail dos itens 0.1 a 0.3 somente poderão ser exibidos quando vierem da identidade institucional confirmada. A PoC atual dispõe de nome fictício, mas ainda não possui cargo/função nem e-mail institucional.
+
+Depois que o G1 cria o Registro, a interface mantém o ARP como pendência explícita e conduz o APA à escolha entre preencher pessoalmente ou indicar outro agente. O próprio APA somente pode assumir quando já possuir autorização de `preenchedor`; a alternativa “outro” lista apenas pessoas elegíveis com conta ativa e designação vigente na Secretaria. A atribuição registra Registro, autor, destinatário, data e versão, é idempotente e não concede permissão. Até essa confirmação, nenhum agente não autorizado pode iniciar o FORM 1.
 
 O escopo desta PoC está restrito às 18 Secretarias da Administração Direta. O Hortoprev, autarquia da Administração Indireta, não integra o catálogo nem os percursos demonstrados nesta etapa. Uma eventual inclusão futura exigirá decisão própria de escopo e a revisão da denominação apresentada ao agente.
 

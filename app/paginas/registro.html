@@ -46,6 +46,9 @@
     <div><strong>APA em exercício</strong><br>{% if registro.form1_integral.apa_atual %}Matrícula {{ registro.form1_integral.apa_atual.matricula }} · {{ registro.form1_integral.apa_atual.nome }}{% else %}Não configurado{% endif %}{% if registro.form1_integral.apa_atual and registro.form1_integral.apa_atual.modalidade == 'substituicao_temporaria' %}<br><span class="ajuda">Substituição temporária</span>{% endif %}</div>
     <div><strong>ARP atual</strong><br>{% if registro.form1_integral.arp_atual %}Matrícula {{ registro.form1_integral.arp_atual.matricula }} · {{ registro.form1_integral.arp_atual.nome }}{% else %}Ainda não atribuído{% endif %}</div>
   </div>
+  {% if not registro.form1_integral.arp_atual %}
+  <p class="aviso-leitura"><strong>Pendência de atribuição:</strong> o Registro foi preservado, mas nenhum ARP foi confirmado. Somente após uma atribuição válida o agente autorizado poderá iniciar o FORM 1.</p>
+  {% endif %}
   <p class="ajuda">A identidade simulada fornece o nome fictício. Cargo/função e e-mail institucional não são inventados quando não constam do cadastro disponível.</p>
 
   {% set proxima = registro.form1_integral.proxima_providencia %}
@@ -76,15 +79,16 @@
     {% endif %}
   </section>
 
+  <h3 id="titulo-atribuicao-arp">Responsável pelo preenchimento do FORM 1</h3>
   {% if registro.form1_integral.pode_atribuir_arp %}
   <form class="formulario" method="post" action="{{ url_for('atribuir_arp_integral', registro_id=registro.id) }}">
     <input type="hidden" name="conta_id" value="{{ conta_id }}">
     <input type="hidden" name="comando_id" value="{{ comando_atribuir_arp }}">
     <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.versao_atribuicao }}">
     <fieldset>
-      <legend>Quem será responsável pelo preenchimento do FORM 1?</legend>
-      <label class="opcao"><input type="radio" name="modo" value="proprio" required> <span>Eu mesmo preencherei o formulário.</span></label>
-      <label class="opcao"><input type="radio" name="modo" value="outro" required> <span>Desejo indicar outro agente para preencher o formulário.</span></label>
+      <legend>Quem preencherá o FORM 1?</legend>
+      <label class="opcao"><input type="radio" name="modo" value="proprio" required> <span>Eu mesmo, APA atual.</span></label>
+      <label class="opcao"><input type="radio" name="modo" value="outro" required> <span>Designar outro agente público autorizado para o preenchimento.</span></label>
       <label for="arp_pessoa_id">Agente indicado</label>
       <select id="arp_pessoa_id" name="arp_pessoa_id">
         <option value="">Selecione somente para indicar outro agente</option>
