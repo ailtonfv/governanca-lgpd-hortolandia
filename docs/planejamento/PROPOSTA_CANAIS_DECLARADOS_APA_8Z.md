@@ -1,15 +1,15 @@
 # Proposta técnica — canais declarados pelo APA na abertura
 
-**Situação:** proposta pendente de autorização; não implementada no Incremento 8Z.
+**Situação:** proposta autorizada e implementada no Incremento 8AA; este documento preserva a análise que antecedeu a implementação.
 **Escopo:** permitir que o APA escolha canais do catálogo geral quando ainda não existir vínculo vigente `ObjetoCanal`, sem modificar o catálogo mestre.
 
-## Estado atual e impedimento
+## Estado anterior ao Incremento 8AA
 
 O catálogo `Canal` contém os meios autorizados. `ObjetoCanal` registra quais deles são habituais para cada Serviço, Processo ou Atividade. Na abertura, o G1 aceita somente um subconjunto desses vínculos e `RegistroCanal.objeto_canal_id` é obrigatório. Portanto, um canal existente no catálogo geral, mas ainda não vinculado ao objeto, não possui hoje uma referência válida para a projeção histórica.
 
 Usar texto livre, criar silenciosamente `ObjetoCanal` ou gravar o código em outro campo violaria, respectivamente, o catálogo fechado, a separação entre declaração do Registro e curadoria do catálogo ou o contrato de persistência. Por isso o 8Z não implementa essa seleção.
 
-## Estrutura mínima recomendada
+## Estrutura implementada
 
 Preservar `ConfirmacaoCanaisRegistro` como cabeçalho da declaração e evoluir `RegistroCanal` de modo não destrutivo:
 
@@ -31,35 +31,35 @@ Nenhuma declaração direta deverá criar ou alterar `ObjetoCanal`. A curadoria 
 
 ## Contrato e evento
 
-O comando G1 deverá receber, separadamente, os códigos confirmados por vínculo do objeto e os códigos declarados a partir do catálogo geral. O evento deverá usar uma nova versão de esquema e registrar a origem de cada canal. Eventos de esquema 2 e 3, Registros antigos e snapshots existentes não serão reinterpretados.
+O comando G1 recebe uma única seleção de códigos do catálogo geral ativo. O domínio resolve e registra a origem de cada item: vínculo vigente do objeto ou declaração direta do APA. O evento usa o esquema 4 e registra essa origem. Eventos de esquema 2 e 3, Registros antigos e snapshots existentes não são reinterpretados.
 
 As situações permanecem exclusivas:
 
 1. canais identificados — ao menos um canal, vinculado ou declarado;
 2. nenhum canal aplicável — lista vazia por confirmação expressa;
-3. a confirmar — não cria o Registro até a política autorizar outro comportamento.
+3. a confirmar — cria o Registro com pendência explícita, sem ser interpretado como “nenhum”.
 
-## Interface proposta
+## Interface implementada
 
-Quando o objeto não possuir todos os canais conhecidos pelo APA, a tela poderá apresentar:
+Quando o objeto não possuir todos os canais conhecidos pelo APA, a tela apresenta:
 
 1. canais já vinculados ao objeto;
-2. ação **Adicionar canal do catálogo geral**;
-3. lista somente com canais ativos ainda não selecionados;
+2. lista fechada dos canais ativos do catálogo geral;
+3. vínculos do objeto como sugestões pré-selecionadas, sempre sujeitos à confirmação do APA;
 4. aviso explícito: “Esta declaração vale somente para este Registro e não altera o catálogo mestre”.
 
 Não haverá texto livre, dados de cidadãos, protocolos ou atendimentos individuais. A decisão pendente sobre WhatsApp permanece preservada.
 
-## Migração e compatibilidade
+## Migração e compatibilidade implementadas
 
-Implementar em incremento próprio:
+A migração 18 executa de modo não destrutivo:
 
 1. adicionar colunas inicialmente anuláveis;
 2. preencher `canal_id_catalogo` e `origem_confirmacao='VINCULO_OBJETO'` nas linhas existentes;
 3. verificar órfãos, duplicidades e lacres;
 4. aplicar chaves e restrições depois da conferência;
 5. não regravar eventos nem snapshots antigos;
-6. documentar reversão estrutural sem executar operação destrutiva na base de demonstração.
+6. reversão estrutural protegida, recusada quando houver declarações diretas ou confirmações pendentes que o esquema anterior não represente.
 
 ## Testes necessários
 
@@ -73,10 +73,7 @@ Implementar em incremento próprio:
 - leitura da pergunta 2.1 e condicionais independentes de Ouvidoria/e-SIC;
 - rollback integral e migração não destrutiva.
 
-## Decisões ainda necessárias
+## Limitações e decisões posteriores
 
-- aprovação da nova versão do contrato G1 e do esquema de evento;
-- autorização da migração e da origem `DECLARACAO_APA`;
 - definição de eventual fila de curadoria para declarações recorrentes;
-- confirmação de que “a confirmar” continuará bloqueando a abertura;
 - tratamento institucional definitivo do WhatsApp.

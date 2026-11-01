@@ -36,10 +36,10 @@ def test_abertura_explica_catalogo_demonstrativo_e_tres_situacoes_de_canais():
     assert "Item do catálogo da demonstração" in pagina.text
     assert "não representam inventário municipal homologado" in pagina.text
     assert "Por quais canais as demandas chegam habitualmente?" in pagina.text
-    assert "Existem canais habituais" in pagina.text
+    assert "Conheço os canais utilizados" in pagina.text
     assert "Nenhum canal de entrada se aplica ao objeto" in pagina.text
-    assert "Ainda não foi possível confirmar os canais utilizados" in pagina.text
-    assert "não significa automaticamente que nenhum canal se aplica" in pagina.text
+    assert "Ainda preciso confirmar os canais" in pagina.text
+    assert "não significa ausência de canais" in pagina.text
     assert "não informe um contexto livre" in pagina.text
 
 

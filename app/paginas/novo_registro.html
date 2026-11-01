@@ -75,30 +75,27 @@
 
     <fieldset id="canais-habituais" aria-describedby="ajuda-canais" {% if 'situacao_canais' in erros_campos %}aria-invalid="true"{% endif %}>
       <legend>4. Por quais canais as demandas chegam habitualmente? <span class="marcador-obrigatorio" aria-label="obrigatório">*</span></legend>
-      <p class="ajuda" id="ajuda-canais">Confirme somente os meios habituais pelos quais a demanda chega a este objeto. Eles não representam cidadãos, telefonemas nem protocolos individuais. A ausência de canais no catálogo não significa automaticamente que nenhum canal se aplica.</p>
-      {% for objeto in objetos %}
-        {% if objeto.canais %}
-        <div class="grupo-canais" data-objeto-canais="{{ objeto.id }}" hidden>
-          <label class="opcao opcao-situacao-canal">
-            <input type="radio" name="situacao_canais" value="identificados" required
-                   {% if valores.situacao_canais == 'identificados' %}checked{% endif %} disabled>
-            <span><strong>Existem canais habituais</strong><br>Revise e mantenha marcados somente os canais efetivamente utilizados.</span>
+      <p class="ajuda" id="ajuda-canais">Confirme somente os meios habituais pelos quais a demanda chega a este objeto. Eles não representam cidadãos, telefonemas nem protocolos individuais. A declaração vale para este Registro e não altera o catálogo mestre.</p>
+      <label class="opcao opcao-situacao-canal">
+        <input type="radio" name="situacao_canais" value="identificados" required
+               {% if valores.situacao_canais == 'identificados' %}checked{% endif %}>
+        <span><strong>Conheço os canais utilizados</strong><br>Selecione um ou mais canais do catálogo geral. Os vínculos já conhecidos do objeto aparecem como sugestão e devem ser conferidos.</span>
+      </label>
+      <div id="catalogo-canais-geral" class="grupo-canais">
+        <div class="grade-opcoes">
+          {% for canal in canais_catalogo %}
+          <label class="opcao" for="canal-catalogo-{{ canal.id }}">
+            <input id="canal-catalogo-{{ canal.id }}" type="checkbox"
+                   name="canais_ids" value="{{ canal.id }}"
+                   data-objetos-sugeridos="{{ canal.objetos_sugeridos|join(',') }}"
+                   {% if canal.id in valores.canais_ids %}checked{% endif %}
+                   {% if valores.situacao_canais != 'identificados' %}disabled{% endif %}>
+            <span>{{ canal.nome }}</span>
           </label>
-          <p><strong>{{ objeto.nome_canonico }}</strong></p>
-          <div class="grade-opcoes">
-            {% for canal in objeto.canais %}
-            <label class="opcao" for="canal-{{ objeto.id }}-{{ canal.id }}">
-              <input id="canal-{{ objeto.id }}-{{ canal.id }}" type="checkbox"
-                     name="canais_ids" value="{{ canal.id }}"
-                     {% if canal.id in valores.canais_ids %}checked{% endif %} disabled>
-              <span>{{ canal.nome }}</span>
-            </label>
-            {% endfor %}
-          </div>
+          {% endfor %}
         </div>
-        {% endif %}
-      {% endfor %}
-      <p id="canais-sem-vinculo" class="aviso-leitura" hidden>O item ainda não possui canais habituais vinculados no catálogo. Se você conhece os canais utilizados, marque a informação como pendente e solicite a revisão cadastral; o sistema não interpretará a ausência como “nenhum canal”.</p>
+        <p id="canais-sem-vinculo" class="aviso-leitura" hidden>Este item não possui canais previamente vinculados. Você ainda pode declarar os canais realmente utilizados escolhendo opções válidas do catálogo geral.</p>
+      </div>
       <label class="opcao opcao-situacao-canal">
         <input type="radio" name="situacao_canais" value="nenhum" required
                {% if valores.situacao_canais == 'nenhum' %}checked{% endif %}>
@@ -107,7 +104,7 @@
       <label class="opcao opcao-situacao-canal">
         <input type="radio" name="situacao_canais" value="informacao_insuficiente" required
                {% if valores.situacao_canais == 'informacao_insuficiente' %}checked{% endif %}>
-        <span><strong>Ainda não foi possível confirmar os canais utilizados</strong><br>Informação pendente: a criação aguardará revisão cadastral.</span>
+        <span><strong>Ainda preciso confirmar os canais</strong><br>Registra uma informação pendente; não significa ausência de canais.</span>
       </label>
       {% if 'situacao_canais' in erros_campos %}<p class="erro-campo">Confirme os canais identificados, a inexistência aplicável ou a insuficiência cadastral.</p>{% endif %}
     </fieldset>
@@ -139,12 +136,22 @@
   const unidade = document.getElementById('unidade_id');
   const objeto = document.getElementById('objeto_principal_id');
   const contexto = document.getElementById('contexto_id');
-  const gruposCanais = document.querySelectorAll('[data-objeto-canais]');
+  const catalogoCanais = document.getElementById('catalogo-canais-geral');
+  const camposCanais = catalogoCanais.querySelectorAll('input[name="canais_ids"]');
   const canaisSemVinculo = document.getElementById('canais-sem-vinculo');
   const semItensCatalogo = document.getElementById('sem-itens-catalogo');
   const semContextosCatalogo = document.getElementById('sem-contextos-catalogo');
   const ajudaContexto = document.getElementById('exemplo-contexto');
   const situacoesCanais = document.querySelectorAll('input[name="situacao_canais"]');
+  function atualizarObrigatoriedadeCanais() {
+    const identificados = document.querySelector('input[name="situacao_canais"][value="identificados"]')?.checked;
+    const selecionados = [...camposCanais].filter((campo) => campo.checked);
+    camposCanais.forEach((campo, indice) => {
+      campo.disabled = !identificados;
+      campo.required = Boolean(identificados && selecionados.length === 0 && indice === 0);
+    });
+    catalogoCanais.hidden = !identificados;
+  }
   function atualizarAjudaContexto() {
     const selecionado = contexto.options[contexto.selectedIndex];
     if (selecionado?.value) {
@@ -154,25 +161,23 @@
     }
   }
   function filtrarCanais(limpar = true) {
-    let quantidadeVisivel = 0;
     if (limpar) {
       situacoesCanais.forEach((campo) => { campo.checked = false; });
-    }
-    for (const grupo of gruposCanais) {
-      const ativo = Boolean(objeto.value && grupo.dataset.objetoCanais === objeto.value);
-      grupo.hidden = !ativo;
-      const confirmacao = grupo.querySelector('input[name="situacao_canais"]');
-      confirmacao.disabled = !ativo;
-      if (ativo && limpar) confirmacao.checked = true;
-      for (const campo of grupo.querySelectorAll('input[name="canais_ids"]')) {
-        campo.disabled = !ativo || !confirmacao.checked;
-        if (ativo) {
-          quantidadeVisivel += 1;
-          if (limpar) campo.checked = true;
-        }
+      camposCanais.forEach((campo) => { campo.checked = false; });
+      const sugeridos = [...camposCanais].filter((campo) =>
+        (campo.dataset.objetosSugeridos || '').split(',').includes(objeto.value)
+      );
+      if (sugeridos.length) {
+        const confirmacao = document.querySelector('input[name="situacao_canais"][value="identificados"]');
+        confirmacao.checked = true;
+        sugeridos.forEach((campo) => { campo.checked = true; });
       }
     }
-    canaisSemVinculo.hidden = !objeto.value || quantidadeVisivel > 0;
+    const temSugestao = [...camposCanais].some((campo) =>
+      (campo.dataset.objetosSugeridos || '').split(',').includes(objeto.value)
+    );
+    canaisSemVinculo.hidden = !objeto.value || temSugestao;
+    atualizarObrigatoriedadeCanais();
   }
   function filtrarContextos(limpar = true) {
     let quantidadeVisivel = 0;
@@ -204,15 +209,10 @@
   contexto.addEventListener('change', atualizarAjudaContexto);
   situacoesCanais.forEach((situacao) => situacao.addEventListener('change', () => {
     const identificados = situacao.value === 'identificados' && situacao.checked;
-    for (const grupo of gruposCanais) {
-      if (!grupo.hidden) {
-        for (const campo of grupo.querySelectorAll('input[name="canais_ids"]')) {
-          campo.disabled = !identificados;
-          if (!identificados) campo.checked = false;
-        }
-      }
-    }
+    if (!identificados) camposCanais.forEach((campo) => { campo.checked = false; });
+    atualizarObrigatoriedadeCanais();
   }));
+  camposCanais.forEach((campo) => campo.addEventListener('change', atualizarObrigatoriedadeCanais));
   filtrarObjetos(false);
 </script>
 {% endblock %}

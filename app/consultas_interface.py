@@ -493,6 +493,19 @@ def carregar_opcoes_novo_registro(sessao, conta_id):
         })
     for objeto in objetos:
         objeto.setdefault("canais", [])
+    objetos_sugeridos_por_canal = {}
+    for vinculo, canal in linhas_canais:
+        objetos_sugeridos_por_canal.setdefault(canal.id, []).append(vinculo.objeto_id)
+    canais_catalogo = [
+        {
+            "id": canal.id,
+            "nome": canal.nome_canonico,
+            "objetos_sugeridos": objetos_sugeridos_por_canal.get(canal.id, []),
+        }
+        for canal in sessao.scalars(
+            select(Canal).where(Canal.ativo.is_(True)).order_by(Canal.nome_canonico)
+        )
+    ]
     linhas_contextos = sessao.execute(
         select(ContextoAtuacao, ObjetoContextoCatalogo.objeto_id)
         .join(ObjetoContextoCatalogo,
@@ -518,6 +531,7 @@ def carregar_opcoes_novo_registro(sessao, conta_id):
         "unidades": unidades,
         "objetos": objetos,
         "contextos": contextos,
+        "canais_catalogo": canais_catalogo,
     }
 
 
@@ -547,6 +561,8 @@ def carregar_registro(sessao, conta_id, registro_id):
     resumo["confirmacao_canais"] = (
         None if confirmacao_canais is None else {
             "objeto_id": confirmacao_canais.objeto_id,
+            "situacao": confirmacao_canais.situacao,
+            "versao_contrato_g1": confirmacao_canais.versao_contrato_g1,
             "confirmado_por_id": confirmacao_canais.confirmado_por_id,
             "confirmado_em": confirmacao_canais.confirmado_em,
             "confirmado_por_nome": (
@@ -555,7 +571,11 @@ def carregar_registro(sessao, conta_id, registro_id):
                 else confirmacao_canais.confirmado_por_id
             ),
             "canais": [
-                {"id": item.canal_id_snapshot, "nome": item.canal_nome_snapshot}
+                {
+                    "id": item.canal_id_snapshot,
+                    "nome": item.canal_nome_snapshot,
+                    "origem": item.origem_confirmacao,
+                }
                 for item in canais_registro
             ],
         }
@@ -609,10 +629,11 @@ def carregar_registro(sessao, conta_id, registro_id):
         }
     else:
         leitura_2_1 = {
-            "estado": (
-                "canais_confirmados" if canais_registro
-                else "ausencia_confirmada"
-            ),
+            "estado": {
+                "identificados": "canais_confirmados",
+                "nenhum": "ausencia_confirmada",
+                "informacao_insuficiente": "confirmacao_pendente",
+            }[confirmacao_canais.situacao],
             "somente_leitura": True,
             "canais": [
                 {"id": item.canal_id_snapshot, "nome": item.canal_nome_snapshot}
@@ -703,6 +724,7 @@ def carregar_registro(sessao, conta_id, registro_id):
             "condicao_canal_ativa": (
                 None
                 if confirmacao_canais is None
+                or confirmacao_canais.situacao == "informacao_insuficiente"
                 or campo_id not in CONDICOES_CANAIS_BLOCO_2
                 else CONDICOES_CANAIS_BLOCO_2[campo_id] in {
                     item.classificacao_form1_snapshot for item in canais_registro

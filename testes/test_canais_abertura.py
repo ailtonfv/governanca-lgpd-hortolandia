@@ -52,8 +52,9 @@ def test_apa_confirma_nenhum_canal_e_a_decisao_fica_explicita(sessao):
     assert confirmacao.confirmado_por_id == "PESSOA-A"
     assert _canais_do_registro(sessao, resultado["registro_id"]) == []
     evento = evento_g1(resultado["codigo_lgpd"])
-    assert evento.versao_esquema_evento == 3
+    assert evento.versao_esquema_evento == 4
     assert evento.conteudo["canais_habituais_confirmados"] == []
+    assert evento.conteudo["situacao_canais"] == "nenhum"
 
 
 def test_apa_confirma_um_canal_habitual(sessao):
@@ -86,17 +87,16 @@ def test_apa_confirma_varios_canais_sem_criar_varios_registros(sessao):
     assert resultado["canais_confirmados"] == ["CNL-001", "CNL-002"]
 
 
-@pytest.mark.parametrize("canais", [["CNL-003"], ["CNL-INEXISTENTE"]])
-def test_rejeita_canal_nao_vinculado_ou_forjado(sessao, canais):
+def test_rejeita_canal_forjado_fora_do_catalogo_geral(sessao):
     # Arrange + Act
     resultado = g1(
-        f"CMD-CANAL-INVALIDO-{canais[0]}", "OBJ-SRV-002", "CTX-TRIB-03",
-        canais_confirmados_ids=canais,
+        "CMD-CANAL-INVALIDO", "OBJ-SRV-002", "CTX-TRIB-03",
+        canais_confirmados_ids=["CNL-INEXISTENTE"],
     )
 
     # Assert
     assert not resultado["permitido"]
-    assert "fora dos vínculos habituais vigentes" in resultado["motivo"]
+    assert "fora do catálogo geral ativo" in resultado["motivo"]
     assert sessao.scalar(select(func.count()).select_from(Registro)) == 0
     assert sessao.scalar(select(func.count()).select_from(ConfirmacaoCanaisRegistro)) == 0
     auditoria = sessao.scalars(select(EventoAuditoria)).one()
@@ -114,20 +114,9 @@ def test_rejeita_canal_repetido(sessao):
     assert sessao.scalar(select(func.count()).select_from(Registro)) == 0
 
 
-@pytest.mark.parametrize("situacao", ["canal_inativo", "vinculo_encerrado"])
-def test_rejeita_canal_inativo_ou_com_vigencia_encerrada(sessao, situacao):
+def test_rejeita_canal_inativo(sessao):
     # Arrange
-    if situacao == "canal_inativo":
-        sessao.execute(update(Canal).where(Canal.id == "CNL-001").values(ativo=False))
-    else:
-        sessao.execute(
-            update(ObjetoCanal)
-            .where(
-                ObjetoCanal.objeto_id == "OBJ-SRV-002",
-                ObjetoCanal.canal_id == "CNL-001",
-            )
-            .values(vigente_ate=datetime.now(timezone.utc) - timedelta(seconds=1))
-        )
+    sessao.execute(update(Canal).where(Canal.id == "CNL-001").values(ativo=False))
     sessao.commit()
 
     # Act
@@ -139,6 +128,31 @@ def test_rejeita_canal_inativo_ou_com_vigencia_encerrada(sessao, situacao):
     # Assert
     assert not resultado["permitido"]
     assert sessao.scalar(select(func.count()).select_from(Registro)) == 0
+
+
+def test_vinculo_encerrado_nao_impede_declaracao_direta_do_apa(sessao):
+    # Arrange
+    sessao.execute(
+        update(ObjetoCanal)
+        .where(
+            ObjetoCanal.objeto_id == "OBJ-SRV-002",
+            ObjetoCanal.canal_id == "CNL-001",
+        )
+        .values(vigente_ate=datetime.now(timezone.utc) - timedelta(seconds=1))
+    )
+    sessao.commit()
+
+    # Act
+    resultado = g1(
+        "CMD-CANAL-VINCULO-ENCERRADO", "OBJ-SRV-002", "CTX-TRIB-03",
+        canais_confirmados_ids=["CNL-001"],
+    )
+
+    # Assert
+    assert resultado["permitido"]
+    item = _canais_do_registro(sessao, resultado["registro_id"])[0]
+    assert item.origem_confirmacao == "DECLARACAO_APA"
+    assert item.objeto_canal_id is None
 
 
 def test_somente_apa_em_exercicio_pode_confirmar_canais(sessao):
@@ -183,12 +197,11 @@ def test_evento_g1_audita_retrato_e_mantem_cadeia_integra(sessao):
 
     evento = evento_g1(resultado["codigo_lgpd"])
     retrato = evento.conteudo["canais_habituais_confirmados"]
-    assert retrato == [{
-        "objeto_canal_id": retrato[0]["objeto_canal_id"],
-        "objeto_id": "OBJ-SRV-002",
-        "canal_id": "CNL-001",
-        "canal_nome_snapshot": "Balcão de atendimento (fictício)",
-    }]
+    assert retrato[0]["objeto_canal_id"] is not None
+    assert retrato[0]["origem_confirmacao"] == "VINCULO_OBJETO"
+    assert retrato[0]["objeto_id"] == "OBJ-SRV-002"
+    assert retrato[0]["canal_id"] == "CNL-001"
+    assert retrato[0]["canal_nome_snapshot"] == "Balcão de atendimento (fictício)"
     assert verificar_cadeia(sessao, resultado["codigo_lgpd"])[0]
 
 
@@ -279,10 +292,10 @@ def test_tela_apresenta_canais_habituais_depois_do_objeto():
     )
     assert "Balcão de atendimento (fictício)" in resposta.text
     assert "Portal da Prefeitura (fictício)" in resposta.text
-    assert 'data-objeto-canais="OBJ-SRV-001"' in resposta.text
-    assert "A ausência de canais no catálogo não significa automaticamente" in resposta.text
+    assert 'data-objetos-sugeridos="OBJ-SRV-001"' in resposta.text
+    assert "não altera o catálogo mestre" in resposta.text
     assert "Nenhum canal de entrada se aplica ao objeto" in resposta.text
-    assert "Ainda não foi possível confirmar os canais utilizados" in resposta.text
+    assert "Ainda preciso confirmar os canais" in resposta.text
     assert "cidadãos, telefonemas nem protocolos individuais" in resposta.text
 
 
@@ -323,12 +336,12 @@ def test_tela_nao_aceita_canal_forjado(sessao):
             "unidade_id": "UNID-NORTE",
             "contexto_id": "CTX-TRIB-03",
             "situacao_canais": "identificados",
-            "canais_ids": "CNL-003",
+            "canais_ids": "CNL-INEXISTENTE",
         },
     )
 
     assert resposta.status_code == 200
-    assert "canal fora dos vínculos habituais vigentes" in resposta.text
+    assert "canal fora do catálogo geral ativo" in resposta.text
     assert sessao.scalar(select(func.count()).select_from(Registro)) == 0
 
 
@@ -348,7 +361,7 @@ def test_migracao_15_cria_projecoes_sem_alterar_registro_existente(sessao):
     assert "confirmacao_canais_registro" in inspetor.get_table_names()
     assert "registro_canal" in inspetor.get_table_names()
     assert {fk["referred_table"] for fk in inspetor.get_foreign_keys("registro_canal")} == {
-        "confirmacao_canais_registro", "objeto_canal", "pessoa",
+        "canal", "confirmacao_canais_registro", "objeto_canal", "pessoa",
     }
     with Session(motor) as verificacao:
         registro = verificacao.get(Registro, legado["registro_id"])

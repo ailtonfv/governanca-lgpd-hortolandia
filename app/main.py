@@ -231,15 +231,9 @@ def criar_registro_pela_tela(
             valores=valores,
             campos_erro=faltantes,
         )
-    if situacao_canais == "informacao_insuficiente":
-        return _voltar_novo_registro(
-            conta_id=conta_id,
-            mensagem=("O catálogo ainda não permite confirmar os canais habituais deste item. "
-                      "Solicite a revisão cadastral antes de criar o Registro."),
-            valores=valores,
-            campos_erro=["situacao_canais"],
-        )
-    if situacao_canais not in {"identificados", "nenhum"}:
+    if situacao_canais not in {
+        "identificados", "nenhum", "informacao_insuficiente"
+    }:
         return _voltar_novo_registro(
             conta_id=conta_id,
             mensagem="A confirmação dos canais habituais é inválida.",

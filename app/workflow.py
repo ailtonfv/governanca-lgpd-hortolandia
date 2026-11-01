@@ -175,8 +175,9 @@ def criar_registro(sessao, *, comando_id, conta_id, unidade_id, contexto_id, tit
       dos canais habituais do objeto principal; uma lista vazia confirma nenhum.
       ``None`` preserva integralmente o percurso legado da PoC nuclear.
     situacao_canais: no percurso ampliado da abertura, explicita se o APA
-      confirmou canais identificados ou confirmou que nenhum se aplica. O valor
-      ``None`` preserva as chamadas anteriores e o contrato nuclear.
+      confirmou canais identificados, confirmou que nenhum se aplica ou ainda
+      precisa confirmar. O valor ``None`` preserva as chamadas anteriores e o
+      contrato nuclear.
 
     Ordem (DA-38, item 9): barreiras -> 1. equivalência -> 2. família -> 3. alerta estrutural -> resultado.
     Devolve o RESULTADO (dicionário). Numa repetição do pedido, o mesmo resultado com reexecutado = True.
@@ -266,43 +267,60 @@ def criar_registro(sessao, *, comando_id, conta_id, unidade_id, contexto_id, tit
     situacao_efetiva = situacao_canais
     if situacao_efetiva is None and canais_informados is not None:
         situacao_efetiva = "nenhum" if not canais_informados else "identificados"
-    if situacao_efetiva not in {None, "identificados", "nenhum"}:
+    if situacao_efetiva not in {
+        None, "identificados", "nenhum", "informacao_insuficiente"
+    }:
         return negar("situação de confirmação dos canais inválida")
     if situacao_efetiva == "identificados" and not canais_informados:
         return negar("selecione ao menos um canal habitual identificado")
     if situacao_efetiva == "nenhum" and canais_informados:
         return negar("a confirmação de nenhum canal não aceita canais selecionados")
+    if situacao_efetiva == "informacao_insuficiente" and canais_informados:
+        return negar("a informação pendente sobre canais não aceita canais selecionados")
 
     # A confirmação ampliada é opcional para preservar o contrato nuclear. Quando
-    # usada, aceita um subconjunto (inclusive vazio) dos vínculos vigentes do objeto
-    # principal. Código repetido, inativo, encerrado ou forjado é recusado.
+    # usada, aceita canais ativos do catálogo geral. Um vínculo vigente com o objeto
+    # é preservado como origem sugerida; sem vínculo, a origem é a declaração do APA
+    # e o catálogo mestre não é alterado. Código repetido, inativo ou forjado é recusado.
     canais_confirmados = None
     if canais_informados is not None:
         if len(canais_informados) != len(set(canais_informados)):
             return negar("o mesmo canal foi informado mais de uma vez")
-        linhas_canais = sessao.execute(
-            select(ObjetoCanal, Canal)
-            .join(Canal, Canal.id == ObjetoCanal.canal_id)
+        canais_catalogo = sessao.scalars(
+            select(Canal)
             .where(
-                ObjetoCanal.objeto_id == objeto_principal_id,
-                ObjetoCanal.canal_id.in_(canais_informados),
-                ObjetoCanal.vigente_de <= momento,
-                or_(ObjetoCanal.vigente_ate.is_(None), ObjetoCanal.vigente_ate > momento),
+                Canal.id.in_(canais_informados),
                 Canal.ativo.is_(True),
             )
-            .order_by(ObjetoCanal.canal_id)
+            .order_by(Canal.id)
         ).all() if canais_informados else []
-        if {vinculo.canal_id for vinculo, _ in linhas_canais} != set(canais_informados):
-            return negar("canal fora dos vínculos habituais vigentes do objeto")
+        if {canal.id for canal in canais_catalogo} != set(canais_informados):
+            return negar("canal fora do catálogo geral ativo")
+        vinculos = {
+            vinculo.canal_id: vinculo
+            for vinculo in sessao.scalars(
+                select(ObjetoCanal).where(
+                    ObjetoCanal.objeto_id == objeto_principal_id,
+                    ObjetoCanal.canal_id.in_(canais_informados),
+                    ObjetoCanal.vigente_de <= momento,
+                    or_(ObjetoCanal.vigente_ate.is_(None), ObjetoCanal.vigente_ate > momento),
+                )
+            )
+        } if canais_informados else {}
         canais_confirmados = [
             {
-                "objeto_canal_id": vinculo.id,
-                "objeto_id": vinculo.objeto_id,
-                "canal_id": vinculo.canal_id,
+                "objeto_canal_id": (
+                    None if canal.id not in vinculos else vinculos[canal.id].id
+                ),
+                "objeto_id": objeto_principal_id,
+                "canal_id": canal.id,
                 "canal_nome": canal.nome_canonico,
                 "classificacao_form1": canal.classificacao_form1,
+                "origem_confirmacao": (
+                    "VINCULO_OBJETO" if canal.id in vinculos else "DECLARACAO_APA"
+                ),
             }
-            for vinculo, canal in linhas_canais
+            for canal in canais_catalogo
         ]
 
     # 2. verificação 1 — equivalência bloqueadora (todos os conflitos)
@@ -347,7 +365,8 @@ def criar_registro(sessao, *, comando_id, conta_id, unidade_id, contexto_id, tit
         with sessao.begin_nested():
             registro, evento = _nascer_registro(sessao, comando, conta_id, unidade_id, objetos, papeis,
                                                 contexto, titulo_objeto, advertencia, alertas,
-                                                exercicio_apa, momento, canais_confirmados)
+                                                exercicio_apa, momento, canais_confirmados,
+                                                situacao_efetiva)
     except IntegrityError as erro:
         if nome_da_restricao(erro) != RESTRICAO_EQUIVALENCIA:
             raise                                    # defeito: precisa aparecer, não ser mascarado
@@ -370,6 +389,7 @@ def criar_registro(sessao, *, comando_id, conta_id, unidade_id, contexto_id, tit
         conteudo_resultado["canais_confirmados"] = [
             item["canal_id"] for item in canais_confirmados
         ]
+        conteudo_resultado["situacao_canais"] = situacao_efetiva
     resultado = fechar_comando(comando, conteudo_resultado)
     sessao.flush()
     return resultado
@@ -377,7 +397,7 @@ def criar_registro(sessao, *, comando_id, conta_id, unidade_id, contexto_id, tit
 
 def _nascer_registro(sessao, comando, conta_id, unidade_id, objetos, papeis, contexto,
                      titulo_objeto, advertencia, alertas, exercicio_apa, momento,
-                     canais_confirmados=None):
+                     canais_confirmados=None, situacao_canais=None):
     """Cria o Registro (com o número do ano), o ciclo 1, o FORM 1, os vínculos e o ato G1."""
     ano = ano_administrativo(momento)
     numero = proximo_numero_do_ano(sessao, ano)
@@ -401,6 +421,8 @@ def _nascer_registro(sessao, comando, conta_id, unidade_id, objetos, papeis, con
         sessao.add(ConfirmacaoCanaisRegistro(
             registro_id=registro.id,
             objeto_id=principal_id,
+            situacao=situacao_canais,
+            versao_contrato_g1=4,
             confirmado_por_id=comando.ator_id,
             confirmado_em=momento,
         ))
@@ -409,6 +431,8 @@ def _nascer_registro(sessao, comando, conta_id, unidade_id, objetos, papeis, con
             sessao.add(RegistroCanal(
                 registro_id=registro.id,
                 objeto_canal_id=canal["objeto_canal_id"],
+                canal_id_catalogo=canal["canal_id"],
+                origem_confirmacao=canal["origem_confirmacao"],
                 objeto_id_snapshot=canal["objeto_id"],
                 canal_id_snapshot=canal["canal_id"],
                 canal_nome_snapshot=canal["canal_nome"],
@@ -429,9 +453,12 @@ def _nascer_registro(sessao, comando, conta_id, unidade_id, objetos, papeis, con
     if alertas:
         conteudo["alertas"] = alertas
     if canais_confirmados is not None:
+        conteudo["situacao_canais"] = situacao_canais
+        conteudo["versao_contrato_g1"] = 4
         conteudo["canais_habituais_confirmados"] = [
             {
                 "objeto_canal_id": canal["objeto_canal_id"],
+                "origem_confirmacao": canal["origem_confirmacao"],
                 "objeto_id": canal["objeto_id"],
                 "canal_id": canal["canal_id"],
                 "canal_nome_snapshot": canal["canal_nome"],
@@ -445,7 +472,7 @@ def _nascer_registro(sessao, comando, conta_id, unidade_id, objetos, papeis, con
     evento = registrar_evento(sessao, comando, "registro", registro.codigo_lgpd, "criar_registro",
                               conteudo, codigo_evento="G1", registro_id=registro.id,
                               ciclo_id=ciclo.id, em_nome_de=exercicio_apa["em_nome_de"],
-                              versao_esquema_evento=(3 if canais_confirmados is not None else 2))
+                              versao_esquema_evento=(4 if canais_confirmados is not None else 2))
     ciclo.evento_inicio_id = evento.id
     registro.sequencia_atual = evento.sequencia_cadeia
     sessao.flush()

@@ -67,7 +67,7 @@ def test_api_nao_cria_registro_quando_campo_essencial_esta_ausente(
     assert sessao.scalar(select(func.count()).select_from(Registro)) == 0
 
 
-def test_ausencia_de_catalogo_nao_e_interpretada_como_nenhum_canal(sessao):
+def test_informacao_pendente_nao_e_interpretada_como_nenhum_canal(sessao):
     # Arrange + Act
     resposta = cliente.post(
         "/registros",
@@ -82,8 +82,10 @@ def test_ausencia_de_catalogo_nao_e_interpretada_como_nenhum_canal(sessao):
 
     # Assert
     assert resposta.status_code == 200
-    assert "não permite confirmar os canais habituais" in resposta.text
-    assert sessao.scalar(select(func.count()).select_from(Registro)) == 0
+    registro = sessao.scalars(select(Registro)).one()
+    confirmacao = sessao.get(ConfirmacaoCanaisRegistro, registro.id)
+    assert confirmacao.situacao == "informacao_insuficiente"
+    assert sessao.scalar(select(func.count()).select_from(RegistroCanal)) == 0
 
 
 def test_confirmacao_de_canais_identificados_exige_ao_menos_um_canal(sessao):

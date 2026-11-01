@@ -15,9 +15,11 @@
     <strong>Canais habituais confirmados na abertura</strong>
     {% if registro.confirmacao_canais is none %}
     <p class="ajuda">Não houve confirmação de canais neste Registro, criado antes deste incremento.</p>
+    {% elif registro.confirmacao_canais.situacao == 'informacao_insuficiente' %}
+    <p class="ajuda">A confirmação dos canais permanece pendente. Isso não significa que nenhum canal se aplica.</p>
     {% elif registro.confirmacao_canais.canais %}
     <ul>
-      {% for canal in registro.confirmacao_canais.canais %}<li>{{ canal.nome }}</li>{% endfor %}
+      {% for canal in registro.confirmacao_canais.canais %}<li>{{ canal.nome }}{% if canal.origem == 'DECLARACAO_APA' %} <span class="ajuda">— informado pelo APA para este Registro</span>{% endif %}</li>{% endfor %}
     </ul>
     {% else %}
     <p class="ajuda">Nenhum canal foi confirmado como aplicável.</p>

@@ -10,7 +10,7 @@
 - Os dados funcionais do agente têm outro propósito: autenticação, autorização, autoria e auditoria.
 - Antes do FORM 1, o agente seleciona primeiro a Secretaria responsável pelo Registro dentro de seu alcance institucional.
 - Em seguida, define se mapeará um serviço, processo ou atividade do catálogo e escolhe o contexto de atuação.
-- Antes da criação, confirma expressamente os canais habituais identificados ou que nenhum canal se aplica. Catálogo sem informação não é interpretado como ausência de canal e exige revisão cadastral.
+- Antes da criação, o APA declara expressamente os canais habituais identificados, que nenhum canal se aplica ou que a informação ainda precisa ser confirmada. A situação pendente não é interpretada como ausência de canal.
 - A Prefeitura permanece a controladora; a Secretaria é a responsável interna pelo Registro. Departamentos e setores podem executar partes do objeto sem substituir essa responsabilidade.
 - O ponto focal da LGPD será apresentado como **Agente Público Autorizado responsável pelo Registro**: abre o Registro, coordena o levantamento local, acompanha pendências e encaminha o FORM 1. Quando também autorizado para o preenchimento, pode executar pessoalmente os atos do FORM 1.
 - Na PoC ampliada, a forma curta **APA — Agente Público Autorizado** identifica essa função de abertura. **ARP — Agente Responsável pelo Preenchimento** identifica a pessoa designada para executar o levantamento factual do FORM 1 integral. APA e ARP podem ser a mesma pessoa.
@@ -35,8 +35,9 @@ flowchart TD
     C --> K{"Canais habituais<br/>confirmáveis?"}
     K -- "identificados" --> X["Contexto de atuação"]
     K -- "nenhum aplicável<br/>confirmado pelo APA" --> X
-    K -- "informação insuficiente" --> R["Revisão cadastral<br/>sem criar Registro"]
+    K -- "a confirmar" --> P["Pendência explícita<br/>sem presumir ausência"]
     X --> G["G1 cria Registro + ciclo 1<br/>FORM 1 Não iniciado"]
+    P --> X
     G --> D{"Quem preencherá<br/>o FORM 1?"}
     D --> A["O próprio APA autorizado"]
     D --> O["Outro agente elegível<br/>matrícula + nome"]
@@ -47,7 +48,7 @@ flowchart TD
 - A lista de objetos não deverá ser global: depois da Secretaria e do tipo, a tela mostrará somente itens relacionados àquela Secretaria.
 - A Carta de Serviços e o portal municipal poderão iniciar a relação de serviços; os FORMs recebidos das Secretarias serão fonte de candidatos a serviços, processos e atividades.
 - Um item informado no FORM não se torna oficial automaticamente. A curadoria deverá verificar se há tratamento de dados pessoais, classificar o tipo, normalizar duplicidades, vincular as Secretarias responsáveis ou participantes e atribuir identificador canônico.
-- Após o objeto, a tela oferece os canais habituais catalogados e exige decisão expressa do APA. O APA pode confirmar um ou vários canais identificados ou confirmar que nenhum se aplica. Se o catálogo não possuir informação suficiente, a abertura é interrompida para revisão cadastral; a ausência de vínculo nunca é convertida automaticamente em “nenhum”.
+- Após o objeto, a tela oferece o catálogo geral de canais ativos e destaca como sugestões os vínculos vigentes de `ObjetoCanal`. O APA pode declarar um ou vários canais, confirmar que nenhum se aplica ou registrar que ainda precisa confirmar. Uma declaração direta vale somente para o Registro e não cria nem altera `ObjetoCanal`; ausência de vínculo nunca é convertida automaticamente em “nenhum”.
 - Depois dos canais, a tela oferece apenas contextos de atuação compatíveis. Se nenhum servir, o agente solicitará revisão do catálogo, sem digitação livre. A ajuda identifica o contexto selecionado e o distingue da finalidade do tratamento, que será descrita no FORM 1.
 - Canal de atendimento — inclusive o 156 — não é um quarto tipo de objeto. Só terá Registro próprio quando realizar tratamento autônomo de dados pessoais; quando apenas encaminhar, será apoio do Registro principal.
 
@@ -61,6 +62,16 @@ flowchart LR
 ```
 
 As relações **Secretaria ↔ objeto** e **objeto ↔ contexto permitido** possuem estruturas próprias, com fonte e vigência; a primeira também distingue os papéis `RESPONSAVEL` e `PARTICIPANTE`. No corte atual, a tela oferece somente os vínculos fictícios vigentes da Secretaria e do item escolhidos, e o G1 repete as duas autorizações no servidor. A curadoria e a carga institucional dos vínculos continuam pendentes (O-80), mas não exigirão mudança no percurso da interface.
+
+### Contrato G1 v4 — canais declarados pelo APA
+
+O contrato G1 v4 preserva os contratos anteriores e acrescenta três situações mutuamente exclusivas para o campo 4 da abertura: `identificados`, `nenhum` e `informacao_insuficiente`. Em `identificados`, deve existir ao menos um canal ativo do catálogo geral; nas outras situações, a lista deve permanecer vazia. Canal inexistente, inativo, repetido ou combinado com uma situação contraditória é recusado no domínio.
+
+O retrato histórico do Registro guarda a situação, a versão do contrato, autoria, data e, quando houver canais, o código e o nome exibidos. Cada item informa se veio de um vínculo vigente de `ObjetoCanal` (`VINCULO_OBJETO`) ou de uma declaração direta do APA (`DECLARACAO_APA`). A segunda origem não modifica o catálogo mestre. Os eventos antigos dos esquemas 2 e 3 não são regravados; novas aberturas ampliadas usam o esquema 4.
+
+O 8AA cobre a declaração no ato de abertura. Uma correção futura deverá ser um novo comando auditável: acrescentará evento com executor, data e versão, atualizará a projeção corrente e preservará o evento G1 e a autoria anteriores. Não existe neste incremento interface nem comando para corrigir os canais depois da abertura; a projeção não deve ser editada diretamente.
+
+A migração 18 acrescenta esses metadados sem apagar vínculos existentes: confirmações anteriores com itens são classificadas como `identificados`, confirmações vazias como `nenhum`, e seus itens recebem a origem `VINCULO_OBJETO`. A reversão estrutural é possível apenas enquanto não existirem declarações diretas ou confirmações pendentes, porque esses conteúdos não podem ser representados com segurança pelo esquema anterior.
 
 ## Aproveitamento estrutural do inventário existente
 

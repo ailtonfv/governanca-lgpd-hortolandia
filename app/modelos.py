@@ -791,8 +791,17 @@ class ConfirmacaoCanaisRegistro(Base):
 
     registro_id = Column(String(36), ForeignKey("registro.id"), primary_key=True)
     objeto_id = Column(String(50), ForeignKey("objeto_catalogo.id"), nullable=False)
+    situacao = Column(String(30), nullable=False, server_default="nenhum")
+    versao_contrato_g1 = Column(Integer, nullable=False, server_default="4")
     confirmado_por_id = Column(String(50), ForeignKey("pessoa.id"), nullable=False)
     confirmado_em = Column(DateTime(timezone=True), nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "situacao IN ('identificados', 'nenhum', 'informacao_insuficiente')",
+            name="ck_confirmacao_canais_situacao",
+        ),
+    )
 
 
 class RegistroCanal(Base):
@@ -807,7 +816,9 @@ class RegistroCanal(Base):
     registro_id = Column(
         String(36), ForeignKey("confirmacao_canais_registro.registro_id"), nullable=False
     )
-    objeto_canal_id = Column(Integer, ForeignKey("objeto_canal.id"), nullable=False)
+    objeto_canal_id = Column(Integer, ForeignKey("objeto_canal.id"))
+    canal_id_catalogo = Column(String(50), ForeignKey("canal.id"), nullable=False)
+    origem_confirmacao = Column(String(30), nullable=False)
     objeto_id_snapshot = Column(String(50), nullable=False)
     canal_id_snapshot = Column(String(50), nullable=False)
     canal_nome_snapshot = Column(String(200), nullable=False)
@@ -823,5 +834,10 @@ class RegistroCanal(Base):
             "classificacao_form1_snapshot IS NULL OR "
             "classificacao_form1_snapshot IN ('Ouvidoria', 'e-SIC')",
             name="ck_registro_canal_classificacao_form1",
+        ),
+        CheckConstraint(
+            "(origem_confirmacao = 'VINCULO_OBJETO' AND objeto_canal_id IS NOT NULL) OR "
+            "(origem_confirmacao = 'DECLARACAO_APA' AND objeto_canal_id IS NULL)",
+            name="ck_registro_canal_origem",
         ),
     )
