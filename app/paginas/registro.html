@@ -238,6 +238,28 @@
         </ol>
       </nav>
     </section>
+    <section class="bloco-form1-integral" aria-labelledby="titulo-conferencia-interna-form1">
+      <p class="etiqueta">Etapa preparatória · não submete o formulário</p>
+      <h3 id="titulo-conferencia-interna-form1">Conferência interna pelo APA</h3>
+      {% if registro.form1_integral.conferencia_interna %}
+      <p class="aviso-leitura"><strong>FORM 1 aguardando conferência interna.</strong> A versão {{ registro.form1_integral.conferencia_interna.versao_rascunho }} foi preservada em snapshot técnico {{ registro.form1_integral.conferencia_interna.numero_snapshot }} por {{ registro.form1_integral.conferencia_interna.solicitada_por }}.</p>
+      <p class="ajuda">Este encaminhamento não é submissão, homologação, conclusão institucional nem envio à T.I.</p>
+      {% if registro.form1_integral.conferencia_interna.pode_consultar %}
+      <a class="botao-link" href="{{ url_for('consultar_conferencia_interna', registro_id=registro.id) }}?conta_id={{ conta_id }}">Conferir versão apresentada</a>
+      {% endif %}
+      {% elif registro.form1_integral.pode_solicitar_conferencia %}
+      <p>O ARP pode apresentar ao APA a versão atual do rascunho, mesmo incompleta, para conferência interna.</p>
+      {% if registro.form1_integral.pre_validacao %}<p><strong>{{ registro.form1_integral.pre_validacao.quantidades.incompletos }}</strong> campo(s) obrigatório(s) ativo(s) ainda incompleto(s).</p>{% endif %}
+      <form method="post" action="{{ url_for('solicitar_conferencia_interna', registro_id=registro.id) }}">
+        <input type="hidden" name="conta_id" value="{{ conta_id }}">
+        <input type="hidden" name="comando_id" value="{{ comando_solicitar_conferencia }}">
+        <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
+        <button class="botao-primario" type="submit">Solicitar conferência interna do APA</button>
+      </form>
+      {% else %}
+      <p class="ajuda">Nenhuma ação de conferência interna está disponível para seu perfil neste momento.</p>
+      {% endif %}
+    </section>
     <aside class="legenda-form1-integral" aria-labelledby="titulo-legenda-form1">
       <h3 id="titulo-legenda-form1">Como ler as sinalizações</h3>
       <ul class="lista-legenda-obrigatoriedade">

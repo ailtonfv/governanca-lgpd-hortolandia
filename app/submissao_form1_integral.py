@@ -100,6 +100,64 @@ def _envelope_snapshot(sessao, rascunho):
     }
 
 
+def preparar_snapshot_na_transacao(
+    sessao, *, comando, registro, rascunho, pessoa_id, momento,
+    ordem_no_comando=1, reusar_existente=False,
+):
+    """Cria o retrato exato dentro do comando chamador, sem mudar workflow."""
+
+    existente = sessao.scalars(
+        select(VersaoForm1Integral).where(
+            VersaoForm1Integral.registro_id == registro.id,
+            VersaoForm1Integral.versao_rascunho == rascunho.versao_rascunho,
+        )
+    ).one_or_none()
+    if existente is not None:
+        return (existente, None) if reusar_existente else (None, existente)
+
+    conteudo = _envelope_snapshot(sessao, rascunho)
+    canonico = _texto_canonico(conteudo)
+    lacre_snapshot = lacre(canonico)
+    numero = (sessao.scalar(
+        select(func.max(VersaoForm1Integral.numero)).where(
+            VersaoForm1Integral.registro_id == registro.id
+        )
+    ) or 0) + 1
+    snapshot_id = str(uuid.uuid4())
+    evento = registrar_evento(
+        sessao, comando, "registro", registro.codigo_lgpd, TIPO_COMANDO,
+        {
+            "registro_id": registro.id,
+            "snapshot_id": snapshot_id,
+            "numero": numero,
+            "versao_rascunho": rascunho.versao_rascunho,
+            "versao_contrato": VERSAO_CONTRATO_FORM1_INTEGRAL_CANDIDATA,
+            "lacre": lacre_snapshot,
+            "submissao_habilitada": False,
+        },
+        ordem_no_comando=ordem_no_comando,
+        registro_id=registro.id,
+        ciclo_id=_ciclo(sessao, registro).id,
+        versao_esquema_evento=2,
+    )
+    versao = VersaoForm1Integral(
+        id=snapshot_id,
+        registro_id=registro.id,
+        numero=numero,
+        versao_rascunho=rascunho.versao_rascunho,
+        versao_contrato=VERSAO_CONTRATO_FORM1_INTEGRAL_CANDIDATA,
+        revisao_fonte=REVISAO_FONTE_FORM1_INTEGRAL,
+        conteudo=conteudo,
+        conteudo_canonico=canonico,
+        lacre=lacre_snapshot,
+        preparado_por=pessoa_id,
+        preparado_em=momento,
+        evento_preparacao_id=evento.id,
+    )
+    sessao.add(versao)
+    return versao, evento
+
+
 def preparar_snapshot_form1_integral(
     sessao, *, comando_id, conta_id, registro_id, versao_lida, momento=None
 ):
@@ -164,51 +222,15 @@ def preparar_snapshot_form1_integral(
             "esta versão do rascunho já possui snapshot técnico",
             snapshot_id=existente.id,
         )
-
-    conteudo = _envelope_snapshot(sessao, rascunho)
-    canonico = _texto_canonico(conteudo)
-    lacre_snapshot = lacre(canonico)
-    numero = (sessao.scalar(
-        select(func.max(VersaoForm1Integral.numero)).where(
-            VersaoForm1Integral.registro_id == registro_id
-        )
-    ) or 0) + 1
-    snapshot_id = str(uuid.uuid4())
-    evento = registrar_evento(
-        sessao, comando, "registro", registro.codigo_lgpd,
-        TIPO_COMANDO,
-        {
-            "registro_id": registro.id,
-            "snapshot_id": snapshot_id,
-            "numero": numero,
-            "versao_rascunho": versao_lida,
-            "versao_contrato": VERSAO_CONTRATO_FORM1_INTEGRAL_CANDIDATA,
-            "lacre": lacre_snapshot,
-            "submissao_habilitada": False,
-        },
-        registro_id=registro.id,
-        ciclo_id=_ciclo(sessao, registro).id,
-        versao_esquema_evento=2,
+    versao, evento = preparar_snapshot_na_transacao(
+        sessao, comando=comando, registro=registro, rascunho=rascunho,
+        pessoa_id=pessoa_id, momento=momento,
     )
-    sessao.add(VersaoForm1Integral(
-        id=snapshot_id,
-        registro_id=registro.id,
-        numero=numero,
-        versao_rascunho=versao_lida,
-        versao_contrato=VERSAO_CONTRATO_FORM1_INTEGRAL_CANDIDATA,
-        revisao_fonte=REVISAO_FONTE_FORM1_INTEGRAL,
-        conteudo=conteudo,
-        conteudo_canonico=canonico,
-        lacre=lacre_snapshot,
-        preparado_por=pessoa_id,
-        preparado_em=momento,
-        evento_preparacao_id=evento.id,
-    ))
     registrar_auditoria(
         sessao, "snapshot_form1_integral_preparado", ator_tipo, ator_id,
         {
             "registro_id": registro.id,
-            "snapshot_id": snapshot_id,
+            "snapshot_id": versao.id,
             "versao_rascunho": versao_lida,
             "submissao_habilitada": False,
         },
@@ -219,11 +241,11 @@ def preparar_snapshot_form1_integral(
         "permitido": True,
         "motivo": "Snapshot técnico do FORM 1 integral preparado",
         "registro_id": registro.id,
-        "snapshot_id": snapshot_id,
-        "numero": numero,
+        "snapshot_id": versao.id,
+        "numero": versao.numero,
         "versao_rascunho": versao_lida,
         "versao_contrato": VERSAO_CONTRATO_FORM1_INTEGRAL_CANDIDATA,
-        "lacre": lacre_snapshot,
+        "lacre": versao.lacre,
         "evento": evento.sequencia_cadeia,
         "submissao_habilitada": False,
     })

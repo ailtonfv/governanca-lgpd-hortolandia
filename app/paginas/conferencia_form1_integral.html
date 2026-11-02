@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block titulo %}Conferência interna · {{ registro.codigo_lgpd }}{% endblock %}
+{% block conteudo %}
+<p><a class="voltar" href="{{ url_for('detalhe_registro', registro_id=registro.id) }}?conta_id={{ conta_id }}">← Voltar ao Registro</a></p>
+<section class="detalhe" aria-labelledby="titulo-conferencia">
+  <p class="etiqueta">Ato preparatório · somente leitura</p>
+  <h1 id="titulo-conferencia">FORM 1 aguardando conferência interna</h1>
+  <p><strong>{{ registro.codigo_lgpd }}</strong> — {{ registro.titulo_objeto }}</p>
+  <p class="aviso-leitura"><strong>Importante:</strong> esta consulta não é submissão, homologação, conclusão institucional nem envio à T.I. O rascunho pode conter pendências.</p>
+  <dl>
+    <div><dt>Versão apresentada</dt><dd>Rascunho {{ conferencia.versao_rascunho }} · snapshot técnico {{ snapshot.numero }}</dd></div>
+    <div><dt>Solicitada por</dt><dd>{% if solicitante %}{{ solicitante.matricula }} — {{ solicitante.nome }}{% else %}{{ conferencia.solicitada_por_id }}{% endif %}</dd></div>
+    <div><dt>Solicitada em</dt><dd>{{ conferencia.solicitada_em }}</dd></div>
+    <div><dt>Lacre</dt><dd><code>{{ snapshot.lacre }}</code></dd></div>
+  </dl>
+</section>
+
+<section class="form1" aria-labelledby="titulo-conteudo-apresentado">
+  <h2 id="titulo-conteudo-apresentado">Conteúdo exato apresentado pelo ARP</h2>
+  {% if respostas %}
+  <dl class="resumo-respostas-conferencia">
+    {% for item in respostas %}
+    <div><dt>{{ item.id }} — {{ item.pergunta }}</dt><dd>{{ item.valor }}</dd></div>
+    {% endfor %}
+  </dl>
+  {% else %}<p>Nenhuma resposta foi registrada nesta versão.</p>{% endif %}
+  {% if participantes %}<h3>Participantes informados</h3><pre>{{ participantes }}</pre>{% endif %}
+  {% if destinatarios %}<h3>Destinatários informados</h3><pre>{{ destinatarios }}</pre>{% endif %}
+</section>
+{% endblock %}

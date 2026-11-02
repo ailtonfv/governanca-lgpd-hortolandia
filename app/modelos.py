@@ -347,6 +347,47 @@ class VersaoForm1Integral(Base):
     )
 
 
+class ConferenciaInternaForm1Integral(Base):
+    """Projeção da solicitação preparatória do ARP para conferência do APA.
+
+    A projeção referencia o snapshot técnico imutável apresentado. Ela não
+    representa submissão, homologação ou conclusão institucional do FORM 1.
+    O histórico completo permanece no livro de atos do Registro.
+    """
+    __tablename__ = "conferencia_interna_form1_integral"
+
+    registro_id = Column(String(36), ForeignKey("registro.id"), primary_key=True)
+    situacao = Column(String(50), nullable=False)
+    versao_projecao = Column(Integer, nullable=False)
+    snapshot_id = Column(
+        String(36), ForeignKey("versao_form1_integral.id"), nullable=False, unique=True
+    )
+    versao_rascunho = Column(Integer, nullable=False)
+    solicitada_por_id = Column(String(50), ForeignKey("pessoa.id"), nullable=False)
+    solicitada_em = Column(DateTime(timezone=True), nullable=False)
+    apa_em_exercicio_no_momento_id = Column(
+        String(50), ForeignKey("pessoa.id"), nullable=False
+    )
+    evento_solicitacao_id = Column(
+        BigInteger, ForeignKey("evento.id"), nullable=False, unique=True
+    )
+
+    __table_args__ = (
+        CheckConstraint(
+            "situacao = 'aguardando_conferencia_interna_apa'",
+            name="ck_conferencia_interna_form1_situacao",
+        ),
+        CheckConstraint(
+            "versao_projecao >= 1",
+            name="ck_conferencia_interna_form1_versao_projecao",
+        ),
+        CheckConstraint(
+            "versao_rascunho >= 1",
+            name="ck_conferencia_interna_form1_versao_rascunho",
+        ),
+    )
+
+
 class ContadorRegistro(Base):
     """Contador anual do código LGPD (D4): LGPD-2026-00041, depois LGPD-2027-00001.
     Atualizado na mesma transação do G1, com INSERT ... ON CONFLICT ... RETURNING:

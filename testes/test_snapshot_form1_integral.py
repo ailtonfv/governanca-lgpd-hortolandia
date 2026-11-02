@@ -15,6 +15,7 @@ from app.eventos import lacre, verificar_cadeia
 from app.main import app
 from app.modelos import (
     Comando,
+    ConferenciaInternaForm1Integral,
     Evento,
     EventoAuditoria,
     Instrumento,
@@ -256,6 +257,7 @@ def test_snapshot_nao_possui_endpoint_nem_acao_na_interface(sessao):
 
 def test_migracao_cria_tabela_reversivel_e_snapshot_e_imutavel_no_banco(sessao):
     with motor.begin() as conexao:
+        ConferenciaInternaForm1Integral.__table__.drop(bind=conexao)
         VersaoForm1Integral.__table__.drop(bind=conexao)
     with Session(motor) as outra, outra.begin():
         aplicar_migracao(outra)
@@ -265,6 +267,8 @@ def test_migracao_cria_tabela_reversivel_e_snapshot_e_imutavel_no_banco(sessao):
     assert not inspect(motor).has_table("versao_form1_integral")
     with Session(motor) as outra, outra.begin():
         aplicar_migracao(outra)
+    with motor.begin() as conexao:
+        ConferenciaInternaForm1Integral.__table__.create(bind=conexao)
 
     registro = _preparar(sessao, "F18C-IMUTAVEL")
     resultado = _snapshot(sessao, registro, "F18C-IMUTAVEL-SNAPSHOT")

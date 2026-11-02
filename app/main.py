@@ -13,6 +13,10 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from app.atribuicao_form1_integral import atribuir_arp_form1_integral
+from app.conferencia_interna_form1_integral import (
+    carregar_versao_para_conferencia,
+    solicitar_conferencia_interna_form1_integral,
+)
 from app.banco import motor
 from app.consultas_interface import (carregar_conflitos_duplicidade_visiveis,
                                      carregar_opcoes_novo_registro, carregar_painel,
@@ -385,6 +389,7 @@ def detalhe_registro(
             "comando_atribuir_arp": str(uuid.uuid4()),
             "comando_iniciar_integral": str(uuid.uuid4()),
             "comando_salvar_integral": str(uuid.uuid4()),
+            "comando_solicitar_conferencia": str(uuid.uuid4()),
             "comando_salvar_bloco_2": str(uuid.uuid4()),
             "comando_salvar_bloco_3": str(uuid.uuid4()),
             "comando_adicionar_participante": str(uuid.uuid4()),
@@ -971,6 +976,77 @@ def remover_participante_integral(
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, "Participante do Bloco 3 removido.",
         ancora="titulo-bloco-3",
+    )
+
+
+@app.post("/registros/{registro_id}/form1-integral/conferencia-interna/solicitar")
+def solicitar_conferencia_interna(
+    registro_id: str,
+    conta_id: str = Form(max_length=50),
+    comando_id: str = Form(max_length=64),
+    versao_lida: int = Form(ge=1),
+    sessao: Session = Depends(obter_sessao),
+):
+    resultado = solicitar_conferencia_interna_form1_integral(
+        sessao, comando_id=comando_id, conta_id=conta_id,
+        registro_id=registro_id, versao_lida=versao_lida,
+    )
+    sessao.commit()
+    sucesso = (
+        "Conferência interna solicitada ao APA. A versão "
+        f"{resultado.get('versao_rascunho', versao_lida)} do rascunho foi "
+        "preservada para consulta. Isso não submete nem conclui o FORM 1."
+    )
+    return _voltar_ao_registro(
+        registro_id, conta_id, resultado, sucesso,
+        ancora="titulo-conferencia-interna-form1",
+    )
+
+
+@app.get(
+    "/registros/{registro_id}/form1-integral/conferencia-interna",
+    response_class=HTMLResponse,
+)
+def consultar_conferencia_interna(
+    registro_id: str,
+    request: Request,
+    conta_id: str = Query(default="CONTA-A1", max_length=50),
+    sessao: Session = Depends(obter_sessao),
+):
+    resultado = carregar_versao_para_conferencia(
+        sessao, conta_id=conta_id, registro_id=registro_id,
+    )
+    if resultado is None:
+        sessao.commit()
+        return paginas.TemplateResponse(
+            request=request, name="erro.html",
+            context={
+                "titulo": "Conferência indisponível",
+                "mensagem": "Somente o APA em exercício pode consultar a versão apresentada.",
+            },
+            status_code=403,
+        )
+    registro, conferencia, snapshot, solicitante = resultado
+    sessao.commit()
+    respostas = snapshot.conteudo.get("form1_integral", {}).get("respostas", {})
+    catalogo = campos_por_id()
+    return paginas.TemplateResponse(
+        request=request,
+        name="conferencia_form1_integral.html",
+        context={
+            "conta_id": conta_id,
+            "registro": registro,
+            "conferencia": conferencia,
+            "snapshot": snapshot,
+            "solicitante": solicitante,
+            "respostas": [
+                {"id": campo_id, "pergunta": catalogo[campo_id].pergunta, "valor": valor}
+                for campo_id, valor in sorted(respostas.items())
+                if campo_id in catalogo
+            ],
+            "participantes": snapshot.conteudo.get("form1_integral", {}).get("participantes", []),
+            "destinatarios": snapshot.conteudo.get("form1_integral", {}).get("destinatarios_10_2_1", []),
+        },
     )
 
 

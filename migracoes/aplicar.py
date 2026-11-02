@@ -30,6 +30,7 @@ from migracoes.classificacao_canais_form1 import aplicar as migracao_0016
 from migracoes.versao_form1_integral import aplicar as migracao_0017
 from migracoes.canais_declarados_apa import aplicar as migracao_0018
 from migracoes.catalogo_canais_institucionais import aplicar as migracao_0019
+from migracoes.conferencia_interna_form1_integral import aplicar as migracao_0020
 
 MIGRACOES = [
     # (número, nome, função que recebe a sessão)
@@ -51,6 +52,7 @@ MIGRACOES = [
     (17, "snapshots técnicos imutáveis do FORM 1 integral", migracao_0017),
     (18, "canais do catálogo geral declarados pelo APA no G1", migracao_0018),
     (19, "modalidades institucionais do catálogo geral de canais", migracao_0019),
+    (20, "solicitação preparatória de conferência interna do FORM 1", migracao_0020),
 ]
 
 

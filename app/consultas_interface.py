@@ -33,11 +33,12 @@ from app.form1_integral import (CONDICOES_BLOCO_2, CONDICOES_BLOCO_4, CONDICOES_
 from app.pre_validacao_form1_integral import (
     metadado_visual_obrigatoriedade, pre_validar_form1_integral,
 )
-from app.modelos import (AtribuicaoForm1Integral, Conta, ContextoAtuacao, Designacao, Evento, Instrumento,
+from app.modelos import (AtribuicaoForm1Integral, ConferenciaInternaForm1Integral, Conta, ContextoAtuacao, Designacao, Evento, Instrumento,
                          Canal, ConfirmacaoCanaisRegistro, ObjetoCanal,
                          ObjetoCatalogo, ObjetoContextoCatalogo, RegistroCanal,
                          UnidadeObjetoCatalogo, Pendencia, Pessoa,
-                          RascunhoForm1Integral, RascunhoInstrumento, Registro, Unidade)
+                          RascunhoForm1Integral, RascunhoInstrumento, Registro, Unidade,
+                          VersaoForm1Integral)
 
 
 ROTULOS_ESTADO = {
@@ -338,6 +339,7 @@ def carregar_painel(sessao, conta_id):
     registros = [_resumo_registro(registro, unidade) for registro, unidade in linhas]
 
     proximas_providencias_form1 = []
+    proximas_conferencias_form1 = []
     for registro, unidade in linhas:
         atribuicao = sessao.get(AtribuicaoForm1Integral, registro.id)
         if not _pode_editar_form1_integral(identidade, atribuicao, registro):
@@ -379,6 +381,39 @@ def carregar_painel(sessao, conta_id):
             ),
         })
 
+    for registro, unidade in linhas:
+        exercicio = apa_em_exercicio(sessao, registro.unidade_principal_atual_id)
+        if exercicio is None or exercicio["pessoa_id"] != identidade["pessoa_id"]:
+            continue
+        conferencia = sessao.get(ConferenciaInternaForm1Integral, registro.id)
+        if conferencia is None:
+            continue
+        snapshot = sessao.get(VersaoForm1Integral, conferencia.snapshot_id)
+        solicitante = sessao.get(Pessoa, conferencia.solicitada_por_id)
+        pre_validacao = pre_validar_form1_integral(
+            snapshot.conteudo.get("form1_integral", {}),
+            nome_institucional=(None if solicitante is None else solicitante.nome),
+            cargo_funcao=None,
+            email_institucional=None,
+            respostas_somente_leitura={
+                "2.1": [
+                    item.get("classificacao_form1")
+                    for item in snapshot.conteudo.get("retrato_canais", {}).get("canais", [])
+                    if item.get("classificacao_form1")
+                ]
+            },
+        )
+        proximas_conferencias_form1.append({
+            "registro_id": registro.id,
+            "codigo_lgpd": registro.codigo_lgpd,
+            "tipo": registro.tipo_objeto.capitalize(),
+            "titulo": rotulo_interface(registro.titulo_objeto),
+            "situacao": "FORM 1 aguardando conferência interna",
+            "numero_snapshot": snapshot.numero,
+            "versao_rascunho": conferencia.versao_rascunho,
+            "quantidade_pendencias": pre_validacao["quantidades"]["incompletos"],
+        })
+
     resumos_por_id = {item["id"]: item for item in registros}
     alertas = listar_alertas_operacionais(sessao, conta_id)
     for alerta in alertas:
@@ -407,6 +442,8 @@ def carregar_painel(sessao, conta_id):
     quantidade_registros_com_providencias = len({
         item["registro_id"] for item in proximas_providencias_form1
     } | {
+        item["registro_id"] for item in proximas_conferencias_form1
+    } | {
         item["registro_id"] for item in alertas
     })
     pode_criar_registro = bool(
@@ -417,6 +454,7 @@ def carregar_painel(sessao, conta_id):
         "registros": registros,
         "alertas": alertas,
         "proximas_providencias_form1": proximas_providencias_form1,
+        "proximas_conferencias_form1": proximas_conferencias_form1,
         "quantidade_registros_com_providencias": quantidade_registros_com_providencias,
         "pode_criar_registro": pode_criar_registro,
     }
@@ -767,6 +805,15 @@ def carregar_registro(sessao, conta_id, registro_id):
             sessao, registro.id, pre_validacao_integral, rascunho_integral.conteudo
         )
     )
+    conferencia_integral = sessao.get(ConferenciaInternaForm1Integral, registro.id)
+    snapshot_conferencia = (
+        None if conferencia_integral is None
+        else sessao.get(VersaoForm1Integral, conferencia_integral.snapshot_id)
+    )
+    solicitante_conferencia = (
+        None if conferencia_integral is None
+        else sessao.get(Pessoa, conferencia_integral.solicitada_por_id)
+    )
     resumo["form1_integral"] = {
         "situacao": "rascunho" if rascunho_integral is not None else "nao_iniciado",
         "pode_atribuir_arp": pode_atribuir_arp,
@@ -811,6 +858,28 @@ def carregar_registro(sessao, conta_id, registro_id):
             "salvo_em": rascunho_integral.salvo_em,
         },
         "pre_validacao": pre_validacao_integral,
+        "conferencia_interna": (
+            None if conferencia_integral is None else {
+                "situacao": conferencia_integral.situacao,
+                "snapshot_id": conferencia_integral.snapshot_id,
+                "numero_snapshot": snapshot_conferencia.numero,
+                "versao_rascunho": conferencia_integral.versao_rascunho,
+                "solicitada_em": conferencia_integral.solicitada_em,
+                "solicitada_por": (
+                    conferencia_integral.solicitada_por_id
+                    if solicitante_conferencia is None else
+                    f"{solicitante_conferencia.matricula} — {rotulo_interface(solicitante_conferencia.nome)}"
+                ),
+                "pode_consultar": bool(
+                    exercicio_apa is not None
+                    and exercicio_apa["pessoa_id"] == identidade["pessoa_id"]
+                ),
+            }
+        ),
+        "pode_solicitar_conferencia": bool(
+            pode_editar_integral and rascunho_integral is not None
+            and conferencia_integral is None
+        ),
         "painel_progresso": painel_progresso_integral,
         "proxima_providencia": _projetar_proxima_providencia_form1_integral(
             identidade=identidade,

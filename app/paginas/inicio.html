@@ -58,6 +58,22 @@
       </div>
     </div>
     {% endif %}
+    {% if proximas_conferencias_form1 %}
+    <div class="grupo-atencao-painel" aria-labelledby="titulo-conferencias-form1">
+      <h3 id="titulo-conferencias-form1">Conferência interna do FORM 1</h3>
+      <div class="lista-providencias-painel">
+        {% for providencia in proximas_conferencias_form1 %}
+        <article class="alerta alerta-proxima_acao">
+          <p class="etiqueta">{{ providencia.codigo_lgpd }}</p>
+          <h3>{{ providencia.tipo }} · {{ providencia.titulo }}</h3>
+          <p><strong>Situação:</strong> {{ providencia.situacao }}</p>
+          <p>Versão {{ providencia.versao_rascunho }} apresentada ao APA; {{ providencia.quantidade_pendencias }} campo(s) obrigatório(s) ativo(s) ainda incompleto(s).</p>
+          <a class="botao-link" href="{{ url_for('consultar_conferencia_interna', registro_id=providencia.registro_id) }}?conta_id={{ conta_id }}">Conferir versão apresentada</a>
+        </article>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
     {% if alertas %}
     <div class="grupo-atencao-painel" aria-labelledby="titulo-pendencias-institucionais">
       <h3 id="titulo-pendencias-institucionais">Pendências e ações institucionais</h3>
@@ -74,7 +90,7 @@
       </div>
     </div>
     {% endif %}
-    {% if not proximas_providencias_form1 and not alertas %}
+    {% if not proximas_providencias_form1 and not proximas_conferencias_form1 and not alertas %}
     <p class="vazio">Nenhuma providência pendente para seu perfil neste momento.</p>
     {% endif %}
   </section>
