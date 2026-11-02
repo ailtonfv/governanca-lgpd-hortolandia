@@ -254,6 +254,10 @@
       {% if registro.form1_integral.conferencia_interna.pode_consultar %}
       <a class="botao-link" href="{{ url_for('consultar_conferencia_interna', registro_id=registro.id) }}?conta_id={{ conta_id }}">Conferir versão apresentada</a>
       {% endif %}
+      {% elif registro.form1_integral.confirmacao_interna %}
+      <p class="sucesso"><strong>Conferência interna confirmada.</strong> Apresentação {{ registro.form1_integral.confirmacao_interna.numero_apresentacao }}, referente ao rascunho {{ registro.form1_integral.confirmacao_interna.versao_rascunho }}.</p>
+      <p class="ajuda">Confirmação registrada por {{ registro.form1_integral.confirmacao_interna.confirmada_por }}. Este ato não é submissão, homologação ou declaração de conformidade.</p>
+      <a class="botao-link" href="{{ url_for('consultar_conferencia_interna', registro_id=registro.id) }}?conta_id={{ conta_id }}">Consultar versão confirmada</a>
       {% elif registro.form1_integral.devolucao_interna %}
       <p class="aviso-leitura"><strong>Devolvido para ajustes pelo APA.</strong> Apresentação {{ registro.form1_integral.devolucao_interna.numero_apresentacao }}, referente ao rascunho {{ registro.form1_integral.devolucao_interna.versao_rascunho }}.</p>
       <p><strong>Justificativa:</strong> {{ registro.form1_integral.devolucao_interna.justificativa }}</p>
@@ -289,6 +293,7 @@
           <li>
             <strong>Apresentação {{ item.numero_apresentacao }}</strong> — rascunho {{ item.versao_rascunho }}, snapshot {{ item.numero_snapshot }} · {{ item.situacao }}.
             {% if item.justificativa_devolucao %}<br><span>Justificativa da devolução: {{ item.justificativa_devolucao }}</span>{% endif %}
+            {% if item.confirmada_por %}<br><span>Confirmada por: {{ item.confirmada_por }}</span>{% endif %}
           </li>
           {% endfor %}
         </ol>

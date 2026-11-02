@@ -4,7 +4,7 @@
 <p><a class="voltar" href="{{ url_for('detalhe_registro', registro_id=registro.id) }}?conta_id={{ conta_id }}">← Voltar ao Registro</a></p>
 <section class="detalhe" aria-labelledby="titulo-conferencia">
   <p class="etiqueta">Ato preparatório · somente leitura</p>
-  <h1 id="titulo-conferencia">FORM 1 aguardando conferência interna</h1>
+  <h1 id="titulo-conferencia">{% if conferencia_pendente %}FORM 1 aguardando conferência interna{% else %}Conferência interna confirmada{% endif %}</h1>
   <p><strong>{{ registro.codigo_lgpd }}</strong> — {{ registro.titulo_objeto }}</p>
   <p class="aviso-leitura"><strong>Importante:</strong> esta consulta não é submissão, homologação, conclusão institucional nem envio à T.I. O rascunho pode conter pendências.</p>
   <dl>
@@ -28,9 +28,19 @@
   {% if destinatarios %}<h3>Destinatários informados</h3><pre>{{ destinatarios }}</pre>{% endif %}
 </section>
 
-<section class="form1" aria-labelledby="titulo-devolver-conferencia">
+{% if conferencia_pendente %}
+<section class="form1" aria-labelledby="titulo-decidir-conferencia">
   <p class="etiqueta">Ato do APA · não conclui nem submete o FORM 1</p>
-  <h2 id="titulo-devolver-conferencia">Devolver para ajustes</h2>
+  <h2 id="titulo-decidir-conferencia">Decisão da conferência interna</h2>
+  <h3>Confirmar conferência interna</h3>
+  <p>Confirme somente a versão identificada acima. Este ato é preparatório e não representa submissão, homologação ou declaração de conformidade.</p>
+  <form method="post" action="{{ url_for('confirmar_conferencia_interna', registro_id=registro.id) }}">
+    <input type="hidden" name="conta_id" value="{{ conta_id }}">
+    <input type="hidden" name="comando_id" value="{{ comando_confirmar_conferencia }}">
+    <input type="hidden" name="versao_lida" value="{{ conferencia.versao_projecao }}">
+    <button class="botao-primario" type="submit">Confirmar conferência interna</button>
+  </form>
+  <h3>Devolver para ajustes</h3>
   <p>Use esta ação quando o ARP precisar corrigir ou complementar o levantamento apresentado. O snapshot acima permanecerá íntegro no histórico.</p>
   <form class="formulario" method="post" action="{{ url_for('devolver_conferencia_interna', registro_id=registro.id) }}">
     <input type="hidden" name="conta_id" value="{{ conta_id }}">
@@ -42,4 +52,11 @@
     <button class="botao-primario" type="submit">Confirmar devolução para ajustes</button>
   </form>
 </section>
+{% else %}
+<section class="form1" aria-labelledby="titulo-confirmacao-registrada">
+  <p class="etiqueta">Ato preparatório registrado</p>
+  <h2 id="titulo-confirmacao-registrada">Conferência interna confirmada pelo APA</h2>
+  <p>Esta versão permanece disponível somente para consulta dos perfis autorizados. A confirmação não submeteu, homologou ou declarou o FORM 1 adequado à LGPD.</p>
+</section>
+{% endif %}
 {% endblock %}

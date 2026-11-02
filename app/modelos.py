@@ -418,6 +418,9 @@ class HistoricoConferenciaForm1Integral(Base):
     devolvida_em = Column(DateTime(timezone=True))
     justificativa_devolucao = Column(Text)
     evento_devolucao_id = Column(BigInteger, ForeignKey("evento.id"), unique=True)
+    confirmada_por_id = Column(String(50), ForeignKey("pessoa.id"))
+    confirmada_em = Column(DateTime(timezone=True))
+    evento_confirmacao_id = Column(BigInteger, ForeignKey("evento.id"), unique=True)
 
     __table_args__ = (
         UniqueConstraint(
@@ -425,7 +428,8 @@ class HistoricoConferenciaForm1Integral(Base):
             name="uq_historico_conferencia_form1_numero",
         ),
         CheckConstraint(
-            "situacao IN ('aguardando_conferencia_interna_apa', 'devolvida_para_ajustes')",
+            "situacao IN ('aguardando_conferencia_interna_apa', "
+            "'devolvida_para_ajustes', 'conferencia_interna_confirmada')",
             name="ck_historico_conferencia_form1_situacao",
         ),
         CheckConstraint(
@@ -443,11 +447,20 @@ class HistoricoConferenciaForm1Integral(Base):
         CheckConstraint(
             "(situacao = 'aguardando_conferencia_interna_apa' "
             "AND devolvida_por_id IS NULL AND devolvida_em IS NULL "
-            "AND justificativa_devolucao IS NULL AND evento_devolucao_id IS NULL) OR "
+            "AND justificativa_devolucao IS NULL AND evento_devolucao_id IS NULL "
+            "AND confirmada_por_id IS NULL AND confirmada_em IS NULL "
+            "AND evento_confirmacao_id IS NULL) OR "
             "(situacao = 'devolvida_para_ajustes' "
             "AND devolvida_por_id IS NOT NULL AND devolvida_em IS NOT NULL "
-            "AND justificativa_devolucao IS NOT NULL AND evento_devolucao_id IS NOT NULL)",
-            name="ck_historico_conferencia_form1_devolucao_completa",
+            "AND justificativa_devolucao IS NOT NULL AND evento_devolucao_id IS NOT NULL "
+            "AND confirmada_por_id IS NULL AND confirmada_em IS NULL "
+            "AND evento_confirmacao_id IS NULL) OR "
+            "(situacao = 'conferencia_interna_confirmada' "
+            "AND devolvida_por_id IS NULL AND devolvida_em IS NULL "
+            "AND justificativa_devolucao IS NULL AND evento_devolucao_id IS NULL "
+            "AND confirmada_por_id IS NOT NULL AND confirmada_em IS NOT NULL "
+            "AND evento_confirmacao_id IS NOT NULL)",
+            name="ck_historico_conferencia_form1_decisao_completa",
         ),
         Index(
             "ix_historico_conferencia_form1_registro",

@@ -32,6 +32,7 @@ from migracoes.canais_declarados_apa import aplicar as migracao_0018
 from migracoes.catalogo_canais_institucionais import aplicar as migracao_0019
 from migracoes.conferencia_interna_form1_integral import aplicar as migracao_0020
 from migracoes.historico_conferencia_form1_integral import aplicar as migracao_0021
+from migracoes.confirmacao_conferencia_form1_integral import aplicar as migracao_0022
 
 MIGRACOES = [
     # (número, nome, função que recebe a sessão)
@@ -55,6 +56,7 @@ MIGRACOES = [
     (19, "modalidades institucionais do catálogo geral de canais", migracao_0019),
     (20, "solicitação preparatória de conferência interna do FORM 1", migracao_0020),
     (21, "devolução e reapresentação interna do FORM 1", migracao_0021),
+    (22, "confirmação preparatória da conferência interna do FORM 1", migracao_0022),
 ]
 
 

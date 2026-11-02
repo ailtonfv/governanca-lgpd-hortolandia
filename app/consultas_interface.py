@@ -158,7 +158,7 @@ def _projetar_painel_progresso_form1_integral(
 def _projetar_proxima_providencia_form1_integral(
     *, identidade, arp_atual, pode_editar, rascunho, pre_validacao,
     e_apa_atual=False, conferencia_pendente=False,
-    pode_consultar_conferencia=False, devolucao=None,
+    pode_consultar_conferencia=False, devolucao=None, confirmacao=None,
 ):
     """Orienta a interface usando somente autorização e estado já projetados."""
 
@@ -193,6 +193,19 @@ def _projetar_proxima_providencia_form1_integral(
                 "A versão atual foi apresentada ao APA para conferência interna. "
                 "Aguarde a devolução ou a futura decisão correspondente; nenhuma "
                 "submissão institucional foi realizada."
+            ),
+            "retomada": None,
+            "papel": papel,
+        }
+
+    if confirmacao is not None:
+        return {
+            "tipo": "conferencia_confirmada",
+            "rotulo": None,
+            "descricao": (
+                f"A conferência interna da apresentação "
+                f"{confirmacao['numero_apresentacao']} foi confirmada pelo APA. "
+                "Este ato não representa submissão ou homologação institucional."
             ),
             "retomada": None,
             "papel": papel,
@@ -327,6 +340,24 @@ def _devolucao_para_interface(sessao, registro_id):
     }
 
 
+def _confirmacao_para_interface(sessao, registro_id):
+    historico = _ultimo_historico_conferencia(sessao, registro_id)
+    if historico is None or historico.situacao != "conferencia_interna_confirmada":
+        return None
+    confirmador = sessao.get(Pessoa, historico.confirmada_por_id)
+    return {
+        "numero_apresentacao": historico.numero_apresentacao,
+        "snapshot_id": historico.snapshot_id,
+        "versao_rascunho": historico.versao_rascunho,
+        "confirmada_em": historico.confirmada_em,
+        "confirmada_por": (
+            historico.confirmada_por_id
+            if confirmador is None
+            else f"{confirmador.matricula} · {rotulo_interface(confirmador.nome)}"
+        ),
+    }
+
+
 def _pode_editar_form1_integral(identidade, atribuicao, registro):
     """Reutiliza a autorização vigente sem criar uma permissão de painel."""
 
@@ -454,6 +485,9 @@ def carregar_painel(sessao, conta_id):
         rascunho = sessao.get(RascunhoForm1Integral, registro.id)
         conferencia = sessao.get(ConferenciaInternaForm1Integral, registro.id)
         if conferencia is not None:
+            continue
+        confirmacao = _confirmacao_para_interface(sessao, registro.id)
+        if confirmacao is not None:
             continue
         devolucao = _devolucao_para_interface(sessao, registro.id)
         arp_atual = sessao.get(Pessoa, atribuicao.arp_atual_id)
@@ -621,6 +655,7 @@ def carregar_painel(sessao, conta_id):
         atribuicao = sessao.get(AtribuicaoForm1Integral, registro_id)
         rascunho = sessao.get(RascunhoForm1Integral, registro_id)
         conferencia = sessao.get(ConferenciaInternaForm1Integral, registro_id)
+        confirmacao = _confirmacao_para_interface(sessao, registro_id)
         resumo["responsavel_proxima_etapa"] = None
         if conferencia is not None:
             resumo["situacao_form1_integral"] = "Aguardando conferência interna"
@@ -631,6 +666,8 @@ def carregar_painel(sessao, conta_id):
                     resumo["responsavel_proxima_etapa"] = (
                         f"{pessoa.matricula} · {rotulo_interface(pessoa.nome)} (APA)"
                     )
+        elif confirmacao is not None:
+            resumo["situacao_form1_integral"] = "Conferência interna confirmada"
         elif rascunho is not None:
             resumo["situacao_form1_integral"] = "Em preenchimento"
         elif atribuicao is not None:
@@ -1005,6 +1042,7 @@ def carregar_registro(sessao, conta_id, registro_id):
     )
     conferencia_integral = sessao.get(ConferenciaInternaForm1Integral, registro.id)
     devolucao_integral = _devolucao_para_interface(sessao, registro.id)
+    confirmacao_integral = _confirmacao_para_interface(sessao, registro.id)
     historicos_conferencia = sessao.scalars(
         select(HistoricoConferenciaForm1Integral)
         .where(HistoricoConferenciaForm1Integral.registro_id == registro.id)
@@ -1085,6 +1123,7 @@ def carregar_registro(sessao, conta_id, registro_id):
             }
         ),
         "devolucao_interna": devolucao_integral,
+        "confirmacao_interna": confirmacao_integral,
         "historico_conferencias": [
             {
                 "numero_apresentacao": item.numero_apresentacao,
@@ -1098,14 +1137,29 @@ def carregar_registro(sessao, conta_id, registro_id):
                     "Aguardando conferência do APA"
                     if item.situacao == "aguardando_conferencia_interna_apa"
                     else "Devolvida para ajustes"
+                    if item.situacao == "devolvida_para_ajustes"
+                    else "Conferência interna confirmada"
                 ),
                 "justificativa_devolucao": item.justificativa_devolucao,
+                "confirmada_por": (
+                    None
+                    if item.confirmada_por_id is None
+                    else (
+                        item.confirmada_por_id
+                        if sessao.get(Pessoa, item.confirmada_por_id) is None
+                        else (
+                            f"{sessao.get(Pessoa, item.confirmada_por_id).matricula} · "
+                            f"{rotulo_interface(sessao.get(Pessoa, item.confirmada_por_id).nome)}"
+                        )
+                    )
+                ),
             }
             for item in historicos_conferencia
         ],
         "pode_solicitar_conferencia": bool(
             pode_editar_integral and rascunho_integral is not None
             and conferencia_integral is None
+            and confirmacao_integral is None
             and (
                 devolucao_integral is None
                 or rascunho_integral.versao_rascunho
@@ -1130,6 +1184,7 @@ def carregar_registro(sessao, conta_id, registro_id):
                 and exercicio_apa["pessoa_id"] == identidade["pessoa_id"]
             ),
             devolucao=devolucao_integral,
+            confirmacao=confirmacao_integral,
         ),
         "campos_bloco_1": {
             campo_id: {
