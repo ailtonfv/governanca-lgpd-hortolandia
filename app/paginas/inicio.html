@@ -47,12 +47,14 @@
           <h3>{{ providencia.tipo }} · {{ providencia.titulo }}</h3>
           <p><strong>FORM que exige atuação:</strong> FORM 1</p>
           <p><strong>Situação do FORM 1:</strong> {{ providencia.situacao }}</p>
-          {% if providencia.quantidade_pendencias > 0 %}
+          {% if providencia.quantidade_pendencias is none %}
+          <p>O rascunho do FORM 1 ainda não foi iniciado.</p>
+          {% elif providencia.quantidade_pendencias > 0 %}
           <p><strong>{{ providencia.quantidade_pendencias }}</strong> campo(s) obrigatório(s) ativo(s) incompleto(s).</p>
           {% else %}
           <p>Nenhum campo obrigatório ativo incompleto; revise a pré-validação consultiva.</p>
           {% endif %}
-          <a class="botao-link" aria-label="Continuar FORM 1 do Registro {{ providencia.codigo_lgpd }}" href="{{ url_for('detalhe_registro', registro_id=providencia.registro_id) }}?conta_id={{ conta_id }}#{{ providencia.ancora }}">Continuar FORM 1</a>
+          <a class="botao-link" aria-label="{{ providencia.acao_rotulo }} do Registro {{ providencia.codigo_lgpd }}" href="{{ url_for('detalhe_registro', registro_id=providencia.registro_id) }}?conta_id={{ conta_id }}#{{ providencia.ancora }}">{{ providencia.acao_rotulo }}</a>
         </article>
         {% endfor %}
       </div>

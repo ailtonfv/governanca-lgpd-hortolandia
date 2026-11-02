@@ -345,8 +345,6 @@ def carregar_painel(sessao, conta_id):
         if not _pode_editar_form1_integral(identidade, atribuicao, registro):
             continue
         rascunho = sessao.get(RascunhoForm1Integral, registro.id)
-        if rascunho is None:
-            continue
         arp_atual = sessao.get(Pessoa, atribuicao.arp_atual_id)
         confirmacao_canais = sessao.get(ConfirmacaoCanaisRegistro, registro.id)
         canais_registro = sessao.scalars(
@@ -373,11 +371,23 @@ def carregar_painel(sessao, conta_id):
             "codigo_lgpd": registro.codigo_lgpd,
             "tipo": registro.tipo_objeto.capitalize(),
             "titulo": rotulo_interface(registro.titulo_objeto),
-            "situacao": "Em preenchimento",
-            "quantidade_pendencias": pre_validacao["quantidades"]["incompletos"],
+            "situacao": (
+                "Não iniciado" if proxima["tipo"] == "iniciar" else "Em preenchimento"
+            ),
+            "quantidade_pendencias": (
+                None
+                if pre_validacao is None
+                else pre_validacao["quantidades"]["incompletos"]
+            ),
+            "acao_rotulo": proxima["rotulo"],
             "ancora": (
                 f"titulo-bloco-{retomada['bloco']}"
-                if retomada is not None else "titulo-pre-validacao-form1"
+                if retomada is not None
+                else (
+                    "titulo-form1-integral"
+                    if proxima["tipo"] == "iniciar"
+                    else "titulo-pre-validacao-form1"
+                )
             ),
         })
 

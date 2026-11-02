@@ -5,10 +5,80 @@ from fastapi.testclient import TestClient
 from app.atribuicao_form1_integral import atribuir_arp_form1_integral
 from app.main import app
 from app import consultas_interface
+from testes.apoio import CADASTRO, g1
 from testes.test_bloco5_form1_integral import _rascunho_pronto
 
 
 cliente = TestClient(app)
+
+
+def test_arp_sem_rascunho_recebe_acao_para_iniciar_form1(sessao):
+    # Arrange
+    registro = g1(
+        "F18AD-ARP-INICIAR",
+        CADASTRO,
+        "CTX-TRIB-01",
+        titulo="Serviço inicial fictício",
+    )
+    atribuir_arp_form1_integral(
+        sessao,
+        comando_id="F18AD-ARP-INICIAR-ATRIBUICAO",
+        conta_id="CONTA-A1",
+        registro_id=registro["registro_id"],
+        modo="proprio",
+        versao_lida=0,
+    )
+    sessao.commit()
+
+    # Act
+    pagina = cliente.get("/?conta_id=CONTA-A1")
+
+    # Assert
+    assert pagina.status_code == 200
+    assert registro["codigo_lgpd"] in pagina.text
+    assert "Situação do FORM 1:</strong> Não iniciado" in pagina.text
+    assert "O rascunho do FORM 1 ainda não foi iniciado." in pagina.text
+    assert ">Iniciar FORM 1</a>" in pagina.text
+    assert (
+        f'/registros/{registro["registro_id"]}?conta_id=CONTA-A1'
+        '#titulo-form1-integral'
+    ) in pagina.text
+    assert (
+        'aria-label="1 Registro(s) com providências">1</span>'
+        in pagina.text
+    )
+
+
+def test_apa_nao_recebe_inicio_quando_outro_arp_foi_designado(sessao):
+    # Arrange
+    registro = g1(
+        "F18AD-OUTRO-ARP",
+        CADASTRO,
+        "CTX-TRIB-01",
+        titulo="Serviço delegado fictício",
+    )
+    atribuir_arp_form1_integral(
+        sessao,
+        comando_id="F18AD-OUTRO-ARP-ATRIBUICAO",
+        conta_id="CONTA-A1",
+        registro_id=registro["registro_id"],
+        modo="outro",
+        arp_pessoa_id="PESSOA-G",
+        versao_lida=0,
+    )
+    sessao.commit()
+
+    # Act
+    pagina_apa = cliente.get("/?conta_id=CONTA-A1")
+    pagina_arp = cliente.get("/?conta_id=CONTA-G1")
+
+    # Assert
+    assert pagina_apa.status_code == 200
+    assert pagina_arp.status_code == 200
+    assert registro["codigo_lgpd"] in pagina_apa.text
+    assert "Iniciar FORM 1" not in pagina_apa.text
+    assert registro["codigo_lgpd"] in pagina_arp.text
+    assert ">Iniciar FORM 1</a>" in pagina_arp.text
 
 
 def _rascunho_do_epsilon(sessao, prefixo):
