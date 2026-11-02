@@ -34,7 +34,7 @@ def test_painel_identifica_agente_e_mostra_apenas_seu_escopo():
     assert "Este ambiente de demonstração não solicita senha" in resposta.text
     assert "Criar novo Registro LGPD" in resposta.text
     assert "Nada será criado antes da confirmação final" in resposta.text
-    assert "Pendências e próximas ações" in resposta.text
+    assert "Cada cartão reúne a situação do Registro" in resposta.text
     assert "O que precisa da sua atenção" in resposta.text
     assert "Mapeamentos disponíveis para você" in resposta.text
     assert norte["codigo_lgpd"] in resposta.text

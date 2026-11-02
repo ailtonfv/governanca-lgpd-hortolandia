@@ -33,21 +33,26 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 }
 .cabecalho-secao { display: flex; align-items: center; justify-content: space-between; margin-top: 2.2rem; }
 .contador { min-width: 2.2rem; height: 2.2rem; display: grid; place-items: center; border-radius: 999px; background: var(--azul-escuro); color: white; font-weight: 800; }
-.grade-painel-inicial { display: grid; grid-template-columns: minmax(0, 3fr) minmax(18rem, 2fr); grid-template-areas: "mapeamentos atencao"; gap: 1.25rem; align-items: start; }
 .painel-inicial { min-width: 0; }
-.painel-mapeamentos { grid-area: mapeamentos; }
-.painel-atencao { grid-area: atencao; }
 .painel-inicial .cabecalho-secao { min-height: 4.8rem; gap: .75rem; align-items: flex-start; }
 .painel-inicial .contador { flex: 0 0 auto; }
 .painel-inicial .vazio { margin: .75rem 0 0; padding: .75rem; }
+.resumo-contadores-painel { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 1rem; }
+.resumo-contadores-painel > div { display: flex; align-items: center; gap: .5rem; max-width: 13rem; color: #425466; font-size: .85rem; font-weight: 700; }
 .lista-mapeamentos-painel { display: grid; gap: .8rem; margin-top: 1rem; }
-.cartao-mapeamento { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: center; min-width: 0; padding: 1rem; border: 1px solid var(--borda); border-left: .3rem solid var(--azul); border-radius: .6rem; background: white; box-shadow: 0 4px 18px rgba(12,59,90,.05); }
+.cartao-mapeamento { display: grid; grid-template-columns: minmax(0, 1fr) minmax(11rem, auto); gap: 1rem; align-items: start; min-width: 0; padding: 1rem; border: 1px solid var(--borda); border-left: .3rem solid var(--azul); border-radius: .6rem; background: white; box-shadow: 0 4px 18px rgba(12,59,90,.05); }
 .cartao-mapeamento-conteudo { min-width: 0; }
 .cartao-mapeamento h3, .cartao-mapeamento p { overflow-wrap: anywhere; }
 .cartao-mapeamento h3 { margin: .25rem 0 .45rem; font-size: 1rem; }
 .cartao-mapeamento .codigo-registro, .cartao-mapeamento .unidade-registro { margin: 0; }
 .cartao-mapeamento .estado { margin-top: .65rem; }
 .cartao-mapeamento .botao-link-secundario { max-width: 12rem; white-space: normal; }
+.providencias-registro { display: grid; gap: .65rem; margin-top: .85rem; }
+.providencia-registro { padding: .8rem; border: 1px solid var(--borda); border-left: .3rem solid var(--verde); border-radius: .5rem; background: #f7fcf8; }
+.providencia-registro p, .sem-providencia-registro p { margin: .3rem 0; }
+.providencia-registro .botao-link { margin-top: .45rem; }
+.sem-providencia-registro { margin-top: .85rem; padding: .7rem .8rem; border: 1px dashed var(--borda); border-radius: .5rem; color: #425466; background: var(--fundo); }
+.acoes-cartao-registro { display: flex; justify-content: flex-end; }
 .grade-alertas { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1rem; margin-top: 1rem; }
 .grupo-atencao-painel { margin-top: 1.25rem; }
 .grupo-atencao-painel > h3 { margin-bottom: .15rem; }
@@ -222,13 +227,12 @@ dl div { border-top: 1px solid var(--borda); padding-top: .75rem; }
 dt { font-size: .8rem; font-weight: 800; text-transform: uppercase; color: #526475; }
 dd { margin: .25rem 0 0; }
 @media (max-width: 950px) {
-  .grade-painel-inicial { grid-template-columns: 1fr; grid-template-areas: "atencao" "mapeamentos"; }
   .painel-inicial .cabecalho-secao { min-height: 0; }
 }
 @media (max-width: 700px) {
   .topo, .abertura { align-items: stretch; flex-direction: column; }
-  .grade-painel-inicial { grid-template-columns: 1fr; grid-template-areas: "atencao" "mapeamentos"; }
   .painel-inicial .cabecalho-secao { min-height: 0; }
+  .resumo-contadores-painel { justify-content: flex-start; }
   .cartao-mapeamento { grid-template-columns: 1fr; align-items: stretch; }
   .cartao-mapeamento .botao-link-secundario { width: 100%; max-width: none; }
   .controle-designacao-arp { grid-template-columns: 1fr; }

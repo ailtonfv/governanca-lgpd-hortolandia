@@ -28,82 +28,23 @@
 <p class="aviso-leitura acao-painel">Seu papel atual permite consultar ou atuar nos mapeamentos disponíveis, mas não abrir um novo Registro LGPD. A criação fica disponível ao Agente Público Autorizado responsável pelo Registro.</p>
 {% endif %}
 
-<div class="grade-painel-inicial">
-  <section class="painel-inicial painel-atencao" aria-labelledby="titulo-alertas">
-    <div class="cabecalho-secao">
-      <div>
-        <p class="etiqueta">Pendências e próximas ações</p>
-        <h2 id="titulo-alertas">O que precisa da sua atenção</h2>
-      </div>
-      <span class="contador contador-providencias" aria-label="{{ quantidade_registros_com_providencias }} Registro(s) com providências">{{ quantidade_registros_com_providencias }}</span>
-    </div>
-    {% if proximas_providencias_form1 %}
-    <div class="grupo-atencao-painel" aria-labelledby="titulo-providencias-form1">
-      <h3 id="titulo-providencias-form1">Preenchimento do FORM 1</h3>
-      <div class="lista-providencias-painel">
-        {% for providencia in proximas_providencias_form1 %}
-        <article class="alerta alerta-proxima_acao">
-          <p class="etiqueta">{{ providencia.codigo_lgpd }}</p>
-          <h3>{{ providencia.tipo }} · {{ providencia.titulo }}</h3>
-          <p><strong>FORM que exige atuação:</strong> FORM 1</p>
-          <p><strong>Situação do FORM 1:</strong> {{ providencia.situacao }}</p>
-          {% if providencia.quantidade_pendencias is none %}
-          <p>O rascunho do FORM 1 ainda não foi iniciado.</p>
-          {% elif providencia.quantidade_pendencias > 0 %}
-          <p><strong>{{ providencia.quantidade_pendencias }}</strong> campo(s) obrigatório(s) ativo(s) incompleto(s).</p>
-          {% else %}
-          <p>Nenhum campo obrigatório ativo incompleto; revise a pré-validação consultiva.</p>
-          {% endif %}
-          <a class="botao-link" aria-label="{{ providencia.acao_rotulo }} do Registro {{ providencia.codigo_lgpd }}" href="{{ url_for('detalhe_registro', registro_id=providencia.registro_id) }}?conta_id={{ conta_id }}#{{ providencia.ancora }}">{{ providencia.acao_rotulo }}</a>
-        </article>
-        {% endfor %}
-      </div>
-    </div>
-    {% endif %}
-    {% if proximas_conferencias_form1 %}
-    <div class="grupo-atencao-painel" aria-labelledby="titulo-conferencias-form1">
-      <h3 id="titulo-conferencias-form1">Conferência interna do FORM 1</h3>
-      <div class="lista-providencias-painel">
-        {% for providencia in proximas_conferencias_form1 %}
-        <article class="alerta alerta-proxima_acao">
-          <p class="etiqueta">{{ providencia.codigo_lgpd }}</p>
-          <h3>{{ providencia.tipo }} · {{ providencia.titulo }}</h3>
-          <p><strong>Situação:</strong> {{ providencia.situacao }}</p>
-          <p>Versão {{ providencia.versao_rascunho }} apresentada ao APA; {{ providencia.quantidade_pendencias }} campo(s) obrigatório(s) ativo(s) ainda incompleto(s).</p>
-          <a class="botao-link" href="{{ url_for('consultar_conferencia_interna', registro_id=providencia.registro_id) }}?conta_id={{ conta_id }}">Conferir versão apresentada</a>
-        </article>
-        {% endfor %}
-      </div>
-    </div>
-    {% endif %}
-    {% if alertas %}
-    <div class="grupo-atencao-painel" aria-labelledby="titulo-pendencias-institucionais">
-      <h3 id="titulo-pendencias-institucionais">Pendências e ações institucionais</h3>
-      <div class="lista-providencias-painel">
-        {% for alerta in alertas %}
-        <article class="alerta alerta-{{ alerta.nivel }}">
-          <p class="etiqueta">{{ alerta.codigo_lgpd }}</p>
-          <h3>{{ alerta.tipo }} · {{ alerta.titulo }}</h3>
-          <p><strong>{{ alerta.formulario }}:</strong> {{ alerta.situacao }}</p>
-          <p><strong>Próxima ação:</strong> {{ alerta.rotulo }}.</p>
-          <a class="botao-link" aria-label="Ver providência do Registro {{ alerta.codigo_lgpd }}" href="{{ url_for('detalhe_registro', registro_id=alerta.registro_id) }}?conta_id={{ conta_id }}">Ver providência no Registro</a>
-        </article>
-        {% endfor %}
-      </div>
-    </div>
-    {% endif %}
-    {% if not proximas_providencias_form1 and not proximas_conferencias_form1 and not alertas %}
-    <p class="vazio">Nenhuma providência pendente para seu perfil neste momento.</p>
-    {% endif %}
-  </section>
-
-  <section class="painel-inicial painel-mapeamentos" aria-labelledby="titulo-registros">
+<section class="painel-inicial painel-registros-unificado" aria-labelledby="titulo-registros">
     <div class="cabecalho-secao">
       <div>
         <p class="etiqueta">Serviços, processos e atividades</p>
         <h2 id="titulo-registros">Mapeamentos disponíveis para você</h2>
+        <p>Cada cartão reúne a situação do Registro, a situação do FORM 1 e as providências atribuídas ao seu perfil.</p>
       </div>
-      <span class="contador">{{ registros|length }}</span>
+      <div class="resumo-contadores-painel" aria-label="Resumo do painel">
+        <div>
+          <span class="contador" aria-label="{{ registros|length }} Registro(s) disponível(is)">{{ registros|length }}</span>
+          <span>Registros</span>
+        </div>
+        <div>
+          <span class="contador contador-providencias" aria-label="{{ quantidade_registros_com_providencias }} Registro(s) com providências">{{ quantidade_registros_com_providencias }}</span>
+          <span>O que precisa da sua atenção</span>
+        </div>
+      </div>
     </div>
     {% if registros %}
     <p class="sr-apenas">Registros LGPD que {{ identidade.nome }} pode consultar</p>
@@ -114,15 +55,49 @@
           <p class="etiqueta codigo-registro">{{ registro.codigo_lgpd }}</p>
           <h3>{{ registro.tipo }} · {{ registro.titulo }}</h3>
           <p class="unidade-registro"><strong>Secretaria:</strong> {{ registro.unidade }}</p>
-          <span class="estado estado-{{ registro.estado_codigo }}">{{ registro.estado }}</span>
+          <p><strong>Situação do Registro:</strong> <span class="estado estado-{{ registro.estado_codigo }}">{{ registro.estado }}</span></p>
+          <p><strong>Situação do FORM 1:</strong> {{ registro.situacao_form1_integral }}</p>
+          {% if registro.providencias %}
+          <div class="providencias-registro" aria-label="Providências do Registro {{ registro.codigo_lgpd }}">
+            {% for providencia in registro.providencias %}
+            <div class="providencia-registro providencia-{{ providencia.categoria }}{% if providencia.nivel %} alerta-{{ providencia.nivel }}{% endif %}">
+              <p><strong>Responsável pela próxima etapa:</strong> {{ providencia.responsavel }}</p>
+              <p><strong>{{ providencia.formulario }}:</strong> {{ providencia.situacao }}</p>
+              {% if providencia.quantidade_pendencias is none and providencia.categoria == 'preenchimento_form1' %}
+              <p>O rascunho do FORM 1 ainda não foi iniciado.</p>
+              {% elif providencia.quantidade_pendencias is not none and providencia.quantidade_pendencias > 0 %}
+              <p><strong>{{ providencia.quantidade_pendencias }}</strong> campo(s) obrigatório(s) ativo(s) incompleto(s).</p>
+              {% elif providencia.quantidade_pendencias == 0 and providencia.categoria == 'preenchimento_form1' %}
+              <p>Nenhum campo obrigatório ativo incompleto; revise a pré-validação consultiva.</p>
+              {% endif %}
+              {% if providencia.rotulo %}<p><strong>Próxima ação:</strong> {{ providencia.rotulo }}.</p>{% endif %}
+              {% if providencia.categoria == 'conferencia_form1' %}
+              <a class="botao-link" href="{{ url_for('consultar_conferencia_interna', registro_id=registro.id) }}?conta_id={{ conta_id }}">{{ providencia.acao_rotulo }}</a>
+              {% elif providencia.categoria == 'preenchimento_form1' %}
+              <a class="botao-link" aria-label="{{ providencia.acao_rotulo }} do Registro {{ registro.codigo_lgpd }}" href="{{ url_for('detalhe_registro', registro_id=registro.id) }}?conta_id={{ conta_id }}#{{ providencia.ancora }}">{{ providencia.acao_rotulo }}</a>
+              {% else %}
+              <a class="botao-link" aria-label="Ver providência do Registro {{ registro.codigo_lgpd }}" href="{{ url_for('detalhe_registro', registro_id=registro.id) }}?conta_id={{ conta_id }}">{{ providencia.acao_rotulo }}</a>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="sem-providencia-registro">
+            <p>Nenhuma providência pendente para seu perfil neste momento.</p>
+            {% if registro.responsavel_proxima_etapa %}
+            <p><strong>Responsável pela próxima etapa:</strong> {{ registro.responsavel_proxima_etapa }}</p>
+            {% endif %}
+          </div>
+          {% endif %}
         </div>
-        <a class="botao-link-secundario" aria-label="Ver detalhes do Registro {{ registro.codigo_lgpd }}" href="{{ url_for('detalhe_registro', registro_id=registro.id) }}?conta_id={{ conta_id }}">Ver detalhes do Registro</a>
+        <div class="acoes-cartao-registro">
+          <a class="botao-link-secundario" aria-label="Ver detalhes do Registro {{ registro.codigo_lgpd }}" href="{{ url_for('detalhe_registro', registro_id=registro.id) }}?conta_id={{ conta_id }}">Ver detalhes do Registro</a>
+        </div>
       </article>
       {% endfor %}
     </div>
     {% else %}
     <p class="vazio">Nenhum Registro LGPD está disponível para consulta por este agente.</p>
     {% endif %}
-  </section>
-</div>
+</section>
 {% endblock %}

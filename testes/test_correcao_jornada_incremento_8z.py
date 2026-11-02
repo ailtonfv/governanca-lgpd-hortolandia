@@ -145,14 +145,15 @@ def test_duplicidade_de_outra_secretaria_nao_divulga_detalhes():
     assert "Consultar este Registro" not in resposta.text
 
 
-def test_css_preserva_60_40_e_empilha_cartoes_em_largura_reduzida():
+def test_css_preserva_cartoes_unificados_em_largura_reduzida():
     # Arrange + Act
     estilo = cliente.get("/estaticos/estilo.css")
 
     # Assert
     assert estilo.status_code == 200
-    assert "minmax(0, 3fr) minmax(18rem, 2fr)" in estilo.text
+    assert "minmax(0, 3fr) minmax(18rem, 2fr)" not in estilo.text
     assert ".cartao-mapeamento" in estilo.text
+    assert ".providencias-registro" in estilo.text
     assert "@media (max-width: 950px)" in estilo.text
-    assert 'grid-template-areas: "atencao" "mapeamentos"' in estilo.text
+    assert ".resumo-contadores-painel" in estilo.text
     assert "overflow-x: auto" not in estilo.text.split(".lista-mapeamentos-painel", 1)[1].split(".grade-alertas", 1)[0]

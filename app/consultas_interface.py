@@ -320,6 +320,7 @@ def _resumo_registro(registro, unidade):
         "estado": ROTULOS_ESTADO.get(registro.estado_atual, registro.estado_atual),
         "estado_codigo": registro.estado_atual,
         "unidade": unidade.nome,
+        "unidade_id": registro.unidade_principal_atual_id,
         "contexto_id": registro.contexto_atuacao_id,
         "ciclo": registro.ciclo_atual,
     }
@@ -456,6 +457,76 @@ def carregar_painel(sessao, conta_id):
     } | {
         item["registro_id"] for item in alertas
     })
+
+    providencias_por_registro = {item["id"]: [] for item in registros}
+    for item in proximas_providencias_form1:
+        providencias_por_registro[item["registro_id"]].append({
+            "categoria": "preenchimento_form1",
+            "formulario": "FORM 1",
+            "situacao": item["situacao"],
+            "quantidade_pendencias": item["quantidade_pendencias"],
+            "acao_rotulo": item["acao_rotulo"],
+            "ancora": item["ancora"],
+            "responsavel": (
+                f"{identidade['matricula']} · {identidade['nome']} (ARP)"
+            ),
+        })
+    for item in proximas_conferencias_form1:
+        providencias_por_registro[item["registro_id"]].append({
+            "categoria": "conferencia_form1",
+            "formulario": "FORM 1",
+            "situacao": item["situacao"],
+            "quantidade_pendencias": item["quantidade_pendencias"],
+            "acao_rotulo": "Conferir levantamento",
+            "responsavel": (
+                f"{identidade['matricula']} · {identidade['nome']} (APA)"
+            ),
+        })
+    for alerta in alertas:
+        if alerta["registro_id"] not in providencias_por_registro:
+            continue
+        providencias_por_registro[alerta["registro_id"]].append({
+            "categoria": "alerta",
+            "formulario": alerta["formulario"],
+            "situacao": alerta["situacao"],
+            "acao_rotulo": "Ver providência no Registro",
+            "rotulo": alerta["rotulo"],
+            "nivel": alerta["nivel"],
+            "quantidade_pendencias": None,
+            "responsavel": (
+                f"{identidade['matricula']} · {identidade['nome']}"
+            ),
+        })
+
+    for resumo in registros:
+        registro_id = resumo["id"]
+        resumo["providencias"] = providencias_por_registro[registro_id]
+        atribuicao = sessao.get(AtribuicaoForm1Integral, registro_id)
+        rascunho = sessao.get(RascunhoForm1Integral, registro_id)
+        conferencia = sessao.get(ConferenciaInternaForm1Integral, registro_id)
+        resumo["responsavel_proxima_etapa"] = None
+        if conferencia is not None:
+            resumo["situacao_form1_integral"] = "Aguardando conferência interna"
+            exercicio = apa_em_exercicio(sessao, resumo["unidade_id"])
+            if exercicio is not None:
+                pessoa = sessao.get(Pessoa, exercicio["pessoa_id"])
+                if pessoa is not None:
+                    resumo["responsavel_proxima_etapa"] = (
+                        f"{pessoa.matricula} · {rotulo_interface(pessoa.nome)} (APA)"
+                    )
+        elif rascunho is not None:
+            resumo["situacao_form1_integral"] = "Em preenchimento"
+        elif atribuicao is not None:
+            resumo["situacao_form1_integral"] = "Não iniciado"
+        else:
+            resumo["situacao_form1_integral"] = "Aguardando definição do ARP"
+
+        if atribuicao is not None and resumo["responsavel_proxima_etapa"] is None:
+            arp_atual = sessao.get(Pessoa, atribuicao.arp_atual_id)
+            if arp_atual is not None:
+                resumo["responsavel_proxima_etapa"] = (
+                    f"{arp_atual.matricula} · {rotulo_interface(arp_atual.nome)} (ARP)"
+                )
     pode_criar_registro = bool(
         unidades_em_que_e_apa_atual(sessao, identidade["pessoa_id"])
     )

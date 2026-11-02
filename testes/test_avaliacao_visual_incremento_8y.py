@@ -76,11 +76,13 @@ def test_jornada_operacional_nao_expoe_rotulos_tecnicos_dos_contratos():
     assert "Questionário resumido de demonstração" in pagina.text
 
 
-def test_layout_preserva_paineis_60_40_e_adapta_designacao_arp():
+def test_layout_unifica_painel_e_adapta_designacao_arp():
     # Arrange + Act
     css = (RAIZ / "app" / "estaticos" / "estilo.css").read_text(encoding="utf-8")
 
     # Assert
-    assert "minmax(0, 3fr) minmax(18rem, 2fr)" in css
+    assert "minmax(0, 3fr) minmax(18rem, 2fr)" not in css
+    assert ".resumo-contadores-painel" in css
+    assert ".providencias-registro" in css
     assert ".controle-designacao-arp" in css
     assert "grid-template-columns: 1fr" in css

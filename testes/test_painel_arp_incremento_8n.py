@@ -98,6 +98,48 @@ def _rascunho_do_epsilon(sessao, prefixo):
     return registro
 
 
+def test_cartoes_atribuem_acoes_corretas_a_alfa_e_epsilon(sessao):
+    # Arrange
+    registro_epsilon = _rascunho_do_epsilon(sessao, "F18AD-CARTAO-EPSILON")
+    registro_alfa = g1(
+        "F18AD-CARTAO-ALFA",
+        "OBJ-SRV-001",
+        "CTX-TRIB-03",
+        titulo="Serviço inicial de Alfa fictício",
+    )
+    atribuir_arp_form1_integral(
+        sessao,
+        comando_id="F18AD-CARTAO-ALFA-ATRIBUICAO",
+        conta_id="CONTA-A1",
+        registro_id=registro_alfa["registro_id"],
+        modo="proprio",
+        versao_lida=0,
+    )
+    sessao.commit()
+
+    # Act
+    pagina_alfa = cliente.get("/?conta_id=CONTA-A1")
+    pagina_epsilon = cliente.get("/?conta_id=CONTA-G1")
+
+    # Assert
+    for pagina in (pagina_alfa, pagina_epsilon):
+        assert pagina.status_code == 200
+        assert pagina.text.count('class="cartao-mapeamento"') == 2
+        assert 'aria-label="1 Registro(s) com providências">1</span>' in pagina.text
+        assert registro_alfa["codigo_lgpd"] in pagina.text
+        assert registro_epsilon["codigo_lgpd"] in pagina.text
+
+    assert ">Iniciar FORM 1</a>" in pagina_alfa.text
+    assert ">Continuar FORM 1</a>" not in pagina_alfa.text
+    assert "MAT-FICT-0007" in pagina_alfa.text
+    assert "(ARP)" in pagina_alfa.text
+
+    assert ">Continuar FORM 1</a>" in pagina_epsilon.text
+    assert ">Iniciar FORM 1</a>" not in pagina_epsilon.text
+    assert "MAT-FICT-0001" in pagina_epsilon.text
+    assert "(ARP)" in pagina_epsilon.text
+
+
 def test_arp_com_rascunho_e_pendencias_recebe_proxima_providencia(sessao):
     # Arrange
     registro = _rascunho_do_epsilon(sessao, "F18N-ARP-PENDENTE")
@@ -107,7 +149,7 @@ def test_arp_com_rascunho_e_pendencias_recebe_proxima_providencia(sessao):
 
     # Assert
     assert pagina.status_code == 200
-    assert "Preenchimento do FORM 1" in pagina.text
+    assert "Responsável pela próxima etapa:" in pagina.text
     assert registro["codigo_lgpd"] in pagina.text
     assert "Atividade tributária fictícia" in pagina.text
     assert "Situação do FORM 1:</strong> Em preenchimento" in pagina.text
@@ -132,7 +174,6 @@ def test_apa_e_agente_sem_permissao_nao_recebem_acao_do_arp(sessao):
     for pagina in (pagina_apa, pagina_sem_permissao):
         assert pagina.status_code == 200
         assert registro["codigo_lgpd"] in pagina.text
-        assert "Preenchimento do FORM 1" not in pagina.text
         assert "Continuar FORM 1" not in pagina.text
 
 

@@ -51,7 +51,7 @@ def _rascunho_do_epsilon_em_objeto(
     return registro
 
 
-def test_painel_separa_consulta_e_providencia_do_mesmo_registro(sessao):
+def test_painel_reune_consulta_e_providencia_no_mesmo_cartao(sessao):
     # Arrange
     registro = _rascunho_do_epsilon(sessao, "F18O-UM-REGISTRO")
 
@@ -60,14 +60,12 @@ def test_painel_separa_consulta_e_providencia_do_mesmo_registro(sessao):
 
     # Assert
     assert pagina.status_code == 200
-    assert 'class="grade-painel-inicial"' in pagina.text
-    assert pagina.text.index("Mapeamentos disponíveis para você") < pagina.text.index(
-        "Ver detalhes do Registro"
-    )
-    assert pagina.text.index("O que precisa da sua atenção") < pagina.text.index(
-        "Continuar FORM 1"
-    )
-    assert pagina.text.count(registro["codigo_lgpd"]) >= 2
+    assert 'class="grade-painel-inicial"' not in pagina.text
+    assert pagina.text.count('class="cartao-mapeamento"') == 1
+    assert registro["codigo_lgpd"] in pagina.text
+    assert "Situação do Registro:" in pagina.text
+    assert "Situação do FORM 1:" in pagina.text
+    assert "Responsável pela próxima etapa:" in pagina.text
     assert (
         f'/registros/{registro["registro_id"]}?conta_id=CONTA-G1">'
         "Ver detalhes do Registro"
@@ -165,12 +163,14 @@ def test_contador_considera_registro_unico_quando_ha_varios_alertas(sessao):
     assert pagina.text.count(">Ver providência no Registro</a>") == 2
 
 
-def test_layout_prioriza_atencao_em_telas_pequenas_sem_biblioteca_externa():
+def test_layout_unificado_empilha_cartao_em_tela_pequena_sem_biblioteca_externa():
     # Arrange / Act
     estilo = cliente.get("/estaticos/estilo.css")
 
     # Assert
     assert estilo.status_code == 200
-    assert 'grid-template-columns: minmax(0, 3fr) minmax(18rem, 2fr)' in estilo.text
-    assert 'grid-template-areas: "mapeamentos atencao"' in estilo.text
-    assert 'grid-template-areas: "atencao" "mapeamentos"' in estilo.text
+    assert 'painel-registros-unificado' in cliente.get("/?conta_id=CONTA-A1").text
+    assert 'grid-template-columns: minmax(0, 3fr) minmax(18rem, 2fr)' not in estilo.text
+    assert '.resumo-contadores-painel' in estilo.text
+    assert '.providencias-registro' in estilo.text
+    assert '.cartao-mapeamento { grid-template-columns: 1fr' in estilo.text
