@@ -112,7 +112,7 @@ def test_arp_visualiza_justificativa_corrige_e_apa_recebe_reapresentacao(sessao)
         item for item in painel_arp["proximas_providencias_form1"]
         if item["registro_id"] == registro["registro_id"]
     )
-    assert providencia["acao_rotulo"] == "Corrigir FORM 1"
+    assert providencia["acao_rotulo"] == "Corrigir FORM 1 Integral"
     assert "Complementar o fluxo fictício" in providencia["justificativa_devolucao"]
     _, detalhe = carregar_registro(sessao, "CONTA-G1", registro["registro_id"])
     integral = detalhe["form1_integral"]

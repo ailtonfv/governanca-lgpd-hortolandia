@@ -260,7 +260,8 @@ def test_percurso_completo_contexto_g1_i1_i2_pela_interface():
         data={"conta_id": "CONTA-A1", "comando_id": "CMD-UI-PONTA-I1"},
     )
     assert iniciado.status_code == 200
-    assert "Questionário resumido iniciado" in iniciado.text
+    assert "Questionário sintético legado iniciado" in iniciado.text
+    assert "Questionário sintético legado — recurso exclusivo de demonstração técnica" in iniciado.text
 
     salvo = cliente.post(
         f"/registros/{registro_id}/form1/salvar",
@@ -307,18 +308,25 @@ def _registro_com_form1(prefixo="CMD-UI-FORM"):
 def test_detalhe_oferece_i1_apenas_ao_preenchedor():
     registro, _ = _registro_com_form1("CMD-UI-I1-VISIVEL")
 
-    alfa = cliente.get(
+    detalhe = cliente.get(
         f"/registros/{registro['registro_id']}", params={"conta_id": "CONTA-A1"}
     )
+    alfa = cliente.get(
+        f"/registros/{registro['registro_id']}/questionario-sintetico-legado",
+        params={"conta_id": "CONTA-A1"},
+    )
     beta = cliente.get(
-        f"/registros/{registro['registro_id']}", params={"conta_id": "CONTA-B1"}
+        f"/registros/{registro['registro_id']}/questionario-sintetico-legado",
+        params={"conta_id": "CONTA-B1"},
     )
 
+    assert "Questionário sintético legado — recurso exclusivo de demonstração técnica" in detalhe.text
+    assert "data-instrumento-regressao" not in detalhe.text
     assert "Objetivo:" in alfa.text
     assert "registrar, sem identificar pessoas" in alfa.text
     assert "quais categorias de titulares e dados" in alfa.text
-    assert ">Iniciar preenchimento</button>" in alfa.text
-    assert ">Iniciar preenchimento</button>" not in beta.text
+    assert ">Iniciar questionário sintético legado</button>" in alfa.text
+    assert ">Iniciar questionário sintético legado</button>" not in beta.text
     assert "não está designado como Servidor responsável" in beta.text
 
 
@@ -331,8 +339,8 @@ def test_i1_pela_tela_cria_rascunho_e_exibe_formulario():
     )
 
     assert resposta.status_code == 200
-    assert "Questionário resumido iniciado" in resposta.text
-    assert ">Salvar rascunho</button>" in resposta.text
+    assert "Questionário sintético legado iniciado" in resposta.text
+    assert ">Salvar rascunho do questionário sintético legado</button>" in resposta.text
     with Session(motor) as sessao:
         assert sessao.get(RascunhoInstrumento, instrumento_id).versao_rascunho == 1
 
@@ -345,7 +353,8 @@ def test_formulario_orienta_selecao_multipla_pelo_contexto_do_objeto():
     )
 
     resposta = cliente.get(
-        f"/registros/{registro['registro_id']}", params={"conta_id": "CONTA-A1"}
+        f"/registros/{registro['registro_id']}/questionario-sintetico-legado",
+        params={"conta_id": "CONTA-A1"},
     )
 
     assert resposta.status_code == 200

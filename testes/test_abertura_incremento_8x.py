@@ -130,7 +130,8 @@ def test_criacao_conduz_a_escolha_explicita_do_arp_sem_atribuicao_automatica(ses
     assert "Ainda não designado" in resposta.text
     assert "Eu mesmo, APA atual" in resposta.text
     assert "Designar outro agente público autorizado" in resposta.text
-    assert "Pendência de atribuição" in resposta.text
+    assert "Pendência de atribuição" not in resposta.text
+    assert resposta.text.count('id="titulo-atribuicao-arp"') == 1
     assert "Matrícula MAT-FICT-0007" in resposta.text
 
 

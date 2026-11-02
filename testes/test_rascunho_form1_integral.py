@@ -320,7 +320,8 @@ def test_interface_inicia_e_salva_bloco_1(sessao):
     assert "Rascunho salvo com sucesso às" in salvamento.text
     assert "Bloco 1 atualizado." in salvamento.text
     assert "Rascunho 2" in salvamento.text
-    assert "Questionário resumido de demonstração" in salvamento.text
+    assert "Questionário resumido de demonstração" not in salvamento.text
+    assert "Salvar rascunho do FORM 1" in salvamento.text
 
 
 def test_migracao_12_recria_tabela_do_rascunho_integral():

@@ -1,30 +1,11 @@
 {% extends "base.html" %}
-{% block titulo %}{{ registro.codigo_lgpd }} · Governança LGPD{% endblock %}
+{% block titulo %}{% if modo_legado %}Questionário sintético legado · {% endif %}{{ registro.codigo_lgpd }} · Governança LGPD{% endblock %}
 {% block conteudo %}
 <p><a class="voltar" href="/?conta_id={{ conta_id }}">← Voltar ao painel</a></p>
-<section class="detalhe">
+<section class="identificacao-registro" aria-labelledby="titulo-registro">
   <p class="etiqueta">{{ registro.tipo }} · ciclo {{ registro.ciclo }}</p>
-  <h1>{{ registro.codigo_lgpd }}</h1>
+  <h1 id="titulo-registro">{{ registro.codigo_lgpd }}</h1>
   <p class="destaque">{{ registro.titulo }}</p>
-  <dl>
-    <div><dt>Situação</dt><dd>{{ registro.estado }}</dd></div>
-    <div><dt>Secretaria responsável</dt><dd>{{ registro.unidade }}</dd></div>
-    <div><dt>Contexto de atuação</dt><dd>{% if registro.contexto_nome %}{{ registro.contexto_nome }} ({{ registro.contexto_id }}){% else %}{{ registro.contexto_id }}{% endif %}</dd></div>
-  </dl>
-  <div class="canais-confirmados">
-    <strong>Canais declarados na abertura</strong>
-    {% if registro.confirmacao_canais is none %}
-    <p class="ajuda">Registro histórico sem declaração verificável de canais. Isso não significa que nenhum canal se aplica.</p>
-    {% elif registro.confirmacao_canais.situacao == 'informacao_insuficiente' %}
-    <p class="ajuda">A informação sobre os canais ainda precisa ser confirmada. Isso não significa que nenhum canal se aplica.</p>
-    {% elif registro.confirmacao_canais.canais %}
-    <ul>
-      {% for canal in registro.confirmacao_canais.canais %}<li>{{ canal.nome }}{% if canal.origem == 'DECLARACAO_APA' %} <span class="ajuda">— informado pelo APA para este Registro</span>{% endif %}</li>{% endfor %}
-    </ul>
-    {% else %}
-    <p class="ajuda">O APA declarou expressamente que nenhum canal de entrada se aplica a este objeto.</p>
-    {% endif %}
-  </div>
 </section>
 
 {% if mensagem %}
@@ -32,6 +13,7 @@
    role="{{ 'alert' if erro else 'status' }}" aria-live="{{ 'assertive' if erro else 'polite' }}">{{ mensagem }}</p>
 {% endif %}
 
+{% if not modo_legado %}
 <section class="form1 form1-integral" aria-labelledby="titulo-form1-integral" data-registro-id="{{ registro.id }}">
   <div class="cabecalho-secao cabecalho-form1">
     <div>
@@ -69,25 +51,11 @@
       </button>
       {% endif %}
     {% elif proxima.tipo == 'consultar' %}
-      <button type="button" class="botao-primario" data-consultar-form1>Consultar FORM 1</button>
+      <button type="button" class="botao-primario" data-consultar-form1>Consultar FORM 1 Integral</button>
     {% elif proxima.tipo == 'conferir' %}
       <a class="botao-link botao-primario" href="{{ url_for('consultar_conferencia_interna', registro_id=registro.id) }}?conta_id={{ conta_id }}">{{ proxima.rotulo }}</a>
     {% endif %}
   </section>
-
-  <details class="informacoes-institucionais-form1">
-    <summary>Informações institucionais do Registro — somente leitura</summary>
-    <div class="identidades-form1">
-      <div><strong>APA de abertura</strong><br>{% if registro.form1_integral.apa_abertura %}Matrícula {{ registro.form1_integral.apa_abertura.matricula }} · {{ registro.form1_integral.apa_abertura.nome }}{% else %}Não identificado{% endif %}</div>
-      <div><strong>APA em exercício</strong><br>{% if registro.form1_integral.apa_atual %}Matrícula {{ registro.form1_integral.apa_atual.matricula }} · {{ registro.form1_integral.apa_atual.nome }}{% else %}Não configurado{% endif %}{% if registro.form1_integral.apa_atual and registro.form1_integral.apa_atual.modalidade == 'substituicao_temporaria' %}<br><span class="ajuda">Substituição temporária</span>{% endif %}</div>
-      <div><strong>ARP vigente</strong><br>{% if registro.form1_integral.arp_atual %}Matrícula {{ registro.form1_integral.arp_atual.matricula }} · {{ registro.form1_integral.arp_atual.nome }}<br><span class="ajuda">Designação vigente{% if registro.form1_integral.arp_atual.apa_tambem_arp %} · o APA em exercício também é o ARP{% endif %}</span>{% else %}Ainda não designado{% endif %}</div>
-    </div>
-    <p class="ajuda">Cargo/função e e-mail institucional não são inventados quando não constam do cadastro disponível.</p>
-  </details>
-
-  {% if not registro.form1_integral.arp_atual %}
-  <p class="aviso-leitura"><strong>Pendência de atribuição:</strong> o Registro foi preservado, mas nenhum ARP foi confirmado. Somente após uma atribuição válida o agente autorizado poderá iniciar o FORM 1.</p>
-  {% endif %}
 
   {% if registro.form1_integral.pode_atribuir_arp %}
   <section class="area-designacao-arp" aria-labelledby="titulo-atribuicao-arp">
@@ -130,6 +98,33 @@
   {% else %}
   <p class="aviso-leitura">Somente um APA responsável pelo Registro nesta Secretaria pode definir ou substituir o ARP. Esta informação não concede ação de preenchimento.</p>
   {% endif %}
+
+  <details class="informacoes-institucionais-form1">
+    <summary>Informações do Registro — somente leitura</summary>
+    <dl>
+      <div><dt>Situação do Registro</dt><dd>{{ registro.estado }}</dd></div>
+      <div><dt>Secretaria responsável</dt><dd>{{ registro.unidade }}</dd></div>
+      <div><dt>Contexto de atuação</dt><dd>{% if registro.contexto_nome %}{{ registro.contexto_nome }} ({{ registro.contexto_id }}){% else %}{{ registro.contexto_id }}{% endif %}</dd></div>
+    </dl>
+    <div class="canais-confirmados">
+      <strong>Canais declarados na abertura</strong>
+      {% if registro.confirmacao_canais is none %}
+      <p class="ajuda">Registro histórico sem declaração verificável de canais. Isso não significa que nenhum canal se aplica.</p>
+      {% elif registro.confirmacao_canais.situacao == 'informacao_insuficiente' %}
+      <p class="ajuda">A informação sobre os canais ainda precisa ser confirmada. Isso não significa que nenhum canal se aplica.</p>
+      {% elif registro.confirmacao_canais.canais %}
+      <ul>{% for canal in registro.confirmacao_canais.canais %}<li>{{ canal.nome }}{% if canal.origem == 'DECLARACAO_APA' %} <span class="ajuda">— informado pelo APA para este Registro</span>{% endif %}</li>{% endfor %}</ul>
+      {% else %}
+      <p class="ajuda">O APA declarou expressamente que nenhum canal de entrada se aplica a este objeto.</p>
+      {% endif %}
+    </div>
+    <div class="identidades-form1">
+      <div><strong>APA de abertura</strong><br>{% if registro.form1_integral.apa_abertura %}Matrícula {{ registro.form1_integral.apa_abertura.matricula }} · {{ registro.form1_integral.apa_abertura.nome }}{% else %}Não identificado{% endif %}</div>
+      <div><strong>APA em exercício</strong><br>{% if registro.form1_integral.apa_atual %}Matrícula {{ registro.form1_integral.apa_atual.matricula }} · {{ registro.form1_integral.apa_atual.nome }}{% else %}Não configurado{% endif %}{% if registro.form1_integral.apa_atual and registro.form1_integral.apa_atual.modalidade == 'substituicao_temporaria' %}<br><span class="ajuda">Substituição temporária</span>{% endif %}</div>
+      <div><strong>ARP vigente</strong><br>{% if registro.form1_integral.arp_atual %}Matrícula {{ registro.form1_integral.arp_atual.matricula }} · {{ registro.form1_integral.arp_atual.nome }}<br><span class="ajuda">Designação vigente{% if registro.form1_integral.arp_atual.apa_tambem_arp %} · o APA em exercício também é o ARP{% endif %}</span>{% else %}Ainda não designado{% endif %}</div>
+    </div>
+    <p class="ajuda">Cargo/função e e-mail institucional não são inventados quando não constam do cadastro disponível.</p>
+  </details>
 
   <h3 id="titulo-etapas-form1">Etapas do FORM 1</h3>
   <ol class="etapas-form1" aria-labelledby="titulo-etapas-form1">
@@ -1277,14 +1272,14 @@
     });
   })();
 </script>
+{% endif %}
 
-<details class="recursos-demonstracao">
-  <summary>Outros recursos do ambiente de demonstração</summary>
+{% if modo_legado %}
 <section class="form1" aria-labelledby="titulo-form1" data-instrumento-regressao="form1-resumido">
   <div class="cabecalho-secao cabecalho-form1">
     <div>
-      <p class="etiqueta">Questionário resumido de demonstração</p>
-      <h2 id="titulo-form1">Questionário resumido</h2>
+      <p class="etiqueta">Recurso técnico separado da jornada operacional</p>
+      <h2 id="titulo-form1">Questionário sintético legado — recurso exclusivo de demonstração técnica</h2>
     </div>
     <p class="objetivo-form1"><strong>Objetivo:</strong> registrar, sem identificar pessoas, para que os dados pessoais são utilizados, quais categorias de titulares e dados participam do tratamento e se existe compartilhamento.</p>
     <span class="estado">{{ registro.form1.estado_rotulo }}</span>
@@ -1296,7 +1291,7 @@
     <form method="post" action="{{ url_for('iniciar_form1', registro_id=registro.id) }}">
       <input type="hidden" name="conta_id" value="{{ conta_id }}">
       <input type="hidden" name="comando_id" value="{{ comando_i1 }}">
-      <button class="botao-primario" type="submit">Iniciar preenchimento</button>
+      <button class="botao-primario" type="submit">Iniciar questionário sintético legado</button>
     </form>
     {% else %}
     <p class="aviso-leitura">Este agente pode consultar o Registro, mas não está designado como Servidor responsável pelo preenchimento do FORM 1.</p>
@@ -1345,7 +1340,7 @@
         <p>Rascunho {{ registro.form1.rascunho.versao }} · último salvamento por {{ registro.form1.rascunho.salvo_por }}</p>
         <div>
           <p class="estado-salvamento" data-estado-salvamento role="status" aria-live="polite">Rascunho confirmado no servidor.</p>
-          <button class="botao-primario" type="submit">Salvar rascunho</button>
+          <button class="botao-primario" type="submit">Salvar rascunho do questionário sintético legado</button>
         </div>
       </div>
     </form>
@@ -1356,5 +1351,11 @@
     <p class="aviso-leitura">O FORM 1 está em {{ registro.form1.estado|replace('_', ' ') }}. A edição não está disponível neste estado.</p>
   {% endif %}
 </section>
-</details>
+{% else %}
+<aside class="recurso-tecnico-legado" aria-labelledby="titulo-recurso-legado">
+  <h2 id="titulo-recurso-legado">Recurso técnico separado</h2>
+  <p class="ajuda">O recurso abaixo pertence ao contrato sintético preservado para regressão técnica. Ele não faz parte do preenchimento do FORM 1 Integral REV13.</p>
+  <a class="botao-link-secundario" href="{{ url_for('questionario_sintetico_legado', registro_id=registro.id) }}?conta_id={{ conta_id }}">Questionário sintético legado — recurso exclusivo de demonstração técnica</a>
+</aside>
+{% endif %}
 {% endblock %}

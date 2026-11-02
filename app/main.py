@@ -386,6 +386,7 @@ def detalhe_registro(
             "conta_id": conta_id,
             "mensagem": mensagem,
             "erro": erro,
+            "modo_legado": False,
             "comando_i1": str(uuid.uuid4()),
             "comando_i2": str(uuid.uuid4()),
             "comando_atribuir_arp": str(uuid.uuid4()),
@@ -430,6 +431,74 @@ def detalhe_registro(
     )
 
 
+@app.get(
+    "/registros/{registro_id}/questionario-sintetico-legado",
+    response_class=HTMLResponse,
+)
+def questionario_sintetico_legado(
+    registro_id: str,
+    request: Request,
+    conta_id: str = Query(default="CONTA-A1", max_length=50),
+    mensagem: str | None = Query(default=None, max_length=300),
+    erro: bool = Query(default=False),
+    sessao: Session = Depends(obter_sessao),
+):
+    """Mantém o contrato 2 acessível fora da jornada operacional do Integral."""
+
+    identidade, registro = carregar_registro(sessao, conta_id, registro_id)
+    if identidade is None:
+        return paginas.TemplateResponse(
+            request=request,
+            name="erro.html",
+            context={"titulo": "Conta indisponível", "mensagem": "A conta fictícia não existe ou está inativa."},
+            status_code=404,
+        )
+    if registro is None:
+        return paginas.TemplateResponse(
+            request=request,
+            name="erro.html",
+            context={"titulo": "Registro não encontrado", "mensagem": "O Registro informado não existe."},
+            status_code=404,
+        )
+    if registro is False:
+        registrar_auditoria(
+            sessao,
+            "tentativa_negada",
+            "pessoa",
+            identidade["pessoa_id"],
+            {
+                "acao_tentada": "consultar_questionario_sintetico_legado",
+                "objeto": registro_id,
+                "conta_id": conta_id,
+                "motivo": "Registro fora do alcance institucional da pessoa",
+            },
+        )
+        sessao.commit()
+        return paginas.TemplateResponse(
+            request=request,
+            name="erro.html",
+            context={
+                "titulo": "Acesso negado",
+                "mensagem": "Este Registro não pertence ao alcance institucional do agente simulado.",
+            },
+            status_code=403,
+        )
+    return paginas.TemplateResponse(
+        request=request,
+        name="registro.html",
+        context={
+            "identidade": identidade,
+            "registro": registro,
+            "conta_id": conta_id,
+            "mensagem": mensagem,
+            "erro": erro,
+            "modo_legado": True,
+            "comando_i1": str(uuid.uuid4()),
+            "comando_i2": str(uuid.uuid4()),
+        },
+    )
+
+
 def _voltar_ao_registro(registro_id, conta_id, resultado, sucesso, *, ancora=None):
     mensagem = (
         sucesso
@@ -444,6 +513,24 @@ def _voltar_ao_registro(registro_id, conta_id, resultado, sucesso, *, ancora=Non
     fragmento = f"#{ancora}" if ancora else ""
     return RedirectResponse(
         url=f"/registros/{registro_id}?{urlencode(parametros)}{fragmento}",
+        status_code=303,
+    )
+
+
+def _voltar_ao_questionario_legado(
+    registro_id, conta_id, resultado, sucesso, *, ancora="titulo-form1",
+):
+    mensagem = sucesso if resultado["permitido"] else resultado["motivo"]
+    parametros = {
+        "conta_id": conta_id,
+        "mensagem": mensagem,
+        "erro": "0" if resultado["permitido"] else "1",
+    }
+    return RedirectResponse(
+        url=(
+            f"/registros/{registro_id}/questionario-sintetico-legado?"
+            f"{urlencode(parametros)}#{ancora}"
+        ),
         status_code=303,
     )
 
@@ -1120,9 +1207,9 @@ def iniciar_form1(
         instrumento_id=registro["form1"]["id"],
     )
     sessao.commit()
-    return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Questionário resumido iniciado. O rascunho está pronto para preenchimento.",
-        ancora="titulo-form1",
+    return _voltar_ao_questionario_legado(
+        registro_id, conta_id, resultado,
+        "Questionário sintético legado iniciado. O rascunho técnico está pronto para preenchimento.",
     )
 
 
@@ -1168,9 +1255,8 @@ def salvar_form1(
         compartilhamentos or [],
     )
     if problema:
-        return _voltar_ao_registro(
+        return _voltar_ao_questionario_legado(
             registro_id, conta_id, {"permitido": False, "motivo": problema}, "",
-            ancora="titulo-form1",
         )
     resultado = salvar_rascunho(
         sessao,
@@ -1181,7 +1267,9 @@ def salvar_form1(
         conteudo=conteudo,
     )
     sessao.commit()
-    return _voltar_ao_registro(
-        registro_id, conta_id, resultado, _mensagem_salvamento(resultado, "Questionário resumido atualizado."),
-        ancora="titulo-form1",
+    return _voltar_ao_questionario_legado(
+        registro_id, conta_id, resultado,
+        _mensagem_salvamento(
+            resultado, "Rascunho do questionário sintético legado atualizado."
+        ),
     )

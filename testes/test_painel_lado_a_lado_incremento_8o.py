@@ -102,7 +102,7 @@ def test_arp_com_quatro_rascunhos_recebe_quatro_providencias_identificadas(sessa
         'class="contador contador-providencias" '
         'aria-label="4 Registro(s) com providências">4</span>'
     ) in pagina.text
-    assert pagina.text.count(">Continuar FORM 1</a>") == 4
+    assert pagina.text.count(">Continuar FORM 1 Integral</a>") == 4
     for registro in registros:
         assert registro["codigo_lgpd"] in pagina.text
         assert (

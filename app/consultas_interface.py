@@ -227,7 +227,7 @@ def _projetar_proxima_providencia_form1_integral(
         )
         return {
             "tipo": "corrigir",
-            "rotulo": "Corrigir FORM 1",
+            "rotulo": "Corrigir FORM 1 Integral",
             "descricao": (
                 f"O APA devolveu a apresentação {devolucao['numero_apresentacao']} "
                 f"para ajustes. Justificativa: {devolucao['justificativa']}"
@@ -239,7 +239,7 @@ def _projetar_proxima_providencia_form1_integral(
     if pode_editar and rascunho is None:
         return {
             "tipo": "iniciar",
-            "rotulo": "Iniciar FORM 1",
+            "rotulo": "Iniciar FORM 1 Integral",
             "descricao": (
                 "Você é o ARP atual e possui autorização vigente. "
                 "Inicie o rascunho para acessar a primeira pergunta."
@@ -269,7 +269,7 @@ def _projetar_proxima_providencia_form1_integral(
         )
         return {
             "tipo": "continuar",
-            "rotulo": "Continuar FORM 1",
+            "rotulo": "Continuar FORM 1 Integral",
             "descricao": descricao,
             "retomada": retomada,
             "papel": papel,
@@ -277,7 +277,7 @@ def _projetar_proxima_providencia_form1_integral(
     if e_apa_atual and arp_atual is not None and rascunho is not None:
         return {
             "tipo": "consultar",
-            "rotulo": "Consultar FORM 1",
+            "rotulo": "Consultar FORM 1 Integral",
             "descricao": (
                 f"Este FORM 1 está sob responsabilidade da matrícula {arp_atual.matricula} · "
                 f"{rotulo_interface(arp_atual.nome)}. Você pode consultar o levantamento "

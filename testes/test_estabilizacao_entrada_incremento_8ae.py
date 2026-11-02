@@ -58,7 +58,7 @@ def test_apa_que_tambem_e_arp_ve_acao_antes_dos_quadros_e_redesignacao_recolhida
     assert pagina.text.index('class="proxima-providencia"') < pagina.text.index(
         'class="informacoes-institucionais-form1"'
     )
-    assert "Informações institucionais do Registro — somente leitura" in pagina.text
+    assert "Informações do Registro — somente leitura" in pagina.text
     assert "ARP vigente:</strong> matrícula MAT-FICT-0001 · Servidor Alfa" in pagina.text
     assert '<details class="alteracao-arp">' in pagina.text
     assert '<details class="alteracao-arp" open' not in pagina.text
@@ -88,7 +88,7 @@ def test_apa_consulta_e_arp_continua_o_mesmo_rascunho_sem_trocar_permissoes(sess
     trecho_apa = _trecho_proxima_providencia(pagina_apa.text)
     trecho_arp = _trecho_proxima_providencia(pagina_arp.text)
     assert "Seu papel neste Registro:</strong> APA" in trecho_apa
-    assert "Consultar FORM 1" in trecho_apa
+    assert "Consultar FORM 1 Integral" in trecho_apa
     assert "data-consultar-form1" in trecho_apa
     assert "Você pode consultar o levantamento em modo somente leitura" in trecho_apa
     assert '<form class="formulario formulario-integral"' not in pagina_apa.text
