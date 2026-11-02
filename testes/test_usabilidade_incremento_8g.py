@@ -38,7 +38,8 @@ def test_salvar_bloco_preserva_etapa_posicao_e_exibe_confirmacao(sessao):
     assert destino.endswith("#titulo-bloco-5")
     pagina = cliente.get(resposta.headers["location"])
     assert pagina.status_code == 200
-    assert "Bloco 5 do FORM 1 salvo com segurança." in pagina.text
+    assert "Rascunho salvo com sucesso às" in pagina.text
+    assert "Bloco 5 atualizado." in pagina.text
     assert 'id="mensagem-registro"' in pagina.text
     assert "var blocoDaUrl" in pagina.text and "scrollIntoView" in pagina.text
     with Session(motor) as verificacao:
@@ -74,7 +75,7 @@ def test_indicacao_repetida_confirma_arp_sem_evento_ou_permissao_duplicados(sess
     assert primeira.headers["location"].endswith("#titulo-form1-integral")
     pagina_primeira = cliente.get(primeira.headers["location"])
     pagina_repetida = cliente.get(repetida.headers["location"])
-    identidade = "Matrícula MAT-FICT-0007 · Servidor Épsilon (fictício)"
+    identidade = "Matrícula MAT-FICT-0007 · Servidor Épsilon"
     assert "Designação do ARP confirmada." in pagina_primeira.text
     assert "Nenhuma alteração:" in pagina_repetida.text
     assert identidade in pagina_repetida.text

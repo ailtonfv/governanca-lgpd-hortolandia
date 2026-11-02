@@ -76,7 +76,7 @@ def test_ausencia_de_canais_confirmada_e_estado_explicito(sessao):
     leitura = resumo["form1_integral"]["leitura_2_1"]
     assert leitura["estado"] == "ausencia_confirmada"
     assert leitura["canais"] == []
-    assert leitura["confirmado_por"] == "Servidor Alfa (fictício)"
+    assert leitura["confirmado_por"] == "Servidor Alfa"
 
 
 def test_registro_antigo_sem_confirmacao_permanece_distinto_e_compativel(sessao):

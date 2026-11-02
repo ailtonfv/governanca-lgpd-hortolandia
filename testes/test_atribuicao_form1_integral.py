@@ -197,16 +197,17 @@ def test_interface_distingue_form_integral_e_permite_indicar_arp():
         },
     )
 
-    assert "Ambiente de demonstração · somente dados fictícios" in antes.text
+    assert "Ambiente de demonstração — utilize exclusivamente dados fictícios." in antes.text
     assert "FORM 1 — Levantamento Inicial do Tratamento de Dados Pessoais" in antes.text
     assert "Quem preencherá o FORM 1?" in antes.text
-    assert "Servidor Épsilon (fictício)" in antes.text
+    assert "Servidor Épsilon" in antes.text
+    assert "Ainda não designado" in antes.text
     assert '<option value="PESSOA-A">' not in antes.text
     assert "Etapa 4 de 4" in antes.text
     assert "Questionário resumido de demonstração" in antes.text
     assert resposta.status_code == 200
     assert "Designação do ARP confirmada" in resposta.text
-    assert "Servidor Épsilon (fictício)" in resposta.text
+    assert "Servidor Épsilon" in resposta.text
 
 
 def test_interface_nao_oferece_atribuicao_a_quem_nao_e_apa():

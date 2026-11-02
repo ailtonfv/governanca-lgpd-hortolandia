@@ -70,6 +70,14 @@ ROTULOS_ALERTA = {
 }
 
 
+def rotulo_interface(valor):
+    """Oculta o marcador repetitivo da massa sem alterar o dado persistido."""
+
+    if not isinstance(valor, str):
+        return valor
+    return valor.removesuffix(" (fictício)")
+
+
 EVENTOS_SALVAMENTO_BLOCO_FORM1_INTEGRAL = {
     1: "salvar_bloco_1_form1_integral",
     2: "salvar_bloco_2_form1_integral",
@@ -189,12 +197,13 @@ def _projetar_proxima_providencia_form1_integral(
         }
     if arp_atual is None:
         descricao = (
-            "Nenhum ARP está indicado. O APA em exercício deve definir o responsável "
-            "antes que o rascunho possa ser iniciado."
+            "O APA deverá assumir o preenchimento ou designar um Agente Responsável "
+            "pelo Preenchimento (ARP) antes que o rascunho possa ser iniciado."
         )
     elif arp_atual.id != identidade["pessoa_id"]:
         descricao = (
-            f"O ARP atual é a matrícula {arp_atual.matricula} · {arp_atual.nome}. "
+            f"O ARP atual é a matrícula {arp_atual.matricula} · "
+            f"{rotulo_interface(arp_atual.nome)}. "
             "Somente essa pessoa, com designação vigente de preenchedor, pode iniciar "
             "ou continuar o FORM 1."
         )
@@ -267,7 +276,7 @@ def _identidade(sessao, conta_id):
         "conta_id": conta.id,
         "pessoa_id": pessoa.id,
         "matricula": pessoa.matricula,
-        "nome": pessoa.nome,
+        "nome": rotulo_interface(pessoa.nome),
         "designacoes": [
             {"papel": papel, "unidade_id": unidade_id, "unidade": unidade}
             for papel, unidade_id, unidade in designacoes
@@ -305,7 +314,7 @@ def _resumo_registro(registro, unidade):
     return {
         "id": registro.id,
         "codigo_lgpd": registro.codigo_lgpd,
-        "titulo": registro.titulo_objeto,
+        "titulo": rotulo_interface(registro.titulo_objeto),
         "tipo": registro.tipo_objeto.capitalize(),
         "estado": ROTULOS_ESTADO.get(registro.estado_atual, registro.estado_atual),
         "estado_codigo": registro.estado_atual,
@@ -361,7 +370,7 @@ def carregar_painel(sessao, conta_id):
             "registro_id": registro.id,
             "codigo_lgpd": registro.codigo_lgpd,
             "tipo": registro.tipo_objeto.capitalize(),
-            "titulo": registro.titulo_objeto,
+            "titulo": rotulo_interface(registro.titulo_objeto),
             "situacao": "Em preenchimento",
             "quantidade_pendencias": pre_validacao["quantidades"]["incompletos"],
             "ancora": (
@@ -566,7 +575,7 @@ def carregar_registro(sessao, conta_id, registro_id):
             "confirmado_por_id": confirmacao_canais.confirmado_por_id,
             "confirmado_em": confirmacao_canais.confirmado_em,
             "confirmado_por_nome": (
-                confirmador_canais.nome
+                rotulo_interface(confirmador_canais.nome)
                 if confirmador_canais is not None
                 else confirmacao_canais.confirmado_por_id
             ),
@@ -590,7 +599,7 @@ def carregar_registro(sessao, conta_id, registro_id):
     autor_salvamento = None
     if rascunho is not None:
         pessoa = sessao.get(Pessoa, rascunho.salvo_por)
-        autor_salvamento = pessoa.nome if pessoa is not None else rascunho.salvo_por
+        autor_salvamento = rotulo_interface(pessoa.nome) if pessoa is not None else rascunho.salvo_por
     pode_preencher = any(
         item["unidade_id"] == registro.unidade_principal_atual_id
         and item["papel"] == "preenchedor"
@@ -613,7 +622,7 @@ def carregar_registro(sessao, conta_id, registro_id):
     autor_integral = None
     if rascunho_integral is not None:
         pessoa = sessao.get(Pessoa, rascunho_integral.salvo_por)
-        autor_integral = pessoa.nome if pessoa is not None else rascunho_integral.salvo_por
+        autor_integral = rotulo_interface(pessoa.nome) if pessoa is not None else rascunho_integral.salvo_por
     resposta_legada_2_1 = (
         None if rascunho_integral is None
         else rascunho_integral.conteudo.get("respostas", {}).get("2.1")
@@ -765,24 +774,30 @@ def carregar_registro(sessao, conta_id, registro_id):
         "apa_abertura": None if apa_abertura is None else {
             "id": apa_abertura.id,
             "matricula": apa_abertura.matricula,
-            "nome": apa_abertura.nome,
+            "nome": rotulo_interface(apa_abertura.nome),
         },
         "apa_atual": None if apa_atual is None else {
             "id": apa_atual.id,
             "matricula": apa_atual.matricula,
-            "nome": apa_atual.nome,
+            "nome": rotulo_interface(apa_atual.nome),
             "modalidade": exercicio_apa["modalidade"],
             "titular_id": exercicio_apa["titular_id"],
         },
         "arp_atual": None if arp_atual is None else {
             "id": arp_atual.id,
             "matricula": arp_atual.matricula,
-            "nome": arp_atual.nome,
+            "nome": rotulo_interface(arp_atual.nome),
+            "situacao": "vigente",
+            "designado_em": atribuicao_integral.atribuido_em,
+            "designado_por": atribuicao_integral.atribuido_por,
+            "apa_tambem_arp": bool(
+                apa_atual is not None and apa_atual.id == arp_atual.id
+            ),
         },
         "versao_atribuicao": (0 if atribuicao_integral is None
                               else atribuicao_integral.versao),
         "candidatos_arp": [
-            {"id": pessoa.id, "matricula": pessoa.matricula, "nome": pessoa.nome}
+            {"id": pessoa.id, "matricula": pessoa.matricula, "nome": rotulo_interface(pessoa.nome)}
             for pessoa in candidatos_arp
         ],
         "rascunho": None if rascunho_integral is None else {

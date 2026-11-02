@@ -2,6 +2,8 @@
 
 from pathlib import Path
 from urllib.parse import urlencode
+from datetime import datetime
+from zoneinfo import ZoneInfo
 import uuid
 
 from fastapi import Depends, FastAPI, Form, Query, Request
@@ -14,7 +16,7 @@ from app.atribuicao_form1_integral import atribuir_arp_form1_integral
 from app.banco import motor
 from app.consultas_interface import (carregar_conflitos_duplicidade_visiveis,
                                      carregar_opcoes_novo_registro, carregar_painel,
-                                     carregar_registro)
+                                     carregar_registro, rotulo_interface)
 from app.eventos import registrar_auditoria
 from app.form1_sintetico import (CATEGORIAS_DADOS, CATEGORIAS_TITULARES,
                                  DESTINATARIOS_COMPARTILHAMENTO)
@@ -50,6 +52,19 @@ PASTA_APP = Path(__file__).resolve().parent
 app = FastAPI(title="PoC LGPD Hortolândia", docs_url=None, redoc_url=None)
 app.mount("/estaticos", StaticFiles(directory=PASTA_APP / "estaticos"), name="estaticos")
 paginas = Jinja2Templates(directory=PASTA_APP / "paginas")
+FUSO_OFICIAL = ZoneInfo("America/Sao_Paulo")
+
+
+def _mensagem_salvamento(resultado, descricao):
+    if resultado["permitido"]:
+        if resultado.get("alterado") is False:
+            return "Nenhuma alteração nova para salvar. O rascunho já estava atualizado."
+        horario = datetime.now(FUSO_OFICIAL).strftime("%H:%M")
+        return f"Rascunho salvo com sucesso às {horario}. {descricao}"
+    return (
+        "Não foi possível salvar. Suas alterações ainda não foram confirmadas. "
+        + resultado["motivo"]
+    )
 
 
 def _normalizar_cascata_abertura(opcoes, valores):
@@ -409,9 +424,14 @@ def detalhe_registro(
 
 
 def _voltar_ao_registro(registro_id, conta_id, resultado, sucesso, *, ancora=None):
+    mensagem = (
+        sucesso
+        if resultado["permitido"] or sucesso.startswith("Não foi possível salvar.")
+        else resultado["motivo"]
+    )
     parametros = {
         "conta_id": conta_id,
-        "mensagem": sucesso if resultado["permitido"] else resultado["motivo"],
+        "mensagem": mensagem,
         "erro": "0" if resultado["permitido"] else "1",
     }
     fragmento = f"#{ancora}" if ancora else ""
@@ -459,11 +479,11 @@ def atribuir_arp_integral(
     if arp is None:
         sucesso = "Designação do ARP confirmada."
     elif resultado.get("reexecutado"):
-        sucesso = f"A designação do ARP já foi processada. ARP atual: matrícula {arp.matricula} · {arp.nome}."
+        sucesso = f"A designação do ARP já foi processada. ARP atual: matrícula {arp.matricula} · {rotulo_interface(arp.nome)}."
     elif resultado.get("alterado"):
-        sucesso = f"Designação do ARP confirmada. ARP atual: matrícula {arp.matricula} · {arp.nome}."
+        sucesso = f"Designação do ARP confirmada. ARP atual: matrícula {arp.matricula} · {rotulo_interface(arp.nome)}."
     else:
-        sucesso = f"Nenhuma alteração: matrícula {arp.matricula} · {arp.nome} já é o ARP atual."
+        sucesso = f"Nenhuma alteração: matrícula {arp.matricula} · {rotulo_interface(arp.nome)} já é o ARP atual."
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, sucesso, ancora="titulo-form1-integral"
     )
@@ -526,7 +546,7 @@ def salvar_bloco_1_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Bloco 1 do FORM 1 salvo com segurança.",
+        registro_id, conta_id, resultado, _mensagem_salvamento(resultado, "Bloco 1 atualizado."),
         ancora=_ancora_apos_salvar_bloco(1, acao_pos_salvar, resultado["permitido"]),
     )
 
@@ -579,7 +599,7 @@ async def salvar_bloco_2_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Bloco 2 do FORM 1 salvo com segurança.",
+        registro_id, conta_id, resultado, _mensagem_salvamento(resultado, "Bloco 2 atualizado."),
         ancora=_ancora_apos_salvar_bloco(2, acao_pos_salvar, resultado["permitido"]),
     )
 
@@ -602,7 +622,7 @@ async def salvar_bloco_4_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Bloco 4 do FORM 1 salvo com segurança.",
+        registro_id, conta_id, resultado, _mensagem_salvamento(resultado, "Bloco 4 atualizado."),
         ancora=_ancora_apos_salvar_bloco(4, acao_pos_salvar, resultado["permitido"]),
     )
 
@@ -625,7 +645,7 @@ async def salvar_bloco_5_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Bloco 5 do FORM 1 salvo com segurança.",
+        registro_id, conta_id, resultado, _mensagem_salvamento(resultado, "Bloco 5 atualizado."),
         ancora=_ancora_apos_salvar_bloco(5, acao_pos_salvar, resultado["permitido"]),
     )
 
@@ -648,7 +668,7 @@ async def salvar_bloco_6_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Bloco 6 do FORM 1 salvo com segurança.",
+        registro_id, conta_id, resultado, _mensagem_salvamento(resultado, "Bloco 6 atualizado."),
         ancora=_ancora_apos_salvar_bloco(6, acao_pos_salvar, resultado["permitido"]),
     )
 
@@ -669,7 +689,7 @@ async def salvar_bloco_7_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Bloco 7 do FORM 1 salvo com segurança.",
+        registro_id, conta_id, resultado, _mensagem_salvamento(resultado, "Bloco 7 atualizado."),
         ancora=_ancora_apos_salvar_bloco(7, acao_pos_salvar, resultado["permitido"]),
     )
 
@@ -690,7 +710,7 @@ async def salvar_bloco_8_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Bloco 8 do FORM 1 salvo com segurança.",
+        registro_id, conta_id, resultado, _mensagem_salvamento(resultado, "Bloco 8 atualizado."),
         ancora=_ancora_apos_salvar_bloco(8, acao_pos_salvar, resultado["permitido"]),
     )
 
@@ -711,7 +731,7 @@ async def salvar_bloco_9_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Bloco 9 do FORM 1 salvo com segurança.",
+        registro_id, conta_id, resultado, _mensagem_salvamento(resultado, "Bloco 9 atualizado."),
         ancora=_ancora_apos_salvar_bloco(9, acao_pos_salvar, resultado["permitido"]),
     )
 
@@ -732,7 +752,7 @@ async def salvar_bloco_10_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Bloco 10 do FORM 1 salvo com segurança.",
+        registro_id, conta_id, resultado, _mensagem_salvamento(resultado, "Bloco 10 atualizado."),
         ancora=_ancora_apos_salvar_bloco(10, acao_pos_salvar, resultado["permitido"]),
     )
 
@@ -819,7 +839,7 @@ async def salvar_bloco_11_integral(
     sessao.commit()
     return _voltar_ao_registro(
         registro_id, conta_id, resultado,
-        "Bloco 11 do FORM 1 salvo com segurança.",
+        _mensagem_salvamento(resultado, "Bloco 11 atualizado."),
         ancora=_ancora_apos_salvar_bloco(11, acao_pos_salvar, resultado["permitido"]),
     )
 
@@ -840,7 +860,7 @@ async def salvar_bloco_12_integral(
     sessao.commit()
     return _voltar_ao_registro(
         registro_id, conta_id, resultado,
-        "Bloco 12 do FORM 1 salvo com segurança.",
+        _mensagem_salvamento(resultado, "Bloco 12 atualizado."),
         ancora=_ancora_apos_salvar_bloco(12, acao_pos_salvar, resultado["permitido"]),
     )
 
@@ -861,7 +881,7 @@ async def salvar_bloco_13_integral(
     sessao.commit()
     return _voltar_ao_registro(
         registro_id, conta_id, resultado,
-        "Bloco 13 do FORM 1 salvo com segurança.",
+        _mensagem_salvamento(resultado, "Bloco 13 atualizado."),
         ancora=_ancora_apos_salvar_bloco(13, acao_pos_salvar, resultado["permitido"]),
     )
 
@@ -882,7 +902,7 @@ async def salvar_bloco_14_integral(
     sessao.commit()
     return _voltar_ao_registro(
         registro_id, conta_id, resultado,
-        "Bloco 14 do FORM 1 salvo com segurança.",
+        _mensagem_salvamento(resultado, "Bloco 14 atualizado."),
         ancora=_ancora_apos_salvar_bloco(14, acao_pos_salvar, resultado["permitido"]),
     )
 
@@ -904,7 +924,7 @@ def salvar_bloco_3_integral(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Bloco 3 do FORM 1 salvo com segurança.",
+        registro_id, conta_id, resultado, _mensagem_salvamento(resultado, "Bloco 3 atualizado."),
         ancora=_ancora_apos_salvar_bloco(3, acao_pos_salvar, resultado["permitido"]),
     )
 
@@ -972,7 +992,7 @@ def iniciar_form1(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "FORM 1 iniciado. O rascunho está pronto para preenchimento.",
+        registro_id, conta_id, resultado, "Questionário resumido iniciado. O rascunho está pronto para preenchimento.",
         ancora="titulo-form1",
     )
 
@@ -1033,6 +1053,6 @@ def salvar_form1(
     )
     sessao.commit()
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, "Rascunho salvo com segurança.",
+        registro_id, conta_id, resultado, _mensagem_salvamento(resultado, "Questionário resumido atualizado."),
         ancora="titulo-form1",
     )

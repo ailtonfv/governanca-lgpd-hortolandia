@@ -517,6 +517,7 @@ def _salvar_conteudo(
     registro.sequencia_atual = evento.sequencia_cadeia
     resultado = fechar_comando(comando, {
         "permitido": True,
+        "alterado": True,
         "motivo": motivo,
         "registro_id": registro.id,
         "versao_rascunho": nova_versao,
@@ -1422,6 +1423,7 @@ def salvar_bloco_1_form1_integral(
     registro.sequencia_atual = evento.sequencia_cadeia
     resultado = fechar_comando(comando, {
         "permitido": True,
+        "alterado": True,
         "motivo": "Bloco 1 do FORM 1 integral salvo",
         "registro_id": registro.id,
         "versao_rascunho": nova_versao,

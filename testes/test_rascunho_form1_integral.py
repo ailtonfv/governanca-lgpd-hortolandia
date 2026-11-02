@@ -317,7 +317,8 @@ def test_interface_inicia_e_salva_bloco_1(sessao):
     assert inicio.status_code == 200 and "Bloco 1 de 14" in inicio.text
     assert "Cadastro imobiliário fictício" in inicio.text
     assert salvamento.status_code == 200
-    assert "Bloco 1 do FORM 1 salvo com segurança" in salvamento.text
+    assert "Rascunho salvo com sucesso às" in salvamento.text
+    assert "Bloco 1 atualizado." in salvamento.text
     assert "Rascunho 2" in salvamento.text
     assert "Questionário resumido de demonstração" in salvamento.text
 

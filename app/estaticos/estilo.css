@@ -183,6 +183,11 @@ legend { padding: 0 .4rem; color: var(--azul-escuro); font-weight: 800; }
 .alerta-classificacao { color: #78350f; font-weight: 650; }
 .aviso-classificacao { padding: .75rem; border-left: .25rem solid #b45309; background: #fffbeb; color: #5f370e; }
 .ajuda { margin-top: .35rem; color: #526475; font-size: .9rem; }
+.ajuda-compartilhamento { padding: .7rem .8rem; border-left: .25rem solid var(--azul); background: #eef6fa; }
+.estado-salvamento { margin: .25rem 0; color: #3f5968; font-size: .9rem; font-weight: 700; }
+.estado-salvamento-pendente { color: #78350f; }
+.estado-salvamento-processando { color: var(--azul); }
+.formulario button[aria-disabled="true"] { cursor: wait; opacity: .72; }
 .ajuda-cartilha-form1 { margin: .55rem 0 .85rem; border: 1px solid #9fb6c4; border-radius: .45rem; background: #f8fbfd; }
 .ajuda-cartilha-form1 summary { padding: .55rem .7rem; color: var(--azul); font-weight: 800; cursor: pointer; }
 .ajuda-cartilha-form1 summary:hover { background: #eef6fa; }

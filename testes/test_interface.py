@@ -27,8 +27,8 @@ def test_painel_identifica_agente_e_mostra_apenas_seu_escopo():
 
     assert resposta.status_code == 200
     assert 'lang="pt-BR"' in resposta.text
-    assert "Ambiente de demonstração · somente dados fictícios" in resposta.text
-    assert "Servidor Alfa (fictício)" in resposta.text
+    assert "Ambiente de demonstração — utilize exclusivamente dados fictícios." in resposta.text
+    assert "Servidor Alfa" in resposta.text
     assert "matrícula MAT-FICT-0001" in resposta.text
     assert "Simular entrada por matrícula" in resposta.text
     assert "Este ambiente de demonstração não solicita senha" in resposta.text
@@ -201,7 +201,7 @@ def test_g1_pela_tela_cria_registro_contextualizado_e_form1_nao_iniciado():
     assert resposta.status_code == 200
     assert "Registro criado. Agora confirme quem será o responsável pelo preenchimento" in resposta.text
     assert "ciclo 1" in resposta.text
-    assert "Certidão de débitos (fictício)" in resposta.text
+    assert "Certidão de débitos" in resposta.text
     assert "Planejamento Urbano e Gestão Estratégica" in resposta.text
     assert "CTX-TRIB-03" in resposta.text
     assert "Não iniciado" in resposta.text
@@ -260,7 +260,7 @@ def test_percurso_completo_contexto_g1_i1_i2_pela_interface():
         data={"conta_id": "CONTA-A1", "comando_id": "CMD-UI-PONTA-I1"},
     )
     assert iniciado.status_code == 200
-    assert "FORM 1 iniciado" in iniciado.text
+    assert "Questionário resumido iniciado" in iniciado.text
 
     salvo = cliente.post(
         f"/registros/{registro_id}/form1/salvar",
@@ -274,7 +274,7 @@ def test_percurso_completo_contexto_g1_i1_i2_pela_interface():
         },
     )
     assert salvo.status_code == 200
-    assert "Rascunho salvo com segurança" in salvo.text
+    assert "Rascunho salvo com sucesso às" in salvo.text
     assert "Rascunho 2" in salvo.text
 
     with Session(motor) as sessao:
@@ -331,7 +331,7 @@ def test_i1_pela_tela_cria_rascunho_e_exibe_formulario():
     )
 
     assert resposta.status_code == 200
-    assert "FORM 1 iniciado" in resposta.text
+    assert "Questionário resumido iniciado" in resposta.text
     assert ">Salvar rascunho</button>" in resposta.text
     with Session(motor) as sessao:
         assert sessao.get(RascunhoInstrumento, instrumento_id).versao_rascunho == 1
@@ -375,7 +375,7 @@ def test_i2_pela_tela_salva_somente_opcoes_fechadas():
     )
 
     assert resposta.status_code == 200
-    assert "Rascunho salvo com segurança" in resposta.text
+    assert "Rascunho salvo com sucesso às" in resposta.text
     assert "Rascunho 2" in resposta.text
     with Session(motor) as sessao:
         rascunho = sessao.get(RascunhoInstrumento, instrumento_id)

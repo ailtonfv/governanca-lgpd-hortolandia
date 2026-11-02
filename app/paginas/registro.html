@@ -12,17 +12,17 @@
     <div><dt>Contexto de atuação</dt><dd>{% if registro.contexto_nome %}{{ registro.contexto_nome }} ({{ registro.contexto_id }}){% else %}{{ registro.contexto_id }}{% endif %}</dd></div>
   </dl>
   <div class="canais-confirmados">
-    <strong>Canais habituais confirmados na abertura</strong>
+    <strong>Canais declarados na abertura</strong>
     {% if registro.confirmacao_canais is none %}
-    <p class="ajuda">Não houve confirmação de canais neste Registro, criado antes deste incremento.</p>
+    <p class="ajuda">Registro histórico sem declaração verificável de canais. Isso não significa que nenhum canal se aplica.</p>
     {% elif registro.confirmacao_canais.situacao == 'informacao_insuficiente' %}
-    <p class="ajuda">A confirmação dos canais permanece pendente. Isso não significa que nenhum canal se aplica.</p>
+    <p class="ajuda">A informação sobre os canais ainda precisa ser confirmada. Isso não significa que nenhum canal se aplica.</p>
     {% elif registro.confirmacao_canais.canais %}
     <ul>
       {% for canal in registro.confirmacao_canais.canais %}<li>{{ canal.nome }}{% if canal.origem == 'DECLARACAO_APA' %} <span class="ajuda">— informado pelo APA para este Registro</span>{% endif %}</li>{% endfor %}
     </ul>
     {% else %}
-    <p class="ajuda">Nenhum canal foi confirmado como aplicável.</p>
+    <p class="ajuda">O APA declarou expressamente que nenhum canal de entrada se aplica a este objeto.</p>
     {% endif %}
   </div>
 </section>
@@ -35,23 +35,22 @@
 <section class="form1 form1-integral" aria-labelledby="titulo-form1-integral" data-registro-id="{{ registro.id }}">
   <div class="cabecalho-secao cabecalho-form1">
     <div>
-      <p class="etiqueta">Ambiente de demonstração · somente dados fictícios</p>
       <h2 id="titulo-form1-integral">FORM 1 — Levantamento Inicial do Tratamento de Dados Pessoais</h2>
     </div>
     <p class="objetivo-form1"><strong>Objetivo:</strong> Descreva como este serviço, processo ou atividade coleta, utiliza, compartilha, armazena e protege dados pessoais.</p>
     <span class="estado">{% if registro.form1_integral.rascunho %}Rascunho {{ registro.form1_integral.rascunho.versao }}{% else %}Não iniciado{% endif %}</span>
   </div>
-  <p class="aviso-leitura status-submissao-form1"><strong>Situação operacional:</strong> a submissão ainda não está disponível neste ambiente de demonstração. O rascunho pode ser salvo e retomado mesmo incompleto.</p>
+  <p class="aviso-leitura status-submissao-form1"><strong>Situação operacional:</strong> os 14 blocos estão disponíveis para preenchimento e revisão. A conclusão institucional do FORM 1 ainda não está habilitada nesta versão. O rascunho pode ser salvo e retomado mesmo incompleto.</p>
 
   <div class="identidades-form1">
     <div><strong>APA de abertura</strong><br>{% if registro.form1_integral.apa_abertura %}Matrícula {{ registro.form1_integral.apa_abertura.matricula }} · {{ registro.form1_integral.apa_abertura.nome }}{% else %}Não identificado{% endif %}</div>
     <div><strong>APA em exercício</strong><br>{% if registro.form1_integral.apa_atual %}Matrícula {{ registro.form1_integral.apa_atual.matricula }} · {{ registro.form1_integral.apa_atual.nome }}{% else %}Não configurado{% endif %}{% if registro.form1_integral.apa_atual and registro.form1_integral.apa_atual.modalidade == 'substituicao_temporaria' %}<br><span class="ajuda">Substituição temporária</span>{% endif %}</div>
-    <div><strong>ARP atual</strong><br>{% if registro.form1_integral.arp_atual %}Matrícula {{ registro.form1_integral.arp_atual.matricula }} · {{ registro.form1_integral.arp_atual.nome }}{% else %}Ainda não atribuído{% endif %}</div>
+    <div><strong>ARP atual</strong><br>{% if registro.form1_integral.arp_atual %}Matrícula {{ registro.form1_integral.arp_atual.matricula }} · {{ registro.form1_integral.arp_atual.nome }}<br><span class="ajuda">Designação vigente{% if registro.form1_integral.arp_atual.apa_tambem_arp %} · o APA em exercício também é o ARP{% endif %}</span>{% else %}Ainda não designado{% endif %}</div>
   </div>
   {% if not registro.form1_integral.arp_atual %}
   <p class="aviso-leitura"><strong>Pendência de atribuição:</strong> o Registro foi preservado, mas nenhum ARP foi confirmado. Somente após uma atribuição válida o agente autorizado poderá iniciar o FORM 1.</p>
   {% endif %}
-  <p class="ajuda">A identidade simulada fornece o nome fictício. Cargo/função e e-mail institucional não são inventados quando não constam do cadastro disponível.</p>
+  <p class="ajuda">Cargo/função e e-mail institucional não são inventados quando não constam do cadastro disponível.</p>
 
   {% set proxima = registro.form1_integral.proxima_providencia %}
   <section class="proxima-providencia" aria-labelledby="titulo-proxima-providencia">
@@ -315,7 +314,7 @@
       <p class="ajuda">Rascunho parcial permitido. Não informe nomes, CPF, protocolos de atendimento ou dados de casos concretos.</p>
 
       {% if registro.form1_integral.pode_editar %}
-      <form class="formulario" method="post" action="{{ url_for('salvar_bloco_1_integral', registro_id=registro.id) }}">
+      <form class="formulario formulario-integral" method="post" action="{{ url_for('salvar_bloco_1_integral', registro_id=registro.id) }}">
         <input type="hidden" name="conta_id" value="{{ conta_id }}">
         <input type="hidden" name="comando_id" value="{{ comando_salvar_integral }}">
         <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
@@ -377,11 +376,11 @@
         {% set campo = campo_2_1 %}<p><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</p>
         {% include '_ajuda_cartilha_form1.html' %}
         {% if leitura_2_1.estado == 'canais_confirmados' %}
-        <p>Canais habituais confirmados pelo APA na abertura:</p>
+        <p>Canais declarados pelo APA na abertura:</p>
         <ul>{% for canal in leitura_2_1.canais %}<li>{{ canal.nome }} <span class="ajuda">({{ canal.id }})</span></li>{% endfor %}</ul>
         <p class="ajuda">Confirmação de {{ leitura_2_1.confirmado_por }} em {{ leitura_2_1.confirmado_em }}.</p>
         {% elif leitura_2_1.estado == 'ausencia_confirmada' %}
-        <p>Nenhum canal habitual foi confirmado pelo APA na abertura.</p>
+        <p>O APA declarou expressamente que nenhum canal habitual se aplica.</p>
         <p class="ajuda">Confirmação de {{ leitura_2_1.confirmado_por }} em {{ leitura_2_1.confirmado_em }}.</p>
         {% else %}
         <p>Este Registro é anterior à confirmação histórica de canais. Não há retrato do APA para recuperar automaticamente.</p>
@@ -445,9 +444,10 @@
       <p class="etiqueta">FORM 1 — Etapa 1 de 4 — Bloco 3 de 14</p>
       <h3 id="titulo-bloco-3">{{ titulos_blocos_navegacao[3] }}</h3>
       <p class="ajuda">Cada participante é uma ocorrência independente. Registre a unidade ou entidade, nunca o nome de uma pessoa.</p>
+      <p class="ajuda ajuda-compartilhamento"><strong>Como distinguir:</strong> outra unidade ou Secretaria integra a própria Prefeitura; “Outro órgão público” representa destinatário público externo; empresa, OSC, concessionária ou prestador representa entidade privada. Contrato ou parceria, por si só, não transforma a entidade em Operadora LGPD. Esta participação no tratamento não é a tramitação administrativa do Registro LGPD.</p>
 
       {% if registro.form1_integral.pode_editar %}
-      <form class="formulario" method="post" action="{{ url_for('salvar_bloco_3_integral', registro_id=registro.id) }}">
+      <form class="formulario formulario-integral" method="post" action="{{ url_for('salvar_bloco_3_integral', registro_id=registro.id) }}">
         <input type="hidden" name="conta_id" value="{{ conta_id }}">
         <input type="hidden" name="comando_id" value="{{ comando_salvar_bloco_3 }}">
         <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
@@ -626,7 +626,7 @@
         </div>
         {% endfor %}
         <div class="rodape-formulario">
-          <p>O rascunho pode permanecer incompleto; as validações para envio do FORM 1 continuam desabilitadas.</p>
+          <p>O rascunho pode permanecer incompleto; a conclusão institucional do FORM 1 ainda não está habilitada.</p>
           {% set numero_bloco = 6 %}{% include '_acoes_salvar_bloco_form1.html' %}
         </div>
       </form>
@@ -717,7 +717,7 @@
     </div>
   {% endif %}
 
-  <p class="ajuda">Os 14 blocos estão disponíveis para preenchimento e revisão. O envio do FORM 1 permanece desabilitado neste ambiente de demonstração.</p>
+  <p class="ajuda">Os 14 blocos estão disponíveis para preenchimento e revisão. A conclusão institucional do FORM 1 ainda não está habilitada nesta versão.</p>
 </section>
 
 <script>
@@ -1059,6 +1059,62 @@
       });
     }
   })();
+  (function iniciarFeedbackDeSalvamento() {
+    var formularios = Array.from(document.querySelectorAll('.formulario-integral, .formulario-rascunho'));
+    if (!formularios.length) return;
+
+    function controlesDeEnvio(formulario) {
+      return Array.from(formulario.querySelectorAll('button[type="submit"], input[type="submit"]'));
+    }
+
+    function atualizarEstado(formulario, texto, classe) {
+      var estado = formulario.querySelector('[data-estado-salvamento]');
+      if (!estado) return;
+      estado.textContent = texto;
+      estado.classList.remove('estado-salvamento-pendente', 'estado-salvamento-processando');
+      if (classe) estado.classList.add(classe);
+    }
+
+    formularios.forEach(function (formulario) {
+      formulario.addEventListener('input', function () {
+        atualizarEstado(formulario, 'Alterações não salvas.', 'estado-salvamento-pendente');
+      });
+      formulario.addEventListener('change', function () {
+        atualizarEstado(formulario, 'Alterações não salvas.', 'estado-salvamento-pendente');
+      });
+      formulario.addEventListener('submit', function (evento) {
+        if (formulario.dataset.enviando === 'true') {
+          evento.preventDefault();
+          return;
+        }
+        formulario.dataset.enviando = 'true';
+        atualizarEstado(formulario, 'Salvando...', 'estado-salvamento-processando');
+        controlesDeEnvio(formulario).forEach(function (controle) {
+          controle.dataset.rotuloAntesDeSalvar = controle.value || controle.textContent;
+          controle.setAttribute('aria-disabled', 'true');
+        });
+        var acionador = evento.submitter;
+        if (acionador) {
+          if (acionador.tagName === 'INPUT') acionador.value = 'Salvando...';
+          else acionador.textContent = 'Salvando...';
+        }
+      });
+    });
+
+    window.addEventListener('pageshow', function () {
+      formularios.forEach(function (formulario) {
+        delete formulario.dataset.enviando;
+        controlesDeEnvio(formulario).forEach(function (controle) {
+          controle.removeAttribute('aria-disabled');
+          var rotulo = controle.dataset.rotuloAntesDeSalvar;
+          if (!rotulo) return;
+          if (controle.tagName === 'INPUT') controle.value = rotulo;
+          else controle.textContent = rotulo;
+          delete controle.dataset.rotuloAntesDeSalvar;
+        });
+      });
+    });
+  })();
 </script>
 
 <details class="recursos-demonstracao">
@@ -1087,7 +1143,7 @@
   {% elif registro.form1.estado == 'em_preenchimento' and registro.form1.rascunho %}
     {% set conteudo = registro.form1.rascunho.conteudo %}
     {% if registro.form1.pode_preencher %}
-    <form class="formulario" method="post" action="{{ url_for('salvar_form1', registro_id=registro.id) }}">
+    <form class="formulario formulario-rascunho" method="post" action="{{ url_for('salvar_form1', registro_id=registro.id) }}">
       <input type="hidden" name="conta_id" value="{{ conta_id }}">
       <input type="hidden" name="comando_id" value="{{ comando_i2 }}">
       <input type="hidden" name="versao_lida" value="{{ registro.form1.rascunho.versao }}">
@@ -1126,7 +1182,10 @@
 
       <div class="rodape-formulario">
         <p>Rascunho {{ registro.form1.rascunho.versao }} · último salvamento por {{ registro.form1.rascunho.salvo_por }}</p>
-        <button class="botao-primario" type="submit">Salvar rascunho</button>
+        <div>
+          <p class="estado-salvamento" data-estado-salvamento role="status" aria-live="polite">Rascunho confirmado no servidor.</p>
+          <button class="botao-primario" type="submit">Salvar rascunho</button>
+        </div>
       </div>
     </form>
     {% else %}

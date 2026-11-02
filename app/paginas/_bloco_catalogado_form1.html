@@ -6,6 +6,9 @@
     <input type="hidden" name="conta_id" value="{{ conta_id }}">
     <input type="hidden" name="comando_id" value="{{ comando_bloco }}">
     <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
+    {% if numero_bloco == 10 %}
+    <p class="ajuda ajuda-compartilhamento"><strong>Destinatários do tratamento:</strong> diferencie circulação interna entre unidades ou Secretarias da Prefeitura, compartilhamento com órgão ou entidade pública externa e compartilhamento com entidade privada. A função concreta deve ser registrada; contrato ou parceria não torna automaticamente uma entidade Operadora LGPD. Não confunda este compartilhamento de dados com a tramitação administrativa do Registro LGPD.</p>
+    {% endif %}
     {% for campo in campos_bloco.values() %}
     <div class="campo-integral{% if campo.condicoes %} campo-condicional{% endif %}"
          {% if campo.condicoes %}data-condicoes='{{ campo.condicoes | tojson }}'{% endif %}>

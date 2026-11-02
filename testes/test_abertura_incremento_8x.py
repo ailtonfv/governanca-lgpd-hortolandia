@@ -127,7 +127,7 @@ def test_criacao_conduz_a_escolha_explicita_do_arp_sem_atribuicao_automatica(ses
     assert resposta.status_code == 200
     assert "Agora confirme quem será o responsável pelo preenchimento" in resposta.text
     assert 'id="titulo-atribuicao-arp"' in resposta.text
-    assert "Ainda não atribuído" in resposta.text
+    assert "Ainda não designado" in resposta.text
     assert "Eu mesmo, APA atual" in resposta.text
     assert "Designar outro agente público autorizado" in resposta.text
     assert "Pendência de atribuição" in resposta.text

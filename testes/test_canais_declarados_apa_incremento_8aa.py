@@ -126,7 +126,7 @@ def test_informacao_pendente_cria_retrato_distinto_de_nenhum(sessao):
     assert confirmacao.situacao == "informacao_insuficiente"
     assert sessao.scalar(select(func.count()).select_from(RegistroCanal)) == 0
     pagina = cliente.get(f"/registros/{registro.id}", params={"conta_id": "CONTA-A1"})
-    assert "confirmação dos canais permanece pendente" in pagina.text
+    assert "informação sobre os canais ainda precisa ser confirmada" in pagina.text
     assert "Isso não significa que nenhum canal se aplica" in pagina.text
 
 

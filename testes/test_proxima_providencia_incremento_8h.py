@@ -99,7 +99,7 @@ def test_apa_com_outro_arp_ve_responsavel_sem_acao_de_preenchimento(sessao):
 
     # Assert
     trecho_apa = _trecho_proxima_providencia(pagina_apa.text)
-    assert "matrícula MAT-FICT-0007 · Servidor Épsilon (fictício)" in trecho_apa
+    assert "matrícula MAT-FICT-0007 · Servidor Épsilon" in trecho_apa
     assert "Somente essa pessoa" in trecho_apa
     assert "Iniciar FORM 1" not in trecho_apa
     assert "Continuar FORM 1" not in trecho_apa
@@ -118,8 +118,8 @@ def test_registro_sem_arp_explica_por_que_nao_ha_acao_de_preenchimento(sessao):
 
     # Assert
     trecho = _trecho_proxima_providencia(pagina.text)
-    assert "Nenhum ARP está indicado" in trecho
-    assert "deve definir o responsável" in trecho
+    assert "O APA deverá assumir o preenchimento ou designar um Agente Responsável" in trecho
+    assert "antes que o rascunho possa ser iniciado" in trecho
     assert "Iniciar FORM 1" not in trecho
     assert "Continuar FORM 1" not in trecho
 

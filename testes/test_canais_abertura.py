@@ -315,7 +315,7 @@ def test_tela_confirma_canal_e_exibe_retrato_no_registro(sessao):
     )
 
     assert resposta.status_code == 200
-    assert "Canais habituais confirmados na abertura" in resposta.text
+    assert "Canais declarados na abertura" in resposta.text
     assert "Presencial / balcão de atendimento" in resposta.text
     registro = sessao.scalars(select(Registro).where(
         Registro.titulo_objeto == "Certidão de débitos (fictício)"

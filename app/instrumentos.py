@@ -221,7 +221,7 @@ def salvar_rascunho(sessao, *, comando_id, conta_id, instrumento_id, versao_lida
     )
     resultado = fechar_comando(
         comando,
-        {"permitido": True, "motivo": "rascunho salvo",
+        {"permitido": True, "alterado": True, "motivo": "rascunho salvo",
          "instrumento_id": instrumento.id, "estado_instrumento": "em_preenchimento",
          "versao_rascunho": nova_versao, "lacre_conteudo": novo_lacre,
          "evento_i2": evento.sequencia_cadeia},
