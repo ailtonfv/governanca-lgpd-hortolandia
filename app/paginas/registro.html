@@ -90,10 +90,14 @@
       <legend>Quem preencherá o FORM 1?</legend>
       <label class="opcao"><input type="radio" name="modo" value="proprio" required> <span>Eu mesmo, APA atual.</span></label>
       <label class="opcao"><input type="radio" name="modo" value="outro" required> <span>Designar outro agente público autorizado para o preenchimento.</span></label>
-      <div class="controle-designacao-arp">
+      <div class="controle-designacao-arp" data-painel-modo-arp="proprio" hidden>
+        <p class="ajuda">Ao confirmar, você assumirá o preenchimento como ARP. A escolha desta opção, isoladamente, não altera a designação atual.</p>
+        <button class="botao-primario" type="submit">Confirmar que assumirei o preenchimento</button>
+      </div>
+      <div class="controle-designacao-arp" data-painel-modo-arp="outro" hidden>
         <div>
           <label for="arp_pessoa_id">ARP selecionado para designação</label>
-          <select id="arp_pessoa_id" name="arp_pessoa_id">
+          <select id="arp_pessoa_id" name="arp_pessoa_id" disabled>
             <option value="">Selecione somente para designar outro agente</option>
             {% for pessoa in registro.form1_integral.candidatos_arp %}
             <option value="{{ pessoa.id }}">Matrícula {{ pessoa.matricula }} · {{ pessoa.nome }}</option>
@@ -102,7 +106,7 @@
         </div>
         <button class="botao-primario" type="submit">Confirmar designação do ARP</button>
       </div>
-      <p class="ajuda">Selecionar uma pessoa não confirma a designação. A confirmação também não concede acesso: o agente precisa possuir previamente conta ativa e autorização de preenchimento nesta Secretaria.</p>
+      <p class="ajuda">A designação atual permanece válida até a confirmação. Selecionar uma pessoa não concede acesso: o agente precisa possuir previamente conta ativa e autorização de preenchimento nesta Secretaria.</p>
     </fieldset>
   </form>
   {% else %}
@@ -152,24 +156,16 @@
       <p class="ajuda">O painel descreve o rascunho salvo e a navegação desta sessão. Ele não mede conformidade com a LGPD.</p>
       <div class="grade-progresso-form1">
         <article class="cartao-progresso-form1 jornada-form1">
-          <h4>Jornada percorrida</h4>
-          <div class="gauge-form1" role="progressbar" aria-label="Blocos visitados nesta sessão"
-               aria-valuemin="0" aria-valuemax="14" aria-valuenow="0">
-            <svg viewBox="0 0 120 66" aria-hidden="true" focusable="false">
-              <path class="gauge-form1-trilho" pathLength="100" d="M10 60 A50 50 0 0 1 110 60"></path>
-              <path class="gauge-form1-progresso" pathLength="100" d="M10 60 A50 50 0 0 1 110 60"></path>
-              <g class="gauge-form1-ponteiro" data-gauge-ponteiro transform="rotate(-90 60 60)">
-                <line x1="60" y1="60" x2="60" y2="18"></line>
-                <circle cx="60" cy="60" r="4"></circle>
-              </g>
-            </svg>
-            <p><strong data-gauge-visitados>0</strong> de 14 blocos visitados nesta sessão</p>
+          <h4>Jornada do preenchimento</h4>
+          <div class="indicadores-compactos-form1" aria-live="polite">
+            <p class="indicador-compacto-form1"><strong>{{ progresso.quantidade_com_respostas_salvas }} de 14</strong><span>blocos possuem respostas salvas</span></p>
+            <p class="indicador-compacto-form1"><strong><span data-jornada-visitados>0</span> de 14</strong><span>blocos visitados nesta sessão</span></p>
           </div>
-          <p class="resumo-jornada-form1" aria-live="polite">
-            <strong data-gauge-posicao>Etapa 1 de 4 · Bloco 1 de 14</strong><br>
-            <span><strong>{{ progresso.quantidade_com_respostas_salvas }}</strong> bloco(s) com respostas salvas · <strong>{{ progresso.quantidade_salvos }}</strong> bloco(s) com evento de salvamento · <strong data-gauge-restantes>14</strong> ainda não visitado(s) nesta sessão.</span>
+          <p class="resumo-jornada-form1">
+            <strong data-jornada-posicao>Etapa 1 de 4 · Bloco 1 de 14</strong><br>
+            <span><strong data-jornada-restantes>14</strong> bloco(s) ainda não visitado(s) nesta sessão.</span>
           </p>
-          <p class="ajuda ajuda-ponteiro-form1">O ponteiro indica somente a posição atual entre os 14 blocos. Visitar um bloco ou salvar um bloco vazio não representa conclusão do trabalho.</p>
+          <p class="ajuda">Respostas salvas e visitas indicam atividade no rascunho; salvar um bloco vazio não representa conclusão. Esses indicadores não significam conferência, submissão ou conformidade.</p>
           <p class="legenda-estados-bloco">
             <span class="estado-bloco visitado">Visitado nesta sessão</span>
             <span class="estado-bloco salvo">Respostas salvas</span>
@@ -180,14 +176,7 @@
 
         <article class="cartao-progresso-form1 pendencias-form1">
           <h4>Pendências a resolver</h4>
-          <div class="gauge-form1 gauge-pendencias-form1 {{ 'sem-pendencias' if progresso.quantidade_incompletos == 0 else 'com-pendencias' }}"
-               role="status" aria-label="{{ progresso.quantidade_incompletos }} campos obrigatórios ativos incompletos">
-            <svg viewBox="0 0 120 66" aria-hidden="true" focusable="false">
-              <path class="gauge-form1-trilho" d="M10 60 A50 50 0 0 1 110 60"></path>
-              <path class="gauge-pendencias-arco" d="M10 60 A50 50 0 0 1 110 60"></path>
-            </svg>
-            <p><strong class="numero-pendencias-form1">{{ progresso.quantidade_incompletos }}</strong><br><span>campo(s) obrigatório(s) ativo(s) incompleto(s)</span></p>
-          </div>
+          <p class="contador-pendencias-form1" role="status"><strong class="numero-pendencias-form1">{{ progresso.quantidade_incompletos }}</strong><span> campo(s) com pendências segundo a política atualmente configurada</span></p>
           {% if progresso.quantidade_incompletos == 0 %}
           <p class="situacao-pendencias-form1 sem-pendencias"><strong>Nenhuma pendência obrigatória ativa no estado salvo.</strong></p>
           {% else %}
@@ -857,6 +846,28 @@
       });
     });
   })();
+  (function iniciarDesignacaoCondicionalArp() {
+    var formulario = document.querySelector('form[action$="/form1-integral/atribuir-arp"]');
+    if (!formulario) return;
+    var modos = Array.from(formulario.querySelectorAll('input[name="modo"]'));
+    var paineis = Array.from(formulario.querySelectorAll('[data-painel-modo-arp]'));
+    var selecao = formulario.querySelector('#arp_pessoa_id');
+
+    function atualizarModo() {
+      var marcado = modos.find(function (modo) { return modo.checked; });
+      var valor = marcado ? marcado.value : '';
+      paineis.forEach(function (painel) {
+        painel.hidden = painel.dataset.painelModoArp !== valor;
+      });
+      if (selecao) {
+        selecao.disabled = valor !== 'outro';
+        selecao.required = valor === 'outro';
+      }
+    }
+
+    modos.forEach(function (modo) { modo.addEventListener('change', atualizarModo); });
+    atualizarModo();
+  })();
   (function iniciarNavegacaoForm1() {
     var raiz = document.querySelector('.form1-integral');
     if (!raiz) return;
@@ -928,19 +939,9 @@
       window.sessionStorage.setItem(chaveBloco, String(numero));
       window.sessionStorage.setItem(chaveVisitados, JSON.stringify(Array.from(visitados)));
       var quantidade = visitados.size;
-      var percentual = (quantidade / 14) * 100;
-      var gauge = painelProgresso.querySelector('.gauge-form1');
-      var arco = painelProgresso.querySelector('.gauge-form1-progresso');
-      var ponteiro = painelProgresso.querySelector('[data-gauge-ponteiro]');
-      if (gauge) gauge.setAttribute('aria-valuenow', String(quantidade));
-      if (arco) arco.style.strokeDasharray = percentual + ' 100';
-      if (ponteiro) {
-        var anguloPosicao = -90 + ((numero - 1) / 13) * 180;
-        ponteiro.setAttribute('transform', 'rotate(' + anguloPosicao + ' 60 60)');
-      }
-      var valorVisitados = painelProgresso.querySelector('[data-gauge-visitados]');
-      var valorRestantes = painelProgresso.querySelector('[data-gauge-restantes]');
-      var valorPosicao = painelProgresso.querySelector('[data-gauge-posicao]');
+      var valorVisitados = painelProgresso.querySelector('[data-jornada-visitados]');
+      var valorRestantes = painelProgresso.querySelector('[data-jornada-restantes]');
+      var valorPosicao = painelProgresso.querySelector('[data-jornada-posicao]');
       if (valorVisitados) valorVisitados.textContent = String(quantidade);
       if (valorRestantes) valorRestantes.textContent = String(14 - quantidade);
       if (valorPosicao) valorPosicao.textContent = 'Etapa ' + etapaDoNumeroDoBloco(numero) + ' de 4 · Bloco ' + numero + ' de 14';
@@ -1047,6 +1048,12 @@
         destino.scrollIntoView({ block: 'start' });
       });
     });
+    raiz.querySelectorAll('[data-bloco-anterior]').forEach(function (botao) {
+      botao.addEventListener('click', function () {
+        var destino = raiz.querySelector('[data-painel-bloco="' + botao.dataset.blocoAnterior + '"]');
+        if (destino) destino.click();
+      });
+    });
     raiz.addEventListener('focusin', function (evento) {
       var bloco = evento.target.closest('.bloco-form1-integral');
       var titulo = bloco && bloco.querySelector('h3[id^="titulo-bloco-"]');
@@ -1084,6 +1091,59 @@
   (function iniciarFeedbackDeSalvamento() {
     var formularios = Array.from(document.querySelectorAll('.formulario-integral, .formulario-rascunho'));
     if (!formularios.length) return;
+    var raizIntegral = document.querySelector('.form1-integral');
+    var prefixoRecuperacao = raizIntegral ? 'form1-integral-tentativa-' + raizIntegral.dataset.registroId + '-' : '';
+
+    function numeroDoBlocoDoFormulario(formulario) {
+      var bloco = formulario.closest('.bloco-form1-integral');
+      var titulo = bloco && bloco.querySelector('h3[id^="titulo-bloco-"]');
+      return titulo ? titulo.id.replace('titulo-bloco-', '') : '';
+    }
+
+    function chaveRecuperacao(formulario) {
+      var numero = numeroDoBlocoDoFormulario(formulario);
+      return prefixoRecuperacao && numero ? prefixoRecuperacao + numero : '';
+    }
+
+    function preservarTentativa(formulario) {
+      var chave = chaveRecuperacao(formulario);
+      if (!chave) return;
+      var dados = [];
+      new FormData(formulario).forEach(function (valor, nome) {
+        if (!['conta_id', 'comando_id', 'versao_lida', 'acao_pos_salvar'].includes(nome)) {
+          dados.push([nome, String(valor)]);
+        }
+      });
+      window.sessionStorage.setItem(chave, JSON.stringify(dados));
+    }
+
+    function restaurarTentativa(formulario) {
+      var chave = chaveRecuperacao(formulario);
+      var serializado = chave && window.sessionStorage.getItem(chave);
+      if (!serializado) return;
+      var dados;
+      try { dados = JSON.parse(serializado); } catch (erro) { return; }
+      var valoresPorNome = {};
+      dados.forEach(function (par) {
+        if (!valoresPorNome[par[0]]) valoresPorNome[par[0]] = [];
+        valoresPorNome[par[0]].push(par[1]);
+      });
+      formulario.querySelectorAll('[name]').forEach(function (controle) {
+        var valores = valoresPorNome[controle.name] || [];
+        if (controle.type === 'checkbox' || controle.type === 'radio') controle.checked = valores.includes(controle.value);
+        else if (controle.tagName === 'SELECT' && controle.multiple) Array.from(controle.options).forEach(function (opcao) { opcao.selected = valores.includes(opcao.value); });
+        else if (!['hidden', 'submit'].includes(controle.type)) controle.value = valores[0] || '';
+      });
+      formulario.dataset.alterado = 'true';
+      atualizarEstado(formulario, 'O salvamento falhou. Os valores digitados foram preservados para nova tentativa.', 'estado-salvamento-pendente');
+    }
+
+    var falhaRetornada = new URLSearchParams(window.location.search).get('erro') === '1';
+    if (prefixoRecuperacao && !falhaRetornada) {
+      Object.keys(window.sessionStorage).filter(function (chave) {
+        return chave.indexOf(prefixoRecuperacao) === 0;
+      }).forEach(function (chave) { window.sessionStorage.removeItem(chave); });
+    }
 
     function controlesDeEnvio(formulario) {
       return Array.from(formulario.querySelectorAll('button[type="submit"], input[type="submit"]'));
@@ -1098,34 +1158,49 @@
     }
 
     formularios.forEach(function (formulario) {
+      formulario.dataset.alterado = 'false';
       formulario.addEventListener('input', function () {
+        formulario.dataset.alterado = 'true';
         atualizarEstado(formulario, 'Alterações não salvas.', 'estado-salvamento-pendente');
       });
       formulario.addEventListener('change', function () {
+        formulario.dataset.alterado = 'true';
         atualizarEstado(formulario, 'Alterações não salvas.', 'estado-salvamento-pendente');
       });
       formulario.addEventListener('submit', function (evento) {
+        var acionador = evento.submitter;
+        if (formulario.classList.contains('formulario-integral') && formulario.dataset.alterado !== 'true') {
+          evento.preventDefault();
+          atualizarEstado(formulario, 'Nenhuma alteração para salvar.', '');
+          var proximoBloco = acionador && acionador.dataset.proximoBloco;
+          var destino = proximoBloco && document.querySelector('[data-painel-bloco="' + proximoBloco + '"]');
+          if (destino) destino.click();
+          return;
+        }
         if (formulario.dataset.enviando === 'true') {
           evento.preventDefault();
           return;
         }
         formulario.dataset.enviando = 'true';
+        preservarTentativa(formulario);
         atualizarEstado(formulario, 'Salvando...', 'estado-salvamento-processando');
         controlesDeEnvio(formulario).forEach(function (controle) {
           controle.dataset.rotuloAntesDeSalvar = controle.value || controle.textContent;
           controle.setAttribute('aria-disabled', 'true');
         });
-        var acionador = evento.submitter;
         if (acionador) {
           if (acionador.tagName === 'INPUT') acionador.value = 'Salvando...';
           else acionador.textContent = 'Salvando...';
         }
       });
+      if (falhaRetornada && formulario.classList.contains('formulario-integral')) restaurarTentativa(formulario);
     });
 
     window.addEventListener('pageshow', function () {
       formularios.forEach(function (formulario) {
         delete formulario.dataset.enviando;
+        var tentativaPendente = falhaRetornada && chaveRecuperacao(formulario) && window.sessionStorage.getItem(chaveRecuperacao(formulario));
+        if (!tentativaPendente) formulario.dataset.alterado = 'false';
         controlesDeEnvio(formulario).forEach(function (controle) {
           controle.removeAttribute('aria-disabled');
           var rotulo = controle.dataset.rotuloAntesDeSalvar;

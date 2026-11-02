@@ -29,7 +29,7 @@ def test_regua_horizontal_oferece_quatorze_destinos_e_foco_acessivel(sessao):
     assert pagina.status_code == 200
     assert 'class="regua-navegacao-blocos"' in pagina.text
     assert 'aria-label="Navegação horizontal pelos 14 blocos do FORM 1"' in pagina.text
-    assert pagina.text.count('data-painel-bloco="') == 14
+    assert pagina.text.count('<button type="button" data-painel-bloco="') == 14
     assert pagina.text.count('class="numero-bloco"') == 14
     assert "aria-current', 'step'" in pagina.text
     assert "destino.focus({ preventScroll: true })" in pagina.text

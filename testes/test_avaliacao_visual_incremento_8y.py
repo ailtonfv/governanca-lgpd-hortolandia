@@ -52,8 +52,8 @@ def test_designacao_arp_distingue_selecao_confirmacao_e_responsavel_atual():
     assert "ARP atual" in pagina.text
     assert "ARP selecionado para designação" in pagina.text
     assert "Confirmar designação do ARP" in pagina.text
-    assert "Selecionar uma pessoa não confirma a designação" in pagina.text
-    assert "A confirmação também não concede acesso" in pagina.text
+    assert "A designação atual permanece válida até a confirmação" in pagina.text
+    assert "Selecionar uma pessoa não concede acesso" in pagina.text
 
 
 def test_jornada_operacional_nao_expoe_rotulos_tecnicos_dos_contratos():

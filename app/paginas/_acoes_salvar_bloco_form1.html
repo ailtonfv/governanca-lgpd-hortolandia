@@ -1,11 +1,14 @@
 <p class="estado-salvamento" data-estado-salvamento role="status" aria-live="polite">Rascunho confirmado no servidor.</p>
 <div class="acoes-salvamento-bloco">
-  <button class="botao-primario" type="submit" name="acao_pos_salvar" value="proximo">
-    {% if numero_bloco == 14 %}
-      Salvar e acessar a pré-validação
-    {% else %}
-      Salvar e avançar ao Bloco {{ numero_bloco + 1 }} — {{ titulos_blocos_navegacao[numero_bloco + 1] }}
-    {% endif %}
+  {% if numero_bloco > 1 %}
+  <button class="botao-secundario" type="button" data-bloco-anterior="{{ numero_bloco - 1 }}">Anterior</button>
+  {% endif %}
+  <button class="botao-secundario" type="submit" name="acao_pos_salvar" value="permanecer">Salvar rascunho</button>
+  {% if numero_bloco < 14 %}
+  <button class="botao-primario" type="submit" name="acao_pos_salvar" value="proximo" data-proximo-bloco="{{ numero_bloco + 1 }}">
+    Salvar e avançar <span class="destino-acao-bloco">ao Bloco {{ numero_bloco + 1 }} — {{ titulos_blocos_navegacao[numero_bloco + 1] }}</span>
   </button>
-  <button class="botao-secundario" type="submit" name="acao_pos_salvar" value="permanecer">Salvar e permanecer neste bloco</button>
+  {% else %}
+  <button class="botao-primario" type="button" data-continuar-revisao>Consultar pré-validação</button>
+  {% endif %}
 </div>

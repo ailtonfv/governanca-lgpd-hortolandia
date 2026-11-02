@@ -42,11 +42,11 @@ def test_painel_distingue_salvamento_pendencias_e_dependencias(sessao):
     assert progresso["quantidade_incompletos"] > 0
     assert progresso["quantidade_governanca"] > 0
     assert 'data-blocos-salvos="5"' in pagina.text
-    assert "<strong>2</strong> bloco(s) com respostas salvas" in pagina.text
-    assert "<strong>1</strong> bloco(s) com evento de salvamento" in pagina.text
+    assert "<strong>2 de 14</strong><span>blocos possuem respostas salvas" in pagina.text
     assert "dependência(s) institucional(is) ou regra(s) de governança" in pagina.text
     assert "Pendências a resolver" in pagina.text
-    assert 'class="gauge-form1 gauge-pendencias-form1 com-pendencias"' in pagina.text
+    assert 'class="contador-pendencias-form1"' in pagina.text
+    assert "pendências segundo a política atualmente configurada" in pagina.text
     assert "Há informações obrigatórias a resolver." in pagina.text
 
 
@@ -85,12 +85,9 @@ def test_jornada_usa_sessao_do_navegador_sem_gravar_evento(sessao):
 
     # Assert
     assert quantidade_depois == quantidade_antes
-    assert pagina.text.count('data-painel-bloco="') == 14
-    assert 'role="progressbar"' in pagina.text
-    assert 'class="gauge-form1" role="progressbar"' in pagina.text
-    assert 'class="gauge-form1 gauge-pendencias-form1' in pagina.text
-    assert 'class="gauge-pendencias-arco"' in pagina.text
-    assert 'aria-valuemax="14"' in pagina.text
+    assert pagina.text.count('<button type="button" data-painel-bloco="') == 14
+    assert 'class="indicadores-compactos-form1"' in pagina.text
+    assert "gauge-form1" not in pagina.text
     assert "blocos visitados nesta sessão" in pagina.text
     assert "form1-integral-visitados-" in pagina.text
     assert "Ele não mede conformidade com a LGPD." in pagina.text

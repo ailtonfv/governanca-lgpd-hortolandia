@@ -93,25 +93,17 @@ th { color: #425466; font-size: .8rem; text-transform: uppercase; letter-spacing
 .grade-progresso-form1 { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(17rem, .9fr); gap: 1rem; }
 .cartao-progresso-form1 { min-width: 0; padding: 1rem; border: 1px solid var(--borda); border-radius: .6rem; background: #f8fbfd; }
 .cartao-progresso-form1 h4 { margin: 0 0 .75rem; color: var(--azul-escuro); }
-.gauge-form1 { width: min(15rem, 100%); margin: 0 auto; text-align: center; }
-.gauge-form1 svg { display: block; width: 100%; height: auto; }
-.gauge-form1 path { fill: none; stroke-width: 10; stroke-linecap: round; }
-.gauge-form1-trilho { stroke: #d6e0e6; }
-.gauge-form1-progresso { stroke: var(--azul); stroke-dasharray: 0 100; }
-.gauge-form1-ponteiro line { stroke: var(--azul-escuro); stroke-width: 2.5; stroke-linecap: round; }
-.gauge-form1-ponteiro circle { fill: var(--azul-escuro); stroke: white; stroke-width: 1.5; }
-.gauge-form1 p { margin: -.25rem 0 .5rem; }
-.gauge-form1 [data-gauge-visitados] { color: var(--azul-escuro); font-size: 1.7rem; }
-.gauge-pendencias-form1 .gauge-pendencias-arco { stroke: #b45309; }
-.gauge-pendencias-form1.sem-pendencias .gauge-pendencias-arco { stroke: var(--verde); }
-.gauge-pendencias-form1 p { margin-top: -1rem; }
-.gauge-pendencias-form1 p span { display: inline-block; max-width: 13rem; color: #425466; font-size: .85rem; line-height: 1.3; }
-.gauge-pendencias-form1.sem-pendencias .numero-pendencias-form1 { color: var(--verde); }
+.indicadores-compactos-form1 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
+.indicador-compacto-form1 { margin: 0; padding: .75rem; border-left: .3rem solid var(--azul); border-radius: .35rem; background: white; }
+.indicador-compacto-form1 strong, .indicador-compacto-form1 span { display: block; }
+.indicador-compacto-form1 strong { color: var(--azul-escuro); font-size: 1.25rem; }
+.indicador-compacto-form1 span { margin-top: .2rem; color: #425466; font-size: .85rem; }
+.contador-pendencias-form1 { margin: 0 0 .75rem; padding: .75rem; border-left: .3rem solid #b45309; border-radius: .35rem; background: #fffbeb; }
+.contador-pendencias-form1 .numero-pendencias-form1 { margin-right: .2rem; }
 .situacao-pendencias-form1 { text-align: center; }
 .situacao-pendencias-form1.com-pendencias { color: #78350f; }
 .situacao-pendencias-form1.sem-pendencias { color: var(--verde); }
-.resumo-jornada-form1 { text-align: center; }
-.ajuda-ponteiro-form1 { max-width: 34rem; margin: .45rem auto .75rem; text-align: center; }
+.resumo-jornada-form1 { margin: .8rem 0; }
 .legenda-estados-bloco { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem .8rem; margin: .75rem 0; }
 .legenda-estados-bloco .estado-bloco { display: inline-block; margin: 0; }
 .regua-navegacao-blocos { margin-top: 1rem; padding: .55rem; overflow-x: auto; border: 1px solid var(--borda); border-radius: .6rem; background: #f8fbfd; scrollbar-gutter: stable; }
@@ -130,6 +122,8 @@ th { color: #425466; font-size: .8rem; text-transform: uppercase; letter-spacing
 .estado-bloco.visitado { color: #425466; font-weight: 800; }
 .estado-bloco.a-percorrer { color: #526475; }
 .numero-pendencias-form1 { color: #78350f; font-size: 1.7rem; }
+.controle-designacao-arp[hidden] { display: none; }
+.destino-acao-bloco { display: block; margin-top: .15rem; font-size: .78rem; font-weight: 600; }
 .distribuicao-pendencias-form1 { display: grid; grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr)); gap: .4rem; margin: .75rem 0; padding: 0; list-style: none; }
 .distribuicao-pendencias-form1 li { display: flex; justify-content: space-between; gap: .5rem; padding: .4rem .55rem; border: 1px solid #d6e0e6; border-radius: .4rem; background: white; }
 .distribuicao-pendencias-form1 li span { min-width: 1.5rem; color: #78350f; font-weight: 900; text-align: center; }
@@ -247,6 +241,7 @@ dd { margin: .25rem 0 0; }
   .cabecalho-form1 { grid-template-columns: 1fr; }
   .identidades-form1, .etapas-form1 { grid-template-columns: 1fr; }
   .grade-progresso-form1 { grid-template-columns: 1fr; }
+  .indicadores-compactos-form1 { grid-template-columns: 1fr; }
   .regua-navegacao-blocos { margin-inline: -.25rem; }
   .objetivo-form1 { padding: .75rem 0 0; border-left: 0; border-top: 1px solid var(--borda); }
   th:nth-child(3), td:nth-child(3) { display: none; }
@@ -254,5 +249,4 @@ dd { margin: .25rem 0 0; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
   .destino-pendencia-ativo { transition: none; }
-  .gauge-form1-progresso { transition: none; }
 }
