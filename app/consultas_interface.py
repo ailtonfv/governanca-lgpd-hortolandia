@@ -156,9 +156,34 @@ def _projetar_painel_progresso_form1_integral(
 
 
 def _projetar_proxima_providencia_form1_integral(
-    *, identidade, arp_atual, pode_editar, rascunho, pre_validacao
+    *, identidade, arp_atual, pode_editar, rascunho, pre_validacao,
+    e_apa_atual=False, conferencia_pendente=False,
+    pode_consultar_conferencia=False,
 ):
     """Orienta a interface usando somente autorização e estado já projetados."""
+
+    papel = (
+        "APA e ARP"
+        if e_apa_atual and pode_editar
+        else "APA"
+        if e_apa_atual
+        else "ARP"
+        if pode_editar
+        else "Consulta"
+    )
+
+    if conferencia_pendente and pode_consultar_conferencia:
+        return {
+            "tipo": "conferir",
+            "rotulo": "Consultar levantamento recebido",
+            "descricao": (
+                "O ARP apresentou uma versão do levantamento para conferência interna. "
+                "Consulte exatamente o snapshot recebido; esta ação não conclui nem "
+                "submete institucionalmente o FORM 1."
+            ),
+            "retomada": None,
+            "papel": papel,
+        }
 
     if pode_editar and rascunho is None:
         return {
@@ -169,6 +194,7 @@ def _projetar_proxima_providencia_form1_integral(
                 "Inicie o rascunho para acessar a primeira pergunta."
             ),
             "retomada": None,
+            "papel": papel,
         }
     if pode_editar:
         retomada = next(
@@ -195,6 +221,19 @@ def _projetar_proxima_providencia_form1_integral(
             "rotulo": "Continuar FORM 1",
             "descricao": descricao,
             "retomada": retomada,
+            "papel": papel,
+        }
+    if e_apa_atual and arp_atual is not None and rascunho is not None:
+        return {
+            "tipo": "consultar",
+            "rotulo": "Consultar FORM 1",
+            "descricao": (
+                f"Este FORM 1 está sob responsabilidade da matrícula {arp_atual.matricula} · "
+                f"{rotulo_interface(arp_atual.nome)}. Você pode consultar o levantamento "
+                "em modo somente leitura e aguardará sua apresentação para conferência."
+            ),
+            "retomada": None,
+            "papel": papel,
         }
     if arp_atual is None:
         descricao = (
@@ -218,6 +257,7 @@ def _projetar_proxima_providencia_form1_integral(
         "rotulo": None,
         "descricao": descricao,
         "retomada": None,
+        "papel": papel,
     }
 
 
@@ -968,6 +1008,16 @@ def carregar_registro(sessao, conta_id, registro_id):
             pode_editar=pode_editar_integral,
             rascunho=rascunho_integral,
             pre_validacao=pre_validacao_integral,
+            e_apa_atual=bool(
+                exercicio_apa is not None
+                and exercicio_apa["pessoa_id"] == identidade["pessoa_id"]
+            ),
+            conferencia_pendente=conferencia_integral is not None,
+            pode_consultar_conferencia=bool(
+                conferencia_integral is not None
+                and exercicio_apa is not None
+                and exercicio_apa["pessoa_id"] == identidade["pessoa_id"]
+            ),
         ),
         "campos_bloco_1": {
             campo_id: {

@@ -83,6 +83,15 @@ th { color: #425466; font-size: .8rem; text-transform: uppercase; letter-spacing
 .proxima-providencia { margin: 1.25rem 0; padding: 1rem; border: 1px solid #86b99a; border-left: .35rem solid var(--verde); border-radius: .6rem; background: #f0fdf4; }
 .proxima-providencia h3 { margin: .25rem 0 .5rem; }
 .proxima-providencia form { margin: .85rem 0 0; }
+.informacoes-institucionais-form1 { margin: 1.25rem 0; border: 1px solid var(--borda); border-radius: .6rem; background: repeating-linear-gradient(135deg, #f8fafb, #f8fafb 12px, #f3f6f8 12px, #f3f6f8 24px); }
+.informacoes-institucionais-form1 > summary, .alteracao-arp > summary { cursor: pointer; padding: 1rem; color: var(--azul-escuro); font-weight: 700; }
+.informacoes-institucionais-form1[open] > summary, .alteracao-arp[open] > summary { border-bottom: 1px solid var(--borda); }
+.informacoes-institucionais-form1 .identidades-form1 { margin: 1rem; }
+.informacoes-institucionais-form1 > .ajuda { display: block; margin: 0 1rem 1rem; }
+.area-designacao-arp { margin: 1.25rem 0; padding: 1rem; border: 1px solid var(--borda); border-radius: .6rem; background: #fff; }
+.area-designacao-arp > p { margin-top: 0; }
+.alteracao-arp { border-top: 1px solid var(--borda); }
+.alteracao-arp > .formulario { margin-top: 1rem; }
 .form1-integral fieldset .opcao { margin-bottom: .75rem; }
 .form1-integral fieldset > label[for] { margin-top: 1rem; }
 .etapas-form1 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .75rem; padding: 0; margin: 1.4rem 0 0; list-style: none; }

@@ -42,20 +42,11 @@
   </div>
   <p class="aviso-leitura status-submissao-form1"><strong>Situação operacional:</strong> os 14 blocos estão disponíveis para preenchimento e revisão. A conclusão institucional do FORM 1 ainda não está habilitada nesta versão. O rascunho pode ser salvo e retomado mesmo incompleto.</p>
 
-  <div class="identidades-form1">
-    <div><strong>APA de abertura</strong><br>{% if registro.form1_integral.apa_abertura %}Matrícula {{ registro.form1_integral.apa_abertura.matricula }} · {{ registro.form1_integral.apa_abertura.nome }}{% else %}Não identificado{% endif %}</div>
-    <div><strong>APA em exercício</strong><br>{% if registro.form1_integral.apa_atual %}Matrícula {{ registro.form1_integral.apa_atual.matricula }} · {{ registro.form1_integral.apa_atual.nome }}{% else %}Não configurado{% endif %}{% if registro.form1_integral.apa_atual and registro.form1_integral.apa_atual.modalidade == 'substituicao_temporaria' %}<br><span class="ajuda">Substituição temporária</span>{% endif %}</div>
-    <div><strong>ARP atual</strong><br>{% if registro.form1_integral.arp_atual %}Matrícula {{ registro.form1_integral.arp_atual.matricula }} · {{ registro.form1_integral.arp_atual.nome }}<br><span class="ajuda">Designação vigente{% if registro.form1_integral.arp_atual.apa_tambem_arp %} · o APA em exercício também é o ARP{% endif %}</span>{% else %}Ainda não designado{% endif %}</div>
-  </div>
-  {% if not registro.form1_integral.arp_atual %}
-  <p class="aviso-leitura"><strong>Pendência de atribuição:</strong> o Registro foi preservado, mas nenhum ARP foi confirmado. Somente após uma atribuição válida o agente autorizado poderá iniciar o FORM 1.</p>
-  {% endif %}
-  <p class="ajuda">Cargo/função e e-mail institucional não são inventados quando não constam do cadastro disponível.</p>
-
   {% set proxima = registro.form1_integral.proxima_providencia %}
   <section class="proxima-providencia" aria-labelledby="titulo-proxima-providencia">
     <p class="etiqueta">Orientação conforme o estado e as permissões atuais</p>
     <h3 id="titulo-proxima-providencia">Próxima providência</h3>
+    <p><strong>Seu papel neste Registro:</strong> {{ proxima.papel }}.</p>
     <p>{{ proxima.descricao }}</p>
     {% if proxima.tipo == 'iniciar' %}
     <form method="post" action="{{ url_for('iniciar_form1_integral', registro_id=registro.id) }}">
@@ -77,11 +68,36 @@
         {{ proxima.rotulo }}
       </button>
       {% endif %}
+    {% elif proxima.tipo == 'consultar' %}
+      <button type="button" class="botao-primario" data-consultar-form1>Consultar FORM 1</button>
+    {% elif proxima.tipo == 'conferir' %}
+      <a class="botao-link botao-primario" href="{{ url_for('consultar_conferencia_interna', registro_id=registro.id) }}?conta_id={{ conta_id }}">{{ proxima.rotulo }}</a>
     {% endif %}
   </section>
 
-  <h3 id="titulo-atribuicao-arp">Designação do ARP</h3>
+  <details class="informacoes-institucionais-form1">
+    <summary>Informações institucionais do Registro — somente leitura</summary>
+    <div class="identidades-form1">
+      <div><strong>APA de abertura</strong><br>{% if registro.form1_integral.apa_abertura %}Matrícula {{ registro.form1_integral.apa_abertura.matricula }} · {{ registro.form1_integral.apa_abertura.nome }}{% else %}Não identificado{% endif %}</div>
+      <div><strong>APA em exercício</strong><br>{% if registro.form1_integral.apa_atual %}Matrícula {{ registro.form1_integral.apa_atual.matricula }} · {{ registro.form1_integral.apa_atual.nome }}{% else %}Não configurado{% endif %}{% if registro.form1_integral.apa_atual and registro.form1_integral.apa_atual.modalidade == 'substituicao_temporaria' %}<br><span class="ajuda">Substituição temporária</span>{% endif %}</div>
+      <div><strong>ARP vigente</strong><br>{% if registro.form1_integral.arp_atual %}Matrícula {{ registro.form1_integral.arp_atual.matricula }} · {{ registro.form1_integral.arp_atual.nome }}<br><span class="ajuda">Designação vigente{% if registro.form1_integral.arp_atual.apa_tambem_arp %} · o APA em exercício também é o ARP{% endif %}</span>{% else %}Ainda não designado{% endif %}</div>
+    </div>
+    <p class="ajuda">Cargo/função e e-mail institucional não são inventados quando não constam do cadastro disponível.</p>
+  </details>
+
+  {% if not registro.form1_integral.arp_atual %}
+  <p class="aviso-leitura"><strong>Pendência de atribuição:</strong> o Registro foi preservado, mas nenhum ARP foi confirmado. Somente após uma atribuição válida o agente autorizado poderá iniciar o FORM 1.</p>
+  {% endif %}
+
   {% if registro.form1_integral.pode_atribuir_arp %}
+  <section class="area-designacao-arp" aria-labelledby="titulo-atribuicao-arp">
+  {% if registro.form1_integral.arp_atual %}
+    <p id="titulo-atribuicao-arp"><strong>ARP vigente:</strong> matrícula {{ registro.form1_integral.arp_atual.matricula }} · {{ registro.form1_integral.arp_atual.nome }}.</p>
+    <details class="alteracao-arp">
+      <summary>Alterar responsável pelo preenchimento</summary>
+  {% else %}
+    <h3 id="titulo-atribuicao-arp">Designação do ARP</h3>
+  {% endif %}
   <form class="formulario" method="post" action="{{ url_for('atribuir_arp_integral', registro_id=registro.id) }}">
     <input type="hidden" name="conta_id" value="{{ conta_id }}">
     <input type="hidden" name="comando_id" value="{{ comando_atribuir_arp }}">
@@ -109,8 +125,10 @@
       <p class="ajuda">A designação atual permanece válida até a confirmação. Selecionar uma pessoa não concede acesso: o agente precisa possuir previamente conta ativa e autorização de preenchimento nesta Secretaria.</p>
     </fieldset>
   </form>
+  {% if registro.form1_integral.arp_atual %}</details>{% endif %}
+  </section>
   {% else %}
-  <p class="aviso-leitura">Somente um APA responsável pelo Registro nesta Secretaria pode definir ou substituir o ARP.</p>
+  <p class="aviso-leitura">Somente um APA responsável pelo Registro nesta Secretaria pode definir ou substituir o ARP. Esta informação não concede ação de preenchimento.</p>
   {% endif %}
 
   <h3 id="titulo-etapas-form1">Etapas do FORM 1</h3>
@@ -1072,6 +1090,19 @@
         window.history.replaceState(null, '', '#titulo-pre-validacao-form1');
         destino.focus({ preventScroll: true });
         destino.scrollIntoView({ block: 'center' });
+      });
+    });
+    raiz.querySelectorAll('[data-consultar-form1]').forEach(function (botao) {
+      botao.addEventListener('click', function () {
+        if (!confirmarNavegacaoComAlteracoes()) return;
+        var destino = document.getElementById('titulo-bloco-1');
+        if (!destino) return;
+        exibirEtapa('1', '#titulo-bloco-1', 1);
+        atualizarPainelJornada(1);
+        window.history.replaceState(null, '', '#titulo-bloco-1');
+        destino.setAttribute('tabindex', '-1');
+        destino.focus({ preventScroll: true });
+        destino.scrollIntoView({ block: 'start' });
       });
     });
     var destinoInicial = blocoDaUrl ? document.getElementById('titulo-bloco-' + numeroBloco)

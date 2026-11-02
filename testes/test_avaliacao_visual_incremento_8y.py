@@ -49,7 +49,7 @@ def test_designacao_arp_distingue_selecao_confirmacao_e_responsavel_atual():
 
     # Assert
     assert pagina.status_code == 200
-    assert "ARP atual" in pagina.text
+    assert "ARP vigente" in pagina.text
     assert "ARP selecionado para designação" in pagina.text
     assert "Confirmar designação do ARP" in pagina.text
     assert "A designação atual permanece válida até a confirmação" in pagina.text
