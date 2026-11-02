@@ -1,4 +1,6 @@
-"""Solicitação preparatória do ARP para conferência interna do APA."""
+"""Conferência interna preparatória entre ARP e APA."""
+
+import uuid
 
 from sqlalchemy import select
 
@@ -6,7 +8,8 @@ from app.comandos import abrir_comando, fechar_comando
 from app.continuidade_apa import apa_em_exercicio, pessoa_e_apa_em_exercicio
 from app.eventos import registrar_auditoria, registrar_evento
 from app.modelos import (
-    ConferenciaInternaForm1Integral, Pessoa, Registro, VersaoForm1Integral,
+    ConferenciaInternaForm1Integral, HistoricoConferenciaForm1Integral,
+    Pessoa, Registro, VersaoForm1Integral,
 )
 from app.rascunho_form1_integral import (
     _agora_utc, _ator, _ciclo, _contexto_autorizado, _lacre, _negar,
@@ -17,6 +20,21 @@ from app.submissao_form1_integral import preparar_snapshot_na_transacao
 
 TIPO_COMANDO = "solicitar_conferencia_interna_form1_integral"
 SITUACAO = "aguardando_conferencia_interna_apa"
+TIPO_COMANDO_DEVOLUCAO = "devolver_conferencia_interna_form1_integral"
+SITUACAO_DEVOLVIDA = "devolvida_para_ajustes"
+LIMITE_JUSTIFICATIVA = 2000
+
+
+def _ultimo_historico(sessao, registro_id, *, bloquear=False):
+    consulta = (
+        select(HistoricoConferenciaForm1Integral)
+        .where(HistoricoConferenciaForm1Integral.registro_id == registro_id)
+        .order_by(HistoricoConferenciaForm1Integral.numero_apresentacao.desc())
+        .limit(1)
+    )
+    if bloquear:
+        consulta = consulta.with_for_update()
+    return sessao.scalars(consulta).first()
 
 
 def solicitar_conferencia_interna_form1_integral(
@@ -88,6 +106,20 @@ def solicitar_conferencia_interna_form1_integral(
             TIPO_COMANDO, "a Secretaria não possui APA em exercício",
         )
 
+    ultimo = _ultimo_historico(sessao, registro_id, bloquear=True)
+    if (
+        ultimo is not None
+        and ultimo.situacao == SITUACAO_DEVOLVIDA
+        and rascunho.versao_rascunho <= ultimo.versao_rascunho
+    ):
+        return _negar(
+            sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
+            TIPO_COMANDO,
+            "salve ao menos um ajuste no rascunho antes de solicitar nova conferência",
+            versao_devolvida=ultimo.versao_rascunho,
+            versao_atual=rascunho.versao_rascunho,
+        )
+
     snapshot, evento_snapshot = preparar_snapshot_na_transacao(
         sessao, comando=comando, registro=registro, rascunho=rascunho,
         pessoa_id=pessoa_id, momento=momento, reusar_existente=True,
@@ -104,6 +136,10 @@ def solicitar_conferencia_interna_form1_integral(
             "solicitada_por_id": pessoa_id,
             "apa_em_exercicio_no_momento_id": exercicio["pessoa_id"],
             "situacao": SITUACAO,
+            "numero_apresentacao": (
+                1 if ultimo is None else ultimo.numero_apresentacao + 1
+            ),
+            "papel_ator": "ARP",
             "ato_preparatorio": True,
             "submissao_habilitada": False,
             "conclusao_institucional": False,
@@ -124,6 +160,20 @@ def solicitar_conferencia_interna_form1_integral(
         apa_em_exercicio_no_momento_id=exercicio["pessoa_id"],
         evento_solicitacao_id=evento.id,
     ))
+    numero_apresentacao = 1 if ultimo is None else ultimo.numero_apresentacao + 1
+    sessao.add(HistoricoConferenciaForm1Integral(
+        id=str(uuid.uuid4()),
+        registro_id=registro.id,
+        numero_apresentacao=numero_apresentacao,
+        situacao=SITUACAO,
+        versao=1,
+        snapshot_id=snapshot.id,
+        versao_rascunho=rascunho.versao_rascunho,
+        solicitada_por_id=pessoa_id,
+        solicitada_em=momento,
+        apa_em_exercicio_no_momento_id=exercicio["pessoa_id"],
+        evento_solicitacao_id=evento.id,
+    ))
     registrar_auditoria(
         sessao, "conferencia_interna_form1_solicitada", ator_tipo, ator_id,
         {
@@ -131,6 +181,8 @@ def solicitar_conferencia_interna_form1_integral(
             "snapshot_id": snapshot.id,
             "versao_rascunho": rascunho.versao_rascunho,
             "apa_em_exercicio_no_momento_id": exercicio["pessoa_id"],
+            "numero_apresentacao": numero_apresentacao,
+            "papel_ator": "ARP",
             "submissao_habilitada": False,
         },
         comando_id=comando.id,
@@ -145,6 +197,142 @@ def solicitar_conferencia_interna_form1_integral(
         "versao_rascunho": rascunho.versao_rascunho,
         "evento": evento.sequencia_cadeia,
         "situacao": SITUACAO,
+        "numero_apresentacao": numero_apresentacao,
+        "submissao_habilitada": False,
+    })
+    sessao.flush()
+    return resultado
+
+
+def devolver_conferencia_interna_form1_integral(
+    sessao, *, comando_id, conta_id, registro_id, versao_lida,
+    justificativa, momento=None,
+):
+    """Devolve ao ARP o snapshot apresentado, sem submeter o FORM 1."""
+
+    momento = momento or _agora_utc()
+    justificativa = (justificativa or "").strip()
+    parametros = {
+        "conta_id": conta_id,
+        "registro_id": registro_id,
+        "versao_lida": versao_lida,
+        "justificativa": justificativa,
+    }
+    _conta, pessoa_id, ator_tipo, ator_id = _ator(sessao, conta_id)
+    comando, resposta = abrir_comando(
+        sessao, comando_id, TIPO_COMANDO_DEVOLUCAO, parametros,
+        ator_tipo, ator_id, conta_id,
+    )
+    if resposta is not None:
+        return resposta
+    if not justificativa:
+        return _negar(
+            sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
+            TIPO_COMANDO_DEVOLUCAO, "informe a justificativa da devolução",
+        )
+    if len(justificativa) > LIMITE_JUSTIFICATIVA:
+        return _negar(
+            sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
+            TIPO_COMANDO_DEVOLUCAO,
+            f"a justificativa deve ter no máximo {LIMITE_JUSTIFICATIVA} caracteres",
+        )
+
+    registro = sessao.scalars(
+        select(Registro).where(Registro.id == registro_id).with_for_update()
+    ).one_or_none()
+    if registro is None or not pessoa_e_apa_em_exercicio(
+        sessao, pessoa_id, registro.unidade_principal_atual_id
+    ):
+        return _negar(
+            sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
+            TIPO_COMANDO_DEVOLUCAO,
+            "somente o APA em exercício pode devolver a versão apresentada",
+        )
+    conferencia = sessao.scalars(
+        select(ConferenciaInternaForm1Integral)
+        .where(ConferenciaInternaForm1Integral.registro_id == registro_id)
+        .with_for_update()
+    ).one_or_none()
+    if conferencia is None:
+        return _negar(
+            sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
+            TIPO_COMANDO_DEVOLUCAO,
+            "não existe solicitação de conferência interna pendente",
+        )
+    if versao_lida != conferencia.versao_projecao:
+        return _negar(
+            sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
+            TIPO_COMANDO_DEVOLUCAO,
+            "conferência interna desatualizada: recarregue antes de devolver",
+            versao_lida=versao_lida,
+            versao_atual=conferencia.versao_projecao,
+        )
+    historico = sessao.scalars(
+        select(HistoricoConferenciaForm1Integral)
+        .where(
+            HistoricoConferenciaForm1Integral.registro_id == registro_id,
+            HistoricoConferenciaForm1Integral.snapshot_id == conferencia.snapshot_id,
+        )
+        .with_for_update()
+    ).one_or_none()
+    if historico is None or historico.situacao != SITUACAO:
+        return _negar(
+            sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
+            TIPO_COMANDO_DEVOLUCAO,
+            "o histórico da apresentação pendente não está íntegro",
+        )
+
+    evento = registrar_evento(
+        sessao, comando, "registro", registro.codigo_lgpd,
+        TIPO_COMANDO_DEVOLUCAO,
+        {
+            "registro_id": registro.id,
+            "snapshot_id": conferencia.snapshot_id,
+            "numero_apresentacao": historico.numero_apresentacao,
+            "versao_rascunho": conferencia.versao_rascunho,
+            "justificativa": justificativa,
+            "devolvida_por_id": pessoa_id,
+            "papel_ator": "APA",
+            "situacao": SITUACAO_DEVOLVIDA,
+            "ato_preparatorio": True,
+            "submissao_habilitada": False,
+            "conclusao_institucional": False,
+        },
+        ordem_no_comando=1,
+        registro_id=registro.id,
+        ciclo_id=_ciclo(sessao, registro).id,
+        versao_esquema_evento=2,
+    )
+    historico.situacao = SITUACAO_DEVOLVIDA
+    historico.versao += 1
+    historico.devolvida_por_id = pessoa_id
+    historico.devolvida_em = momento
+    historico.justificativa_devolucao = justificativa
+    historico.evento_devolucao_id = evento.id
+    sessao.delete(conferencia)
+    registrar_auditoria(
+        sessao, "conferencia_interna_form1_devolvida", ator_tipo, ator_id,
+        {
+            "registro_id": registro.id,
+            "snapshot_id": historico.snapshot_id,
+            "numero_apresentacao": historico.numero_apresentacao,
+            "versao_rascunho": historico.versao_rascunho,
+            "justificativa": justificativa,
+            "papel_ator": "APA",
+            "submissao_habilitada": False,
+        },
+        comando_id=comando.id,
+    )
+    registro.sequencia_atual = evento.sequencia_cadeia
+    resultado = fechar_comando(comando, {
+        "permitido": True,
+        "motivo": "FORM 1 devolvido ao ARP para ajustes",
+        "registro_id": registro.id,
+        "snapshot_id": historico.snapshot_id,
+        "numero_apresentacao": historico.numero_apresentacao,
+        "versao_rascunho": historico.versao_rascunho,
+        "evento": evento.sequencia_cadeia,
+        "situacao": SITUACAO_DEVOLVIDA,
         "submissao_habilitada": False,
     })
     sessao.flush()

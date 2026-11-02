@@ -54,7 +54,7 @@
       <input type="hidden" name="comando_id" value="{{ comando_iniciar_integral }}">
       <button class="botao-primario" type="submit">{{ proxima.rotulo }}</button>
     </form>
-    {% elif proxima.tipo == 'continuar' %}
+    {% elif proxima.tipo in ['continuar', 'corrigir'] %}
       {% if proxima.retomada %}
       <button type="button" class="botao-primario"
               data-pendencia-campo="{{ proxima.retomada.campo_id }}"
@@ -254,6 +254,21 @@
       {% if registro.form1_integral.conferencia_interna.pode_consultar %}
       <a class="botao-link" href="{{ url_for('consultar_conferencia_interna', registro_id=registro.id) }}?conta_id={{ conta_id }}">Conferir versão apresentada</a>
       {% endif %}
+      {% elif registro.form1_integral.devolucao_interna %}
+      <p class="aviso-leitura"><strong>Devolvido para ajustes pelo APA.</strong> Apresentação {{ registro.form1_integral.devolucao_interna.numero_apresentacao }}, referente ao rascunho {{ registro.form1_integral.devolucao_interna.versao_rascunho }}.</p>
+      <p><strong>Justificativa:</strong> {{ registro.form1_integral.devolucao_interna.justificativa }}</p>
+      <p class="ajuda">Devolução registrada por {{ registro.form1_integral.devolucao_interna.devolvida_por }}. O snapshot apresentado permanece imutável.</p>
+      {% if registro.form1_integral.pode_solicitar_conferencia %}
+      <p>Após revisar e salvar as correções, o ARP pode apresentar uma nova versão ao APA.</p>
+      <form method="post" action="{{ url_for('solicitar_conferencia_interna', registro_id=registro.id) }}">
+        <input type="hidden" name="conta_id" value="{{ conta_id }}">
+        <input type="hidden" name="comando_id" value="{{ comando_solicitar_conferencia }}">
+        <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
+        <button class="botao-primario" type="submit">Solicitar nova conferência interna do APA</button>
+      </form>
+      {% else %}
+      <p class="ajuda">Salve ao menos um ajuste no rascunho antes de solicitar nova conferência.</p>
+      {% endif %}
       {% elif registro.form1_integral.pode_solicitar_conferencia %}
       <p>O ARP pode apresentar ao APA a versão atual do rascunho, mesmo incompleta, para conferência interna.</p>
       {% if registro.form1_integral.pre_validacao %}<p><strong>{{ registro.form1_integral.pre_validacao.quantidades.incompletos }}</strong> campo(s) obrigatório(s) ativo(s) ainda incompleto(s).</p>{% endif %}
@@ -265,6 +280,19 @@
       </form>
       {% else %}
       <p class="ajuda">Nenhuma ação de conferência interna está disponível para seu perfil neste momento.</p>
+      {% endif %}
+      {% if registro.form1_integral.historico_conferencias %}
+      <details class="historico-conferencias-form1">
+        <summary>Histórico de apresentações internas</summary>
+        <ol>
+          {% for item in registro.form1_integral.historico_conferencias %}
+          <li>
+            <strong>Apresentação {{ item.numero_apresentacao }}</strong> — rascunho {{ item.versao_rascunho }}, snapshot {{ item.numero_snapshot }} · {{ item.situacao }}.
+            {% if item.justificativa_devolucao %}<br><span>Justificativa da devolução: {{ item.justificativa_devolucao }}</span>{% endif %}
+          </li>
+          {% endfor %}
+        </ol>
+      </details>
       {% endif %}
     </section>
     <aside class="legenda-form1-integral" aria-labelledby="titulo-legenda-form1">

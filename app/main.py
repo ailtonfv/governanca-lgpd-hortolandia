@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from app.atribuicao_form1_integral import atribuir_arp_form1_integral
 from app.conferencia_interna_form1_integral import (
     carregar_versao_para_conferencia,
+    devolver_conferencia_interna_form1_integral,
     solicitar_conferencia_interna_form1_integral,
 )
 from app.banco import motor
@@ -1046,7 +1047,32 @@ def consultar_conferencia_interna(
             ],
             "participantes": snapshot.conteudo.get("form1_integral", {}).get("participantes", []),
             "destinatarios": snapshot.conteudo.get("form1_integral", {}).get("destinatarios_10_2_1", []),
+            "comando_devolver_conferencia": str(uuid.uuid4()),
         },
+    )
+
+
+@app.post(
+    "/registros/{registro_id}/form1-integral/conferencia-interna/devolver"
+)
+def devolver_conferencia_interna(
+    registro_id: str,
+    conta_id: str = Form(max_length=50),
+    comando_id: str = Form(max_length=64),
+    versao_lida: int = Form(ge=1),
+    justificativa: str = Form(min_length=1, max_length=2000),
+    sessao: Session = Depends(obter_sessao),
+):
+    resultado = devolver_conferencia_interna_form1_integral(
+        sessao, comando_id=comando_id, conta_id=conta_id,
+        registro_id=registro_id, versao_lida=versao_lida,
+        justificativa=justificativa,
+    )
+    sessao.commit()
+    return _voltar_ao_registro(
+        registro_id, conta_id, resultado,
+        "FORM 1 devolvido ao ARP para ajustes. A versão apresentada foi preservada.",
+        ancora="titulo-conferencia-interna-form1",
     )
 
 

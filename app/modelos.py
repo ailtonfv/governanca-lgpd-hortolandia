@@ -388,6 +388,74 @@ class ConferenciaInternaForm1Integral(Base):
     )
 
 
+class HistoricoConferenciaForm1Integral(Base):
+    """Histórico de cada apresentação interna do FORM 1 ao APA.
+
+    A projeção ``ConferenciaInternaForm1Integral`` representa somente a
+    solicitação pendente. Esta tabela preserva cada apresentação e eventual
+    devolução sem transformá-las em submissão institucional.
+    """
+    __tablename__ = "historico_conferencia_form1_integral"
+
+    id = Column(String(36), primary_key=True)
+    registro_id = Column(String(36), ForeignKey("registro.id"), nullable=False)
+    numero_apresentacao = Column(Integer, nullable=False)
+    situacao = Column(String(50), nullable=False)
+    versao = Column(Integer, nullable=False)
+    snapshot_id = Column(
+        String(36), ForeignKey("versao_form1_integral.id"), nullable=False, unique=True
+    )
+    versao_rascunho = Column(Integer, nullable=False)
+    solicitada_por_id = Column(String(50), ForeignKey("pessoa.id"), nullable=False)
+    solicitada_em = Column(DateTime(timezone=True), nullable=False)
+    apa_em_exercicio_no_momento_id = Column(
+        String(50), ForeignKey("pessoa.id"), nullable=False
+    )
+    evento_solicitacao_id = Column(
+        BigInteger, ForeignKey("evento.id"), nullable=False, unique=True
+    )
+    devolvida_por_id = Column(String(50), ForeignKey("pessoa.id"))
+    devolvida_em = Column(DateTime(timezone=True))
+    justificativa_devolucao = Column(Text)
+    evento_devolucao_id = Column(BigInteger, ForeignKey("evento.id"), unique=True)
+
+    __table_args__ = (
+        UniqueConstraint(
+            "registro_id", "numero_apresentacao",
+            name="uq_historico_conferencia_form1_numero",
+        ),
+        CheckConstraint(
+            "situacao IN ('aguardando_conferencia_interna_apa', 'devolvida_para_ajustes')",
+            name="ck_historico_conferencia_form1_situacao",
+        ),
+        CheckConstraint(
+            "numero_apresentacao >= 1",
+            name="ck_historico_conferencia_form1_numero_positivo",
+        ),
+        CheckConstraint(
+            "versao >= 1",
+            name="ck_historico_conferencia_form1_versao_positiva",
+        ),
+        CheckConstraint(
+            "versao_rascunho >= 1",
+            name="ck_historico_conferencia_form1_rascunho_positivo",
+        ),
+        CheckConstraint(
+            "(situacao = 'aguardando_conferencia_interna_apa' "
+            "AND devolvida_por_id IS NULL AND devolvida_em IS NULL "
+            "AND justificativa_devolucao IS NULL AND evento_devolucao_id IS NULL) OR "
+            "(situacao = 'devolvida_para_ajustes' "
+            "AND devolvida_por_id IS NOT NULL AND devolvida_em IS NOT NULL "
+            "AND justificativa_devolucao IS NOT NULL AND evento_devolucao_id IS NOT NULL)",
+            name="ck_historico_conferencia_form1_devolucao_completa",
+        ),
+        Index(
+            "ix_historico_conferencia_form1_registro",
+            "registro_id", "numero_apresentacao",
+        ),
+    )
+
+
 class ContadorRegistro(Base):
     """Contador anual do código LGPD (D4): LGPD-2026-00041, depois LGPD-2027-00001.
     Atualizado na mesma transação do G1, com INSERT ... ON CONFLICT ... RETURNING:

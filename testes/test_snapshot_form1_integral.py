@@ -18,6 +18,7 @@ from app.modelos import (
     ConferenciaInternaForm1Integral,
     Evento,
     EventoAuditoria,
+    HistoricoConferenciaForm1Integral,
     Instrumento,
     RascunhoForm1Integral,
     Registro,
@@ -257,6 +258,7 @@ def test_snapshot_nao_possui_endpoint_nem_acao_na_interface(sessao):
 
 def test_migracao_cria_tabela_reversivel_e_snapshot_e_imutavel_no_banco(sessao):
     with motor.begin() as conexao:
+        HistoricoConferenciaForm1Integral.__table__.drop(bind=conexao)
         ConferenciaInternaForm1Integral.__table__.drop(bind=conexao)
         VersaoForm1Integral.__table__.drop(bind=conexao)
     with Session(motor) as outra, outra.begin():
@@ -269,6 +271,7 @@ def test_migracao_cria_tabela_reversivel_e_snapshot_e_imutavel_no_banco(sessao):
         aplicar_migracao(outra)
     with motor.begin() as conexao:
         ConferenciaInternaForm1Integral.__table__.create(bind=conexao)
+        HistoricoConferenciaForm1Integral.__table__.create(bind=conexao)
 
     registro = _preparar(sessao, "F18C-IMUTAVEL")
     resultado = _snapshot(sessao, registro, "F18C-IMUTAVEL-SNAPSHOT")

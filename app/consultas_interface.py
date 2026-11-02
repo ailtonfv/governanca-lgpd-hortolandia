@@ -33,7 +33,7 @@ from app.form1_integral import (CONDICOES_BLOCO_2, CONDICOES_BLOCO_4, CONDICOES_
 from app.pre_validacao_form1_integral import (
     metadado_visual_obrigatoriedade, pre_validar_form1_integral,
 )
-from app.modelos import (AtribuicaoForm1Integral, ConferenciaInternaForm1Integral, Conta, ContextoAtuacao, Designacao, Evento, Instrumento,
+from app.modelos import (AtribuicaoForm1Integral, ConferenciaInternaForm1Integral, HistoricoConferenciaForm1Integral, Conta, ContextoAtuacao, Designacao, Evento, Instrumento,
                          Canal, ConfirmacaoCanaisRegistro, ObjetoCanal,
                          ObjetoCatalogo, ObjetoContextoCatalogo, RegistroCanal,
                          UnidadeObjetoCatalogo, Pendencia, Pessoa,
@@ -158,7 +158,7 @@ def _projetar_painel_progresso_form1_integral(
 def _projetar_proxima_providencia_form1_integral(
     *, identidade, arp_atual, pode_editar, rascunho, pre_validacao,
     e_apa_atual=False, conferencia_pendente=False,
-    pode_consultar_conferencia=False,
+    pode_consultar_conferencia=False, devolucao=None,
 ):
     """Orienta a interface usando somente autorização e estado já projetados."""
 
@@ -182,6 +182,44 @@ def _projetar_proxima_providencia_form1_integral(
                 "submete institucionalmente o FORM 1."
             ),
             "retomada": None,
+            "papel": papel,
+        }
+
+    if conferencia_pendente:
+        return {
+            "tipo": "aguardar_conferencia",
+            "rotulo": None,
+            "descricao": (
+                "A versão atual foi apresentada ao APA para conferência interna. "
+                "Aguarde a devolução ou a futura decisão correspondente; nenhuma "
+                "submissão institucional foi realizada."
+            ),
+            "retomada": None,
+            "papel": papel,
+        }
+
+    if pode_editar and devolucao is not None:
+        retomada = next(
+            (
+                {
+                    "campo_id": item["campo_id"],
+                    "bloco": item["bloco"],
+                    "etapa": item["etapa"],
+                    "destino_tipo": item["destino_tipo"],
+                }
+                for item in pre_validacao["incompletos"]
+                if item["destino_navegavel"]
+            ),
+            None,
+        )
+        return {
+            "tipo": "corrigir",
+            "rotulo": "Corrigir FORM 1",
+            "descricao": (
+                f"O APA devolveu a apresentação {devolucao['numero_apresentacao']} "
+                f"para ajustes. Justificativa: {devolucao['justificativa']}"
+            ),
+            "retomada": retomada,
             "papel": papel,
         }
 
@@ -258,6 +296,34 @@ def _projetar_proxima_providencia_form1_integral(
         "descricao": descricao,
         "retomada": None,
         "papel": papel,
+    }
+
+
+def _ultimo_historico_conferencia(sessao, registro_id):
+    return sessao.scalars(
+        select(HistoricoConferenciaForm1Integral)
+        .where(HistoricoConferenciaForm1Integral.registro_id == registro_id)
+        .order_by(HistoricoConferenciaForm1Integral.numero_apresentacao.desc())
+        .limit(1)
+    ).first()
+
+
+def _devolucao_para_interface(sessao, registro_id):
+    historico = _ultimo_historico_conferencia(sessao, registro_id)
+    if historico is None or historico.situacao != "devolvida_para_ajustes":
+        return None
+    devolvedor = sessao.get(Pessoa, historico.devolvida_por_id)
+    return {
+        "numero_apresentacao": historico.numero_apresentacao,
+        "snapshot_id": historico.snapshot_id,
+        "versao_rascunho": historico.versao_rascunho,
+        "justificativa": historico.justificativa_devolucao,
+        "devolvida_em": historico.devolvida_em,
+        "devolvida_por": (
+            historico.devolvida_por_id
+            if devolvedor is None
+            else f"{devolvedor.matricula} · {rotulo_interface(devolvedor.nome)}"
+        ),
     }
 
 
@@ -386,6 +452,10 @@ def carregar_painel(sessao, conta_id):
         if not _pode_editar_form1_integral(identidade, atribuicao, registro):
             continue
         rascunho = sessao.get(RascunhoForm1Integral, registro.id)
+        conferencia = sessao.get(ConferenciaInternaForm1Integral, registro.id)
+        if conferencia is not None:
+            continue
+        devolucao = _devolucao_para_interface(sessao, registro.id)
         arp_atual = sessao.get(Pessoa, atribuicao.arp_atual_id)
         confirmacao_canais = sessao.get(ConfirmacaoCanaisRegistro, registro.id)
         canais_registro = sessao.scalars(
@@ -405,6 +475,7 @@ def carregar_painel(sessao, conta_id):
             pode_editar=True,
             rascunho=rascunho,
             pre_validacao=pre_validacao,
+            devolucao=devolucao,
         )
         retomada = proxima["retomada"]
         proximas_providencias_form1.append({
@@ -413,7 +484,9 @@ def carregar_painel(sessao, conta_id):
             "tipo": registro.tipo_objeto.capitalize(),
             "titulo": rotulo_interface(registro.titulo_objeto),
             "situacao": (
-                "Não iniciado" if proxima["tipo"] == "iniciar" else "Em preenchimento"
+                "Não iniciado" if proxima["tipo"] == "iniciar"
+                else "Devolvido para ajustes" if proxima["tipo"] == "corrigir"
+                else "Em preenchimento"
             ),
             "quantidade_pendencias": (
                 None
@@ -421,6 +494,9 @@ def carregar_painel(sessao, conta_id):
                 else pre_validacao["quantidades"]["incompletos"]
             ),
             "acao_rotulo": proxima["rotulo"],
+            "justificativa_devolucao": (
+                None if devolucao is None else devolucao["justificativa"]
+            ),
             "ancora": (
                 f"titulo-bloco-{retomada['bloco']}"
                 if retomada is not None
@@ -507,6 +583,7 @@ def carregar_painel(sessao, conta_id):
             "quantidade_pendencias": item["quantidade_pendencias"],
             "acao_rotulo": item["acao_rotulo"],
             "ancora": item["ancora"],
+            "justificativa_devolucao": item.get("justificativa_devolucao"),
             "responsavel": (
                 f"{identidade['matricula']} · {identidade['nome']} (ARP)"
             ),
@@ -927,6 +1004,16 @@ def carregar_registro(sessao, conta_id, registro_id):
         )
     )
     conferencia_integral = sessao.get(ConferenciaInternaForm1Integral, registro.id)
+    devolucao_integral = _devolucao_para_interface(sessao, registro.id)
+    historicos_conferencia = sessao.scalars(
+        select(HistoricoConferenciaForm1Integral)
+        .where(HistoricoConferenciaForm1Integral.registro_id == registro.id)
+        .order_by(HistoricoConferenciaForm1Integral.numero_apresentacao)
+    ).all()
+    snapshots_historico = {
+        item.snapshot_id: sessao.get(VersaoForm1Integral, item.snapshot_id)
+        for item in historicos_conferencia
+    }
     snapshot_conferencia = (
         None if conferencia_integral is None
         else sessao.get(VersaoForm1Integral, conferencia_integral.snapshot_id)
@@ -997,9 +1084,33 @@ def carregar_registro(sessao, conta_id, registro_id):
                 ),
             }
         ),
+        "devolucao_interna": devolucao_integral,
+        "historico_conferencias": [
+            {
+                "numero_apresentacao": item.numero_apresentacao,
+                "versao_rascunho": item.versao_rascunho,
+                "numero_snapshot": (
+                    snapshots_historico[item.snapshot_id].numero
+                    if snapshots_historico[item.snapshot_id] is not None
+                    else item.snapshot_id
+                ),
+                "situacao": (
+                    "Aguardando conferência do APA"
+                    if item.situacao == "aguardando_conferencia_interna_apa"
+                    else "Devolvida para ajustes"
+                ),
+                "justificativa_devolucao": item.justificativa_devolucao,
+            }
+            for item in historicos_conferencia
+        ],
         "pode_solicitar_conferencia": bool(
             pode_editar_integral and rascunho_integral is not None
             and conferencia_integral is None
+            and (
+                devolucao_integral is None
+                or rascunho_integral.versao_rascunho
+                > devolucao_integral["versao_rascunho"]
+            )
         ),
         "painel_progresso": painel_progresso_integral,
         "proxima_providencia": _projetar_proxima_providencia_form1_integral(
@@ -1018,6 +1129,7 @@ def carregar_registro(sessao, conta_id, registro_id):
                 and exercicio_apa is not None
                 and exercicio_apa["pessoa_id"] == identidade["pessoa_id"]
             ),
+            devolucao=devolucao_integral,
         ),
         "campos_bloco_1": {
             campo_id: {

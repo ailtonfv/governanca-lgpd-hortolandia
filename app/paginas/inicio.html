@@ -63,6 +63,9 @@
             <div class="providencia-registro providencia-{{ providencia.categoria }}{% if providencia.nivel %} alerta-{{ providencia.nivel }}{% endif %}">
               <p><strong>Responsável pela próxima etapa:</strong> {{ providencia.responsavel }}</p>
               <p><strong>{{ providencia.formulario }}:</strong> {{ providencia.situacao }}</p>
+              {% if providencia.justificativa_devolucao %}
+              <p class="aviso-leitura"><strong>Justificativa do APA:</strong> {{ providencia.justificativa_devolucao }}</p>
+              {% endif %}
               {% if providencia.quantidade_pendencias is none and providencia.categoria == 'preenchimento_form1' %}
               <p>O rascunho do FORM 1 ainda não foi iniciado.</p>
               {% elif providencia.quantidade_pendencias is not none and providencia.quantidade_pendencias > 0 %}
