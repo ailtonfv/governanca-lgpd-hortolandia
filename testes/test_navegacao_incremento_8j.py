@@ -141,4 +141,5 @@ def test_interface_orienta_os_14_blocos_dados_volumes_e_instrumentos(sessao):
     assert "Separação entre instrumentos" not in pagina.text
     assert "Outros recursos do ambiente de demonstração" not in pagina.text
     assert "Questionário resumido de demonstração" not in pagina.text
-    assert "Questionário sintético legado — recurso exclusivo de demonstração técnica" in pagina.text
+    assert "Questionário sintético legado — recurso exclusivo de demonstração técnica" not in pagina.text
+    assert "questionario-sintetico-legado" not in pagina.text

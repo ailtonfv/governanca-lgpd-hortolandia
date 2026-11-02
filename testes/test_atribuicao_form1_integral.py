@@ -205,7 +205,8 @@ def test_interface_distingue_form_integral_e_permite_indicar_arp():
     assert '<option value="PESSOA-A">' not in antes.text
     assert "Etapa 4 de 4" in antes.text
     assert "Questionário resumido de demonstração" not in antes.text
-    assert "Questionário sintético legado — recurso exclusivo de demonstração técnica" in antes.text
+    assert "Questionário sintético legado — recurso exclusivo de demonstração técnica" not in antes.text
+    assert "questionario-sintetico-legado" not in antes.text
     assert resposta.status_code == 200
     assert "Designação do ARP confirmada" in resposta.text
     assert "Servidor Épsilon" in resposta.text

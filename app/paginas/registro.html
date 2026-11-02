@@ -1351,11 +1351,5 @@
     <p class="aviso-leitura">O FORM 1 está em {{ registro.form1.estado|replace('_', ' ') }}. A edição não está disponível neste estado.</p>
   {% endif %}
 </section>
-{% else %}
-<aside class="recurso-tecnico-legado" aria-labelledby="titulo-recurso-legado">
-  <h2 id="titulo-recurso-legado">Recurso técnico separado</h2>
-  <p class="ajuda">O recurso abaixo pertence ao contrato sintético preservado para regressão técnica. Ele não faz parte do preenchimento do FORM 1 Integral REV13.</p>
-  <a class="botao-link-secundario" href="{{ url_for('questionario_sintetico_legado', registro_id=registro.id) }}?conta_id={{ conta_id }}">Questionário sintético legado — recurso exclusivo de demonstração técnica</a>
-</aside>
 {% endif %}
 {% endblock %}

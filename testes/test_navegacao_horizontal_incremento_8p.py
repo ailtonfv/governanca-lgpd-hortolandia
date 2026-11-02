@@ -151,4 +151,5 @@ def test_separacao_nao_anuncia_fim_prematuro_do_form_integral(sessao):
     assert "Separação entre instrumentos" not in pagina.text
     assert "Outros recursos do ambiente de demonstração" not in pagina.text
     assert "Questionário resumido de demonstração" not in pagina.text
-    assert "Questionário sintético legado — recurso exclusivo de demonstração técnica" in pagina.text
+    assert "Questionário sintético legado — recurso exclusivo de demonstração técnica" not in pagina.text
+    assert "questionario-sintetico-legado" not in pagina.text

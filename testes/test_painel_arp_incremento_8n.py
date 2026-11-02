@@ -38,11 +38,11 @@ def test_arp_sem_rascunho_recebe_acao_para_iniciar_form1(sessao):
     assert registro["codigo_lgpd"] in pagina.text
     assert "Situação do FORM 1:</strong> Não iniciado" in pagina.text
     assert "O rascunho do FORM 1 ainda não foi iniciado." in pagina.text
-    assert ">Iniciar FORM 1 Integral</a>" in pagina.text
+    assert ">Iniciar FORM 1 Integral</button>" in pagina.text
     assert (
-        f'/registros/{registro["registro_id"]}?conta_id=CONTA-A1'
-        '#titulo-form1-integral'
+        f'action="http://testserver/registros/{registro["registro_id"]}/form1-integral/iniciar"'
     ) in pagina.text
+    assert 'name="conta_id" value="CONTA-A1"' in pagina.text
     assert (
         'aria-label="1 Registro(s) com providências">1</span>'
         in pagina.text
@@ -78,7 +78,7 @@ def test_apa_nao_recebe_inicio_quando_outro_arp_foi_designado(sessao):
     assert registro["codigo_lgpd"] in pagina_apa.text
     assert "Iniciar FORM 1" not in pagina_apa.text
     assert registro["codigo_lgpd"] in pagina_arp.text
-    assert ">Iniciar FORM 1 Integral</a>" in pagina_arp.text
+    assert ">Iniciar FORM 1 Integral</button>" in pagina_arp.text
 
 
 def _rascunho_do_epsilon(sessao, prefixo):
@@ -129,13 +129,13 @@ def test_cartoes_atribuem_acoes_corretas_a_alfa_e_epsilon(sessao):
         assert registro_alfa["codigo_lgpd"] in pagina.text
         assert registro_epsilon["codigo_lgpd"] in pagina.text
 
-    assert ">Iniciar FORM 1 Integral</a>" in pagina_alfa.text
+    assert ">Iniciar FORM 1 Integral</button>" in pagina_alfa.text
     assert ">Continuar FORM 1 Integral</a>" not in pagina_alfa.text
     assert "MAT-FICT-0007" in pagina_alfa.text
     assert "(ARP)" in pagina_alfa.text
 
     assert ">Continuar FORM 1 Integral</a>" in pagina_epsilon.text
-    assert ">Iniciar FORM 1 Integral</a>" not in pagina_epsilon.text
+    assert ">Iniciar FORM 1 Integral</button>" not in pagina_epsilon.text
     assert "MAT-FICT-0001" in pagina_epsilon.text
     assert "(ARP)" in pagina_epsilon.text
 

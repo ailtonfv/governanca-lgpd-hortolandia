@@ -76,6 +76,12 @@
               {% if providencia.rotulo %}<p><strong>Próxima ação:</strong> {{ providencia.rotulo }}.</p>{% endif %}
               {% if providencia.categoria == 'conferencia_form1' %}
               <a class="botao-link" href="{{ url_for('consultar_conferencia_interna', registro_id=registro.id) }}?conta_id={{ conta_id }}">{{ providencia.acao_rotulo }}</a>
+              {% elif providencia.categoria == 'preenchimento_form1' and providencia.acao_tipo == 'iniciar' %}
+              <form class="acao-iniciar-form1-integral" method="post" action="{{ url_for('iniciar_form1_integral', registro_id=registro.id) }}">
+                <input type="hidden" name="conta_id" value="{{ conta_id }}">
+                <input type="hidden" name="comando_id" value="{{ providencia.comando_id }}">
+                <button class="botao-link" aria-label="{{ providencia.acao_rotulo }} do Registro {{ registro.codigo_lgpd }}" type="submit">{{ providencia.acao_rotulo }}</button>
+              </form>
               {% elif providencia.categoria == 'preenchimento_form1' %}
               <a class="botao-link" aria-label="{{ providencia.acao_rotulo }} do Registro {{ registro.codigo_lgpd }}" href="{{ url_for('detalhe_registro', registro_id=registro.id) }}?conta_id={{ conta_id }}#{{ providencia.ancora }}">{{ providencia.acao_rotulo }}</a>
               {% else %}

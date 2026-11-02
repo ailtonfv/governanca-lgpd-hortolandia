@@ -1,5 +1,7 @@
 """Incremento 8AH — separação operacional entre os contratos 2 e 3."""
 
+import re
+
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 
@@ -34,7 +36,8 @@ def test_registro_sem_arp_prioriza_designacao_e_nao_expoe_questionario_legado():
     assert 'class="formulario formulario-integral"' not in pagina.text
     assert "Questionário resumido de demonstração" not in pagina.text
     assert "data-instrumento-regressao" not in pagina.text
-    assert "Questionário sintético legado — recurso exclusivo de demonstração técnica" in pagina.text
+    assert "Questionário sintético legado — recurso exclusivo de demonstração técnica" not in pagina.text
+    assert "questionario-sintetico-legado" not in pagina.text
 
 
 def test_designacao_confirmada_permite_ao_arp_iniciar_no_bloco_1():
@@ -74,6 +77,58 @@ def test_designacao_confirmada_permite_ao_arp_iniciar_no_bloco_1():
     assert 'id="titulo-bloco-1"' in destino.text
     assert "Salvar rascunho do FORM 1" in destino.text
     assert "data-instrumento-regressao" not in destino.text
+
+
+def test_painel_do_arp_inicia_form1_integral_diretamente_no_bloco_1():
+    # Arrange
+    registro = _registro("8AH-PAINEL-INICIAR-G1")
+    cliente.post(
+        f"/registros/{registro['registro_id']}/form1-integral/atribuir-arp",
+        data={
+            "conta_id": "CONTA-A1",
+            "comando_id": "8AH-PAINEL-ATRIBUIR-ARP",
+            "modo": "outro",
+            "arp_pessoa_id": "PESSOA-G",
+            "versao_lida": "0",
+        },
+    )
+    painel = cliente.get("/", params={"conta_id": "CONTA-G1"})
+    formulario = re.search(
+        rf'<form class="acao-iniciar-form1-integral"[^>]*'
+        rf'action="((?:http://testserver)?/registros/{registro["registro_id"]}/form1-integral/iniciar)"'
+        rf'[^>]*>(.*?)</form>',
+        painel.text,
+        re.DOTALL,
+    )
+
+    # Act
+    assert formulario is not None
+    comando = re.search(
+        r'name="comando_id" value="([^"]+)"', formulario.group(2)
+    )
+    inicio = cliente.post(
+        formulario.group(1),
+        data={"conta_id": "CONTA-G1", "comando_id": comando.group(1)},
+        follow_redirects=False,
+    )
+
+    # Assert
+    assert painel.status_code == 200
+    assert ">Iniciar FORM 1 Integral</button>" in formulario.group(2)
+    assert (
+        f'/registros/{registro["registro_id"]}?conta_id=CONTA-G1'
+        '#titulo-form1-integral'
+    ) not in painel.text
+    assert inicio.status_code == 303
+    assert inicio.headers["location"].endswith("#titulo-bloco-1")
+    assert "questionario-sintetico-legado" not in inicio.headers["location"]
+    destino = cliente.get(inicio.headers["location"])
+    assert destino.status_code == 200
+    assert "FORM 1 — Etapa 1 de 4 — Bloco 1 de 14" in destino.text
+    assert 'id="titulo-bloco-1"' in destino.text
+    assert "Iniciar FORM 1 Integral" not in destino.text
+    assert "data-instrumento-regressao" not in destino.text
+    assert "questionario-sintetico-legado" not in destino.text
 
 
 def test_salvar_e_avancar_preserva_resposta_sem_abrir_instrumento_legado(sessao):
@@ -133,6 +188,7 @@ def test_questionario_legado_permanece_controlado_e_independente(sessao):
 
     # Assert
     assert "data-instrumento-regressao" not in normal.text
+    assert "questionario-sintetico-legado" not in normal.text
     assert legado.status_code == 200
     assert "Questionário sintético legado — recurso exclusivo de demonstração técnica" in legado.text
     assert "Iniciar preenchimento" not in legado.text

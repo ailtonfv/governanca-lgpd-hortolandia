@@ -129,6 +129,13 @@ def inicio(
             context={"titulo": "Conta indisponível", "mensagem": "A conta fictícia não existe ou está inativa."},
             status_code=404,
         )
+    for registro in painel["registros"]:
+        for providencia in registro["providencias"]:
+            if (
+                providencia["categoria"] == "preenchimento_form1"
+                and providencia.get("acao_tipo") == "iniciar"
+            ):
+                providencia["comando_id"] = str(uuid.uuid4())
     return paginas.TemplateResponse(
         request=request,
         name="inicio.html",

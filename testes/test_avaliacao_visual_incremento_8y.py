@@ -74,7 +74,8 @@ def test_jornada_operacional_nao_expoe_rotulos_tecnicos_dos_contratos():
         assert rotulo_tecnico not in pagina.text
     assert "Outros recursos do ambiente de demonstração" not in pagina.text
     assert "Questionário resumido de demonstração" not in pagina.text
-    assert "Questionário sintético legado — recurso exclusivo de demonstração técnica" in pagina.text
+    assert "Questionário sintético legado — recurso exclusivo de demonstração técnica" not in pagina.text
+    assert "questionario-sintetico-legado" not in pagina.text
 
 
 def test_layout_unifica_painel_e_adapta_designacao_arp():

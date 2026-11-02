@@ -528,6 +528,7 @@ def carregar_painel(sessao, conta_id):
                 else pre_validacao["quantidades"]["incompletos"]
             ),
             "acao_rotulo": proxima["rotulo"],
+            "acao_tipo": proxima["tipo"],
             "justificativa_devolucao": (
                 None if devolucao is None else devolucao["justificativa"]
             ),
@@ -616,6 +617,7 @@ def carregar_painel(sessao, conta_id):
             "situacao": item["situacao"],
             "quantidade_pendencias": item["quantidade_pendencias"],
             "acao_rotulo": item["acao_rotulo"],
+            "acao_tipo": item["acao_tipo"],
             "ancora": item["ancora"],
             "justificativa_devolucao": item.get("justificativa_devolucao"),
             "responsavel": (

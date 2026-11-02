@@ -221,8 +221,8 @@ legend { padding: 0 .4rem; color: var(--azul-escuro); font-weight: 800; }
 .recursos-demonstracao > summary { cursor: pointer; padding: 1rem 1.25rem; color: var(--azul-escuro); font-weight: 700; }
 .recursos-demonstracao[open] > summary { border-bottom: 1px solid var(--borda); }
 .recursos-demonstracao > .form1 { margin: 0; border: 0; }
-.recurso-tecnico-legado { margin: 1.5rem 0; padding: 1rem 1.25rem; border: 1px dashed #9fb6c4; border-radius: .6rem; background: #f8fbfd; }
-.recurso-tecnico-legado h2 { margin-top: 0; font-size: 1.05rem; }
+.acao-iniciar-form1-integral { margin: 0; }
+.acao-iniciar-form1-integral .botao-link { border: 0; font: inherit; cursor: pointer; }
 .botao-primario { width: auto; min-width: 220px; border-color: var(--azul); background: var(--azul); color: white; font-weight: 800; cursor: pointer; }
 .botao-primario:hover { background: var(--azul-escuro); }
 .botao-link { display: inline-block; padding: .75rem 1rem; border-radius: .45rem; background: var(--azul); color: white; text-decoration: none; }

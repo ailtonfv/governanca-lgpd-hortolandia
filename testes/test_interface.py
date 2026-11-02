@@ -320,7 +320,8 @@ def test_detalhe_oferece_i1_apenas_ao_preenchedor():
         params={"conta_id": "CONTA-B1"},
     )
 
-    assert "Questionário sintético legado — recurso exclusivo de demonstração técnica" in detalhe.text
+    assert "Questionário sintético legado — recurso exclusivo de demonstração técnica" not in detalhe.text
+    assert "questionario-sintetico-legado" not in detalhe.text
     assert "data-instrumento-regressao" not in detalhe.text
     assert "Objetivo:" in alfa.text
     assert "registrar, sem identificar pessoas" in alfa.text
