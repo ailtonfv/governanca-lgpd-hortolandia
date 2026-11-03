@@ -51,7 +51,7 @@ def test_arp_autorizado_inicia_form1_e_chega_ao_primeiro_bloco(sessao):
     retomada = cliente.get(inicio.headers["location"])
     assert "Rascunho 1" in retomada.text
     assert 'id="titulo-bloco-1"' in retomada.text
-    assert "destinoInicial.focus({ preventScroll: true });" in retomada.text
+    assert "posicionarDestinoForm1(destinoInicial);" in retomada.text
     assert 'disabled aria-disabled="true"' not in retomada.text
 
 

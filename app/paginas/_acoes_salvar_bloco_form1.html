@@ -3,12 +3,15 @@
   {% if numero_bloco > 1 %}
   <button class="botao-secundario" type="button" data-bloco-anterior="{{ numero_bloco - 1 }}">Anterior</button>
   {% endif %}
-  <button class="botao-secundario" type="submit" name="acao_pos_salvar" value="permanecer">Salvar rascunho do FORM 1</button>
+  <button class="botao-secundario" type="submit" name="acao_pos_salvar" value="permanecer" aria-label="Salvar rascunho do FORM 1 e permanecer neste bloco">Salvar rascunho</button>
   {% if numero_bloco < 14 %}
   <button class="botao-primario" type="submit" name="acao_pos_salvar" value="proximo" data-proximo-bloco="{{ numero_bloco + 1 }}">
-    Salvar e avançar <span class="destino-acao-bloco">ao Bloco {{ numero_bloco + 1 }} — {{ titulos_blocos_navegacao[numero_bloco + 1] }}</span>
+    Salvar e avançar
   </button>
   {% else %}
   <button class="botao-primario" type="button" data-continuar-revisao>Consultar pré-validação</button>
   {% endif %}
 </div>
+{% if numero_bloco < 14 %}
+<p class="destino-acao-bloco">Próximo: Bloco {{ numero_bloco + 1 }} — {{ titulos_blocos_navegacao[numero_bloco + 1] }}</p>
+{% endif %}

@@ -1,5 +1,7 @@
 """Consultas preparadas para a interface, sem regras de negócio nos templates."""
 
+import re
+
 from sqlalchemy import func, or_, select
 
 from app.alertas_operacionais import listar_alertas_operacionais
@@ -69,6 +71,25 @@ ROTULOS_ALERTA = {
     "RESPOSTA_INTERSECRETARIAL_AGUARDANDO_DECISAO": "Resposta de outra unidade aguardando decisão",
     "CONCLUSAO_BLOQUEADA": "Conclusão bloqueada",
 }
+
+
+def instrucao_para_interface(campo):
+    """Omite apenas a lista impressa que reproduz integralmente as opções."""
+    instrucao = campo.instrucao
+    partes = re.split(r"[○☐]", instrucao)
+
+    def normalizar(texto):
+        return " ".join(texto.split())
+
+    if (
+        campo.alternativas
+        and len(partes) > 1
+        and not partes[0].strip()
+        and [normalizar(parte) for parte in partes[1:]]
+        == [normalizar(opcao) for opcao in campo.alternativas]
+    ):
+        return ""
+    return instrucao
 
 
 def rotulo_interface(valor):
@@ -986,7 +1007,7 @@ def carregar_registro(sessao, conta_id, registro_id):
             "pergunta": perguntas_interface.get(campo_id, campo.pergunta),
             "controle": campo.controle,
             "alternativas": alternativas,
-            "instrucao": campo.instrucao,
+            "instrucao": instrucao_para_interface(campo),
             "ajuda_contextual": ajudas_contextuais.get(campo_id),
             "ajuda_cartilha": (
                 None
@@ -1193,7 +1214,7 @@ def carregar_registro(sessao, conta_id, registro_id):
                 "id": catalogo_integral[campo_id].id,
                 "pergunta": catalogo_integral[campo_id].pergunta,
                 "alternativas": catalogo_integral[campo_id].alternativas,
-                "instrucao": catalogo_integral[campo_id].instrucao,
+                "instrucao": instrucao_para_interface(catalogo_integral[campo_id]),
                 "obrigatoriedade": metadado_visual_obrigatoriedade(campo_id),
             }
             for campo_id in ("1.1", "1.1.1", "1.2", "1.3", "1.4")

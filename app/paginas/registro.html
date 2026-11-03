@@ -778,6 +778,24 @@
 </section>
 
 <script>
+  // A navegação e o envio continuam disponíveis sem armazenamento de sessão.
+  var sessaoForm1 = {
+    getItem: function (chave) { try { return window.sessionStorage.getItem(chave); } catch (erro) { return null; } },
+    setItem: function (chave, valor) { try { window.sessionStorage.setItem(chave, valor); } catch (erro) { /* Memória auxiliar indisponível. */ } },
+    removeItem: function (chave) { try { window.sessionStorage.removeItem(chave); } catch (erro) { /* Sem efeito no rascunho do servidor. */ } },
+    chaves: function () { try { return Object.keys(window.sessionStorage); } catch (erro) { return []; } }
+  };
+  function posicionarDestinoForm1(destino) {
+    if (!destino) return;
+    destino.setAttribute('tabindex', '-1');
+    destino.focus({ preventScroll: true });
+    window.requestAnimationFrame(function () {
+      var mensagem = document.getElementById('mensagem-registro');
+      var margem = 24 + (mensagem ? mensagem.getBoundingClientRect().height + 12 : 0);
+      destino.style.scrollMarginTop = margem + 'px';
+      destino.scrollIntoView({ block: 'start', behavior: 'instant' });
+    });
+  }
   function sincronizarSinalizacaoObrigatoriedade() {
     document.querySelectorAll('[data-obrigatoriedade-condicional="true"]').forEach(function (indicador) {
       var recipiente = indicador.closest('.campo-integral, .campo-condicional');
@@ -953,7 +971,7 @@
     }
     var visitados = new Set();
     try {
-      JSON.parse(window.sessionStorage.getItem(chaveVisitados) || '[]').forEach(function (bloco) {
+      JSON.parse(sessaoForm1.getItem(chaveVisitados) || '[]').forEach(function (bloco) {
         if (Number(bloco) >= 1 && Number(bloco) <= 14) visitados.add(String(bloco));
       });
     } catch (erro) {
@@ -967,7 +985,7 @@
       : numeroBloco <= 3 ? '1'
       : numeroBloco <= 8 ? '2'
       : numeroBloco <= 11 ? '3' : '4';
-    var etapaInicial = etapaDaUrl ? etapaDaUrl[1] : etapaDoBloco || window.sessionStorage.getItem(chave);
+    var etapaInicial = etapaDaUrl ? etapaDaUrl[1] : etapaDoBloco || sessaoForm1.getItem(chave);
     if (!botoes.some(function (botao) { return botao.dataset.etapaAlvo === etapaInicial && !botao.disabled; })) etapaInicial = '1';
 
     function etapaDoNumeroDoBloco(numero) {
@@ -982,8 +1000,8 @@
       numero = Number(numero);
       if (!painelProgresso || numero < 1 || numero > 14) return;
       visitados.add(String(numero));
-      window.sessionStorage.setItem(chaveBloco, String(numero));
-      window.sessionStorage.setItem(chaveVisitados, JSON.stringify(Array.from(visitados)));
+      sessaoForm1.setItem(chaveBloco, String(numero));
+      sessaoForm1.setItem(chaveVisitados, JSON.stringify(Array.from(visitados)));
       var quantidade = visitados.size;
       var valorVisitados = painelProgresso.querySelector('[data-jornada-visitados]');
       var valorRestantes = painelProgresso.querySelector('[data-jornada-restantes]');
@@ -1018,7 +1036,7 @@
         botao.setAttribute('aria-selected', String(ativo));
         botao.closest('li').classList.toggle('etapa-atual', ativo);
       });
-      window.sessionStorage.setItem(chave, numero);
+      sessaoForm1.setItem(chave, numero);
       window.history.replaceState(null, '', destinoInicial || '#form1-etapa-' + numero);
       var estado = raiz.querySelector('.estado-navegacao-form1');
       if (estado) estado.textContent = 'Etapa ' + numero + ' exibida, Bloco ' + numeroBlocoAlvo + ' de 14. Use o mapa da jornada para consultar ou editar qualquer outro bloco.';
@@ -1078,6 +1096,7 @@
           var primeiroBloco = primeiroBlocoDaEtapa(botao.dataset.etapaAlvo);
           exibirEtapa(botao.dataset.etapaAlvo, null, primeiroBloco);
           atualizarPainelJornada(primeiroBloco);
+          posicionarDestinoForm1(document.getElementById('titulo-bloco-' + primeiroBloco));
         }
       });
     });
@@ -1089,9 +1108,7 @@
         exibirEtapa(etapaDoNumeroDoBloco(numero), '#titulo-bloco-' + numero, numero);
         atualizarPainelJornada(numero);
         if (!destino) return;
-        destino.setAttribute('tabindex', '-1');
-        destino.focus({ preventScroll: true });
-        destino.scrollIntoView({ block: 'start' });
+        posicionarDestinoForm1(destino);
       });
     });
     raiz.querySelectorAll('[data-bloco-anterior]').forEach(function (botao) {
@@ -1128,23 +1145,23 @@
         exibirEtapa('1', '#titulo-bloco-1', 1);
         atualizarPainelJornada(1);
         window.history.replaceState(null, '', '#titulo-bloco-1');
-        destino.setAttribute('tabindex', '-1');
-        destino.focus({ preventScroll: true });
-        destino.scrollIntoView({ block: 'start' });
+        posicionarDestinoForm1(destino);
       });
     });
     var destinoInicial = blocoDaUrl ? document.getElementById('titulo-bloco-' + numeroBloco)
       : preValidacaoDaUrl ? document.getElementById('titulo-pre-validacao-form1') : null;
-    var blocoGuardado = Number(window.sessionStorage.getItem(chaveBloco));
+    var blocoGuardado = Number(sessaoForm1.getItem(chaveBloco));
     var blocoInicial = numeroBloco || (blocoGuardado >= 1 && blocoGuardado <= 14 ? blocoGuardado : primeiroBlocoDaEtapa(etapaInicial));
     exibirEtapa(etapaInicial, destinoInicial ? window.location.hash : null, blocoInicial);
     atualizarPainelJornada(blocoInicial);
     if (destinoInicial) {
-      window.requestAnimationFrame(function () {
-        destinoInicial.setAttribute('tabindex', '-1');
-        destinoInicial.focus({ preventScroll: true });
-        destinoInicial.scrollIntoView({ block: preValidacaoDaUrl ? 'center' : 'start' });
-      });
+      posicionarDestinoForm1(destinoInicial);
+      if (document.readyState !== 'complete') {
+        var hashInicial = window.location.hash;
+        window.addEventListener('load', function () {
+          if (window.location.hash === hashInicial) posicionarDestinoForm1(destinoInicial);
+        }, { once: true });
+      }
     }
   })();
   (function iniciarFeedbackDeSalvamento() {
@@ -1173,12 +1190,12 @@
           dados.push([nome, String(valor)]);
         }
       });
-      window.sessionStorage.setItem(chave, JSON.stringify(dados));
+      sessaoForm1.setItem(chave, JSON.stringify(dados));
     }
 
     function restaurarTentativa(formulario) {
       var chave = chaveRecuperacao(formulario);
-      var serializado = chave && window.sessionStorage.getItem(chave);
+      var serializado = chave && sessaoForm1.getItem(chave);
       if (!serializado) return;
       var dados;
       try { dados = JSON.parse(serializado); } catch (erro) { return; }
@@ -1199,9 +1216,9 @@
 
     var falhaRetornada = new URLSearchParams(window.location.search).get('erro') === '1';
     if (prefixoRecuperacao && !falhaRetornada) {
-      Object.keys(window.sessionStorage).filter(function (chave) {
+      sessaoForm1.chaves().filter(function (chave) {
         return chave.indexOf(prefixoRecuperacao) === 0;
-      }).forEach(function (chave) { window.sessionStorage.removeItem(chave); });
+      }).forEach(function (chave) { sessaoForm1.removeItem(chave); });
     }
 
     function controlesDeEnvio(formulario) {
@@ -1258,7 +1275,7 @@
     window.addEventListener('pageshow', function () {
       formularios.forEach(function (formulario) {
         delete formulario.dataset.enviando;
-        var tentativaPendente = falhaRetornada && chaveRecuperacao(formulario) && window.sessionStorage.getItem(chaveRecuperacao(formulario));
+        var tentativaPendente = falhaRetornada && chaveRecuperacao(formulario) && sessaoForm1.getItem(chaveRecuperacao(formulario));
         if (!tentativaPendente) formulario.dataset.alterado = 'false';
         controlesDeEnvio(formulario).forEach(function (controle) {
           controle.removeAttribute('aria-disabled');

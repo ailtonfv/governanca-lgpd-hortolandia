@@ -33,7 +33,7 @@ def test_regua_horizontal_oferece_quatorze_destinos_e_foco_acessivel(sessao):
     assert pagina.text.count('class="numero-bloco"') == 14
     assert "aria-current', 'step'" in pagina.text
     assert "destino.focus({ preventScroll: true })" in pagina.text
-    assert "destino.scrollIntoView({ block: 'start' })" in pagina.text
+    assert "posicionarDestinoForm1(destino);" in pagina.text
     assert estilo.status_code == 200
     assert ".regua-navegacao-blocos" in estilo.text
     assert "overflow-x: auto" in estilo.text

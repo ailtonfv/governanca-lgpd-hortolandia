@@ -74,12 +74,12 @@ def test_interface_nomeia_destinos_e_prioriza_um_bloco_sem_perder_navegacao(sess
 
     # Assert
     assert pagina.status_code == 200
-    assert "ao Bloco 4 — Pessoas a quem os dados se referem" in pagina.text
-    assert "ao Bloco 5 — Categorias de dados" in pagina.text
-    assert "ao Bloco 6 — Origem dos dados" in pagina.text
-    assert "ao Bloco 14 — Achados e pendências" in pagina.text
+    assert "Próximo: Bloco 4 — Pessoas a quem os dados se referem" in pagina.text
+    assert "Próximo: Bloco 5 — Categorias de dados" in pagina.text
+    assert "Próximo: Bloco 6 — Origem dos dados" in pagina.text
+    assert "Próximo: Bloco 14 — Achados e pendências" in pagina.text
     assert pagina.text.count("Salvar rascunho") >= 14
     assert pagina.text.count(">Anterior</button>") == 13
     assert "bloco.hidden = oculto || numeroDoBloco !== numeroBlocoAlvo;" in pagina.text
     assert "Use o mapa da jornada para consultar ou editar qualquer outro bloco." in pagina.text
-    assert "destinoInicial.focus({ preventScroll: true });" in pagina.text
+    assert "posicionarDestinoForm1(destinoInicial);" in pagina.text

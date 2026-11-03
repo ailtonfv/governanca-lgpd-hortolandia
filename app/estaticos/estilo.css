@@ -209,7 +209,13 @@ legend { padding: 0 .4rem; color: var(--azul-escuro); font-weight: 800; }
 .referencia-cartilha-form1 { color: #526475; font-size: .85rem; }
 .rodape-formulario { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-top: 1.4rem; }
 .rodape-formulario p { margin: 0; color: #526475; }
-.acoes-salvamento-bloco { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .65rem; }
+.formulario-integral .rodape-formulario { display: block; }
+.acoes-salvamento-bloco { display: flex; flex-wrap: wrap; align-items: center; gap: .65rem; margin-top: .75rem; }
+.acoes-salvamento-bloco > button { flex: 0 1 auto; width: auto; min-width: 0; min-height: 2.75rem; margin: 0; padding: .65rem 1rem; font: inherit; font-weight: 700; }
+.formulario-integral .rodape-formulario .destino-acao-bloco { margin-top: .5rem; }
+.form1-integral { overflow-anchor: none; }
+.form1-integral [id^="titulo-bloco-"] { scroll-margin-top: var(--margem-destino-form1, 1.5rem); }
+.painel-etapa-form1 > .bloco-form1-integral { min-height: calc(100svh - 2rem); }
 .botao-secundario { width: auto; border-color: var(--azul); background: white; color: var(--azul); font-weight: 800; cursor: pointer; }
 .botao-secundario:hover { background: #eef6fa; }
 .ajuda-volume { padding-left: .75rem; border-left: .2rem solid var(--azul); }
@@ -257,6 +263,7 @@ dd { margin: .25rem 0 0; }
   .rodape-formulario { align-items: stretch; flex-direction: column; }
   .botao-primario, .botao-secundario { width: 100%; }
   .acoes-salvamento-bloco { width: 100%; }
+  .acoes-salvamento-bloco > button { flex: 1 1 100%; width: 100%; }
   .cabecalho-form1 { grid-template-columns: 1fr; }
   .identidades-form1, .etapas-form1 { grid-template-columns: 1fr; }
   .grade-progresso-form1 { grid-template-columns: 1fr; }

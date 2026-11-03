@@ -369,7 +369,7 @@ def test_interface_libera_as_quatro_etapas_e_mantem_submissao_bloqueada(sessao):
     assert "/form1-integral/submeter" not in pagina.text
     assert "A conclusão institucional do FORM 1 ainda não está habilitada" in pagina.text
     assert "Pendências antes da futura submissão" in pagina.text
-    assert "window.sessionStorage.setItem(chave, numero)" in pagina.text
+    assert "sessaoForm1.setItem(chave, numero)" in pagina.text
     assert salvamento.status_code == 200
     assert "Rascunho salvo com sucesso às" in salvamento.text
     assert "Bloco 2 atualizado." in salvamento.text

@@ -133,6 +133,6 @@ def test_acesso_direto_as_perguntas_preserva_foco_e_navegacao_existentes(sessao)
     # Assert
     assert 'id="titulo-bloco-1"' in pagina.text
     assert "destino.focus({ preventScroll: true });" in pagina.text
-    assert "destino.scrollIntoView({ block: 'start' });" in pagina.text
+    assert "posicionarDestinoForm1(destino);" in pagina.text
     assert "Etapas do FORM 1" in pagina.text
     assert "Fim das quatro etapas do FORM 1" not in pagina.text

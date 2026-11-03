@@ -65,7 +65,7 @@ def test_avanco_entre_etapas_preserva_rascunho_incompleto(sessao):
     assert unquote(resposta.headers["location"]).endswith("#titulo-bloco-9")
     pagina = cliente.get(resposta.headers["location"])
     assert "FORM 1 — Etapa 3 de 4 — Bloco 9 de 14" in pagina.text
-    assert "destinoInicial.focus({ preventScroll: true });" in pagina.text
+    assert "posicionarDestinoForm1(destinoInicial);" in pagina.text
     with Session(motor) as verificacao:
         rascunho = verificacao.get(RascunhoForm1Integral, registro["registro_id"])
         assert rascunho.versao_rascunho == 2
