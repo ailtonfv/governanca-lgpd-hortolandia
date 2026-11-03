@@ -110,7 +110,7 @@ def test_rodapes_dos_blocos_longo_e_curto_tem_mesma_estrutura(sessao):
     # Assert: status, ações e indicação seguinte são linhas independentes.
     for bloco in (2, 3):
         grupo = parser.grupos[f'Ações do Bloco {bloco}']
-        assert [tag for tag, _, pais in grupo if not pais] == ['p', 'div', 'p']
+        assert [tag for tag, _, pais in grupo if not pais] == ['p', 'div', 'p', 'p']
         botoes = [atributos for tag, atributos, _ in grupo if tag == 'button']
         assert len(botoes) == 3
         assert botoes[0]['data-bloco-anterior'] == str(bloco - 1)

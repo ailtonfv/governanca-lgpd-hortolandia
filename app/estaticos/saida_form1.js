@@ -173,7 +173,7 @@
         tentativas.delete(f);
         f.dataset.alterado = 'false';
         var estado = f.querySelector('[data-estado-salvamento]');
-        if (estado) estado.textContent = 'Rascunho confirmado no servidor.';
+        if (estado) estado.textContent = 'Rascunho salvo com sucesso. Suas respostas foram guardadas; o FORM 1 não foi concluído nem submetido.';
       }
       sair();
     } catch (falha) {

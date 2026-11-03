@@ -111,7 +111,8 @@ def test_feedback_de_salvamento_cobre_andamento_sucesso_falha_e_nova_edicao(sess
     # Assert
     assert "Alterações não salvas." in pagina.text
     assert "Salvando..." in pagina.text
-    assert "Rascunho confirmado no servidor." in pagina.text
+    assert "Sem alterações para salvar." in pagina.text
+    assert "Rascunho confirmado no servidor." not in pagina.text
     assert "formulario.dataset.enviando" in pagina.text
 
     falha = cliente.post(

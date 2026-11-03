@@ -79,7 +79,7 @@ for (const indisponivel of [false, true]) {
       janela.scrollTo({top:420 - 96 - alturaBarra});
       return true;
     }});
-    vm.runInNewContext(auxiliares + navegacao, contexto);
+    vm.runInNewContext(fs.readFileSync('app/estaticos/localizador_form1.js', 'utf8') + auxiliares + navegacao, contexto);
     if (retomando) {
       assert.equal(eventos.load, undefined, 'A retomada não pode disputar rolagem com o posicionamento do título no load.');
       eventos.pageshow();

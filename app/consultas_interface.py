@@ -33,7 +33,7 @@ from app.form1_integral import (CONDICOES_BLOCO_2, CONDICOES_BLOCO_4, CONDICOES_
                                 IDS_PARTICIPANTE_BLOCO_3,
                                 alternativas_outro_por_campo, campos_por_id)
 from app.pre_validacao_form1_integral import (
-    metadado_visual_obrigatoriedade, pre_validar_form1_integral,
+    metadado_visual_obrigatoriedade, pre_validar_form1_integral, perguntas_para_localizacao,
 )
 from app.modelos import (AtribuicaoForm1Integral, ConferenciaInternaForm1Integral, HistoricoConferenciaForm1Integral, Conta, ContextoAtuacao, Designacao, Evento, Instrumento,
                          Canal, ConfirmacaoCanaisRegistro, ObjetoCanal,
@@ -1185,6 +1185,7 @@ def carregar_registro(sessao, conta_id, registro_id):
             "salvo_em": rascunho_integral.salvo_em,
         },
         "pre_validacao": pre_validacao_integral,
+        "perguntas_localizacao": perguntas_para_localizacao(),
         "conferencia_interna": (
             None if conferencia_integral is None else {
                 "situacao": conferencia_integral.situacao,

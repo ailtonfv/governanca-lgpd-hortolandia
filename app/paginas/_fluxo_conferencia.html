@@ -10,10 +10,11 @@
     <li {% if fluxo.atual == 'devolver' %}aria-current="step"{% endif %}><strong>Devolver para ajustes</strong><span>APA justifica → ARP corrige → ARP pode reapresentar nova versão.</span>{% if fluxo.atual == 'devolver' %}<strong>Situação atual</strong>{% endif %}</li>
     <li {% if fluxo.atual == 'confirmar' %}aria-current="step"{% endif %}><strong>Confirmar conferência interna</strong><span>APA confere aquela versão → histórico preservado → continuidade conforme o fluxo vigente.</span>{% if fluxo.atual == 'confirmar' %}<strong>Situação atual</strong>{% endif %}</li>
   </ul>
-  <p><strong>Agora:</strong> {{ fluxo.estado }}.{% if fluxo.versao is not none %} Versão apresentada: <strong>{{ fluxo.versao }}</strong>.{% endif %}</p>
+  <p><strong>Agora:</strong> {{ fluxo.estado }}.{% if fluxo.versao is not none %} {{ "Versão conferida" if fluxo.atual == "confirmar" else "Versão apresentada" }}: <strong>{{ fluxo.versao }}</strong>.{% endif %}</p>
   {% if fluxo.decidida_por %}<p><strong>Decisão registrada por:</strong> {{ fluxo.decidida_por }}{% if not fluxo_compacto %} · {{ fluxo.decidida_em }}{% endif %}.</p>{% endif %}
   {% if fluxo_compacto %}
-  <p><strong>Responsável pela próxima ação:</strong> {{ fluxo.responsavel }}.{% if fluxo.atual == 'confirmar' %} O rascunho permanece sob responsabilidade de {{ fluxo.arp }}, conforme as permissões existentes.{% endif %}</p>
+  {% if fluxo.atual == 'confirmar' %}<p>A conferência desta apresentação foi encerrada. Não existe decisão de conferência pendente. O ARP {{ fluxo.arp }} permanece responsável pelo rascunho, conforme as permissões vigentes.</p>
+  {% else %}<p><strong>Responsável pela próxima ação:</strong> {{ fluxo.responsavel }}.</p>{% endif %}
   {% else %}
   <p><strong>Próxima providência:</strong> {{ fluxo.proxima }}</p>
   <p><strong>Responsável atual:</strong> {{ fluxo.responsavel }}</p>

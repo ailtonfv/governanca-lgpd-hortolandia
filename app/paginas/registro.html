@@ -272,6 +272,7 @@
       {% elif registro.form1_integral.devolucao_interna %}
       <p class="aviso-leitura"><strong>Devolvido para ajustes pelo APA.</strong> Apresentação {{ registro.form1_integral.devolucao_interna.numero_apresentacao }}, referente ao rascunho {{ registro.form1_integral.devolucao_interna.versao_rascunho }}.</p>
       <p><strong>Justificativa:</strong> {{ registro.form1_integral.devolucao_interna.justificativa }}</p>
+      {% if registro.form1_integral.pode_editar %}{% include '_localizador_pergunta_form1.html' %}{% endif %}
       <p class="ajuda">Devolução registrada por {{ registro.form1_integral.devolucao_interna.devolvida_por }}. O snapshot apresentado permanece imutável.</p>
       {% if registro.form1_integral.pode_solicitar_conferencia %}
       <p>Após revisar e salvar as correções, o ARP pode apresentar uma nova versão ao APA.</p>
@@ -356,6 +357,13 @@
       </details>
       {% endfor %}
       {% else %}<p>Nenhum campo obrigatório ativo está incompleto, mas as decisões de governança abaixo ainda impedem a submissão.</p>{% endif %}
+      {% if pre_validacao.avisos %}
+      <details class="avisos-facultativos-form1">
+        <summary><strong>{{ pre_validacao.quantidades.avisos }} aviso(s) informativo(s) — respostas facultativas a confirmar</strong></summary>
+        <p>Estes avisos não entram no contador de obrigatórios incompletos e não impedem salvar ou solicitar conferência interna.</p>
+        <ul>{% for item in pre_validacao.avisos %}<li>{% include '_destino_pergunta_form1.html' %}<span class="ajuda">{{ item.detalhe }}</span></li>{% endfor %}</ul>
+      </details>
+      {% endif %}
       <details>
         <summary><strong>Integrações e regras pendentes</strong></summary>
         <ul>
@@ -404,8 +412,8 @@
         {% set campo = registro.form1_integral.campos_bloco_1['1.1.1'] %}
         <div id="integral-1-1-1" class="campo-condicional" data-visivel-quando="Sim">
           <label for="integral-referencia"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</label>
-          <input id="integral-referencia" name="referencia_institucional" maxlength="500" value="{{ respostas_integral.get('1.1.1', '') }}">
-          <p class="ajuda">{{ campo.instrucao }}</p>
+          <input id="integral-referencia" aria-describedby="instrucao-integral-1-1-1" name="referencia_institucional" maxlength="500" value="{{ respostas_integral.get('1.1.1', '') }}">
+          <p class="ajuda" id="instrucao-integral-1-1-1">{{ campo.instrucao }}</p>
         </div>
 
         <div class="campos-reaproveitados">
@@ -472,27 +480,27 @@
         {% if (campo.id != '2.1' or not leitura_2_1.somente_leitura) and campo.condicao_canal_ativa is not sameas false %}
         <div class="campo-integral{% if campo.condicao and campo.condicao_canal_ativa is none %} campo-condicional{% endif %}"
              {% if campo.condicao and campo.condicao_canal_ativa is none %}data-depende-de="campo__{{ campo.condicao[0] }}" data-valores="{{ campo.condicao[1] | join('||') }}"{% endif %}>
-          <label><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</label>
+          <div id="rotulo-integral-{{ campo.id }}" class="rotulo-campo"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</div>
           {% include '_ajuda_cartilha_form1.html' %}
           {% if campo.controle == 'seleção múltipla (combo com marcações)' %}
-          <div class="grade-opcoes">
+          <div class="grade-opcoes" role="group" aria-labelledby="rotulo-integral-{{ campo.id }}" {% if campo.ajuda_cartilha %}aria-describedby="ajuda-cartilha-{{ campo.id }}"{% endif %}>
             {% for valor, rotulo in campo.alternativas %}
-            <label class="opcao"><input type="checkbox" name="campo__{{ campo.id }}" value="{{ valor }}" {% if valor in respostas_integral.get(campo.id, []) %}checked{% endif %}> {% include '_alternativa_form1.html' %}</label>
+            <label class="opcao"><input type="checkbox" id="opcao-integral-{{ campo.id }}-{{ loop.index }}" name="campo__{{ campo.id }}" value="{{ valor }}" {% if valor in respostas_integral.get(campo.id, []) %}checked{% endif %}> {% include '_alternativa_form1.html' %}</label>
             {% endfor %}
           </div>
           {% elif campo.alternativas %}
-          <select name="campo__{{ campo.id }}">
+          <select name="campo__{{ campo.id }}" {% include '_atributos_controle_form1.html' %}>
             <option value="">Ainda não respondido</option>
             {% for valor, rotulo in campo.alternativas %}
             <option value="{{ valor }}" {% if respostas_integral.get(campo.id) == valor %}selected{% endif %}>{{ rotulo }}</option>
             {% endfor %}
           </select>
           {% elif campo.controle == 'texto longo, limitado e orientado' %}
-          <textarea name="campo__{{ campo.id }}" rows="4">{{ respostas_integral.get(campo.id, '') }}</textarea>
+          <textarea name="campo__{{ campo.id }}" {% include '_atributos_controle_form1.html' %} rows="4">{{ respostas_integral.get(campo.id, '') }}</textarea>
           {% else %}
-          <input name="campo__{{ campo.id }}" value="{{ respostas_integral.get(campo.id, '') }}">
+          <input name="campo__{{ campo.id }}" {% include '_atributos_controle_form1.html' %} value="{{ respostas_integral.get(campo.id, '') }}">
           {% endif %}
-          {% if campo.instrucao %}<p class="ajuda">{{ campo.instrucao }}</p>{% endif %}
+          {% if campo.instrucao %}<p class="ajuda" id="instrucao-integral-{{ campo.id }}">{{ campo.instrucao }}</p>{% endif %}
           {% if campo.ajuda_contextual %}<p class="ajuda ajuda-volume"><strong>{{ campo.ajuda_contextual }}</strong></p>{% endif %}
           {% include '_complemento_outro_form1.html' %}
         </div>
@@ -565,15 +573,15 @@
             <legend>Adicionar participante</legend>
             {% for campo in registro.form1_integral.campos_participante.values() %}
             <div class="campo-integral{% if campo.id == '3.5.1' %} campo-condicional{% endif %}" {% if campo.id == '3.5.1' %}data-depende-de="campo__3.5" data-valores="Sim"{% endif %}>
-              <label><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</label>
+              <div id="rotulo-integral-{{ campo.id }}" class="rotulo-campo"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</div>
               {% if campo.controle == 'seleção múltipla (combo com marcações)' %}
-              <div class="grade-opcoes">{% for valor, rotulo in campo.alternativas %}<label class="opcao"><input type="checkbox" name="campo__{{ campo.id }}" value="{{ valor }}"> <span>{{ rotulo }}</span></label>{% endfor %}</div>
+              <div class="grade-opcoes" role="group" aria-labelledby="rotulo-integral-{{ campo.id }}" {% if campo.ajuda_cartilha %}aria-describedby="ajuda-cartilha-{{ campo.id }}"{% endif %}>{% for valor, rotulo in campo.alternativas %}<label class="opcao"><input type="checkbox" id="opcao-integral-{{ campo.id }}-{{ loop.index }}" name="campo__{{ campo.id }}" value="{{ valor }}"> <span>{{ rotulo }}</span></label>{% endfor %}</div>
               {% elif campo.alternativas %}
-              <select name="campo__{{ campo.id }}"><option value="">Ainda não respondido</option>{% for valor, rotulo in campo.alternativas %}<option value="{{ valor }}">{{ rotulo }}</option>{% endfor %}</select>
+              <select name="campo__{{ campo.id }}" {% include '_atributos_controle_form1.html' %}><option value="">Ainda não respondido</option>{% for valor, rotulo in campo.alternativas %}<option value="{{ valor }}">{{ rotulo }}</option>{% endfor %}</select>
               {% else %}
-              <input name="campo__{{ campo.id }}">
+              <input name="campo__{{ campo.id }}" {% include '_atributos_controle_form1.html' %}>
               {% endif %}
-              {% if campo.instrucao %}<p class="ajuda">{{ campo.instrucao }}</p>{% endif %}
+              {% if campo.instrucao %}<p class="ajuda" id="instrucao-integral-{{ campo.id }}">{{ campo.instrucao }}</p>{% endif %}
               {% set valor_complemento = '' %}
               {% include '_complemento_outro_form1.html' %}
             </div>
@@ -599,21 +607,21 @@
         {% for campo in registro.form1_integral.campos_bloco_4.values() %}
         <div class="campo-integral{% if campo.condicao %} campo-condicional{% endif %}"
              {% if campo.condicao %}data-depende-de="campo__{{ campo.condicao[0] }}" data-valores="{{ campo.condicao[1] | join('||') }}"{% endif %}>
-          <label><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</label>
+          <div id="rotulo-integral-{{ campo.id }}" class="rotulo-campo"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</div>
           {% include '_ajuda_cartilha_form1.html' %}
           {% if campo.controle == 'seleção múltipla (combo com marcações)' or campo.id == '4.2.5.1' %}
-          <div class="grade-opcoes">
+          <div class="grade-opcoes" role="group" aria-labelledby="rotulo-integral-{{ campo.id }}" {% if campo.ajuda_cartilha %}aria-describedby="ajuda-cartilha-{{ campo.id }}"{% endif %}>
             {% for valor, rotulo in campo.alternativas %}
-            <label class="opcao"><input type="checkbox" name="campo__{{ campo.id }}" value="{{ valor }}" {% if valor in respostas_integral.get(campo.id, []) %}checked{% endif %}> {% include '_alternativa_form1.html' %}</label>
+            <label class="opcao"><input type="checkbox" id="opcao-integral-{{ campo.id }}-{{ loop.index }}" name="campo__{{ campo.id }}" value="{{ valor }}" {% if valor in respostas_integral.get(campo.id, []) %}checked{% endif %}> {% include '_alternativa_form1.html' %}</label>
             {% endfor %}
           </div>
           {% else %}
-          <select name="campo__{{ campo.id }}">
+          <select name="campo__{{ campo.id }}" {% include '_atributos_controle_form1.html' %}>
             <option value="">Ainda não respondido</option>
             {% for valor, rotulo in campo.alternativas %}<option value="{{ valor }}" {% if respostas_integral.get(campo.id) == valor %}selected{% endif %}>{{ rotulo }}</option>{% endfor %}
           </select>
           {% endif %}
-          {% if campo.instrucao %}<p class="ajuda">{{ campo.instrucao }}</p>{% endif %}
+          {% if campo.instrucao %}<p class="ajuda" id="instrucao-integral-{{ campo.id }}">{{ campo.instrucao }}</p>{% endif %}
           {% if campo.ajuda_contextual %}<p class="ajuda">{{ campo.ajuda_contextual }}</p>{% endif %}
           {% include '_complemento_outro_form1.html' %}
         </div>
@@ -640,18 +648,18 @@
         <input type="hidden" name="comando_id" value="{{ comando_salvar_bloco_5 }}">
         <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
         <fieldset>
-          <legend><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</legend>
+          <legend id="rotulo-integral-{{ campo.id }}"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</legend>
           {% include '_ajuda_cartilha_form1.html' %}
-          <div class="grade-opcoes">
+          <div class="grade-opcoes" role="group" aria-labelledby="rotulo-integral-{{ campo.id }}" {% if campo.ajuda_cartilha %}aria-describedby="ajuda-cartilha-{{ campo.id }}"{% endif %}>
             {% for valor, rotulo in campo.alternativas %}
-            <label class="opcao"><input type="checkbox" name="campo__5.1" value="{{ valor }}" {% if valor in respostas_integral.get('5.1', []) %}checked{% endif %}> {% include '_alternativa_form1.html' %}</label>
+            <label class="opcao"><input type="checkbox" id="opcao-integral-5-1-{{ loop.index }}" name="campo__5.1" value="{{ valor }}" {% if valor in respostas_integral.get('5.1', []) %}checked{% endif %}> {% include '_alternativa_form1.html' %}</label>
             {% endfor %}
           </div>
         </fieldset>
         <div class="campo-condicional" data-depende-de="campo__5.1" data-valores="Outro">
           <label for="complemento-outro-5-1"><strong>Complemento de “Outro”</strong></label>
-          <input id="complemento-outro-5-1" name="complemento_outro_5_1" maxlength="200" value="{{ registro.form1_integral.rascunho.conteudo.get('complementos', {}).get('5.1', '') }}">
-          <p class="ajuda">Descreva apenas o nome da categoria, em até 200 caracteres. Não registre nome de pessoa, CPF, matrícula, telefone, e-mail ou outro identificador concreto. Esta orientação reduz o risco, mas não substitui controles institucionais de segurança e revisão.</p>
+          <input id="complemento-outro-5-1" aria-describedby="ajuda-complemento-5-1" name="complemento_outro_5_1" maxlength="200" value="{{ registro.form1_integral.rascunho.conteudo.get('complementos', {}).get('5.1', '') }}">
+          <p class="ajuda" id="ajuda-complemento-5-1">Descreva apenas o nome da categoria, em até 200 caracteres. Não registre nome de pessoa, CPF, matrícula, telefone, e-mail ou outro identificador concreto. Esta orientação reduz o risco, mas não substitui controles institucionais de segurança e revisão.</p>
         </div>
         <div class="rodape-formulario">
           <p>O rascunho pode permanecer incompleto. “A confirmar” não poderá coexistir com outra alternativa.</p>
@@ -675,25 +683,25 @@
         {% for campo in registro.form1_integral.campos_bloco_6.values() %}
         <div class="campo-integral{% if campo.condicao %} campo-condicional{% endif %}"
              {% if campo.condicao %}data-depende-de="campo__{{ campo.condicao[0] }}" data-valores="{{ campo.condicao[1] | join('||') }}"{% endif %}>
-          <label><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</label>
+          <div id="rotulo-integral-{{ campo.id }}" class="rotulo-campo"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</div>
           {% include '_ajuda_cartilha_form1.html' %}
           {% if campo.controle == 'seleção múltipla (combo com marcações)' or campo.id == '6.2.2' %}
-          <div class="grade-opcoes">
+          <div class="grade-opcoes" role="group" aria-labelledby="rotulo-integral-{{ campo.id }}" {% if campo.ajuda_cartilha %}aria-describedby="ajuda-cartilha-{{ campo.id }}"{% endif %}>
             {% for valor, rotulo in campo.alternativas %}
-            <label class="opcao"><input type="checkbox" name="campo__{{ campo.id }}" value="{{ valor }}" {% if valor in respostas_integral.get(campo.id, []) %}checked{% endif %}> {% include '_alternativa_form1.html' %}</label>
+            <label class="opcao"><input type="checkbox" id="opcao-integral-{{ campo.id }}-{{ loop.index }}" name="campo__{{ campo.id }}" value="{{ valor }}" {% if valor in respostas_integral.get(campo.id, []) %}checked{% endif %}> {% include '_alternativa_form1.html' %}</label>
             {% endfor %}
           </div>
           {% elif campo.alternativas %}
-          <select name="campo__{{ campo.id }}">
+          <select name="campo__{{ campo.id }}" {% include '_atributos_controle_form1.html' %}>
             <option value="">Ainda não respondido</option>
             {% for valor, rotulo in campo.alternativas %}<option value="{{ valor }}" {% if respostas_integral.get(campo.id) == valor %}selected{% endif %}>{{ rotulo }}</option>{% endfor %}
           </select>
           {% elif campo.controle == 'texto longo, limitado e orientado' %}
-          <textarea name="campo__{{ campo.id }}" maxlength="2000">{{ respostas_integral.get(campo.id, '') }}</textarea>
+          <textarea name="campo__{{ campo.id }}" {% include '_atributos_controle_form1.html' %} maxlength="2000">{{ respostas_integral.get(campo.id, '') }}</textarea>
           {% else %}
-          <input name="campo__{{ campo.id }}" maxlength="500" value="{{ respostas_integral.get(campo.id, '') }}">
+          <input name="campo__{{ campo.id }}" {% include '_atributos_controle_form1.html' %} maxlength="500" value="{{ respostas_integral.get(campo.id, '') }}">
           {% endif %}
-          {% if campo.instrucao %}<p class="ajuda">{{ campo.instrucao }}</p>{% endif %}
+          {% if campo.instrucao %}<p class="ajuda" id="instrucao-integral-{{ campo.id }}">{{ campo.instrucao }}</p>{% endif %}
           {% if campo.ajuda_contextual %}<p class="ajuda">{{ campo.ajuda_contextual }}</p>{% endif %}
           {% include '_complemento_outro_form1.html' %}
         </div>
@@ -718,11 +726,11 @@
         <input type="hidden" name="comando_id" value="{{ comando_salvar_bloco_7 }}">
         <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
         <fieldset>
-          <legend><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</legend>
+          <legend id="rotulo-integral-{{ campo.id }}"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</legend>
           {% include '_ajuda_cartilha_form1.html' %}
-          <div class="grade-opcoes">
+          <div class="grade-opcoes" role="group" aria-labelledby="rotulo-integral-{{ campo.id }}" {% if campo.ajuda_cartilha %}aria-describedby="ajuda-cartilha-{{ campo.id }}"{% endif %}>
           {% for valor, rotulo in campo.alternativas %}
-            <label class="opcao"><input type="checkbox" name="campo__7.1" value="{{ valor }}" {% if valor in respostas_integral.get('7.1', []) %}checked{% endif %}> <span>{{ rotulo }}</span></label>
+            <label class="opcao"><input type="checkbox" id="opcao-integral-7-1-{{ loop.index }}" name="campo__7.1" value="{{ valor }}" {% if valor in respostas_integral.get('7.1', []) %}checked{% endif %}> <span>{{ rotulo }}</span></label>
           {% endfor %}
           </div>
         </fieldset>
@@ -795,6 +803,7 @@
 
 <script src="{{ url_for('estaticos', path='/saida_form1.js') }}"></script>
 <script src="{{ url_for('estaticos', path='/posicao_form1.js') }}"></script>
+<script src="{{ url_for('estaticos', path='localizador_form1.js') }}"></script>
 <script>
   // A navegação e o envio continuam disponíveis sem armazenamento de sessão.
   var sessaoForm1 = {
@@ -1147,6 +1156,7 @@
         if (confirmarNavegacaoComAlteracoes()) focarPendencia(botao);
       });
     });
+    window.iniciarLocalizadorForm1(raiz);
     raiz.querySelectorAll('[data-continuar-revisao]').forEach(function (botao) {
       botao.addEventListener('click', function () {
         if (!confirmarNavegacaoComAlteracoes()) return;
@@ -1228,6 +1238,10 @@
         }
       });
       sessaoForm1.setItem(chave, JSON.stringify(dados));
+      sessaoForm1.setItem(prefixoRecuperacao + 'confirmacao', JSON.stringify({
+        acao: formulario.getAttribute('action'),
+        versao: Number(formulario.querySelector('[name="versao_lida"]').value)
+      }));
     }
 
     function restaurarTentativa(formulario) {
@@ -1252,6 +1266,12 @@
     }
 
     var falhaRetornada = new URLSearchParams(window.location.search).get('erro') === '1';
+    var confirmacaoSalvamento = null;
+    try { confirmacaoSalvamento = JSON.parse(sessaoForm1.getItem(prefixoRecuperacao + 'confirmacao')); } catch (e) { /* Sem evidência local, não afirmar sucesso. */ }
+    var mensagemSalvamento = document.getElementById('mensagem-registro');
+    var sucessoRetornado = new URLSearchParams(window.location.search).get('erro') === '0'
+      && mensagemSalvamento && mensagemSalvamento.textContent.trim().indexOf('Rascunho salvo com sucesso') === 0;
+
     if (prefixoRecuperacao && !falhaRetornada) {
       sessaoForm1.chaves().filter(function (chave) {
         return chave.indexOf(prefixoRecuperacao) === 0;
@@ -1272,13 +1292,19 @@
 
     formularios.forEach(function (formulario) {
       formulario.dataset.alterado = 'false';
+      var versaoAtual = formulario.querySelector('[name="versao_lida"]');
+      if (sucessoRetornado && confirmacaoSalvamento && versaoAtual
+          && confirmacaoSalvamento.acao === formulario.getAttribute('action')
+          && Number(versaoAtual.value) === confirmacaoSalvamento.versao + 1) {
+        atualizarEstado(formulario, 'Rascunho salvo com sucesso. Suas respostas foram guardadas; o FORM 1 não foi concluído nem submetido.', '');
+      }
       formulario.addEventListener('input', function () {
         formulario.dataset.alterado = String(!window.saidaForm1 || window.saidaForm1.alterado(formulario));
-        atualizarEstado(formulario, formulario.dataset.alterado === 'true' ? 'Alterações não salvas.' : 'Sem alterações não salvas.', 'estado-salvamento-pendente');
+        atualizarEstado(formulario, formulario.dataset.alterado === 'true' ? 'Alterações não salvas.' : (formulario.classList.contains('formulario-integral') ? 'Sem alterações para salvar. Conteúdo correspondente ao último estado persistido; isso não indica bloco completo.' : 'Sem alterações não salvas.'), 'estado-salvamento-pendente');
       });
       formulario.addEventListener('change', function () {
         formulario.dataset.alterado = String(!window.saidaForm1 || window.saidaForm1.alterado(formulario));
-        atualizarEstado(formulario, formulario.dataset.alterado === 'true' ? 'Alterações não salvas.' : 'Sem alterações não salvas.', 'estado-salvamento-pendente');
+        atualizarEstado(formulario, formulario.dataset.alterado === 'true' ? 'Alterações não salvas.' : (formulario.classList.contains('formulario-integral') ? 'Sem alterações para salvar. Conteúdo correspondente ao último estado persistido; isso não indica bloco completo.' : 'Sem alterações não salvas.'), 'estado-salvamento-pendente');
       });
       formulario.addEventListener('submit', function (evento) {
         var acionador = evento.submitter;

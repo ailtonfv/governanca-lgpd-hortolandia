@@ -320,3 +320,17 @@ dd { margin: .25rem 0 0; }
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
   .destino-pendencia-ativo { transition: none; }
 }
+
+/* Campos equivalentes do Integral: sem interferir no questionário sintético. */
+.form1-integral .formulario-integral input:not([type]),
+.form1-integral .formulario-integral input[type="text"],
+.form1-integral .formulario-integral input[type="number"],
+.localizador-pergunta input {
+  box-sizing: border-box; width: 100%; max-width: 100%; min-width: 0;
+  min-height: 2.75rem; padding: .7rem; border: 1px solid var(--borda);
+  border-radius: .45rem; background: white; color: var(--texto); font: inherit;
+}
+.rotulo-campo { font-weight: 600; margin-bottom: .35rem; }
+.localizador-pergunta { margin: 1rem 0; }
+.localizador-pergunta [role="status"] { min-height: 1.5em; }
+.localizador-pergunta li { margin: .35rem 0; }

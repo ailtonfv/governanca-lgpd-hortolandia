@@ -211,6 +211,12 @@ def _item(campo_id: str, tipo: str, detalhe: str) -> dict:
     }
 
 
+def perguntas_para_localizacao() -> list[dict]:
+    """Destinos canônicos de consulta; não interpreta justificativas nem altera respostas."""
+    return [_item(campo_id, "localizacao", "") for campo_id in campos_por_id()
+            if not campo_id.startswith("0.")]
+
+
 def _condicao_participante_ativa(campo_id: str, respostas: dict) -> bool:
     condicao = CONDICOES_PARTICIPANTE_BLOCO_3.get(campo_id)
     return not condicao or _corresponde(respostas.get(condicao[0]), condicao[1])
@@ -285,6 +291,7 @@ def pre_validar_form1_integral(conteudo: dict, *, nome_institucional: str | None
     respostas = {**respostas_originais, **respostas_somente_leitura}
     participantes = conteudo.get("participantes", []) if isinstance(conteudo, dict) else []
     incompletos, nao_aplicaveis, regras_pendentes = [], [], []
+    avisos = []
 
     identidade = {"0.1": nome_institucional, "0.2": cargo_funcao, "0.3": email_institucional}
     for campo_id, valor in identidade.items():
@@ -298,6 +305,11 @@ def pre_validar_form1_integral(conteudo: dict, *, nome_institucional: str | None
         if (campo_id.startswith("0.") or campo_id == "10.2.1"
                 or (campo_id.startswith("3.") and campo_id != "3.1")):
             continue
+        if regra.classe in {CLASSE_FACULTATIVA_REV13, CLASSE_FACULTATIVA_PROPOSTA}:
+            valor = respostas.get(campo_id)
+            if (_condicao_ativa(campo_id, respostas)
+                    and (valor == "A confirmar" or isinstance(valor, list) and "A confirmar" in valor)):
+                avisos.append(_item(campo_id, "aviso", "Resposta facultativa a confirmar; aviso não bloqueante."))
         if regra.classe not in {CLASSE_ESSENCIAL, CLASSE_CONDICIONAL}:
             continue
         if campo_id in _CAMPOS_CONDICAO_PENDENTE:
@@ -378,10 +390,10 @@ def pre_validar_form1_integral(conteudo: dict, *, nome_institucional: str | None
         "versao_politica": VERSAO_POLITICA_FORM1_8V,
         "matriz_base": VERSAO_MATRIZ_BASE_FORM1_8V,
         "incompletos": incompletos, "nao_aplicaveis": nao_aplicaveis,
-        "regras_pendentes": regras_pendentes,
+        "regras_pendentes": regras_pendentes, "avisos": avisos,
         "por_bloco": [{"bloco": bloco, "itens": itens} for bloco, itens in
                       sorted(por_bloco.items(), key=lambda parte: int(parte[0]))],
-        "quantidades": {"incompletos": len(incompletos),
+        "quantidades": {"avisos": len(avisos), "incompletos": len(incompletos),
                         "nao_aplicaveis": len(nao_aplicaveis),
                         "regras_pendentes": len(regras_pendentes)},
     }

@@ -166,7 +166,8 @@ def test_fluxo_operacional_direto_em_todos_estados_sem_duplicar_historico(sessao
     _solicitar(sessao, registro, comando='FLUXO-DIRETO-S2', versao=ajuste['versao_rascunho'])
     _confirmar(sessao, registro, comando='FLUXO-DIRETO-CONF')
     texto = verificar('Conferência interna confirmada', 'Confirmar conferência interna', False)
-    assert 'Sem providência de conferência pendente' in texto
+    assert 'Não existe decisão de conferência pendente' in texto
+    assert 'Versão conferida:' in texto
     assert 'MAT-FICT-0007' in texto and 'MAT-FICT-0001' in texto
     painel = _EstruturaFluxo(cliente.get('/?conta_id=CONTA-G1').text)
     fluxo_painel = next(e for e in painel.elementos if 'fluxo-conferencia' in e['attrs'].get('class', '').split())

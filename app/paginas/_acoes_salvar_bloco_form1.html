@@ -1,5 +1,5 @@
 <footer class="acoes-bloco-form1" aria-label="Ações do Bloco {{ numero_bloco }}">
-<p class="estado-salvamento" data-estado-salvamento role="status" aria-live="polite">Rascunho confirmado no servidor.</p>
+<p class="estado-salvamento" data-estado-salvamento role="status" aria-live="polite">Sem alterações para salvar. Conteúdo correspondente ao último estado persistido; isso não indica bloco completo.</p>
 <div class="acoes-salvamento-bloco">
   {% if numero_bloco > 1 %}
   <button class="botao-secundario" type="button" data-bloco-anterior="{{ numero_bloco - 1 }}">Anterior</button>
@@ -16,4 +16,5 @@
 {% if numero_bloco < 14 %}
 <p class="destino-acao-bloco">Próximo: Bloco {{ numero_bloco + 1 }} — {{ titulos_blocos_navegacao[numero_bloco + 1] }}</p>
 {% endif %}
+<p class="ajuda orientacao-salvamento">Salvar rascunho guarda suas respostas para continuar depois. Não conclui nem submete o FORM 1.</p>
 </footer>
