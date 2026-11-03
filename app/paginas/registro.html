@@ -257,6 +257,8 @@
     <section class="bloco-form1-integral" aria-labelledby="titulo-conferencia-interna-form1">
       <p class="etiqueta">Etapa preparatória · não submete o formulário</p>
       <h3 id="titulo-conferencia-interna-form1">Conferência interna pelo APA</h3>
+      {% set fluxo = registro.form1_integral.fluxo_conferencia %}
+      <details class="percurso-conferencia-cartao"><summary>Entender a situação e o percurso da conferência</summary>{% include '_fluxo_conferencia.html' %}</details>
       {% if registro.form1_integral.conferencia_interna %}
       <p class="aviso-leitura"><strong>FORM 1 aguardando conferência interna.</strong> A versão {{ registro.form1_integral.conferencia_interna.versao_rascunho }} foi preservada em snapshot técnico {{ registro.form1_integral.conferencia_interna.numero_snapshot }} por {{ registro.form1_integral.conferencia_interna.solicitada_por }}.</p>
       <p class="ajuda">Este encaminhamento não é submissão, homologação, conclusão institucional nem envio à T.I.</p>
@@ -295,7 +297,7 @@
       <p class="ajuda">Nenhuma ação de conferência interna está disponível para seu perfil neste momento.</p>
       {% endif %}
       {% if registro.form1_integral.historico_conferencias %}
-      <details class="historico-conferencias-form1">
+      <details id="historico-conferencias-form1" class="historico-conferencias-form1">
         <summary>Histórico de apresentações internas</summary>
         <ol>
           {% for item in registro.form1_integral.historico_conferencias %}
@@ -809,7 +811,7 @@
       var mensagem = document.getElementById('mensagem-registro');
       var barra = document.getElementById('retorno-painel-form1');
       var margem = 24 + (barra ? barra.getBoundingClientRect().height : 0) + (mensagem ? mensagem.getBoundingClientRect().height + 12 : 0);
-      var inicio = destino.closest('.bloco-form1-integral') || destino;
+      var inicio = destino.id === 'historico-conferencias-form1' ? destino : destino.closest('.bloco-form1-integral') || destino;
       var topo = window.scrollY + inicio.getBoundingClientRect().top - margem;
       window.scrollTo({ top: Math.max(0, topo), behavior: 'instant' });
     });
@@ -1168,6 +1170,11 @@
     });
     var destinoInicial = blocoDaUrl ? document.getElementById('titulo-bloco-' + numeroBloco)
       : preValidacaoDaUrl ? document.getElementById('titulo-pre-validacao-form1') : null;
+    if (window.location.hash === '#historico-conferencias-form1') {
+      destinoInicial = document.getElementById('historico-conferencias-form1');
+      if (destinoInicial) destinoInicial.open = true;
+    }
+    if (window.location.hash === '#titulo-conferencia-interna-form1') destinoInicial = document.getElementById('titulo-conferencia-interna-form1');
     var blocoGuardado = Number(sessaoForm1.getItem(chaveBloco));
     var blocoInicial = numeroBloco || (blocoGuardado >= 1 && blocoGuardado <= 14 && etapaDoNumeroDoBloco(blocoGuardado) === etapaInicial ? blocoGuardado : primeiroBlocoDaEtapa(etapaInicial));
     if (!destinoInicial && (etapaDaUrl || retomada && retomada.posicao)) destinoInicial = document.getElementById('titulo-bloco-' + blocoInicial);

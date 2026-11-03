@@ -22,7 +22,7 @@ from app.conferencia_interna_form1_integral import (
 from app.banco import motor
 from app.consultas_interface import (carregar_conflitos_duplicidade_visiveis,
                                      carregar_opcoes_novo_registro, carregar_painel,
-                                     carregar_registro, rotulo_interface)
+                                     carregar_registro, rotulo_interface, projetar_fluxo_conferencia)
 from app.eventos import registrar_auditoria
 from app.form1_sintetico import (CATEGORIAS_DADOS, CATEGORIAS_TITULARES,
                                  DESTINATARIOS_COMPARTILHAMENTO)
@@ -1130,6 +1130,7 @@ def consultar_conferencia_interna(
         request=request,
         name="conferencia_form1_integral.html",
         context={
+            "fluxo": projetar_fluxo_conferencia(sessao, registro.id, registro.unidade_principal_atual_id),
             "conta_id": conta_id,
             "registro": registro,
             "conferencia": conferencia,

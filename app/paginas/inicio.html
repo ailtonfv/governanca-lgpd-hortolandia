@@ -57,6 +57,13 @@
           <p class="unidade-registro"><strong>Secretaria:</strong> {{ registro.unidade }}</p>
           <p><strong>Situação do Registro:</strong> <span class="estado estado-{{ registro.estado_codigo }}">{{ registro.estado }}</span></p>
           <p><strong>Situação do FORM 1:</strong> {{ registro.situacao_form1_integral }}</p>
+          {% set fluxo = registro.fluxo_conferencia %}
+          <p class="resumo-conferencia-cartao"><strong>Conferência interna:</strong> {{ fluxo.estado }}{% if fluxo.versao is not none %} · versão apresentada {{ fluxo.versao }}{% endif %}.</p>
+          <details class="percurso-conferencia-cartao">
+            <summary>Entender o percurso ARP → APA → ARP</summary>
+            {% include '_fluxo_conferencia.html' %}
+            {% if fluxo.tem_historico %}<a href="{{ url_for('detalhe_registro', registro_id=registro.id) }}?conta_id={{ conta_id }}#historico-conferencias-form1">Consultar histórico deste Registro</a>{% endif %}
+          </details>
           {% if registro.providencias %}
           <div class="providencias-registro" aria-label="Providências do Registro {{ registro.codigo_lgpd }}">
             {% for providencia in registro.providencias %}
@@ -94,7 +101,7 @@
           <div class="sem-providencia-registro">
             <p>Nenhuma providência pendente para seu perfil neste momento.</p>
             {% if registro.responsavel_proxima_etapa %}
-            <p><strong>Responsável pela próxima etapa:</strong> {{ registro.responsavel_proxima_etapa }}</p>
+            <p><strong>{% if fluxo.atual == 'confirmar' %}ARP responsável pelo rascunho (sem conferência pendente):{% else %}Responsável pela próxima etapa:{% endif %}</strong> {{ registro.responsavel_proxima_etapa }}</p>
             {% endif %}
           </div>
           {% endif %}

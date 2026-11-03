@@ -342,6 +342,62 @@ def _ultimo_historico_conferencia(sessao, registro_id):
     ).first()
 
 
+def projetar_fluxo_conferencia(sessao, registro_id, unidade_id):
+    """Resumo de leitura para telas já autorizadas; não atribui tarefas/permissões."""
+    historico = _ultimo_historico_conferencia(sessao, registro_id)
+    pendente = sessao.get(ConferenciaInternaForm1Integral, registro_id)
+    atribuicao = sessao.get(AtribuicaoForm1Integral, registro_id)
+    rascunho = sessao.get(RascunhoForm1Integral, registro_id)
+    exercicio = apa_em_exercicio(sessao, unidade_id)
+
+    def rotulo(pessoa_id, papel):
+        pessoa = sessao.get(Pessoa, pessoa_id) if pessoa_id else None
+        return (f"{pessoa.matricula} — {rotulo_interface(pessoa.nome)} ({papel})"
+                if pessoa else f"{papel} não identificado no cadastro vigente")
+
+    apa = rotulo(exercicio["pessoa_id"] if exercicio else None, "APA")
+    arp = rotulo(atribuicao.arp_atual_id if atribuicao else None, "ARP")
+    situacao = pendente.situacao if pendente else historico.situacao if historico else None
+    atual, estado, proxima, responsavel = (
+        "preencher", "Sem apresentação para conferência",
+        "O ARP preenche e pode apresentar uma versão, mesmo incompleta, quando autorizado.", arp,
+    )
+    if atribuicao is None:
+        proxima, responsavel = "O APA precisa definir quem preencherá o FORM 1.", apa
+    if situacao == "aguardando_conferencia_interna_apa":
+        atual, estado, proxima, responsavel = (
+            "conferir", "Aguardando conferência interna",
+            "O APA consulta a versão apresentada e escolhe confirmar a conferência ou devolver para ajustes.", apa,
+        )
+    elif situacao == "devolvida_para_ajustes":
+        atual, estado, proxima, responsavel = (
+            "devolver", "Devolvida para ajustes",
+            "O ARP consulta a justificativa, corrige, salva e pode reapresentar uma nova versão quando autorizado.", arp,
+        )
+    elif situacao == "conferencia_interna_confirmada":
+        atual, estado, proxima, responsavel = (
+            "confirmar", "Conferência interna confirmada",
+            "Não há decisão de conferência pendente para esta apresentação. A versão confirmada permanece no histórico; eventual continuidade do preenchimento respeita as ações e permissões já disponíveis.",
+            "Sem providência de conferência pendente",
+        )
+    referencia = pendente or historico
+    return {
+        "atual": atual, "estado": estado, "proxima": proxima, "responsavel": responsavel,
+        "apa": apa, "arp": arp,
+        "versao": referencia.versao_rascunho if referencia else None,
+        "versao_atual": rascunho.versao_rascunho if rascunho else None,
+        "tem_historico": historico is not None,
+        "decidida_por": (
+            rotulo(historico.confirmada_por_id, "APA") if atual == "confirmar"
+            else rotulo(historico.devolvida_por_id, "APA") if atual == "devolver" else None
+        ),
+        "decidida_em": (
+            historico.confirmada_em if atual == "confirmar"
+            else historico.devolvida_em if atual == "devolver" else None
+        ),
+    }
+
+
 def _devolucao_para_interface(sessao, registro_id):
     historico = _ultimo_historico_conferencia(sessao, registro_id)
     if historico is None or historico.situacao != "devolvida_para_ajustes":
@@ -674,6 +730,7 @@ def carregar_painel(sessao, conta_id):
 
     for resumo in registros:
         registro_id = resumo["id"]
+        resumo["fluxo_conferencia"] = projetar_fluxo_conferencia(sessao, registro_id, resumo["unidade_id"])
         resumo["providencias"] = providencias_por_registro[registro_id]
         atribuicao = sessao.get(AtribuicaoForm1Integral, registro_id)
         rascunho = sessao.get(RascunhoForm1Integral, registro_id)
@@ -1084,6 +1141,7 @@ def carregar_registro(sessao, conta_id, registro_id):
         else sessao.get(Pessoa, conferencia_integral.solicitada_por_id)
     )
     resumo["form1_integral"] = {
+        "fluxo_conferencia": projetar_fluxo_conferencia(sessao, registro.id, registro.unidade_principal_atual_id),
         "situacao": "rascunho" if rascunho_integral is not None else "nao_iniciado",
         "pode_atribuir_arp": pode_atribuir_arp,
         "pode_editar": pode_editar_integral,

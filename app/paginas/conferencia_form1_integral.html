@@ -15,6 +15,12 @@
   </dl>
 </section>
 
+<details class="form1 percurso-conferencia-cartao" open>
+  <summary>Situação atual e percurso da conferência interna</summary>
+  {% include '_fluxo_conferencia.html' %}
+  <a href="{{ url_for('detalhe_registro', registro_id=registro.id) }}?conta_id={{ conta_id }}#historico-conferencias-form1">Consultar histórico de apresentações deste Registro</a>
+</details>
+
 <section class="form1" aria-labelledby="titulo-conteudo-apresentado">
   <h2 id="titulo-conteudo-apresentado">Conteúdo exato apresentado pelo ARP</h2>
   {% if respostas %}
@@ -32,15 +38,21 @@
 <section class="form1" aria-labelledby="titulo-decidir-conferencia">
   <p class="etiqueta">Ato do APA · não conclui nem submete o FORM 1</p>
   <h2 id="titulo-decidir-conferencia">Decisão da conferência interna</h2>
-  <h3>Confirmar conferência interna</h3>
-  <p>Confirme somente a versão identificada acima. Este ato é preparatório e não representa submissão, homologação ou declaração de conformidade.</p>
-  <form method="post" action="{{ url_for('confirmar_conferencia_interna', registro_id=registro.id) }}">
+  <p>Escolha uma das alternativas para a <strong>versão {{ conferencia.versao_rascunho }}</strong>. Conferir não exige que todos os campos obrigatórios estejam preenchidos.</p>
+  <div class="alternativas-conferencia">
+  <section class="opcao-confirmacao-conferencia" aria-labelledby="titulo-opcao-confirmar">
+  <h3 id="titulo-opcao-confirmar">Opção A — Confirmar conferência interna</h3>
+  <p>Registra que você conferiu a versão {{ conferencia.versao_rascunho }} apresentada pelo ARP. Preserva essa versão, sem submetê-la institucionalmente, homologá-la ou declarar conformidade à LGPD.</p>
+  <form id="form-confirmar-conferencia" method="post" action="{{ url_for('confirmar_conferencia_interna', registro_id=registro.id) }}">
     <input type="hidden" name="conta_id" value="{{ conta_id }}">
     <input type="hidden" name="comando_id" value="{{ comando_confirmar_conferencia }}">
     <input type="hidden" name="versao_lida" value="{{ conferencia.versao_projecao }}">
-    <button class="botao-primario" type="submit">Confirmar conferência interna</button>
+    <label class="opcao"><input type="checkbox" id="ciencia-confirmacao" required> Entendo que minha decisão é confirmar a conferência interna da versão {{ conferencia.versao_rascunho }}, e não devolver para correções.</label>
+    <button class="botao-secundario" type="submit">Confirmar conferência interna da versão {{ conferencia.versao_rascunho }}</button>
   </form>
-  <h3>Devolver para ajustes</h3>
+  </section>
+  <section class="opcao-devolucao-conferencia" aria-labelledby="titulo-opcao-devolver">
+  <h3 id="titulo-opcao-devolver">Opção B — Devolver para ajustes</h3>
   <p>Use esta ação quando o ARP precisar corrigir ou complementar o levantamento apresentado. O snapshot acima permanecerá íntegro no histórico.</p>
   <form class="formulario" method="post" action="{{ url_for('devolver_conferencia_interna', registro_id=registro.id) }}">
     <input type="hidden" name="conta_id" value="{{ conta_id }}">
@@ -49,9 +61,20 @@
     <label for="justificativa-devolucao"><strong>Justificativa obrigatória</strong></label>
     <textarea id="justificativa-devolucao" name="justificativa" maxlength="2000" required aria-describedby="ajuda-justificativa-devolucao"></textarea>
     <p id="ajuda-justificativa-devolucao" class="ajuda">Explique objetivamente o que precisa ser revisto. Não inclua dados pessoais de casos concretos.</p>
-    <button class="botao-primario" type="submit">Confirmar devolução para ajustes</button>
+    <button class="botao-secundario" type="submit">Confirmar devolução para ajustes</button>
   </form>
+  </section>
+  </div>
 </section>
+<dialog id="dialogo-confirmar-conferencia" aria-labelledby="titulo-confirmar-decisao" aria-describedby="efeito-confirmar-decisao">
+  <h2 id="titulo-confirmar-decisao">Confirmar a conferência da versão {{ conferencia.versao_rascunho }}?</h2>
+  <p id="efeito-confirmar-decisao">Você registrará, como APA, a conferência interna da versão {{ conferencia.versao_rascunho }} do Registro {{ registro.codigo_lgpd }}. A solicitação deixará de estar pendente e a versão continuará preservada. Esta ação não devolve o levantamento ao ARP para ajustes, não é submissão institucional, homologação nem aprovação jurídica.</p>
+  <div class="acoes-decisao-conferencia">
+    <button type="button" class="botao-secundario" data-cancelar-confirmacao autofocus>Cancelar e revisar as opções</button>
+    <button type="button" class="botao-primario" data-efetivar-confirmacao>Sim, registrar conferência da versão {{ conferencia.versao_rascunho }}</button>
+  </div>
+</dialog>
+<script src="{{ url_for('estaticos', path='/decisao_conferencia.js') }}"></script>
 {% else %}
 <section class="form1" aria-labelledby="titulo-confirmacao-registrada">
   <p class="etiqueta">Ato preparatório registrado</p>
