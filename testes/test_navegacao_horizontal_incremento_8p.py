@@ -54,7 +54,7 @@ def test_navegacao_alerta_alteracoes_nao_salvas_sem_remover_respostas(sessao):
     assert "confirmarNavegacaoComAlteracoes()" in pagina.text
     assert "beforeunload" in pagina.text
     assert "formulario.addEventListener('submit'" in pagina.text
-    assert "alteracoesNaoSalvas = false" in pagina.text
+    assert "window.saidaForm1.temAlteracoes()" in pagina.text
     assert 'id="titulo-bloco-1"' in pagina.text
     assert 'id="titulo-bloco-14"' in pagina.text
 

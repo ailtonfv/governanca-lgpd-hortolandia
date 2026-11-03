@@ -8,6 +8,7 @@ const navegacao = html.slice(html.indexOf('(function iniciarNavegacaoForm1()'), 
 
 for (const indisponivel of [false, true]) {
  for (const alturaJanela of [600, 900]) {
+  for (const alturaBarra of [0, 48, 96]) {
   for (const inicial of [1, 2, 3, 4, 8, 14]) {
     const eventos = {};
     let focado, rolado;
@@ -67,13 +68,13 @@ for (const indisponivel of [false, true]) {
     const contexto = {
       window: janela, document: {
         readyState: 'loading', querySelector() { return raiz; },
-        getElementById(id) { return id === 'mensagem-registro' ? {getBoundingClientRect() { return {height: 60}; }} : titulos.find(t => t.id === id); }
+        getElementById(id) { return id === 'retorno-painel-form1' ? {getBoundingClientRect() {return {height: alturaBarra};}} : id === 'mensagem-registro' ? {getBoundingClientRect() { return {height: 60}; }} : titulos.find(t => t.id === id); }
       }, sincronizarControlesForm1() {}
     };
     vm.runInNewContext(auxiliares + navegacao, contexto);
     assert.equal(focado, titulos[inicial - 1]);
     assert.equal(rolado, focado);
-    assert.equal(blocos[inicial - 1].getBoundingClientRect().top, 96);
+    assert.equal(blocos[inicial - 1].getBoundingClientRect().top, 96 + alturaBarra);
     assert.ok(ordem.indexOf(etapas.find(p => !p.hidden)) < ordem.indexOf(progresso));
     assert.equal(blocos.filter(b => !b.hidden).length, 1);
     eventos.load();
@@ -82,12 +83,13 @@ for (const indisponivel of [false, true]) {
       assert.equal(rolado, titulos[n - 1]);
       assert.equal(janela.location.hash, '#titulo-bloco-' + n);
       assert.equal(blocos[n - 1].hidden, false);
-      assert.equal(blocos[n - 1].getBoundingClientRect().top, 96);
+      assert.equal(blocos[n - 1].getBoundingClientRect().top, 96 + alturaBarra);
     }
     anterior.click();
     assert.equal(rolado, titulos[1]);
     botoes[1].click();
     assert.equal(rolado, titulos[3]);
+  }
   }
  }
 }

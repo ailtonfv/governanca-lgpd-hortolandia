@@ -1,7 +1,21 @@
 {% extends "base.html" %}
 {% block titulo %}{% if modo_legado %}Questionário sintético legado · {% endif %}{{ registro.codigo_lgpd }} · Governança LGPD{% endblock %}
 {% block conteudo %}
-<p><a class="voltar" href="/?conta_id={{ conta_id }}">← Voltar ao painel</a></p>
+<nav {% if not modo_legado %}id="retorno-painel-form1" class="retorno-painel-form1"{% endif %} aria-label="Retorno ao painel">
+  <a class="voltar" href="/?conta_id={{ conta_id }}">← Voltar ao painel</a>
+</nav>
+{% if not modo_legado %}
+<dialog id="dialogo-saida-form1" aria-labelledby="titulo-saida-form1" aria-describedby="descricao-saida-form1">
+  <h2 id="titulo-saida-form1">Alterações não salvas</h2>
+  <p id="descricao-saida-form1">Deseja salvar antes de voltar ao painel? Se houver edições em outros blocos, elas também serão salvas. Campos obrigatórios incompletos não impedem salvar o rascunho.</p>
+  <p data-erro-saida role="alert"></p>
+  <div class="acoes-saida-form1">
+    <button type="button" class="botao-primario" data-salvar-voltar>Salvar e voltar</button>
+    <button type="button" class="botao-secundario" data-sair-sem-salvar>Sair sem salvar</button>
+    <button type="button" class="botao-secundario" data-continuar-preenchendo autofocus>Continuar preenchendo</button>
+  </div>
+</dialog>
+{% endif %}
 <section class="identificacao-registro" aria-labelledby="titulo-registro">
   <p class="etiqueta">{{ registro.tipo }} · ciclo {{ registro.ciclo }}</p>
   <h1 id="titulo-registro">{{ registro.codigo_lgpd }}</h1>
@@ -777,6 +791,7 @@
   <p class="ajuda">Os 14 blocos estão disponíveis para preenchimento e revisão. A conclusão institucional do FORM 1 ainda não está habilitada nesta versão.</p>
 </section>
 
+<script src="{{ url_for('estaticos', path='/saida_form1.js') }}"></script>
 <script>
   // A navegação e o envio continuam disponíveis sem armazenamento de sessão.
   var sessaoForm1 = {
@@ -791,7 +806,8 @@
     destino.focus({ preventScroll: true });
     window.requestAnimationFrame(function () {
       var mensagem = document.getElementById('mensagem-registro');
-      var margem = 24 + (mensagem ? mensagem.getBoundingClientRect().height + 12 : 0);
+      var barra = document.getElementById('retorno-painel-form1');
+      var margem = 24 + (barra ? barra.getBoundingClientRect().height : 0) + (mensagem ? mensagem.getBoundingClientRect().height + 12 : 0);
       var inicio = destino.closest('.bloco-form1-integral') || destino;
       var topo = window.scrollY + inicio.getBoundingClientRect().top - margem;
       window.scrollTo({ top: Math.max(0, topo), behavior: 'instant' });
@@ -943,30 +959,26 @@
     var chaveBloco = 'form1-integral-bloco-' + raiz.dataset.registroId;
     var chaveVisitados = 'form1-integral-visitados-' + raiz.dataset.registroId;
     var painelProgresso = raiz.querySelector('[data-painel-progresso]');
-    var alteracoesNaoSalvas = false;
     var navegacaoComAlteracoesConfirmada = false;
     var mensagemAlteracoesNaoSalvas = 'Há alterações não salvas neste bloco. Elas continuarão visíveis nesta página, mas ainda não foram registradas. Deseja mudar de bloco?';
     raiz.querySelectorAll('.formulario-integral').forEach(function (formulario) {
       formulario.addEventListener('input', function () {
-        alteracoesNaoSalvas = true;
         navegacaoComAlteracoesConfirmada = false;
       });
       formulario.addEventListener('change', function () {
-        alteracoesNaoSalvas = true;
         navegacaoComAlteracoesConfirmada = false;
       });
       formulario.addEventListener('submit', function () {
-        alteracoesNaoSalvas = false;
         navegacaoComAlteracoesConfirmada = false;
       });
     });
     window.addEventListener('beforeunload', function (evento) {
-      if (!alteracoesNaoSalvas) return;
+      if (!window.saidaForm1 || !window.saidaForm1.deveAvisar()) return;
       evento.preventDefault();
       evento.returnValue = '';
     });
     function confirmarNavegacaoComAlteracoes() {
-      if (!alteracoesNaoSalvas || navegacaoComAlteracoesConfirmada) return true;
+      if (!window.saidaForm1 || !window.saidaForm1.temAlteracoes() || navegacaoComAlteracoesConfirmada) return true;
       navegacaoComAlteracoesConfirmada = window.confirm(mensagemAlteracoesNaoSalvas);
       return navegacaoComAlteracoesConfirmada;
     }
@@ -1239,15 +1251,16 @@
     formularios.forEach(function (formulario) {
       formulario.dataset.alterado = 'false';
       formulario.addEventListener('input', function () {
-        formulario.dataset.alterado = 'true';
-        atualizarEstado(formulario, 'Alterações não salvas.', 'estado-salvamento-pendente');
+        formulario.dataset.alterado = String(!window.saidaForm1 || window.saidaForm1.alterado(formulario));
+        atualizarEstado(formulario, formulario.dataset.alterado === 'true' ? 'Alterações não salvas.' : 'Sem alterações não salvas.', 'estado-salvamento-pendente');
       });
       formulario.addEventListener('change', function () {
-        formulario.dataset.alterado = 'true';
-        atualizarEstado(formulario, 'Alterações não salvas.', 'estado-salvamento-pendente');
+        formulario.dataset.alterado = String(!window.saidaForm1 || window.saidaForm1.alterado(formulario));
+        atualizarEstado(formulario, formulario.dataset.alterado === 'true' ? 'Alterações não salvas.' : 'Sem alterações não salvas.', 'estado-salvamento-pendente');
       });
       formulario.addEventListener('submit', function (evento) {
         var acionador = evento.submitter;
+        if (window.saidaForm1 && formulario.classList.contains('formulario-integral')) formulario.dataset.alterado = String(window.saidaForm1.alterado(formulario));
         if (formulario.classList.contains('formulario-integral') && formulario.dataset.alterado !== 'true') {
           evento.preventDefault();
           atualizarEstado(formulario, 'Nenhuma alteração para salvar.', '');
@@ -1261,6 +1274,7 @@
           return;
         }
         formulario.dataset.enviando = 'true';
+        if (window.saidaForm1) window.saidaForm1.envioNormal();
         preservarTentativa(formulario);
         atualizarEstado(formulario, 'Salvando...', 'estado-salvamento-processando');
         controlesDeEnvio(formulario).forEach(function (controle) {
