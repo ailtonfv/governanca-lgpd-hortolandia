@@ -792,8 +792,9 @@
     window.requestAnimationFrame(function () {
       var mensagem = document.getElementById('mensagem-registro');
       var margem = 24 + (mensagem ? mensagem.getBoundingClientRect().height + 12 : 0);
-      destino.style.scrollMarginTop = margem + 'px';
-      destino.scrollIntoView({ block: 'start', behavior: 'instant' });
+      var inicio = destino.closest('.bloco-form1-integral') || destino;
+      var topo = window.scrollY + inicio.getBoundingClientRect().top - margem;
+      window.scrollTo({ top: Math.max(0, topo), behavior: 'instant' });
     });
   }
   function sincronizarSinalizacaoObrigatoriedade() {
@@ -1030,6 +1031,8 @@
           var numeroDoBloco = titulo ? Number(titulo.id.replace('titulo-bloco-', '')) : null;
           bloco.hidden = oculto || numeroDoBloco !== numeroBlocoAlvo;
         });
+        // O preenchimento vem antes do acompanhamento, que permanece acessível.
+        if (!oculto && painelProgresso) raiz.insertBefore(painel, painelProgresso);
       });
       botoes.forEach(function (botao) {
         var ativo = botao.dataset.etapaAlvo === numero;

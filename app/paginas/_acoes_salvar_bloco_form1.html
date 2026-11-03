@@ -1,3 +1,4 @@
+<footer class="acoes-bloco-form1" aria-label="Ações do Bloco {{ numero_bloco }}">
 <p class="estado-salvamento" data-estado-salvamento role="status" aria-live="polite">Rascunho confirmado no servidor.</p>
 <div class="acoes-salvamento-bloco">
   {% if numero_bloco > 1 %}
@@ -15,3 +16,4 @@
 {% if numero_bloco < 14 %}
 <p class="destino-acao-bloco">Próximo: Bloco {{ numero_bloco + 1 }} — {{ titulos_blocos_navegacao[numero_bloco + 1] }}</p>
 {% endif %}
+</footer>

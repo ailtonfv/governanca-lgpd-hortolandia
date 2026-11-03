@@ -2,6 +2,7 @@
 
 from dataclasses import replace
 from pathlib import Path
+from html.parser import HTMLParser
 import shutil
 import subprocess
 
@@ -74,3 +75,49 @@ def test_javascript_navega_com_sessao_antiga_e_storage_indisponivel():
     resultado = subprocess.run([node, str(raiz / 'testes/apoio_navegacao_form1.cjs')], cwd=raiz, capture_output=True, text=True)
     # Assert
     assert resultado.returncode == 0, resultado.stdout + resultado.stderr
+
+
+def test_rodapes_dos_blocos_longo_e_curto_tem_mesma_estrutura(sessao):
+    # Arrange
+    class Rodapes(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.grupos = {}
+            self.atual = None
+            self.pilha = []
+
+        def handle_starttag(self, tag, atributos):
+            atributos = dict(atributos)
+            if tag == 'footer' and atributos.get('class') == 'acoes-bloco-form1':
+                self.atual = []
+                self.grupos[atributos['aria-label']] = self.atual
+                self.pilha = []
+            elif self.atual is not None:
+                self.atual.append((tag, atributos, tuple(self.pilha)))
+                self.pilha.append(tag)
+
+        def handle_endtag(self, tag):
+            if tag == 'footer':
+                self.atual = None
+            elif self.atual is not None and self.pilha:
+                self.pilha.pop()
+
+    registro = _rascunho_pronto(sessao, 'UX-RODAPES-FICTICIOS')
+    # Act
+    pagina = TestClient(app).get(f'/registros/{registro["registro_id"]}?conta_id=CONTA-A1')
+    parser = Rodapes()
+    parser.feed(pagina.text)
+    # Assert: status, ações e indicação seguinte são linhas independentes.
+    for bloco in (2, 3):
+        grupo = parser.grupos[f'Ações do Bloco {bloco}']
+        assert [tag for tag, _, pais in grupo if not pais] == ['p', 'div', 'p']
+        botoes = [atributos for tag, atributos, _ in grupo if tag == 'button']
+        assert len(botoes) == 3
+        assert botoes[0]['data-bloco-anterior'] == str(bloco - 1)
+        assert botoes[1]['value'] == 'permanecer'
+        assert botoes[2]['value'] == 'proximo'
+        assert botoes[2]['class'] == 'botao-primario'
+    css = TestClient(app).get('/estaticos/estilo.css').text
+    assert 'grid-template-columns: repeat(3, minmax(0, max-content))' in css
+    assert '@container (max-width: 34rem)' in css
+    assert 'min-height: calc(100svh' not in css
