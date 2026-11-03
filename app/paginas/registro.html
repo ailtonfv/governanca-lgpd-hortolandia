@@ -258,7 +258,7 @@
       <p class="etiqueta">Etapa preparatória · não submete o formulário</p>
       <h3 id="titulo-conferencia-interna-form1">Conferência interna pelo APA</h3>
       {% set fluxo = registro.form1_integral.fluxo_conferencia %}
-      <details class="percurso-conferencia-cartao"><summary>Entender a situação e o percurso da conferência</summary>{% include '_fluxo_conferencia.html' %}</details>
+      {% with fluxo_compacto=true %}{% include '_fluxo_conferencia.html' %}{% endwith %}
       {% if registro.form1_integral.conferencia_interna %}
       <p class="aviso-leitura"><strong>FORM 1 aguardando conferência interna.</strong> A versão {{ registro.form1_integral.conferencia_interna.versao_rascunho }} foi preservada em snapshot técnico {{ registro.form1_integral.conferencia_interna.numero_snapshot }} por {{ registro.form1_integral.conferencia_interna.solicitada_por }}.</p>
       <p class="ajuda">Este encaminhamento não é submissão, homologação, conclusão institucional nem envio à T.I.</p>

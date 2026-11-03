@@ -1,5 +1,6 @@
 """Clareza da conferência: apresentação não modifica governança (AAA)."""
 from pathlib import Path
+from html.parser import HTMLParser
 import shutil
 import subprocess
 
@@ -101,3 +102,72 @@ def test_dialogo_exige_decisao_explicita_e_cancelamento_nao_envia():
     raiz = Path(__file__).resolve().parents[1]
     resultado = subprocess.run([node, str(raiz / 'testes/apoio_decisao_conferencia.cjs')], cwd=raiz, capture_output=True, text=True)
     assert resultado.returncode == 0, resultado.stdout + resultado.stderr
+
+
+class _EstruturaFluxo(HTMLParser):
+    """Inspeciona ancestralidade e textos do HTML; não mede layout visual."""
+    def __init__(self, html):
+        super().__init__()
+        self.elementos, self.pilha = [], []
+        self.feed(html)
+
+    def handle_starttag(self, tag, attrs):
+        elemento = {'tag': tag, 'attrs': dict(attrs), 'ancestrais': self.pilha[:], 'texto': ''}
+        self.elementos.append(elemento)
+        if tag not in {'input', 'meta', 'link', 'br', 'hr', 'img', 'source'}:
+            self.pilha.append(elemento)
+
+    def handle_endtag(self, tag):
+        for i in range(len(self.pilha) - 1, -1, -1):
+            if self.pilha[i]['tag'] == tag:
+                del self.pilha[i:]
+                break
+
+    def handle_data(self, data):
+        for elemento in self.pilha:
+            elemento['texto'] += data
+
+
+def test_fluxo_operacional_direto_em_todos_estados_sem_duplicar_historico(sessao):
+    # Arrange: o mesmo Registro passa pelos estados existentes, sem regra nova.
+    registro = _preparar(sessao, 'FLUXO-DIRETO')
+    cliente = TestClient(app)
+    url = f'/registros/{registro["registro_id"]}?conta_id=CONTA-G1'
+
+    def verificar(estado, destaque, com_versao):
+        pagina = cliente.get(url)
+        assert pagina.status_code == 200
+        estrutura = _EstruturaFluxo(pagina.text)
+        fluxos = [e for e in estrutura.elementos if 'fluxo-conferencia-compacto' in e['attrs'].get('class', '').split()]
+        assert len(fluxos) == 1
+        fluxo = fluxos[0]
+        assert not any(e['tag'] == 'details' for e in fluxo['ancestrais'])
+        assert any(e['attrs'].get('aria-labelledby') == 'titulo-conferencia-interna-form1' for e in fluxo['ancestrais'])
+        internos = [e for e in estrutura.elementos if any(a is fluxo for a in e['ancestrais'])]
+        atual = [e for e in internos if e['attrs'].get('aria-current') == 'step']
+        assert len(atual) == 1 and destaque in atual[0]['texto']
+        assert estado in fluxo['texto']
+        assert 'Devolver para ajustes' in fluxo['texto'] and 'Confirmar conferência interna' in fluxo['texto']
+        assert not any(e['tag'] in {'button', 'input', 'form', 'select'} for e in internos)
+        assert any(e['tag'] == 'svg' and e['attrs'].get('aria-hidden') == 'true' for e in internos)
+        assert ('Apresentação registrada · rascunho 1' in fluxo['texto']) is com_versao
+        assert 'não são aprovação jurídica' in fluxo['texto']
+        historicos = [e for e in estrutura.elementos if e['attrs'].get('id') == 'historico-conferencias-form1']
+        assert all(not any(a is fluxo for a in h['ancestrais']) for h in historicos)
+        return fluxo['texto']
+
+    # Act / Assert: destaque deriva da apresentação/decisão, não da visita à tela.
+    verificar('Sem apresentação', 'ARP preenche', False)
+    _solicitar(sessao, registro, comando='FLUXO-DIRETO-S1')
+    verificar('Aguardando conferência', 'APA confere', True)
+    _devolver(sessao, registro, comando='FLUXO-DIRETO-DEV')
+    verificar('Devolvida para ajustes', 'Devolver para ajustes', True)
+    ajuste = _salvar_ajuste(sessao, registro, comando='FLUXO-DIRETO-AJUSTE')
+    _solicitar(sessao, registro, comando='FLUXO-DIRETO-S2', versao=ajuste['versao_rascunho'])
+    _confirmar(sessao, registro, comando='FLUXO-DIRETO-CONF')
+    texto = verificar('Conferência interna confirmada', 'Confirmar conferência interna', False)
+    assert 'Sem providência de conferência pendente' in texto
+    assert 'MAT-FICT-0007' in texto and 'MAT-FICT-0001' in texto
+    painel = _EstruturaFluxo(cliente.get('/?conta_id=CONTA-G1').text)
+    fluxo_painel = next(e for e in painel.elementos if 'fluxo-conferencia' in e['attrs'].get('class', '').split())
+    assert any(e['tag'] == 'details' for e in fluxo_painel['ancestrais'])

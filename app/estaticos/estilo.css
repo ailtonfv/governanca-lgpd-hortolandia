@@ -246,7 +246,14 @@ legend { padding: 0 .4rem; color: var(--azul-escuro); font-weight: 800; }
 .trajeto-conferencia { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .ramificacoes-conferencia, .alternativas-conferencia { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .trajeto-conferencia li, .ramificacoes-conferencia li { padding: .65rem; background: var(--fundo); border: 1px solid var(--borda); border-radius: .4rem; }
-.trajeto-conferencia li:not(:last-child)::after { content: ' →'; color: var(--azul); }
+.trajeto-conferencia { margin-bottom: 0; }
+.trajeto-conferencia li { position: relative; }
+.trajeto-conferencia li:not(:last-child)::after { content: '→'; position: absolute; right: -.65rem; top: calc(50% - .75rem); color: var(--azul); font-weight: 800; }
+.conexoes-decisao-conferencia { display: block; width: 100%; height: 2rem; overflow: visible; fill: none; stroke: var(--azul); stroke-width: 2; }
+.ramificacoes-conferencia { margin-top: 0; }
+.fluxo-conferencia-compacto { margin-block: .75rem; }
+.fluxo-conferencia-compacto p { margin-block: .4rem; }
+.fluxo-conferencia-compacto li { padding: .5rem; }
 .fluxo-conferencia li span { display: block; }
 .fluxo-conferencia [aria-current="step"] { border: 2px solid var(--azul); background: #e0f2fe; }
 .alternativas-conferencia { display: grid; gap: 1.25rem; margin-top: 1rem; align-items: start; }
@@ -256,6 +263,14 @@ legend { padding: 0 .4rem; color: var(--azul-escuro); font-weight: 800; }
 #dialogo-confirmar-conferencia::backdrop { background: rgb(12 59 90 / 55%); }
 .acoes-decisao-conferencia { display: grid; gap: .75rem; }
 @media (max-width: 700px) { .trajeto-conferencia, .ramificacoes-conferencia, .alternativas-conferencia { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 700px) {
+  .trajeto-conferencia li:not(:last-child)::after { content: '↓'; right: calc(50% - .4rem); top: auto; bottom: -.9rem; }
+  .conexoes-decisao-conferencia { display: none; }
+  .ramificacoes-conferencia { position: relative; margin-top: .65rem; margin-left: 1rem; padding-left: 1rem; border-left: 2px solid var(--azul); }
+  .ramificacoes-conferencia::before { content: ''; position: absolute; left: -2px; top: -.65rem; height: .65rem; border-left: 2px solid var(--azul); }
+  .ramificacoes-conferencia li { position: relative; }
+  .ramificacoes-conferencia li::before { content: ''; position: absolute; left: -1rem; top: 1rem; width: 1rem; border-top: 2px solid var(--azul); }
+}
 .mensagem-registro { position: sticky; top: calc(var(--altura-retorno-form1, 0px) + .75rem); z-index: 20; box-shadow: 0 .35rem 1rem rgba(12,59,90,.16); }
 .retorno-painel-form1 { position: sticky; top: 0; z-index: 30; padding: .65rem 0; background: #F4F7F9; border-bottom: 1px solid #D6E0E6; }
 .retorno-painel-form1 a { display: inline-block; padding: .25rem .5rem; }
