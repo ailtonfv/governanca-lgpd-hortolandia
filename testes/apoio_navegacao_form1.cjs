@@ -9,6 +9,7 @@ const navegacao = html.slice(html.indexOf('(function iniciarNavegacaoForm1()'), 
 for (const indisponivel of [false, true]) {
  for (const alturaJanela of [600, 900]) {
   for (const alturaBarra of [0, 48, 96]) {
+  for (const retomando of [false, true]) {
   for (const inicial of [1, 2, 3, 4, 8, 14]) {
     const eventos = {};
     let focado, rolado;
@@ -71,13 +72,25 @@ for (const indisponivel of [false, true]) {
         getElementById(id) { return id === 'retorno-painel-form1' ? {getBoundingClientRect() {return {height: alturaBarra};}} : id === 'mensagem-registro' ? {getBoundingClientRect() { return {height: 60}; }} : titulos.find(t => t.id === id); }
       }, sincronizarControlesForm1() {}
     };
+    let restauracoes = 0;
+    if (retomando) janela.criarRetomadaForm1 = () => ({posicao: {bloco: inicial}, restaurar() {
+      restauracoes++;
+      titulos[inicial - 1].focus();
+      janela.scrollTo({top:420 - 96 - alturaBarra});
+      return true;
+    }});
     vm.runInNewContext(auxiliares + navegacao, contexto);
+    if (retomando) {
+      assert.equal(eventos.load, undefined, 'A retomada não pode disputar rolagem com o posicionamento do título no load.');
+      eventos.pageshow();
+      assert.equal(restauracoes, 1);
+    }
     assert.equal(focado, titulos[inicial - 1]);
     assert.equal(rolado, focado);
     assert.equal(blocos[inicial - 1].getBoundingClientRect().top, 96 + alturaBarra);
     assert.ok(ordem.indexOf(etapas.find(p => !p.hidden)) < ordem.indexOf(progresso));
     assert.equal(blocos.filter(b => !b.hidden).length, 1);
-    eventos.load();
+    if (!retomando) eventos.load();
     for (const n of [3, 2, 4, 5, 14, 1]) {
       mapa[n - 1].click();
       assert.equal(rolado, titulos[n - 1]);
@@ -89,6 +102,8 @@ for (const indisponivel of [false, true]) {
     assert.equal(rolado, titulos[1]);
     botoes[1].click();
     assert.equal(rolado, titulos[3]);
+    if (retomando) assert.equal(restauracoes, 1, 'Anterior e navegação explícita não devem restaurar a região antiga.');
+  }
   }
   }
  }

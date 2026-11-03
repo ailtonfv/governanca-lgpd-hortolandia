@@ -792,6 +792,7 @@
 </section>
 
 <script src="{{ url_for('estaticos', path='/saida_form1.js') }}"></script>
+<script src="{{ url_for('estaticos', path='/posicao_form1.js') }}"></script>
 <script>
   // A navegação e o envio continuam disponíveis sem armazenamento de sessão.
   var sessaoForm1 = {
@@ -959,6 +960,8 @@
     var chaveBloco = 'form1-integral-bloco-' + raiz.dataset.registroId;
     var chaveVisitados = 'form1-integral-visitados-' + raiz.dataset.registroId;
     var painelProgresso = raiz.querySelector('[data-painel-progresso]');
+    var retomada = window.criarRetomadaForm1 ? window.criarRetomadaForm1(raiz, sessaoForm1) : null;
+    window.retomadaForm1 = retomada;
     var navegacaoComAlteracoesConfirmada = false;
     var mensagemAlteracoesNaoSalvas = 'Há alterações não salvas neste bloco. Elas continuarão visíveis nesta página, mas ainda não foram registradas. Deseja mudar de bloco?';
     raiz.querySelectorAll('.formulario-integral').forEach(function (formulario) {
@@ -993,12 +996,12 @@
     var etapaDaUrl = window.location.hash.match(/^#form1-etapa-([1-4])$/);
     var blocoDaUrl = window.location.hash.match(/^#titulo-bloco-(\d{1,2})$/);
     var preValidacaoDaUrl = window.location.hash === '#titulo-pre-validacao-form1';
-    var numeroBloco = blocoDaUrl ? Number(blocoDaUrl[1]) : null;
+    var numeroBloco = retomada && retomada.posicao ? retomada.posicao.bloco : blocoDaUrl ? Number(blocoDaUrl[1]) : null;
     var etapaDoBloco = numeroBloco === null ? null
       : numeroBloco <= 3 ? '1'
       : numeroBloco <= 8 ? '2'
       : numeroBloco <= 11 ? '3' : '4';
-    var etapaInicial = etapaDaUrl ? etapaDaUrl[1] : etapaDoBloco || sessaoForm1.getItem(chave);
+    var etapaInicial = etapaDoBloco || (etapaDaUrl ? etapaDaUrl[1] : sessaoForm1.getItem(chave));
     if (!botoes.some(function (botao) { return botao.dataset.etapaAlvo === etapaInicial && !botao.disabled; })) etapaInicial = '1';
 
     function etapaDoNumeroDoBloco(numero) {
@@ -1166,12 +1169,24 @@
     var destinoInicial = blocoDaUrl ? document.getElementById('titulo-bloco-' + numeroBloco)
       : preValidacaoDaUrl ? document.getElementById('titulo-pre-validacao-form1') : null;
     var blocoGuardado = Number(sessaoForm1.getItem(chaveBloco));
-    var blocoInicial = numeroBloco || (blocoGuardado >= 1 && blocoGuardado <= 14 ? blocoGuardado : primeiroBlocoDaEtapa(etapaInicial));
+    var blocoInicial = numeroBloco || (blocoGuardado >= 1 && blocoGuardado <= 14 && etapaDoNumeroDoBloco(blocoGuardado) === etapaInicial ? blocoGuardado : primeiroBlocoDaEtapa(etapaInicial));
+    if (!destinoInicial && (etapaDaUrl || retomada && retomada.posicao)) destinoInicial = document.getElementById('titulo-bloco-' + blocoInicial);
     exibirEtapa(etapaInicial, destinoInicial ? window.location.hash : null, blocoInicial);
     atualizarPainelJornada(blocoInicial);
     if (destinoInicial) {
-      posicionarDestinoForm1(destinoInicial);
-      if (document.readyState !== 'complete') {
+      if (retomada && retomada.posicao) {
+        var hashRetomada = window.location.hash;
+        var restaurarRegiao = function () {
+          window.requestAnimationFrame(function () {
+            if (window.location.hash === hashRetomada && !retomada.restaurar()) posicionarDestinoForm1(destinoInicial);
+          });
+        };
+        if (document.readyState === 'complete') restaurarRegiao();
+        else window.addEventListener('pageshow', restaurarRegiao, {once: true});
+      } else {
+        posicionarDestinoForm1(destinoInicial);
+      }
+      if (!(retomada && retomada.posicao) && document.readyState !== 'complete') {
         var hashInicial = window.location.hash;
         window.addEventListener('load', function () {
           if (window.location.hash === hashInicial) posicionarDestinoForm1(destinoInicial);
@@ -1274,6 +1289,7 @@
           return;
         }
         formulario.dataset.enviando = 'true';
+        if (window.retomadaForm1 && formulario.classList.contains('formulario-integral')) window.retomadaForm1.antesDeSalvar(formulario, acionador);
         if (window.saidaForm1) window.saidaForm1.envioNormal();
         preservarTentativa(formulario);
         atualizarEstado(formulario, 'Salvando...', 'estado-salvamento-processando');
