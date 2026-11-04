@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block titulo %}{{ titulo_secao }} — Cartilha LGPD {{ edicao }}{% endblock %}
+{% macro apresentar(blocos) %}
+  {% for bloco in blocos %}
+    {% if bloco.tipo == 'texto' %}<p>{{ bloco.texto }}</p>
+    {% elif bloco.tipo == 'titulo' %}<h2>{{ bloco.texto }}</h2>
+    {% elif bloco.tipo == 'imagem' %}<img src="{{ bloco.src }}" alt="{{ bloco.alt }}" loading="lazy">
+    {% elif bloco.tipo == 'tabela' %}
+      <div class="tabela-cartilha" role="region" aria-label="Quadro da Cartilha" tabindex="0">
+        <table><caption>Quadro da seção {{ titulo_secao }}</caption><tbody>
+        {% for linha in bloco.linhas %}<tr>{% for celula in linha %}<td colspan="{{ celula.colunas }}">{{ apresentar(celula.blocos) }}</td>{% endfor %}</tr>{% endfor %}
+        </tbody></table>
+      </div>
+    {% endif %}
+  {% endfor %}
+{% endmacro %}
+{% block conteudo %}
+<article class="cartao leitura-cartilha" aria-labelledby="titulo-cartilha">
+  <p class="sobretitulo">Cartilha LGPD · {{ edicao }} · 03/11/2026 · Consulta local</p>
+  <h1 id="titulo-cartilha">{{ titulo_secao }}</h1>
+  <p class="ajuda">Leitura da seção do documento original, com apresentação adaptada à tela. O arquivo original permanece inalterado. A orientação não altera respostas nem regras do formulário.</p>
+  <p class="aviso">O FORM 1 permanece na aba anterior. Volte àquela aba para continuar do mesmo ponto, inclusive com respostas ainda não salvas.</p>
+  {{ apresentar(conteudo_secao) }}
+</article>
+{% endblock %}

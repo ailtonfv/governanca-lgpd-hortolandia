@@ -13,6 +13,8 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from app.atribuicao_form1_integral import atribuir_arp_form1_integral
+from app.ajudas_cartilha_form1 import SECOES_CARTILHA, VERSAO_CARTILHA_AJUDAS_FORM1
+from app.cartilha_local import acesso_local_cartilha, secoes_cartilha_disponiveis
 from app.conferencia_interna_form1_integral import (
     carregar_versao_para_conferencia,
     confirmar_conferencia_interna_form1_integral,
@@ -58,6 +60,7 @@ PASTA_APP = Path(__file__).resolve().parent
 app = FastAPI(title="PoC LGPD Hortolândia", docs_url=None, redoc_url=None)
 app.mount("/estaticos", StaticFiles(directory=PASTA_APP / "estaticos"), name="estaticos")
 paginas = Jinja2Templates(directory=PASTA_APP / "paginas")
+paginas.env.globals["consulta_cartilha_local"] = acesso_local_cartilha
 FUSO_OFICIAL = ZoneInfo("America/Sao_Paulo")
 
 
@@ -334,6 +337,31 @@ def criar_registro_pela_tela(
     return _voltar_novo_registro(
         conta_id=conta_id, mensagem=motivo, valores=valores, campos_erro=[campo],
         conflitos_codigos=conflitos_codigos,
+    )
+
+
+@app.get("/registros/{registro_id}/cartilha/{edicao}/{secao_id}", response_class=HTMLResponse)
+def consultar_cartilha_secao(
+    registro_id: str, edicao: str, secao_id: str, request: Request,
+    conta_id: str = Query(max_length=50), sessao: Session = Depends(obter_sessao),
+):
+    cabecalhos = {
+        "Cache-Control": "private, no-store", "X-Robots-Tag": "noindex, nofollow",
+        "Referrer-Policy": "no-referrer", "X-Content-Type-Options": "nosniff",
+        "Content-Security-Policy": "default-src 'none'; style-src 'self'; img-src data:; frame-ancestors 'none'; base-uri 'none'; form-action 'none'",
+    }
+    if not acesso_local_cartilha(request):
+        return HTMLResponse("Consulta da Cartilha restrita ao ambiente local da PoC.", status_code=403, headers=cabecalhos)
+    identidade, registro = carregar_registro(sessao, conta_id, registro_id)
+    if not identidade or not registro:
+        return HTMLResponse("Consulta não disponível para este Registro e agente.", status_code=403, headers=cabecalhos)
+    secoes = secoes_cartilha_disponiveis() if edicao == VERSAO_CARTILHA_AJUDAS_FORM1 else {}
+    if secao_id not in secoes:
+        return HTMLResponse("Seção da Cartilha REV30.13 indisponível. Volte à aba do FORM 1; suas respostas permanecem lá.", status_code=404, headers=cabecalhos)
+    return paginas.TemplateResponse(
+        request=request, name="cartilha_secao.html",
+        context={"titulo_secao": SECOES_CARTILHA[secao_id], "edicao": edicao,
+                 "conteudo_secao": secoes[secao_id]}, headers=cabecalhos,
     )
 
 

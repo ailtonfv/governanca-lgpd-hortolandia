@@ -206,6 +206,13 @@ legend { padding: 0 .4rem; color: var(--azul-escuro); font-weight: 800; }
 .ajuda-cartilha-form1 summary:focus-visible { outline: .2rem solid var(--azul); outline-offset: .12rem; }
 .conteudo-ajuda-cartilha-form1 { padding: 0 .75rem .7rem; color: #334155; }
 .conteudo-ajuda-cartilha-form1 p { margin: .45rem 0 0; }
+.leitura-cartilha { max-width: 85ch; margin-inline: auto; overflow-wrap: anywhere; }
+.leitura-cartilha p { white-space: pre-line; line-height: 1.65; }
+.leitura-cartilha img { max-width: 100%; height: auto; }
+.tabela-cartilha { max-width: 100%; overflow-x: auto; margin-block: 1rem; }
+.tabela-cartilha table { width: 100%; table-layout: auto; }
+.tabela-cartilha td { white-space: normal; vertical-align: top; padding: .65rem; }
+.tabela-cartilha:focus-visible { outline: .2rem solid var(--azul); outline-offset: .12rem; }
 .referencia-cartilha-form1 { color: #526475; font-size: .85rem; }
 .rodape-formulario { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-top: 1.4rem; }
 .rodape-formulario p { margin: 0; color: #526475; }

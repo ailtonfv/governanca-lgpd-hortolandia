@@ -5,6 +5,7 @@ import re
 from sqlalchemy import func, or_, select
 
 from app.alertas_operacionais import listar_alertas_operacionais
+from app.cartilha_local import secoes_cartilha_disponiveis
 from app.ajudas_cartilha_form1 import (
     AJUDAS_CARTILHA_FORM1,
     VERSAO_CARTILHA_AJUDAS_FORM1,
@@ -1016,6 +1017,8 @@ def carregar_registro(sessao, conta_id, registro_id):
         ).order_by(Unidade.nome)
     ).all()
 
+    secoes_cartilha = secoes_cartilha_disponiveis()
+
     def metadado_integral(campo_id):
         campo = catalogo_integral[campo_id]
         alternativas = campo.alternativas
@@ -1072,6 +1075,7 @@ def carregar_registro(sessao, conta_id, registro_id):
                 else {
                     **AJUDAS_CARTILHA_FORM1[campo_id],
                     "versao": VERSAO_CARTILHA_AJUDAS_FORM1,
+                    "disponivel": AJUDAS_CARTILHA_FORM1[campo_id]["secao_id"] in secoes_cartilha,
                 }
             ),
             "alternativa_outro": alternativas_outro.get(campo_id),

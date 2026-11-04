@@ -1,12 +1,28 @@
-"""Ajudas contextuais do piloto Cartilha REV30.11 × FORM 1 REV13.
+"""Mapa editorial versionado: ID REV13 → seção estável → edição local.
 
-O conteúdo reproduz a seleção de oito campos da matriz de correspondência do
-Incremento 8W. A Cartilha é documento interno e, enquanto não houver um meio
-institucional de consulta autenticada, a interface informa a seção correta sem
-publicar ou simular um link para o arquivo.
+Somente orientações de leitura; não altera contratos nem obrigatoriedade.
+O documento interno e sua representação HTML não são publicados no Git.
 """
 
-VERSAO_CARTILHA_AJUDAS_FORM1 = "REV30.11"
+VERSAO_CARTILHA_AJUDAS_FORM1 = "REV30.13"
+ARQUIVO_CARTILHA = "CARTILHA_LGPD_HORTOLANDIA_REV30_13_MARCO_03-11-2026.docx"
+SHA256_CARTILHA = "479599007a3cd9a7b79797bc0f2e948a40ec9ed2b916fa7687aa404694855848"
+
+# Identidade de tópico independente de paginação; não reutilizar para outro tema.
+SECOES_CARTILHA = {
+    "fatos-analises-decisoes": "1.3 Fatos, análises e decisões",
+    "competencia-finalidade": "2.1 Competência, finalidade e hipótese legal",
+    "dados-sensiveis": "2.4 Hipóteses legais e dados sensíveis",
+    "participantes": "3.3 Operador, terceiros, OSCs e entidades parceiras",
+    "conceitos": "4.1 Conceitos centrais da LGPD",
+    "levantamento": "5.1 Levantamento da realidade",
+    "canais-ambientes": "5.2 Operações, canais e ambientes",
+    "imagem-voz": "6.1 Fotografias, vídeos, voz e comunicação institucional",
+    "whatsapp": "6.10 WhatsApp e dispositivos pessoais",
+    "ciencia-consentimento": "7.2 Transparência, ciência, consentimento e publicidade",
+    "acesso-minimo": "8.1 Necessidade de conhecer e acesso mínimo",
+    "retencao": "9.1 Retenção e temporalidade documental",
+}
 
 LIMITE_GERAL_FORM1 = (
     "O FORM 1 registra a realidade do fluxo; análises de legitimidade ou decisões "
@@ -21,7 +37,11 @@ LIMITE_FATO_FORM2 = (
 AJUDAS_CARTILHA_FORM1 = {
     "2.1": {
         "texto": (
-            "Marque o primeiro canal pelo qual a demanda chega. WhatsApp é canal "
+            "Consulte os canais habituais confirmados pelo APA para este Registro. "
+            "A confirmação pode indicar vários canais ou ausência de canais. Em "
+            "Registros antigos sem confirmação histórica, preserve a informação "
+            "existente; essa ausência não significa que nenhum canal se aplica. "
+            "O ARP não altera aqui a confirmação do APA. WhatsApp é canal "
             "de entrada, não repositório oficial."
         ),
         "secao": "5.2 Operações, canais e ambientes",
@@ -85,3 +105,68 @@ AJUDAS_CARTILHA_FORM1 = {
         "limite": LIMITE_GERAL_FORM1,
     },
 }
+
+
+def _ajuda(texto, topico, limite=LIMITE_GERAL_FORM1):
+    return {"texto": texto, "secao": SECOES_CARTILHA[topico], "limite": limite}
+
+
+AJUDAS_CARTILHA_FORM1.update({
+    "2.13": _ajuda(
+        "Informe o que é solicitado na prática. Consentimento, ciência, aceite e "
+        "autorização não são sinônimos; o nome ou a assinatura do documento não "
+        "determina por si só a hipótese legal.", "ciencia-consentimento", LIMITE_FATO_FORM2),
+    "2.13.1": _ajuda(
+        "Descreva como essa manifestação é obtida e registrada, sem inserir dados "
+        "de pessoas atendidas. Relatar o procedimento não significa validar "
+        "juridicamente o consentimento.", "ciencia-consentimento", LIMITE_FATO_FORM2),
+    "8.7": _ajuda(
+        "Identifique o uso efetivo de WhatsApp institucional, pessoal ou ambos. "
+        "Diferencie o canal utilizado, o dispositivo e o ambiente em que a "
+        "informação administrativa é guardada.", "whatsapp"),
+    "8.8": _ajuda(
+        "Informe se a informação relevante recebida pelo aplicativo é registrada "
+        "no ambiente institucional apropriado. A conversa no aplicativo não "
+        "substitui o repositório oficial.", "whatsapp"),
+    "8.8.1": _ajuda(
+        "Identifique onde a informação é registrada institucionalmente. Descreva "
+        "o ambiente, sem copiar mensagens, arquivos ou dados de cidadãos.", "whatsapp"),
+    "8.9": _ajuda(
+        "Informe se documentos ou cópias permanecem no aplicativo ou em backups "
+        "fora do ambiente institucional, mesmo após o registro oficial.", "whatsapp"),
+    "10.8": _ajuda(
+        "Informe a divulgação pública que ocorre de fato. Captar, registrar e "
+        "publicar imagem, voz ou outros dados são operações diferentes; relatar "
+        "a publicação não significa aprovar sua legitimidade.", "imagem-voz", LIMITE_FATO_FORM2),
+    "10.8.1": _ajuda(
+        "Identifique onde ocorre a divulgação, distinguindo canais institucionais "
+        "e pessoais. Transparência não significa exposição irrestrita nem "
+        "autorização automática para reutilização.", "ciencia-consentimento", LIMITE_FATO_FORM2),
+    "12.1": _ajuda(
+        "Informe se existe prazo de guarda definido. Não invente prazos: consulte "
+        "os instrumentos de temporalidade aplicáveis. Retenção de dados e "
+        "temporalidade documental são relacionadas, mas distintas.", "retencao"),
+    "3.2": _ajuda(
+        "Identifique os tipos de participantes do fluxo. A participação de uma "
+        "empresa, OSC ou entidade parceira não a torna automaticamente Operadora.", "participantes", LIMITE_FATO_FORM2),
+    "3.3": _ajuda(
+        "Identifique a unidade, órgão ou entidade participante, sem cadastrar "
+        "cidadãos. Diferencie sua identidade institucional do papel jurídico "
+        "que será analisado posteriormente.", "participantes", LIMITE_FATO_FORM2),
+    "3.4": _ajuda(
+        "Marque o que este participante realmente faz com os dados. As funções "
+        "operacionais descritas não determinam automaticamente seu papel "
+        "jurídico de Controlador ou Operador.", "participantes", LIMITE_FATO_FORM2),
+    "3.4.1": _ajuda(
+        "Descreva o acesso ou a retenção dos dados pelo participante conforme a "
+        "realidade. Participar do fluxo não implica acesso irrestrito.", "acesso-minimo"),
+    "3.5": _ajuda(
+        "Informe se existe instrumento formal relacionado à participação. "
+        "Contrato, convênio ou parceria não define sozinho o papel de Operador.", "participantes", LIMITE_FATO_FORM2),
+})
+
+# Mesmo mapa usado pelo componente e pela rota; nenhuma URL externa ou página presumida.
+for _item in AJUDAS_CARTILHA_FORM1.values():
+    _item["secao_id"] = next(
+        chave for chave, titulo in SECOES_CARTILHA.items() if titulo == _item["secao"]
+    )

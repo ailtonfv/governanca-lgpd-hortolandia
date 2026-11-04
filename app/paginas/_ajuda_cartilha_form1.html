@@ -5,6 +5,11 @@
     <p>{{ campo.ajuda_cartilha.texto }}</p>
     <p>{{ campo.ajuda_cartilha.limite }}</p>
     <p class="referencia-cartilha-form1"><strong>Referência:</strong> Cartilha LGPD {{ campo.ajuda_cartilha.versao }} — seção {{ campo.ajuda_cartilha.secao }}.</p>
+    {% if campo.ajuda_cartilha.disponivel and consulta_cartilha_local(request) %}
+    <p><a href="{{ url_for('consultar_cartilha_secao', registro_id=registro.id, edicao=campo.ajuda_cartilha.versao, secao_id=campo.ajuda_cartilha.secao_id) }}?conta_id={{ conta_id | urlencode }}" target="_blank" rel="noopener noreferrer">Consultar este item da Cartilha <span>(abre em outra aba)</span></a></p>
+    {% else %}
+    <p class="ajuda">Consulta da Cartilha indisponível neste ambiente. A referência acima permanece disponível; solicite a edição REV30.13 ao responsável pela PoC.</p>
+    {% endif %}
   </div>
 </details>
 {% endif %}

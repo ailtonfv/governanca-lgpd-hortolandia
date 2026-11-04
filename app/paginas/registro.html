@@ -574,6 +574,7 @@
             {% for campo in registro.form1_integral.campos_participante.values() %}
             <div class="campo-integral{% if campo.id == '3.5.1' %} campo-condicional{% endif %}" {% if campo.id == '3.5.1' %}data-depende-de="campo__3.5" data-valores="Sim"{% endif %}>
               <div id="rotulo-integral-{{ campo.id }}" class="rotulo-campo"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</div>
+              {% include '_ajuda_cartilha_form1.html' %}
               {% if campo.controle == 'seleção múltipla (combo com marcações)' %}
               <div class="grade-opcoes" role="group" aria-labelledby="rotulo-integral-{{ campo.id }}" {% if campo.ajuda_cartilha %}aria-describedby="ajuda-cartilha-{{ campo.id }}"{% endif %}>{% for valor, rotulo in campo.alternativas %}<label class="opcao"><input type="checkbox" id="opcao-integral-{{ campo.id }}-{{ loop.index }}" name="campo__{{ campo.id }}" value="{{ valor }}"> <span>{{ rotulo }}</span></label>{% endfor %}</div>
               {% elif campo.alternativas %}

@@ -20,14 +20,14 @@ def test_piloto_reproduz_os_oito_campos_da_matriz_sem_criar_perguntas():
     ids_catalogados = set(AJUDAS_CARTILHA_FORM1)
 
     # Act / Assert
-    assert ids_catalogados == IDS_PILOTO
-    assert VERSAO_CARTILHA_AJUDAS_FORM1 == "REV30.11"
+    assert IDS_PILOTO <= ids_catalogados
+    assert VERSAO_CARTILHA_AJUDAS_FORM1 == "REV30.13"
     assert all(item["texto"] for item in AJUDAS_CARTILHA_FORM1.values())
     assert all(item["secao"] for item in AJUDAS_CARTILHA_FORM1.values())
     assert all(item["limite"] for item in AJUDAS_CARTILHA_FORM1.values())
 
 
-def test_projecao_associa_ajuda_somente_aos_campos_do_piloto(sessao):
+def test_projecao_preserva_piloto_e_inclui_expansao_seletiva(sessao):
     # Arrange
     registro = _rascunho_pronto(sessao, "F18W-PROJECAO")
 
@@ -42,9 +42,9 @@ def test_projecao_associa_ajuda_somente_aos_campos_do_piloto(sessao):
     assert {
         campo_id for campo_id, campo in campos.items()
         if campo.get("ajuda_cartilha")
-    } == IDS_PILOTO
+    } == set(AJUDAS_CARTILHA_FORM1) - {"3.2", "3.3", "3.4", "3.4.1", "3.5"}
     assert campos["2.1"]["ajuda_cartilha"]["secao"].startswith("5.2 ")
-    assert campos["5.1"]["ajuda_cartilha"]["versao"] == "REV30.11"
+    assert campos["5.1"]["ajuda_cartilha"]["versao"] == "REV30.13"
 
 
 def test_interface_exibe_ajudas_sob_demanda_sem_link_inoperante(sessao):
@@ -59,10 +59,11 @@ def test_interface_exibe_ajudas_sob_demanda_sem_link_inoperante(sessao):
 
     # Assert
     assert pagina.status_code == 200
-    assert pagina.text.count("Entenda esta pergunta") == 8
-    assert "Cartilha LGPD REV30.11 — seção 5.2 Operações, canais e ambientes" in pagina.text
-    assert "Cartilha LGPD REV30.11 — seção 8.1 Necessidade de conhecer e acesso mínimo" in pagina.text
+    assert pagina.text.count("Entenda esta pergunta") == len(AJUDAS_CARTILHA_FORM1)
+    assert "Cartilha LGPD REV30.13 — seção 5.2 Operações, canais e ambientes" in pagina.text
+    assert "Cartilha LGPD REV30.13 — seção 8.1 Necessidade de conhecer e acesso mínimo" in pagina.text
     assert "WhatsApp é canal de entrada, não repositório oficial" in pagina.text
-    assert "Consultar Cartilha LGPD" not in pagina.text
+    assert "Consultar este item da Cartilha" not in pagina.text
+    assert "Consulta da Cartilha indisponível neste ambiente" in pagina.text
     assert estilo.status_code == 200
     assert ".ajuda-cartilha-form1 summary:focus-visible" in estilo.text
