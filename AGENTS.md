@@ -43,6 +43,27 @@ Leia este arquivo antes de alterar código ou documentação. Em seguida, leia s
 - O titular é representado por categorias. O sistema de mapeamento não cadastra pessoas titulares.
 - Autenticação real e integração com cadastro funcional não serão improvisadas na PoC.
 
+## Governança das referências FORM 1 × Cartilha LGPD
+
+A Cartilha LGPD é uma referência institucional versionada, integrada às ajudas contextuais do FORM 1 Integral REV13.
+
+**Regras obrigatórias para qualquer agente que modificar a Cartilha, as ajudas contextuais ou seus vínculos:**
+
+1. Preservar identificadores temáticos estáveis, sem depender exclusivamente de números de página.
+2. Manter explícita a versão da Cartilha associada a cada referência.
+3. Ao incorporar nova revisão, verificar a correspondência entre as perguntas REV13, os assuntos e as seções efetivamente existentes.
+4. Executar testes automatizados dos vínculos navegáveis, verificando a disponibilidade e a correspondência dos destinos.
+5. Não substituir silenciosamente referências históricas nem eliminar versões anteriores sem decisão expressa e avaliação dos impactos.
+6. Quando uma seção for renomeada, dividida, reunida ou excluída, atualizar o mapa de correspondência e registrar a alteração.
+7. Não inventar links, âncoras, páginas ou conteúdos inexistentes.
+8. Preservar a possibilidade de consultar a Cartilha sem perder respostas ou interromper o preenchimento do FORM 1.
+9. Atualizar o README.md quando houver alteração efetiva no funcionamento.
+10. Distinguir sempre uma regra documentada de uma funcionalidade efetivamente implementada e testada.
+
+**Critério de aceite:** nenhuma atualização da integração FORM 1 × Cartilha poderá ser considerada concluída sem a verificação dos vínculos afetados e o registro dos resultados.
+
+A publicação externa da Cartilha exige autorização institucional específica. Sua disponibilização na PoC permanece local e somente para leitura, conforme a configuração vigente.
+
 ## Ao alterar código
 
 - Antes de modificar, identificar o requisito funcional, inspecionar a implementação existente, determinar a causa do problema e propor a menor correção necessária, com testes e critérios objetivos de aceite. Preservar contratos, dados históricos e permissões.
