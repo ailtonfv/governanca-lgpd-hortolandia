@@ -8,9 +8,10 @@
 <dialog id="dialogo-saida-form1" aria-labelledby="titulo-saida-form1" aria-describedby="descricao-saida-form1">
   <h2 id="titulo-saida-form1">Alterações não salvas</h2>
   <p id="descricao-saida-form1">Deseja salvar antes de voltar ao painel? Se houver edições em outros blocos, elas também serão salvas. Campos obrigatórios incompletos não impedem salvar o rascunho.</p>
+  <p>Sair sem salvar descarta somente as alterações ainda não salvas nesta página. As respostas anteriormente salvas permanecem no rascunho deste Registro LGPD.</p>
   <p data-erro-saida role="alert"></p>
   <div class="acoes-saida-form1">
-    <button type="button" class="botao-primario" data-salvar-voltar>Salvar e voltar</button>
+    <button type="button" class="botao-primario" data-salvar-voltar>Salvar e voltar ao painel</button>
     <button type="button" class="botao-secundario" data-sair-sem-salvar>Sair sem salvar</button>
     <button type="button" class="botao-secundario" data-continuar-preenchendo autofocus>Continuar preenchendo</button>
   </div>
@@ -37,6 +38,7 @@
     <span class="estado">{% if registro.form1_integral.rascunho %}Rascunho {{ registro.form1_integral.rascunho.versao }}{% else %}Não iniciado{% endif %}</span>
   </div>
   <p class="aviso-leitura status-submissao-form1"><strong>Situação operacional:</strong> os 14 blocos estão disponíveis para preenchimento e revisão. A conclusão institucional do FORM 1 ainda não está habilitada nesta versão. O rascunho pode ser salvo e retomado mesmo incompleto.</p>
+  <p class="ajuda"><strong>Rascunho e apresentação:</strong> o rascunho é a versão de trabalho editável pelo ARP autorizado. Salvar pode atualizar essa versão, mas não altera apresentações históricas nem solicita nova conferência ao APA. Uma apresentação conferida permanece imutável; conferência interna não equivale a homologação ou submissão institucional.</p>
 
   {% if not registro.form1_integral.pode_editar %}
   <div class="area-somente-leitura modo-consulta-form1" role="note">
@@ -1296,6 +1298,16 @@
     var mensagemSalvamento = document.getElementById('mensagem-registro');
     var sucessoRetornado = new URLSearchParams(window.location.search).get('erro') === '0'
       && mensagemSalvamento && mensagemSalvamento.textContent.trim().indexOf('Rascunho salvo com sucesso') === 0;
+
+    // O aviso vale para este retorno do salvamento, não para uma nova recarga.
+    // Preserva conta, âncora e memória de posição; não altera a resposta HTTP
+    // utilizada pelo salvamento/saída segura nem os avisos de erro.
+    if (sucessoRetornado && raizIntegral) {
+      var urlSemAviso = new URL(window.location.href);
+      urlSemAviso.searchParams.delete('mensagem');
+      urlSemAviso.searchParams.delete('erro');
+      window.history.replaceState(window.history.state, '', urlSemAviso.href);
+    }
 
     if (prefixoRecuperacao && !falhaRetornada) {
       sessaoForm1.chaves().filter(function (chave) {

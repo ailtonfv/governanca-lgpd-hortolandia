@@ -48,11 +48,25 @@ for (const caso of ['inicial', 'sucesso', 'outra-versao', 'erro']) {
  closest(){return {querySelector(){return {id:'titulo-bloco-2'};}};},
  querySelector(s){return s === '[data-estado-salvamento]' ? status : s === '[name="versao_lida"]' ? versao : null;},
  querySelectorAll(s){return s === '[name]' ? [valor,versao] : [];},addEventListener(tipo,fn){this[tipo]=fn;}};
- const win={location:{search:caso==='erro'?'?erro=1':caso==='inicial'?'':'?erro=0'},addEventListener(){}};
- const ctx={window:win,URLSearchParams,document:{querySelectorAll(){return [f];},querySelector(){return {dataset:{registroId:'FICTICIO'}};},getElementById(){return {textContent:'Rascunho salvo com sucesso às 10:00.'};}},
+ const urlOriginal = new URL('http://localhost/registros/FICTICIO?conta_id=CONTA-G1#titulo-bloco-2');
+ if(caso!=='inicial') { urlOriginal.searchParams.set('erro',caso==='erro'?'1':'0'); urlOriginal.searchParams.set('mensagem','Rascunho salvo com sucesso às 10:00.'); }
+ const posicao={posicaoForm1:{bloco:2,indice:1,topo:300}};
+ const win={location:urlOriginal,history:{state:posicao,replaceState(state,_,href){this.state=state;win.location=new URL(href);}},addEventListener(){}};
+ const ctx={window:win,URL,URLSearchParams,document:{querySelectorAll(){return [f];},querySelector(){return {dataset:{registroId:'FICTICIO'}};},getElementById(){return win.location.searchParams.has('mensagem') ? {textContent:'Rascunho salvo com sucesso às 10:00.'} : null;}},
  sessaoForm1:{getItem(k){return memoria.get(k)||null;},setItem(k,v){memoria.set(k,v);},removeItem(k){memoria.delete(k);},chaves(){return [...memoria.keys()];}}};
  vm.runInNewContext(feedback,ctx);
  assert.equal(status.textContent.includes('Rascunho salvo com sucesso.'),caso==='sucesso');
+ assert.equal(win.location.searchParams.get('conta_id'),'CONTA-G1');
+ assert.equal(win.location.hash,'#titulo-bloco-2');
+ assert.equal(win.history.state,posicao);
+ assert.equal(win.location.searchParams.has('mensagem'),caso==='erro');
+ if(caso==='sucesso') {
+  // A recarga usa a URL limpa: nenhum novo aviso ou salvamento é produzido.
+  status.textContent='Sem alterações para salvar.';
+  vm.runInNewContext(feedback,ctx);
+  assert.equal(status.textContent,'Sem alterações para salvar.');
+  assert.equal(valor.value,'resposta persistida');
+ }
  if(caso==='erro') { assert.equal(valor.value,'texto digitado fictício'); assert.equal(f.dataset.alterado,'true'); assert.match(status.textContent,/salvamento falhou/); }
  f.input(); assert.match(status.textContent,/Alterações não salvas/);
  win.saidaForm1={alterado(){return false;}}; f.change(); assert.match(status.textContent,/Sem alterações para salvar/);

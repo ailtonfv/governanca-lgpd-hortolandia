@@ -4,7 +4,7 @@
   {% if numero_bloco > 1 %}
   <button class="botao-secundario" type="button" data-bloco-anterior="{{ numero_bloco - 1 }}">Anterior</button>
   {% endif %}
-  <button class="botao-secundario" type="submit" name="acao_pos_salvar" value="permanecer" aria-label="Salvar rascunho do FORM 1 e permanecer neste bloco">Salvar rascunho</button>
+  <button class="botao-secundario" type="submit" name="acao_pos_salvar" value="permanecer" aria-label="Salvar e permanecer neste bloco">Salvar e permanecer neste bloco</button>
   {% if numero_bloco < 14 %}
   <button class="botao-primario" type="submit" name="acao_pos_salvar" value="proximo" data-proximo-bloco="{{ numero_bloco + 1 }}">
     Salvar e avançar
@@ -16,5 +16,5 @@
 {% if numero_bloco < 14 %}
 <p class="destino-acao-bloco">Próximo: Bloco {{ numero_bloco + 1 }} — {{ titulos_blocos_navegacao[numero_bloco + 1] }}</p>
 {% endif %}
-<p class="ajuda orientacao-salvamento">Salvar rascunho guarda suas respostas para continuar depois. Não conclui nem submete o FORM 1.</p>
+<p class="ajuda orientacao-salvamento">Suas respostas são salvas no rascunho deste Registro LGPD. Você poderá continuar depois. Salvar não conclui nem submete o FORM 1.</p>
 </footer>

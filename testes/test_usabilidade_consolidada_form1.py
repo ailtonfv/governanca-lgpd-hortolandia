@@ -45,7 +45,11 @@ def test_html_preserva_opcoes_e_reduz_rodape_sem_falsos_controles(sessao):
     assert 'name="campo__2.13"' in pagina.text
     assert 'value="Em alguns casos"' in pagina.text
     assert 'Não informe protocolo, número de atendimento' in pagina.text
-    assert 'value="permanecer" aria-label="Salvar rascunho do FORM 1 e permanecer neste bloco">Salvar rascunho</button>' in pagina.text
+    assert 'value="permanecer" aria-label="Salvar e permanecer neste bloco">Salvar e permanecer neste bloco</button>' in pagina.text
+    assert pagina.text.count('Suas respostas são salvas no rascunho deste Registro LGPD.') == 14
+    assert 'data-salvar-voltar>Salvar e voltar ao painel</button>' in pagina.text
+    assert 'Sair sem salvar descarta somente as alterações ainda não salvas nesta página.' in pagina.text
+    assert 'Salvar pode atualizar essa versão, mas não altera apresentações históricas nem solicita nova conferência ao APA.' in pagina.text
     assert 'Próximo: Bloco 3' in pagina.text
     assert 'Conferência interna pelo APA' in pagina.text
     assert 'Pendências antes da futura submissão' in pagina.text

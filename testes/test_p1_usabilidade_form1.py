@@ -101,7 +101,7 @@ def test_avisos_sao_apresentados_separadamente_e_nao_impedem_salvar(sessao):
     assert 'data-pendencia-campo="2.12"' in pagina.text
     assert 'Sem alterações para salvar.' in pagina.text
     assert 'Rascunho confirmado no servidor.' not in pagina.text
-    assert 'Salvar rascunho guarda suas respostas para continuar depois. Não conclui nem submete o FORM 1.' in pagina.text
+    assert 'Suas respostas são salvas no rascunho deste Registro LGPD. Você poderá continuar depois. Salvar não conclui nem submete o FORM 1.' in pagina.text
 
 
 def test_devolucao_localiza_catalogo_preservando_justificativa_snapshot_e_permissoes(sessao):

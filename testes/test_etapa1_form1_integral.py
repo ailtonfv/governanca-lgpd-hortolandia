@@ -374,7 +374,7 @@ def test_interface_libera_as_quatro_etapas_e_mantem_submissao_bloqueada(sessao):
     assert "Rascunho salvo com sucesso às" in salvamento.text
     assert "Bloco 2 atualizado." in salvamento.text
     assert "Questionário resumido de demonstração" not in salvamento.text
-    assert "Salvar rascunho do FORM 1" in salvamento.text
+    assert "Salvar e permanecer neste bloco" in salvamento.text
 
 
 def test_navegacao_integral_nao_concede_edicao_a_outro_agente(sessao):

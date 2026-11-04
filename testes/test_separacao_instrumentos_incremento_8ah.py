@@ -75,7 +75,7 @@ def test_designacao_confirmada_permite_ao_arp_iniciar_no_bloco_1():
     assert "FORM 1 — Levantamento Inicial do Tratamento de Dados Pessoais" in destino.text
     assert "FORM 1 — Etapa 1 de 4 — Bloco 1 de 14" in destino.text
     assert 'id="titulo-bloco-1"' in destino.text
-    assert "Salvar rascunho do FORM 1" in destino.text
+    assert "Salvar e permanecer neste bloco" in destino.text
     assert "data-instrumento-regressao" not in destino.text
 
 
