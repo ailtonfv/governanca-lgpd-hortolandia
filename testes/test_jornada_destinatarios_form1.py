@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.modelos import RascunhoForm1Integral
 from app.pre_validacao_form1_integral import pre_validar_form1_integral
-from testes.test_destinatarios_10_2_1_form1_integral import _preparar
+from testes.test_destinatarios_10_2_1_form1_integral import _preparar, _adicionar
 
 cliente = TestClient(app)
 
@@ -19,6 +19,10 @@ def test_javascript_jornada_e_html_sem_salvamento_preparatorio(sessao):
     assert 'Salvar respostas do Bloco 10' not in html
     assert 'Salvar e incluir este destinatário' in html
     assert 'jornada_destinatarios_form1.js' in html
+    assert 'Categoria deste destinatário' in html
+    assert 'Categoria selecionada em 10.2' not in html
+    assert 'data-destinatario-novo="true"' in html
+    assert 'aria-describedby="destinatario-novo-orientacao-categoria"' in html
     assert html.index('titulo-destinatarios-10-2-1') < html.index('rotulo-integral-10.3')
     raiz = Path(__file__).resolve().parents[1]
     resultado = subprocess.run([shutil.which('node'), str(raiz/'testes/apoio_jornada_destinatarios.cjs')], cwd=raiz, capture_output=True, text=True)
@@ -62,3 +66,24 @@ def test_sequencia_http_duas_ocorrencias_edicao_remocao_e_outros_blocos(sessao):
     detalhes = [i['detalhe'] for i in pre['incompletos'] if i['campo_id']=='10.2.1']
     assert any('instrumento' in d for d in detalhes)
     assert not any('cnpj' in d for d in detalhes)
+
+
+def test_mudar_10_2_preserva_categoria_e_dados_da_ocorrencia_no_historico(sessao):
+    r = _preparar(sessao, 'CATEGORIA-FICTICIA-HIST', ['Outra Secretaria', 'Outro órgão público'])
+    assert _adicionar(sessao, r, 'CATEGORIA-FICTICIA-INCLUIR', 2)['permitido']
+    sessao.commit()
+    rid = r['registro_id']
+    anterior = deepcopy(sessao.get(RascunhoForm1Integral, rid).conteudo['destinatarios_10_2_1'][0])
+    resposta = cliente.post(f'/registros/{rid}/form1-integral/bloco-10/salvar', data={
+        'conta_id':'CONTA-A1', 'comando_id':'CATEGORIA-FICTICIA-REVER', 'versao_lida':'3',
+        'campo__10.1':'Sim', 'campo__10.2':'Outro órgão público',
+    }, follow_redirects=False)
+    assert resposta.status_code == 303 and 'erro=0' in resposta.headers['location']
+    sessao.expire_all()
+    conteudo = sessao.get(RascunhoForm1Integral, rid).conteudo
+    assert not conteudo['destinatarios_10_2_1']
+    historico = conteudo['destinatarios_10_2_1_inativos'][0]
+    assert all(historico[k] == v for k, v in anterior.items())
+    assert historico['motivo_desativacao']
+    html = cliente.get(f'/registros/{rid}?conta_id=CONTA-A1').text
+    assert 'Outra Secretaria' in html and 'Outro órgão público' in html

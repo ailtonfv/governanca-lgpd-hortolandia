@@ -1,13 +1,14 @@
 {% set prefixo_destinatario = "destinatario-" ~ destinatario.get("id", "novo") ~ "-" %}
 <div data-destinatario-editor data-categorias-municipais='{{ campo.categorias_municipais_destinatarios | tojson }}'>
-<label>Categoria selecionada em 10.2
-  <select name="destinatario__categoria" id="{{ prefixo_destinatario }}categoria" required>
+<label>Categoria deste destinatário
+  <select name="destinatario__categoria" id="{{ prefixo_destinatario }}categoria" data-destinatario-novo="{{ 'false' if destinatario.get('id') else 'true' }}" aria-describedby="{{ prefixo_destinatario }}orientacao-categoria" required>
     <option value="">Selecione</option>
     {% for categoria in respostas_integral.get('10.2', []) if categoria != 'A confirmar' %}
     <option value="{{ categoria }}" {% if destinatario.get('categoria') == categoria %}selected{% endif %}>{{ categoria }}</option>
     {% endfor %}
   </select>
 </label>
+<p class="ajuda" id="{{ prefixo_destinatario }}orientacao-categoria" data-orientacao-categoria aria-live="polite">Escolha uma das categorias marcadas na pergunta 10.2.</p>
 <label>Modo de identificação
   <select name="destinatario__modalidade" id="{{ prefixo_destinatario }}modalidade" required>
     {% for valor, rotulo in [('identificado','Destinatário identificado'),('requisicao_eventual','Requisição eventual'),('nao_determinavel','Não determinável neste momento')] %}

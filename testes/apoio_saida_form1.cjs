@@ -32,8 +32,9 @@ class Dados {
   constructor(f) {this.dados = new Map(f.elements.filter(c => !c.disabled && (!['checkbox','radio'].includes(c.type) || c.checked)).map(c => [c.name,c.value]));}
   set(k,v) {this.dados.set(k,v);} get(k) {return this.dados.get(k);}
 }
-function preparar(numeros = [2,3]) {
+function preparar(numeros = [2,3], configurar = () => {}) {
   const forms = numeros.map(n => formulario(n));
+  configurar(forms);
   const link = elemento(); link.href='https://poc.invalid/?conta_id=CONTA-FICTICIA';
   const barra = elemento(); barra.querySelector = () => link; barra.getBoundingClientRect = () => ({height:48});
   const salvar=elemento(), sair=elemento(), continuar=elemento(), erro=elemento();
@@ -127,6 +128,31 @@ function preparar(numeros = [2,3]) {
   assert.equal(e.requests[2].opts.body.get('versao_lida'),'3');
   assert.match(e.requests[2].url,/destinatarios/);
   assert.equal(e.forms[2].inert,true);
+  // Categoria automática não basta para incluir uma ficha vazia ao salvar o bloco.
+  function fichaNova(forms) {
+    const f=forms[1]; f.action+='/destinatarios/adicionar';
+    f.categoria=f.campo('destinatario__categoria','','select-one');
+    f.categoria.form=f;f.categoria.dataset.destinatarioNovo='true';
+  }
+  e=preparar([10,10],fichaNova);
+  let ficha=e.forms[1], categoria=ficha.categoria;
+  categoria.value='Outra Secretaria';e.window.saidaForm1.registrarCategoriaAutomatica(categoria);
+  assert.equal(e.window.saidaForm1.alterado(ficha),false);
+  e.forms[0].texto.value='Resposta fictícia';await e.window.saidaForm1.salvarPendentes({destino});
+  assert.equal(e.requests.length,1);assert.ok(!e.requests[0].url.endsWith('/adicionar'));
+  // Inclusão explícita continua permitida, inclusive rascunho incompleto.
+  e=preparar([10,10],fichaNova);ficha=e.forms[1];categoria=ficha.categoria;
+  categoria.value='Outra Secretaria';e.window.saidaForm1.registrarCategoriaAutomatica(categoria);
+  await e.window.saidaForm1.salvarPendentes({destino,adicional:ficha});assert.equal(e.requests.length,1);
+  assert.equal(e.requests[0].opts.body.get('destinatario__categoria'),'Outra Secretaria');
+  // A sugestão não limpa alterações reais e continua fazendo parte da chave/payload.
+  e=preparar([10,10],fichaNova);ficha=e.forms[1];categoria=ficha.categoria;
+  ficha.texto.value='Unidade fictícia';categoria.value='Outra Secretaria';
+  e.window.saidaForm1.registrarCategoriaAutomatica(categoria);assert.ok(e.window.saidaForm1.alterado(ficha));
+  e.fetch=async()=>{throw new TypeError('rede');};await e.window.saidaForm1.salvarPendentes({destino});
+  categoria.value='Outro órgão público';e.window.saidaForm1.registrarCategoriaAutomatica(categoria);
+  await e.window.saidaForm1.salvarPendentes({destino});assert.equal(e.requests.length,1);
+  assert.equal(e.window.destino,undefined);
   // Inclusão confirmada seguida de falha: impede editar/reincluir a mesma ocorrência.
   e=preparar([10,14]); e.forms[0].action+='/destinatarios/adicionar';
   e.forms.forEach(f=>f.texto.value='Texto');

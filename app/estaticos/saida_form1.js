@@ -37,6 +37,18 @@
   function alterado(f) { return originais.has(f) && originais.get(f) !== assinatura(f); }
   function temAlteracoes() { return formularios.some(alterado); }
   window.saidaForm1 = {
+    // A sugestão automática de categoria, sozinha, não cadastra um destinatário.
+    // Atualiza somente esse controle no ponto de comparação; mantém as demais
+    // edições e a assinatura completa utilizada nas tentativas idempotentes.
+    registrarCategoriaAutomatica: function (controle) {
+      var f = controle.form;
+      if (!originais.has(f) || controle.name !== 'destinatario__categoria' ||
+          controle.dataset.destinatarioNovo !== 'true' || !f.getAttribute('action').endsWith('/destinatarios/adicionar')) return;
+      var anterior = JSON.parse(originais.get(f));
+      var atual = JSON.parse(assinatura(f)).find(function (item) { return item[0] === controle.name; });
+      originais.set(f, JSON.stringify(anterior.map(function (item) { return item[0] === controle.name ? atual : item; })));
+      valoresConfirmados.get(f).forEach(function (item) { if (item.controle === controle) item.valor = controle.value; });
+    },
     alterado: alterado,
     temAlteracoes: temAlteracoes,
     deveAvisar: function () { return !saindo && !envioNormal && (ocupado || temAlteracoes()); },
