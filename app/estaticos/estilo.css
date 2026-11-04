@@ -336,6 +336,9 @@ dd { margin: .25rem 0 0; }
 .form1-integral .formulario-integral input:not([type]),
 .form1-integral .formulario-integral input[type="text"],
 .form1-integral .formulario-integral input[type="number"],
+.form1-integral .continuacao-formulario-integral input:not([type]),
+.form1-integral .continuacao-formulario-integral input[type="text"],
+.form1-integral .continuacao-formulario-integral input[type="number"],
 .localizador-pergunta input {
   box-sizing: border-box; width: 100%; max-width: 100%; min-width: 0;
   min-height: 2.75rem; padding: .7rem; border: 1px solid var(--borda);

@@ -6,7 +6,7 @@ window.criarRetomadaForm1 = function (raiz, sessao) {
   var ultimaEdicao = null;
   function visivel(c) { return c && !c.closest('[hidden], [data-condicional-oculta="true"]') && c.getClientRects().length > 0; }
   function blocoAtivo() { return Array.from(raiz.querySelectorAll('.bloco-form1-integral')).find(visivel); }
-  function controles(f) { return Array.from(f.querySelectorAll('input:not([type="hidden"]), select, textarea')); }
+  function controles(f) { return Array.from((window.elementosFormularioForm1 ? window.elementosFormularioForm1(f, 'input:not([type="hidden"]), select, textarea') : f.querySelectorAll('input:not([type="hidden"]), select, textarea'))); }
   function capturar(preferirEdicao) {
     var bloco = blocoAtivo();
     if (!bloco) return null;
@@ -15,7 +15,7 @@ window.criarRetomadaForm1 = function (raiz, sessao) {
     var campo = candidatos.includes(ultimaEdicao) && (preferirEdicao || ultimaEdicao.getBoundingClientRect().top >= margem
       && ultimaEdicao.getBoundingClientRect().top < window.innerHeight) ? ultimaEdicao
       : candidatos.find(function (c) { var r = c.getBoundingClientRect(); return r.bottom > margem && r.top < window.innerHeight; });
-    var f = campo && campo.closest('form');
+    var f = campo && (campo.form || campo.closest('form'));
     return {escopo: escopo, bloco: Number(bloco.querySelector('h3').id.replace('titulo-bloco-', '')),
       deslocamento: Math.max(0, margem - bloco.getBoundingClientRect().top),
       acao: f ? f.getAttribute('action') : null, indice: f ? controles(f).indexOf(campo) : -1,

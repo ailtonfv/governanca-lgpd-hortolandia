@@ -814,6 +814,7 @@
   <p class="ajuda">Os 14 blocos estão disponíveis para preenchimento e revisão. A conclusão institucional do FORM 1 ainda não está habilitada nesta versão.</p>
 </section>
 
+<script src="{{ url_for('estaticos', path='/formulario_associado_form1.js') }}"></script>
 <script src="{{ url_for('estaticos', path='/saida_form1.js') }}"></script>
 <script src="{{ url_for('estaticos', path='/posicao_form1.js') }}"></script>
 <script src="{{ url_for('estaticos', path='localizador_form1.js') }}"></script>
@@ -915,10 +916,10 @@
     var raiz = document.querySelector('.form1-integral');
     if (!raiz) return;
     raiz.querySelectorAll('form').forEach(function (formulario) {
-      var nomes = new Set(Array.from(formulario.querySelectorAll('input[type="checkbox"][name]'))
+      var nomes = new Set(Array.from((window.elementosFormularioForm1 ? window.elementosFormularioForm1(formulario, 'input[type="checkbox"][name]') : formulario.querySelectorAll('input[type="checkbox"][name]')))
         .map(function (opcao) { return opcao.name; }));
       nomes.forEach(function (nome) {
-        var opcoes = Array.from(formulario.querySelectorAll('input[type="checkbox"]'))
+        var opcoes = Array.from((window.elementosFormularioForm1 ? window.elementosFormularioForm1(formulario, 'input[type="checkbox"]') : formulario.querySelectorAll('input[type="checkbox"]')))
           .filter(function (opcao) { return opcao.name === nome; });
         var excludentes = opcoes.filter(function (opcao) {
           return opcao.value === 'A confirmar' || opcao.value === 'Não se aplica'
@@ -1282,7 +1283,7 @@
         if (!valoresPorNome[par[0]]) valoresPorNome[par[0]] = [];
         valoresPorNome[par[0]].push(par[1]);
       });
-      formulario.querySelectorAll('[name]').forEach(function (controle) {
+      (window.elementosFormularioForm1 ? window.elementosFormularioForm1(formulario, '[name]') : formulario.querySelectorAll('[name]')).forEach(function (controle) {
         var valores = valoresPorNome[controle.name] || [];
         if (controle.type === 'checkbox' || controle.type === 'radio') controle.checked = valores.includes(controle.value);
         else if (controle.tagName === 'SELECT' && controle.multiple) Array.from(controle.options).forEach(function (opcao) { opcao.selected = valores.includes(opcao.value); });
@@ -1316,11 +1317,11 @@
     }
 
     function controlesDeEnvio(formulario) {
-      return Array.from(formulario.querySelectorAll('button[type="submit"], input[type="submit"]'));
+      return Array.from((window.elementosFormularioForm1 ? window.elementosFormularioForm1(formulario, 'button[type="submit"], input[type="submit"]') : formulario.querySelectorAll('button[type="submit"], input[type="submit"]')));
     }
 
     function atualizarEstado(formulario, texto, classe) {
-      var estado = formulario.querySelector('[data-estado-salvamento]');
+      var estado = window.elementosFormularioForm1 ? window.elementosFormularioForm1(formulario, '[data-estado-salvamento]')[0] : formulario.querySelector('[data-estado-salvamento]');
       if (!estado) return;
       estado.textContent = texto;
       estado.classList.remove('estado-salvamento-pendente', 'estado-salvamento-processando');

@@ -127,7 +127,9 @@ def test_interface_orienta_os_14_blocos_dados_volumes_e_instrumentos(sessao):
     assert pagina.text.count('name="acao_pos_salvar" value="proximo"') == 13
     assert pagina.text.count("Salvar e avançar") == 13
     assert "Consultar pré-validação" in pagina.text
-    assert pagina.text.count('name="acao_pos_salvar" value="permanecer"') == 14
+    # Um rodapé por bloco e o atalho do mesmo comando junto de 10.2.1.
+    assert pagina.text.count('aria-label="Salvar e permanecer neste bloco"') == 14
+    assert pagina.text.count('name="acao_pos_salvar" value="permanecer"') == 15
     assert "FORM 1 — Etapa 1 de 4 — Bloco 1 de 14" in pagina.text
     assert "FORM 1 — Etapa 4 de 4 — Bloco 14 de 14" in pagina.text
     assert "Dado Pessoal:" in pagina.text

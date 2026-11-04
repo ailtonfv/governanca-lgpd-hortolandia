@@ -4,9 +4,9 @@
   {% if numero_bloco > 1 %}
   <button class="botao-secundario" type="button" data-bloco-anterior="{{ numero_bloco - 1 }}">Anterior</button>
   {% endif %}
-  <button class="botao-secundario" type="submit" name="acao_pos_salvar" value="permanecer" aria-label="Salvar e permanecer neste bloco">Salvar e permanecer neste bloco</button>
+  <button {% if formulario_associado %}form="{{ formulario_associado }}"{% endif %} class="botao-secundario" type="submit" name="acao_pos_salvar" value="permanecer" aria-label="Salvar e permanecer neste bloco">Salvar e permanecer neste bloco</button>
   {% if numero_bloco < 14 %}
-  <button class="botao-primario" type="submit" name="acao_pos_salvar" value="proximo" data-proximo-bloco="{{ numero_bloco + 1 }}">
+  <button {% if formulario_associado %}form="{{ formulario_associado }}"{% endif %} class="botao-primario" type="submit" name="acao_pos_salvar" value="proximo" data-proximo-bloco="{{ numero_bloco + 1 }}">
     Salvar e avançar
   </button>
   {% else %}

@@ -3,7 +3,7 @@
   <h3 id="titulo-bloco-{{ numero_bloco }}">{{ titulo_bloco }}</h3>
   {% include '_leitura_bloco_form1.html' %}
   {% if registro.form1_integral.pode_editar %}
-  <form class="formulario formulario-integral" method="post" action="{{ url_for(rota_bloco, registro_id=registro.id) }}">
+  <form {% if numero_bloco == 10 %}id="formulario-bloco-10"{% endif %} class="formulario formulario-integral" method="post" action="{{ url_for(rota_bloco, registro_id=registro.id) }}">
     <input type="hidden" name="conta_id" value="{{ conta_id }}">
     <input type="hidden" name="comando_id" value="{{ comando_bloco }}">
     <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
@@ -11,16 +11,19 @@
     <p class="ajuda ajuda-compartilhamento"><strong>Destinatários do tratamento:</strong> diferencie circulação interna entre unidades ou Secretarias da Prefeitura, compartilhamento com órgão ou entidade pública externa e compartilhamento com entidade privada. A função concreta deve ser registrada; contrato ou parceria não torna automaticamente uma entidade Operadora LGPD. Não confunda este compartilhamento de dados com a tramitação administrativa do Registro LGPD.</p>
     {% endif %}
     {% for campo in campos_bloco.values() %}
+    {% if campo.estrutura_destinatarios %}</form>{% endif %}
+    {% set formulario_associado = 'formulario-bloco-10' if numero_bloco == 10 and campo.id not in ('10.1', '10.2', '10.2.1') else none %}
     <div class="campo-integral{% if campo.condicoes %} campo-condicional{% endif %}"
          {% if campo.condicoes %}data-condicoes='{{ campo.condicoes | tojson }}'{% endif %}>
       <div id="rotulo-integral-{{ campo.id }}" class="rotulo-campo"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</div>
       {% include '_ajuda_cartilha_form1.html' %}
+      {% if campo.ajuda_contextual %}<p class="ajuda">{{ campo.ajuda_contextual }}</p>{% endif %}
       {% if campo.estrutura_destinatarios %}
-      <p class="ajuda">Os destinatários são registrados abaixo, em ocorrências estruturadas e repetíveis. Respostas textuais antigas são preservadas somente para consulta.</p>
+      {% include '_destinatarios_10_2_1.html' %}
       {% elif campo.controle in ('seleção múltipla (combo com marcações)', 'reuso do catálogo de referência (ver campo indicado)') %}
       <div class="grade-opcoes" role="group" aria-labelledby="rotulo-integral-{{ campo.id }}" {% if campo.ajuda_cartilha %}aria-describedby="ajuda-cartilha-{{ campo.id }}"{% endif %}>
         {% for valor, rotulo in campo.alternativas %}
-        <label class="opcao"><input type="checkbox" id="opcao-integral-{{ campo.id }}-{{ loop.index }}" name="campo__{{ campo.id }}" value="{{ valor }}" {% if valor in respostas_integral.get(campo.id, []) %}checked{% endif %}> {% include '_alternativa_form1.html' %}</label>
+        <label class="opcao"><input {% if formulario_associado %}form="{{ formulario_associado }}"{% endif %} type="checkbox" id="opcao-integral-{{ campo.id }}-{{ loop.index }}" name="campo__{{ campo.id }}" value="{{ valor }}" {% if valor in respostas_integral.get(campo.id, []) %}checked{% endif %}> {% include '_alternativa_form1.html' %}</label>
         {% endfor %}
       </div>
       {% elif campo.alternativas %}
@@ -36,12 +39,13 @@
       {% if campo.instrucao %}<p class="ajuda" id="instrucao-integral-{{ campo.id }}">{{ campo.instrucao }}</p>{% endif %}
       {% include '_complemento_outro_form1.html' %}
     </div>
+    {% if campo.estrutura_destinatarios %}<div class="formulario continuacao-formulario-integral" data-continuacao-formulario="formulario-bloco-10">{% endif %}
     {% endfor %}
+    {% set formulario_associado = 'formulario-bloco-10' if numero_bloco == 10 else none %}
     <div class="rodape-formulario">
       <p>O rascunho admite respostas parciais. Campos condicionais inativos são preservados somente no histórico.</p>
       {% include '_acoes_salvar_bloco_form1.html' %}
     </div>
-  </form>
-  {% if numero_bloco == 10 %}{% include '_destinatarios_10_2_1.html' %}{% endif %}
+  {% if numero_bloco == 10 %}</div>{% else %}</form>{% endif %}
   {% else %}<p class="aviso-leitura">Somente o ARP atual pode alterar este rascunho.</p>{% endif %}
 </section>

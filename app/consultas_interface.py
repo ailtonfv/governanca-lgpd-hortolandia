@@ -15,7 +15,7 @@ from app.classificacao_catalogo_5_1 import (
     VERSAO_CLASSIFICACAO_CATALOGO_5_1,
 )
 from app.continuidade_apa import apa_em_exercicio, unidades_em_que_e_apa_atual
-from app.rascunho_form1_integral import _respostas_reaproveitadas
+from app.rascunho_form1_integral import _respostas_reaproveitadas, CATEGORIAS_MUNICIPAIS_10_2
 from app.form1_sintetico import (CATEGORIAS_DADOS, CATEGORIAS_TITULARES,
                                  DESTINATARIOS_COMPARTILHAMENTO)
 from app.form1_integral import (CONDICOES_BLOCO_1, CONDICOES_PARTICIPANTE_BLOCO_3,
@@ -1053,6 +1053,8 @@ def carregar_registro(sessao, conta_id, registro_id):
             )
         else:
             alternativas = tuple((item, item) for item in alternativas)
+        if campo_id == '9.1':
+            alternativas = tuple((valor, rotulo.replace('AGENTE PÚBLICO AUTORIZADO', 'Servidor com acesso autorizado')) for valor, rotulo in alternativas)
         condicao = (
             CONDICOES_BLOCO_2.get(campo_id)
             or CONDICOES_BLOCO_4.get(campo_id)
@@ -1072,8 +1074,11 @@ def carregar_registro(sessao, conta_id, registro_id):
         }
         perguntas_interface = {
             "6.1.1": "Qual é a origem dos dados pessoais utilizados neste fluxo?",
+            "10.1": "Neste serviço, processo ou atividade, os dados pessoais são enviados ou disponibilizados para acesso de outra unidade, Secretaria, órgão ou entidade, dentro ou fora da Prefeitura?",
         }
         ajudas_contextuais = {
+            "9.1": "A autorização para acessar os dados não atribui o papel institucional de APA, responsável pela governança do Registro LGPD.",
+            "10.1": "Considere tanto o envio de documentos ou arquivos quanto o acesso a informações por meio de sistemas. Inclua outras unidades da mesma Secretaria, outras Secretarias e entidades externas. Não confunda a circulação dos dados pessoais com a tramitação administrativa do Registro LGPD.",
             "2.8": "Atendimentos: quantidade de atendimentos realizados em um período.",
             "2.9": "Registros: estoque de registros administrativos existente em uma data de referência.",
             "2.10": "Ocorrências: eventos que geram atuações, em determinado período.",
@@ -1088,7 +1093,7 @@ def carregar_registro(sessao, conta_id, registro_id):
             "pergunta": perguntas_interface.get(campo_id, campo.pergunta),
             "controle": campo.controle,
             "alternativas": alternativas,
-            "instrucao": instrucao_para_interface(campo),
+            "instrucao": '' if campo_id == '10.2.1' else instrucao_para_interface(campo),
             "ajuda_contextual": ajudas_contextuais.get(campo_id),
             "ajuda_cartilha": (
                 None
@@ -1118,6 +1123,7 @@ def carregar_registro(sessao, conta_id, registro_id):
                 }
             ),
             "estrutura_destinatarios": campo_id == "10.2.1",
+            "categorias_municipais_destinatarios": sorted(CATEGORIAS_MUNICIPAIS_10_2) if campo_id == '10.2.1' else [],
             "obrigatoriedade": metadado_visual_obrigatoriedade(campo_id),
         }
     # Projeção de consulta: usa as mesmas condições e o mesmo catálogo da edição.

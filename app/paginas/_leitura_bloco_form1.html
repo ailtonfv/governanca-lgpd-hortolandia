@@ -5,6 +5,7 @@
   <section id="consulta-integral-{{ campo.id }}" class="campo-integral pergunta-consulta" tabindex="-1" aria-labelledby="rotulo-consulta-{{ campo.id }}">
     <h4 id="rotulo-consulta-{{ campo.id }}">{{ campo.id }} — {{ campo.pergunta }}</h4>
     {% include '_ajuda_cartilha_form1.html' %}
+    {% if campo.ajuda_contextual %}<p class="ajuda">{{ campo.ajuda_contextual }}</p>{% endif %}
     {% for leitura in campo.leituras %}
       {% if leitura.participante %}<p><strong>Participante {{ leitura.participante }}</strong></p>{% endif %}
       {% if not leitura.ativa %}<p class="ajuda">Não aplicável às respostas salvas atuais. Nenhum campo de edição é habilitado.</p>{% endif %}
