@@ -28,7 +28,7 @@
 {% endif %}
 
 {% if not modo_legado %}
-<section class="form1 form1-integral" aria-labelledby="titulo-form1-integral" data-registro-id="{{ registro.id }}">
+<section data-modo-consulta="{{ 'false' if registro.form1_integral.pode_editar else 'true' }}" class="form1 form1-integral" aria-labelledby="titulo-form1-integral" data-registro-id="{{ registro.id }}">
   <div class="cabecalho-secao cabecalho-form1">
     <div>
       <h2 id="titulo-form1-integral">FORM 1 — Levantamento Inicial do Tratamento de Dados Pessoais</h2>
@@ -38,6 +38,12 @@
   </div>
   <p class="aviso-leitura status-submissao-form1"><strong>Situação operacional:</strong> os 14 blocos estão disponíveis para preenchimento e revisão. A conclusão institucional do FORM 1 ainda não está habilitada nesta versão. O rascunho pode ser salvo e retomado mesmo incompleto.</p>
 
+  {% if not registro.form1_integral.pode_editar %}
+  <div class="area-somente-leitura modo-consulta-form1" role="note">
+    <strong>Somente leitura — modo de consulta.</strong> Você pode consultar as perguntas e respostas salvas, mas não editar este rascunho.
+    {% if registro.form1_integral.arp_atual %}<p>Responsável pelo preenchimento: matrícula {{ registro.form1_integral.arp_atual.matricula }} — {{ registro.form1_integral.arp_atual.nome }}.</p>{% endif %}
+  </div>
+  {% endif %}
   {% set proxima = registro.form1_integral.proxima_providencia %}
   <section class="proxima-providencia" aria-labelledby="titulo-proxima-providencia">
     <p class="etiqueta">Orientação conforme o estado e as permissões atuais</p>
@@ -113,8 +119,8 @@
   <p class="aviso-leitura">Somente um APA responsável pelo Registro nesta Secretaria pode definir ou substituir o ARP. Esta informação não concede ação de preenchimento.</p>
   {% endif %}
 
-  <details class="informacoes-institucionais-form1">
-    <summary>Informações do Registro — somente leitura</summary>
+  <details class="informacoes-institucionais-form1 area-somente-leitura">
+    <summary>Informações do Registro — Somente leitura</summary>
     <dl>
       <div><dt>Situação do Registro</dt><dd>{{ registro.estado }}</dd></div>
       <div><dt>Secretaria responsável</dt><dd>{{ registro.unidade }}</dd></div>
@@ -175,11 +181,12 @@
       13: 'Exposição física ou visual',
       14: 'Achados e pendências'
     } %}
-    <section class="painel-progresso-form1" data-painel-progresso data-total-blocos="14"
+    <section class="painel-progresso-form1 area-somente-leitura" data-painel-progresso data-total-blocos="14"
              data-blocos-salvos="{{ progresso.blocos_salvos | join(',') }}"
              data-blocos-com-respostas="{{ progresso.blocos_com_respostas_salvas | join(',') }}"
              aria-labelledby="titulo-painel-progresso-form1">
       <h3 id="titulo-painel-progresso-form1">Progresso e pendências do FORM 1</h3>
+      <p class="selo-somente-leitura">Somente leitura · controles de consulta disponíveis</p>
       <p class="ajuda">O painel descreve o rascunho salvo e a navegação desta sessão. Ele não mede conformidade com a LGPD.</p>
       <div class="grade-progresso-form1">
         <article class="cartao-progresso-form1 jornada-form1">
@@ -227,7 +234,7 @@
                   data-pendencia-destino="{{ proxima_pendencia.destino_tipo }}">
             <span>Próxima pergunta pendente</span>
             <strong>{{ proxima_pendencia.campo_id }} — {{ proxima_pendencia.pergunta }}</strong>
-            <span class="rotulo-destino-pendencia">Ir à pergunta</span>
+            <span class="rotulo-destino-pendencia">{{ 'Ir à pergunta' if registro.form1_integral.pode_editar else 'Consultar pergunta' }}</span>
           </button>
           {% endif %}
           <div class="dependencias-governanca-form1">
@@ -258,7 +265,7 @@
       <p class="etiqueta">Etapa preparatória · não submete o formulário</p>
       <h3 id="titulo-conferencia-interna-form1">Conferência interna pelo APA</h3>
       {% set fluxo = registro.form1_integral.fluxo_conferencia %}
-      {% with fluxo_compacto=true %}{% include '_fluxo_conferencia.html' %}{% endwith %}
+      <div class="area-somente-leitura"><p class="selo-somente-leitura">Somente leitura · situação da conferência</p>{% with fluxo_compacto=true %}{% include '_fluxo_conferencia.html' %}{% endwith %}</div>
       {% if registro.form1_integral.conferencia_interna %}
       <p class="aviso-leitura"><strong>FORM 1 aguardando conferência interna.</strong> A versão {{ registro.form1_integral.conferencia_interna.versao_rascunho }} foi preservada em snapshot técnico {{ registro.form1_integral.conferencia_interna.numero_snapshot }} por {{ registro.form1_integral.conferencia_interna.solicitada_por }}.</p>
       <p class="ajuda">Este encaminhamento não é submissão, homologação, conclusão institucional nem envio à T.I.</p>
@@ -298,8 +305,8 @@
       <p class="ajuda">Nenhuma ação de conferência interna está disponível para seu perfil neste momento.</p>
       {% endif %}
       {% if registro.form1_integral.historico_conferencias %}
-      <details id="historico-conferencias-form1" class="historico-conferencias-form1">
-        <summary>Histórico de apresentações internas</summary>
+      <details id="historico-conferencias-form1" class="historico-conferencias-form1 area-somente-leitura">
+        <summary>Somente leitura — Histórico de apresentações internas</summary>
         <ol>
           {% for item in registro.form1_integral.historico_conferencias %}
           <li>
@@ -312,23 +319,25 @@
       </details>
       {% endif %}
     </section>
-    <aside class="legenda-form1-integral" aria-labelledby="titulo-legenda-form1">
+    <aside class="legenda-form1-integral area-somente-leitura" aria-labelledby="titulo-legenda-form1">
       <h3 id="titulo-legenda-form1">Como ler as sinalizações</h3>
+      <p class="selo-somente-leitura">Somente leitura · controles de consulta disponíveis</p>
       <ul class="lista-legenda-obrigatoriedade">
         <li><span class="amostra-obrigatoriedade obrigatorio">*</span> <strong>Obrigatório</strong></li>
         <li><span class="amostra-obrigatoriedade condicional">**</span> <strong>Obrigatório em alguns casos</strong> — passa a <span class="amostra-obrigatoriedade obrigatorio">*</span> quando a condição estiver ativa.</li>
         <li><span class="amostra-obrigatoriedade recomendado">***</span> <strong>Recomendado</strong> — categoria reservada; nenhum campo possui essa classificação na matriz vigente.</li>
         <li><span class="amostra-obrigatoriedade facultativo">****</span> <strong>Facultativo</strong></li>
       </ul>
-      <p class="ajuda">Perguntas condicionais inativas permanecem ocultas e são contabilizadas como não aplicáveis. DP e DPS identificam categorias de dados pessoais e não indicam obrigatoriedade da pergunta.</p>
+      <p class="ajuda">{% if registro.form1_integral.pode_editar %}Perguntas condicionais inativas permanecem ocultas e são contabilizadas como não aplicáveis.{% else %}Na consulta, perguntas condicionais inativas são identificadas como não aplicáveis, sem controles de edição.{% endif %} DP e DPS identificam categorias de dados pessoais e não indicam obrigatoriedade da pergunta.</p>
       <ul class="lista-legenda-dados">
         <li><span class="sigla-dado-legenda sigla-dado-legenda-dp"><strong>DP</strong></span> <strong>Dado Pessoal:</strong> informação relativa a pessoa identificada ou identificável.</li>
         <li><span class="sigla-dado-legenda sigla-dado-legenda-dps"><strong>DPS</strong></span> <strong>Dado Pessoal Sensível:</strong> categorias definidas no art. 5º, II, da LGPD, incluindo dados de saúde e convicção religiosa.</li>
       </ul>
     </aside>
-    <section class="bloco-form1-integral" aria-labelledby="titulo-pre-validacao-form1">
+    <section class="bloco-form1-integral area-somente-leitura" aria-labelledby="titulo-pre-validacao-form1">
       <p class="etiqueta">Verificação consultiva · não submete o formulário</p>
       <h3 id="titulo-pre-validacao-form1" tabindex="-1">Pendências antes da futura submissão</h3>
+      <p class="selo-somente-leitura">Somente leitura · controles de consulta disponíveis</p>
       <p>A verificação encontrou <strong>{{ pre_validacao.quantidades.incompletos }}</strong> campo(s) obrigatório(s) ativo(s) ainda incompleto(s), <strong>{{ pre_validacao.quantidades.nao_aplicaveis }}</strong> campo(s) condicional(is) não aplicável(is) neste rascunho e <strong>{{ pre_validacao.quantidades.regras_pendentes }}</strong> regra(s) ou integração(ões) dependentes de governança.</p>
       <p class="ajuda">O rascunho continua podendo ser salvo. Esta consulta não altera respostas, não cria versão submetida e não declara adequação à LGPD.</p>
       {% if pre_validacao.por_bloco %}
@@ -344,9 +353,9 @@
                     data-pendencia-bloco="{{ item.bloco }}"
                     data-pendencia-etapa="{{ item.etapa }}"
                     data-pendencia-destino="{{ item.destino_tipo }}"
-                    aria-label="Ir para {{ 'a seção relacionada à' if item.destino_tipo == 'secao' else 'a pergunta' }} {{ item.campo_id }} no Bloco {{ item.bloco }}">
+                    aria-label="{{ 'Ir para' if registro.form1_integral.pode_editar else 'Consultar' }} {{ 'a seção relacionada à' if item.destino_tipo == 'secao' else 'a pergunta' }} {{ item.campo_id }} no Bloco {{ item.bloco }}">
               <strong>{{ item.campo_id }}</strong> — {{ item.pergunta }}{% if item.ocorrencia %} (participante {{ item.ocorrencia }}){% endif %}
-              <span class="rotulo-destino-pendencia">{{ 'Ir à seção relacionada' if item.destino_tipo == 'secao' else 'Ir à pergunta' }}</span>
+              <span class="rotulo-destino-pendencia">{{ ('Consultar seção' if item.destino_tipo == 'secao' else 'Consultar pergunta') if not registro.form1_integral.pode_editar else ('Ir à seção relacionada' if item.destino_tipo == 'secao' else 'Ir à pergunta') }}</span>
             </button>
             {% else %}
             <strong>{{ item.campo_id }}</strong> — {{ item.pergunta }} <span class="ajuda">Sem destino editável neste formulário.</span>
@@ -375,9 +384,9 @@
                     data-pendencia-bloco="{{ item.bloco }}"
                     data-pendencia-etapa="{{ item.etapa }}"
                     data-pendencia-destino="{{ item.destino_tipo }}"
-                    aria-label="Ir para {{ 'a seção relacionada à' if item.destino_tipo == 'secao' else 'a pergunta' }} {{ item.campo_id }} no Bloco {{ item.bloco }}">
+                    aria-label="{{ 'Ir para' if registro.form1_integral.pode_editar else 'Consultar' }} {{ 'a seção relacionada à' if item.destino_tipo == 'secao' else 'a pergunta' }} {{ item.campo_id }} no Bloco {{ item.bloco }}">
               <strong>{{ item.campo_id }}</strong> — {{ item.descricao if item.descricao else item.detalhe }}
-              <span class="rotulo-destino-pendencia">{{ 'Ir à seção relacionada' if item.destino_tipo == 'secao' else 'Ir à pergunta' }}</span>
+              <span class="rotulo-destino-pendencia">{{ ('Consultar seção' if item.destino_tipo == 'secao' else 'Consultar pergunta') if not registro.form1_integral.pode_editar else ('Ir à seção relacionada' if item.destino_tipo == 'secao' else 'Ir à pergunta') }}</span>
             </button>
             {% else %}
             {% if item.campo_id %}<strong>{{ item.campo_id }}</strong> — {% endif %}{{ item.descricao if item.descricao else item.detalhe }}
@@ -392,6 +401,7 @@
     <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-1">
       <p class="etiqueta">FORM 1 — Etapa 1 de 4 — Bloco 1 de 14</p>
       <h3 id="titulo-bloco-1">{{ titulos_blocos_navegacao[1] }}</h3>
+      {% with numero_bloco=1 %}{% include '_leitura_bloco_form1.html' %}{% endwith %}
       <p class="ajuda">Rascunho parcial permitido. Não informe nomes, CPF, protocolos de atendimento ou dados de casos concretos.</p>
 
       {% if registro.form1_integral.pode_editar %}
@@ -437,11 +447,7 @@
       </form>
       {% else %}
       <p class="aviso-leitura">Este rascunho pode ser consultado, mas somente o ARP atual pode alterá-lo.</p>
-      <dl class="resumo respostas-somente-leitura">
-        {% for campo_id in ['1.1', '1.1.1', '1.2', '1.3', '1.4'] %}
-        <div><dt>{{ campo_id }} — {{ registro.form1_integral.campos_bloco_1[campo_id].pergunta }}</dt><dd>{{ respostas_integral.get(campo_id, 'Ainda não respondido') }}</dd></div>
-        {% endfor %}
-      </dl>
+
       {% endif %}
     </section>
 
@@ -453,8 +459,8 @@
       {% set leitura_2_1 = registro.form1_integral.leitura_2_1 %}
       {% set campo_2_1 = registro.form1_integral.campos_bloco_2['2.1'] %}
       {% if leitura_2_1.somente_leitura or not registro.form1_integral.pode_editar %}
-      <div class="campo-integral respostas-somente-leitura" data-canais-2-1-estado="{{ leitura_2_1.estado }}">
-        {% set campo = campo_2_1 %}<p><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</p>
+      <div id="consulta-integral-2.1" class="campo-integral respostas-somente-leitura area-somente-leitura" tabindex="-1" data-canais-2-1-estado="{{ leitura_2_1.estado }}">
+        <p class="selo-somente-leitura">Somente leitura</p>{% set campo = campo_2_1 %}<p><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</p>
         {% include '_ajuda_cartilha_form1.html' %}
         {% if leitura_2_1.estado == 'canais_confirmados' %}
         <p>Canais declarados pelo APA na abertura:</p>
@@ -471,6 +477,7 @@
       </div>
       {% endif %}
 
+      {% with numero_bloco=2 %}{% include '_leitura_bloco_form1.html' %}{% endwith %}
       {% if registro.form1_integral.pode_editar %}
       <form class="formulario formulario-integral" method="post" action="{{ url_for('salvar_bloco_2_integral', registro_id=registro.id) }}">
         <input type="hidden" name="conta_id" value="{{ conta_id }}">
@@ -513,17 +520,14 @@
       </form>
       {% else %}
       <p class="aviso-leitura">Somente o ARP atual pode alterar este rascunho.</p>
-      <dl class="resumo respostas-somente-leitura">
-        {% for campo in registro.form1_integral.campos_bloco_2.values() %}
-        {% if campo.id != '2.1' and campo.condicao_canal_ativa is not sameas false and respostas_integral.get(campo.id) %}<div><dt>{{ campo.id }} — {{ campo.pergunta }}</dt><dd>{{ respostas_integral.get(campo.id) | join(', ') if respostas_integral.get(campo.id) is not string else respostas_integral.get(campo.id) }}</dd></div>{% endif %}
-        {% endfor %}
-      </dl>
+
       {% endif %}
     </section>
 
     <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-3">
       <p class="etiqueta">FORM 1 — Etapa 1 de 4 — Bloco 3 de 14</p>
       <h3 id="titulo-bloco-3">{{ titulos_blocos_navegacao[3] }}</h3>
+      {% with numero_bloco=3 %}{% include '_leitura_bloco_form1.html' %}{% endwith %}
       <p class="ajuda">Cada participante é uma ocorrência independente. Registre a unidade ou entidade, nunca o nome de uma pessoa.</p>
       <p class="ajuda ajuda-compartilhamento"><strong>Como distinguir:</strong> outra unidade ou Secretaria integra a própria Prefeitura; “Outro órgão público” representa destinatário público externo; empresa, OSC, concessionária ou prestador representa entidade privada. Contrato ou parceria, por si só, não transforma a entidade em Operadora LGPD. Esta participação no tratamento não é a tramitação administrativa do Registro LGPD.</p>
 
@@ -544,6 +548,7 @@
       </form>
       {% endif %}
 
+      {% if registro.form1_integral.pode_editar %}
       <div id="participantes-integral" class="campo-condicional" data-visivel-quando="Sim">
         {% for participante in registro.form1_integral.rascunho.participantes %}
         <article class="cartao-participante">
@@ -592,6 +597,7 @@
         </form>
         {% endif %}
       </div>
+      {% endif %}
     </section>
 
     </div>
@@ -599,6 +605,7 @@
     <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-4">
       <p class="etiqueta">FORM 1 — Etapa 2 de 4 — Bloco 4 de 14</p>
       <h3 id="titulo-bloco-4">{{ titulos_blocos_navegacao[4] }}</h3>
+      {% with numero_bloco=4 %}{% include '_leitura_bloco_form1.html' %}{% endwith %}
       <p class="ajuda">Informe somente categorias de titulares e de representantes. O sistema de mapeamento não cadastra pessoas titulares.</p>
       {% if registro.form1_integral.pode_editar %}
       <form class="formulario formulario-integral" method="post" action="{{ url_for('salvar_bloco_4_integral', registro_id=registro.id) }}">
@@ -640,6 +647,7 @@
     <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-5">
       <p class="etiqueta">FORM 1 — Etapa 2 de 4 — Bloco 5 de 14</p>
       <h3 id="titulo-bloco-5">{{ titulos_blocos_navegacao[5] }}</h3>
+      {% with numero_bloco=5 %}{% include '_leitura_bloco_form1.html' %}{% endwith %}
       <p class="ajuda">Marque somente categorias efetivamente tratadas neste fluxo. Não informe nomes, números de documentos, contatos, protocolos ou dados de casos concretos.</p>
       {% if registro.form1_integral.pode_editar %}
       {% set campo = registro.form1_integral.campos_bloco_5['5.1'] %}
@@ -675,6 +683,7 @@
     <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-6">
       <p class="etiqueta">FORM 1 — Etapa 2 de 4 — Bloco 6 de 14</p>
       <h3 id="titulo-bloco-6">{{ titulos_blocos_navegacao[6] }}</h3>
+      {% with numero_bloco=6 %}{% include '_leitura_bloco_form1.html' %}{% endwith %}
       <p class="ajuda">Informe categorias de fontes. Evite nomes ou identificadores de pessoas concretas.</p>
       {% if registro.form1_integral.pode_editar %}
       <form class="formulario formulario-integral" method="post" action="{{ url_for('salvar_bloco_6_integral', registro_id=registro.id) }}">
@@ -720,6 +729,7 @@
     <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-7">
       <p class="etiqueta">FORM 1 — Etapa 2 de 4 — Bloco 7 de 14</p>
       <h3 id="titulo-bloco-7">{{ titulos_blocos_navegacao[7] }}</h3>
+      {% with numero_bloco=7 %}{% include '_leitura_bloco_form1.html' %}{% endwith %}
       {% if registro.form1_integral.pode_editar %}
       {% set campo = registro.form1_integral.campos_bloco_7['7.1'] %}
       <form class="formulario formulario-integral" method="post" action="{{ url_for('salvar_bloco_7_integral', registro_id=registro.id) }}">
@@ -1074,7 +1084,10 @@
     }
 
     function controleDoCampo(campoId) {
-      if (campoId === '2.1') return raiz.querySelector('[data-canais-2-1-estado]');
+      if (campoId === '2.1') {
+        var canaisLeitura = raiz.querySelector('[data-canais-2-1-estado]');
+        if (canaisLeitura) return canaisLeitura;
+      }
       var nomesEspeciais = {
         '1.1': 'referencia_existente',
         '1.1.1': 'referencia_institucional',
@@ -1089,23 +1102,28 @@
 
     function destinoDaPendencia(botao) {
       var campoId = botao.dataset.pendenciaCampo;
+      var leitura = document.getElementById('consulta-integral-' + campoId);
+      if (leitura) return leitura;
       if (botao.dataset.pendenciaDestino === 'secao') {
         if (campoId === '10.2.1') return document.getElementById('titulo-destinatarios-10-2-1');
         if (campoId.indexOf('3.') === 0) return document.getElementById('participantes-integral');
       }
-      return controleDoCampo(campoId) || document.getElementById('titulo-bloco-' + botao.dataset.pendenciaBloco);
+      return controleDoCampo(campoId);
     }
 
     function focarPendencia(botao) {
-      exibirEtapa(botao.dataset.pendenciaEtapa, null, botao.dataset.pendenciaBloco);
+      exibirEtapa(botao.dataset.pendenciaEtapa, '#titulo-bloco-' + botao.dataset.pendenciaBloco, botao.dataset.pendenciaBloco);
       atualizarPainelJornada(botao.dataset.pendenciaBloco);
       var destino = destinoDaPendencia(botao);
       var estado = raiz.querySelector('.estado-navegacao-form1');
-      if (!destino || destino.closest('[data-condicional-oculta="true"]')) {
+      if (!destino || destino.closest('[data-condicional-oculta="true"], [hidden]')) {
+        var indisponivel = !destino;
         destino = document.getElementById('titulo-bloco-' + botao.dataset.pendenciaBloco);
-        if (estado) estado.textContent = 'Etapa exibida. A pergunta ' + botao.dataset.pendenciaCampo + ' depende de uma condição ativa; revise o Bloco ' + botao.dataset.pendenciaBloco + '.';
+        if (estado) estado.textContent = indisponivel
+          ? 'A pergunta ' + botao.dataset.pendenciaCampo + ' não possui destino disponível neste modo. Consulte as informações do Bloco ' + botao.dataset.pendenciaBloco + '.'
+          : 'Etapa exibida. A pergunta ' + botao.dataset.pendenciaCampo + ' depende de uma condição ativa; revise o Bloco ' + botao.dataset.pendenciaBloco + '.';
       } else if (estado) {
-        estado.textContent = 'Etapa exibida. Foco posicionado na pendência ' + botao.dataset.pendenciaCampo + '.';
+        estado.textContent = (raiz.dataset && raiz.dataset.modoConsulta === 'true' ? 'Somente leitura. Consulta da pergunta ' : 'Etapa exibida. Foco posicionado na pendência ') + botao.dataset.pendenciaCampo + '.';
       }
       if (!destino) return;
       var destaque = destino.closest('.campo-integral, fieldset, .colecao-destinatarios') || destino.closest('.bloco-form1-integral') || destino;
@@ -1116,7 +1134,13 @@
       if (!/^(INPUT|SELECT|TEXTAREA|BUTTON)$/.test(destino.tagName)) destino.setAttribute('tabindex', '-1');
       destino.focus({ preventScroll: true });
       var reduzirMovimento = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      destaque.scrollIntoView({ behavior: reduzirMovimento ? 'auto' : 'smooth', block: 'center' });
+      // Alinha o início da pergunta, não o centro de um fieldset alto (ex.: 5.1).
+      var barra = document.getElementById('retorno-painel-form1');
+      var mensagem = document.getElementById('mensagem-registro');
+      var margem = 24 + (barra && barra.getBoundingClientRect ? barra.getBoundingClientRect().height : 0)
+        + (mensagem && mensagem.getBoundingClientRect ? mensagem.getBoundingClientRect().height + 12 : 0);
+      if (destaque.style) destaque.style.scrollMarginTop = margem + 'px';
+      destaque.scrollIntoView({ behavior: reduzirMovimento ? 'auto' : 'smooth', block: 'start' });
       window.setTimeout(function () { destaque.classList.remove('destino-pendencia-ativo'); }, 3500);
     }
 

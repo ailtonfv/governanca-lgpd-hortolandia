@@ -1,6 +1,7 @@
 <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-{{ numero_bloco }}">
   <p class="etiqueta">FORM 1 — Etapa {{ etapa_bloco }} de 4 — Bloco {{ numero_bloco }} de 14</p>
   <h3 id="titulo-bloco-{{ numero_bloco }}">{{ titulo_bloco }}</h3>
+  {% include '_leitura_bloco_form1.html' %}
   {% if registro.form1_integral.pode_editar %}
   <form class="formulario formulario-integral" method="post" action="{{ url_for(rota_bloco, registro_id=registro.id) }}">
     <input type="hidden" name="conta_id" value="{{ conta_id }}">

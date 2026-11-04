@@ -109,8 +109,8 @@ def test_mapa_distingue_visitado_salvo_e_sem_pendencia_sem_declarar_conclusao(se
     assert "Sem pendências obrigatórias ativas" in pagina.text
     assert "Ainda não preenchido" in pagina.text
     trecho = pagina.text[
-        pagina.text.index('class="painel-progresso-form1"'):
-        pagina.text.index('class="legenda-form1-integral"')
+        pagina.text.index('class="painel-progresso-form1 '):
+        pagina.text.index('class="legenda-form1-integral ')
     ]
     assert "concluído" not in trecho.lower()
     assert "adequado" not in trecho.lower()

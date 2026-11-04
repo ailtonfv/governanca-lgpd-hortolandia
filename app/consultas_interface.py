@@ -17,7 +17,8 @@ from app.classificacao_catalogo_5_1 import (
 from app.continuidade_apa import apa_em_exercicio, unidades_em_que_e_apa_atual
 from app.form1_sintetico import (CATEGORIAS_DADOS, CATEGORIAS_TITULARES,
                                  DESTINATARIOS_COMPARTILHAMENTO)
-from app.form1_integral import (CONDICOES_BLOCO_2, CONDICOES_BLOCO_4, CONDICOES_BLOCO_6, CONDICOES_BLOCO_8,
+from app.form1_integral import (CONDICOES_BLOCO_1, CONDICOES_PARTICIPANTE_BLOCO_3,
+                                CONDICOES_BLOCO_2, CONDICOES_BLOCO_4, CONDICOES_BLOCO_6, CONDICOES_BLOCO_8,
                                 CONDICOES_BLOCO_9,
                                 CONDICOES_BLOCO_10,
                                 CONDICOES_BLOCO_11,
@@ -1099,6 +1100,47 @@ def carregar_registro(sessao, conta_id, registro_id):
             "estrutura_destinatarios": campo_id == "10.2.1",
             "obrigatoriedade": metadado_visual_obrigatoriedade(campo_id),
         }
+    # Projeção de consulta: usa as mesmas condições e o mesmo catálogo da edição.
+    # Não cria controles desabilitados nem altera o rascunho persistido.
+    campos_leitura = {bloco: [] for bloco in range(1, 15)}
+    if rascunho_integral is not None and not pode_editar_integral:
+        conteudo_leitura = rascunho_integral.conteudo
+        respostas_leitura = conteudo_leitura.get("respostas", {})
+
+        def leitura_do_campo(campo, respostas, complementos):
+            condicoes = campo["condicoes"]
+            especial = (CONDICOES_BLOCO_1.get(campo["id"])
+                        or CONDICOES_PARTICIPANTE_BLOCO_3.get(campo["id"]))
+            if especial:
+                condicoes = (especial,)
+            ativo = campo["condicao_canal_ativa"]
+            if ativo is None:
+                ativo = all(
+                    any(valor in aceitos for valor in (
+                        respostas.get(dependencia, []) if isinstance(respostas.get(dependencia), list)
+                        else [respostas.get(dependencia)]
+                    )) for dependencia, aceitos in condicoes
+                )
+            valor = respostas.get(campo["id"])
+            return {"ativa": ativo, "valores": valor if isinstance(valor, list) else [valor] if valor else [],
+                    "complemento": complementos.get(campo["id"])}
+
+        for campo_id in catalogo_integral:
+            bloco = 2 if campo_id in IDS_BLOCO_2 else int(campo_id.split(".")[0])
+            if not bloco or campo_id == "2.1":
+                continue  # A identidade e o retrato histórico de canais já têm componentes próprios.
+            campo = metadado_integral(campo_id)
+            if campo_id in IDS_PARTICIPANTE_BLOCO_3:
+                leituras = [
+                    {**leitura_do_campo(campo, item.get("respostas", {}), item.get("complementos", {})),
+                     "participante": indice}
+                    for indice, item in enumerate(conteudo_leitura.get("participantes", []), start=1)
+                ] if respostas_leitura.get("3.1") == "Sim" else []
+                campo["participantes_ativos"] = respostas_leitura.get("3.1") == "Sim"
+            else:
+                leituras = [leitura_do_campo(campo, respostas_leitura, conteudo_leitura.get("complementos", {}))]
+            campos_leitura[bloco].append({**campo, "leituras": leituras})
+
     candidatos_arp = sessao.scalars(
         select(Pessoa)
         .join(Designacao, Designacao.pessoa_id == Pessoa.id)
@@ -1149,6 +1191,7 @@ def carregar_registro(sessao, conta_id, registro_id):
         "situacao": "rascunho" if rascunho_integral is not None else "nao_iniciado",
         "pode_atribuir_arp": pode_atribuir_arp,
         "pode_editar": pode_editar_integral,
+        "campos_leitura": campos_leitura,
         "apa_abertura": None if apa_abertura is None else {
             "id": apa_abertura.id,
             "matricula": apa_abertura.matricula,

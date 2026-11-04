@@ -1,0 +1,36 @@
+{% if not registro.form1_integral.pode_editar %}
+<div class="area-somente-leitura leitura-bloco-form1">
+  <p class="selo-somente-leitura">Somente leitura · respostas salvas</p>
+  {% for campo in registro.form1_integral.campos_leitura[numero_bloco] %}
+  <section id="consulta-integral-{{ campo.id }}" class="campo-integral pergunta-consulta" tabindex="-1" aria-labelledby="rotulo-consulta-{{ campo.id }}">
+    <h4 id="rotulo-consulta-{{ campo.id }}">{{ campo.id }} — {{ campo.pergunta }}</h4>
+    {% include '_ajuda_cartilha_form1.html' %}
+    {% for leitura in campo.leituras %}
+      {% if leitura.participante %}<p><strong>Participante {{ leitura.participante }}</strong></p>{% endif %}
+      {% if not leitura.ativa %}<p class="ajuda">Não aplicável às respostas salvas atuais. Nenhum campo de edição é habilitado.</p>{% endif %}
+      {% if leitura.valores %}
+      {% if not leitura.ativa %}<p class="ajuda">Resposta anterior preservada para consulta:</p>{% endif %}
+      <ul class="valores-consulta">
+        {% for valor in leitura.valores %}
+        {% set rotulo = dict(campo.alternativas).get(valor, valor) %}
+        <li>{% include '_alternativa_form1.html' %}</li>
+        {% endfor %}
+      </ul>
+      {% elif leitura.ativa and campo.id != '10.2.1' %}<p>Ainda não respondido.</p>{% endif %}
+      {% if leitura.complemento %}<p>Complemento salvo: {{ leitura.complemento }}</p>{% endif %}
+    {% else %}<p>{{ 'Nenhum participante informado.' if campo.participantes_ativos else 'Não aplicável: participação não indicada nas respostas salvas.' }}</p>{% endfor %}
+    {% if campo.id == '10.2.1' %}
+      {% for destinatario in registro.form1_integral.rascunho.destinatarios_10_2_1 %}
+      <details><summary>Destinatário {{ loop.index }} — {{ destinatario.categoria }}</summary>
+        <dl class="resumo">
+        {% for chave, rotulo in [('modalidade','Modo de identificação'), ('unidade_id','Unidade municipal'), ('identificacao','Identificação institucional'), ('cnpj','CNPJ da entidade'), ('instrumento','Instrumento pertinente'), ('classe_orgao_requisitante','Classe do órgão requisitante'), ('hipotese_requisicao','Hipótese da requisição'), ('meio_publicacao','Meio de publicação'), ('natureza_destinatario','Natureza do destinatário'), ('justificativa','Justificativa')] %}
+          {% if destinatario.get(chave) %}<div><dt>{{ rotulo }}</dt><dd>{{ destinatario[chave] }}</dd></div>{% endif %}
+        {% endfor %}
+        </dl>
+      </details>
+      {% else %}<p>Nenhum destinatário estruturado informado.</p>{% endfor %}
+    {% endif %}
+  </section>
+  {% endfor %}
+</div>
+{% endif %}

@@ -1,7 +1,7 @@
 <button type="button" class="botao-pendencia-form1"
         data-pendencia-campo="{{ item.campo_id }}" data-pendencia-bloco="{{ item.bloco }}"
         data-pendencia-etapa="{{ item.etapa }}" data-pendencia-destino="{{ item.destino_tipo }}"
-        aria-label="Ir para a pergunta ou seção {{ item.campo_id }} no Bloco {{ item.bloco }}">
+        aria-label="{{ 'Ir para' if registro.form1_integral.pode_editar else 'Consultar' }} a pergunta ou seção {{ item.campo_id }} no Bloco {{ item.bloco }}">
   <strong>{{ item.campo_id }}</strong> — {{ item.pergunta }}
-  <span class="rotulo-destino-pendencia">{{ 'Ir à seção relacionada' if item.destino_tipo == 'secao' else 'Ir à pergunta' }}</span>
+  <span class="rotulo-destino-pendencia">{{ ('Consultar seção' if item.destino_tipo == 'secao' else 'Consultar pergunta') if not registro.form1_integral.pode_editar else ('Ir à seção relacionada' if item.destino_tipo == 'secao' else 'Ir à pergunta') }}</span>
 </button>

@@ -30,7 +30,7 @@ def test_registro_sem_arp_prioriza_designacao_e_nao_expoe_questionario_legado():
     assert pagina.status_code == 200
     assert "Designação do ARP" in pagina.text
     assert pagina.text.index("Designação do ARP") < pagina.text.index(
-        "Informações do Registro — somente leitura"
+        "Informações do Registro — Somente leitura"
     )
     assert "Iniciar FORM 1 Integral" not in pagina.text
     assert 'class="formulario formulario-integral"' not in pagina.text

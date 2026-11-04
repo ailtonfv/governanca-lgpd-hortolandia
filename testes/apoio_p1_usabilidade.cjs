@@ -25,7 +25,7 @@ for (const oculto of [false, true]) {
  const titulo = {tagName:'H3', closest(){return this;}, classList:{add(){},remove(){}}, setAttribute(){}, focus(){focado=this;}, scrollIntoView(){}};
  const controle = {tagName:'INPUT', closest(s){return s.includes('data-condicional') ? (oculto ? {} : null) : titulo;}, focus(){focado=this;}};
  const mensagem = {};
- const ctx = {raiz:{querySelector(){return mensagem;},querySelectorAll(){return [];}},document:{getElementById(){return titulo;}},
+ const ctx = {raiz:{querySelector(){return mensagem;},querySelectorAll(){return [];}},document:{getElementById(id){return id.startsWith("titulo-bloco-") ? titulo : null;}},
  controleDoCampo(){return controle;},exibirEtapa(n){etapa=n;},atualizarPainelJornada(){},window:{setTimeout(){},matchMedia(){return {matches:true};}}};
  vm.runInNewContext(funcoesDestino, ctx);
  ctx.focarPendencia({dataset:{pendenciaCampo:'2.4',pendenciaBloco:'2',pendenciaEtapa:'1',pendenciaDestino:'campo'}});

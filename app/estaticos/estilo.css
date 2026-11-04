@@ -83,7 +83,7 @@ th { color: #425466; font-size: .8rem; text-transform: uppercase; letter-spacing
 .proxima-providencia { margin: 1.25rem 0; padding: 1rem; border: 1px solid #86b99a; border-left: .35rem solid var(--verde); border-radius: .6rem; background: #f0fdf4; }
 .proxima-providencia h3 { margin: .25rem 0 .5rem; }
 .proxima-providencia form { margin: .85rem 0 0; }
-.informacoes-institucionais-form1 { margin: 1.25rem 0; border: 1px solid var(--borda); border-radius: .6rem; background: repeating-linear-gradient(135deg, #f8fafb, #f8fafb 12px, #f3f6f8 12px, #f3f6f8 24px); }
+.informacoes-institucionais-form1 { margin: 1.25rem 0; border: 1px solid var(--borda); border-radius: .6rem; }
 .informacoes-institucionais-form1 > summary, .alteracao-arp > summary { cursor: pointer; padding: 1rem; color: var(--azul-escuro); font-weight: 700; }
 .informacoes-institucionais-form1[open] > summary, .alteracao-arp[open] > summary { border-bottom: 1px solid var(--borda); }
 .informacoes-institucionais-form1 .identidades-form1 { margin: 1rem; }
@@ -341,3 +341,16 @@ dd { margin: .25rem 0 0; }
 .localizador-pergunta { margin: 1rem 0; }
 .localizador-pergunta [role="status"] { min-height: 1.5em; }
 .localizador-pergunta li { margin: .35rem 0; }
+
+/* Consulta não é desabilitação: links, detalhes e navegação continuam operacionais. */
+.form1-integral .area-somente-leitura {
+  background: repeating-linear-gradient(135deg, #f8fafb, #f8fafb 12px, #f3f6f8 12px, #f3f6f8 24px);
+  color: var(--texto); border: 1px solid var(--borda); border-radius: .6rem;
+  padding: 1rem; margin-block: .8rem; min-width: 0; overflow-wrap: anywhere;
+}
+.form1-integral .selo-somente-leitura { font-size: .85rem; font-weight: 700; color: var(--azul-escuro); margin: 0 0 .6rem; }
+.form1-integral .pergunta-consulta { padding: .8rem; margin-block: .8rem; border: 1px solid var(--borda); border-radius: .4rem; background: transparent; }
+.form1-integral .pergunta-consulta h4 { margin: 0 0 .6rem; }
+.form1-integral .valores-consulta { padding-left: 1.2rem; }
+.form1-integral .pergunta-consulta:focus { outline: 3px solid var(--azul); outline-offset: 3px; }
+.form1-integral .area-somente-leitura .cartao-progresso-form1 { background: transparent; }
