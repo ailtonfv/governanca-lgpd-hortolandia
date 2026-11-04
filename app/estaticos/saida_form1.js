@@ -117,18 +117,30 @@
     });
   }
 
-  salvar.addEventListener('click', async function () {
+  async function salvarPendentes(opcoes) {
+    opcoes = opcoes || {};
     if (ocupado) return;
     ocupado = true;
+    var aviso = opcoes.aviso || erro;
+    var focoAnterior = document.activeElement;
+    var inerteAnterior = raiz.inert;
+    raiz.inert = true;
     dialogo.setAttribute('aria-busy', 'true');
     [salvar, descartar, continuar].forEach(function (b) { b.disabled = true; });
-    erro.textContent = 'Salvando as alterações. Aguarde a confirmação.';
+    aviso.textContent = 'Salvando as alterações desta página. Aguarde a confirmação.';
     try {
       // Ordem canônica: resposta controladora antes das ocorrências repetíveis.
       var pendentes = formularios.filter(alterado).sort(function (a, b) {
         function numero(f) { return Number(f.closest('.bloco-form1-integral').querySelector('h3').id.replace('titulo-bloco-', '')); }
         return numero(a) - numero(b);
       });
+      if (opcoes.adicional && !pendentes.includes(opcoes.adicional)) pendentes.push(opcoes.adicional);
+      // Verificar controles antes da primeira gravação; ramos inativos não exigem envio.
+      for (var candidato of pendentes) {
+        if (!candidato.closest('[data-condicional-oculta="true"]') && candidato.checkValidity && !candidato.checkValidity()) {
+          throw new Error('Revise a categoria e o modo de identificação dos destinatários antes de salvar. Nenhuma alteração foi enviada.');
+        }
+      }
       for (var f of pendentes) {
         // Uma ocorrência desativada pela resposta controladora não é enviada.
         if (f.closest('[data-condicional-oculta="true"]')) continue;
@@ -170,19 +182,36 @@
         }
         atualizarChaves(pagina);
         confirmarValores(f);
+        // Se uma etapa posterior falhar, não transformar a ocorrência já criada
+        // em outra inclusão ao editar o mesmo formulário ainda presente no DOM.
+        if (f.getAttribute('action').endsWith('/adicionar')) f.inert = true;
         tentativas.delete(f);
         f.dataset.alterado = 'false';
         var estado = window.elementosFormularioForm1 ? window.elementosFormularioForm1(f, '[data-estado-salvamento]')[0] : f.querySelector('[data-estado-salvamento]');
         if (estado) estado.textContent = 'Rascunho salvo com sucesso. Suas respostas foram guardadas; o FORM 1 não foi concluído nem submetido.';
       }
-      sair();
+      if (opcoes.destino) {
+        if (!pendentes.length) {
+          var semGravacao = new URL(opcoes.destino);
+          semGravacao.searchParams.delete('erro');
+          semGravacao.searchParams.delete('mensagem');
+          opcoes.destino = semGravacao.href;
+        }
+        saindo = true;
+        window.location.assign(opcoes.destino);
+      } else sair();
     } catch (falha) {
-      erro.textContent = (falha instanceof TypeError ? 'Falha de conexão. As alterações continuam nesta página; tente novamente.' : falha.message)
+      aviso.textContent = (falha instanceof TypeError ? 'Falha de conexão. As alterações continuam nesta página; tente novamente.' : falha.message)
         + ' Os blocos já confirmados permanecem salvos. Você pode continuar preenchendo.';
     } finally {
       ocupado = false;
+      raiz.inert = inerteAnterior;
       dialogo.removeAttribute('aria-busy');
       [salvar, descartar, continuar].forEach(function (b) { b.disabled = false; });
+      if (!saindo && opcoes.aviso && opcoes.aviso.focus) opcoes.aviso.focus();
+      else if (!saindo && focoAnterior && focoAnterior.focus) focoAnterior.focus();
     }
-  });
+  }
+  window.saidaForm1.salvarPendentes = salvarPendentes;
+  salvar.addEventListener('click', function () { return salvarPendentes(); });
 })();

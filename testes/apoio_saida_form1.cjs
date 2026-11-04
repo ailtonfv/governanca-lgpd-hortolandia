@@ -118,5 +118,40 @@ function preparar(numeros = [2,3]) {
   assert.equal(e.window.destino,undefined); assert.equal(e.window.saidaForm1.alterado(e.forms[0]),false);
   assert.equal(e.window.saidaForm1.alterado(e.forms[1]),true);
   e.sair.eventos.click(); assert.equal(e.forms[0].texto.value,'Texto'); assert.equal(e.forms[1].texto.value,'');
-  console.log('Retorno, cancelamento, descarte, persistência, falhas, concorrência e idempotência: aprovados (DOM simulado).');
+  // Jornada do Bloco 10: mesma fila preserva outros blocos antes do destinatário.
+  e=preparar([2,10,10]); e.forms[2].action+='/destinatarios/adicionar';
+  e.forms.forEach(f=>f.texto.value='Resposta fictícia');
+  const destino='https://poc.invalid/registros/FICTICIO?conta_id=CONTA-FICTICIA#titulo-bloco-11';
+  await e.window.saidaForm1.salvarPendentes({destino});
+  assert.equal(e.requests.length,3); assert.equal(e.window.destino,destino);
+  assert.equal(e.requests[2].opts.body.get('versao_lida'),'3');
+  assert.match(e.requests[2].url,/destinatarios/);
+  assert.equal(e.forms[2].inert,true);
+  // Inclusão confirmada seguida de falha: impede editar/reincluir a mesma ocorrência.
+  e=preparar([10,14]); e.forms[0].action+='/destinatarios/adicionar';
+  e.forms.forEach(f=>f.texto.value='Texto');
+  e.fetch=async()=>e.requests.length===1?e.resposta(2):e.resposta(2,'1');
+  await e.window.saidaForm1.salvarPendentes({destino});
+  assert.equal(e.forms[0].inert,true); assert.equal(e.window.destino,undefined);
+  assert.equal(e.window.saidaForm1.alterado(e.forms[0]),false);
+
+  // Remover é ato explícito, depois das respostas e edições já digitadas.
+  e=preparar([10]); e.forms[0].texto.value='Correção fictícia';
+  const remover=formulario(10,'destinatarios/ID-FICTICIO/remover');
+  await e.window.saidaForm1.salvarPendentes({destino,adicional:remover});
+  assert.equal(e.requests.length,2); assert.match(e.requests[1].url,/remover$/);
+
+  // Nenhum envio quando uma ocorrência apresenta controles inválidos.
+  e=preparar([10,10]); e.forms.forEach(f=>f.texto.value='Texto'); e.forms[1].checkValidity=()=>false;
+  const aviso=elemento(); await e.window.saidaForm1.salvarPendentes({destino,aviso});
+  assert.equal(e.requests.length,0); assert.equal(e.window.destino,undefined); assert.ok(aviso.focado);
+
+  // Respostas confirmadas + destinatário recusado: retentativa não repete o primeiro ato.
+  e=preparar([10,10]); e.forms.forEach(f=>f.texto.value='Texto');
+  e.fetch=async()=>e.requests.length===1?e.resposta(2):e.resposta(2,'1');
+  await e.window.saidaForm1.salvarPendentes({destino});
+  assert.equal(e.window.destino,undefined); assert.equal(e.window.saidaForm1.alterado(e.forms[0]),false);
+  e.fetch=null; await e.window.saidaForm1.salvarPendentes({destino});
+  assert.equal(e.requests.length,3); assert.equal(e.window.destino,destino);
+  console.log('Retorno e jornada coordenada: preservação, falhas, concorrência e idempotência aprovadas (DOM simulado).');
 })().catch(e=>{console.error(e);process.exitCode=1;});

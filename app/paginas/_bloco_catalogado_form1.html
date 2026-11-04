@@ -3,6 +3,7 @@
   <h3 id="titulo-bloco-{{ numero_bloco }}">{{ titulo_bloco }}</h3>
   {% include '_leitura_bloco_form1.html' %}
   {% if registro.form1_integral.pode_editar %}
+  {% if numero_bloco == 10 %}<p role="status" aria-live="polite" tabindex="-1" data-estado-jornada-destinatarios></p>{% endif %}
   <form {% if numero_bloco == 10 %}id="formulario-bloco-10"{% endif %} class="formulario formulario-integral" method="post" action="{{ url_for(rota_bloco, registro_id=registro.id) }}">
     <input type="hidden" name="conta_id" value="{{ conta_id }}">
     <input type="hidden" name="comando_id" value="{{ comando_bloco }}">

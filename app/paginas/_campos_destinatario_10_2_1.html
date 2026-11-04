@@ -22,6 +22,7 @@
 </label>
 <label>Instrumento pertinente (ato, norma, convênio ou contrato, conforme o caso)<input name="destinatario__instrumento" id="{{ prefixo_destinatario }}instrumento" maxlength="500" value="{{ destinatario.get('instrumento', '') }}"></label>
 <p class="ajuda">Para destinatário municipal identificado, a pré-validação vigente considera a unidade do catálogo e o instrumento pertinente. CNPJ não é exigido para essa categoria. O rascunho admite informações incompletas.</p>
+<p class="ajuda">A unidade identifica quem recebe os dados. O instrumento registra a referência institucional que fundamenta a circulação; não significa que exista contrato entre Secretarias. Informe somente a referência conhecida, sem inventar um fundamento.</p>
 <details data-destinatario-complementares>
 <summary>Identificação externa e informações complementares — conforme categoria e modo</summary>
 <p class="ajuda">Destinatário externo identificado: identificação e instrumento; entidades parceiras ou contratadas também possuem CNPJ na pré-validação. Requisição eventual: classe do órgão e hipótese da requisição, sem inventar destinatário nominal. Público em geral: meio de publicação. Outro: identificação e natureza. Não determinável: justificativa. Os valores já informados são preservados, mesmo com esta seção recolhida.</p>

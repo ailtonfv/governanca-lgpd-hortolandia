@@ -2,8 +2,9 @@
 <div class="colecao-destinatarios" aria-labelledby="titulo-destinatarios-10-2-1">
   <h4 id="titulo-destinatarios-10-2-1">Destinatários identificados — 10.2.1</h4>
   <p class="ajuda">Use somente dados institucionais fictícios nesta demonstração. Não informe nomes de cidadãos, contatos pessoais ou protocolos individuais.</p>
-  <p class="ajuda">Se acabou de alterar 10.1 ou 10.2, salve as respostas do bloco antes de adicionar ou atualizar destinatários. Cada ocorrência tem seu próprio comando de salvamento.</p>
-  <button class="botao-secundario" form="formulario-bloco-10" type="submit" name="acao_pos_salvar" value="permanecer">Salvar respostas do Bloco 10</button>
+  <p class="ajuda">Selecione a categoria em 10.2 e preencha o destinatário aqui. Salvar ao final do bloco também guarda os destinatários preenchidos e as demais alterações desta página. Para incluir mais um destinatário, use “Salvar e incluir este destinatário”; depois abra novamente “Adicionar destinatário”.</p>
+  <p class="ajuda">Alterações e remoções também salvam as respostas pendentes antes de continuar. Se uma etapa falhar, as gravações já confirmadas permanecem salvas e o restante fica nesta página para correção. Salvar não solicita conferência nem submete o FORM 1.</p>
+  <noscript><p class="aviso-leitura">Ative JavaScript para o salvamento coordenado deste bloco. Sem ele, não envie alterações de destinatários junto com respostas ainda não salvas.</p></noscript>
   {% if registro.form1_integral.rascunho.destinatario_legado_10_2_1 %}
   <div class="aviso-leitura"><strong>Resposta textual legada preservada:</strong> {{ registro.form1_integral.rascunho.destinatario_legado_10_2_1 }}. Ela não foi convertida automaticamente.</div>
   {% endif %}
@@ -15,13 +16,13 @@
       <input type="hidden" name="comando_id" value="{{ comandos_atualizar_destinatario[item.id] }}">
       <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
       {% set destinatario = item %}{% include '_campos_destinatario_10_2_1.html' %}
-      <button class="botao-primario" type="submit">Atualizar ocorrência</button>
+      <button class="botao-primario" type="submit">Salvar alterações e atualizar destinatário</button>
     </form>
     <form method="post" action="{{ url_for('remover_destinatario_10_2_1_integral', registro_id=registro.id, destinatario_id=item.id) }}">
       <input type="hidden" name="conta_id" value="{{ conta_id }}">
       <input type="hidden" name="comando_id" value="{{ comandos_remover_destinatario[item.id] }}">
       <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
-      <button type="submit">Remover da visão ativa</button>
+      <button type="submit">Salvar alterações e remover destinatário da visão ativa</button>
     </form>
   </details>
   {% else %}<p>Nenhum destinatário estruturado informado.</p>{% endfor %}
@@ -32,7 +33,7 @@
       <input type="hidden" name="comando_id" value="{{ comando_adicionar_destinatario }}">
       <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
       {% set destinatario = {} %}{% include '_campos_destinatario_10_2_1.html' %}
-      <button class="botao-primario" type="submit">Adicionar ocorrência</button>
+      <button class="botao-primario" type="submit">Salvar e incluir este destinatário</button>
     </form>
   </details>
 </div>

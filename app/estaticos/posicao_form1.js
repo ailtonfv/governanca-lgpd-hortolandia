@@ -33,7 +33,8 @@ window.criarRetomadaForm1 = function (raiz, sessao) {
     return p && p.escopo === escopo && Number.isInteger(p.bloco) && p.bloco >= 1 && p.bloco <= 14
       && Number.isFinite(p.deslocamento) && Number.isFinite(p.topo)
       && (!etapa || Number(etapa[1]) === (p.bloco <= 3 ? 1 : p.bloco <= 8 ? 2 : p.bloco <= 11 ? 3 : 4))
-      && (!hash || Number(hash[1]) === p.bloco) && window.location.hash !== '#titulo-pre-validacao-form1';
+      && (!hash || Number(hash[1]) === p.bloco) && window.location.hash !== '#titulo-pre-validacao-form1'
+      && window.location.hash !== '#titulo-destinatarios-10-2-1';
   }
   var posicao = null;
   try {
