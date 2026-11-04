@@ -174,3 +174,8 @@ def test_layout_unificado_empilha_cartao_em_tela_pequena_sem_biblioteca_externa(
     assert '.resumo-contadores-painel' in estilo.text
     assert '.providencias-registro' in estilo.text
     assert '.cartao-mapeamento { grid-template-columns: 1fr' in estilo.text
+    # A ação de retomar inclui botão, explicação e consulta: não pode
+    # consumir a largura do conteúdo por dimensionamento automático.
+    assert 'grid-template-columns: minmax(0, 1fr) minmax(11rem, auto)' not in estilo.text
+    assert 'grid-template-columns: minmax(0, 1fr) minmax(11rem, 16rem)' in estilo.text
+    assert '.acoes-cartao-registro { display: flex; flex-direction: column;' in estilo.text
