@@ -44,7 +44,7 @@ def test_arp_sem_rascunho_recebe_acao_para_iniciar_form1(sessao):
     ) in pagina.text
     assert 'name="conta_id" value="CONTA-A1"' in pagina.text
     assert (
-        'aria-label="1 Registro(s) com providências">1</span>'
+        'aria-label="0 providência(s) de conferência">0</span>'
         in pagina.text
     )
 
@@ -125,7 +125,7 @@ def test_cartoes_atribuem_acoes_corretas_a_alfa_e_epsilon(sessao):
     for pagina in (pagina_alfa, pagina_epsilon):
         assert pagina.status_code == 200
         assert pagina.text.count('class="cartao-mapeamento"') == 2
-        assert 'aria-label="1 Registro(s) com providências">1</span>' in pagina.text
+        assert 'aria-label="0 providência(s) de conferência">0</span>' in pagina.text
         assert registro_alfa["codigo_lgpd"] in pagina.text
         assert registro_epsilon["codigo_lgpd"] in pagina.text
 

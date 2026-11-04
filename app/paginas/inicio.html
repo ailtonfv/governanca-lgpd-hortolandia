@@ -38,14 +38,20 @@
       <div class="resumo-contadores-painel" aria-label="Resumo do painel">
         <div>
           <span class="contador" aria-label="{{ registros|length }} Registro(s) disponível(is)">{{ registros|length }}</span>
-          <span>Registros</span>
+          <span>Registros disponíveis</span>
         </div>
         <div>
-          <span class="contador contador-providencias" aria-label="{{ quantidade_registros_com_providencias }} Registro(s) com providências">{{ quantidade_registros_com_providencias }}</span>
-          <span>O que precisa da sua atenção</span>
+          <span class="contador contador-providencias" aria-label="{{ quantidade_providencias_conferencia }} providência(s) de conferência">{{ quantidade_providencias_conferencia }}</span>
+          <span>Providências de conferência</span>
+        </div>
+        <div>
+          <span class="contador contador-campos" aria-label="{{ quantidade_campos_obrigatorios_pendentes }} campo(s) obrigatório(s) pendente(s)">{{ quantidade_campos_obrigatorios_pendentes }}</span>
+          <span>Campos obrigatórios pendentes</span>
         </div>
       </div>
     </div>
+    <p class="ajuda">Providências de conferência são solicitações ao APA ou devoluções para ajuste pelo ARP; não são perguntas incompletas. Zero providências não significa FORM 1 completo.</p>
+    <p class="ajuda">Campos obrigatórios ainda sem resposta nos levantamentos sob sua responsabilidade. O rascunho pode continuar sendo salvo mesmo incompleto.</p>
     {% if registros %}
     <p class="sr-apenas">Registros LGPD que {{ identidade.nome }} pode consultar</p>
     <div class="lista-mapeamentos-painel">
@@ -57,7 +63,11 @@
           <p class="unidade-registro"><strong>Secretaria:</strong> {{ registro.unidade }}</p>
           <p><strong>Situação do Registro:</strong> <span class="estado estado-{{ registro.estado_codigo }}">{{ registro.estado }}</span></p>
           <p><strong>Situação do FORM 1:</strong> {{ registro.situacao_form1_integral }}</p>
+          {% if registro.preenchimento_arp %}
+          <p><strong>Seu preenchimento:</strong> {{ registro.preenchimento_arp.quantidade }} campo(s) obrigatório(s) ativo(s) incompleto(s).{% if registro.preenchimento_arp.nao_iniciado %} Contagem inicial, com os dados da abertura; rascunho ainda não iniciado.{% endif %}</p>
+          {% endif %}
           {% set fluxo = registro.fluxo_conferencia %}
+          <p><strong>Responsável pelo rascunho:</strong> {{ fluxo.arp }}</p>
           <p class="resumo-conferencia-cartao"><strong>Conferência interna:</strong> {{ fluxo.estado }}{% if fluxo.versao is not none %} · versão apresentada {{ fluxo.versao }}{% endif %}.</p>
           <details class="percurso-conferencia-cartao">
             <summary>Entender o percurso ARP → APA → ARP</summary>
@@ -99,7 +109,7 @@
           </div>
           {% else %}
           <div class="sem-providencia-registro">
-            <p>Nenhuma providência pendente para seu perfil neste momento.</p>
+            <p>Nenhuma providência de conferência pendente para seu perfil neste momento. Isso não significa que o FORM 1 esteja completo.</p>
             {% if registro.responsavel_proxima_etapa %}
             <p><strong>{% if fluxo.atual == 'confirmar' %}ARP responsável pelo rascunho (sem conferência pendente):{% else %}Responsável pela próxima etapa:{% endif %}</strong> {{ registro.responsavel_proxima_etapa }}</p>
             {% endif %}
@@ -107,6 +117,10 @@
           {% endif %}
         </div>
         <div class="acoes-cartao-registro">
+          {% if registro.preenchimento_arp and not registro.preenchimento_arp.nao_iniciado and registro.fluxo_conferencia.atual == 'confirmar' %}
+          <a class="botao-link" aria-label="Retomar rascunho do Registro {{ registro.codigo_lgpd }}" href="{{ url_for('detalhe_registro', registro_id=registro.id) }}?conta_id={{ conta_id }}#{{ registro.preenchimento_arp.ancora }}">Retomar rascunho do FORM 1</a>
+          <p class="ajuda">A conferência preservou a versão apresentada. Seu rascunho continua editável; alterações não modificam aquela versão.</p>
+          {% endif %}
           <a class="botao-link-secundario" aria-label="Ver detalhes do Registro {{ registro.codigo_lgpd }}" href="{{ url_for('detalhe_registro', registro_id=registro.id) }}?conta_id={{ conta_id }}">Ver detalhes do Registro</a>
         </div>
       </article>

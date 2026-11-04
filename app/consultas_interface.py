@@ -15,6 +15,7 @@ from app.classificacao_catalogo_5_1 import (
     VERSAO_CLASSIFICACAO_CATALOGO_5_1,
 )
 from app.continuidade_apa import apa_em_exercicio, unidades_em_que_e_apa_atual
+from app.rascunho_form1_integral import _respostas_reaproveitadas
 from app.form1_sintetico import (CATEGORIAS_DADOS, CATEGORIAS_TITULARES,
                                  DESTINATARIOS_COMPARTILHAMENTO)
 from app.form1_integral import (CONDICOES_BLOCO_1, CONDICOES_PARTICIPANTE_BLOCO_3,
@@ -452,14 +453,14 @@ def _pode_editar_form1_integral(identidade, atribuicao, registro):
 
 
 def _pre_validar_rascunho_integral(
-    rascunho, *, arp_atual, confirmacao_canais, canais_registro
+    rascunho, *, arp_atual, confirmacao_canais, canais_registro, conteudo_inicial=None
 ):
     """Mantém painel e detalhe sobre a mesma pré-validação consultiva."""
 
-    if rascunho is None:
+    if rascunho is None and conteudo_inicial is None:
         return None
     return pre_validar_form1_integral(
-        rascunho.conteudo,
+        rascunho.conteudo if rascunho is not None else conteudo_inicial,
         nome_institucional=None if arp_atual is None else arp_atual.nome,
         cargo_funcao=None,
         email_institucional=None,
@@ -557,18 +558,13 @@ def carregar_painel(sessao, conta_id):
 
     proximas_providencias_form1 = []
     proximas_conferencias_form1 = []
+    preenchimentos_arp = {}
+    devolucoes_atribuidas = set()
     for registro, unidade in linhas:
         atribuicao = sessao.get(AtribuicaoForm1Integral, registro.id)
         if not _pode_editar_form1_integral(identidade, atribuicao, registro):
             continue
         rascunho = sessao.get(RascunhoForm1Integral, registro.id)
-        conferencia = sessao.get(ConferenciaInternaForm1Integral, registro.id)
-        if conferencia is not None:
-            continue
-        confirmacao = _confirmacao_para_interface(sessao, registro.id)
-        if confirmacao is not None:
-            continue
-        devolucao = _devolucao_para_interface(sessao, registro.id)
         arp_atual = sessao.get(Pessoa, atribuicao.arp_atual_id)
         confirmacao_canais = sessao.get(ConfirmacaoCanaisRegistro, registro.id)
         canais_registro = sessao.scalars(
@@ -581,7 +577,24 @@ def carregar_painel(sessao, conta_id):
             arp_atual=arp_atual,
             confirmacao_canais=confirmacao_canais,
             canais_registro=canais_registro,
+            # Mesmas respostas reaproveitadas da abertura, sem iniciar ou salvar rascunho.
+            conteudo_inicial={"respostas": _respostas_reaproveitadas(registro)},
         )
+        primeira = next((p for p in pre_validacao["incompletos"] if p["destino_navegavel"]), None)
+        preenchimentos_arp[registro.id] = {
+            "quantidade": pre_validacao["quantidades"]["incompletos"],
+            "nao_iniciado": rascunho is None,
+            "ancora": f"titulo-bloco-{primeira['bloco']}" if primeira else "titulo-bloco-1",
+        }
+        conferencia = sessao.get(ConferenciaInternaForm1Integral, registro.id)
+        if conferencia is not None:
+            continue
+        confirmacao = _confirmacao_para_interface(sessao, registro.id)
+        if confirmacao is not None:
+            continue
+        devolucao = _devolucao_para_interface(sessao, registro.id)
+        if devolucao is not None:
+            devolucoes_atribuidas.add(registro.id)
         proxima = _projetar_proxima_providencia_form1_integral(
             identidade=identidade,
             arp_atual=arp_atual,
@@ -603,7 +616,7 @@ def carregar_painel(sessao, conta_id):
             ),
             "quantidade_pendencias": (
                 None
-                if pre_validacao is None
+                if rascunho is None
                 else pre_validacao["quantidades"]["incompletos"]
             ),
             "acao_rotulo": proxima["rotulo"],
@@ -734,6 +747,7 @@ def carregar_painel(sessao, conta_id):
         registro_id = resumo["id"]
         resumo["fluxo_conferencia"] = projetar_fluxo_conferencia(sessao, registro_id, resumo["unidade_id"])
         resumo["providencias"] = providencias_por_registro[registro_id]
+        resumo["preenchimento_arp"] = preenchimentos_arp.get(registro_id)
         atribuicao = sessao.get(AtribuicaoForm1Integral, registro_id)
         rascunho = sessao.get(RascunhoForm1Integral, registro_id)
         conferencia = sessao.get(ConferenciaInternaForm1Integral, registro_id)
@@ -773,6 +787,12 @@ def carregar_painel(sessao, conta_id):
         "proximas_providencias_form1": proximas_providencias_form1,
         "proximas_conferencias_form1": proximas_conferencias_form1,
         "quantidade_registros_com_providencias": quantidade_registros_com_providencias,
+        "quantidade_providencias_conferencia": len(devolucoes_atribuidas | {
+            item["registro_id"] for item in proximas_conferencias_form1
+        }),
+        "quantidade_campos_obrigatorios_pendentes": sum(
+            item["quantidade"] for item in preenchimentos_arp.values()
+        ),
         "pode_criar_registro": pode_criar_registro,
     }
 
