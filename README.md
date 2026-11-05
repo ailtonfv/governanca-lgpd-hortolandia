@@ -17,6 +17,7 @@ Toda apresentação institucional derivada deste projeto deve utilizar o **bras�
 | Entender o que é o sistema e de onde vem | as seções logo abaixo ("De onde vem", "O que é") |
 | Ver, em 5 minutos, como um Registro anda no M1a | [Mapa do M1a](docs/arquitetura/MAPA_M1a.md) |
 | Saber o que já funciona e o que falta | [O que já funciona](#o-que-já-funciona) e [Próximos passos](#próximos-passos) |
+| Acompanhar a primeira avaliação funcional do FORM 1 e os ajustes pendentes | [Backlog consolidado da PoC ampliada](docs/planejamento/BACKLOG_AJUSTES_POC_AMPLIADA.md) |
 | Montar o ambiente e rodar os testes | [Instalação e execução](docs/operacao/INSTALACAO.md) |
 | Entender as camadas do código | [Arquitetura](docs/arquitetura/ARQUITETURA_POC.md) |
 | Dar contexto rápido a uma IA antes de uma tarefa | [Pacote de contexto](docs/contexto/context.md) e [instruções para agentes](AGENTS.md) |

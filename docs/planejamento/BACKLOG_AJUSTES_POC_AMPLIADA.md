@@ -1,0 +1,182 @@
+# Acompanhamento dos ajustes da PoC ampliada
+
+**Data da consolidação:** 05/11/2026. **Base inspecionada:** `main`, commit `26b9e97f0d6cdca4a19b342929128591947bab13`, com alterações locais descritas abaixo.
+
+O diagnóstico e a tabela registram a situação anterior aos commits de estabilização. A seção final atualiza o versionamento e a evidência dos testes, preservando as 13 ocorrências e suas propostas.
+
+Este documento reúne o diagnóstico e as propostas da primeira avaliação assistida dos 14 blocos. Não autoriza implementação das propostas, mudança de contrato ou liberação da submissão institucional. Cartilha e apresentação não foram modificadas.
+
+## Evidências e limites
+
+O responsável funcional informou ter percorrido os 14 blocos no Registro fictício `LGPD-2026-00004`, com navegação, condicionais, salvamento e recuperação satisfatórios. Naquela avaliação, foram observados 15 obrigatórios ativos incompletos, 49 condicionais não aplicáveis, um aviso facultativo e duas dependências de governança. São valores daquele momento, relatados pelo usuário, não totais fixos nem uma nova consulta ao banco nesta tarefa. A avaliação não equivale à conclusão integral nem à submissão institucional.
+
+A correção local da ordenação teve **71 testes aprovados**, incluindo dez cenários novos, e comparação de **102 cenários** com a versão anterior: conteúdo, contagens, ocorrências e regras preservados. Esses resultados pertencem à tarefa imediatamente anterior; não foram repetidos nesta consolidação documental.
+
+**ACEITAÇÃO VISUAL DA ORDENAÇÃO NÃO VERIFICADA.** Nesta sessão, a ferramenta de navegador falhou na inicialização: `failed to write kernel assets`, erro do Windows 3, caminho não encontrado. Não foi possível abrir a tela por essa ferramenta. Não houve contorno, salvamento ou alteração do rascunho demonstrativo.
+
+Situações abaixo descrevem a entrega indicada, não uma aceitação global: **identificada**, **em análise**, **autorizada**, **implementada**, **testada** ou **concluída**. Uma entrega testada automaticamente pode ainda depender de avaliação manual. P1 indica precisão factual ou usabilidade importante; P2 indica consolidação editorial. O bloqueio institucional é requisito para futura liberação, não defeito que impeça demonstrar o rascunho e a conferência interna.
+
+## Registro das ocorrências
+
+| ID | Identificação | Componente e descrição | Classificação | Prioridade | Situação e evidência |
+|---|---|---|---|---|---|
+| AJ-001 | 05/11/2026 | 12.3 e 12.4 agregam procedimentos e evidências de operações diferentes. | Revisão conceitual | P1 / A | Em análise; proposta abaixo. Nenhuma mudança executável. |
+| AJ-002 | 05/11/2026 | 12.5 não diferencia transferência de sistema, arquivo, custódia e mudança de localização. | Revisão conceitual | P1 / A | Em análise; definição e compatibilidade dependem de decisão. |
+| AJ-003 | 05/11/2026 | 13.1 precisa explicar as três alternativas especiais no contexto da pergunta. | Melhoria | P1 / B | Identificada; exclusividade já implementada. Teste existente cobre cada alternativa especial com exposição concreta. |
+| AJ-004 | 05/11/2026 | 13.2 reúne guarda de documentos e bloqueio de estações em uma resposta. | Revisão conceitual | P1 / B | Em análise; proposta de duas dimensões, sem implementação. |
+| AJ-005 | 05/11/2026 | Total de obrigatórios no painel não aponta diretamente à sua distribuição. | Melhoria | P1 / C | Identificada; quantidade e navegação por Registro já existem nos cartões. Proposta apenas de apresentação. |
+| AJ-006 | 05/11/2026 | Pendências complementares fora da ordem canônica. | Defeito | P1 / D | Testada localmente, sem commit; `pre_validar_form1_integral()`. 71 testes e comparação de 102 cenários. Aceitação visual pendente. |
+| AJ-007 | 05/11/2026 | Formalização documental de APA e SAA. | Melhoria documental | P2 / E | Implementada no README local, sem commit. SAA não cria perfil ou permissão. Harmonização de outros documentos pendente. |
+| AJ-008 | 05/11/2026 | Dependência editorial de “WhatsApp corporativo”. | Dependência institucional/documental | P2 / E | Em análise: expressão encontrada na REV30.14; dependência continua no código. Reconciliar antes de declará-la resolvida no sistema. |
+| AJ-009 | 05/11/2026 | Ajuda usa REV30.13 enquanto referência editorial consolidada é REV30.14. | Melhoria documental | P1 / E | Em análise; 12 títulos preservados, dez seções com texto extraído igual e duas alteradas. Sem troca de edição. |
+| AJ-010 | 05/11/2026 | Aprovação institucional da matriz e marco de liberação. | Dependência institucional | P0 para submissão | Identificada; submissão permanece bloqueada. Demonstração de rascunho/conferência não depende dessa liberação. |
+| AJ-011 | 05/11/2026 | Categoria única em 10.2.1 dispensando escolha repetida. | Melhoria | P1 | Concluída tecnicamente e versionada em `26b9e97`; não constitui nova aceitação visual nesta sessão. |
+| AJ-012 | 05/11/2026 | Coordenação do salvamento das respostas e destinatários do Bloco 10. | Melhoria | P1 | Concluída tecnicamente e versionada em `35f66a3`; cobertura em `test_jornada_destinatarios_form1.py`, incluída na rodada anterior de 71 testes. |
+| AJ-013 | 05/11/2026 | Destinatários na posição 10.2 → 10.2.1 → 10.3 da área de preenchimento. | Defeito | P1 | Correção existente em `b75a660`; reforço de teste local em `test_usabilidade_blocos_9_10.py`. Não confundir com AJ-006, relativo à lista de pendências. |
+
+As pendências históricas do 8Z continuam em [BACKLOG_VERIFICACOES_VISUAIS_8Z.md](BACKLOG_VERIFICACOES_VISUAIS_8Z.md). Este acompanhamento não as declara aprovadas; critérios antigos vinculados ao painel de duas listas precisam ser confrontados com o painel unificado antes de nova execução, sem reescrever o histórico.
+
+## A — Guarda e destinação no Bloco 12
+
+### Estado comprovado
+
+O catálogo `app/catalogos/form1_rev13.csv`, carregado por `app/form1_integral.py`, define:
+
+| ID | Representação atual | Obrigatoriedade vigente |
+|---|---|---|
+| 12.3 | Seleção única: Sim, Não, A confirmar; abrange eliminação, arquivamento, devolução e transferência. | Facultativa nesta proposta. |
+| 12.4 | Seleção única: Sim, Não, Em alguns casos, A confirmar, Não se aplica; evidência de eliminação, devolução ou transferência. | Facultativa nesta proposta. |
+| 12.4.1 | Texto único para localização da evidência. | Condicional a 12.4 = Sim ou Em alguns casos. |
+| 12.5 | Seleção única: Sim, Não, A confirmar; transferência para outro sistema ou arquivo como destinação/guarda. | Facultativa nesta proposta. |
+| 12.5.1 | Texto único para o sistema/arquivo de destino. | Condicional a 12.5 = Sim. |
+
+Fontes: `CONDICOES_BLOCO_12`, `MATRIZ_CAMPOS_FORM1_REV13.md`, `salvar_bloco_12_form1_integral()` e contrato candidato 3. As respostas ficam no envelope JSON do rascunho. `VersaoForm1Integral` e `app/submissao_form1_integral.py` preservam snapshots; não se deve reescrever uma versão para aplicar novas interpretações.
+
+### Proposta mínima para aprovação
+
+Preservar os números 12.3 e 12.4 como grupos visuais. Dentro de cada grupo, identificar separadamente quatro operações: guarda/arquivamento, eliminação, devolução e transferência. Para cada operação, registrar a existência de procedimento e, em dimensão distinta, a existência de evidência de execução. Não inferir um valor a partir da outra dimensão. Aplicar a documentos físicos e digitais, sem pressupor que serão eliminados.
+
+Propor respostas por operação que distingam existência, ausência, informação parcial, informação a confirmar e não aplicabilidade, com o catálogo exato submetido à aprovação. “Não se aplica” deve permanecer disponível para evidências; ausência de execução a evidenciar não deve ser confundida automaticamente com ausência de procedimento. Definir expressamente esse caso antes de implementar. Não presumir que toda resposta negativa exija justificativa.
+
+Manter 12.4.1 como localização/referência da evidência, mas associada à operação pertinente. Uma mesma referência pode apoiar várias operações, sem copiar arquivos ou dados de cidadãos. A regra de exigência de 12.4.1 precisará ser reexpressa por operação e aprovada; não converter as perguntas facultativas em obrigatórias por conveniência técnica.
+
+Em 12.5, identificar a natureza da transferência: outro sistema, arquivo/unidade documental ou custódia. Essas dimensões podem coexistir; não impor exclusividade. Simples mudança de localização não implica automaticamente transferência de custódia. 12.5.1 mantém o destino e a explicação factual pertinente. A mudança de local já descrita no Bloco 11 pode ser referenciada, sem exigir nova resposta idêntica.
+
+Separação proposta: Bloco 8 descreve sistemas/meios utilizados na execução; Bloco 10 descreve disponibilização a destinatários; Bloco 11 descreve a guarda atual; Bloco 12 descreve temporalidade, destinação e transferências ligadas a esse ciclo. Um mesmo sistema pode aparecer em mais de um contexto com funções distintas; isso não deve gerar cópia automática de respostas. O levantamento não aprova a legalidade da destinação nem fixa prazos arquivísticos.
+
+### Impacto e compatibilidade
+
+Não se trata de simples troca de rótulos: os escalares atuais não representam quatro respostas independentes. Propor uma estrutura versionada no envelope JSON, com discriminação das operações, mantendo os IDs externos preferencialmente. O desenho definitivo deve ser aprovado no contrato e na matriz antes do código; não introduzir tipos novos sob a mesma versão sem discriminação. Não há evidência de necessidade de nova tabela; avaliar primeiro o envelope existente.
+
+Preservar integralmente a resposta legada e sua versão de origem. Um “Sim” antigo não pode virar quatro respostas “Sim”. Propor leitura legada identificada e confirmação explícita pelo ARP ao adotar o novo formato, com ato auditável e novas respostas inicialmente não inferidas. Manter snapshots, lacres e eventos antigos intocados; eventual evolução do rascunho deve ter estratégia reversível, sem conversão em lote implícita.
+
+**Arquivos potencialmente afetados:** catálogo e carregador `app/form1_integral.py`; contrato candidato e matriz versionados; `app/rascunho_form1_integral.py`; `app/pre_validacao_form1_integral.py`; projeções em `app/consultas_interface.py`; `_bloco_catalogado_form1.html` e consulta somente leitura; testes de Bloco 12, snapshots e pré-validação. Inspecionar serialização em `app/submissao_form1_integral.py` antes de decidir se precisa de alteração; não presume mudança de banco.
+
+**Testes futuros:** procedimento existente somente para arquivamento; evidência presente somente para eliminação; aplicação parcial; não aplicabilidade e informação desconhecida; físicos/digitais; transferência simultânea de sistema/custódia; mudança de local sem troca de custódia; condicionais por operação; salvamento incompleto; reabertura de legado; snapshots anteriores íntegros; autorização, concorrência, idempotência e rollback se a escrita mudar.
+
+**Risco:** alto de reinterpretar legado ou alterar exigências indevidamente; mitigação por esquema discriminado e testes de compatibilidade. **Esforço indicativo:** 8–14 horas de implementação e testes após decisões fechadas; incerteza maior se houver nova matriz/contrato ou migração de formato não prevista. Não inclui tempo de aprovação institucional.
+
+## B — Clareza e granularidade do Bloco 13
+
+### 13.1 — Orientação sem mudança de regra
+
+As três alternativas especiais existem no catálogo. `problema_exclusividade_multisselecao()` em `app/politica_form1_integral_8v.py` exige que cada uma seja usada isoladamente. O teste parametrizado `test_bloco_13_recusa_excludente_com_outra_situacao`, em `testes/test_bloco13_form1_integral.py`, já cobre **cada uma das três** combinada com uma exposição concreta. Não criar teste duplicado; complementar a cobertura visual/da ajuda se aprovada. Esse teste foi inspecionado, não reexecutado nesta tarefa documental.
+
+Proposta de texto no componente existente “Entenda esta pergunta”:
+
+> **Nenhuma das situações acima:** o fluxo foi examinado e nenhuma das situações de exposição listadas foi identificada. **Não se aplica:** as situações investigadas não são pertinentes ao fluxo analisado. **A confirmar:** ainda não existem informações suficientes para concluir a avaliação. Escolha cada uma dessas alternativas isoladamente; elas não podem ser combinadas com situações concretas de exposição.
+
+13.1 não possui entrada em `AJUDAS_CARTILHA_FORM1`. Reutilizar o componente com orientação sem criar um link editorial inexistente; se houver referência à Cartilha, verificar antes a seção real e executar os testes de vínculos exigidos no AGENTS. Não atribuir uma nova seção por analogia. A pré-validação continua tratando “A confirmar” como pendência no campo obrigatório; o texto não deve prometer conclusão ou aprovação.
+
+Arquivos possíveis: mapa de ajudas, componente `_ajuda_cartilha_form1.html`, projeção da ajuda e testes associados, somente se necessários ao mecanismo sem referência. Risco baixo, de contradizer a regra ou inventar um destino. Testar alternativas especiais isoladas, todas as combinações proibidas pertinentes, preservação do rascunho e leitura por teclado. **Esforço: 1–2 horas**, após autorização.
+
+### 13.2 — Duas medidas independentes
+
+A resposta atual é única: Sempre, Às vezes, Não, A confirmar ou Não se aplica. A matriz a classifica como facultativa nesta proposta. Não é possível representar com precisão guarda realizada e estação não bloqueada.
+
+Propor duas linhas sob 13.2: guarda dos documentos e bloqueio das estações, cada uma com resposta própria. Preservar a numeração visual não elimina a mudança de estrutura de dados. Aprovar o esquema versionado e as condições de não aplicabilidade, sem inferir “Não se aplica” para uma medida a partir da outra. Evitar criar novas perguntas independentes se o grupo puder comportar as dimensões.
+
+Manter a resposta antiga explicitamente como agregada; não copiá-la para ambas as linhas. Preservar a natureza facultativa até decisão contrária. Aplicam-se as salvaguardas de compatibilidade do Bloco 12.
+
+Arquivos possíveis: catálogo/contrato/matriz aprovados, `app/form1_integral.py`, `salvar_bloco_13_form1_integral()`, pré-validação, templates e consulta histórica. Testar combinações discordantes, uma dimensão vazia, não aplicabilidade, salvamento/retomada, legado e versões imutáveis. Risco médio de conversão indevida e mudança de exigência. **Esforço: 4–6 horas**, com decisões fechadas e reutilização do formato aprovado; estimativa pode cair se a infraestrutura do Bloco 12 servir ao mesmo desenho.
+
+## C — Distribuição das pendências no painel
+
+`carregar_painel()` em `app/consultas_interface.py` já calcula `preenchimentos_arp` somente após `_pode_editar_form1_integral()`. Usa a pré-validação vigente, inclui rascunho não iniciado por cálculo em memória e soma uma entrada por Registro. A projeção entrega `registro.preenchimento_arp.quantidade`; `app/paginas/inicio.html` já a apresenta em **Seu preenchimento** no cartão. O indicador consolidado, porém, é apenas texto e não leva diretamente a essa distribuição.
+
+Proposta mínima: tornar consultável junto ao contador uma seção expansível “Distribuição por Registro”, utilizando exclusivamente os mesmos cartões/projeções já autorizados. Cada linha mostra código, título, quantidade e link ao cartão correspondente. Não listar cada pergunta nem duplicar formulários/botões de ação. O link ao cartão destaca o item e preserva a navegação de início/retomada já existente. Incluir Registros pertinentes com zero quando necessário para explicar a soma; identificar rascunho ainda não iniciado. A soma exibida deve coincidir com o indicador e não incluir Registros apenas consultáveis de outro ARP.
+
+Alternativa ainda menor: ligação do contador à lista existente, destacando os cartões com preenchimento do usuário. Escolher a seção expansível se a quantidade de cartões dificultar a compreensão imediata; não reconstruir dois painéis de tarefas.
+
+**Arquivos possíveis:** `app/paginas/inicio.html`, estilos existentes e testes do painel; projeção apenas se faltar um dado, sem nova consulta de autorização ou recálculo. **Testes futuros:** um/vários Registros, soma sem duplicação, zero, rascunho não iniciado, APA com outro ARP, sem acesso, conferência pendente e histórico confirmado; links corretos, foco por teclado e telas estreitas. **Risco:** vazamento de contagens ou duplicação caso se abandone o filtro existente; minimizar reutilizando `preenchimento_arp`. **Esforço: 2–4 horas**, incluindo testes e conferência manual.
+
+## D — Ordenação local e aceitação visual
+
+A alteração em `pre_validar_form1_integral()` ordena estavelmente `incompletos` pela matriz antes de agrupar por bloco. Complementos e ocorrências da mesma pergunta conservam conteúdo e identidade. O total não muda. A lista global também segue a ordem canônica, mantendo coerência da primeira pendência com a lista exibida. Os casos 10.2.1 antes de 10.3, inclusive com 10.2 já respondida, estão cobertos por teste de HTML.
+
+Permanecem locais e sem commit: `app/pre_validacao_form1_integral.py`, `testes/test_ordenacao_pendencias_form1.py`, o reforço anterior de `testes/test_usabilidade_blocos_9_10.py` e as adições de APA/SAA e ordenação no README. A sessão atual não mudou esses arquivos de código/teste.
+
+Roteiro de aceite sem editar o Registro 00004: abrir o Registro com autorização, expandir **Pendências antes da futura submissão → Bloco 10** e conferir a ordem dos IDs presentes. Se 10.2 estiver satisfeita, ela não deve aparecer; isso não é defeito. Se 10.2.1 e 10.3 estiverem ambas pendentes, 10.2.1 deve preceder 10.3. A sequência com os três IDs exige que 10.2 também tenha uma pendência, como complemento de “Outro”; usar somente massa isolada de teste para esse cenário, não mudar o rascunho avaliado para provocá-lo. Conferir os detalhes das ocorrências e os destinos de consulta/edição conforme permissão. Registrar data, perfil, captura e resultado. **Esforço manual estimado: 0,5–1 hora**, sem repetir a regressão se o código não mudar.
+
+## E — Dependências documentais e institucionais
+
+### APA, SAA e ARP
+
+A seção **APA e SAA — autorização de governança e acesso aos dados** já existe no README local. Diferencia autorização de acesso/tratamento de competência de abertura/governança; SAA não é novo perfil. A referência à apresentação de 9.1 preserva códigos históricos. Cartilha, apresentação e demais fontes terão harmonização em marco posterior, sem ampliar permissões. Situação documental implementada não significa commit/publicação.
+
+### Cartilha REV30.13 e REV30.14
+
+Leitura somente textual, sem edição nem avaliação da diagramação:
+
+- A edição efetivamente usada pela PoC é `documentos_locais/cartilha/CARTILHA_LGPD_HORTOLANDIA_REV30_13_MARCO_03-11-2026.docx`, fora do Git. Existe e seu SHA-256 corresponde ao configurado em `app/ajudas_cartilha_form1.py`.
+- O carregador `app/cartilha_local.py` disponibiliza **12 seções temáticas**, utilizadas pelas **22 ajudas** do mapa. Há identidade temática estável, edição explícita e checagem do hash; não há fundamento para substituir apenas o rótulo por REV30.14.
+- Foi localizada a referência editorial `CARTILHA_LGPD_REV30_14_CONSOLIDADA_SAA_05-11-2026.docx`, em `11_Cartilha_Apresentacoes` do conjunto SAD. SHA-256: `3bc5df4c2751fd2f24ec9abdded59e436d00aaf893b6b411aa6c364d801baadf`.
+- Os 12 títulos de seção do mapa existem na REV30.14. Na comparação do texto extraído, dez seções são iguais; **5.1 Levantamento da realidade** e **5.2 Operações, canais e ambientes** mudaram. 5.1 acrescenta o percurso entre Secretarias e esclarecimento sobre destinatário interno; 5.2 acrescenta orientação sobre instrumento pertinente municipal e a pendência de modelagem. A comparação não certifica equivalência de imagens/diagramação.
+- As referências atuais continuam coerentes com a edição REV30.13 que identificam e com seções disponíveis localmente. Isso não constitui teste visual de navegação nesta sessão nem atualização para a nova edição.
+
+Propor incorporação controlada após autorização: conferir a correspondência das 22 ajudas; preservar IDs temáticos; manter edições anteriores consultáveis sem substituir silenciosamente seus destinos; registrar revisão/hash e alterações editoriais; disponibilizar a nova edição somente localmente e para leitura. O carregador atual fixa uma edição/hash; preservar consulta histórica ao adotar outra edição exige desenho explícito de seleção por versão, não só trocar constantes. Não publicar DOCX nem seu conteúdo no Git/portal externo.
+
+Testes necessários: cada destino temático na edição correta, edição ausente/divergente, autorização ao Registro, acesso apenas local, abertura em outra aba, retorno sem perda, manutenção dos destinos antigos. Reutilizar `testes/test_cartilha_local_form1.py` e `testes/test_ajudas_cartilha_incremento_8w.py`. Esses testes foram consultados, não reexecutados nesta etapa; nenhum vínculo foi modificado. **Esforço: 2–4 horas**, condicionado à revisão editorial e ao suporte de edições coexistentes.
+
+### WhatsApp e pontos a reconciliar
+
+`REGRAS_PENDENTES_GLOBAIS` ainda contém `F1-D04-DOC`, solicitando formalização de “WhatsApp corporativo”. A expressão foi localizada no texto da REV30.14 sobre o catálogo de canais. Portanto, registrar como **formalização textual localizada, reconciliação da dependência pendente**, em vez de prometer acrescentar novamente algo já presente. A seção 6.10 manteve o texto extraído da REV30.13; conferir se a redação aprovada cobre também a distinção entre canal, dispositivo, repositório e backups que motivou F1-D04-DOC antes de retirar o aviso. Nada foi retirado nesta sessão.
+
+Há ainda uma cautela editorial para a atualização: o trecho sobre canais afirma que processos transversais têm Registro próprio, enquanto o AGENTS condiciona Registro próprio a tratamento autônomo. Não transportar essa frase para uma nova regra automática. Solicitar esclarecimento pontual dessa correspondência na revisão editorial, sem reabrir a arquitetura nem alterar a fonte nesta tarefa.
+
+A aprovação da matriz e do marco institucional permanece pendente. Não alterar `APROVACAO-MATRIZ`, não habilitar submissão nem atribuir competências aos FORMs posteriores.
+
+## Ordem recomendada e critérios de encerramento
+
+1. Concluir o aceite visual da ordenação já testada e avaliar a proposta consolidada. Não ampliar a correção se a ordem estiver correta.
+2. Aprovar conjuntamente a granularidade de 12.3/12.4/12.5 e 13.2, o esquema de compatibilidade e as condicionais. Resolver essas decisões antes de codificar; não converter valores legados por inferência.
+3. Executar, após autorização específica, as melhorias independentes e pequenas de 13.1 e da distribuição do contador, aproveitando componentes e testes existentes.
+4. Implementar a evolução versionada dos Blocos 12/13 somente com desenho aprovado, seguida de testes de compatibilidade e avaliação manual.
+5. Incorporar a nova edição da Cartilha em revisão controlada e reconciliar F1-D04-DOC; manter o bloqueio institucional enquanto não houver autorização própria.
+
+As faixas de esforço acima representam execução e verificação do recorte, não prazo garantido ou nova estimativa do produto completo. Não incluem espera por decisões. Testes compartilhados devem ser reutilizados, evitando somar duas vezes a mesma regressão.
+
+Na sessão de diagnóstico foram alterados somente este documento e o link no README. Não houve testes integrais, migrações, alterações no banco demonstrativo, novos testes ou correções funcionais. As evidências anteriores foram preservadas. Naquela sessão, nenhum commit ou push foi realizado. As propostas aguardam avaliação e autorização específica.
+
+## Estabilização e versionamento local — 05/11/2026
+
+Por autorização específica posterior ao diagnóstico, foram revisadas as cinco alterações locais esperadas, sem encontrar arquivos estranhos ao escopo ou indícios de credenciais/dados pessoais reais nas adições. Os trechos independentes do README foram separados no índice, sem reescrever seu conteúdo ou descartar alterações.
+
+- **AJ-006 e reforço de teste AJ-013:** commit `cea01e2de7195d1f6e9a3e1d8e8e3bf6b7cb0c05`, `fix(form1): ordenar pendencias pela sequencia canonica`. Inclui pré-validação, os dois arquivos de testes de ordenação/usabilidade e o parágrafo correspondente no README. Situação: testada e commitada localmente; aceitação visual ainda pendente.
+- **AJ-007:** commit `e52c4afdd60365d446a06541486801f43be31ab6`, `docs(lgpd): formalizar distincao entre APA e SAA`. Inclui somente a definição e seus limites no README. Não cria perfil ou permissão.
+- **Planejamento:** este backlog e seu link no README constituem o commit documental separado `docs(poc): consolidar backlog de ajustes da ampliacao`. As propostas dos Blocos 12/13 e do painel permanecem não implementadas.
+
+### Verificação executada
+
+Regressão proporcional: **109 testes aprovados, zero falhas**, em 67,79 segundos. Um aviso preexistente: depreciação de `anyio.abc.BlockingPortal` em `starlette.testclient`; não impediu a execução. Não foi executada a suíte integral.
+
+Comando PowerShell executado na raiz do repositório, com o ambiente `lgpd-poc` ativado:
+
+```powershell
+$env:LGPD_BANCO_TESTE='lgpd_poc_teste'
+python -m pytest -q -o addopts= -p no:cacheprovider testes/test_ordenacao_pendencias_form1.py testes/test_pre_validacao_form1_integral.py testes/test_complementos_outro_form1_integral.py testes/test_destinatarios_10_2_1_form1_integral.py testes/test_usabilidade_blocos_9_10.py testes/test_jornada_destinatarios_form1.py testes/test_painel_progresso_incremento_8k.py testes/test_tres_contadores_painel.py testes/test_politica_p0_incremento_8v.py testes/test_leitura_preenchimento_form1.py testes/test_p1_usabilidade_form1.py testes/test_bloco10_form1_integral.py testes/test_continuidade_navegacao_incremento_8m.py testes/test_etapa1_form1_integral.py testes/test_snapshot_form1_integral.py
+```
+
+A rodada abrange ordem canônica, condicionais, participantes/destinatários repetíveis, rascunhos, navegação, pré-validação, snapshots e bloqueio da submissão institucional. As rotinas da suíte preparam somente o banco isolado `lgpd_poc_teste`; o banco demonstrativo e suas respostas não foram alterados. Não houve alteração funcional posterior aos testes. A verificação `git diff --check` passou e os 13 IDs do backlog e o link do README foram conferidos.
+
+Nenhum push foi autorizado ou realizado nesta estabilização. A inspeção visual continua **NÃO VERIFICADA**, com o roteiro da seção D preservado. Não houve funcionalidades adicionais, mudanças de contratos, matriz, permissões, Cartilha, apresentação ou FORMs 2–4.
