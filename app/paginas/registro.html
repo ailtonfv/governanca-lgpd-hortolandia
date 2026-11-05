@@ -816,6 +816,7 @@
 
 <script src="{{ url_for('estaticos', path='/formulario_associado_form1.js') }}"></script>
 <script src="{{ url_for('estaticos', path='/saida_form1.js') }}"></script>
+<script src="{{ url_for('estaticos', path='/extensao_medidas_form1.js') }}"></script>
 <script src="{{ url_for('estaticos', path='/posicao_form1.js') }}"></script>
 <script src="{{ url_for('estaticos', path='localizador_form1.js') }}"></script>
 <script>
@@ -1281,6 +1282,10 @@
       if (!serializado) return;
       var dados;
       try { dados = JSON.parse(serializado); } catch (erro) { return; }
+      // Uma tentativa legada não pode preencher as perguntas da extensão.
+      var estruturaAtual = formulario.querySelector('[name="estrutura_lida"]');
+      var estruturaTentativa = dados.find(function (item) { return item[0] === 'estrutura_lida'; });
+      if (estruturaAtual && estruturaAtual.value !== (estruturaTentativa ? estruturaTentativa[1] : 'F1-C3-REV13')) return;
       var valoresPorNome = {};
       dados.forEach(function (par) {
         if (!valoresPorNome[par[0]]) valoresPorNome[par[0]] = [];

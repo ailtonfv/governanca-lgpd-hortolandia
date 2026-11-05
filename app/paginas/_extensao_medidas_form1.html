@@ -1,0 +1,17 @@
+<p class="ajuda">Versão deste rascunho: <strong>{{ registro.form1_integral.versao_estrutura }}</strong>.</p>
+{% set extensao_medidas = registro.form1_integral.extensao_medidas %}
+{% include '_legado_medidas_form1.html' %}
+{% if not extensao_medidas and registro.form1_integral.pode_editar %}
+<details>
+  <summary>Adotar perguntas separadas sobre guarda física e bloqueio de estações</summary>
+  <p>A adoção é opcional. Preserva um snapshot do rascunho salvo e a resposta agregada de 13.2. As novas perguntas 13.2 e 13.2.1 são facultativas, independentes e começam sem resposta. Salve antes quaisquer alterações desta página.</p>
+  <form method="post" action="{{ url_for('adotar_medidas_bloco_13', registro_id=registro.id) }}" data-adotar-medidas>
+    <input type="hidden" name="conta_id" value="{{ conta_id }}">
+    <input type="hidden" name="comando_id" value="{{ comando_adotar_medidas }}">
+    <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
+    <label class="opcao"><input type="checkbox" name="confirmar" value="sim" required> Confirmo a adoção da extensão e entendo que as novas respostas começarão vazias.</label>
+    <button type="submit">Adotar perguntas separadas no Bloco 13</button>
+    <p role="status" tabindex="-1" data-aviso-adocao></p>
+  </form>
+</details>
+{% endif %}

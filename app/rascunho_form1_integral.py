@@ -267,7 +267,7 @@ def _validar_respostas_bloco_1(respostas):
     return None
 
 
-def _validar_respostas_catalogadas(sessao, respostas, campos_permitidos):
+def _validar_respostas_catalogadas(sessao, respostas, campos_permitidos, catalogo=None):
     """Valida o recorte REV13 sem antecipar as regras de submissão integral."""
 
     if not isinstance(respostas, dict):
@@ -275,7 +275,7 @@ def _validar_respostas_catalogadas(sessao, respostas, campos_permitidos):
     desconhecidos = set(respostas) - set(campos_permitidos)
     if desconhecidos:
         return "campo não editável ou desconhecido: " + ", ".join(sorted(desconhecidos))
-    catalogo = campos_por_id()
+    catalogo = campos_por_id() if catalogo is None else catalogo
     for campo_id, valor in respostas.items():
         campo = catalogo[campo_id]
         if campo_id in CAMPOS_SECRETARIA:
@@ -493,8 +493,9 @@ def _rascunho_bloqueado(sessao, registro_id):
 
 def _salvar_conteudo(
     sessao, *, comando, registro, rascunho, pessoa_id, versao_lida,
-    conteudo, tipo_evento, motivo, detalhes, momento,
+    conteudo, tipo_evento, motivo, detalhes, momento, ordem_no_comando=1,
 ):
+    from app.extensao_medidas_form1 import versao_estrutura
     nova_versao = versao_lida + 1
     rascunho.conteudo = conteudo
     rascunho.versao_rascunho = nova_versao
@@ -508,11 +509,13 @@ def _salvar_conteudo(
             "versao_anterior": versao_lida,
             "versao_rascunho": nova_versao,
             "lacre_conteudo": rascunho.lacre_conteudo,
+            "versao_estrutura": versao_estrutura(conteudo),
             **detalhes,
         },
         registro_id=registro.id,
         ciclo_id=_ciclo(sessao, registro).id,
         versao_esquema_evento=2,
+        ordem_no_comando=ordem_no_comando,
     )
     registro.sequencia_atual = evento.sequencia_cadeia
     resultado = fechar_comando(comando, {
@@ -992,7 +995,7 @@ def salvar_bloco_6_form1_integral(
 def _salvar_bloco_catalogado_form1_integral(
     sessao, *, numero_bloco, comando_id, conta_id, registro_id, versao_lida,
     respostas, campos_editaveis, condicoes, complementos_outro=None, momento=None,
-    transformar_conteudo=None,
+    transformar_conteudo=None, estrutura_lida=None,
 ):
     """Executa o padrão atômico dos blocos catalogados do rascunho REV13."""
 
@@ -1006,13 +1009,24 @@ def _salvar_bloco_catalogado_form1_integral(
         "versao_lida": versao_lida, "respostas": respostas,
         "complementos_outro": complementos_outro,
     }
+    catalogo = None
+    if numero_bloco == 13:
+        from app.extensao_medidas_form1 import (
+            VERSAO_BASE, VERSAO_EXTENSAO, catalogo_efetivo, versao_estrutura,
+        )
+        if estrutura_lida is not None:
+            parametros["estrutura_lida"] = estrutura_lida
+        estrutura_lida = estrutura_lida or VERSAO_BASE
+        if estrutura_lida == VERSAO_EXTENSAO:
+            catalogo = catalogo_efetivo({"extensao_medidas": {"versao": estrutura_lida}})
+            campos_editaveis = campos_editaveis | {"13.2.1"}
     conta, pessoa_id, ator_tipo, ator_id = _ator(sessao, conta_id)
     comando, resposta = abrir_comando(
         sessao, comando_id, tipo_comando, parametros, ator_tipo, ator_id, conta_id,
     )
     if resposta is not None:
         return resposta
-    problema = problema_complemento or _validar_respostas_catalogadas(sessao, respostas, campos_editaveis)
+    problema = problema_complemento or _validar_respostas_catalogadas(sessao, respostas, campos_editaveis, catalogo)
     problema = problema or _validar_condicionais(respostas, condicoes)
     if problema:
         return _negar(
@@ -1026,6 +1040,9 @@ def _salvar_bloco_catalogado_form1_integral(
     )
     if resposta is not None:
         return resposta
+    if numero_bloco == 13 and estrutura_lida != versao_estrutura(rascunho.conteudo):
+        return _negar(sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
+                      tipo_comando, "versão da estrutura divergente: recarregue o Bloco 13")
     conteudo = _conteudo_com_respostas_do_bloco(
         rascunho, campos_editaveis=campos_editaveis, respostas=respostas,
         condicoes=condicoes,
@@ -1137,7 +1154,7 @@ def salvar_bloco_12_form1_integral(
 
 def salvar_bloco_13_form1_integral(
     sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas,
-    complementos_outro=None, momento=None,
+    complementos_outro=None, momento=None, estrutura_lida=None,
 ):
     """Salva situações de exposição física ou visual do Bloco 13."""
 
@@ -1145,7 +1162,7 @@ def salvar_bloco_13_form1_integral(
         sessao, numero_bloco=13, comando_id=comando_id, conta_id=conta_id,
         registro_id=registro_id, versao_lida=versao_lida, respostas=respostas,
         campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_13, condicoes={},
-        complementos_outro=complementos_outro, momento=momento,
+        complementos_outro=complementos_outro, momento=momento, estrutura_lida=estrutura_lida,
     )
 
 

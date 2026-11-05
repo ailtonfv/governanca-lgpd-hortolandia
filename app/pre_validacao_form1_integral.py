@@ -11,6 +11,7 @@ import re
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
+from app.extensao_medidas_form1 import catalogo_efetivo, matriz_efetiva, versao_estrutura
 
 from app.form1_integral import (
     CONDICOES_BLOCO_1, CONDICOES_BLOCO_2, CONDICOES_BLOCO_4,
@@ -99,10 +100,10 @@ def carregar_matriz_obrigatoriedade() -> dict[str, RegraObrigatoriedade]:
     return regras
 
 
-def metadado_visual_obrigatoriedade(campo_id: str) -> dict:
+def metadado_visual_obrigatoriedade(campo_id: str, conteudo=None) -> dict:
     """Projeta a matriz canônica em rótulos visuais, sem criar regra funcional."""
 
-    regra = carregar_matriz_obrigatoriedade()[campo_id]
+    regra = matriz_efetiva(conteudo)[campo_id]
     apresentacoes = {
         CLASSE_ESSENCIAL: ("*", "Obrigatório", "obrigatorio", False),
         CLASSE_SOMENTE_LEITURA: (
@@ -190,8 +191,8 @@ def _condicao_ativa(campo_id: str, respostas: dict) -> bool:
     )
 
 
-def _item(campo_id: str, tipo: str, detalhe: str) -> dict:
-    campo = campos_por_id()[campo_id]
+def _item(campo_id: str, tipo: str, detalhe: str, catalogo=None) -> dict:
+    campo = (campos_por_id() if catalogo is None else catalogo)[campo_id]
     bloco = _bloco(campo_id)
     etapa = _etapa(bloco)
     destino_tipo = (
@@ -211,9 +212,10 @@ def _item(campo_id: str, tipo: str, detalhe: str) -> dict:
     }
 
 
-def perguntas_para_localizacao() -> list[dict]:
+def perguntas_para_localizacao(conteudo=None) -> list[dict]:
     """Destinos canônicos de consulta; não interpreta justificativas nem altera respostas."""
-    return [_item(campo_id, "localizacao", "") for campo_id in campos_por_id()
+    catalogo = catalogo_efetivo(conteudo)
+    return [_item(campo_id, "localizacao", "", catalogo) for campo_id in catalogo
             if not campo_id.startswith("0.")]
 
 
@@ -285,7 +287,8 @@ def pre_validar_form1_integral(conteudo: dict, *, nome_institucional: str | None
                                respostas_somente_leitura: dict | None = None) -> dict:
     """Calcula pendências sem escrever estado ou declarar aptidão à submissão."""
 
-    regras = carregar_matriz_obrigatoriedade()
+    regras = matriz_efetiva(conteudo)
+    catalogo = catalogo_efetivo(conteudo)
     respostas_originais = conteudo.get("respostas", {}) if isinstance(conteudo, dict) else {}
     respostas_somente_leitura = respostas_somente_leitura or {}
     respostas = {**respostas_originais, **respostas_somente_leitura}
@@ -309,7 +312,7 @@ def pre_validar_form1_integral(conteudo: dict, *, nome_institucional: str | None
             valor = respostas.get(campo_id)
             if (_condicao_ativa(campo_id, respostas)
                     and (valor == "A confirmar" or isinstance(valor, list) and "A confirmar" in valor)):
-                avisos.append(_item(campo_id, "aviso", "Resposta facultativa a confirmar; aviso não bloqueante."))
+                avisos.append(_item(campo_id, "aviso", "Resposta facultativa a confirmar; aviso não bloqueante.", catalogo))
         if regra.classe not in {CLASSE_ESSENCIAL, CLASSE_CONDICIONAL}:
             continue
         if campo_id in _CAMPOS_CONDICAO_PENDENTE:
@@ -394,6 +397,8 @@ def pre_validar_form1_integral(conteudo: dict, *, nome_institucional: str | None
         "consultiva": True, "submissao_habilitada": False,
         "versao_politica": VERSAO_POLITICA_FORM1_8V,
         "matriz_base": VERSAO_MATRIZ_BASE_FORM1_8V,
+        "versao_estrutura": versao_estrutura(conteudo),
+        "matriz_extensao": (conteudo or {}).get("extensao_medidas", {}).get("matriz"),
         "incompletos": incompletos, "nao_aplicaveis": nao_aplicaveis,
         "regras_pendentes": regras_pendentes, "avisos": avisos,
         "por_bloco": [{"bloco": bloco, "itens": itens} for bloco, itens in

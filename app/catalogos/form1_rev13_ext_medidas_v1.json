@@ -1,0 +1,24 @@
+{
+  "id": "F1-C3-REV13-EXT-MEDIDAS-v1",
+  "matriz_id": "MATRIZ-F1-REV13-EXT-MEDIDAS-v1",
+  "contrato_base": 3,
+  "revisao_base": "REV13-2026-09-20",
+  "quantidade_base": 128,
+  "quantidade_efetiva": 129,
+  "campos": [
+    {
+      "id": "13.2",
+      "pergunta": "Quando a equipe se ausenta por período maior, os documentos físicos contendo dados pessoais são guardados em local com acesso controlado?",
+      "classe": "Facultativa nesta proposta",
+      "condicao": "Sempre visível; independente de 13.2.1"
+    },
+    {
+      "id": "13.2.1",
+      "pergunta": "Quando a equipe se ausenta por período maior, as estações de trabalho utilizadas para tratar dados pessoais são bloqueadas?",
+      "classe": "Facultativa nesta proposta",
+      "condicao": "Sempre visível; independente de 13.2"
+    }
+  ],
+  "alternativas": ["Sempre", "Às vezes", "Não", "A confirmar", "Não se aplica"],
+  "observacao": "INSTRUÇÃO_FORMS01_03, 05/11/2026. Adoção explícita pelo ARP; sem conversão de respostas legadas. Não representa aprovação institucional da matriz."
+}

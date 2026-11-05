@@ -8,6 +8,7 @@
   <p><strong>{{ registro.codigo_lgpd }}</strong> — {{ registro.titulo_objeto }}</p>
   <p class="aviso-leitura"><strong>Importante:</strong> esta consulta não é submissão, homologação, conclusão institucional nem envio à T.I. O rascunho pode conter pendências.</p>
   <dl>
+    <div><dt>Versão da estrutura consultada</dt><dd>{{ versao_estrutura }}</dd></div>
     <div><dt>Versão apresentada</dt><dd>Rascunho {{ conferencia.versao_rascunho }} · snapshot técnico {{ snapshot.numero }}</dd></div>
     <div><dt>Solicitada por</dt><dd>{% if solicitante %}{{ solicitante.matricula }} — {{ solicitante.nome }}{% else %}{{ conferencia.solicitada_por_id }}{% endif %}</dd></div>
     <div><dt>Solicitada em</dt><dd>{{ conferencia.solicitada_em }}</dd></div>
@@ -23,6 +24,7 @@
 
 <section class="form1" aria-labelledby="titulo-conteudo-apresentado">
   <h2 id="titulo-conteudo-apresentado">Conteúdo exato apresentado pelo ARP</h2>
+  {% include '_legado_medidas_form1.html' %}
   {% if respostas %}
   <dl class="resumo-respostas-conferencia">
     {% for item in respostas %}

@@ -1,5 +1,7 @@
 """Consultas preparadas para a interface, sem regras de negócio nos templates."""
 
+from app.extensao_medidas_form1 import catalogo_efetivo, versao_estrutura
+
 import re
 
 from sqlalchemy import func, or_, select
@@ -1031,7 +1033,8 @@ def carregar_registro(sessao, conta_id, registro_id):
     pode_editar_integral = _pode_editar_form1_integral(
         identidade, atribuicao_integral, registro
     )
-    catalogo_integral = campos_por_id()
+    conteudo_integral = rascunho_integral.conteudo if rascunho_integral is not None else {}
+    catalogo_integral = catalogo_efetivo(conteudo_integral)
     alternativas_outro = alternativas_outro_por_campo()
     secretarias_integral = sessao.scalars(
         select(Unidade).where(
@@ -1126,7 +1129,7 @@ def carregar_registro(sessao, conta_id, registro_id):
             ),
             "estrutura_destinatarios": campo_id == "10.2.1",
             "categorias_municipais_destinatarios": sorted(CATEGORIAS_MUNICIPAIS_10_2) if campo_id == '10.2.1' else [],
-            "obrigatoriedade": metadado_visual_obrigatoriedade(campo_id),
+            "obrigatoriedade": metadado_visual_obrigatoriedade(campo_id, conteudo_integral),
         }
     # Projeção de consulta: usa as mesmas condições e o mesmo catálogo da edição.
     # Não cria controles desabilitados nem altera o rascunho persistido.
@@ -1260,7 +1263,9 @@ def carregar_registro(sessao, conta_id, registro_id):
             "salvo_em": rascunho_integral.salvo_em,
         },
         "pre_validacao": pre_validacao_integral,
-        "perguntas_localizacao": perguntas_para_localizacao(),
+        "perguntas_localizacao": perguntas_para_localizacao(conteudo_integral),
+        "versao_estrutura": versao_estrutura(conteudo_integral),
+        "extensao_medidas": conteudo_integral.get("extensao_medidas"),
         "conferencia_interna": (
             None if conferencia_integral is None else {
                 "situacao": conferencia_integral.situacao,
@@ -1349,7 +1354,7 @@ def carregar_registro(sessao, conta_id, registro_id):
                 "pergunta": catalogo_integral[campo_id].pergunta,
                 "alternativas": catalogo_integral[campo_id].alternativas,
                 "instrucao": instrucao_para_interface(catalogo_integral[campo_id]),
-                "obrigatoriedade": metadado_visual_obrigatoriedade(campo_id),
+                "obrigatoriedade": metadado_visual_obrigatoriedade(campo_id, conteudo_integral),
             }
             for campo_id in ("1.1", "1.1.1", "1.2", "1.3", "1.4")
         },
@@ -1393,7 +1398,7 @@ def carregar_registro(sessao, conta_id, registro_id):
             campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_12
         },
         "campos_bloco_13": {
-            campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_13
+            campo_id: metadado_integral(campo_id) for campo_id in catalogo_integral if campo_id.startswith("13.")
         },
         "campos_bloco_14": {
             campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_14

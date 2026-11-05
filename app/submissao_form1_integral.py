@@ -82,12 +82,14 @@ def _retrato_canais(sessao, registro_id):
 
 
 def _envelope_snapshot(sessao, rascunho):
+    from app.extensao_medidas_form1 import versao_estrutura
     return {
         "natureza": "preparacao_tecnica_sem_submissao",
         "submissao_habilitada": False,
         "contrato": {
             "versao": VERSAO_CONTRATO_FORM1_INTEGRAL_CANDIDATA,
             "revisao_fonte": REVISAO_FONTE_FORM1_INTEGRAL,
+            "versao_estrutura": versao_estrutura(rascunho.conteudo),
         },
         "origem": {
             "versao_rascunho": rascunho.versao_rascunho,
@@ -105,6 +107,7 @@ def preparar_snapshot_na_transacao(
     ordem_no_comando=1, reusar_existente=False,
 ):
     """Cria o retrato exato dentro do comando chamador, sem mudar workflow."""
+    from app.extensao_medidas_form1 import versao_estrutura
 
     existente = sessao.scalars(
         select(VersaoForm1Integral).where(
@@ -132,6 +135,7 @@ def preparar_snapshot_na_transacao(
             "numero": numero,
             "versao_rascunho": rascunho.versao_rascunho,
             "versao_contrato": VERSAO_CONTRATO_FORM1_INTEGRAL_CANDIDATA,
+            "versao_estrutura": versao_estrutura(rascunho.conteudo),
             "lacre": lacre_snapshot,
             "submissao_habilitada": False,
         },

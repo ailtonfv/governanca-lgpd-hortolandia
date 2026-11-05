@@ -12,6 +12,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
+from app.extensao_medidas_form1 import (
+    adotar_extensao_medidas, catalogo_efetivo, versao_estrutura,
+    VERSAO_BASE, VERSAO_EXTENSAO, IDS_BLOCO_13_EXTENSAO,
+)
 from app.atribuicao_form1_integral import atribuir_arp_form1_integral
 from app.ajudas_cartilha_form1 import SECOES_CARTILHA, VERSAO_CARTILHA_AJUDAS_FORM1
 from app.cartilha_local import acesso_local_cartilha, secoes_cartilha_disponiveis
@@ -454,6 +458,7 @@ def detalhe_registro(
             "comando_salvar_bloco_11": str(uuid.uuid4()),
             "comando_salvar_bloco_12": str(uuid.uuid4()),
             "comando_salvar_bloco_13": str(uuid.uuid4()),
+            "comando_adotar_medidas": str(uuid.uuid4()),
             "comando_salvar_bloco_14": str(uuid.uuid4()),
             "comandos_remover_participante": {
                 participante["id"]: str(uuid.uuid4())
@@ -680,8 +685,8 @@ def salvar_bloco_1_integral(
     )
 
 
-def _respostas_do_formulario(formulario, campo_ids):
-    catalogo = campos_por_id()
+def _respostas_do_formulario(formulario, campo_ids, catalogo=None):
+    catalogo = campos_por_id() if catalogo is None else catalogo
     respostas = {}
     for campo_id in campo_ids:
         nome = f"campo__{campo_id}"
@@ -994,6 +999,24 @@ async def salvar_bloco_12_integral(
     )
 
 
+@app.post("/registros/{registro_id}/form1-integral/bloco-13/adotar-extensao")
+def adotar_medidas_bloco_13(
+    registro_id: str, conta_id: str = Form(max_length=50),
+    comando_id: str = Form(max_length=64), versao_lida: int = Form(ge=1),
+    confirmar: str = Form(default=""), sessao: Session = Depends(obter_sessao),
+):
+    resultado = adotar_extensao_medidas(
+        sessao, comando_id=comando_id, conta_id=conta_id, registro_id=registro_id,
+        versao_lida=versao_lida, confirmar=confirmar == "sim",
+    )
+    sessao.commit()
+    return _voltar_ao_registro(
+        registro_id, conta_id, resultado,
+        "Extensão adotada. Responda separadamente 13.2 e 13.2.1; o histórico anterior foi preservado.",
+        ancora="titulo-bloco-13",
+    )
+
+
 @app.post("/registros/{registro_id}/form1-integral/bloco-13/salvar")
 async def salvar_bloco_13_integral(
     registro_id: str, request: Request, sessao: Session = Depends(obter_sessao),
@@ -1004,7 +1027,11 @@ async def salvar_bloco_13_integral(
     resultado = salvar_bloco_13_form1_integral(
         sessao, comando_id=str(formulario.get("comando_id", ""))[:64], conta_id=conta_id,
         registro_id=registro_id, versao_lida=int(formulario.get("versao_lida", 0)),
-        respostas=_respostas_do_formulario(formulario, IDS_BLOCO_13),
+        respostas=_respostas_do_formulario(
+            formulario, IDS_BLOCO_13_EXTENSAO,
+            catalogo_efetivo({"extensao_medidas": {"versao": VERSAO_EXTENSAO}}),
+        ),
+        estrutura_lida=formulario.get("estrutura_lida"),
         complementos_outro=_complementos_outro_do_formulario(formulario, IDS_BLOCO_13),
     )
     sessao.commit()
@@ -1153,7 +1180,8 @@ def consultar_conferencia_interna(
     registro, conferencia, snapshot, solicitante = resultado
     sessao.commit()
     respostas = snapshot.conteudo.get("form1_integral", {}).get("respostas", {})
-    catalogo = campos_por_id()
+    conteudo_snapshot = snapshot.conteudo.get("form1_integral", {})
+    catalogo = catalogo_efetivo(conteudo_snapshot)
     return paginas.TemplateResponse(
         request=request,
         name="conferencia_form1_integral.html",
@@ -1163,6 +1191,8 @@ def consultar_conferencia_interna(
             "registro": registro,
             "conferencia": conferencia,
             "snapshot": snapshot,
+            "versao_estrutura": versao_estrutura(conteudo_snapshot),
+            "extensao_medidas": conteudo_snapshot.get("extensao_medidas"),
             "solicitante": solicitante,
             "respostas": [
                 {"id": campo_id, "pergunta": catalogo[campo_id].pergunta, "valor": valor}
