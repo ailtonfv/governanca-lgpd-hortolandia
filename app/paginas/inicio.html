@@ -45,18 +45,43 @@
           <span>Providências de conferência</span>
         </div>
         <div>
-          <span class="contador contador-campos" aria-label="{{ quantidade_campos_obrigatorios_pendentes }} campo(s) obrigatório(s) pendente(s)">{{ quantidade_campos_obrigatorios_pendentes }}</span>
+          <span id="contador-campos-pendentes" class="contador contador-campos" aria-label="{{ quantidade_campos_obrigatorios_pendentes }} campo(s) obrigatório(s) pendente(s)">{{ quantidade_campos_obrigatorios_pendentes }}</span>
           <span>Campos obrigatórios pendentes</span>
         </div>
       </div>
     </div>
     <p class="ajuda">Providências de conferência são solicitações ao APA ou devoluções para ajuste pelo ARP; não são perguntas incompletas. Zero providências não significa FORM 1 completo.</p>
     <p class="ajuda">Campos obrigatórios ainda sem resposta nos levantamentos sob sua responsabilidade. O rascunho pode continuar sendo salvo mesmo incompleto.</p>
+    <details class="distribuicao-pendencias-painel" id="distribuicao-pendencias-painel">
+      <summary aria-describedby="contador-campos-pendentes">Detalhar campos obrigatórios pendentes por Registro</summary>
+      {% set registros_preenchimento = registros | selectattr('preenchimento_arp') | list %}
+      {% if registros_preenchimento %}
+      <p class="ajuda">Esta distribuição utiliza os mesmos Registros e contagens do indicador acima, incluindo os que têm zero pendências. Não representa providências de conferência nem aprovação do FORM 1.</p>
+      <ul class="distribuicao-pendencias-lista">
+        {% for registro in registros_preenchimento %}
+        <li data-registro-pendencias="{{ registro.id }}">
+          <div>
+            <strong>{{ registro.codigo_lgpd }}</strong> · {{ registro.tipo }} · {{ registro.titulo }}
+            <p>{{ registro.preenchimento_arp.quantidade }} campo(s) obrigatório(s) ativo(s) incompleto(s).</p>
+            {% if registro.preenchimento_arp.nao_iniciado %}<p class="ajuda">Contagem inicial com os dados da abertura; rascunho ainda não iniciado.</p>{% endif %}
+          </div>
+          {% if registro.preenchimento_arp.nao_iniciado %}
+          <a href="#cartao-registro-{{ registro.id }}" aria-label="Ver ação de início do FORM 1 do Registro {{ registro.codigo_lgpd }}">Ver ação de início no cartão</a>
+          {% else %}
+          <a href="{{ url_for('detalhe_registro', registro_id=registro.id) }}?conta_id={{ conta_id }}#{{ registro.preenchimento_arp.ancora }}" aria-label="Acessar rascunho do Registro {{ registro.codigo_lgpd }}">Acessar rascunho</a>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p>Nenhum Registro com preenchimento autorizado sob sua responsabilidade neste momento.</p>
+      {% endif %}
+    </details>
     {% if registros %}
     <p class="sr-apenas">Registros LGPD que {{ identidade.nome }} pode consultar</p>
     <div class="lista-mapeamentos-painel">
       {% for registro in registros %}
-      <article class="cartao-mapeamento">
+      <article class="cartao-mapeamento" id="cartao-registro-{{ registro.id }}" tabindex="-1">
         <div class="cartao-mapeamento-conteudo">
           <p class="etiqueta codigo-registro">{{ registro.codigo_lgpd }}</p>
           <h3>{{ registro.tipo }} · {{ registro.titulo }}</h3>

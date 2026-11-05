@@ -42,6 +42,14 @@ input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-
 .resumo-contadores-painel > div { display: flex; align-items: center; gap: .5rem; min-width: 0; padding: .8rem; border: 1px solid var(--borda); border-radius: .6rem; color: #425466; font-size: .85rem; font-weight: 700; overflow-wrap: anywhere; }
 @media (max-width: 700px) { .resumo-contadores-painel { grid-template-columns: 1fr; } }
 .lista-mapeamentos-painel { display: grid; gap: .8rem; margin-top: 1rem; }
+.distribuicao-pendencias-painel { margin-block: .8rem; padding: .8rem; border: 1px solid var(--borda); border-radius: .6rem; background: white; min-width: 0; }
+.distribuicao-pendencias-painel > summary { cursor: pointer; color: var(--azul); font-weight: 700; overflow-wrap: anywhere; }
+.distribuicao-pendencias-painel > summary:focus-visible, .cartao-mapeamento:focus-visible { outline: .2rem solid var(--azul); outline-offset: .15rem; }
+.distribuicao-pendencias-lista { list-style: none; margin: .5rem 0 0; padding: 0; }
+.distribuicao-pendencias-lista > li { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; padding-block: .7rem; border-top: 1px solid var(--borda); }
+.distribuicao-pendencias-lista > li > div { flex: 1 1 20rem; min-width: 0; overflow-wrap: anywhere; }
+.distribuicao-pendencias-lista p { margin: .25rem 0; }
+.distribuicao-pendencias-lista a { display: inline-block; padding-block: .5rem; max-width: 100%; overflow-wrap: anywhere; }
 .cartao-mapeamento { display: grid; grid-template-columns: minmax(0, 1fr) minmax(11rem, 16rem); gap: 1rem; align-items: start; min-width: 0; padding: 1rem; border: 1px solid var(--borda); border-left: .3rem solid var(--azul); border-radius: .6rem; background: white; box-shadow: 0 4px 18px rgba(12,59,90,.05); }
 .cartao-mapeamento-conteudo { min-width: 0; }
 .cartao-mapeamento h3, .cartao-mapeamento p { overflow-wrap: anywhere; }
