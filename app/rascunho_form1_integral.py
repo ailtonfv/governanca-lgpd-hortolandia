@@ -278,6 +278,11 @@ def _validar_respostas_catalogadas(sessao, respostas, campos_permitidos, catalog
     catalogo = campos_por_id() if catalogo is None else catalogo
     for campo_id, valor in respostas.items():
         campo = catalogo[campo_id]
+        from app.extensao_guarda_form1 import definicao_guarda
+        limite = next((item.get("limite") for item in definicao_guarda()["campos"]
+                       if item["id"] == campo_id and item["pergunta"] == campo.pergunta), None)
+        if limite and (not isinstance(valor, str) or len(valor) > limite):
+            return f"{campo_id}: informe texto com até {limite} caracteres"
         if campo_id in CAMPOS_SECRETARIA:
             unidade = sessao.get(Unidade, valor) if isinstance(valor, str) else None
             if unidade is None or not unidade.ativa or unidade.id == "UNID-GOV":
@@ -1010,23 +1015,32 @@ def _salvar_bloco_catalogado_form1_integral(
         "complementos_outro": complementos_outro,
     }
     catalogo = None
-    if numero_bloco == 13:
+    problema_estrutura = None
+    if numero_bloco in (12, 13):
         from app.extensao_medidas_form1 import (
-            VERSAO_BASE, VERSAO_EXTENSAO, catalogo_efetivo, versao_estrutura,
+            VERSAO_BASE, catalogo_efetivo, versao_estrutura, conteudo_da_estrutura,
         )
+        from app.extensao_guarda_form1 import condicoes_guarda
         if estrutura_lida is not None:
             parametros["estrutura_lida"] = estrutura_lida
-        estrutura_lida = estrutura_lida or VERSAO_BASE
-        if estrutura_lida == VERSAO_EXTENSAO:
-            catalogo = catalogo_efetivo({"extensao_medidas": {"versao": estrutura_lida}})
-            campos_editaveis = campos_editaveis | {"13.2.1"}
+        # Chamadas legadas do Bloco 12 ainda servem à base e à extensão só de
+        # medidas: a semântica do Bloco 12 é idêntica nesses dois perfis.
+        perfil_lido = estrutura_lida or VERSAO_BASE
+        try:
+            estrutura = conteudo_da_estrutura(perfil_lido)
+            catalogo = catalogo_efetivo(estrutura)
+            campos_editaveis = frozenset(k for k in catalogo if k.startswith(f"{numero_bloco}."))
+            if numero_bloco == 12:
+                condicoes = condicoes_guarda(estrutura)
+        except ValueError as erro:
+            problema_estrutura = str(erro)
     conta, pessoa_id, ator_tipo, ator_id = _ator(sessao, conta_id)
     comando, resposta = abrir_comando(
         sessao, comando_id, tipo_comando, parametros, ator_tipo, ator_id, conta_id,
     )
     if resposta is not None:
         return resposta
-    problema = problema_complemento or _validar_respostas_catalogadas(sessao, respostas, campos_editaveis, catalogo)
+    problema = problema_estrutura or problema_complemento or _validar_respostas_catalogadas(sessao, respostas, campos_editaveis, catalogo)
     problema = problema or _validar_condicionais(respostas, condicoes)
     if problema:
         return _negar(
@@ -1040,9 +1054,12 @@ def _salvar_bloco_catalogado_form1_integral(
     )
     if resposta is not None:
         return resposta
-    if numero_bloco == 13 and estrutura_lida != versao_estrutura(rascunho.conteudo):
-        return _negar(sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
-                      tipo_comando, "versão da estrutura divergente: recarregue o Bloco 13")
+    if numero_bloco in (12, 13):
+        from app.extensao_guarda_form1 import usa_guarda
+        legado_12 = numero_bloco == 12 and estrutura_lida is None and not usa_guarda(rascunho.conteudo)
+        if not legado_12 and perfil_lido != versao_estrutura(rascunho.conteudo):
+            return _negar(sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
+                          tipo_comando, f"versão da estrutura divergente: recarregue o Bloco {numero_bloco}")
     conteudo = _conteudo_com_respostas_do_bloco(
         rascunho, campos_editaveis=campos_editaveis, respostas=respostas,
         condicoes=condicoes,
@@ -1139,7 +1156,7 @@ def salvar_bloco_11_form1_integral(
 
 def salvar_bloco_12_form1_integral(
     sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas,
-    complementos_outro=None, momento=None,
+    complementos_outro=None, momento=None, estrutura_lida=None,
 ):
     """Salva prazo de guarda, destinação e evidências do Bloco 12."""
 
@@ -1148,7 +1165,7 @@ def salvar_bloco_12_form1_integral(
         registro_id=registro_id, versao_lida=versao_lida, respostas=respostas,
         campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_12,
         condicoes=CONDICOES_BLOCO_12, complementos_outro=complementos_outro,
-        momento=momento,
+        momento=momento, estrutura_lida=estrutura_lida,
     )
 
 

@@ -19,17 +19,39 @@ def definicao_extensao():
                        "form1_rev13_ext_medidas_v1.json").read_text(encoding="utf-8"))
 
 
-def versao_estrutura(conteudo=None):
+def versao_medidas(conteudo=None):
     versao = (conteudo or {}).get("extensao_medidas", {}).get("versao", VERSAO_BASE)
     if versao not in (VERSAO_BASE, VERSAO_EXTENSAO):
         raise ValueError("versão da extensão de medidas não reconhecida")
     return versao
 
 
+def versao_estrutura(conteudo=None):
+    from app.extensao_guarda_form1 import usa_guarda, VERSAO_GUARDA, VERSAO_COMBINADA
+    medidas = versao_medidas(conteudo)
+    if usa_guarda(conteudo):
+        return VERSAO_COMBINADA if medidas == VERSAO_EXTENSAO else VERSAO_GUARDA
+    return medidas
+
+
+def conteudo_da_estrutura(versao):
+    """Interpreta o perfil declarado; o domínio ainda confere o perfil persistido."""
+    from app.extensao_guarda_form1 import VERSAO_GUARDA, VERSAO_COMBINADA
+    if versao not in (VERSAO_BASE, VERSAO_EXTENSAO, VERSAO_GUARDA, VERSAO_COMBINADA):
+        raise ValueError("versão da estrutura não reconhecida")
+    conteudo = {}
+    if versao in (VERSAO_EXTENSAO, VERSAO_COMBINADA):
+        conteudo["extensao_medidas"] = {"versao": VERSAO_EXTENSAO}
+    if versao in (VERSAO_GUARDA, VERSAO_COMBINADA):
+        conteudo["extensao_guarda"] = {"versao": VERSAO_GUARDA}
+    return conteudo
+
+
 def catalogo_efetivo(conteudo=None):
     base = campos_por_id()
-    if versao_estrutura(conteudo) == VERSAO_BASE:
-        return base
+    from app.extensao_guarda_form1 import estender_catalogo_guarda
+    if versao_medidas(conteudo) == VERSAO_BASE:
+        return estender_catalogo_guarda(base, conteudo)
     definicao = definicao_extensao()
     resultado = {}
     for campo_id, campo in base.items():
@@ -41,15 +63,16 @@ def catalogo_efetivo(conteudo=None):
                 campo, id=item["id"], pergunta=item["pergunta"],
                 alternativas=tuple(definicao["alternativas"]), instrucao="",
             )
-    return resultado
+    return estender_catalogo_guarda(resultado, conteudo)
 
 
 def matriz_efetiva(conteudo=None):
     # Importação local evita ciclo; a matriz REV13 original permanece intacta.
     from app.pre_validacao_form1_integral import carregar_matriz_obrigatoriedade
     base = carregar_matriz_obrigatoriedade()
-    if versao_estrutura(conteudo) == VERSAO_BASE:
-        return base
+    from app.extensao_guarda_form1 import estender_matriz_guarda
+    if versao_medidas(conteudo) == VERSAO_BASE:
+        return estender_matriz_guarda(base, conteudo)
     resultado = {}
     for campo_id, regra in base.items():
         if campo_id != "13.2":
@@ -60,7 +83,7 @@ def matriz_efetiva(conteudo=None):
                 regra, campo_id=item["id"], classe=item["classe"],
                 condicao=item["condicao"], observacao=definicao_extensao()["observacao"],
             )
-    return resultado
+    return estender_matriz_guarda(resultado, conteudo)
 
 
 def adotar_extensao_medidas(sessao, *, comando_id, conta_id, registro_id,
@@ -84,7 +107,7 @@ def adotar_extensao_medidas(sessao, *, comando_id, conta_id, registro_id,
     problema = None
     if confirmar is not True:
         problema = "confirme expressamente a adoção da extensão antes de continuar"
-    elif versao_estrutura(rascunho.conteudo) != VERSAO_BASE:
+    elif versao_medidas(rascunho.conteudo) != VERSAO_BASE:
         problema = "a extensão de medidas já foi adotada neste rascunho"
     if problema:
         _, _, ator_tipo, ator_id = _ator(sessao, conta_id)
@@ -96,13 +119,14 @@ def adotar_extensao_medidas(sessao, *, comando_id, conta_id, registro_id,
         pessoa_id=pessoa_id, momento=momento, reusar_existente=True,
     )
     conteudo = deepcopy(rascunho.conteudo)
+    estrutura_anterior = versao_estrutura(conteudo)
     anterior = conteudo.get("respostas", {}).pop("13.2", None)
     conteudo["extensao_medidas"] = {
         "versao": VERSAO_EXTENSAO,
         "matriz": definicao_extensao()["matriz_id"],
         "adotada_por": pessoa_id, "papel": "ARP", "adotada_em": momento.isoformat(),
         "legado": {
-            "versao_estrutura": VERSAO_BASE,
+            "versao_estrutura": estrutura_anterior,
             "campo_id": "13.2", "pergunta": campos_por_id()["13.2"].pergunta,
             "resposta": anterior, "snapshot_id": snapshot.id,
             "numero_snapshot": snapshot.numero, "lacre_snapshot": snapshot.lacre,
@@ -120,7 +144,7 @@ def adotar_extensao_medidas(sessao, *, comando_id, conta_id, registro_id,
     )
     registrar_auditoria(
         sessao, "extensao_medidas_form1_adotada", comando.ator_tipo, comando.ator_id,
-        {"registro_id": registro_id, "papel": "ARP", "versao_estrutura": VERSAO_EXTENSAO,
+        {"registro_id": registro_id, "papel": "ARP", "versao_estrutura": versao_estrutura(conteudo),
          "snapshot_anterior_id": snapshot.id, "lacre_anterior": snapshot.lacre,
          "versao_rascunho": resultado["versao_rascunho"]}, comando_id=comando.id,
     )

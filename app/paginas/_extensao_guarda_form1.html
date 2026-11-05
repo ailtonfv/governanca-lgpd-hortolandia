@@ -1,0 +1,19 @@
+<p class="ajuda">Versão deste rascunho: <strong>{{ registro.form1_integral.versao_estrutura }}</strong>.</p>
+{% set extensao_guarda = registro.form1_integral.extensao_guarda %}
+{% include '_legado_guarda_form1.html' %}
+{% if extensao_guarda %}
+<p class="ajuda">Guarda mantém dados ou documentos durante um período; arquivamento organiza e conserva em arquivo; eliminação exclui ou destrói; devolução restitui ao destinatário competente; transferência movimenta entre sistemas, arquivos, unidades ou custódias. Essas operações podem coexistir. Guarda permanente formalmente definida é diferente de permanência indefinida sem destinação. Não realizar eliminação não significa, por si só, irregularidade.</p>
+{% elif registro.form1_integral.pode_editar %}
+<details>
+  <summary>Adotar procedimentos e evidências separados por operação</summary>
+  <p>A adoção preserva o snapshot e os enunciados/respostas anteriores de 12.3 a 12.5.1. As novas respostas começam vazias; as outras perguntas permanecem como estão. Salve antes quaisquer alterações desta página.</p>
+  <form method="post" action="{{ url_for('adotar_guarda_bloco_12', registro_id=registro.id) }}" data-adotar-guarda>
+    <input type="hidden" name="conta_id" value="{{ conta_id }}">
+    <input type="hidden" name="comando_id" value="{{ comando_adotar_guarda }}">
+    <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
+    <label class="opcao"><input type="checkbox" name="confirmar" value="sim" required> Confirmo a adoção da extensão de guarda com novas respostas inicialmente vazias.</label>
+    <button type="submit">Adotar revisão da guarda no Bloco 12</button>
+    <p role="status" tabindex="-1" data-aviso-adocao></p>
+  </form>
+</details>
+{% endif %}

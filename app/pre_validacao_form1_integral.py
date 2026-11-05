@@ -184,10 +184,10 @@ def _normalizar_condicoes(condicao):
     return (condicao,) if isinstance(condicao[0], str) else condicao
 
 
-def _condicao_ativa(campo_id: str, respostas: dict) -> bool:
+def _condicao_ativa(campo_id: str, respostas: dict, condicoes=None) -> bool:
     return all(
         _corresponde(respostas.get(dependencia), aceitos)
-        for dependencia, aceitos in _normalizar_condicoes(_CONDICOES.get(campo_id))
+        for dependencia, aceitos in _normalizar_condicoes((_CONDICOES if condicoes is None else condicoes).get(campo_id))
     )
 
 
@@ -289,6 +289,12 @@ def pre_validar_form1_integral(conteudo: dict, *, nome_institucional: str | None
 
     regras = matriz_efetiva(conteudo)
     catalogo = catalogo_efetivo(conteudo)
+    from app.extensao_guarda_form1 import condicoes_guarda
+    condicoes = {**_CONDICOES, **condicoes_guarda(conteudo)}
+
+    def item_versionado(campo_id, tipo, detalhe):
+        return _item(campo_id, tipo, detalhe, catalogo)
+
     respostas_originais = conteudo.get("respostas", {}) if isinstance(conteudo, dict) else {}
     respostas_somente_leitura = respostas_somente_leitura or {}
     respostas = {**respostas_originais, **respostas_somente_leitura}
@@ -299,7 +305,7 @@ def pre_validar_form1_integral(conteudo: dict, *, nome_institucional: str | None
     identidade = {"0.1": nome_institucional, "0.2": cargo_funcao, "0.3": email_institucional}
     for campo_id, valor in identidade.items():
         if not _respondido(valor) and campo_id not in METADADOS_INSTITUCIONAIS_NAO_BLOQUEANTES:
-            regras_pendentes.append(_item(
+            regras_pendentes.append(item_versionado(
                 campo_id, "integracao_institucional",
                 "metadado obrigatório somente leitura sem fonte institucional autenticada",
             ))
@@ -310,24 +316,24 @@ def pre_validar_form1_integral(conteudo: dict, *, nome_institucional: str | None
             continue
         if regra.classe in {CLASSE_FACULTATIVA_REV13, CLASSE_FACULTATIVA_PROPOSTA}:
             valor = respostas.get(campo_id)
-            if (_condicao_ativa(campo_id, respostas)
+            if (_condicao_ativa(campo_id, respostas, condicoes)
                     and (valor == "A confirmar" or isinstance(valor, list) and "A confirmar" in valor)):
-                avisos.append(_item(campo_id, "aviso", "Resposta facultativa a confirmar; aviso não bloqueante.", catalogo))
+                avisos.append(item_versionado(campo_id, "aviso", "Resposta facultativa a confirmar; aviso não bloqueante."))
         if regra.classe not in {CLASSE_ESSENCIAL, CLASSE_CONDICIONAL}:
             continue
         if campo_id in _CAMPOS_CONDICAO_PENDENTE:
-            regras_pendentes.append(_item(
+            regras_pendentes.append(item_versionado(
                 campo_id, "regra_pendente", "condição reservada à decisão de governança"
             ))
             continue
-        ativo = regra.classe == CLASSE_ESSENCIAL or _condicao_ativa(campo_id, respostas)
+        ativo = regra.classe == CLASSE_ESSENCIAL or _condicao_ativa(campo_id, respostas, condicoes)
         if not ativo:
-            nao_aplicaveis.append(_item(
+            nao_aplicaveis.append(item_versionado(
                 campo_id, "nao_aplicavel", "condição inequívoca não está ativa neste rascunho"
             ))
         elif (campo_id not in respostas_somente_leitura
               and not _respondido(respostas.get(campo_id))):
-            incompletos.append(_item(
+            incompletos.append(item_versionado(
                 campo_id, "incompleto", "campo obrigatório ativo ainda não respondido conclusivamente"
             ))
 
@@ -341,25 +347,25 @@ def pre_validar_form1_integral(conteudo: dict, *, nome_institucional: str | None
         selecionado = (alternativa_outro in valor if isinstance(valor, list)
                        else valor == alternativa_outro)
         if selecionado and not _respondido(complementos.get(campo_id)):
-            incompletos.append(_item(
+            incompletos.append(item_versionado(
                 campo_id, "incompleto",
                 f"a alternativa ‘{alternativa_outro}’ requer complemento descritivo",
             ))
 
     if respostas.get("3.1") == "Sim":
         if not participantes:
-            incompletos.append(_item("3.2", "incompleto", "informe ao menos uma unidade participante"))
+            incompletos.append(item_versionado("3.2", "incompleto", "informe ao menos uma unidade participante"))
         for indice, participante in enumerate(participantes, start=1):
             valores = participante.get("respostas", participante)
             complementos_participante = participante.get("complementos", {})
             for campo_id in ("3.2", "3.3", "3.4", "3.4.1", "3.5"):
                 if not _respondido(valores.get(campo_id)):
-                    item = _item(campo_id, "incompleto", f"participante {indice}: resposta obrigatória ausente")
+                    item = item_versionado(campo_id, "incompleto", f"participante {indice}: resposta obrigatória ausente")
                     item["ocorrencia"] = indice
                     incompletos.append(item)
             if (_condicao_participante_ativa("3.5.1", valores)
                     and not _respondido(valores.get("3.5.1"))):
-                item = _item("3.5.1", "incompleto", f"participante {indice}: resposta condicional ausente")
+                item = item_versionado("3.5.1", "incompleto", f"participante {indice}: resposta condicional ausente")
                 item["ocorrencia"] = indice
                 incompletos.append(item)
             for campo_id in ("3.2", "3.4", "3.5.1"):
@@ -368,7 +374,7 @@ def pre_validar_form1_integral(conteudo: dict, *, nome_institucional: str | None
                 selecionado = (alternativa_outro in valor if isinstance(valor, list)
                                else valor == alternativa_outro)
                 if selecionado and not _respondido(complementos_participante.get(campo_id)):
-                    item = _item(
+                    item = item_versionado(
                         campo_id, "incompleto",
                         f"participante {indice}: a alternativa ‘{alternativa_outro}’ requer complemento descritivo",
                     )
@@ -376,7 +382,7 @@ def pre_validar_form1_integral(conteudo: dict, *, nome_institucional: str | None
                     incompletos.append(item)
     else:
         for campo_id in ("3.2", "3.3", "3.4", "3.4.1", "3.5", "3.5.1"):
-            nao_aplicaveis.append(_item(campo_id, "nao_aplicavel", "3.1 não ativa participantes neste rascunho"))
+            nao_aplicaveis.append(item_versionado(campo_id, "nao_aplicavel", "3.1 não ativa participantes neste rascunho"))
 
     _pre_validar_destinatarios_10_2_1(
         conteudo, respostas, incompletos, regras_pendentes
@@ -399,6 +405,7 @@ def pre_validar_form1_integral(conteudo: dict, *, nome_institucional: str | None
         "matriz_base": VERSAO_MATRIZ_BASE_FORM1_8V,
         "versao_estrutura": versao_estrutura(conteudo),
         "matriz_extensao": (conteudo or {}).get("extensao_medidas", {}).get("matriz"),
+        "matriz_guarda": (conteudo or {}).get("extensao_guarda", {}).get("matriz"),
         "incompletos": incompletos, "nao_aplicaveis": nao_aplicaveis,
         "regras_pendentes": regras_pendentes, "avisos": avisos,
         "por_bloco": [{"bloco": bloco, "itens": itens} for bloco, itens in

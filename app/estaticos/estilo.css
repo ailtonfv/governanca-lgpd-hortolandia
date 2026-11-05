@@ -369,3 +369,12 @@ dd { margin: .25rem 0 0; }
 .form1-integral .valores-consulta { padding-left: 1.2rem; }
 .form1-integral .pergunta-consulta:focus { outline: 3px solid var(--azul); outline-offset: 3px; }
 .form1-integral .area-somente-leitura .cartao-progresso-form1 { background: transparent; }
+
+/* FORM 1: operações de guarda independentes, no mesmo formulário e salvamento. */
+.operacoes-guarda-form1 { min-width: 0; }
+.operacao-guarda-form1 { min-width: 0; margin: 0 0 1rem; padding: 1rem; border: 1px solid #D6E0E6; border-radius: .5rem; }
+.operacao-guarda-form1 legend { color: #0C3B5A; font-weight: 700; padding: 0 .4rem; }
+.grade-operacao-guarda { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.grade-operacao-guarda .campo-integral { min-width: 0; margin: 0; overflow-wrap: anywhere; }
+.grade-operacao-guarda select, .grade-operacao-guarda input { width: 100%; max-width: 100%; box-sizing: border-box; }
+@media (max-width: 800px) { .grade-operacao-guarda { grid-template-columns: minmax(0, 1fr); } }

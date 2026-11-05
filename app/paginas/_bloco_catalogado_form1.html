@@ -1,6 +1,7 @@
 <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-{{ numero_bloco }}">
   <p class="etiqueta">FORM 1 — Etapa {{ etapa_bloco }} de 4 — Bloco {{ numero_bloco }} de 14</p>
   <h3 id="titulo-bloco-{{ numero_bloco }}">{{ titulo_bloco }}</h3>
+  {% if numero_bloco == 12 %}{% include '_extensao_guarda_form1.html' %}{% endif %}
   {% if numero_bloco == 13 %}{% include '_extensao_medidas_form1.html' %}{% endif %}
   {% include '_leitura_bloco_form1.html' %}
   {% if registro.form1_integral.pode_editar %}
@@ -9,11 +10,14 @@
     <input type="hidden" name="conta_id" value="{{ conta_id }}">
     <input type="hidden" name="comando_id" value="{{ comando_bloco }}">
     <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
-    {% if numero_bloco == 13 %}<input type="hidden" name="estrutura_lida" value="{{ registro.form1_integral.versao_estrutura }}">{% endif %}
+    {% if numero_bloco in (12, 13) %}<input type="hidden" name="estrutura_lida" value="{{ registro.form1_integral.versao_estrutura }}">{% endif %}
     {% if numero_bloco == 10 %}
     <p class="ajuda ajuda-compartilhamento"><strong>Destinatários do tratamento:</strong> diferencie circulação interna entre unidades ou Secretarias da Prefeitura, compartilhamento com órgão ou entidade pública externa e compartilhamento com entidade privada. A função concreta deve ser registrada; contrato ou parceria não torna automaticamente uma entidade Operadora LGPD. Não confunda este compartilhamento de dados com a tramitação administrativa do Registro LGPD.</p>
     {% endif %}
     {% for campo in campos_bloco.values() %}
+    {% if campo.operacao_guarda %}
+      {% if campo.id == '12.3' %}{% include '_operacoes_guarda_form1.html' %}{% endif %}
+    {% else %}
     {% if campo.estrutura_destinatarios %}</form>{% endif %}
     {% set formulario_associado = 'formulario-bloco-10' if numero_bloco == 10 and campo.id not in ('10.1', '10.2', '10.2.1') else none %}
     <div class="campo-integral{% if campo.condicoes %} campo-condicional{% endif %}"
@@ -37,12 +41,13 @@
       {% elif campo.controle == 'texto longo, limitado e orientado' %}
       <textarea name="campo__{{ campo.id }}" {% include '_atributos_controle_form1.html' %} maxlength="2000">{{ respostas_integral.get(campo.id, '') }}</textarea>
       {% else %}
-      <input name="campo__{{ campo.id }}" {% include '_atributos_controle_form1.html' %} maxlength="500" value="{{ respostas_integral.get(campo.id, '') }}">
+      <input name="campo__{{ campo.id }}" {% include '_atributos_controle_form1.html' %} maxlength="{{ campo.limite_texto or 500 }}" value="{{ respostas_integral.get(campo.id, '') }}">
       {% endif %}
       {% if campo.instrucao %}<p class="ajuda" id="instrucao-integral-{{ campo.id }}">{{ campo.instrucao }}</p>{% endif %}
       {% include '_complemento_outro_form1.html' %}
     </div>
     {% if campo.estrutura_destinatarios %}<div class="formulario continuacao-formulario-integral" data-continuacao-formulario="formulario-bloco-10">{% endif %}
+    {% endif %}
     {% endfor %}
     {% set formulario_associado = 'formulario-bloco-10' if numero_bloco == 10 else none %}
     <div class="rodape-formulario">

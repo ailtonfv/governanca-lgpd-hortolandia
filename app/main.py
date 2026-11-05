@@ -16,6 +16,7 @@ from app.extensao_medidas_form1 import (
     adotar_extensao_medidas, catalogo_efetivo, versao_estrutura,
     VERSAO_BASE, VERSAO_EXTENSAO, IDS_BLOCO_13_EXTENSAO,
 )
+from app.extensao_guarda_form1 import adotar_extensao_guarda, VERSAO_GUARDA
 from app.atribuicao_form1_integral import atribuir_arp_form1_integral
 from app.ajudas_cartilha_form1 import SECOES_CARTILHA, VERSAO_CARTILHA_AJUDAS_FORM1
 from app.cartilha_local import acesso_local_cartilha, secoes_cartilha_disponiveis
@@ -459,6 +460,7 @@ def detalhe_registro(
             "comando_salvar_bloco_12": str(uuid.uuid4()),
             "comando_salvar_bloco_13": str(uuid.uuid4()),
             "comando_adotar_medidas": str(uuid.uuid4()),
+            "comando_adotar_guarda": str(uuid.uuid4()),
             "comando_salvar_bloco_14": str(uuid.uuid4()),
             "comandos_remover_participante": {
                 participante["id"]: str(uuid.uuid4())
@@ -978,6 +980,24 @@ async def salvar_bloco_11_integral(
     )
 
 
+@app.post("/registros/{registro_id}/form1-integral/bloco-12/adotar-extensao")
+def adotar_guarda_bloco_12(
+    registro_id: str, conta_id: str = Form(max_length=50),
+    comando_id: str = Form(max_length=64), versao_lida: int = Form(ge=1),
+    confirmar: str = Form(default=""), sessao: Session = Depends(obter_sessao),
+):
+    resultado = adotar_extensao_guarda(
+        sessao, comando_id=comando_id, conta_id=conta_id, registro_id=registro_id,
+        versao_lida=versao_lida, confirmar=confirmar == "sim",
+    )
+    sessao.commit()
+    return _voltar_ao_registro(
+        registro_id, conta_id, resultado,
+        "Extensão de guarda adotada. Responda por operação; o conteúdo anterior foi preservado.",
+        ancora="titulo-bloco-12",
+    )
+
+
 @app.post("/registros/{registro_id}/form1-integral/bloco-12/salvar")
 async def salvar_bloco_12_integral(
     registro_id: str, request: Request, sessao: Session = Depends(obter_sessao),
@@ -985,10 +1005,19 @@ async def salvar_bloco_12_integral(
     formulario = await request.form()
     acao_pos_salvar = str(formulario.get("acao_pos_salvar", "permanecer"))
     conta_id = str(formulario.get("conta_id", ""))[:50]
+    from app.extensao_medidas_form1 import conteudo_da_estrutura
+    try:
+        estrutura = conteudo_da_estrutura(formulario.get("estrutura_lida") or VERSAO_BASE)
+    except ValueError:
+        estrutura = {}  # O domínio recusa a versão inválida sem gravar.
+    catalogo = {**catalogo_efetivo({"extensao_guarda": {"versao": VERSAO_GUARDA}}),
+                **catalogo_efetivo(estrutura)}
+    ids_bloco = tuple(k for k in catalogo if k.startswith("12."))
     resultado = salvar_bloco_12_form1_integral(
         sessao, comando_id=str(formulario.get("comando_id", ""))[:64], conta_id=conta_id,
         registro_id=registro_id, versao_lida=int(formulario.get("versao_lida", 0)),
-        respostas=_respostas_do_formulario(formulario, IDS_BLOCO_12),
+        respostas=_respostas_do_formulario(formulario, ids_bloco, catalogo),
+        estrutura_lida=formulario.get("estrutura_lida"),
         complementos_outro=_complementos_outro_do_formulario(formulario, IDS_BLOCO_12),
     )
     sessao.commit()
@@ -1193,6 +1222,7 @@ def consultar_conferencia_interna(
             "snapshot": snapshot,
             "versao_estrutura": versao_estrutura(conteudo_snapshot),
             "extensao_medidas": conteudo_snapshot.get("extensao_medidas"),
+            "extensao_guarda": conteudo_snapshot.get("extensao_guarda"),
             "solicitante": solicitante,
             "respostas": [
                 {"id": campo_id, "pergunta": catalogo[campo_id].pergunta, "valor": valor}

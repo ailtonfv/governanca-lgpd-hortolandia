@@ -1,0 +1,13 @@
+{% if extensao_guarda %}
+<details class="area-somente-leitura">
+  <summary>Consultar respostas anteriores à revisão da guarda — somente leitura</summary>
+  <p>{{ extensao_guarda.legado.versao_estrutura }} · rascunho {{ extensao_guarda.legado.versao_rascunho }} · snapshot técnico {{ extensao_guarda.legado.numero_snapshot }}.</p>
+  <dl>
+  {% for item in extensao_guarda.legado.campos %}
+    <div><dt>{{ item.id }} — {{ item.pergunta }}</dt><dd>{{ item.resposta or 'Não respondida na versão anterior.' }}</dd></div>
+    {% if item.respostas_inativas %}<div><dt>Respostas anteriores fora de aplicação</dt><dd>{{ item.respostas_inativas }}</dd></div>{% endif %}
+  {% endfor %}
+  </dl>
+  <p class="ajuda">O snapshot conserva o conteúdo anterior completo, sua autoria e lacre. Nenhuma resposta agregada foi distribuída automaticamente entre operações.</p>
+</details>
+{% endif %}

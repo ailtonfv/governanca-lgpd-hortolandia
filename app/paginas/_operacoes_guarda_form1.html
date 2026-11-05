@@ -1,0 +1,25 @@
+<div class="operacoes-guarda-form1" aria-label="Procedimentos e evidências por operação">
+  <p class="ajuda">Responda cada dimensão separadamente. Um procedimento não comprova a existência de evidência. “Não se aplica” e “A confirmar” dizem respeito somente à resposta selecionada.</p>
+  {% for operacao in registro.form1_integral.operacoes_guarda %}
+  <fieldset class="operacao-guarda-form1">
+    <legend>{{ operacao.titulo }}</legend>
+    <div class="grade-operacao-guarda">
+    {% for chave in ('procedimento', 'evidencia', 'localizacao') %}
+      {% set campo = campos_bloco[operacao[chave]] %}
+      <div class="campo-integral{% if campo.condicoes %} campo-condicional{% endif %}"{% if campo.condicoes %} data-condicoes='{{ campo.condicoes | tojson }}'{% endif %}>
+        <div id="rotulo-integral-{{ campo.id }}" class="rotulo-campo"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</div>
+        {% if campo.alternativas %}
+        <select name="campo__{{ campo.id }}" {% include '_atributos_controle_form1.html' %}>
+          <option value="">Ainda não respondido</option>
+          {% for valor, rotulo in campo.alternativas %}<option value="{{ valor }}" {% if respostas_integral.get(campo.id) == valor %}selected{% endif %}>{{ rotulo }}</option>{% endfor %}
+        </select>
+        {% else %}
+        <input name="campo__{{ campo.id }}" {% include '_atributos_controle_form1.html' %} maxlength="500" value="{{ respostas_integral.get(campo.id, '') }}">
+        {% endif %}
+        {% if campo.instrucao %}<p class="ajuda" id="instrucao-integral-{{ campo.id }}">{{ campo.instrucao }}</p>{% endif %}
+      </div>
+    {% endfor %}
+    </div>
+  </fieldset>
+  {% endfor %}
+</div>

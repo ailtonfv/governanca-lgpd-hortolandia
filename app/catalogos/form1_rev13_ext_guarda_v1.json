@@ -1,0 +1,308 @@
+{
+  "id": "F1-C3-REV13-EXT-GUARDA-v1",
+  "matriz_id": "MATRIZ-F1-REV13-EXT-GUARDA-v1",
+  "contrato_base": 3,
+  "revisao_base": "REV13-2026-09-20",
+  "quantidade_base": 128,
+  "quantidade_efetiva": 139,
+  "quantidade_com_medidas": 140,
+  "ids_substituidos": [
+    "12.3",
+    "12.4",
+    "12.4.1",
+    "12.5",
+    "12.5.1"
+  ],
+  "operacoes": [
+    {
+      "titulo": "Guarda e arquivamento",
+      "procedimento": "12.3",
+      "evidencia": "12.4",
+      "localizacao": "12.4.1"
+    },
+    {
+      "titulo": "Eliminação",
+      "procedimento": "12.3.1",
+      "evidencia": "12.4.2",
+      "localizacao": "12.4.2.1"
+    },
+    {
+      "titulo": "Devolução",
+      "procedimento": "12.3.2",
+      "evidencia": "12.4.3",
+      "localizacao": "12.4.3.1"
+    },
+    {
+      "titulo": "Transferência",
+      "procedimento": "12.3.3",
+      "evidencia": "12.4.4",
+      "localizacao": "12.4.4.1"
+    }
+  ],
+  "campos": [
+    {
+      "id": "12.3",
+      "pergunta": "Existe procedimento definido para guarda e arquivamento?",
+      "controle": "seleção única (combo)",
+      "alternativas": [
+        "Sim",
+        "Não",
+        "Não se aplica",
+        "A confirmar"
+      ],
+      "classe": "Facultativa nesta proposta",
+      "condicoes": [],
+      "instrucao": ""
+    },
+    {
+      "id": "12.3.1",
+      "pergunta": "Existe procedimento definido para eliminação?",
+      "controle": "seleção única (combo)",
+      "alternativas": [
+        "Sim",
+        "Não",
+        "Não se aplica",
+        "A confirmar"
+      ],
+      "classe": "Facultativa nesta proposta",
+      "condicoes": [],
+      "instrucao": ""
+    },
+    {
+      "id": "12.3.2",
+      "pergunta": "Existe procedimento definido para devolução?",
+      "controle": "seleção única (combo)",
+      "alternativas": [
+        "Sim",
+        "Não",
+        "Não se aplica",
+        "A confirmar"
+      ],
+      "classe": "Facultativa nesta proposta",
+      "condicoes": [],
+      "instrucao": ""
+    },
+    {
+      "id": "12.3.3",
+      "pergunta": "Existe procedimento definido para transferência?",
+      "controle": "seleção única (combo)",
+      "alternativas": [
+        "Sim",
+        "Não",
+        "Não se aplica",
+        "A confirmar"
+      ],
+      "classe": "Facultativa nesta proposta",
+      "condicoes": [],
+      "instrucao": ""
+    },
+    {
+      "id": "12.4",
+      "pergunta": "Há registro ou evidência de guarda e arquivamento?",
+      "controle": "seleção única (combo)",
+      "alternativas": [
+        "Sim",
+        "Não",
+        "Em alguns casos",
+        "A confirmar",
+        "Não se aplica"
+      ],
+      "classe": "Facultativa nesta proposta",
+      "condicoes": [],
+      "instrucao": ""
+    },
+    {
+      "id": "12.4.1",
+      "pergunta": "Onde fica a evidência de guarda e arquivamento?",
+      "controle": "texto curto / numérico conforme enunciado",
+      "alternativas": [],
+      "classe": "Obrigatória condicional",
+      "condicoes": [
+        [
+          "12.4",
+          [
+            "Sim",
+            "Em alguns casos"
+          ]
+        ]
+      ],
+      "instrucao": "Informe a localização ou referência institucional, sem inserir dados pessoais ou anexar documentos.",
+      "limite": 500
+    },
+    {
+      "id": "12.4.2",
+      "pergunta": "Há registro ou evidência de eliminação?",
+      "controle": "seleção única (combo)",
+      "alternativas": [
+        "Sim",
+        "Não",
+        "Em alguns casos",
+        "A confirmar",
+        "Não se aplica"
+      ],
+      "classe": "Facultativa nesta proposta",
+      "condicoes": [],
+      "instrucao": ""
+    },
+    {
+      "id": "12.4.2.1",
+      "pergunta": "Onde fica a evidência de eliminação?",
+      "controle": "texto curto / numérico conforme enunciado",
+      "alternativas": [],
+      "classe": "Obrigatória condicional",
+      "condicoes": [
+        [
+          "12.4.2",
+          [
+            "Sim",
+            "Em alguns casos"
+          ]
+        ]
+      ],
+      "instrucao": "Informe a localização ou referência institucional, sem inserir dados pessoais ou anexar documentos.",
+      "limite": 500
+    },
+    {
+      "id": "12.4.3",
+      "pergunta": "Há registro ou evidência de devolução?",
+      "controle": "seleção única (combo)",
+      "alternativas": [
+        "Sim",
+        "Não",
+        "Em alguns casos",
+        "A confirmar",
+        "Não se aplica"
+      ],
+      "classe": "Facultativa nesta proposta",
+      "condicoes": [],
+      "instrucao": ""
+    },
+    {
+      "id": "12.4.3.1",
+      "pergunta": "Onde fica a evidência de devolução?",
+      "controle": "texto curto / numérico conforme enunciado",
+      "alternativas": [],
+      "classe": "Obrigatória condicional",
+      "condicoes": [
+        [
+          "12.4.3",
+          [
+            "Sim",
+            "Em alguns casos"
+          ]
+        ]
+      ],
+      "instrucao": "Informe a localização ou referência institucional, sem inserir dados pessoais ou anexar documentos.",
+      "limite": 500
+    },
+    {
+      "id": "12.4.4",
+      "pergunta": "Há registro ou evidência de transferência?",
+      "controle": "seleção única (combo)",
+      "alternativas": [
+        "Sim",
+        "Não",
+        "Em alguns casos",
+        "A confirmar",
+        "Não se aplica"
+      ],
+      "classe": "Facultativa nesta proposta",
+      "condicoes": [],
+      "instrucao": ""
+    },
+    {
+      "id": "12.4.4.1",
+      "pergunta": "Onde fica a evidência de transferência?",
+      "controle": "texto curto / numérico conforme enunciado",
+      "alternativas": [],
+      "classe": "Obrigatória condicional",
+      "condicoes": [
+        [
+          "12.4.4",
+          [
+            "Sim",
+            "Em alguns casos"
+          ]
+        ]
+      ],
+      "instrucao": "Informe a localização ou referência institucional, sem inserir dados pessoais ou anexar documentos.",
+      "limite": 500
+    },
+    {
+      "id": "12.5",
+      "pergunta": "Há transferência de dados ou documentos entre sistemas, arquivos, unidades administrativas ou responsáveis pela custódia?",
+      "controle": "seleção única (combo)",
+      "alternativas": [
+        "Sim",
+        "Não",
+        "A confirmar"
+      ],
+      "classe": "Facultativa nesta proposta",
+      "condicoes": [],
+      "instrucao": ""
+    },
+    {
+      "id": "12.5.1",
+      "pergunta": "Quais modalidades de transferência ocorrem atualmente?",
+      "controle": "seleção múltipla (combo com marcações)",
+      "alternativas": [
+        "Entre sistemas",
+        "Para arquivo físico ou digital",
+        "Entre unidades administrativas",
+        "De custódia",
+        "Outra situação"
+      ],
+      "classe": "Obrigatória condicional",
+      "condicoes": [
+        [
+          "12.5",
+          [
+            "Sim"
+          ]
+        ]
+      ],
+      "instrucao": ""
+    },
+    {
+      "id": "12.5.1.1",
+      "pergunta": "Descreva a outra modalidade de transferência.",
+      "controle": "texto curto / numérico conforme enunciado",
+      "alternativas": [],
+      "classe": "Obrigatória condicional",
+      "condicoes": [
+        [
+          "12.5",
+          [
+            "Sim"
+          ]
+        ],
+        [
+          "12.5.1",
+          [
+            "Outra situação"
+          ]
+        ]
+      ],
+      "instrucao": "Até 200 caracteres. Não informe dados pessoais concretos.",
+      "limite": 200
+    },
+    {
+      "id": "12.5.2",
+      "pergunta": "Qual é o destino ou a referência institucional da transferência?",
+      "controle": "texto curto / numérico conforme enunciado",
+      "alternativas": [],
+      "classe": "Obrigatória condicional",
+      "condicoes": [
+        [
+          "12.5",
+          [
+            "Sim"
+          ]
+        ]
+      ],
+      "instrucao": "Referencie sistemas, arquivos, unidades ou custodiantes já descritos nos Blocos 8, 10 e 11, quando pertinente. Não informe pessoas titulares.",
+      "limite": 500
+    }
+  ],
+  "observacao": "INSTRUÇÃO_FORMS01_04, 05/11/2026. Levantamento factual, sem juízo jurídico. Adoção explícita; nenhuma conversão de respostas históricas. Submissão bloqueada."
+}

@@ -1,6 +1,7 @@
 """Consultas preparadas para a interface, sem regras de negócio nos templates."""
 
 from app.extensao_medidas_form1 import catalogo_efetivo, versao_estrutura
+from app.extensao_guarda_form1 import condicoes_guarda, definicao_guarda, usa_guarda
 
 import re
 
@@ -1035,6 +1036,11 @@ def carregar_registro(sessao, conta_id, registro_id):
     )
     conteudo_integral = rascunho_integral.conteudo if rascunho_integral is not None else {}
     catalogo_integral = catalogo_efetivo(conteudo_integral)
+    condicoes_bloco12 = condicoes_guarda(conteudo_integral)
+    operacoes_guarda = definicao_guarda()["operacoes"] if usa_guarda(conteudo_integral) else []
+    ids_operacoes_guarda = {op[chave] for op in operacoes_guarda
+                           for chave in ("procedimento", "evidencia", "localizacao")}
+
     alternativas_outro = alternativas_outro_por_campo()
     secretarias_integral = sessao.scalars(
         select(Unidade).where(
@@ -1067,7 +1073,7 @@ def carregar_registro(sessao, conta_id, registro_id):
             or CONDICOES_BLOCO_9.get(campo_id)
             or CONDICOES_BLOCO_10.get(campo_id)
             or CONDICOES_BLOCO_11.get(campo_id)
-            or CONDICOES_BLOCO_12.get(campo_id)
+            or condicoes_bloco12.get(campo_id)
             or CONDICOES_BLOCO_14.get(campo_id)
         )
         condicoes = () if not condicao else (
@@ -1128,6 +1134,9 @@ def carregar_registro(sessao, conta_id, registro_id):
                 }
             ),
             "estrutura_destinatarios": campo_id == "10.2.1",
+            "operacao_guarda": campo_id in ids_operacoes_guarda,
+            "limite_texto": next((item.get("limite") for item in definicao_guarda()["campos"]
+                                   if item["id"] == campo_id), None) if usa_guarda(conteudo_integral) else None,
             "categorias_municipais_destinatarios": sorted(CATEGORIAS_MUNICIPAIS_10_2) if campo_id == '10.2.1' else [],
             "obrigatoriedade": metadado_visual_obrigatoriedade(campo_id, conteudo_integral),
         }
@@ -1266,6 +1275,8 @@ def carregar_registro(sessao, conta_id, registro_id):
         "perguntas_localizacao": perguntas_para_localizacao(conteudo_integral),
         "versao_estrutura": versao_estrutura(conteudo_integral),
         "extensao_medidas": conteudo_integral.get("extensao_medidas"),
+        "extensao_guarda": conteudo_integral.get("extensao_guarda"),
+        "operacoes_guarda": operacoes_guarda,
         "conferencia_interna": (
             None if conferencia_integral is None else {
                 "situacao": conferencia_integral.situacao,
@@ -1395,7 +1406,7 @@ def carregar_registro(sessao, conta_id, registro_id):
             campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_11
         },
         "campos_bloco_12": {
-            campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_12
+            campo_id: metadado_integral(campo_id) for campo_id in catalogo_integral if campo_id.startswith("12.")
         },
         "campos_bloco_13": {
             campo_id: metadado_integral(campo_id) for campo_id in catalogo_integral if campo_id.startswith("13.")
