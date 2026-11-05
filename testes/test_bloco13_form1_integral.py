@@ -1,5 +1,8 @@
 """Bloco 13 do FORM 1 integral — exposição física ou visual."""
 
+from copy import deepcopy
+from itertools import combinations
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -35,13 +38,49 @@ def test_bloco_13_recusa_excludente_com_outra_situacao(sessao, excludente):
     assert not resultado["permitido"] and "selecionada isoladamente" in resultado["motivo"]
 
 
-def test_bloco_13_aceita_cada_excludente_isoladamente(sessao):
+@pytest.mark.parametrize("excludente", ("Nenhuma das situações acima", "A confirmar", "Não se aplica"))
+def test_bloco_13_aceita_cada_excludente_isoladamente(sessao, excludente):
     registro = _rascunho(sessao, "F113-ISO")
     resultado = salvar_bloco_13_form1_integral(sessao, comando_id="F113-ISO-S", conta_id="CONTA-A1",
         registro_id=registro["registro_id"], versao_lida=1,
-        respostas={"13.1": ["Nenhuma das situações acima"], "13.4": ["Não se aplica"]})
+        respostas={"13.1": [excludente], "13.4": ["Não se aplica"]})
     sessao.commit()
     assert resultado["permitido"]
+    assert sessao.get(RascunhoForm1Integral, registro["registro_id"]).conteudo["respostas"]["13.1"] == [excludente]
+
+
+@pytest.mark.parametrize("alternativas", list(combinations(
+    ("Nenhuma das situações acima", "A confirmar", "Não se aplica"), 2)))
+def test_bloco_13_recusa_especiais_combinadas_sem_perder_resposta(sessao, alternativas):
+    registro = _rascunho(sessao, "F113-ESPECIAIS")
+    rid = registro["registro_id"]
+    assert salvar_bloco_13_form1_integral(sessao, comando_id="F113-PREVIA", conta_id="CONTA-A1",
+        registro_id=rid, versao_lida=1, respostas={"13.1": [SITUACAO_TELA]})["permitido"]
+    sessao.commit()
+    anterior = deepcopy(sessao.get(RascunhoForm1Integral, rid).conteudo)
+
+    resultado = salvar_bloco_13_form1_integral(sessao, comando_id="F113-COMBINADAS", conta_id="CONTA-A1",
+        registro_id=rid, versao_lida=2, respostas={"13.1": list(alternativas)})
+    sessao.commit()
+
+    assert not resultado["permitido"]
+    assert "selecionada isoladamente" in resultado["motivo"]
+    assert sessao.get(RascunhoForm1Integral, rid).conteudo == anterior
+
+
+def test_ajuda_13_1_explica_alternativas_sem_inventar_referencia(sessao):
+    registro = _rascunho(sessao, "F113-AJUDA")
+    pagina = cliente.get(f"/registros/{registro['registro_id']}?conta_id=CONTA-A1")
+
+    assert pagina.status_code == 200
+    ajuda = pagina.text.split('id="ajuda-cartilha-13.1"', 1)[1].split('</details>', 1)[0]
+    assert '<summary>Entenda esta pergunta</summary>' in ajuda
+    assert "O fluxo foi examinado e nenhuma das situações de exposição apresentadas foi identificada." in ajuda
+    assert "As situações investigadas não são pertinentes às características do fluxo analisado." in ajuda
+    assert "Ainda não existem informações suficientes para concluir" in ajuda
+    assert "isoladamente" in ajuda and "pré-validação" in ajuda
+    assert "Referência:" not in ajuda and '<a ' not in ajuda
+    assert 'aria-describedby="ajuda-cartilha-13.1"' in pagina.text
 
 
 def test_bloco_13_recusa_opcao_forjada_e_repetida(sessao):

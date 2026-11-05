@@ -22,7 +22,7 @@ Situações abaixo descrevem a entrega indicada, não uma aceitação global: **
 |---|---|---|---|---|---|
 | AJ-001 | 05/11/2026 | 12.3 e 12.4 agregam procedimentos e evidências de operações diferentes. | Revisão conceitual | P1 / A | Em análise; proposta abaixo. Nenhuma mudança executável. |
 | AJ-002 | 05/11/2026 | 12.5 não diferencia transferência de sistema, arquivo, custódia e mudança de localização. | Revisão conceitual | P1 / A | Em análise; definição e compatibilidade dependem de decisão. |
-| AJ-003 | 05/11/2026 | 13.1 precisa explicar as três alternativas especiais no contexto da pergunta. | Melhoria | P1 / B | Identificada; exclusividade já implementada. Teste existente cobre cada alternativa especial com exposição concreta. |
+| AJ-003 | 05/11/2026 | 13.1 precisa explicar as três alternativas especiais no contexto da pergunta. | Melhoria | P1 / B | Implementada e testada na INSTRUÇÃO_FORMS01_01 / Etapa A: ajuda contextual diferencia as três alternativas; exclusividade preservada. 51 testes aprovados. Aceitação visual NÃO VERIFICADA. |
 | AJ-004 | 05/11/2026 | 13.2 reúne guarda de documentos e bloqueio de estações em uma resposta. | Revisão conceitual | P1 / B | Em análise; proposta de duas dimensões, sem implementação. |
 | AJ-005 | 05/11/2026 | Total de obrigatórios no painel não aponta diretamente à sua distribuição. | Melhoria | P1 / C | Identificada; quantidade e navegação por Registro já existem nos cartões. Proposta apenas de apresentação. |
 | AJ-006 | 05/11/2026 | Pendências complementares fora da ordem canônica. | Defeito | P1 / D | Testada localmente, sem commit; `pre_validar_form1_integral()`. 71 testes e comparação de 102 cenários. Aceitação visual pendente. |
@@ -180,3 +180,13 @@ python -m pytest -q -o addopts= -p no:cacheprovider testes/test_ordenacao_penden
 A rodada abrange ordem canônica, condicionais, participantes/destinatários repetíveis, rascunhos, navegação, pré-validação, snapshots e bloqueio da submissão institucional. As rotinas da suíte preparam somente o banco isolado `lgpd_poc_teste`; o banco demonstrativo e suas respostas não foram alterados. Não houve alteração funcional posterior aos testes. A verificação `git diff --check` passou e os 13 IDs do backlog e o link do README foram conferidos.
 
 Nenhum push foi autorizado ou realizado nesta estabilização. A inspeção visual continua **NÃO VERIFICADA**, com o roteiro da seção D preservado. Não houve funcionalidades adicionais, mudanças de contratos, matriz, permissões, Cartilha, apresentação ou FORMs 2–4.
+
+## INSTRUÇÃO_FORMS01_01 — Etapa A / AJ-003 — 05/11/2026
+
+A pergunta 13.1 agora reutiliza **Entenda esta pergunta** para diferenciar “Nenhuma das situações acima”, “Não se aplica” e “A confirmar”, com explicação da exclusividade já vigente. A orientação funcional não inventa seção, edição ou link da Cartilha; as 22 referências editoriais existentes permanecem inalteradas. Os controles estão associados à ajuda por `aria-describedby`. Não houve alteração de catálogo, matriz, respostas ou regras de escrita.
+
+Verificação: **51 testes aprovados, zero falhas**, em 28,11 segundos, no banco isolado `lgpd_poc_teste`. Inclui as três alternativas isoladas, cada especial com exposição concreta, pares de especiais recusados sem perda da resposta anterior, apresentação da ajuda, acessibilidade estrutural, vínculos da Cartilha, pré-validação e preservação do bloqueio institucional. A primeira tentativa foi impedida na preparação pela restrição de conexão local (erro Windows 10013); a repetição com acesso autorizado ao banco de teste foi aprovada. Um aviso preexistente de depreciação de `anyio.abc.BlockingPortal` permanece.
+
+Comando: `python -m pytest -q --tb=short -o addopts= -p no:cacheprovider testes/test_bloco13_form1_integral.py testes/test_ajudas_cartilha_incremento_8w.py testes/test_cartilha_local_form1.py testes/test_politica_p0_incremento_8v.py testes/test_leitura_preenchimento_form1.py testes/test_pre_validacao_form1_integral.py testes/test_p1_usabilidade_form1.py`, com `LGPD_BANCO_TESTE=lgpd_poc_teste`.
+
+**ACEITAÇÃO VISUAL NÃO VERIFICADA.** Conferência manual pendente: acessar 13.1 como ARP, abrir a ajuda por teclado em tela larga e estreita, conferir legibilidade e compreensão das três distinções. A aprovação automatizada não substitui essa avaliação. Etapa B ainda não iniciada neste checkpoint; sem push.

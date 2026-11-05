@@ -59,7 +59,7 @@ def test_interface_exibe_ajudas_sob_demanda_sem_link_inoperante(sessao):
 
     # Assert
     assert pagina.status_code == 200
-    assert pagina.text.count("Entenda esta pergunta") == len(AJUDAS_CARTILHA_FORM1)
+    assert pagina.text.count("Entenda esta pergunta") == len(AJUDAS_CARTILHA_FORM1) + 1
     assert "Cartilha LGPD REV30.13 — seção 5.2 Operações, canais e ambientes" in pagina.text
     assert "Cartilha LGPD REV30.13 — seção 8.1 Necessidade de conhecer e acesso mínimo" in pagina.text
     assert "WhatsApp é canal de entrada, não repositório oficial" in pagina.text

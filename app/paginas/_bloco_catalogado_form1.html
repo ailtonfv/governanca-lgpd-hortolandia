@@ -22,7 +22,7 @@
       {% if campo.estrutura_destinatarios %}
       {% include '_destinatarios_10_2_1.html' %}
       {% elif campo.controle in ('seleção múltipla (combo com marcações)', 'reuso do catálogo de referência (ver campo indicado)') %}
-      <div class="grade-opcoes" role="group" aria-labelledby="rotulo-integral-{{ campo.id }}" {% if campo.ajuda_cartilha %}aria-describedby="ajuda-cartilha-{{ campo.id }}"{% endif %}>
+      <div class="grade-opcoes" role="group" aria-labelledby="rotulo-integral-{{ campo.id }}" {% if campo.ajuda_cartilha or campo.ajuda_alternativas %}aria-describedby="ajuda-cartilha-{{ campo.id }}"{% endif %}>
         {% for valor, rotulo in campo.alternativas %}
         <label class="opcao"><input {% if formulario_associado %}form="{{ formulario_associado }}"{% endif %} type="checkbox" id="opcao-integral-{{ campo.id }}-{{ loop.index }}" name="campo__{{ campo.id }}" value="{{ valor }}" {% if valor in respostas_integral.get(campo.id, []) %}checked{% endif %}> {% include '_alternativa_form1.html' %}</label>
         {% endfor %}

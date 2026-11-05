@@ -8,6 +8,15 @@ VERSAO_CARTILHA_AJUDAS_FORM1 = "REV30.13"
 ARQUIVO_CARTILHA = "CARTILHA_LGPD_HORTOLANDIA_REV30_13_MARCO_03-11-2026.docx"
 SHA256_CARTILHA = "479599007a3cd9a7b79797bc0f2e948a40ec9ed2b916fa7687aa404694855848"
 
+# Orientação funcional aprovada, sem atribuir seção ou vínculo editorial à Cartilha.
+AJUDAS_ALTERNATIVAS_FORM1 = {
+    "13.1": (
+        ("Nenhuma das situações acima", "O fluxo foi examinado e nenhuma das situações de exposição apresentadas foi identificada."),
+        ("Não se aplica", "As situações investigadas não são pertinentes às características do fluxo analisado."),
+        ("A confirmar", "Ainda não existem informações suficientes para concluir se alguma das situações apresentadas ocorre."),
+    ),
+}
+
 # Identidade de tópico independente de paginação; não reutilizar para outro tema.
 SECOES_CARTILHA = {
     "fatos-analises-decisoes": "1.3 Fatos, análises e decisões",

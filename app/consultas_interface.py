@@ -7,6 +7,7 @@ from sqlalchemy import func, or_, select
 from app.alertas_operacionais import listar_alertas_operacionais
 from app.cartilha_local import secoes_cartilha_disponiveis
 from app.ajudas_cartilha_form1 import (
+    AJUDAS_ALTERNATIVAS_FORM1,
     AJUDAS_CARTILHA_FORM1,
     VERSAO_CARTILHA_AJUDAS_FORM1,
 )
@@ -1095,6 +1096,7 @@ def carregar_registro(sessao, conta_id, registro_id):
             "alternativas": alternativas,
             "instrucao": '' if campo_id == '10.2.1' else instrucao_para_interface(campo),
             "ajuda_contextual": ajudas_contextuais.get(campo_id),
+            "ajuda_alternativas": AJUDAS_ALTERNATIVAS_FORM1.get(campo_id),
             "ajuda_cartilha": (
                 None
                 if campo_id not in AJUDAS_CARTILHA_FORM1
