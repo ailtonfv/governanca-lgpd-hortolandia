@@ -381,6 +381,11 @@ def pre_validar_form1_integral(conteudo: dict, *, nome_institucional: str | None
 
     regras_pendentes.extend({**pendencia, "tipo": "governanca"}
                             for pendencia in REGRAS_PENDENTES_GLOBAIS)
+    # Validadores de complementos e ocorrências acrescentam itens depois das
+    # perguntas comuns. A ordenação estável reúne-os na posição canônica,
+    # preservando os detalhes e a ordem relativa das ocorrências da mesma pergunta.
+    ordem_canonica = {campo_id: indice for indice, campo_id in enumerate(regras)}
+    incompletos.sort(key=lambda item: ordem_canonica[item["campo_id"]])
     por_bloco: dict[str, list[dict]] = {}
     for item in incompletos:
         por_bloco.setdefault(item["bloco"], []).append(item)

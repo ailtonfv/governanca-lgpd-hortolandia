@@ -1,6 +1,8 @@
 """Ordenação e rótulos de apresentação sem alterar valores canônicos."""
 from copy import deepcopy
 from pathlib import Path
+import json
+import re
 import shutil
 import subprocess
 
@@ -21,6 +23,16 @@ def test_cadastro_na_sequencia_sem_forms_aninhados_e_controles_associados(sessao
     assert html.count('id="titulo-destinatarios-10-2-1"') == 1
     assert 'id="instrucao-integral-10.2.1"' not in html
     elementos = Elementos(html).elementos
+    ordem_esperada = ['10.1', '10.2', '10.2.1', '10.3', '10.4', '10.5',
+                      '10.6', '10.7', '10.7.1', '10.8', '10.8.1', '10.9']
+    assert re.findall(r'id="rotulo-integral-(10\.[\d.]+)"', html) == ordem_esperada
+    for _, attrs, pais in elementos:
+        if attrs.get('id') in ('rotulo-integral-10.2', 'rotulo-integral-10.2.1'):
+            recipiente = next(a for _, a in reversed(pais) if 'data-condicoes' in a)
+            assert json.loads(recipiente['data-condicoes']) == [['10.1', ['Sim', 'Em alguns casos']]]
+    consulta = cliente.get(f'/registros/{r["registro_id"]}?conta_id=CONTA-B1')
+    assert consulta.status_code == 200
+    assert re.findall(r'id="rotulo-consulta-(10\.[\d.]+)"', consulta.text) == ordem_esperada
     for tag, attrs, pais in elementos:
         if tag == 'form':
             assert not any(t == 'form' for t, _ in pais), attrs

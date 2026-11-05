@@ -1068,6 +1068,8 @@ A obrigatoriedade é definida de forma declarativa e campo a campo. A matriz ver
 | Obrigatória condicional | Deve estar respondida somente quando sua condição estiver ativa. |
 | Facultativa | Sua ausência não bloqueia a submissão. |
 
+Na seção **“Pendências antes da futura submissão”**, as perguntas seguem a sequência canônica da matriz, inclusive condicionais, complementos de “Outro”, participantes repetíveis e destinatários de `10.2.1`. A ordenação preserva o conteúdo e a identificação de cada ocorrência, sem alterar obrigatoriedade, contagens ou respostas salvas. Assim, uma pendência de `10.2.1` precede `10.3`, mesmo quando `10.2` já está respondida.
+
 As três fases aplicam regras diferentes:
 
 1. **Abertura:** cria e identifica o Registro, define a Secretaria e as responsabilidades APA/ARP; não exige o preenchimento dos 128 identificadores.
