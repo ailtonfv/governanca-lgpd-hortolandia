@@ -238,3 +238,55 @@ Adoção explícita pelo ARP guarda snapshot completo e enunciados/respostas de 
 Mantidos 12.1–12.2, FORMs 2–4, nuclear 2, permissões, snapshots, Cartilha, apresentação e banco demonstrativo. Submissão institucional bloqueada. Aceitação visual **NÃO VERIFICADA**; roteiro e arquivos na especificação. Verificação: **652/652 testes aprovados** em 599,18 s, incluindo 28 novos testes da extensão; um aviso preexistente de descontinuação Starlette/AnyIO. Sem push.
 
 Comandos: `python -m pytest testes/test_extensao_medidas_form1.py testes/test_bloco12_form1_integral.py testes/test_pre_validacao_form1_integral.py -q --tb=short -o addopts= -p no:cacheprovider` (38 aprovados); `python -m pytest testes/test_extensao_guarda_form1.py -q --tb=short -o addopts= -p no:cacheprovider` (27 aprovados antes da inclusão do teste JavaScript); `node testes/apoio_extensao_guarda_form1.cjs` (aprovado); `python -m pytest testes -q --tb=short -o addopts= -p no:cacheprovider` (652 aprovados, incluindo o teste JavaScript). Todas as execuções Python usaram `LGPD_BANCO_TESTE=lgpd_poc_teste`.
+
+## INSTRUÇÃO_FORMS01_05 — Verificação consolidada — 05/11/2026
+
+### Base, isolamento e alcance
+
+Base conferida: `9970803e7cd0cdfc8eb9cadaaed04b56e7877c88`, branch `main`, árvore limpa, sete commits à frente da **referência local** de `origin/main` (sem consulta remota). Esta rodada não modifica aplicação, testes, contratos, matrizes, migrações, documentos técnicos das extensões ou dados demonstrativos. As 13 ocorrências deste backlog e os resultados anteriores permanecem preservados.
+
+Regressão integral concluída: **652/652 testes aprovados**, zero falhas e zero testes ignorados, em **372,66 s (6 min 12 s)**. Um aviso preexistente de descontinuação de `anyio.abc.BlockingPortal`, emitido pelo Starlette TestClient. Executada com `LGPD_BANCO_TESTE=lgpd_poc_teste` e `python -m pytest testes -q --tb=short -o addopts= -p no:cacheprovider`. O `conftest.py` recusa nomes sem sufixo `_teste`, recria o esquema exclusivamente nessa base e utiliza carga fictícia. O Registro demonstrativo `LGPD-2026-00004` não foi acessado nem modificado nesta rodada. A fronteira HTTP é exercitada pelo TestClient, sem representar inspeção visual de navegador.
+
+### Matriz de evidências técnicas
+
+Os cenários automatizados abaixo foram **aprovados nesta regressão**. Isso confirma os comportamentos técnicos exercitados, sem certificar a renderização real ou substituir o aceite funcional humano. Não foi necessário alterar nem acrescentar testes; a suíte existente cobre os cenários técnicos solicitados.
+
+| Item | Verificação técnica e evidência reproduzível | Limite de aceitação |
+|---|---|---|
+| AJ-003 / ajuda 13.1 | `test_bloco13_form1_integral.py`: três explicações distintas, ajuda associada por `aria-describedby`, opções especiais isoladas aceitas e combinações com situações concretas ou entre especiais recusadas sem perder resposta anterior. Orientação em `AJUDAS_ALTERNATIVAS_FORM1`, sem link editorial inventado. | Compreensão pelo servidor, legibilidade e abertura por teclado em navegador NÃO VERIFICADAS. |
+| AJ-005 / distribuição de pendências | `test_distribuicao_pendencias_painel.py`: soma igual ao contador, código/objeto identificados, vários Registros, zero, rascunho não iniciado, acesso ao rascunho correto, APA de outro ARP, perfil sem acesso e separação de conferência versus campos faltantes. | Expansão, foco real e disposição larga/estreita NÃO VERIFICADOS. O caso de zero isola a apresentação com substituição controlada do resultado da pré-validação; não prova existência de formulário completo. |
+| AJ-004 / MEDIDAS | `test_extensao_medidas_form1.py`: adoção explícita autorizada, respostas vazias, independência de 13.2/13.2.1, facultatividade, persistência, versão histórica/enunciado/lacre preservados, recusa de aba antiga, idempotência, concorrência e rollback. | Usabilidade real da adoção e consulta histórica NÃO VERIFICADA nesta rodada. |
+| AJ-001 / GUARDA: procedimentos e evidências | `test_extensao_guarda_form1.py`: quatro operações independentes, localização somente com evidência Sim/Em alguns casos, Não se aplica não ativa localização, A confirmar facultativo gera aviso não bloqueante, persistência e arquivamento de respostas fora de aplicação. Ausência de eliminação não vira irregularidade. | Leitura da matriz compacta, campos condicionais e teclado no navegador NÃO VERIFICADOS. |
+| AJ-002 / GUARDA: transferência | Mesmo arquivo: modalidades múltiplas, Outra situação com complemento, destino, limites, opções forjadas/duplicadas recusadas, respostas inativas preservadas e nova semântica somente após adoção. | Apresentação responsiva e interação real NÃO VERIFICADAS. |
+| Compatibilidade das quatro versões | Teste `test_quatro_perfis_preservam_128_129_e_acrescentam_somente_bloco12`, adoção em ambas as ordens, leitura de snapshots anteriores, preservação de campos não afetados e salvamento dos Blocos 11, 13 e 14 após composição. | A composição não autoriza conversão em lote nem altera a interpretação de snapshots antigos. |
+| Integração e segurança | `test_ensaio_form1_integral.py`, testes de navegação, ordenação, pré-validação, leitura/preenchimento e demais testes da suíte: percurso técnico dos 14 blocos, autorizações, ocorrências, rascunhos, auditoria, concorrência, rollback e fluxo nuclear. | Navegação HTTP/DOM simulado não comprova posicionamento visual ou experiência ponta a ponta em navegador. |
+| Submissão institucional | Testes das extensões e ensaio verificam `submissao_habilitada=False`; snapshots técnicos e conferência interna permanecem atos distintos da submissão. | Nenhuma aprovação institucional ou liberação de submissão decorre desta rodada. |
+
+| Perfil efetivo | Identificadores | Compatibilidade verificada pelos testes |
+|---|---:|---|
+| `F1-C3-REV13` | 128 | Catálogo e matriz originais preservados. |
+| `F1-C3-REV13-EXT-MEDIDAS-v1` | 129 | Separação do item 13.2 sem adoção automática de GUARDA. |
+| `F1-C3-REV13-EXT-GUARDA-v1` | 139 | Revisão do Bloco 12 sem adoção automática de MEDIDAS. |
+| `F1-C3-REV13-EXT-MEDIDAS-GUARDA-v1` | 140 | Composição independente, nas duas ordens de adoção. |
+
+### Acessibilidade e limitação da inspeção visual
+
+**ACEITAÇÃO VISUAL NÃO VERIFICADA.** A tentativa de criar uma aba `about:blank` pelo navegador integrado e a tentativa de inicializar o controle Windows (`@oai/sky`) falharam antes de acessar a aplicação, ambas com: `failed to write kernel assets: O sistema não pode encontrar o caminho especificado. (os error 3)`. É uma falha de inicialização das ferramentas; não há evidência de bloqueio da URL da aplicação nem de defeito visual provocado por ela. Nenhuma proteção foi contornada. Não foi iniciado servidor visual adicional, pois as duas ferramentas de inspeção ficaram indisponíveis.
+
+Verificação de acessibilidade **parcial, técnica**: associação de rótulos/ajudas, IDs, `details/summary` nativos, `fieldset/legend`, estilos de foco e empilhamento abaixo de 800 px estão cobertos por testes ou conferência do código. O JavaScript de adoção/condicionais é exercitado em DOM simulado. Não houve teste real com teclado, leitor de tela, zoom ou larguras distintas; não se declara conformidade WCAG integral.
+
+Cálculo de contraste dos pares de cores do código, sem captura de tela: azul `#075985` sobre branco **7,56:1**; azul escuro `#0C3B5A` sobre branco **11,74:1**; texto `#17212B` sobre branco **16,29:1** e sobre `#F4F7F9` **15,14:1**. Esses pares superam 4,5:1 para texto normal; o cálculo não verifica todas as sobreposições e estados renderizados.
+
+### Roteiro de aceitação manual pendente
+
+Executar somente em base de teste com dados fictícios, após terminar a suíte; não usar o Registro demonstrativo 00004. Registrar resultado, largura, perfil, versão e captura de cada cenário.
+
+1. **Painel e 13.1 — tela larga (por exemplo, 1366 px) e estreita (390 px):** como ARP, expandir a distribuição por Tab/Enter ou Espaço; conferir soma, identificação e destino de cada Registro. Abrir Entenda esta pergunta e conferir as três explicações. Selecionar alternativas concretas e especiais, verificando exclusividade e foco. Como APA de outro ARP e perfil não autorizado, conferir ações e dados efetivamente permitidos.
+2. **MEDIDAS:** preparar resposta agregada fictícia e uma apresentação anterior; adotar expressamente como ARP. Conferir novos campos vazios, legado com enunciado original e duas respostas diferentes. Salvar, recarregar e consultar o snapshot anterior pelo APA autorizado.
+3. **GUARDA:** adotar em outro Registro fictício; conferir quatro operações. Usar procedimento Não e evidência Sim na mesma operação e preencher sua localização. Alterar evidência para Não se aplica/A confirmar; conferir que outras operações não mudam. Marcar duas modalidades e Outra situação, informar complemento/destino, salvar e recarregar; confirmar o legado consultável.
+4. **Composição e navegação:** repetir adoções nas duas ordens, mantendo respostas já salvas na outra extensão; percorrer os 14 blocos, especialmente 11 → 12 → 13 → 14, retornar, consultar pendências e acessar as perguntas. Conferir aviso de edições locais antes de adotar e ausência de perda de respostas.
+5. **Teclado, leitura e histórico:** em ambas as larguras, conferir rótulos, foco visível, ordem de tabulação, ausência de cortes e uso dos controles sem mouse. Consultar versões anteriores e atuais, verificar autoria e enunciados, e confirmar que nenhuma ação libera submissão institucional.
+
+### Resultado e pendências
+
+**Verificação técnica automatizada aprovada, sem regressões identificadas nesta rodada. Homologação consolidada parcial:** a homologação visual e o aceite funcional humano permanecem pendentes, sem aprovação presumida. AJ-001, AJ-002, AJ-003, AJ-004 e AJ-005 mantêm implementação tecnicamente verificada; não são encerradas como visualmente aceitas. Não foram identificados novos defeitos funcionais P0/P1 nos cenários executados, e nenhum item foi reprovado automaticamente. Limitação P1 desta rodada: falta de evidência visual/teclado real, a resolver pela execução do roteiro ou restabelecimento autorizado das ferramentas; não é um defeito da aplicação comprovado. Não há autorização para implementar correções nesta verificação. Nenhum push realizado.
