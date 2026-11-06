@@ -7,13 +7,7 @@
   <link rel="stylesheet" href="{{ url_for('estaticos', path='/estilo.css') }}">
 </head>
 <body>
-  <header class="topo">
-    <div>
-      <p class="sobretitulo">Prefeitura de Hortolândia · Secretaria de Planejamento</p>
-      <p class="marca">Mapeamento LGPD</p>
-    </div>
-    <span class="selo">Ambiente de demonstração — utilize exclusivamente dados fictícios.</span>
-  </header>
+  {% include '_cabecalho_institucional.html' %}
   <main class="conteudo">
     {% block conteudo %}{% endblock %}
   </main>

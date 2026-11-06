@@ -10,6 +10,16 @@ Este trabalho é desenvolvido para a **Prefeitura Municipal de Hortolândia**, n
 
 Toda apresentação institucional derivada deste projeto deve utilizar o **brasão da Prefeitura Municipal de Hortolândia**, seguindo a identidade já adotada na Cartilha LGPD. Materiais de outras administrações públicas podem aparecer como fontes ou referências históricas, mas não substituem a identidade visual de Hortolândia.
 
+### Identidade visual da aplicação — FORMS01_06
+
+O cabeçalho compartilhado `app/paginas/_cabecalho_institucional.html`, incluído pelo template base, apresenta o brasão ao lado de **Prefeitura Municipal de Hortolândia** e **Sistema Municipal de Governança LGPD**. Abrange os painéis dos perfis existentes, abertura, preenchimento/consulta do Registro, pré-validação, conferência de versões históricas, ajuda local e páginas de erro. Os títulos das páginas e a navegação entre blocos permanecem na área de conteúdo; o aviso de ambiente demonstrativo continua explícito.
+
+Recurso: `app/estaticos/imagens/brasao-hortolandia.png`, PNG oficial de 591 × 591 pixels, obtido em **06/11/2026** pelo link de download da [página Nossa Cidade da Prefeitura](https://www.hortolandia.sp.gov.br/nossa-cidade/): [arquivo oficial](https://www.hortolandia.sp.gov.br/arquivos/BANDEIRA%20E%20BRAS%C3%83O/Brasao_Hortolandia.png). Utilizou-se o PNG original, sem conversão dos formatos AI/CDR/PDF oferecidos e sem redesenho, recorte ou alteração de cores/proporções. SHA-256: `ee5f7faec20ebc645c13c6cd28bfa97e5193034e69143dcf1ff6c9c7606f52be`. O navegador carrega a cópia local, sem depender do site externo.
+
+Apresentação: 64 px em telas largas e 48 px até 800 px, texto alternativo e dimensões explícitas; sem novos controles de foco ou mudanças de rolagem. O CSS de impressão mantém o símbolo e usa fundo branco no cabeçalho; impressão/PDF **não verificados visualmente**. O componente poderá ser reutilizado pelos futuros FORMs, sem implementá-los nesta entrega.
+
+Verificação em 06/11/2026: **94 testes aprovados** na regressão selecionada, incluindo 11 novos testes do cabeçalho; um aviso preexistente Starlette/AnyIO. Inspeção real do cabeçalho em navegador, exclusivamente com dados fictícios na base de teste: painéis APA/ARP, larguras efetivas de 1821 e 400 px, abertura e consulta de versão apresentada; foco por Tab preservado no painel. Capturas e alcance no [registro FORMS01_06 do backlog](docs/planejamento/BACKLOG_AJUSTES_POC_AMPLIADA.md#instrução_forms01_06--identidade-institucional--06112026). Essa inspeção focalizada não substitui o aceite humano nem encerra as pendências visuais das extensões da rodada FORMS01_05. Nenhuma alteração de contratos, permissões, banco demonstrativo ou regras; submissão institucional continua bloqueada.
+
 ## Por onde começar
 
 | Se você quer… | Vá para |

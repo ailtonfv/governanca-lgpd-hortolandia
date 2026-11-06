@@ -15,6 +15,12 @@ body { margin: 0; background: var(--fundo); color: var(--texto); line-height: 1.
 a { color: var(--azul); font-weight: 700; }
 .topo { display: flex; justify-content: space-between; gap: 2rem; align-items: center; padding: 1rem max(1rem, calc((100% - 1120px) / 2)); background: var(--azul-escuro); color: white; }
 .topo p { margin: 0; }
+.topo { flex-wrap: wrap; gap: 1rem; }
+.identidade-institucional { display: flex; align-items: center; gap: .9rem; min-width: 0; }
+.identidade-institucional-texto { min-width: 0; overflow-wrap: anywhere; }
+.brasao-institucional { width: 64px; height: 64px; object-fit: contain; flex: 0 0 auto; }
+.topo .marca { font-size: clamp(1rem, 2vw, 1.25rem); }
+.topo .selo { white-space: normal; max-width: 28rem; }
 .sobretitulo, .etiqueta { font-size: .78rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
 .marca { font-size: 1.35rem; font-weight: 800; }
 .selo { border: 1px solid #8ecae6; border-radius: 999px; padding: .4rem .75rem; font-size: .85rem; white-space: nowrap; }
@@ -378,3 +384,11 @@ dd { margin: .25rem 0 0; }
 .grade-operacao-guarda .campo-integral { min-width: 0; margin: 0; overflow-wrap: anywhere; }
 .grade-operacao-guarda select, .grade-operacao-guarda input { width: 100%; max-width: 100%; box-sizing: border-box; }
 @media (max-width: 800px) { .grade-operacao-guarda { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 800px) {
+  .brasao-institucional { width: 48px; height: 48px; }
+}
+@media print {
+  .topo { background: white; color: #17212B; break-inside: avoid; }
+  .topo .selo { border-color: #D6E0E6; }
+  .brasao-institucional { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
