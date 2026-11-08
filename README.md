@@ -1,6 +1,6 @@
 # Sistema de Governança Municipal LGPD — Prova de Conceito
 
-**Prefeitura Municipal de Hortolândia** · PoC nuclear M1a aceita e PoC ampliada iniciada de forma incremental · repositório privado
+**Prefeitura Municipal de Hortolândia** · PoC nuclear M1a aceita e PoC ampliada iniciada de forma incremental
 
 > ⚠️ **Somente dados fictícios.** Nenhum dado pessoal real, CPF, matrícula, senha ou token entra neste repositório, no código, nos testes ou nos logs.
 
@@ -19,6 +19,20 @@ Recurso: `app/estaticos/imagens/brasao-hortolandia.png`, PNG oficial de 591 × 5
 Apresentação: 64 px em telas largas e 48 px até 800 px, texto alternativo e dimensões explícitas; sem novos controles de foco ou mudanças de rolagem. O CSS de impressão mantém o símbolo e usa fundo branco no cabeçalho; impressão/PDF **não verificados visualmente**. O componente poderá ser reutilizado pelos futuros FORMs, sem implementá-los nesta entrega.
 
 Verificação em 06/11/2026: **94 testes aprovados** na regressão selecionada, incluindo 11 novos testes do cabeçalho; um aviso preexistente Starlette/AnyIO. Inspeção real do cabeçalho em navegador, exclusivamente com dados fictícios na base de teste: painéis APA/ARP, larguras efetivas de 1821 e 400 px, abertura e consulta de versão apresentada; foco por Tab preservado no painel. Capturas e alcance no [registro FORMS01_06 do backlog](docs/planejamento/BACKLOG_AJUSTES_POC_AMPLIADA.md#instrução_forms01_06--identidade-institucional--06112026). Essa inspeção focalizada não substitui o aceite humano nem encerra as pendências visuais das extensões da rodada FORMS01_05. Nenhuma alteração de contratos, permissões, banco demonstrativo ou regras; submissão institucional continua bloqueada.
+
+## Percurso demonstrativo em 7 de novembro de 2026
+
+**Central de Acesso → Painel de Registros → Registro LGPD → instrumento autorizado.** A PoC simula a identidade individual. A Central reconhece os vínculos vigentes com Secretarias e identifica o APA titular ou substituto em exercício. Com um vínculo, a Secretaria acompanha a abertura. Com vários, o servidor escolhe entre os autorizados. No ensaio, Alfa acessa Planejamento e Gama acessa Finanças. Zero Registros disponíveis informa o alcance daquela consulta.
+
+O APA seleciona um serviço, processo ou atividade do catálogo controlado, identifica o contexto de atuação e confirma os canais utilizados pelo objeto. Também pode declarar expressamente que nenhum se aplica ou que precisa confirmá-los. As opções do catálogo não constituem declaração. Apenas a confirmação final cria o Registro. A finalidade do tratamento é descrita no FORM 1. Um atendimento, telefonema ou protocolo individual fica no sistema de origem.
+
+O APA acompanha administrativamente o Registro e pode assumir o preenchimento do FORM 1 ou designar um ARP autorizado. A conferência interna identifica a apresentação preservada. A pré-validação é consultiva e a submissão institucional permanece bloqueada. A habilitação do SAA para acessar dados pessoais no exercício de suas atribuições não lhe atribui edição, aprovação ou decisão no sistema.
+
+No FORM 2 demonstrativo, o **AAL — Agente de Análise de Legitimidade** prepara a análise a partir de uma versão factual do FORM 1. A política `F2-DEMO-05-v1` exige habilitação individual vigente por Registro e finalidade. O APA em exercício autorizado a acompanhar seleciona a origem e designa o AAL previamente habilitado. Como AAL, a pessoa consulta somente as origens das preparações que lhe foram atribuídas e edita o respectivo rascunho. O servidor verifica essas autorizações. Cada preparação conserva autoria, histórico e vínculo com o snapshot identificado e lacrado.
+
+A denominação AAL foi aprovada no desenho funcional da PoC. Sua instituição como atribuição administrativa municipal depende de validação e ato competente.
+
+O Dashboard LGPD é uma visão gerencial planejada. A Administração Central da TI é uma área técnica planejada para as 18 Secretarias, com controle de contas e vínculos, disponibilidade, integridade, auditoria e backups. O desenho prevê autenticação individual reforçada, preferencialmente com múltiplos fatores, e autorização específica para conteúdos e operações privilegiadas.
 
 ## Por onde começar
 
@@ -123,7 +137,7 @@ As duas camadas usam dados fictícios e são construídas pelo Encarregado de Da
 
 A PoC ampliada exige mais trabalho: são três marcos em sequência, as situações difíceis mexem em várias peças ao mesmo tempo, e parte das condições depende de decisões institucionais. Em compensação, ela não começa do zero: reaproveita o chassi da nuclear (livro de atos, pedido idempotente, barreiras e auditoria), e cada ato novo segue o mesmo molde.
 
-**Limite funcional acordado:** os quatro FORMs da Cartilha permanecem como referência principal do método, mas a implementação da PoC ampliada termina no **FORM 1 integral**. Os FORMs 2, 3 e 4 ficam alinhados na arquitetura e reservados para uma etapa posterior; inventários e relatórios de apoio não ampliam esse escopo.
+**Evolução do escopo.** O primeiro marco concentrou-se no FORM 1 Integral. A autorização posterior para o FORM 2 abrange apenas a preparação demonstrativa. FORMs 3 e 4, indicadores gerenciais e operação institucional dependem de marcos próprios.
 
 ## Como os Registros são organizados
 
@@ -238,7 +252,7 @@ A curadoria deverá ligar cada item a uma ou mais Secretarias, registrar qual de
 
 #### O que foi aproveitado dos inventários existentes
 
-A **Cartilha e seus quatro FORMs** são a referência funcional principal. A PoC nuclear exercita uma versão sintética do FORM 1; a PoC ampliada deverá executar o FORM 1 integral. Os FORMs 2, 3 e 4 permanecem visíveis no desenho geral, mas não entram no escopo de implementação dessas duas PoCs.
+A **Cartilha e seus quatro FORMs** orientam o método. A PoC nuclear exercita o FORM 1 sintético. Na PoC ampliada, o FORM 1 Integral e a preparação demonstrativa do FORM 2 utilizam o mesmo Registro LGPD.
 
 Os inventários e relatórios preenchidos a partir do modelo de referência servem como **apoio**: oferecem exemplos, vocabulário e situações reais para verificar se o FORM 1 faz as perguntas adequadas. Eles não substituem a Cartilha, não definem novos campos e não são importados automaticamente. Quando revelarem agrupamentos recorrentes — como formação cultural, biblioteca, fiscalização ou gestão de pessoas — esses agrupamentos poderão ser usados como **candidatos ao campo Contexto de atuação**, sempre sujeitos à curadoria.
 
@@ -246,8 +260,8 @@ Os inventários e relatórios preenchidos a partir do modelo de referência serv
 flowchart LR
     C["Cartilha LGPD"] --> F["FORMs 1, 2, 3 e 4"]
     F --> N["PoC nuclear<br/>FORM 1 sintético"]
-    F --> A["PoC ampliada<br/>FORM 1 integral"]
-    F --> P["FORMs 2, 3 e 4<br/>etapa posterior"]
+    F --> A["PoC ampliada<br/>FORM 1 Integral e preparação do FORM 2"]
+    F --> P["Planejados<br/>FORM 3 e FORM 4"]
     I["Inventários e relatórios"] -. "apoio e contextos candidatos" .-> F
 ```
 
@@ -258,13 +272,13 @@ Os quatro FORMS permanecem instrumentos distintos e complementares de um **únic
 | Instrumento | Função no conjunto |
 |---|---|
 | FORM 1 — Levantamento factual | Identificar e descrever como ocorre o tratamento de dados pessoais. |
-| FORM 2 — Validação institucional e jurídica | Examinar conformidade, hipóteses legais e questões institucionais. |
+| FORM 2 — Análise de legitimidade | Preparação demonstrativa disponível. Manifestação jurídica e decisão institucional dependem de competência formal. |
 | FORM 3 — Avaliação de riscos | Identificar e avaliar riscos, impactos e controles. |
 | FORM 4 — Plano de ação | Registrar medidas de adequação, responsáveis, prazos, acompanhamento e evidências. |
 
 O Registro LGPD é aberto por um **Agente Público Autorizado**. Esse agente pode preencher o FORM 1 ou permitir que outro agente devidamente autorizado o faça. A abertura não atribui automaticamente o preenchimento dos demais FORMS; os FORMS 2, 3 e 4 poderão envolver agentes diferentes, conforme competências e autorizações institucionais ainda a definir.
 
-A disponibilidade operacional futura deverá seguir esta sequência, sem criar bloqueios administrativos desnecessários:
+A sequência abaixo descreve o desenho institucional futuro. No ensaio atual, uma versão técnica lacrada e as autorizações individuais permitem a preparação do FORM 2, mesmo com a submissão institucional bloqueada.
 
 1. o FORM 1 fica disponível depois da abertura do Registro LGPD;
 2. após a submissão válida do FORM 1, o FORM 2 é liberado para validação, sem atribuição automática a uma pessoa;
@@ -275,7 +289,7 @@ Excepcionalmente, uma providência identificada no FORM 2 poderá ser registrada
 
 A futura implementação deverá separar permissões de abertura, preenchimento, análise e validação; identificar a autoria de cada atuação; preservar versões, submissões, decisões e evidências; registrar pendências sem paralisar automaticamente etapas independentes; permitir a reavaliação das etapas afetadas por correções posteriores; e acompanhar as ações do FORM 4 até sua conclusão ou encerramento formal.
 
-> **Limite de escopo:** a integração dos quatro FORMS permanece uma diretriz arquitetural. A PoC nuclear continua inalterada e a PoC ampliada, agora iniciada por incrementos, limita-se ao FORM 1 integral. Os FORMS 2, 3 e 4 continuam reservados para etapa posterior; a atribuição institucional de seus responsáveis e a fronteira entre a validação do FORM 1 e a futura liberação do FORM 2 ainda precisam de definição formal.
+> **Limite do ensaio demonstrativo.** A preparação do FORM 2 preserva o contrato nuclear e o FORM 1 REV13. O uso institucional depende de autorização específica. FORMs 3 e 4 permanecem planejados.
 
 Para o catálogo inicial, o inventário oferece somente **candidatos**. Alguns campos ajudam a formar e localizar o item; os demais pertencem ao preenchimento e à análise do tratamento:
 
@@ -856,7 +870,7 @@ O Encarregado de Dados registrou o aceite do M1a em 22/10/2026, com as limitaç�
 
 ### Legenda operacional: agentes e funções
 
-Todos os atores humanos do fluxo são **Agentes Públicos Autorizados**. A expressão usada ao lado do agente indica a função que ele exerce naquele ato; não representa um tipo diferente de pessoa.
+A tabela e o diagrama abaixo preservam as funções descritas no desenho anterior da PoC. Na nomenclatura funcional vigente, **APA** designa o agente autorizado a abrir e acompanhar o Registro. O **ARP** responde pelo levantamento factual e o **AAL** pela preparação da análise de legitimidade. A mesma pessoa pode exercer essas funções com as autorizações correspondentes e com identificação do papel em cada ato.
 
 Na organização municipal prevista para o levantamento, o **Agente Público Autorizado responsável pelo Registro** é o ponto focal da LGPD designado pela Secretaria. Ele abre o Registro, coordena o levantamento local, acompanha pendências e encaminha o FORM 1. O próprio Agente pode também integrar a equipe e preencher o formulário quando possuir essa autorização. A **equipe responsável pelo preenchimento** reúne ainda outros servidores que executam ou conhecem o serviço, processo ou atividade e descrevem a rotina real sob a coordenação funcional desse Agente. Essa coordenação não altera a subordinação administrativa existente na Secretaria.
 
@@ -947,6 +961,8 @@ No Incremento 6, os **Blocos 11 a 14** completaram os 128 identificadores do ras
 
 **INSTRUÇÃO_FORMS01_01 — Etapa A (05/11/2026):** a ajuda “Entenda esta pergunta” de `13.1` diferencia ausência de exposição identificada, não aplicabilidade e informação ainda a confirmar. Reutiliza o componente existente, sem criar referência editorial à Cartilha e sem alterar alternativas, exclusividade, matriz ou respostas. Verificação focal e regressão pertinente: **51 testes aprovados**; aceitação visual **NÃO VERIFICADA**.
 
+**Revisão focalizada dos Blocos 12 e 13 (06/11/2026, instrução também denominada FORMS01_06):** corrigida a ajuda de `13.1`: cada título e explicação formam um grupo vertical, isolado do estilo global de listas em três colunas. Textos, alternativas e exclusividade permanecem iguais. Inspeção focal no navegador com dados fictícios em base de teste confirmou a disposição vertical em tela larga/estreita e abertura/fechamento por teclado; não equivale a aceite humano integral. **94 testes aprovados**, com um aviso preexistente Starlette/AnyIO. Decisão funcional confirmada em 06/11/2026: manter a extensão GUARDA-v1 e sua adoção explícita pelo ARP, sem implementar a proposta de seleção múltipla em `12.3`. A REV13 original continua preservada; a extensão separa as quatro operações sem conversão automática de respostas. Não houve mudança de enunciados, opções, contratos, matriz ou persistência do Bloco 12. O cenário sem destinação definida foi reproduzido por teste de salvamento, reabertura e pré-validação, sem exigência artificial de evidência/destino.
+
 **INSTRUÇÃO_FORMS01_03 — Extensão optativa do Bloco 13 (05/11/2026):** a versão `F1-C3-REV13-EXT-MEDIDAS-v1`, com matriz própria `MATRIZ-F1-REV13-EXT-MEDIDAS-v1`, separa guarda física (`13.2`) e bloqueio de estações (`13.2.1`), ambas facultativas e independentes. A REV13 original conserva seus 128 IDs; a extensão tem 129 IDs efetivos. O ARP autorizado adota explicitamente a extensão, preservando snapshot, enunciado e resposta agregada anteriores; as novas respostas começam vazias. Rascunhos, snapshots, consultas e eventos identificam a versão. Não há conversão automática, migração ou liberação de submissão. O catálogo/matriz declarativo e a compatibilidade estão na [especificação da extensão](docs/arquitetura/EXTENSAO_FORM1_REV13_MEDIDAS_V1.md). Verificação: **32 testes focalizados** e **624/624 na regressão integral**, sem falhas, somente em `lgpd_poc_teste`. Aceitação visual **NÃO VERIFICADA**.
 
 **INSTRUÇÃO_FORMS01_04 — Revisão versionada do Bloco 12 (05/11/2026):** a extensão optativa `F1-C3-REV13-EXT-GUARDA-v1` individualiza procedimentos, evidências e localização por operação, além de modalidades múltiplas e destino da transferência. A adoção explícita pelo ARP preserva snapshot, enunciados e respostas agregadas; novas respostas começam vazias. Procedimentos e evidências são facultativos; localização é condicional à evidência correspondente, e modalidades/destino à existência de transferência. Rascunhos incompletos continuam permitidos. As extensões dos Blocos 12 e 13 são independentes: base REV13 = 128 IDs, somente MEDIDAS = 129, somente GUARDA = 139, ambas = 140 (`F1-C3-REV13-EXT-MEDIDAS-GUARDA-v1`). Não há conversão automática, migração ou avaliação de adequação jurídica. Catálogo/matriz, numeração e compatibilidade: [especificação da extensão GUARDA](docs/arquitetura/EXTENSAO_FORM1_REV13_GUARDA_V1.md). Submissão institucional bloqueada; aceitação visual **NÃO VERIFICADA**. Verificação: **652/652 testes aprovados**, incluindo 28 novos testes da extensão; um aviso preexistente de descontinuação Starlette/AnyIO.
@@ -982,6 +998,8 @@ No Incremento 8P, o mapa dos 14 blocos foi consolidado como uma régua horizonta
 **Pendências de UX para revisão posterior:** pesquisa de ARP por matrícula e nome, com tratamento de homônimos; seleção da unidade receptora por catálogo institucional, depois da identificação das fontes e dos códigos oficiais; ajuda e nomenclatura inequívocas para distinguir compartilhamento com unidades municipais, órgãos externos e terceiros; identificação explícita da **Secretaria responsável** no painel inicial; alinhamento visual dos indicadores **Registros** e **Providências** na revisão visual consolidada; orientação operacional de APA e ARP na futura Cartilha; e revisão da apresentação do botão “Salvar rascunho (I2)” no instrumento sintético, sem interferir em seu contrato. A diferença entre as quatro etapas internas do FORM 1 e os quatro FORMS do sistema recebeu reforço visual no Incremento 8J; os demais itens estão apenas registrados e não foram implementados.
 
 As alternativas `DST-ORGAO-MUNICIPAL`, `DST-ORGAO-PUBLICO-EXTERNO` e `DST-OPERADOR-CONTRATADO` pertencem exclusivamente ao **FORM 1 sintético legado do contrato 2**, preservado e recolhido em “Outros recursos do ambiente de demonstração”. Elas não são alternativas do FORM 1 Integral REV13, cuja identificação estruturada de destinatários utiliza os itens `10.2` e `10.2.1`. Qualquer mudança semântica nesses códigos legados exige versionamento próprio; seus rótulos e snapshots históricos não são reinterpretados pela interface operacional do Integral.
+
+A edição servida pela aplicação permanece a REV30.13. A REV30.14 consolidada e a revisão editorial candidata REV30.15 não substituem automaticamente os destinos das ajudas.
 
 **Ajuda contextual da Cartilha — piloto 8W e integração REV30.13 (04/11/2026).** O piloto 8W oferecia oito orientações com referência textual à REV30.11, sem acesso ao documento. A integração atual reutiliza **Entenda esta pergunta**, atualiza as oito referências para a Cartilha **REV30.13, de 03/11/2026**, e acrescenta **Consultar este item da Cartilha (abre em outra aba)**. A consulta abre diretamente a seção, sem navegar, salvar ou recarregar o FORM 1. A orientação de `2.1` distingue os canais confirmados pelo APA, ausência expressamente confirmada e Registro antigo sem confirmação histórica; não delega ao ARP a alteração da confirmação.
 

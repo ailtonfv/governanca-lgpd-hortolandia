@@ -3,7 +3,10 @@
 | Termo | Significado neste projeto |
 |---|---|
 | Agente | Pessoa que atua no sistema com identidade, designação e alcance institucional |
+| AAL — Agente de Análise de Legitimidade | Prepara a análise do FORM 2 mediante habilitação vigente e designação pelo APA para o Registro e a origem factual correspondentes. Papel aprovado no desenho da PoC. Sua instituição administrativa municipal depende de validação e ato competente. |
 | Alcance institucional | Secretarias e funções em que o agente pode atuar naquele momento |
+| APA — Agente Público Autorizado | Abre o Registro, acompanha seu ciclo administrativo e, quando em exercício e autorizado, designa o AAL previamente habilitado. |
+| ARP — Agente Responsável pelo Preenchimento | Preenche o levantamento factual do FORM 1 e apresenta uma versão para conferência interna. |
 | Ato | Comando funcional identificado, como G1, I2 ou P3 |
 | Auditoria | Registro de ação permitida ou negada, inclusive tentativas sem efeito no domínio |
 | Catálogo | Lista governada, identificada, versionada e não digitada livremente |
@@ -33,8 +36,9 @@
 | POC-TS | Cenário formal de teste |
 | Projeção | Estado atual derivado e consultável do histórico de eventos |
 | Registro LGPD | Agregado principal de governança de um tratamento |
+| SAA — Servidor com Acesso Autorizado | Acessa ou trata dados pessoais conforme suas atribuições operacionais. Essa condição não atribui poderes de APA, ARP ou AAL. |
 | SAD | Documento de Arquitetura da Solução |
-| Snapshot | Cópia imutável do conteúdo submetido numa versão |
+| Snapshot | Retrato imutável de uma versão. No fluxo nuclear pode corresponder ao conteúdo submetido. Na preparação do FORM 2, identifica a versão factual lacrada do FORM 1, inclusive antes de submissão institucional. |
 | Titular | Pessoa natural a quem os dados pessoais se referem; na PoC aparece somente por categoria |
 | Transversalidade | Participação de canais, unidades, bases ou objetos em mais de um contexto sem apagar responsabilidades |
 | Versão | Conteúdo imutável criado na submissão de um Instrumento |

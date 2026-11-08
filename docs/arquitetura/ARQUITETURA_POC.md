@@ -129,3 +129,35 @@ flowchart TB
 - 2026-10-11: cofre de configuração (`.env`, `.gitignore`, `.env.exemplo`) e conexão Python → PostgreSQL validada com o usuário `lgpd_poc_app`.
 - 2026-10-14: Etapa 2d — pedido idempotente estrito (`app/comandos.py`), base `lgpd_poc_v2`, migrações versionadas, 40 testes automatizados.
 - 2026-10-15: repositório reorganizado (código na raiz, texto em `docs/`).
+
+<a id="nav_forms_01"></a>
+## 6. NAV_FORMS_01 — Navegação dos instrumentos
+
+Diretriz funcional aprovada para a PoC em 07/11/2026. O percurso é **Central de Acesso → escolha do instrumento → seleção de um Registro autorizado → área de trabalho do instrumento**. O servidor se identifica e escolhe a Secretaria na Central. Os retornos ao Registro e à Central preservam o contexto e o servidor da aplicação verifica as autorizações a cada acesso.
+
+Os quatro instrumentos compartilham o identificador do Registro LGPD. Cada área apresenta os responsáveis, as ações, as pendências e o histórico pertinentes ao instrumento escolhido. O Painel de Registros geral tem entrada própria para a visão operacional transversal.
+
+| Instrumento | Área de trabalho e limite |
+|---|---|
+| FORM 1 | Levantamento factual pelo ARP e conferência interna pelo APA. O servidor pode consultar ou atuar conforme sua autorização. |
+| FORM 2 | Preparação demonstrativa pelo AAL habilitado e designado e acompanhamento pelo APA autorizado. Cada origem consultável depende da autorização para aquele Registro e preparação. As manifestações especializadas são futuras. |
+| FORM 3 | Avaliação de riscos e controles. Os papéis e as competências aguardam definição. |
+| FORM 4 | Providências e acompanhamento. Os papéis e as competências aguardam definição. |
+
+A participação em um instrumento não concede acesso aos demais. Quando faltar acesso ou atividade, a tela explica a situação apenas até onde a consulta autorizada a distingue. Por exemplo, os campos obrigatórios pendentes do FORM 1 pertencem ao levantamento e ficam fora da seleção de Registros do FORM 2.
+
+## 7. NAV_FORMS_02 — Próxima ação por instrumento
+
+Diretriz aprovada em 07/11/2026. Após a identificação do Registro, da Secretaria e do papel do servidor, a tela apresenta a próxima ação autorizada, a área de trabalho e, por último, a origem e o histórico. O verbo da ação principal descreve o ato disponível naquela versão. As ações secundárias permitem trocar a origem ou retornar à lista, ao Registro e à Central. Erros e resultados da operação permanecem visíveis. O Dashboard planejado fica na área gerencial da Central.
+
+Nos próximos FORMs 3 e 4, aplicar o mesmo padrão após a definição dos papéis, dos estados e das autorizações de cada instrumento.
+
+## 8. NAV_FORMS_03 — Identidade e comandos de navegação
+
+NAV_FORMS_01, NAV_FORMS_02 e NAV_FORMS_03 orientam os quatro instrumentos. A Central identifica o servidor por nome e matrícula e estabelece a Secretaria de atuação. O painel geral tem entrada própria. A lista de cada instrumento mostra os Registros autorizados, e a área de trabalho identifica o papel exercido naquela operação. Nos detalhes do mesmo Registro, “Instrumentos deste Registro” permite mudar de instrumento conforme a autorização vigente.
+
+Destacar a ação principal cabível ao papel e à situação. Apresentar os retornos e a navegação secundária como botões de aparência uniforme, com rótulos que identifiquem o destino. Quando dois destinos próximos puderem ser confundidos, explicar a diferença junto aos comandos. Referências documentais podem continuar como links. Preservar o contexto nos retornos e reservar áreas próprias para histórico e detalhes técnicos.
+
+Quando faltar autorização, apresentar uma explicação sem comando de abertura nem informações sobre preparações, designações ou origens protegidas. A ausência de Registros no FORM 2 também pode decorrer do fim da vigência de uma habilitação. Para os futuros FORMs 3 e 4, aplicar o mesmo padrão quando seus papéis, estados e permissões tiverem definição própria.
+
+O retorno de uma consulta aberta pela lista conserva o instrumento e a Secretaria. Os comandos de início e salvamento do FORM 1 têm redirecionamentos próprios; a continuidade do filtro da lista depois desses comandos fica para verificação específica junto com a proteção de saída do rascunho.
