@@ -1,0 +1,14 @@
+{% macro valor(item, rotulos, agentes, chave='') -%}
+  {% if item is none or item == '' %}<span class="form2-sem-resposta">Não informado nesta versão</span>
+  {% elif item is mapping %}
+    {% if item %}<dl class="form2-dados">{% for nome, conteudo in item.items() %}
+      <div><dt>{{ rotulos.get(nome, nome|replace('_', ' ')) }}</dt><dd>{{ valor(conteudo, rotulos, agentes, nome) }}</dd></div>
+    {% endfor %}</dl>{% else %}<span>Sem informações registradas nesta estrutura</span>{% endif %}
+  {% elif item is sequence and item is not string %}
+    {% if item %}<ol class="form2-ocorrencias">{% for parte in item %}<li>{{ valor(parte, rotulos, agentes, chave) }}</li>{% endfor %}</ol>
+    {% else %}<span>Nenhum item registrado nesta versão — não equivale a resposta negativa</span>{% endif %}
+  {% elif chave in ['adotada_por', 'rascunho_salvo_por'] %}{{ agentes.get(item, 'Identificação funcional indisponível') }}
+  {% elif chave == 'modalidade' %}{{ {'identificado':'Destinatário identificado', 'requisicao_eventual':'Requisição eventual', 'nao_determinavel':'Não determinável neste momento'}.get(item, item) }}
+  {% elif chave == 'papel' and item == 'ARP' %}ARP — Agente Responsável pelo Preenchimento
+  {% else %}<span class="form2-resposta">{{ item }}</span>{% endif %}
+{%- endmacro %}

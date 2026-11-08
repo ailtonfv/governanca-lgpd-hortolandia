@@ -1,0 +1,19 @@
+{% macro identificacao_servidor(pessoa) -%}
+{{ pessoa.nome.removesuffix(' (fictício)') }} — {{ pessoa.matricula }}
+{%- endmacro %}
+
+{% macro acao_preparacao(editavel, e_apa) -%}
+{{ 'Retomar preparação' if editavel else 'Acompanhar preparação' if e_apa else 'Consultar preparação' }}
+{%- endmacro %}
+
+{% macro link_form2(registro, acesso, conta_id, secretaria_id=none) -%}
+<a class="{{ 'botao-link' if instrumento == 'form2' else 'botao-link-secundario' }}" data-acesso-form2 href="{{ url_for('form2_preparacao', registro_id=registro.id) }}?conta_id={{ conta_id|urlencode }}{% if secretaria_id %}&amp;secretaria_id={{ secretaria_id|urlencode }}&amp;instrumento=form2{% endif %}{% if acesso.preparacao_id %}&amp;preparacao_id={{ acesso.preparacao_id }}#anotacoes{% endif %}">{{ acao_preparacao(acesso.pode_editar, acesso.e_apa) if acesso.preparacao_id else 'Selecionar versão do FORM 1' }}<span class="sr-apenas"> para o FORM 2 do Registro {{ registro.codigo_lgpd }}</span></a>
+{%- endmacro %}
+
+{% macro retorno_painel(request, conta_id, instrumento) -%}
+{% if request.query_params.get('instrumento') == instrumento and request.query_params.get('secretaria_id') -%}
+{{ url_for('painel_registros') }}?conta_id={{ conta_id|urlencode }}&amp;secretaria_id={{ request.query_params['secretaria_id']|urlencode }}&amp;instrumento={{ instrumento }}
+{%- else -%}
+{{ url_for('inicio').path }}?conta_id={{ conta_id|urlencode }}
+{%- endif %}
+{%- endmacro %}

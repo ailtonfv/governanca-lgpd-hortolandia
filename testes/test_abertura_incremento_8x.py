@@ -37,7 +37,8 @@ def test_campos_essenciais_sao_sinalizados_e_escolhas_permanecem_apos_erro():
     # Assert
     assert resposta.status_code == 200
     assert "Revise os campos obrigatórios destacados" in resposta.text
-    assert 'value="UNID-NORTE" selected' in resposta.text
+    assert 'type="hidden" id="unidade_id" name="unidade_id" value="UNID-NORTE"' in resposta.text
+    assert '<select id="unidade_id"' not in resposta.text
     assert 'value="servico" required checked' in resposta.text
     assert 'value="OBJ-SRV-002"' in resposta.text
     assert 'value="CTX-TRIB-03"' in resposta.text
@@ -48,7 +49,7 @@ def test_campos_essenciais_sao_sinalizados_e_escolhas_permanecem_apos_erro():
 @pytest.mark.parametrize(
     ("campo", "trecho_erro"),
     [
-        ("unidade_id", "Selecione uma Secretaria em que você seja o APA"),
+        ("unidade_id", "Confira a Secretaria responsável indicada acima"),
         ("tipo_objeto", "Escolha Serviço, Processo ou Atividade"),
         ("objeto_principal_id", "Selecione um item cadastrado para a Secretaria"),
         ("contexto_id", "Selecione um contexto permitido"),

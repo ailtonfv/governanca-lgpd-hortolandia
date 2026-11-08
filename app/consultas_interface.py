@@ -480,7 +480,7 @@ def _pre_validar_rascunho_integral(
     )
 
 
-def _identidade(sessao, conta_id):
+def _identidade(sessao, conta_id, *, vinculos_vigentes=False):
     conta = sessao.get(Conta, conta_id)
     if conta is None or not conta.ativa:
         return None
@@ -488,12 +488,19 @@ def _identidade(sessao, conta_id):
     if pessoa is None or not pessoa.ativa:
         return None
 
-    designacoes = sessao.execute(
+    consulta = (
         select(Designacao.papel, Unidade.id, Unidade.nome)
         .join(Unidade, Unidade.id == Designacao.unidade_id)
         .where(Designacao.pessoa_id == pessoa.id, Designacao.ativa.is_(True))
         .order_by(Unidade.nome, Designacao.papel)
-    ).all()
+    )
+    if vinculos_vigentes:
+        consulta = consulta.where(
+            Unidade.ativa.is_(True),
+            or_(Designacao.vigente_de.is_(None), Designacao.vigente_de <= func.now()),
+            or_(Designacao.vigente_ate.is_(None), Designacao.vigente_ate > func.now()),
+        )
+    designacoes = sessao.execute(consulta).all()
     return {
         "conta_id": conta.id,
         "pessoa_id": pessoa.id,
@@ -506,12 +513,33 @@ def _identidade(sessao, conta_id):
     }
 
 
-def _ids_visiveis(sessao, identidade):
+def carregar_central(sessao, conta_id):
+    identidade = _identidade(sessao, conta_id, vinculos_vigentes=True)
+    if identidade is None:
+        return None
+    secretarias = {}
+    for vinculo in identidade["designacoes"]:
+        unidade_id = vinculo["unidade_id"]
+        if unidade_id in secretarias:
+            continue
+        exercicio = apa_em_exercicio(sessao, unidade_id)
+        apa = sessao.get(Pessoa, exercicio["pessoa_id"]) if exercicio else None
+        secretarias[unidade_id] = {
+            "id": unidade_id, "nome": vinculo["unidade"],
+            "apa": f"{apa.matricula} — {rotulo_interface(apa.nome)}" if apa and apa.ativa else None,
+            "modalidade_apa": exercicio["modalidade"] if exercicio else None,
+        }
+    return {"identidade": identidade, "secretarias": secretarias}
+
+
+def _ids_visiveis(sessao, identidade, secretaria_id=None):
     """Registros da unidade da pessoa ou alcançados por pendência vigente."""
-    unidades = {item["unidade_id"] for item in identidade["designacoes"]}
+    vinculos = [item for item in identidade["designacoes"]
+                if secretaria_id is None or item["unidade_id"] == secretaria_id]
+    unidades = {item["unidade_id"] for item in vinculos}
     unidades_pendencia = {
         item["unidade_id"]
-        for item in identidade["designacoes"]
+        for item in vinculos
         if item["papel"] in {"agente_pendencia", "preenchedor", "validador"}
     }
     ids = set(sessao.scalars(
@@ -527,9 +555,16 @@ def _ids_visiveis(sessao, identidade):
             or pendencia.unidade_destino_id in unidades_pendencia
             or pendencia.unidade_origem_id in unidades_pendencia
         )
-        if participa:
+        if participa and (secretaria_id is None or pendencia.registro_id in ids
+                          or secretaria_id in (pendencia.unidade_origem_id, pendencia.unidade_destino_id)):
             ids.add(pendencia.registro_id)
     return ids
+
+
+def pode_consultar_registro(sessao, conta_id, registro_id):
+    """Mesma visibilidade do painel/detalhes, sem conceder acesso pelo FORM 2."""
+    identidade = _identidade(sessao, conta_id)
+    return bool(identidade and registro_id in _ids_visiveis(sessao, identidade))
 
 
 def _resumo_registro(registro, unidade):
@@ -547,11 +582,15 @@ def _resumo_registro(registro, unidade):
     }
 
 
-def carregar_painel(sessao, conta_id):
-    identidade = _identidade(sessao, conta_id)
+def carregar_painel(sessao, conta_id, *, secretaria_id=None):
+    identidade = _identidade(sessao, conta_id, vinculos_vigentes=secretaria_id is not None)
     if identidade is None:
         return None
-    ids = _ids_visiveis(sessao, identidade)
+    if secretaria_id is not None and not any(
+        item["unidade_id"] == secretaria_id for item in identidade["designacoes"]
+    ):
+        return None
+    ids = _ids_visiveis(sessao, identidade, secretaria_id)
     linhas = sessao.execute(
         select(Registro, Unidade)
         .join(Unidade, Unidade.id == Registro.unidade_principal_atual_id)
@@ -674,6 +713,8 @@ def carregar_painel(sessao, conta_id):
 
     resumos_por_id = {item["id"]: item for item in registros}
     alertas = listar_alertas_operacionais(sessao, conta_id)
+    if secretaria_id is not None:
+        alertas = [alerta for alerta in alertas if alerta["registro_id"] in ids]
     for alerta in alertas:
         resumo = resumos_por_id.get(alerta["registro_id"])
         instrumento = (
@@ -781,9 +822,8 @@ def carregar_painel(sessao, conta_id):
                 resumo["responsavel_proxima_etapa"] = (
                     f"{arp_atual.matricula} · {rotulo_interface(arp_atual.nome)} (ARP)"
                 )
-    pode_criar_registro = bool(
-        unidades_em_que_e_apa_atual(sessao, identidade["pessoa_id"])
-    )
+    unidades_apa = unidades_em_que_e_apa_atual(sessao, identidade["pessoa_id"])
+    pode_criar_registro = bool(unidades_apa) if secretaria_id is None else secretaria_id in unidades_apa
     return {
         "identidade": identidade,
         "registros": registros,
@@ -910,6 +950,7 @@ def carregar_opcoes_novo_registro(sessao, conta_id):
         item = contextos_por_id.setdefault(contexto.id, {
             "id": contexto.id,
             "nome": contexto.nome,
+            "descricao": contexto.descricao,
             "objetos": [],
         })
         item["objetos"].append(objeto_id)

@@ -48,6 +48,11 @@ assert.equal(preparar({tipo:'reload',state:e.janela.history.state,conta:'OUTRA-F
 assert.equal(preparar({tipo:'reload',state:e.janela.history.state,registro:'OUTRO-FICTICIO'}).retomada.posicao,null);
 assert.equal(preparar({tipo:'navigate',state:e.janela.history.state}).retomada.posicao,null);
 assert.equal(preparar({tipo:'reload',state:e.janela.history.state,hash:'#titulo-pre-validacao-form1'}).retomada.posicao,null);
+for (const hash of ['#instrumentos-registro', '#titulo-form1-integral']) {
+  assert.equal(preparar({tipo:'reload',state:e.janela.history.state,hash}).retomada.posicao,null);
+  const pendente = preparar(); pendente.retomada.antesDeSalvar(pendente.form,{value:'permanecer'});
+  assert.equal(preparar({memoria:pendente.memoria,hash}).retomada.posicao,null);
+}
 
 // Não reabre uma condicional que deixou de ser aplicável.
 retorno=preparar({tipo:'reload',state:e.janela.history.state}); retorno.campos[1].oculto=true;

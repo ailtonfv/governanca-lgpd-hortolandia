@@ -4,9 +4,19 @@
 <p><a class="voltar" href="/?conta_id={{ conta_id }}">← Voltar ao painel</a></p>
 
 <section class="detalhe">
-  <p class="etiqueta">Novo Registro LGPD · agente {{ identidade.matricula }}</p>
-  <h1>Qual Secretaria é responsável por este Registro?</h1>
-  <p>Esta tela ainda não cria o Registro. Primeiro confirme a Secretaria que coordenará o mapeamento; depois informe se o objeto é um serviço, processo ou atividade. O FORM 1 somente começa depois da confirmação final.</p>
+  <h1>Novo Registro LGPD</h1>
+  {% if unidades|length == 1 %}
+  <p><strong>Secretaria responsável:</strong> {{ nome_secretaria }}</p>
+  {% elif unidades %}
+  <label for="unidade_id">Secretaria responsável:</label>
+  <select id="unidade_id" name="unidade_id" form="abertura-registro" required
+          {% if 'unidade_id' in erros_campos %}aria-invalid="true" aria-describedby="erro-unidade_id"{% endif %}>
+    <option value="">Selecione a Secretaria</option>
+    {% for unidade in unidades %}<option value="{{ unidade.id }}" {% if valores.unidade_id == unidade.id %}selected{% endif %}>{{ unidade.nome }}</option>{% endfor %}
+  </select>
+  {% endif %}
+  <p><strong>Agente identificado:</strong> {{ identidade.matricula }} — {{ identidade.nome }}</p>
+  {% if unidades %}<p class="ajuda">A Secretaria responsável coordena o Registro. Outras Secretarias poderão participar do tratamento.</p>{% endif %}
 </section>
 
 {% if mensagem %}
@@ -34,23 +44,17 @@
 {% endif %}
 
 <section class="form1" aria-labelledby="titulo-contexto">
-  <h2 id="titulo-contexto">Contexto inicial</h2>
+  <h2 id="titulo-contexto">O que será mapeado?</h2>
   {% if unidades %}
-  <form class="formulario" method="post" action="{{ url_for('criar_registro_pela_tela') }}">
+  <form id="abertura-registro" class="formulario" method="post" action="{{ url_for('criar_registro_pela_tela') }}">
     <input type="hidden" name="conta_id" value="{{ conta_id }}">
     <input type="hidden" name="comando_id" value="{{ comando_g1 }}">
 
-    <label for="unidade_id">1. Secretaria responsável pelo Registro <span class="marcador-obrigatorio" aria-label="obrigatório">*</span></label>
-    <select id="unidade_id" name="unidade_id" required
-            {% if 'unidade_id' in erros_campos %}aria-invalid="true" aria-describedby="erro-unidade_id"{% endif %}>
-      <option value="">Selecione a Secretaria</option>
-      {% for unidade in unidades %}<option value="{{ unidade.id }}" {% if valores.unidade_id == unidade.id %}selected{% endif %}>{{ unidade.nome }}</option>{% endfor %}
-    </select>
-    {% if 'unidade_id' in erros_campos %}<p id="erro-unidade_id" class="erro-campo">Selecione uma Secretaria em que você seja o APA autorizado.</p>{% endif %}
-    <p class="ajuda">Selecione a Secretaria que coordena e mantém este mapeamento. A lista é fechada e respeita o alcance institucional do agente; outras Secretarias poderão participar posteriormente.</p>
+    {% if unidades|length == 1 %}<input type="hidden" id="unidade_id" name="unidade_id" value="{{ valores.unidade_id }}">{% endif %}
+    {% if 'unidade_id' in erros_campos %}<p id="erro-unidade_id" class="erro-campo">{% if unidades|length == 1 %}A Secretaria não foi confirmada. Confira a Secretaria responsável indicada acima antes de confirmar novamente.{% else %}Selecione uma Secretaria em que você seja o APA autorizado.{% endif %}</p>{% endif %}
 
     <fieldset>
-      <legend>2. O que será mapeado? <span class="marcador-obrigatorio" aria-label="obrigatório">*</span></legend>
+      <legend>2. Tipo de objeto <span class="marcador-obrigatorio" aria-label="obrigatório">*</span></legend>
       <p class="ajuda">Escolha a natureza do item que será documentado.</p>
       <div class="grade-opcoes grade-tipos">
         <label class="opcao"><input type="radio" name="tipo_objeto" value="servico" required {% if valores.tipo_objeto == 'servico' %}checked{% endif %}> <span><strong>Serviço</strong><br>O que é entregue ao cidadão.</span></label>
@@ -73,9 +77,10 @@
     <p class="ajuda">A lista contém somente vínculos cadastrados para a Secretaria e o tipo escolhidos. Nesta demonstração, objetos e vínculos são fictícios e não representam inventário municipal homologado. Se o item adequado não aparecer, solicite revisão cadastral; não escolha outro por aproximação.</p>
     <p id="sem-itens-catalogo" class="aviso-leitura" hidden>Nenhum item do tipo escolhido está vinculado a esta Secretaria no catálogo da demonstração. Solicite revisão cadastral.</p>
 
-    <fieldset id="canais-habituais" aria-describedby="ajuda-canais" {% if 'situacao_canais' in erros_campos %}aria-invalid="true"{% endif %}>
+    <fieldset id="canais-habituais" aria-describedby="ajuda-canais" {% if not valores.objeto_principal_id %}disabled{% endif %} {% if 'situacao_canais' in erros_campos %}aria-invalid="true"{% endif %}>
       <legend>4. Por quais canais as demandas chegam habitualmente? <span class="marcador-obrigatorio" aria-label="obrigatório">*</span></legend>
-      <p class="ajuda" id="ajuda-canais">Confirme somente os meios habituais pelos quais a demanda chega a este objeto. Eles não representam cidadãos, telefonemas nem protocolos individuais. A declaração vale para este Registro e não altera o catálogo mestre.</p>
+      <p class="ajuda" id="ajuda-canais">Escolha primeiro o item do catálogo. Depois, declare quais canais são utilizados. Uma sugestão cadastral só fará parte da declaração se você marcar o canal e confirmar a criação do Registro.</p>
+      <details><summary>O que é registrado?</summary><p>A declaração vale para este Registro e não altera o catálogo mestre. Os canais representam meios de entrada das demandas; não representam cidadãos, telefonemas nem protocolos individuais.</p></details>
       <label class="opcao opcao-situacao-canal">
         <input type="radio" name="situacao_canais" value="identificados" required
                {% if valores.situacao_canais == 'identificados' %}checked{% endif %}>
@@ -90,7 +95,7 @@
                    data-objetos-sugeridos="{{ canal.objetos_sugeridos|join(',') }}"
                    {% if canal.id in valores.canais_ids %}checked{% endif %}
                    {% if valores.situacao_canais != 'identificados' %}disabled{% endif %}>
-            <span>{{ canal.nome }}</span>
+            <span>{{ canal.nome }} <small class="sugestao-canal" hidden>· Sugestão do cadastro</small></span>
           </label>
           {% endfor %}
         </div>
@@ -114,12 +119,13 @@
             aria-describedby="exemplo-contexto{% if 'contexto_id' in erros_campos %} erro-contexto_id{% endif %}"
             {% if 'contexto_id' in erros_campos %}aria-invalid="true"{% endif %}>
       <option value="">Selecione o contexto</option>
-      {% for contexto in contextos %}<option value="{{ contexto.id }}" data-objetos="{{ contexto.objetos|join(',') }}" {% if valores.contexto_id == contexto.id %}selected{% endif %}>{{ contexto.nome }}</option>{% endfor %}
+      {% for contexto in contextos %}<option value="{{ contexto.id }}" data-objetos="{{ contexto.objetos|join(',') }}" {% if valores.contexto_id == contexto.id %}selected{% endif %}>{{ contexto.nome }}{% if contexto.descricao %} — {{ contexto.descricao }}{% endif %}</option>{% endfor %}
     </select>
     {% if 'contexto_id' in erros_campos %}<p id="erro-contexto_id" class="erro-campo">Selecione um contexto permitido para o item do catálogo.</p>{% endif %}
     {% if contexto_invalidado %}<p class="aviso-leitura">A seleção anterior foi removida porque esse contexto não é permitido para o item escolhido.</p>{% endif %}
     <p id="sem-contextos-catalogo" class="aviso-leitura" hidden>Nenhum contexto está vinculado a este item no catálogo da demonstração. Solicite revisão cadastral; não informe um contexto livre nem escolha uma opção incompatível.</p>
-    <p class="ajuda" id="exemplo-contexto"><strong>Ajuda sobre contexto de atuação</strong><br>O contexto descreve a frente institucional em que o objeto atua. Ele não é a finalidade do tratamento. A finalidade — para que os dados pessoais são utilizados — será descrita no FORM 1.</p>
+    <p class="ajuda" id="exemplo-contexto">Selecione a área de atuação municipal relacionada ao serviço, processo ou atividade. O contexto classifica onde o objeto atua; não representa a finalidade do tratamento de dados pessoais, que será descrita no FORM 1.</p>
+    <p class="ajuda" id="orientacao-contexto" aria-live="polite"></p>
 
     <div class="rodape-formulario">
       <p>Ao confirmar, o sistema criará o Registro LGPD e deixará o FORM 1 no estado “Não iniciado”.</p>
@@ -131,7 +137,7 @@
   {% endif %}
 </section>
 
-<script>
+{% if unidades %}<script>
   const tipos = document.querySelectorAll('input[name="tipo_objeto"]');
   const unidade = document.getElementById('unidade_id');
   const objeto = document.getElementById('objeto_principal_id');
@@ -141,7 +147,7 @@
   const canaisSemVinculo = document.getElementById('canais-sem-vinculo');
   const semItensCatalogo = document.getElementById('sem-itens-catalogo');
   const semContextosCatalogo = document.getElementById('sem-contextos-catalogo');
-  const ajudaContexto = document.getElementById('exemplo-contexto');
+  const ajudaContexto = document.getElementById('orientacao-contexto');
   const situacoesCanais = document.querySelectorAll('input[name="situacao_canais"]');
   function atualizarObrigatoriedadeCanais() {
     const identificados = document.querySelector('input[name="situacao_canais"][value="identificados"]')?.checked;
@@ -153,29 +159,22 @@
     catalogoCanais.hidden = !identificados;
   }
   function atualizarAjudaContexto() {
-    const selecionado = contexto.options[contexto.selectedIndex];
-    if (selecionado?.value) {
-      ajudaContexto.innerHTML = `<strong>Contexto selecionado:</strong> ${selecionado.textContent}.<br>O contexto descreve a frente institucional em que o objeto atua. Ele não é a finalidade do tratamento. A finalidade — para que os dados pessoais são utilizados — será descrita no FORM 1.`;
-    } else {
-      ajudaContexto.innerHTML = '<strong>Ajuda sobre contexto de atuação</strong><br>O contexto descreve a frente institucional em que o objeto atua. Ele não é a finalidade do tratamento. A finalidade — para que os dados pessoais são utilizados — será descrita no FORM 1.';
-    }
+    const opcoes = [...contexto.options].filter(opcao => opcao.value && !opcao.hidden);
+    ajudaContexto.textContent = contexto.value ? contexto.selectedOptions[0].textContent :
+      opcoes.length === 1 ? 'Único contexto cadastrado para este item. Selecione para confirmar: ' + opcoes[0].textContent : '';
   }
   function filtrarCanais(limpar = true) {
-    if (limpar) {
+    document.getElementById('canais-habituais').disabled = !objeto.value;
+    if (limpar || !objeto.value) {
       situacoesCanais.forEach((campo) => { campo.checked = false; });
       camposCanais.forEach((campo) => { campo.checked = false; });
-      const sugeridos = [...camposCanais].filter((campo) =>
-        (campo.dataset.objetosSugeridos || '').split(',').includes(objeto.value)
-      );
-      if (sugeridos.length) {
-        const confirmacao = document.querySelector('input[name="situacao_canais"][value="identificados"]');
-        confirmacao.checked = true;
-        sugeridos.forEach((campo) => { campo.checked = true; });
-      }
     }
-    const temSugestao = [...camposCanais].some((campo) =>
-      (campo.dataset.objetosSugeridos || '').split(',').includes(objeto.value)
-    );
+    let temSugestao = false;
+    for (const campo of camposCanais) {
+      const sugerido = Boolean(objeto.value) && campo.dataset.objetosSugeridos.split(',').includes(objeto.value);
+      campo.closest('label').querySelector('.sugestao-canal').hidden = !sugerido;
+      if (sugerido) temSugestao = true;
+    }
     canaisSemVinculo.hidden = !objeto.value || temSugestao;
     atualizarObrigatoriedadeCanais();
   }
@@ -183,7 +182,7 @@
     let quantidadeVisivel = 0;
     for (const opcao of contexto.options) {
       const objetos = (opcao.dataset.objetos || '').split(',');
-      opcao.hidden = Boolean(opcao.value && !objetos.includes(objeto.value));
+      opcao.disabled = opcao.hidden = Boolean(opcao.value && (!objeto.value || !objetos.includes(objeto.value)));
       if (opcao.value && !opcao.hidden) quantidadeVisivel += 1;
     }
     if (limpar || contexto.selectedOptions[0]?.hidden) contexto.value = '';
@@ -196,7 +195,7 @@
     let quantidadeVisivel = 0;
     for (const opcao of objeto.options) {
       const unidades = (opcao.dataset.unidades || '').split(',');
-      opcao.hidden = Boolean(opcao.value && (opcao.dataset.tipo !== tipo || !unidades.includes(unidade.value)));
+      opcao.disabled = opcao.hidden = Boolean(opcao.value && (opcao.dataset.tipo !== tipo || !unidades.includes(unidade.value)));
       if (opcao.value && !opcao.hidden) quantidadeVisivel += 1;
     }
     if (limpar || objeto.selectedOptions[0]?.hidden) objeto.value = '';
@@ -214,5 +213,5 @@
   }));
   camposCanais.forEach((campo) => campo.addEventListener('change', atualizarObrigatoriedadeCanais));
   filtrarObjetos(false);
-</script>
+</script>{% endif %}
 {% endblock %}

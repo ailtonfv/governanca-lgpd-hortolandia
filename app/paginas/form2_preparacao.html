@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% from '_links_instrumentos.html' import acao_preparacao, identificacao_servidor %}
+{% from "_consulta_historica_form2.html" import valor %}
+{% block titulo %}FORM 2 · Análise de legitimidade{% endblock %}
+{% block conteudo %}
+<link rel="stylesheet" href="{{ url_for('estaticos', path='/form2_preparacao.css') }}">
+<link rel="stylesheet" href="{{ url_for('estaticos', path='/instrumentos_registro.css') }}">
+{% set url_preparacao = url_for('form2_preparacao', registro_id=registro.id) %}
+{% set sec = {'secretaria_id': contexto_navegacao.secretaria_id} if contexto_navegacao.secretaria_id else {} %}
+<div class="form2-demo">
+<nav class="navegacao-governanca" aria-label="Navegação do FORM 2">
+  <a class="botao-link-secundario" href="{{ url_for('painel_registros').include_query_params(conta_id=conta_id, **dict(sec, instrumento='form2')) }}">Voltar à lista de Registros do FORM 2</a>
+  {% if pode_voltar_registro %}<a class="botao-link-secundario" href="{{ url_for('detalhe_registro', registro_id=registro.id).include_query_params(conta_id=conta_id, **contexto_navegacao) }}#instrumentos-registro">Voltar ao Registro</a>{% endif %}
+  <a class="botao-link-secundario" href="{{ url_for('central').include_query_params(conta_id=conta_id, **sec) }}">Voltar à Central de Acesso</a>
+</nav>
+<section class="detalhe">
+  <p class="etiqueta">Ambiente de demonstração</p>
+  <h1>FORM 2 — Preparação da análise de legitimidade</h1>
+  <p><strong>{{ registro.codigo_lgpd }}</strong> — {{ registro.titulo_objeto }} · Secretaria responsável: {{ secretaria.nome }}</p>
+  <p><strong>Servidor identificado:</strong> {{ identificacao_servidor(pessoa) }}</p>
+  <p><strong>Papel nesta preparação:</strong> {% if e_apa %}APA — Agente Público Autorizado em exercício{% endif %}{% if not e_apa or (alvo and alvo.id in preparacoes_editaveis) %}{{ ' · ' if e_apa else '' }}AAL — Agente de Análise de Legitimidade{% endif %}</p>
+  {% if origem or alvo %}
+    {% set versao_factual = origem.snapshot if origem else snapshots | selectattr('id', 'equalto', alvo.snapshot_id) | first %}
+    <p>Origem: versão {{ versao_factual.numero }} do FORM 1. {% if alvo %}Preparação existente · rascunho {{ alvo.versao_rascunho }}.{% else %}Ainda sem preparação.{% endif %}</p>
+  {% endif %}
+  <p class="ajuda">Etapa preparatória, sem emissão de parecer jurídico ou decisão institucional.</p>
+</section>
+{% if erro %}<p class="mensagem erro" role="alert" tabindex="-1" id="erro-form2">{{ erro }}{% if anotacao_tentada is not none %} Sua anotação enviada permanece abaixo para conferência.{% endif %}</p>{% endif %}
+<section class="form1" aria-labelledby="proxima-acao">
+  <h2 id="proxima-acao">Próxima ação</h2>
+  {% if alvo %}
+  <a class="botao-link" href="{% if not preparacao %}{{ url_preparacao.include_query_params(conta_id=conta_id, preparacao_id=alvo.id, **contexto_navegacao) }}{% endif %}#anotacoes">{{ acao_preparacao(alvo.id in preparacoes_editaveis, e_apa) }}</a>
+  {% elif e_apa and origem %}
+    {% if candidatos %}
+    <form method="post" action="{{ url_for('iniciar_form2_demo', registro_id=registro.id).include_query_params(**contexto_navegacao) }}">
+      <input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="comando_id" value="{{ comando_id }}">
+      <input type="hidden" name="snapshot_id" value="{{ origem.snapshot.id }}">
+      <label for="preparador">AAL — Agente de Análise de Legitimidade habilitado para este Registro</label>
+      <select name="preparador_id" id="preparador" required><option value="">Selecione o AAL</option>{% for agente in candidatos %}<option value="{{ agente.id }}">{{ agente.matricula }} — {{ agente.nome }}</option>{% endfor %}</select>
+      <button type="submit" class="botao-primario">Designar AAL e iniciar preparação</button>
+    </form>
+    {% else %}<p>Nenhum AAL com habilitação vigente disponível para designação neste Registro.</p>{% endif %}
+  {% endif %}
+  {% if snapshots %}
+    {% set selecao_principal = e_apa and not origem %}
+    {% if not selecao_principal %}<details><summary>Consultar outra versão autorizada do FORM 1</summary>{% endif %}
+    <form method="get" action="{{ url_preparacao }}">
+      <input type="hidden" name="conta_id" value="{{ conta_id }}">
+      {% for nome, valor_param in contexto_navegacao.items() %}<input type="hidden" name="{{ nome }}" value="{{ valor_param }}">{% endfor %}
+      <label for="snapshot-origem">Versão do FORM 1 para esta preparação</label>
+      <select id="snapshot-origem" name="snapshot_id" required>
+        <option value="">Selecione a versão</option>
+        {% for item in snapshots %}<option value="{{ item.id }}" {% if origem and origem.snapshot.id == item.id %}selected{% endif %}>Versão {{ item.numero }} · rascunho {{ item.versao_rascunho }} · {{ item.preparado_em }}</option>{% endfor %}
+      </select>
+      <button type="submit" class="{{ 'botao-primario' if selecao_principal else 'botao-secundario' }}">{{ 'Selecionar versão do FORM 1' if selecao_principal else 'Consultar origem' }}</button>
+    </form>
+    {% if not selecao_principal %}</details>{% endif %}
+  {% else %}<p>Nenhuma versão do FORM 1 disponível para preparar neste Registro.</p>{% endif %}
+  {% if preparacoes and (not alvo or preparacoes|length > 1) %}
+  <details><summary>Preparações disponíveis</summary><ul>
+    {% for item in preparacoes %}
+    {% set versao = snapshots | selectattr('id', 'equalto', item.snapshot_id) | first %}
+    <li><a href="{{ url_preparacao.include_query_params(conta_id=conta_id, preparacao_id=item.id, **contexto_navegacao) }}#anotacoes">{{ acao_preparacao(item.id in preparacoes_editaveis, e_apa) }} · origem {{ versao.numero }} · rascunho {{ item.versao_rascunho }}</a></li>
+    {% endfor %}
+  </ul></details>{% endif %}
+</section>
+{% if preparacao %}
+<section class="form1" id="anotacoes" tabindex="-1" aria-labelledby="titulo-anotacoes">
+<h2 id="titulo-anotacoes">Anotações de preparação</h2>
+<p>AAL responsável: {{ agentes.get(preparacao.preparador_id, 'Identificação funcional indisponível') }}. Rascunho {{ preparacao.versao_rascunho }} · último registro em {{ preparacao.salvo_em }} por {{ agentes.get(preparacao.salvo_por, 'Identificação funcional indisponível') }}.</p>
+<p>Facultativas, até 2.000 caracteres. Registre dúvidas sobre o levantamento; não informe nomes, CPF ou dados concretos de cidadãos. Esta orientação não substitui controles de segurança.</p>
+{% if pode_editar %}
+<form id="form2-rascunho" method="post" action="{{ url_for('salvar_form2_demo', registro_id=registro.id, preparacao_id=preparacao.id).include_query_params(**contexto_navegacao) }}">
+  <input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="comando_id" value="{{ comando_id }}">
+  <input type="hidden" name="versao_lida" value="{{ versao_tentada if versao_tentada is not none else preparacao.versao_rascunho }}">
+  <label for="anotacao">Anotação preparatória — não é resposta canônica nem parecer</label>
+  <textarea id="anotacao" name="anotacao_preparatoria" rows="6" maxlength="2000" aria-describedby="ajuda-salvar">{{ anotacao_tentada if anotacao_tentada is not none else preparacao.conteudo.anotacao_preparatoria }}</textarea>
+  <p id="ajuda-salvar">Suas anotações ficam no rascunho desta preparação. Salvar permite continuar depois; não conclui nem submete o FORM 2.</p>
+  <button type="submit" class="botao-primario">Salvar rascunho preparatório</button>
+  <script type="application/json" id="form2-conteudo-salvo">{{ preparacao.conteudo.anotacao_preparatoria|tojson }}</script>
+</form>
+{% else %}<p class="etiqueta">Somente leitura — edição reservada ao AAL designado e habilitado.</p><pre>{{ preparacao.conteudo.anotacao_preparatoria or 'Sem anotação registrada.' }}</pre>{% endif %}
+</section>{% endif %}
+{% if origem %}
+<section class="form1 somente-leitura" aria-labelledby="titulo-origem">
+  <p class="etiqueta">Somente leitura · fatos da versão identificada</p>
+  <h2 id="titulo-origem">FORM 1 — Snapshot {{ origem.snapshot.numero }}</h2>
+  <details><summary>Identificação da versão e autoria</summary>
+  <p>Rascunho de origem {{ origem.snapshot.versao_rascunho }} · {{ origem.estrutura }} · contrato {{ origem.snapshot.versao_contrato }}</p>
+  <p>Versão técnica preparada por: {{ agentes.get(origem.snapshot.preparado_por, 'Identificação funcional indisponível') }} · {{ origem.snapshot.preparado_em }}</p>
+  <p>Lacre verificado. Os nomes e matrículas exibidos identificam os autores no cadastro atual; os identificadores e atos históricos permanecem preservados no conteúdo técnico.</p>
+  </details>
+  <p>Snapshot técnico não equivale a conferência confirmada ou aprovação institucional. Consulte os atos de conferência no FORM 1, sem mudar esta origem.</p>
+  {% if preparacao and snapshots and snapshots[-1].numero > origem.snapshot.numero %}<p>Há snapshot posterior. Esta preparação continua vinculada à origem acima; nenhuma resposta foi substituída.</p>{% endif %}
+  <details><summary>Consultar perguntas e respostas históricas</summary><dl>
+  {% for campo in origem.perguntas %}<div data-pergunta-historica="{{ campo.id }}"><dt>{{ campo.id }} — {{ campo.pergunta }}</dt><dd>{{ valor(campo.valor, consulta_historica.rotulos, agentes) }}</dd></div>{% endfor %}
+  </dl></details>
+  <details><summary>Canais de entrada confirmados na origem</summary>
+    {% if origem.canais.estado == 'sem_confirmacao_historica' %}<p>Sem confirmação histórica de canais. Não significa ausência de canais.</p>
+    {% elif origem.canais.estado == 'ausencia_confirmada' %}<p>Ausência de canais expressamente confirmada pelo APA.</p>
+    {% elif origem.canais.estado == 'canais_confirmados' %}<ul>{% for canal in origem.canais.canais %}<li>{{ canal.canal_nome }}</li>{% endfor %}</ul>
+    {% else %}<p>Situação dos canais não identificada nesta origem; consulte o conteúdo técnico preservado.</p>{% endif %}
+    {% if origem.canais.confirmado_por_id %}<p>Confirmação como APA: {{ agentes.get(origem.canais.confirmado_por_id, 'Identificação funcional indisponível') }} · {{ origem.canais.confirmado_em }}</p>{% endif %}
+  </details>
+  {% for grupo in consulta_historica.grupos %}<details><summary>{{ grupo.titulo }}</summary>
+    {{ valor(grupo.valor, consulta_historica.rotulos, agentes) }}
+  </details>{% endfor %}
+  <details class="form2-tecnico"><summary>Conteúdo técnico completo da origem — identificadores e lacre</summary>
+    <p>Identificador: <code>{{ origem.snapshot.id }}</code></p>
+    <p>Lacre: <code>{{ origem.snapshot.lacre }}</code></p>
+    <pre>{{ origem.snapshot.conteudo|tojson(indent=2) }}</pre>
+  </details>
+</section>
+{% endif %}
+{% if preparacao %}
+<details><summary>Histórico desta preparação — autoria e anotações</summary><ol>
+{% for ato in historico %}<li>Versão {{ ato.conteudo.versao_rascunho }} · {{ agentes.get(ato.ator_id, 'Identificação funcional indisponível') }} · {{ papeis.get(ato.conteudo.papel_exercido, 'Papel registrado no ato histórico') }} · {{ ato.ocorrido_em }}<pre>{{ ato.conteudo.conteudo.anotacao_preparatoria or 'Anotação vazia.' }}</pre>
+<details class="form2-tecnico"><summary>Identificação técnica deste ato</summary><p>Autor: {{ ato.ator_id }} · papel: {{ ato.conteudo.papel_exercido }}</p></details></li>{% endfor %}
+</ol></details>
+{% endif %}
+</div>
+<script src="{{ url_for('estaticos', path='/form2_preparacao.js') }}" defer></script>
+{% endblock %}

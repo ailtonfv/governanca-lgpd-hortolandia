@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% from '_links_instrumentos.html' import identificacao_servidor %}
+{% block titulo %}Central de Acesso LGPD{% endblock %}
+{% macro cartao(area, titulo, objetivo, situacao, icone, numero='') %}
+<li class="cartao-central area-{{ area }}">
+  <svg class="icone-central" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="{{ icone }}"/></svg>
+  <div>
+    <h3>{% if numero %}<span class="numero-form">FORM {{ numero }}<span class="sr-apenas"> — </span></span>{% endif %}{{ titulo }}</h3>
+    <p>{{ objetivo }}</p>
+    <p class="situacao-instrumento">{{ situacao }}</p>
+    {% if secretarias and numero in (1, 2) %}
+    <button class="botao-link-secundario acesso-instrumento" type="submit" form="abrir-painel" name="instrumento" value="form{{ numero }}">{{ 'Acessar FORM 1' if numero == 1 else 'Acessar preparação do FORM 2' }}</button>
+    {% endif %}
+  </div>
+</li>
+{% endmacro %}
+{% block conteudo %}
+<link rel="stylesheet" href="{{ url_for('estaticos', path='/instrumentos_registro.css') }}">
+<div class="central-acesso">
+  <h1>Central de Acesso LGPD</h1>
+  <p>Abra o painel da sua Secretaria para consultar os Registros e acessar os instrumentos disponíveis.</p>
+  <section class="contexto-central" aria-labelledby="titulo-contexto">
+    <h2 id="titulo-contexto">Secretaria de atuação</h2>
+    {% if secretarias %}
+    <form action="{{ url_for('painel_registros') }}" method="get" id="abrir-painel">
+      <input type="hidden" name="conta_id" value="{{ conta_id }}">
+      <fieldset>
+        <legend class="sr-apenas">Secretaria de atuação</legend>
+        {% for id, secretaria in secretarias.items() %}
+          {% if secretarias|length == 1 %}
+          <input type="hidden" name="secretaria_id" value="{{ id }}">
+          <strong class="nome-secretaria">{{ secretaria.nome }}</strong>
+          {% else %}
+          <label for="secretaria-{{ loop.index }}"><input type="radio" name="secretaria_id" id="secretaria-{{ loop.index }}" aria-describedby="apa-{{ loop.index }}" value="{{ id }}" required {% if selecao == id %}checked{% endif %}>
+            {{ secretaria.nome }}</label>
+          {% endif %}
+        {% endfor %}
+      </fieldset>
+    </form>
+    {% else %}
+    <p class="aviso-leitura">Nenhuma Secretaria com vínculo vigente para esta identidade.</p>
+    {% endif %}
+    <dl class="agentes-central">
+      <div><dt>Servidor identificado</dt><dd>{{ identificacao_servidor(identidade) }}</dd></div>
+      {% if secretarias %}
+      <div><dt>APA em exercício · Agente Público Autorizado</dt>
+        {% for secretaria in secretarias.values() %}
+        <dd id="apa-{{ loop.index }}">{% if secretarias|length > 1 %}<strong>{{ secretaria.nome }}</strong> · {% endif %}{{ secretaria.apa or 'Sem identificação vigente' }}{% if secretaria.apa and secretaria.modalidade_apa == 'titular' %} (titular){% elif secretaria.apa and secretaria.modalidade_apa == 'substituicao_temporaria' %} (em substituição temporária){% endif %}</dd>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </dl>
+    {% if secretarias %}
+    <button class="botao-primario" type="submit" form="abrir-painel">Abrir Painel de Registros</button>
+    {% endif %}
+    <details class="identidade-demonstrativa">
+      <summary>Trocar usuário fictício — demonstração</summary>
+      <form action="{{ url_for('central') }}" method="get">
+        <label for="conta_id">Selecionar servidor por matrícula</label>
+        <select id="conta_id" name="conta_id">
+          {% if conta_id not in ['CONTA-A1', 'CONTA-G1', 'CONTA-B1', 'CONTA-C1'] %}
+          <option value="{{ conta_id }}" selected>{{ identidade.matricula }} · {{ identidade.nome }}</option>
+          {% endif %}
+          {% for id, nome in [('CONTA-A1', 'MAT-FICT-0001 · Alfa'), ('CONTA-G1', 'MAT-FICT-0007 · Épsilon'), ('CONTA-B1', 'MAT-FICT-0002 · Beta'), ('CONTA-C1', 'MAT-FICT-0003 · Gama')] %}
+          <option value="{{ id }}" {% if conta_id == id %}selected{% endif %}>{{ nome }}</option>
+          {% endfor %}
+        </select>
+        <p class="ajuda">Este ambiente de demonstração não solicita senha. A troca de servidor fictício é exclusiva da demonstração.</p>
+        <button class="botao-link-secundario" type="submit">Selecionar servidor e entrar</button>
+      </form>
+    </details>
+  </section>
+  <section aria-labelledby="titulo-instrumentos-central">
+    <h2 id="titulo-instrumentos-central">Instrumentos de cada Registro</h2>
+    <ul class="lista-instrumentos-registro">
+      {{ cartao('levantamento', 'Levantamento do tratamento', 'Como os dados pessoais são tratados atualmente?', 'Disponível conforme autorização do Registro.', 'M6 3h9l4 4v14H6z M14 3v5h5 M9 12h7 M9 16h7', 1) }}
+      {{ cartao('legitimidade', 'Análise de legitimidade', 'Por que o tratamento de dados pode ocorrer?', 'Preparação demonstrativa disponível conforme habilitação. Análise jurídica completa ainda não implementada.', 'M12 3v16 M7 21h10 M4 7l16-2 M5 7l-3 7h6z M19 5l-3 7h6z', 2) }}
+      {{ cartao('riscos', 'Avaliação de riscos e controles', 'O que pode afetar os titulares?', 'Planejado', 'M12 2l8 3v6c0 5-3 8-8 11-5-3-8-6-8-11V5z M12 7v5 M12 16h.01', 3) }}
+      {{ cartao('providencias', 'Providências e acompanhamento', 'O que será feito e acompanhado?', 'Planejado', 'M4 6l1.5 1.5L8 4 M11 6h9 M4 12l1.5 1.5L8 10 M11 12h9 M4 18l1.5 1.5L8 16 M11 18h9', 4) }}
+    </ul>
+  </section>
+  <section class="gestao-central" aria-labelledby="titulo-gestao">
+    <h2 id="titulo-gestao">Áreas de Gestão</h2>
+    <ul class="lista-instrumentos-registro">
+      {{ cartao('dashboard', 'Dashboard LGPD', 'Indicadores consolidados de governança, Registros, pendências, riscos e providências.', 'Planejado', 'M3 3v17h18 M7 16v-4 M12 16V6 M17 16V9') }}
+      {{ cartao('ti', 'Administração Central — TI', 'Gestão técnica das 18 Secretarias: administração autorizada, monitoramento, integridade, configurações e auditoria.', 'Planejada. O acesso futuro exigirá habilitação específica e autenticação reforçada.', 'M3 3h18v7H3z M3 14h18v7H3z M6 6.5h1 M6 17.5h1') }}
+    </ul>
+  </section>
+</div>
+{% endblock %}

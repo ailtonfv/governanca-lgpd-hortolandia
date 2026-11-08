@@ -1,8 +1,10 @@
 {% extends "base.html" %}
+{% from '_links_instrumentos.html' import identificacao_servidor, retorno_painel with context %}
 {% block titulo %}{% if modo_legado %}Questionário sintético legado · {% endif %}{{ registro.codigo_lgpd }} · Governança LGPD{% endblock %}
 {% block conteudo %}
-<nav {% if not modo_legado %}id="retorno-painel-form1" class="retorno-painel-form1"{% endif %} aria-label="Retorno ao painel">
-  <a class="voltar" href="/?conta_id={{ conta_id }}">← Voltar ao painel</a>
+<nav {% if not modo_legado %}id="retorno-painel-form1" class="retorno-painel-form1 navegacao-governanca"{% endif %} aria-label="Retorno ao painel">
+  {% set lista_origem = request.query_params.get('instrumento') if request.query_params.get('secretaria_id') else none %}
+  <a class="{{ 'voltar' if modo_legado else 'botao-link-secundario' }}" href="{{ retorno_painel(request, conta_id, 'form2' if lista_origem == 'form2' else 'form1') }}">{% if not modo_legado and lista_origem in ('form1','form2') %}Voltar à lista de Registros do {{ 'FORM 2' if lista_origem == 'form2' else 'FORM 1' }}{% else %}← Voltar ao painel{% if not modo_legado %} — Painel de Registros{% endif %}{% endif %}</a>
 </nav>
 {% if not modo_legado %}
 <dialog id="dialogo-saida-form1" aria-labelledby="titulo-saida-form1" aria-describedby="descricao-saida-form1">
@@ -21,6 +23,9 @@
   <p class="etiqueta">{{ registro.tipo }} · ciclo {{ registro.ciclo }}</p>
   <h1 id="titulo-registro">{{ registro.codigo_lgpd }}</h1>
   <p class="destaque">{{ registro.titulo }}</p>
+  {% if not modo_legado %}
+  <p><strong>Servidor identificado:</strong> {{ identificacao_servidor(identidade) }} · <strong>Secretaria responsável:</strong> {{ registro.unidade }}</p>
+  {% endif %}
 </section>
 
 {% if mensagem %}
@@ -29,10 +34,12 @@
 {% endif %}
 
 {% if not modo_legado %}
+<link rel="stylesheet" href="{{ url_for('estaticos', path='/instrumentos_registro.css') }}">
+{% include '_instrumentos_registro.html' %}
 <section data-modo-consulta="{{ 'false' if registro.form1_integral.pode_editar else 'true' }}" class="form1 form1-integral" aria-labelledby="titulo-form1-integral" data-registro-id="{{ registro.id }}">
   <div class="cabecalho-secao cabecalho-form1">
     <div>
-      <h2 id="titulo-form1-integral">FORM 1 — Levantamento Inicial do Tratamento de Dados Pessoais</h2>
+      <h2 id="titulo-form1-integral" tabindex="-1">FORM 1 — Levantamento Inicial do Tratamento de Dados Pessoais</h2>
     </div>
     <p class="objetivo-form1"><strong>Objetivo:</strong> Descreva como este serviço, processo ou atividade coleta, utiliza, compartilha, armazena e protege dados pessoais.</p>
     <span class="estado">{% if registro.form1_integral.rascunho %}Rascunho {{ registro.form1_integral.rascunho.versao }}{% else %}Não iniciado{% endif %}</span>
@@ -1217,6 +1224,7 @@
       if (destinoInicial) destinoInicial.open = true;
     }
     if (window.location.hash === '#titulo-conferencia-interna-form1') destinoInicial = document.getElementById('titulo-conferencia-interna-form1');
+    if (['#instrumentos-registro', '#titulo-form1-integral'].includes(window.location.hash)) destinoInicial = document.getElementById(window.location.hash.slice(1));
     var blocoGuardado = Number(sessaoForm1.getItem(chaveBloco));
     var blocoInicial = numeroBloco || (blocoGuardado >= 1 && blocoGuardado <= 14 && etapaDoNumeroDoBloco(blocoGuardado) === etapaInicial ? blocoGuardado : primeiroBlocoDaEtapa(etapaInicial));
     if (!destinoInicial && (etapaDaUrl || retomada && retomada.posicao)) destinoInicial = document.getElementById('titulo-bloco-' + blocoInicial);

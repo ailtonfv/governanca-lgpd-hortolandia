@@ -7,8 +7,8 @@ from sqlalchemy.orm import Session
 from app.banco import motor
 from app.main import app
 from app.instrumentos import salvar_rascunho
-from app.modelos import (Evento, EventoAuditoria, Instrumento, RascunhoInstrumento,
-                         Registro)
+from app.modelos import (ConfirmacaoCanaisRegistro, Designacao, Evento, EventoAuditoria,
+                         Instrumento, RascunhoInstrumento, Registro, RegistroCanal)
 from testes.apoio import CADASTRO, LANCAMENTO, g1
 from testes.test_pendencia_intersecretarial import p1
 
@@ -29,11 +29,15 @@ def test_painel_identifica_agente_e_mostra_apenas_seu_escopo():
     assert 'lang="pt-BR"' in resposta.text
     assert "Ambiente de demonstração — utilize exclusivamente dados fictícios." in resposta.text
     assert "Servidor Alfa" in resposta.text
-    assert "matrícula MAT-FICT-0001" in resposta.text
-    assert "Simular entrada por matrícula" in resposta.text
-    assert "Este ambiente de demonstração não solicita senha" in resposta.text
+    assert "Servidor identificado:</strong> Servidor Alfa — MAT-FICT-0001" in resposta.text
+    assert "Agente simulado" not in resposta.text
+    for ajuda in ("ajuda-detalhes", "ajuda-instrumentos"):
+        alvo = f"{ajuda}-{norte['registro_id']}"
+        assert f'aria-describedby="{alvo}"' in resposta.text and f'id="{alvo}"' in resposta.text
+    assert "Selecionar servidor por matrícula" not in resposta.text
+    assert "Voltar à Central de Acesso" in resposta.text and "Trocar Secretaria" not in resposta.text
     assert "Criar novo Registro LGPD" in resposta.text
-    assert "Nada será criado antes da confirmação final" in resposta.text
+    assert "O Registro somente será criado após a confirmação dos dados iniciais." in resposta.text
     assert "Cada cartão reúne a situação do Registro" in resposta.text
     assert "Providências de conferência" in resposta.text
     assert "Campos obrigatórios pendentes" in resposta.text
@@ -65,11 +69,12 @@ def test_painel_exibe_criacao_somente_para_responsavel_pelo_registro():
     assert "Agente Público Autorizado responsável pelo Registro" in analista.text
 
 
-def test_seletor_exibe_agente_que_acumula_funcoes_e_servidor_colaborador():
-    resposta = cliente.get("/", params={"conta_id": "CONTA-A1"})
+def test_seletor_demonstrativo_da_central_identifica_as_pessoas_por_matricula():
+    resposta = cliente.get("/central", params={"conta_id": "CONTA-A1"})
 
-    assert "Alfa · Agente responsável e preenchedor" in resposta.text
-    assert "Épsilon · Servidor preenchedor" in resposta.text
+    assert "MAT-FICT-0001 · Alfa" in resposta.text
+    assert "MAT-FICT-0007 · Épsilon" in resposta.text
+    assert "Este ambiente de demonstração não solicita senha" in resposta.text
 
 
 def test_acesso_direto_a_registro_de_outra_unidade_e_negado_e_auditado():
@@ -101,14 +106,13 @@ def test_novo_registro_define_tipo_unidade_principal_e_contexto_antes_do_form1()
     resposta = cliente.get("/registros/novo", params={"conta_id": "CONTA-A1"})
 
     assert resposta.status_code == 200
-    assert "Qual Secretaria é responsável por este Registro?" in resposta.text
-    assert resposta.text.index("1. Secretaria responsável pelo Registro") < resposta.text.index("2. O que será mapeado?")
+    assert "<h1>Novo Registro LGPD</h1>" in resposta.text
+    assert resposta.text.index("Secretaria responsável:") < resposta.text.index("O que será mapeado?")
     assert "Serviço" in resposta.text and "Processo" in resposta.text and "Atividade" in resposta.text
-    assert "Secretaria responsável pelo Registro" in resposta.text
+    assert '<select id="unidade_id"' not in resposta.text
     assert "Planejamento Urbano e Gestão Estratégica" in resposta.text
     assert "Finanças" not in resposta.text
-    assert "Esta tela ainda não cria o Registro" in resposta.text
-    assert "O FORM 1 somente começa depois da confirmação final" in resposta.text
+    assert "MAT-FICT-0001 — Servidor Alfa" in resposta.text
     assert "Confirmar e criar Registro LGPD" in resposta.text
 
 
@@ -117,9 +121,8 @@ def test_contexto_inicial_diferencia_contexto_e_finalidade_sem_exemplo_incoerent
 
     assert resposta.status_code == 200
     assert 'aria-describedby="exemplo-contexto"' in resposta.text
-    assert "Ajuda sobre contexto de atuação" in resposta.text
-    assert "O contexto descreve a frente institucional" in resposta.text
-    assert "Ele não é a finalidade do tratamento" in resposta.text
+    assert "Selecione a área de atuação municipal" in resposta.text
+    assert "não representa a finalidade do tratamento" in resposta.text
     assert "fornecimento de medicamento de alto custo" not in resposta.text
 
 
@@ -163,6 +166,62 @@ def test_contextos_da_tela_respeitam_o_item_do_catalogo():
     assert 'value="CTX-TRIB-03" data-objetos="' in resposta.text
     assert "OBJ-SRV-002" in resposta.text
     assert 'value="CTX-SAU-01"' not in resposta.text
+
+
+def test_abertura_financas_cancela_sem_gravar_e_confirma_uma_unica_vez(sessao):
+    navegador = TestClient(app)
+    dados = {
+        "conta_id": "CONTA-C1", "unidade_id": "UNID-SUL", "comando_id": "FICT-CENTRAL04",
+        "tipo_objeto": "servico", "objeto_principal_id": "OBJ-SRV-902",
+        "situacao_canais": "informacao_insuficiente", "contexto_id": "CTX-COM-01",
+    }
+    painel = navegador.get("/painel", params={"conta_id": "CONTA-C1", "secretaria_id": "UNID-SUL"})
+    assert "Servidor Gama" in painel.text and "Voltar à Central de Acesso" in painel.text
+    pagina = navegador.get("/registros/novo", params={"conta_id": "CONTA-C1"})
+    assert pagina.context["nome_secretaria"] == "Finanças" and '<select id="unidade_id"' not in pagina.text
+    assert "Contratações públicas — Planejamento, seleção de fornecedores" in pagina.text
+    assert 'MAT-FICT-0003 — Servidor Gama' in pagina.text
+    assert navegador.get("/?conta_id=CONTA-C1").status_code == 200
+    assert sessao.scalars(select(Registro)).all() == []
+    assert navegador.get("/registros/novo?conta_id=CONTA-C1&unidade_id=UNID-NORTE").status_code == 403
+    forjado = navegador.post("/registros", data={
+        **dados, "comando_id": "FICT-CENTRAL04-NEGADO", "unidade_id": "UNID-NORTE",
+        "objeto_principal_id": "OBJ-SRV-002", "contexto_id": "CTX-TRIB-03",
+    })
+    assert forjado.status_code == 403 and sessao.scalars(select(Registro)).all() == []
+    for _ in range(2):
+        resposta = navegador.post("/registros", data=dados, follow_redirects=False)
+        assert resposta.status_code == 303 and "/registros/novo" not in resposta.headers["location"]
+    registro = sessao.scalars(select(Registro)).one()
+    assert registro.unidade_principal_atual_id == "UNID-SUL"
+    declaracao = sessao.get(ConfirmacaoCanaisRegistro, registro.id)
+    assert (declaracao.situacao, declaracao.confirmado_por_id) == ("informacao_insuficiente", "PESSOA-C")
+    assert sessao.scalars(select(RegistroCanal)).all() == []
+    assert len(sessao.scalars(select(Evento).where(Evento.codigo_evento == "G1")).all()) == 1
+
+
+def test_dois_vinculos_de_abertura_preferem_contexto_corrente_e_limitam_lista(sessao):
+    sessao.scalar(select(Designacao).where(Designacao.unidade_id == "UNID-SUL",
+                                          Designacao.tipo_apa == "titular")).pessoa_id = "PESSOA-A"
+    sessao.commit()
+    navegador = TestClient(app)
+    painel = navegador.get("/painel?conta_id=CONTA-A1&secretaria_id=UNID-SUL")
+    assert "Trocar Secretaria" in painel.text
+    pagina = navegador.get("/registros/novo?conta_id=CONTA-A1")
+    assert '<select id="unidade_id"' in pagina.text
+    assert 'value="UNID-SUL" selected' in pagina.text
+    assert {u["id"] for u in pagina.context["unidades"]} == {"UNID-SUL", "UNID-NORTE"}
+    assert navegador.get("/registros/novo?conta_id=CONTA-A1&unidade_id=SEC-SAUDE").status_code == 403
+
+
+def test_sem_objeto_remove_declaracao_de_canais_inclusive_no_retorno():
+    pagina = cliente.get("/registros/novo", params={
+        "conta_id": "CONTA-C1", "unidade_id": "UNID-SUL", "tipo_objeto": "servico",
+        "situacao_canais": "identificados", "canais_ids": ["CNL-001"],
+    })
+    assert pagina.context["valores"]["situacao_canais"] == ""
+    assert pagina.context["valores"]["canais_ids"] == []
+    assert 'id="canais-habituais" aria-describedby="ajuda-canais" disabled' in pagina.text
 
 
 def test_g1_recusa_contexto_incompativel_mesmo_se_forjado():

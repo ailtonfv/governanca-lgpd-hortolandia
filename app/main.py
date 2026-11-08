@@ -1,6 +1,7 @@
 """Balcão HTTP da PoC. As regras continuam nas funções de domínio."""
 
 from pathlib import Path
+from typing import Literal
 from urllib.parse import urlencode
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -27,7 +28,7 @@ from app.conferencia_interna_form1_integral import (
     solicitar_conferencia_interna_form1_integral,
 )
 from app.banco import motor
-from app.consultas_interface import (carregar_conflitos_duplicidade_visiveis,
+from app.consultas_interface import (carregar_central, carregar_conflitos_duplicidade_visiveis,
                                      carregar_opcoes_novo_registro, carregar_painel,
                                      carregar_registro, rotulo_interface, projetar_fluxo_conferencia)
 from app.eventos import registrar_auditoria
@@ -64,6 +65,9 @@ from app.workflow import criar_registro
 PASTA_APP = Path(__file__).resolve().parent
 app = FastAPI(title="PoC LGPD Hortolândia", docs_url=None, redoc_url=None)
 app.mount("/estaticos", StaticFiles(directory=PASTA_APP / "estaticos"), name="estaticos")
+from app.rotas_form2_preparacao import router as rotas_form2_preparacao
+from app.form2_preparacao import projetar_navegacao_preparacao
+app.include_router(rotas_form2_preparacao)
 paginas = Jinja2Templates(directory=PASTA_APP / "paginas")
 paginas.env.globals["consulta_cartilha_local"] = acesso_local_cartilha
 FUSO_OFICIAL = ZoneInfo("America/Sao_Paulo")
@@ -96,7 +100,7 @@ def _normalizar_cascata_abertura(opcoes, valores):
         None,
     )
     objeto_invalidado = bool(valores["objeto_principal_id"] and objeto is None)
-    if valores["unidade_id"] not in unidades_permitidas or objeto_invalidado:
+    if valores["unidade_id"] not in unidades_permitidas or objeto is None:
         valores.update({
             "objeto_principal_id": "",
             "contexto_id": "",
@@ -105,6 +109,8 @@ def _normalizar_cascata_abertura(opcoes, valores):
         })
         return valores, objeto_invalidado, False
 
+    if valores["situacao_canais"] != "identificados":
+        valores["canais_ids"] = []
     contextos_permitidos = {
         item["id"] for item in opcoes["contextos"]
         if objeto is not None and objeto["id"] in item["objetos"]
@@ -126,17 +132,76 @@ def obter_sessao():
 @app.get("/", response_class=HTMLResponse)
 def inicio(
     request: Request,
+    conta_id: str | None = Query(default=None, max_length=50),
+    secretaria_id: str | None = Query(default=None, max_length=50),
+):
+    # Os favoritos e retornos anteriores usam /?conta_id= para abrir o painel.
+    destino = "central" if conta_id is None else "painel_registros"
+    parametros = {k: v for k, v in (("conta_id", conta_id), ("secretaria_id", secretaria_id)) if v is not None}
+    return RedirectResponse(request.url_for(destino).include_query_params(**parametros), status_code=303)
+
+
+def _erro_acesso_central(request, *, conta_indisponivel=False):
+    titulo, mensagem, status = (
+        ("Conta indisponível", "A conta fictícia não existe ou está inativa.", 404)
+        if conta_indisponivel else
+        ("Secretaria indisponível", "Esta identidade não possui vínculo vigente para este contexto.", 403)
+    )
+    return paginas.TemplateResponse(request=request, name="erro.html",
+                                   context={"titulo": titulo, "mensagem": mensagem}, status_code=status)
+
+
+@app.get("/central", response_class=HTMLResponse)
+def central(
+    request: Request,
     conta_id: str = Query(default="CONTA-A1", max_length=50),
+    secretaria_id: str | None = Query(default=None, max_length=50),
     sessao: Session = Depends(obter_sessao),
 ):
-    painel = carregar_painel(sessao, conta_id)
+    acesso = carregar_central(sessao, conta_id)
+    if acesso is None:
+        return _erro_acesso_central(request, conta_indisponivel=True)
+    if secretaria_id is not None and secretaria_id not in acesso["secretarias"]:
+        return _erro_acesso_central(request)
+    return paginas.TemplateResponse(request=request, name="central.html", context={
+        **acesso, "conta_id": conta_id,
+        "selecao": secretaria_id or request.cookies.get(f"secretaria_{conta_id}"),
+    })
+
+
+@app.get("/painel", response_class=HTMLResponse)
+def painel_registros(
+    request: Request,
+    conta_id: str = Query(default="CONTA-A1", max_length=50),
+    secretaria_id: str | None = Query(default=None, max_length=50),
+    instrumento: Literal["form1", "form2"] | None = None,
+    sessao: Session = Depends(obter_sessao),
+):
+    acesso = carregar_central(sessao, conta_id)
+    if acesso is None:
+        return _erro_acesso_central(request, conta_indisponivel=True)
+    secretarias = acesso["secretarias"]
+    if secretaria_id is None:
+        # Preferência de navegação por conta. O vínculo é verificado em todo acesso.
+        anterior = request.cookies.get(f"secretaria_{conta_id}")
+        if anterior in secretarias:
+            secretaria_id = anterior
+        elif len(secretarias) == 1:
+            secretaria_id = next(iter(secretarias))
+        else:
+            return RedirectResponse(request.url_for("central").include_query_params(conta_id=conta_id), status_code=303)
+    if secretaria_id not in secretarias:
+        return _erro_acesso_central(request)
+    painel = carregar_painel(sessao, conta_id, secretaria_id=secretaria_id)
     if painel is None:
-        return paginas.TemplateResponse(
-            request=request,
-            name="erro.html",
-            context={"titulo": "Conta indisponível", "mensagem": "A conta fictícia não existe ou está inativa."},
-            status_code=404,
-        )
+        return _erro_acesso_central(request)
+    registros_exibidos = painel["registros"]
+    if instrumento == "form2":
+        registros_exibidos = []
+        for registro in painel["registros"]:
+            acesso_form2 = projetar_navegacao_preparacao(sessao, conta_id=conta_id, registro_id=registro["id"])
+            if acesso_form2:
+                registros_exibidos.append({**registro, "navegacao_form2": acesso_form2})
     for registro in painel["registros"]:
         for providencia in registro["providencias"]:
             if (
@@ -144,11 +209,16 @@ def inicio(
                 and providencia.get("acao_tipo") == "iniciar"
             ):
                 providencia["comando_id"] = str(uuid.uuid4())
-    return paginas.TemplateResponse(
+    resposta = paginas.TemplateResponse(
         request=request,
         name="inicio.html",
-        context={**painel, "conta_id": conta_id},
+        context={**painel, "conta_id": conta_id, "secretaria": secretarias[secretaria_id],
+                 "instrumento": instrumento, "registros_exibidos": registros_exibidos,
+                 "pode_trocar_secretaria": len(secretarias) > 1},
     )
+    resposta.set_cookie(f"secretaria_{conta_id}", secretaria_id, httponly=True,
+                        samesite="lax", secure=request.url.scheme == "https")
+    return resposta
 
 
 @app.get("/registros/novo", response_class=HTMLResponse)
@@ -175,6 +245,15 @@ def novo_registro(
             context={"titulo": "Conta indisponível", "mensagem": "A identidade fictícia não existe ou está inativa."},
             status_code=404,
         )
+    unidades_apa = {unidade["id"]: unidade["nome"] for unidade in opcoes["unidades"]}
+    if unidade_id and unidade_id not in unidades_apa:
+        return _erro_acesso_central(request)
+    if not unidade_id:
+        anterior = request.cookies.get(f"secretaria_{conta_id}")
+        if anterior in unidades_apa:
+            unidade_id = anterior
+        elif len(unidades_apa) == 1:
+            unidade_id = next(iter(unidades_apa))
     valores, objeto_invalidado, contexto_invalidado = _normalizar_cascata_abertura(
         opcoes,
         {
@@ -198,6 +277,7 @@ def novo_registro(
             "mensagem": mensagem,
             "erro": erro,
             "comando_g1": str(uuid.uuid4()),
+            "nome_secretaria": unidades_apa.get(unidade_id),
             "valores": valores,
             "erros_campos": set(campos_erro or []),
             "objeto_invalidado": objeto_invalidado,
@@ -427,6 +507,7 @@ def detalhe_registro(
             "mensagem": mensagem,
             "erro": erro,
             "modo_legado": False,
+            "navegacao_form2": projetar_navegacao_preparacao(sessao, conta_id=conta_id, registro_id=registro_id),
             "comando_i1": str(uuid.uuid4()),
             "comando_i2": str(uuid.uuid4()),
             "comando_atribuir_arp": str(uuid.uuid4()),
