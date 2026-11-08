@@ -3,10 +3,12 @@
   <summary>Entenda esta pergunta</summary>
   <div class="conteudo-ajuda-cartilha-form1">
     {% if campo.ajuda_alternativas %}
-    <dl>
+    <dl class="definicoes-alternativas-form1">
       {% for alternativa, explicacao in campo.ajuda_alternativas %}
-      <dt><strong>{{ alternativa }}</strong></dt>
-      <dd>{{ explicacao }}</dd>
+      <div>
+        <dt><strong>{{ alternativa }}</strong></dt>
+        <dd>{{ explicacao }}</dd>
+      </div>
       {% endfor %}
     </dl>
     <p>Escolha cada uma dessas alternativas isoladamente, sem combinar com outra alternativa especial ou com situações concretas de exposição. “A confirmar” mantém a informação pendente na pré-validação.</p>

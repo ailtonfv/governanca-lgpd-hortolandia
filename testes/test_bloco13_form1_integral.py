@@ -2,6 +2,8 @@
 
 from copy import deepcopy
 from itertools import combinations
+import re
+from xml.etree import ElementTree
 
 import pytest
 from fastapi.testclient import TestClient
@@ -81,6 +83,16 @@ def test_ajuda_13_1_explica_alternativas_sem_inventar_referencia(sessao):
     assert "isoladamente" in ajuda and "pré-validação" in ajuda
     assert "Referência:" not in ajuda and '<a ' not in ajuda
     assert 'aria-describedby="ajuda-cartilha-13.1"' in pagina.text
+    # Cada título e sua explicação pertencem ao mesmo grupo semântico.
+    from app.ajudas_cartilha_form1 import AJUDAS_ALTERNATIVAS_FORM1
+    definicoes = ElementTree.fromstring(re.search(
+        r'<dl class="definicoes-alternativas-form1">.*?</dl>', ajuda, re.S).group())
+    assert len(definicoes) == 3
+    for grupo, (titulo, explicacao) in zip(definicoes, AJUDAS_ALTERNATIVAS_FORM1['13.1']):
+        assert grupo.tag == 'div'
+        assert [filho.tag for filho in grupo] == ['dt', 'dd']
+        assert ''.join(grupo.find('dt').itertext()) == titulo
+        assert grupo.find('dd').text == explicacao
 
 
 def test_bloco_13_recusa_opcao_forjada_e_repetida(sessao):

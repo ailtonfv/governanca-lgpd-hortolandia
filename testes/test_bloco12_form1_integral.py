@@ -11,6 +11,32 @@ from testes.test_bloco7_form1_integral import _rascunho
 cliente = TestClient(app)
 
 
+def test_cenario_sem_destinacao_definida_preserva_rascunho_legado(sessao):
+    from app.pre_validacao_form1_integral import pre_validar_form1_integral
+
+    registro = _rascunho(sessao, "F112-SEM-DESTINACAO")
+    rid = registro['registro_id']
+    respostas = {"12.1": "Em definição",
+                 "12.2": "Permanece no sistema sem destinação definida",
+                 "12.4": "Não se aplica", "12.5": "Não"}
+    resultado = salvar_bloco_12_form1_integral(sessao, comando_id="F112-SEM-DEST-S",
+        conta_id="CONTA-A1", registro_id=rid, versao_lida=1, respostas=respostas)
+    sessao.commit()
+
+    assert resultado['permitido']
+    conteudo = sessao.get(RascunhoForm1Integral, rid).conteudo
+    assert {k: conteudo['respostas'][k] for k in respostas} == respostas
+    assert '12.3' not in conteudo['respostas']
+    pre = pre_validar_form1_integral(conteudo, nome_institucional="Servidor fictício")
+    assert not any(i['campo_id'].startswith('12.') for i in pre['incompletos'])
+    assert {'12.4.1', '12.5.1'} <= {i['campo_id'] for i in pre['nao_aplicaveis']}
+    assert not pre['submissao_habilitada']
+    pagina = cliente.get(f'/registros/{rid}?conta_id=CONTA-A1')
+    assert pagina.status_code == 200
+    assert '<option value="Em definição" selected>' in pagina.text
+    assert '<option value="Permanece no sistema sem destinação definida" selected>' in pagina.text
+
+
 def test_bloco_12_salva_prazo_destinacao_e_evidencias(sessao):
     registro = _rascunho(sessao, "F112-OK")
     respostas = {

@@ -224,6 +224,10 @@ legend { padding: 0 .4rem; color: var(--azul-escuro); font-weight: 800; }
 .ajuda-cartilha-form1 summary:focus-visible { outline: .2rem solid var(--azul); outline-offset: .12rem; }
 .conteudo-ajuda-cartilha-form1 { padding: 0 .75rem .7rem; color: #334155; }
 .conteudo-ajuda-cartilha-form1 p { margin: .45rem 0 0; }
+.definicoes-alternativas-form1 { display: block; margin: .75rem 0; }
+.definicoes-alternativas-form1 > div { border: 0; padding: 0; margin: 0 0 .85rem; min-width: 0; overflow-wrap: anywhere; }
+.definicoes-alternativas-form1 dt { font-size: 1rem; text-transform: none; color: var(--texto); }
+.definicoes-alternativas-form1 dd { margin: .25rem 0 0; }
 .leitura-cartilha { max-width: 85ch; margin-inline: auto; overflow-wrap: anywhere; }
 .leitura-cartilha p { white-space: pre-line; line-height: 1.65; }
 .leitura-cartilha img { max-width: 100%; height: auto; }
