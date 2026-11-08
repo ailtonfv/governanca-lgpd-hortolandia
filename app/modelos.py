@@ -347,6 +347,55 @@ class VersaoForm1Integral(Base):
     )
 
 
+class HabilitacaoForm2Preparacao(Base):
+    """Escopo demonstrativo por pessoa/Registro, sem papel nuclear implícito."""
+    __tablename__ = "habilitacao_form2_preparacao"
+
+    id = Column(String(36), primary_key=True)
+    registro_id = Column(String(36), ForeignKey("registro.id"), nullable=False)
+    pessoa_id = Column(String(50), ForeignKey("pessoa.id"), nullable=False)
+    finalidade = Column(String(20), nullable=False)
+    vigente_de = Column(DateTime(timezone=True), nullable=False)
+    vigente_ate = Column(DateTime(timezone=True), nullable=False)
+    ativa = Column(Boolean, nullable=False, default=True)
+    fundamento = Column(String(250), nullable=False)
+    versao_politica = Column(String(30), nullable=False)
+    aprovacao_referencia = Column(String(250), nullable=False)
+    registrado_em = Column(DateTime(timezone=True), nullable=False)
+    __table_args__ = (
+        UniqueConstraint("registro_id", "pessoa_id", name="uq_habilitacao_f2_pessoa"),
+        CheckConstraint("vigente_ate > vigente_de", name="ck_habilitacao_f2_vigencia"),
+        CheckConstraint("finalidade IN ('preparar', 'acompanhar')", name="ck_habilitacao_f2_finalidade"),
+    )
+
+
+class PreparacaoForm2(Base):
+    """Rascunho demonstrativo isolado; origem fixa, revisões no livro de atos."""
+    __tablename__ = "preparacao_form2"
+
+    id = Column(String(36), primary_key=True)
+    registro_id = Column(String(36), ForeignKey("registro.id"), nullable=False)
+    ciclo_id = Column(Integer, ForeignKey("ciclo.id"), nullable=False)
+    snapshot_id = Column(String(36), ForeignKey("versao_form1_integral.id"), nullable=False)
+    lacre_origem = Column(String(64), nullable=False)
+    estrutura_origem = Column(String(80), nullable=False)
+    preparador_id = Column(String(50), ForeignKey("pessoa.id"), nullable=False)
+    habilitacao_id = Column(String(36), ForeignKey("habilitacao_form2_preparacao.id"), nullable=False)
+    designado_por = Column(String(50), ForeignKey("pessoa.id"), nullable=False)
+    designado_em = Column(DateTime(timezone=True), nullable=False)
+    versao_politica = Column(String(30), nullable=False)
+    versao_envelope = Column(String(30), nullable=False)
+    conteudo = Column(JSON, nullable=False)
+    versao_rascunho = Column(Integer, nullable=False)
+    salvo_por = Column(String(50), ForeignKey("pessoa.id"), nullable=False)
+    salvo_em = Column(DateTime(timezone=True), nullable=False)
+    lacre_conteudo = Column(String(64), nullable=False)
+    __table_args__ = (
+        UniqueConstraint("registro_id", "snapshot_id", name="uq_preparacao_f2_origem"),
+        CheckConstraint("versao_rascunho >= 1", name="ck_preparacao_f2_versao"),
+    )
+
+
 class ConferenciaInternaForm1Integral(Base):
     """Projeção da solicitação preparatória do ARP para conferência do APA.
 
