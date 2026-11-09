@@ -1,5 +1,10 @@
 # Acompanhamento dos ajustes da PoC ampliada
 
+## INSTRUÇÃO_FORM02_06 · seleção do Registro e Etapa 1
+
+- **Interface.** Seleção e preparação distinguem servidor, função, APA, estado e versão histórica. A unidade de guarda identifica dados ausentes ou sem resposta. Aceite humano pendente nas duas larguras e nos papéis APA/AAL.
+- **Planejamento.** Avaliar a candidata `MATRIZ-F2-ETAPA1-FATOS-F1-v1` e o desenho `F2-ETAPA1-RESPOSTAS-v1`. Antes de autorizar edição individual, decidir os controles documentados, o tratamento das respostas inativas e a alternativa de persistência. As etapas 2 a 4 aguardam decisão própria.
+
 **Data da consolidação:** 05/11/2026. **Base inspecionada:** `main`, commit `26b9e97f0d6cdca4a19b342929128591947bab13`, com alterações locais descritas abaixo.
 
 O diagnóstico e a tabela registram a situação anterior aos commits de estabilização. A seção final atualiza o versionamento e a evidência dos testes, preservando as 13 ocorrências e suas propostas.
