@@ -37,7 +37,7 @@ def test_consulta_http_quatro_estruturas_sem_reinterpretar_origem(sessao, perfil
             assert "não convertidas para os novos campos" in html
     assert 'class="botao-primario">Designar AAL e iniciar preparação' in html
     assert 'class="botao-secundario">Consultar origem' in html
-    assert '<details class="form2-tecnico"><summary>Conteúdo técnico completo' in html
+    assert '<details class="form2-tecnico"><summary>Detalhes técnicos (auditoria)' in html
     assert '"submissao_habilitada": false' in html
     sessao.expire_all()
     snap = sessao.get(VersaoForm1Integral, sid)

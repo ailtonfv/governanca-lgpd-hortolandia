@@ -68,9 +68,11 @@ app = FastAPI(title="PoC LGPD Hortolândia", docs_url=None, redoc_url=None)
 app.mount("/estaticos", StaticFiles(directory=PASTA_APP / "estaticos"), name="estaticos")
 from app.rotas_form2_preparacao import router as rotas_form2_preparacao
 from app.form2_preparacao import projetar_navegacao_preparacao
+from app.apresentacao_form2 import data_local, rotulo_demonstrativo
 app.include_router(rotas_form2_preparacao)
 paginas = Jinja2Templates(directory=PASTA_APP / "paginas")
 paginas.env.globals["consulta_cartilha_local"] = acesso_local_cartilha
+paginas.env.filters.update(data_local=data_local, rotulo_f2=rotulo_demonstrativo)
 FUSO_OFICIAL = ZoneInfo("America/Sao_Paulo")
 
 

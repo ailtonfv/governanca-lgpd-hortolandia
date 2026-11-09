@@ -267,6 +267,25 @@ def _pode_editar_preparacao(sessao, prep, pessoa, hab, registro):
                 and registro.estado_atual == "em_andamento")
 
 
+def _candidatos_habilitados(registro_id, momento):
+    return (select(Pessoa).join(HabilitacaoForm2Preparacao,
+            Pessoa.id == HabilitacaoForm2Preparacao.pessoa_id).where(
+                HabilitacaoForm2Preparacao.registro_id == registro_id,
+                HabilitacaoForm2Preparacao.finalidade == "preparar",
+                HabilitacaoForm2Preparacao.ativa.is_(True),
+                HabilitacaoForm2Preparacao.versao_politica == POLITICA,
+                HabilitacaoForm2Preparacao.vigente_de <= momento,
+                HabilitacaoForm2Preparacao.vigente_ate > momento, Pessoa.ativa.is_(True),
+                select(Conta.id).where(Conta.pessoa_id == Pessoa.id, Conta.ativa.is_(True)).exists()))
+
+
+def _ciclo_em_andamento(sessao, registro):
+    return registro.estado_atual == "em_andamento" and bool(sessao.scalar(
+        select(Ciclo.id).where(Ciclo.registro_id == registro.id,
+                               Ciclo.numero == registro.ciclo_atual, Ciclo.situacao == "ativo")
+    ))
+
+
 def projetar_navegacao_preparacao(sessao, *, conta_id, registro_id, momento=None):
     """Somente links autorizados; não consulta conteúdo nem produz ato/auditoria."""
     if not all(inspect(sessao.connection()).has_table(t) for t in
@@ -281,7 +300,18 @@ def projetar_navegacao_preparacao(sessao, *, conta_id, registro_id, momento=None
         return None
     editaveis = [p for p in visiveis if _pode_editar_preparacao(sessao, p, pessoa, hab, registro)]
     prep = editaveis[-1] if editaveis else visiveis[-1] if visiveis else None
-    return {"preparacao_id": prep.id if prep else None,
+    resumo = None
+    if prep:
+        versao = sessao.scalar(select(VersaoForm1Integral.numero).where(
+            VersaoForm1Integral.id == prep.snapshot_id, VersaoForm1Integral.registro_id == registro.id))
+        autor = sessao.get(Pessoa, prep.salvo_por)
+        resumo = {"origem": versao, "rascunho": prep.versao_rascunho, "salvo_em": prep.salvo_em,
+                  "autor": f"{autor.matricula} — {autor.nome}" if autor else None}
+    pode_iniciar = bool(not prep and e_apa and _ciclo_em_andamento(sessao, registro)
+                        and sessao.scalar(select(VersaoForm1Integral.id).where(
+                            VersaoForm1Integral.registro_id == registro.id).limit(1))
+                        and sessao.scalar(_candidatos_habilitados(registro.id, momento).limit(1)))
+    return {"preparacao_id": prep.id if prep else None, "resumo": resumo, "pode_iniciar": pode_iniciar,
             "pode_editar": bool(editaveis), "e_apa": e_apa}
 
 
@@ -313,14 +343,7 @@ def consultar_preparacao(sessao, *, conta_id, registro_id, preparacao_id=None,
                 raise ValueError("Integridade da preparação não confere.")
             historico = _historico_integro(sessao, referencia)
         snapshots = sessao.scalars(consulta_snapshots.order_by(VersaoForm1Integral.numero)).all()
-        candidatos = sessao.scalars(select(Pessoa).join(HabilitacaoForm2Preparacao,
-            Pessoa.id == HabilitacaoForm2Preparacao.pessoa_id).where(
-                HabilitacaoForm2Preparacao.registro_id == registro_id,
-                HabilitacaoForm2Preparacao.finalidade == "preparar",
-                HabilitacaoForm2Preparacao.ativa.is_(True),
-                HabilitacaoForm2Preparacao.versao_politica == POLITICA,
-                HabilitacaoForm2Preparacao.vigente_de <= momento,
-                HabilitacaoForm2Preparacao.vigente_ate > momento, Pessoa.ativa.is_(True))).all() if e_apa else []
+        candidatos = sessao.scalars(_candidatos_habilitados(registro_id, momento)).all() if e_apa else []
         _auditar(sessao, "form2_consulta", "pessoa", pessoa.id,
                  {"registro_id": registro_id, "preparacao_id": referencia.id if referencia else None,
                   "snapshot_id": sid, "politica": POLITICA})
@@ -330,6 +353,7 @@ def consultar_preparacao(sessao, *, conta_id, registro_id, preparacao_id=None,
         return {"permitido": True, "registro": registro, "pessoa": pessoa,
                 "preparacao": prep, "preparacoes": visiveis, "origem": origem,
                 "snapshots": snapshots, "candidatos": candidatos, "e_apa": e_apa,
+                "ciclo_em_andamento": _ciclo_em_andamento(sessao, registro) if e_apa else False,
                 "pode_editar": pode_editar, "preparacoes_editaveis": editaveis,
                 "historico": historico, "politica": POLITICA}
     except (PermissionError, ValueError) as erro:

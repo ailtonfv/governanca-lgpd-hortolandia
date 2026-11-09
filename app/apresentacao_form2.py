@@ -1,7 +1,11 @@
 """Rótulos de consulta; não modifica nem reinterpreta a origem histórica."""
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
 from sqlalchemy import select
 
 from app.catalogo_form2_rev18 import carregar_catalogo
+from app.extensao_guarda_form1 import definicao_guarda
 from app.modelos import Pessoa
 
 
@@ -29,7 +33,7 @@ ROTULOS = {
 }
 PAPEIS = {
     "APA_designante": "APA — Agente Público Autorizado (designação)",
-    "preparador_demonstrativo": "Preparador autorizado do FORM 2",
+    "preparador_demonstrativo": "AAL — Agente de Análise de Legitimidade (preparação)",
     "ARP": "ARP — Agente Responsável pelo Preenchimento",
 }
 GRUPOS = (
@@ -57,6 +61,22 @@ def apresentar_origem(origem):
     ]}
 
 
+def data_local(momento):
+    if isinstance(momento, str):
+        try:
+            momento = datetime.fromisoformat(momento)
+        except ValueError:
+            return momento
+    if not isinstance(momento, datetime) or momento.tzinfo is None:
+        return momento
+    return momento.astimezone(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y às %H:%M")
+
+
+def rotulo_demonstrativo(valor):
+    return {"Servico": "Serviço", "servico": "serviço",
+            "Ensaio ficticio de origens S1 e S2": "Ensaio fictício de origens S1 e S2"}.get(valor, valor)
+
+
 def unidade_guarda(dados):
     """Projeta a unidade a partir da consulta já autorizada e da origem lacrada."""
     if not dados["pode_editar"]:
@@ -71,7 +91,9 @@ def unidade_guarda(dados):
     origem = dados["origem"]
     perguntas = {item["id"]: item for item in origem["perguntas"]}
     fatos = []
-    for chave in ("12.1", "12.1.1", "12.1.2", "12.1.3"):
+    ids = ["12.1", "12.1.1", "12.1.2", "12.1.3", "12.2"]
+    ids.extend(campo["id"] for campo in definicao_guarda()["campos"])
+    for chave in ids:
         fatos.append({"id": chave, "campo": perguntas.get(chave),
                       "complemento": origem["conteudo"].get("complementos", {}).get(chave)})
     bloco = next(b for b in catalogo["blocos"] if b["numero"] == 2)

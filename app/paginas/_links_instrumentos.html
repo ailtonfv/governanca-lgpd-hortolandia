@@ -9,7 +9,7 @@
 {% macro ancora_preparacao(editavel) -%}{{ '#unidade-guarda' if editavel else '#anotacoes' }}{%- endmacro %}
 
 {% macro link_form2(registro, acesso, conta_id, secretaria_id=none) -%}
-<a class="{{ 'botao-link' if instrumento == 'form2' else 'botao-link-secundario' }}" data-acesso-form2 href="{{ url_for('form2_preparacao', registro_id=registro.id) }}?conta_id={{ conta_id|urlencode }}{% if secretaria_id %}&amp;secretaria_id={{ secretaria_id|urlencode }}&amp;instrumento=form2{% endif %}{% if acesso.preparacao_id %}&amp;preparacao_id={{ acesso.preparacao_id }}{{ ancora_preparacao(acesso.pode_editar) }}{% endif %}">{{ acao_preparacao(acesso.pode_editar, acesso.e_apa) if acesso.preparacao_id else 'Selecionar versão do FORM 1' }}<span class="sr-apenas"> para o FORM 2 do Registro {{ registro.codigo_lgpd }}</span></a>
+<a class="{{ 'botao-link' if instrumento == 'form2' else 'botao-link-secundario' }}" data-acesso-form2 href="{{ url_for('form2_preparacao', registro_id=registro.id) }}?conta_id={{ conta_id|urlencode }}{% if secretaria_id %}&amp;secretaria_id={{ secretaria_id|urlencode }}&amp;instrumento=form2{% endif %}{% if acesso.preparacao_id %}&amp;preparacao_id={{ acesso.preparacao_id }}{{ ancora_preparacao(acesso.pode_editar) }}{% endif %}">{{ acao_preparacao(acesso.pode_editar, acesso.e_apa) if acesso.preparacao_id else 'Iniciar preparação' if acesso.pode_iniciar else 'Consultar disponibilidade' }}<span class="sr-apenas"> para o FORM 2 do Registro {{ registro.codigo_lgpd }}</span></a>
 {%- endmacro %}
 
 {% macro retorno_painel(request, conta_id, instrumento) -%}

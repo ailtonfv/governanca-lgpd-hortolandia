@@ -37,7 +37,7 @@ def test_cartoes_explicam_disponibilidade_sem_oferecer_acesso_direto():
     cartoes = re.findall(r'<li class="cartao-central [^"]+">(.*?)</li>', pagina, re.S)
     esperados = [
         ("FORM 1", "Levantamento do tratamento", "Como os dados pessoais", "Disponível conforme autorização do Registro"),
-        ("FORM 2", "Análise de legitimidade", "Por que o tratamento", "Análise jurídica completa ainda não implementada"),
+        ("FORM 2", "Validação jurídica e institucional", "Por que o tratamento", "Análise jurídica completa ainda não implementada"),
         ("FORM 3", "Avaliação de riscos e controles", "O que pode afetar", "Planejado"),
         ("FORM 4", "Providências e acompanhamento", "O que será feito", "Planejado"),
         ("Dashboard LGPD", "Indicadores consolidados", "Planejado"),
@@ -74,7 +74,7 @@ def test_escolha_explicita_filtra_form2_e_retorna_ao_contexto(sessao, conta, rot
     form2 = cliente.get("/painel", params={**contexto, "instrumento": "form2"})
     assert "<h1>Painel de Registros</h1>" in geral.text
     assert "<h1>Selecionar Registro — FORM 1</h1>" in form1.text
-    assert "<h1>Selecionar Registro — FORM 2</h1>" in form2.text
+    assert "<h1>Selecionar Registro</h1>" in form2.text
     for pagina in (geral, form1):
         assert rid in pagina.text and outro in pagina.text
         for indicador in ("Registros disponíveis", "Providências de conferência", "Campos obrigatórios pendentes"):
@@ -96,7 +96,11 @@ def test_escolha_explicita_filtra_form2_e_retorna_ao_contexto(sessao, conta, rot
         pagina = cliente.get(destino)
         assert pagina.status_code == 200
         identidade = "Servidor Alfa — MAT-FICT-0001" if conta == "CONTA-A1" else "Servidor Épsilon — MAT-FICT-0007"
-        assert f"Servidor identificado:</strong> {identidade}" in pagina.text
+        rotulo_sessao = "Servidor em sessão" if filtro == "form2" else "Servidor identificado"
+        assert f"{rotulo_sessao}:</strong> {identidade}" in pagina.text
+        if filtro == "form2":
+            assert "APA responsável:" in pagina.text and "Função nesta atividade:" in pagina.text
+            assert "versão histórica nº 1" in tela.text and "Último registro em" in tela.text
         assert f"Voltar à lista de Registros do FORM {filtro[-1]}" in pagina.text
         volta = unescape(re.search(r'href="([^"]+/painel\?[^"]+)"', pagina.text).group(1))
         assert dict(cliente.get(volta).url.params) == {**contexto, "instrumento": filtro}

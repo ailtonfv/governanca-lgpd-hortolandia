@@ -24,7 +24,7 @@
 .contexto-central legend { font-weight: 700; }
 .contexto-central label:has(input[type=radio]) { display: flex; align-items: center; gap: .6rem; min-height: 44px; cursor: pointer; }
 .identidade-demonstrativa { margin-top: .85rem; border-top: 1px solid var(--borda); }
-.identidade-demonstrativa summary { padding-block: .7rem; color: var(--azul); cursor: pointer; }
+.identidade-demonstrativa summary { width: fit-content; min-height: 44px; margin-top: .7rem; box-sizing: border-box; cursor: pointer; }
 .identidade-demonstrativa form { max-width: 32rem; padding-block: .5rem; }
 .identidade-demonstrativa select { max-width: 100%; margin-bottom: .5rem; }
 .central-acesso .lista-instrumentos-registro { margin: .8rem 0 0; gap: .8rem; }

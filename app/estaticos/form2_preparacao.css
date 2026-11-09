@@ -7,6 +7,8 @@
 .form2-demo .somente-leitura { background: repeating-linear-gradient(135deg, #f4f7f9, #f4f7f9 8px, #edf1f4 8px, #edf1f4 10px); }
 .form2-demo details { margin-block: 1rem; }
 .form2-demo summary { cursor: pointer; padding-block: .5rem; }
+#unidade-guarda .detalhe dl { display: block; }
+#unidade-guarda .detalhe dd { margin: .25rem 0 .8rem; }
 .form2-demo dt { font-weight: 600; margin-top: 1rem; }
 .form2-demo dd { margin-inline-start: 1rem; }
 .form2-demo .botao-primario, .form2-demo .botao-secundario { min-width: 0; max-width: 100%; min-height: 44px; }

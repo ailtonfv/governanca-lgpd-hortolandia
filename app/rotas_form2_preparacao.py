@@ -10,13 +10,15 @@ from sqlalchemy.orm import Session
 from sqlalchemy import inspect
 
 from app.banco import motor
-from app.modelos import Unidade
+from app.modelos import Pessoa, Unidade
+from app.continuidade_apa import apa_em_exercicio
 from app.consultas_interface import pode_consultar_registro
-from app.apresentacao_form2 import apresentar_origem, identificar_agentes, unidade_guarda, PAPEIS
+from app.apresentacao_form2 import apresentar_origem, identificar_agentes, unidade_guarda, data_local, rotulo_demonstrativo, PAPEIS
 from app.form2_preparacao import consultar_preparacao, iniciar_preparacao, salvar_preparacao
 
 router = APIRouter()
 paginas = Jinja2Templates(directory=Path(__file__).parent / "paginas")
+paginas.env.filters.update(data_local=data_local, rotulo_f2=rotulo_demonstrativo)
 
 
 def sessao_form2():
@@ -53,10 +55,12 @@ def _pagina(request, sessao, registro_id, conta_id, *, preparacao_id=None,
     elif alvo is None and not dados["e_apa"] and visiveis:
         editaveis = dados["preparacoes_editaveis"]
         alvo = next((item for item in reversed(visiveis) if item.id in editaveis), visiveis[-1])
+    exercicio = apa_em_exercicio(sessao, dados["registro"].unidade_principal_atual_id)
     return paginas.TemplateResponse(request=request, name="form2_preparacao.html",
         status_code=409 if erro else 200,
         context={**dados, "contexto_navegacao": _contexto_navegacao(request), "alvo": alvo,
                  "secretaria": sessao.get(Unidade, dados["registro"].unidade_principal_atual_id),
+                 "apa": sessao.get(Pessoa, exercicio["pessoa_id"]) if exercicio else None,
                  "consulta_historica": apresentar_origem(dados.get("origem")),
                  "guarda": unidade_guarda(dados),
                  "pode_voltar_registro": pode_consultar_registro(sessao, conta_id, registro_id),

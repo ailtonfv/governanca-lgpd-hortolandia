@@ -45,9 +45,11 @@ def test_unidade_isola_origens_e_reutiliza_anotacao(sessao, monkeypatch):
         pagina = cliente.get(url, params={**aal, "preparacao_id": pid})
         assert pagina.status_code == 200
         unidade = pagina.text.split('id="unidade-guarda"', 1)[1].split('id="anotacoes"', 1)[0]
-        assert f"Snapshot {numero} " in unidade
+        assert f"Versão histórica nº {numero} " in unidade
         assert "F1-12.1.3" in unidade and "<input" not in unidade and "<textarea" not in unidade
-        assert ("Não informado nesta versão" in unidade) == (numero == 1)
+        prazo = unidade.split('data-fato-guarda="12.1.1"', 1)[1].split("</dd>", 1)[0]
+        assert ("Sem resposta nesta versão" in prazo) == (numero == 1)
+        assert "Pergunta inexistente nesta versão" in unidade.split('data-fato-guarda="12.5.2"', 1)[1].split("</dd>", 1)[0]
         assert ("Referência fictícia de guarda" in unidade) == (numero == 2)
         assert ('>37</span>' in unidade) == (numero == 2)
         for item in itens:
@@ -67,6 +69,22 @@ def test_unidade_isola_origens_e_reutiliza_anotacao(sessao, monkeypatch):
     assert (preparacao.salvo_por, preparacao.versao_rascunho) == ("PESSOA-G", 2)
     assert sessao.get(PreparacaoForm2, p1).versao_rascunho == 1
     assert verificar_cadeia(sessao, p2)[0] and antes == [retrato(s) for s in (s1, s2)]
+
+
+def test_guarda_usa_enunciado_da_extensao_e_respostas_vazias(sessao, monkeypatch):
+    monkeypatch.setattr(apresentacao_form2, "carregar_catalogo",
+                        lambda: {"versao": "TESTE", "blocos": [{"numero": 2, "itens": []}]})
+    rid, sid = base(sessao, perfil="ambas")
+    pid = iniciar(sessao, rid, sid)["preparacao_id"]
+    pagina = cliente.get(f"/registros/{rid}/form2/preparacao",
+                         params={"conta_id": "CONTA-G1", "preparacao_id": pid})
+    assert pagina.status_code == 200
+    unidade = pagina.text.split('id="unidade-guarda"', 1)[1].split('id="anotacoes"', 1)[0]
+    for id_ in ("12.3", "12.4", "12.5", "12.5.2"):
+        item = unidade.split(f'data-fato-guarda="{id_}"', 1)[1].split("</dd>", 1)[0]
+        assert f"F1-{id_} — " in item and "Sem resposta nesta versão." in item
+    assert unidade.count("data-fato-guarda=") == 21
+    assert pagina.text.count("Detalhes técnicos (auditoria)") == 1
 
 
 @pytest.mark.parametrize("invalido", [False, True])

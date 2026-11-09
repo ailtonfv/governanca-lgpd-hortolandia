@@ -4,6 +4,10 @@
 
 > ⚠️ **Somente dados fictícios.** Nenhum dado pessoal real, CPF, matrícula, senha ou token entra neste repositório, no código, nos testes ou nos logs.
 
+## Consulta à preparação do FORM 2
+
+O servidor seleciona um Registro autorizado e vê seu papel, o APA responsável, a versão histórica de origem e o último registro de autoria. O AAL designado pode retomar a anotação geral. Na unidade de guarda, os fatos são lidos segundo a edição da origem. O histórico integral e os detalhes de auditoria ficam disponíveis para consulta. A ausência do catálogo editorial local gera um aviso e mantém a anotação disponível. Respostas individualizadas da Etapa 1 ainda dependem de aprovação de contrato.
+
 ## Contexto institucional
 
 Este trabalho é desenvolvido para a **Prefeitura Municipal de Hortolândia**, no âmbito da **Secretaria de Planejamento Urbano e Gestão Estratégica**. As referências institucionais de reporte são **Andreia Missio**, Secretária Adjunta, e **Eduardo Marchetti Francisco**, Secretário Municipal.

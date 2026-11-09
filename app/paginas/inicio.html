@@ -9,24 +9,26 @@
 </nav>
 <section class="abertura">
   <div>
-    <h1>{{ titulo_pagina }}</h1>
-    <p><strong>Servidor identificado:</strong> {{ identificacao_servidor(identidade) }}</p>
+    {% if instrumento == 'form2' %}<p class="etiqueta">FORM 2 — Validação jurídica e institucional</p>{% endif %}
+    <h1>{{ 'Selecionar Registro' if instrumento == 'form2' else titulo_pagina }}</h1>
+    <p><strong>{{ "Servidor em sessão" if instrumento == "form2" else "Servidor identificado" }}:</strong> {{ identificacao_servidor(identidade) }}</p>
     <p><strong>Secretaria de atuação:</strong> {{ secretaria.nome }}</p>
+    {% if instrumento == 'form2' %}<p><strong>APA responsável:</strong> {{ secretaria.apa or 'Sem APA vigente identificado' }}</p>{% endif %}
   </div>
 </section>
 
-{% if instrumento %}
+{% if instrumento == 'form1' %}
 <section class="instrumentos-registro" aria-labelledby="escolha-registro">
-  <h2 id="escolha-registro">Escolha um Registro para {{ 'o FORM 1' if instrumento == 'form1' else 'a preparação do FORM 2' }}</h2>
-  <p>{% if instrumento == 'form2' %}O APA habilitado acompanha a preparação. O Agente de Análise de Legitimidade (AAL) precisa de habilitação vigente e de designação pelo APA para a preparação correspondente.{% else %}Em cada cartão, abra o levantamento para consultar ou preencher conforme sua autorização.{% endif %}</p>
+  <h2 id="escolha-registro">Escolha um Registro para o FORM 1</h2>
+  <p>Em cada cartão, abra o levantamento para consultar ou preencher conforme sua autorização.</p>
   <a class="botao-link-secundario" href="{{ url_for('painel_registros') }}?conta_id={{ conta_id|urlencode }}&amp;secretaria_id={{ secretaria.id|urlencode }}">Voltar ao Painel geral de Registros</a>
 </section>
-{% elif pode_criar_registro %}
+{% elif not instrumento and pode_criar_registro %}
 <div class="acao-painel">
   <a class="botao-link" aria-describedby="ajuda-criacao" href="{{ url_for('novo_registro') }}?conta_id={{ conta_id }}&amp;unidade_id={{ secretaria.id|urlencode }}">Criar novo Registro LGPD</a>
   <p class="ajuda" id="ajuda-criacao">Inicia o mapeamento de um serviço, processo ou atividade da Secretaria. O Registro somente será criado após a confirmação dos dados iniciais.</p>
 </div>
-{% else %}
+{% elif not instrumento %}
 <p class="aviso-leitura acao-painel">Seu papel atual permite consultar ou atuar nos mapeamentos disponíveis, mas não abrir um novo Registro LGPD. A criação fica disponível ao Agente Público Autorizado responsável pelo Registro.</p>
 {% endif %}
 
@@ -96,15 +98,20 @@
       <article class="cartao-mapeamento" id="cartao-registro-{{ registro.id }}" tabindex="-1">
         <div class="cartao-mapeamento-conteudo">
           <p class="etiqueta codigo-registro">{{ registro.codigo_lgpd }}</p>
-          <h3>{{ registro.tipo }} · {{ registro.titulo }}</h3>
+          <h3>{{ registro.tipo|rotulo_f2 if instrumento == 'form2' else registro.tipo }} · {{ registro.titulo|rotulo_f2 if instrumento == 'form2' else registro.titulo }}</h3>
           <p class="unidade-registro"><strong>Secretaria:</strong> {{ registro.unidade }}</p>
           <p><strong>Situação do Registro:</strong> <span class="estado estado-{{ registro.estado_codigo }}">{{ registro.estado }}</span></p>
           {% if instrumento == 'form2' %}
           {% set acesso = registro.navegacao_form2 %}
-          {% if acesso.pode_editar %}<p>Você está designado como AAL e pode editar esta preparação.</p>
-          {% elif acesso.e_apa and acesso.preparacao_id %}<p>Você pode acompanhar esta preparação como APA.</p>
-          {% elif acesso.e_apa %}<p>Você pode consultar as origens disponíveis como APA. Ainda não há preparação neste Registro.</p>
-          {% else %}<p>A preparação atribuída a você está disponível para consulta.</p>{% endif %}
+          <p><strong>Situação da preparação:</strong> {{ 'Rascunho ' ~ acesso.resumo.rascunho if acesso.resumo else 'Ainda não iniciada' }}.</p>
+          {% if acesso.resumo %}
+          <p>FORM 1 · versão histórica nº {{ acesso.resumo.origem }}. Último registro em {{ acesso.resumo.salvo_em|data_local }}{% if acesso.resumo.autor %} por {{ acesso.resumo.autor.removesuffix(' (fictício)') }}{% endif %}.</p>
+          {% endif %}
+          {% if acesso.pode_editar %}<p>Função nesta atividade: você está designado como AAL. Retome o rascunho para consultar os fatos e anotar sua análise.</p>
+          {% elif acesso.e_apa and acesso.preparacao_id %}<p>Função nesta atividade: você pode acompanhar esta preparação como APA. Abra o rascunho para consulta.</p>
+          {% elif acesso.pode_iniciar %}<p>Função nesta atividade: APA. Para iniciar, consulte as versões de origem e designe um AAL habilitado.</p>
+          {% elif acesso.e_apa %}<p>Função nesta atividade: APA. Consulte a disponibilidade da origem e da designação.</p>
+          {% else %}<p>Função nesta atividade: AAL designado. Consulte a preparação em modo de leitura.</p>{% endif %}
           {% else %}
           <p><strong>Situação do FORM 1:</strong> {{ registro.situacao_form1_integral }}</p>
           {% if registro.preenchimento_arp %}
@@ -172,16 +179,25 @@
           <a class="botao-link" aria-label="Retomar rascunho do Registro {{ registro.codigo_lgpd }}" href="{{ url_registro }}#{{ registro.preenchimento_arp.ancora }}">Retomar rascunho do FORM 1</a>
           <p class="ajuda">A conferência preservou a versão apresentada. Seu rascunho continua editável; alterações não modificam aquela versão.</p>
           {% endif %}
+          {% if instrumento == 'form2' %}
+          <a class="botao-link-secundario" href="{{ url_registro }}#instrumentos-registro">Consultar detalhes e instrumentos do Registro</a>
+          {% else %}
           <a class="botao-link-secundario" aria-label="Ver detalhes do Registro {{ registro.codigo_lgpd }}" aria-describedby="ajuda-detalhes-{{ registro.id }}" href="{{ url_registro }}">Ver detalhes do Registro</a>
           <p class="ajuda" id="ajuda-detalhes-{{ registro.id }}">Consulte a identificação, os responsáveis e a situação geral deste Registro.</p>
           <a class="botao-link-secundario" href="{{ url_registro }}#instrumentos-registro" aria-label="Consultar instrumentos do Registro {{ registro.codigo_lgpd }}" aria-describedby="ajuda-instrumentos-{{ registro.id }}">Instrumentos deste Registro</a>
           <p class="ajuda" id="ajuda-instrumentos-{{ registro.id }}">Veja os quatro FORMs e quais estão disponíveis para seu perfil.</p>
+          {% endif %}
         </div>
       </article>
       {% endfor %}
     </div>
     {% else %}
-    <p class="vazio">{% if instrumento == 'form2' %}Nenhum Registro acessível para preparação do FORM 2 nesta Secretaria com seu acesso atual.{% else %}Nenhum Registro LGPD está disponível para consulta por este agente.{% endif %}</p>
+    <p class="vazio">{% if instrumento == 'form2' %}Nenhum Registro acessível para preparação do FORM 2 nesta Secretaria com seu acesso atual. A consulta como AAL depende de habilitação vigente e de designação pelo APA.{% else %}Nenhum Registro LGPD está disponível para consulta por este agente.{% endif %}</p>
     {% endif %}
 </section>
+{% if instrumento == 'form2' %}
+<nav class="navegacao-governanca" aria-label="Consulta transversal">
+  <a class="botao-link-secundario" href="{{ url_for('painel_registros') }}?conta_id={{ conta_id|urlencode }}&amp;secretaria_id={{ secretaria.id|urlencode }}">Voltar ao Painel geral de Registros</a>
+</nav>
+{% endif %}
 {% endblock %}

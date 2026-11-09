@@ -10,7 +10,7 @@
       <p class="ajuda">{% if registro.form1_integral.pode_editar %}Preenchimento autorizado como ARP.{% else %}Consulta; edição somente pelo ARP autorizado.{% endif %}</p>
     </li>
     <li data-instrumento="FORM2">
-      <h3>FORM 2 — Análise de legitimidade</h3>
+      <h3>FORM 2 — Validação jurídica e institucional</h3>
       <p>Destina-se à análise jurídica e institucional do tratamento. Disponível neste momento: preparação demonstrativa, sem parecer ou decisão institucional.</p>
       {% if navegacao_form2 %}
       {{ link_form2(registro, navegacao_form2, conta_id, request.query_params.get('secretaria_id')) }}

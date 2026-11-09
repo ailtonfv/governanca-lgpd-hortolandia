@@ -99,12 +99,26 @@ def test_preparador_sem_designacao_nao_recebe_link_listagem_ou_origem(sessao):
     assert autorizado.status_code == 200 and "Designar AAL e iniciar preparação" in autorizado.text
 
 
+def test_acao_de_inicio_depende_do_estado_real(sessao):
+    rid, sid = base(sessao)
+    params = {"conta_id": "CONTA-A1", "secretaria_id": "UNID-NORTE", "instrumento": "form2"}
+    assert "Iniciar preparação" in cliente.get("/painel", params=params).text
+    sessao.get(Registro, rid).estado_atual = "suspenso"
+    sessao.commit()
+    lista = cliente.get("/painel", params=params)
+    assert "Consultar disponibilidade" in lista.text and "Iniciar preparação" not in lista.text
+    origem = cliente.get(f"/registros/{rid}/form2/preparacao", params={**params, "snapshot_id": sid})
+    assert origem.status_code == 200 and 'id="preparador"' not in origem.text
+
+
 def test_apa_tambem_preparador_e_estado_sem_edicao(sessao):
     rid, sid = base(sessao)
     habilitar(sessao,rid,"PESSOA-A","preparar")
     pid = iniciar(sessao,rid,sid,preparador_id="PESSOA-A")["preparacao_id"]
     proj = projetar_navegacao_preparacao(sessao,conta_id="CONTA-A1",registro_id=rid)
-    assert proj == {"preparacao_id":pid,"pode_editar":True,"e_apa":True}
+    assert proj["preparacao_id"] == pid and proj["pode_editar"] and proj["e_apa"]
+    assert proj["resumo"]["origem"] == proj["resumo"]["rascunho"] == 1
+    assert "MAT-FICT-0001" in proj["resumo"]["autor"]
     sessao.get(Registro,rid).estado_atual = "suspenso"
     sessao.commit()
     proj = projetar_navegacao_preparacao(sessao,conta_id="CONTA-A1",registro_id=rid)
