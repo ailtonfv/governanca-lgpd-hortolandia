@@ -1,0 +1,32 @@
+<section class="form1" id="unidade-guarda" tabindex="-1" aria-labelledby="titulo-guarda">
+  <p class="etiqueta">FORM 2 · Etapa 1 · Bloco 2</p>
+  <h2 id="titulo-guarda">Fundamento do prazo de guarda</h2>
+  {% if guarda.aviso %}
+  <p role="status">{{ guarda.aviso }} A anotação geral continua disponível.</p>
+  {% else %}
+  <a href="#anotacoes">Ir à anotação geral</a>
+  <section class="detalhe somente-leitura" aria-labelledby="fatos-guarda">
+    <h3 id="fatos-guarda">Área A — Informações do FORM 1</h3>
+    <p>Somente leitura · Snapshot {{ origem.snapshot.numero }} · rascunho {{ origem.snapshot.versao_rascunho }} · {{ origem.estrutura }}. Lacre verificado.</p>
+    <dl>
+    {% for fato in guarda.fatos %}
+      <dt>F1-{{ fato.id }}{% if fato.campo %} — {{ fato.campo.pergunta }}{% endif %}</dt>
+      <dd>{% if fato.campo %}{{ valor(fato.campo.valor, consulta_historica.rotulos, agentes) }}{% else %}Pergunta ausente nesta versão de origem.{% endif %}
+          {% if fato.complemento %}<p>Complemento registrado: {{ fato.complemento }}</p>{% endif %}</dd>
+    {% endfor %}
+    </dl>
+  </section>
+  <section aria-labelledby="orientacoes-guarda">
+    <h3 id="orientacoes-guarda">Área B — Orientações e perguntas do FORM 2</h3>
+    <p>Perguntas para orientar a análise do AAL. Catálogo {{ guarda.versao }}.</p>
+    <ul>
+    {% for questao in guarda.questoes %}
+      <li><p><strong>{{ questao.id }}</strong> — {{ questao.enunciado }}</p>
+        {% if questao.condicao_documental %}<p>Aplicável se {{ questao.condicao_documental.origem }} receber a resposta “{{ questao.condicao_documental.resposta }}”.</p>{% endif %}
+        {% if questao.orientacao %}<p>{{ questao.orientacao }}</p>{% endif %}
+      </li>
+    {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+</section>

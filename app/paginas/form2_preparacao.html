@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from '_links_instrumentos.html' import acao_preparacao, identificacao_servidor %}
+{% from '_links_instrumentos.html' import acao_preparacao, ancora_preparacao, identificacao_servidor %}
 {% from "_consulta_historica_form2.html" import valor %}
 {% block titulo %}FORM 2 · Análise de legitimidade{% endblock %}
 {% block conteudo %}
@@ -29,7 +29,7 @@
 <section class="form1" aria-labelledby="proxima-acao">
   <h2 id="proxima-acao">Próxima ação</h2>
   {% if alvo %}
-  <a class="botao-link" href="{% if not preparacao %}{{ url_preparacao.include_query_params(conta_id=conta_id, preparacao_id=alvo.id, **contexto_navegacao) }}{% endif %}#anotacoes">{{ acao_preparacao(alvo.id in preparacoes_editaveis, e_apa) }}</a>
+  <a class="botao-link" href="{% if not preparacao %}{{ url_preparacao.include_query_params(conta_id=conta_id, preparacao_id=alvo.id, **contexto_navegacao) }}{% endif %}{{ ancora_preparacao(alvo.id in preparacoes_editaveis) }}">{{ acao_preparacao(alvo.id in preparacoes_editaveis, e_apa) }}</a>
   {% elif e_apa and origem %}
     {% if candidatos %}
     <form method="post" action="{{ url_for('iniciar_form2_demo', registro_id=registro.id).include_query_params(**contexto_navegacao) }}">
@@ -60,13 +60,16 @@
   <details><summary>Preparações disponíveis</summary><ul>
     {% for item in preparacoes %}
     {% set versao = snapshots | selectattr('id', 'equalto', item.snapshot_id) | first %}
-    <li><a href="{{ url_preparacao.include_query_params(conta_id=conta_id, preparacao_id=item.id, **contexto_navegacao) }}#anotacoes">{{ acao_preparacao(item.id in preparacoes_editaveis, e_apa) }} · origem {{ versao.numero }} · rascunho {{ item.versao_rascunho }}</a></li>
+    <li><a href="{{ url_preparacao.include_query_params(conta_id=conta_id, preparacao_id=item.id, **contexto_navegacao) }}{{ ancora_preparacao(item.id in preparacoes_editaveis) }}">{{ acao_preparacao(item.id in preparacoes_editaveis, e_apa) }} · origem {{ versao.numero }} · rascunho {{ item.versao_rascunho }}</a></li>
     {% endfor %}
   </ul></details>{% endif %}
 </section>
 {% if preparacao %}
+{% if guarda %}{% include "_unidade_guarda_form2.html" %}{% endif %}
 <section class="form1" id="anotacoes" tabindex="-1" aria-labelledby="titulo-anotacoes">
+{% if guarda and not guarda.aviso %}<p class="etiqueta">Área C — Trabalho do AAL</p>{% endif %}
 <h2 id="titulo-anotacoes">Anotações de preparação</h2>
+{% if guarda %}<p>A anotação é geral e abrange toda a preparação. As perguntas de guarda documental continuam sem respostas individualizadas no FORM 2.</p>{% endif %}
 <p>AAL responsável: {{ agentes.get(preparacao.preparador_id, 'Identificação funcional indisponível') }}. Rascunho {{ preparacao.versao_rascunho }} · último registro em {{ preparacao.salvo_em }} por {{ agentes.get(preparacao.salvo_por, 'Identificação funcional indisponível') }}.</p>
 <p>Facultativas, até 2.000 caracteres. Registre dúvidas sobre o levantamento; não informe nomes, CPF ou dados concretos de cidadãos. Esta orientação não substitui controles de segurança.</p>
 {% if pode_editar %}

@@ -46,7 +46,8 @@ def test_painel_registro_form2_retorno_apa_e_preparador(sessao):
         assert 'id="titulo-form1-integral" tabindex="-1"' in pagina.text
         destino = destino_form2(pagina.text)
         assert f"/registros/{rid}/form2/preparacao?conta_id={conta}" in destino
-        assert f"preparacao_id={pid}#anotacoes" in destino
+        ancora = "unidade-guarda" if editavel else "anotacoes"
+        assert f"preparacao_id={pid}#{ancora}" in destino
         form2 = cliente.get(destino)
         assert form2.status_code == 200
         assert ('id="anotacao"' in form2.text) is editavel

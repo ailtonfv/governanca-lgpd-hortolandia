@@ -2,6 +2,7 @@
   const form = document.getElementById('form2-rascunho');
   const input = document.getElementById('anotacao');
   const saved = document.getElementById('form2-conteudo-salvo');
+  const destinosLocais = ['#anotacoes', '#unidade-guarda'];
   let submitting = false;
   const dirty = () => Boolean(input && saved && input.value !== JSON.parse(saved.textContent));
   window.addEventListener('beforeunload', event => {
@@ -9,7 +10,7 @@
   });
   document.addEventListener('click', event => {
     const link = event.target.closest('a');
-    if (link && link.hash === '#anotacoes' && link.href === location.href.split('#')[0] + '#anotacoes') return;
+    if (link && destinosLocais.includes(link.hash) && link.href === location.href.split('#')[0] + link.hash) return;
     if (link && dirty() && !window.confirm('Há anotações não salvas. Sair descarta somente essas alterações. Continuar?')) event.preventDefault();
   });
   document.addEventListener('submit', event => {
@@ -17,6 +18,6 @@
     if (dirty() && !window.confirm('Há anotações não salvas. Continuar sem salvar?')) event.preventDefault();
   });
   const error = document.getElementById('erro-form2');
-  const target = error || (location.hash === '#anotacoes' && document.getElementById('anotacoes'));
+  const target = error || (destinosLocais.includes(location.hash) && document.getElementById(location.hash.slice(1)));
   if (target) target.focus();
 })();

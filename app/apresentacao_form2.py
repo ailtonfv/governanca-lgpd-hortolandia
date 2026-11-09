@@ -1,6 +1,7 @@
 """Rótulos de consulta; não modifica nem reinterpreta a origem histórica."""
 from sqlalchemy import select
 
+from app.catalogo_form2_rev18 import carregar_catalogo
 from app.modelos import Pessoa
 
 
@@ -53,6 +54,29 @@ def apresentar_origem(origem):
     fonte = origem["conteudo"]
     return {"rotulos": rotulos, "grupos": [
         {"titulo": titulo, "valor": fonte[chave]} for chave, titulo in GRUPOS if chave in fonte
+    ]}
+
+
+def unidade_guarda(dados):
+    """Projeta a unidade a partir da consulta já autorizada e da origem lacrada."""
+    if not dados["pode_editar"]:
+        return None
+    try:
+        catalogo = carregar_catalogo()
+    except FileNotFoundError:
+        return {"aviso": "O catálogo de guarda documental está indisponível nesta instalação."}
+    except (OSError, ValueError, KeyError, TypeError):
+        return {"aviso": "Não foi possível validar o catálogo de guarda documental desta instalação."}
+
+    origem = dados["origem"]
+    perguntas = {item["id"]: item for item in origem["perguntas"]}
+    fatos = []
+    for chave in ("12.1", "12.1.1", "12.1.2", "12.1.3"):
+        fatos.append({"id": chave, "campo": perguntas.get(chave),
+                      "complemento": origem["conteudo"].get("complementos", {}).get(chave)})
+    bloco = next(b for b in catalogo["blocos"] if b["numero"] == 2)
+    return {"versao": catalogo["versao"], "fatos": fatos, "questoes": [
+        q for q in bloco["itens"] if q["id"] in ("F2-2.9", "F2-2.9.1", "F2-2.9.2", "F2-2.9.3")
     ]}
 
 

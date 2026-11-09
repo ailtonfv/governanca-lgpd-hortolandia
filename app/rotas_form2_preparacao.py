@@ -12,7 +12,7 @@ from sqlalchemy import inspect
 from app.banco import motor
 from app.modelos import Unidade
 from app.consultas_interface import pode_consultar_registro
-from app.apresentacao_form2 import apresentar_origem, identificar_agentes, PAPEIS
+from app.apresentacao_form2 import apresentar_origem, identificar_agentes, unidade_guarda, PAPEIS
 from app.form2_preparacao import consultar_preparacao, iniciar_preparacao, salvar_preparacao
 
 router = APIRouter()
@@ -58,6 +58,7 @@ def _pagina(request, sessao, registro_id, conta_id, *, preparacao_id=None,
         context={**dados, "contexto_navegacao": _contexto_navegacao(request), "alvo": alvo,
                  "secretaria": sessao.get(Unidade, dados["registro"].unidade_principal_atual_id),
                  "consulta_historica": apresentar_origem(dados.get("origem")),
+                 "guarda": unidade_guarda(dados),
                  "pode_voltar_registro": pode_consultar_registro(sessao, conta_id, registro_id),
                  "agentes": identificar_agentes(sessao, dados), "papeis": PAPEIS,
                  "conta_id": conta_id, "comando_id": str(uuid.uuid4()),
