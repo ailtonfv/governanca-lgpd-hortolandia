@@ -4,7 +4,7 @@ const vm = require('node:vm');
 const assert = require('node:assert/strict');
 const formularios = new Map();
 let sujo = true, envios = 0;
-for (const seletor of ['[data-adotar-medidas]', '[data-adotar-guarda]']) {
+for (const seletor of ['[data-adotar-medidas]', '[data-adotar-guarda]', '[data-adotar-rev18]']) {
   const aviso = {textContent: '', focus() { this.focado = true; }};
   formularios.set(seletor, {
     aviso,
@@ -24,7 +24,7 @@ for (const form of formularios.values()) {
 assert.equal(envios, 0);
 sujo = false;
 for (const form of formularios.values()) form.enviar({preventDefault() { assert.fail('Não havia alterações locais'); }});
-assert.equal(envios, 2);
+assert.equal(envios, formularios.size);
 
 // Condições declarativas executadas pelo mesmo script usado nos 14 blocos.
 const definicao = JSON.parse(fs.readFileSync('app/catalogos/form1_rev13_ext_guarda_v1.json', 'utf8'));

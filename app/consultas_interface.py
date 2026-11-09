@@ -1,6 +1,7 @@
 """Consultas preparadas para a interface, sem regras de negócio nos templates."""
 
 from app.extensao_medidas_form1 import catalogo_efetivo, versao_estrutura
+from app.rev18_form1 import TITULO_BLOCO_14
 from app.extensao_guarda_form1 import condicoes_guarda, definicao_guarda, usa_guarda
 
 import re
@@ -33,7 +34,6 @@ from app.form1_integral import (CONDICOES_BLOCO_1, CONDICOES_PARTICIPANTE_BLOCO_
                                 FAIXAS_VOLUME_REV13, IDS_BLOCO_2, IDS_BLOCO_4,
                                 IDS_BLOCO_5, IDS_BLOCO_6, IDS_BLOCO_7, IDS_BLOCO_8, IDS_BLOCO_9,
                                 IDS_BLOCO_10,
-                                IDS_BLOCO_11,
                                 IDS_BLOCO_12,
                                 IDS_BLOCO_13,
                                 IDS_BLOCO_14,
@@ -1315,6 +1315,7 @@ def carregar_registro(sessao, conta_id, registro_id):
         "pre_validacao": pre_validacao_integral,
         "perguntas_localizacao": perguntas_para_localizacao(conteudo_integral),
         "versao_estrutura": versao_estrutura(conteudo_integral),
+        "titulo_bloco_14": TITULO_BLOCO_14 if "revisao_18" in conteudo_integral else "Achados e pendências",
         "extensao_medidas": conteudo_integral.get("extensao_medidas"),
         "extensao_guarda": conteudo_integral.get("extensao_guarda"),
         "operacoes_guarda": operacoes_guarda,
@@ -1444,7 +1445,7 @@ def carregar_registro(sessao, conta_id, registro_id):
             {"id": item.id, "nome": item.nome} for item in secretarias_integral
         ],
         "campos_bloco_11": {
-            campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_11
+            campo_id: metadado_integral(campo_id) for campo_id in catalogo_integral if campo_id.startswith("11.")
         },
         "campos_bloco_12": {
             campo_id: metadado_integral(campo_id) for campo_id in catalogo_integral if campo_id.startswith("12.")

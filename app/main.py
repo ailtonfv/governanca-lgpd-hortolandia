@@ -14,10 +14,11 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from app.extensao_medidas_form1 import (
-    adotar_extensao_medidas, catalogo_efetivo, versao_estrutura,
+    adotar_extensao_medidas, catalogo_efetivo, conteudo_da_estrutura, versao_estrutura,
     VERSAO_BASE, VERSAO_EXTENSAO, IDS_BLOCO_13_EXTENSAO,
 )
 from app.extensao_guarda_form1 import adotar_extensao_guarda, VERSAO_GUARDA
+from app.rev18_form1 import adotar_rev18, VERSAO_REV18
 from app.atribuicao_form1_integral import atribuir_arp_form1_integral
 from app.ajudas_cartilha_form1 import SECOES_CARTILHA, VERSAO_CARTILHA_AJUDAS_FORM1
 from app.cartilha_local import acesso_local_cartilha, secoes_cartilha_disponiveis
@@ -542,6 +543,7 @@ def detalhe_registro(
             "comando_salvar_bloco_13": str(uuid.uuid4()),
             "comando_adotar_medidas": str(uuid.uuid4()),
             "comando_adotar_guarda": str(uuid.uuid4()),
+            "comando_adotar_rev18": str(uuid.uuid4()),
             "comando_salvar_bloco_14": str(uuid.uuid4()),
             "comandos_remover_participante": {
                 participante["id"]: str(uuid.uuid4())
@@ -1050,7 +1052,10 @@ async def salvar_bloco_11_integral(
     resultado = salvar_bloco_11_form1_integral(
         sessao, comando_id=str(formulario.get("comando_id", ""))[:64], conta_id=conta_id,
         registro_id=registro_id, versao_lida=int(formulario.get("versao_lida", 0)),
-        respostas=_respostas_do_formulario(formulario, IDS_BLOCO_11),
+        respostas=_respostas_do_formulario(
+            formulario, (*IDS_BLOCO_11, "11.2.5"), catalogo_efetivo(conteudo_da_estrutura(VERSAO_REV18)),
+        ),
+        estrutura_lida=formulario.get("estrutura_lida"),
         complementos_outro=_complementos_outro_do_formulario(formulario, IDS_BLOCO_11),
     )
     sessao.commit()
@@ -1059,6 +1064,21 @@ async def salvar_bloco_11_integral(
         _mensagem_salvamento(resultado, "Bloco 11 atualizado."),
         ancora=_ancora_apos_salvar_bloco(11, acao_pos_salvar, resultado["permitido"]),
     )
+
+
+@app.post("/registros/{registro_id}/form1-integral/adotar-rev18")
+def adotar_revisao_18(
+    registro_id: str, conta_id: str = Form(max_length=50),
+    comando_id: str = Form(max_length=64), versao_lida: int = Form(ge=1),
+    confirmar: str = Form(default=""), sessao: Session = Depends(obter_sessao),
+):
+    resultado = adotar_rev18(
+        sessao, comando_id=comando_id, conta_id=conta_id, registro_id=registro_id,
+        versao_lida=versao_lida, confirmar=confirmar == "sim",
+    )
+    sessao.commit()
+    return _voltar_ao_registro(registro_id, conta_id, resultado, "REV18 adotada neste rascunho.",
+                               ancora="titulo-bloco-11")
 
 
 @app.post("/registros/{registro_id}/form1-integral/bloco-12/adotar-extensao")
@@ -1086,7 +1106,6 @@ async def salvar_bloco_12_integral(
     formulario = await request.form()
     acao_pos_salvar = str(formulario.get("acao_pos_salvar", "permanecer"))
     conta_id = str(formulario.get("conta_id", ""))[:50]
-    from app.extensao_medidas_form1 import conteudo_da_estrutura
     try:
         estrutura = conteudo_da_estrutura(formulario.get("estrutura_lida") or VERSAO_BASE)
     except ValueError:
@@ -1163,6 +1182,7 @@ async def salvar_bloco_14_integral(
         sessao, comando_id=str(formulario.get("comando_id", ""))[:64], conta_id=conta_id,
         registro_id=registro_id, versao_lida=int(formulario.get("versao_lida", 0)),
         respostas=_respostas_do_formulario(formulario, IDS_BLOCO_14),
+        estrutura_lida=formulario.get("estrutura_lida"),
         complementos_outro=_complementos_outro_do_formulario(formulario, IDS_BLOCO_14),
     )
     sessao.commit()

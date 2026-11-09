@@ -1016,7 +1016,7 @@ def _salvar_bloco_catalogado_form1_integral(
     }
     catalogo = None
     problema_estrutura = None
-    if numero_bloco in (12, 13):
+    if numero_bloco in (11, 12, 13, 14):
         from app.extensao_medidas_form1 import (
             VERSAO_BASE, catalogo_efetivo, versao_estrutura, conteudo_da_estrutura,
         )
@@ -1054,10 +1054,13 @@ def _salvar_bloco_catalogado_form1_integral(
     )
     if resposta is not None:
         return resposta
-    if numero_bloco in (12, 13):
+    if numero_bloco in (11, 12, 13, 14):
         from app.extensao_guarda_form1 import usa_guarda
+        from app.rev18_form1 import VERSAO_REV18
         legado_12 = numero_bloco == 12 and estrutura_lida is None and not usa_guarda(rascunho.conteudo)
-        if not legado_12 and perfil_lido != versao_estrutura(rascunho.conteudo):
+        perfil_atual = versao_estrutura(rascunho.conteudo)
+        legado_11_14 = numero_bloco in (11, 14) and estrutura_lida is None and perfil_atual != VERSAO_REV18
+        if not (legado_12 or legado_11_14) and perfil_lido != perfil_atual:
             return _negar(sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
                           tipo_comando, f"versão da estrutura divergente: recarregue o Bloco {numero_bloco}")
     conteudo = _conteudo_com_respostas_do_bloco(
@@ -1141,7 +1144,7 @@ def salvar_bloco_10_form1_integral(
 
 def salvar_bloco_11_form1_integral(
     sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas,
-    complementos_outro=None, momento=None,
+    complementos_outro=None, momento=None, estrutura_lida=None,
 ):
     """Salva repositórios, infraestrutura e dependência de terceiro."""
 
@@ -1150,7 +1153,7 @@ def salvar_bloco_11_form1_integral(
         registro_id=registro_id, versao_lida=versao_lida, respostas=respostas,
         campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_11,
         condicoes=CONDICOES_BLOCO_11, complementos_outro=complementos_outro,
-        momento=momento,
+        momento=momento, estrutura_lida=estrutura_lida,
     )
 
 
@@ -1185,7 +1188,7 @@ def salvar_bloco_13_form1_integral(
 
 def salvar_bloco_14_form1_integral(
     sessao, *, comando_id, conta_id, registro_id, versao_lida, respostas,
-    complementos_outro=None, momento=None,
+    complementos_outro=None, momento=None, estrutura_lida=None,
 ):
     """Salva confirmações pendentes e achados factuais do Bloco 14."""
 
@@ -1194,7 +1197,7 @@ def salvar_bloco_14_form1_integral(
         registro_id=registro_id, versao_lida=versao_lida, respostas=respostas,
         campos_editaveis=CAMPOS_EDITAVEIS_BLOCO_14,
         condicoes=CONDICOES_BLOCO_14, complementos_outro=complementos_outro,
-        momento=momento,
+        momento=momento, estrutura_lida=estrutura_lida,
     )
 
 

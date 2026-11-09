@@ -72,9 +72,32 @@ def condicoes_guarda(conteudo=None):
     return resultado
 
 
+def incorporar_guarda(conteudo, rascunho, snapshot, pessoa_id, momento):
+    from app.extensao_medidas_form1 import catalogo_efetivo, versao_estrutura
+    catalogo = catalogo_efetivo(rascunho.conteudo)
+    legado = {
+        "versao_estrutura": versao_estrutura(rascunho.conteudo),
+        "snapshot_id": snapshot.id, "numero_snapshot": snapshot.numero,
+        "lacre_snapshot": snapshot.lacre, "versao_rascunho": rascunho.versao_rascunho,
+        "rascunho_salvo_por": rascunho.salvo_por,
+        "rascunho_salvo_em": rascunho.salvo_em.isoformat(), "campos": [],
+    }
+    for campo_id in definicao_guarda()["ids_substituidos"]:
+        legado["campos"].append({
+            "id": campo_id, "pergunta": catalogo[campo_id].pergunta,
+            "resposta": conteudo.get("respostas", {}).pop(campo_id, None),
+            "respostas_inativas": conteudo.get("respostas_inativas", {}).pop(campo_id, []),
+        })
+    conteudo["extensao_guarda"] = {
+        "versao": VERSAO_GUARDA, "matriz": definicao_guarda()["matriz_id"],
+        "adotada_por": pessoa_id, "papel": "ARP", "adotada_em": momento.isoformat(),
+        "legado": legado,
+    }
+
+
 def adotar_extensao_guarda(sessao, *, comando_id, conta_id, registro_id,
                           versao_lida, confirmar=False, momento=None):
-    from app.extensao_medidas_form1 import catalogo_efetivo, versao_estrutura
+    from app.extensao_medidas_form1 import versao_estrutura
     from app.rascunho_form1_integral import (
         _agora_utc, _ator, _negar, _preparar_alteracao, _salvar_conteudo,
     )
@@ -100,25 +123,7 @@ def adotar_extensao_guarda(sessao, *, comando_id, conta_id, registro_id,
         pessoa_id=pessoa_id, momento=momento, reusar_existente=True,
     )
     conteudo = deepcopy(rascunho.conteudo)
-    catalogo = catalogo_efetivo(conteudo)
-    legado = {
-        "versao_estrutura": versao_estrutura(conteudo),
-        "snapshot_id": snapshot.id, "numero_snapshot": snapshot.numero,
-        "lacre_snapshot": snapshot.lacre, "versao_rascunho": versao_lida,
-        "rascunho_salvo_por": rascunho.salvo_por,
-        "rascunho_salvo_em": rascunho.salvo_em.isoformat(), "campos": [],
-    }
-    for campo_id in definicao_guarda()["ids_substituidos"]:
-        legado["campos"].append({
-            "id": campo_id, "pergunta": catalogo[campo_id].pergunta,
-            "resposta": conteudo.get("respostas", {}).pop(campo_id, None),
-            "respostas_inativas": conteudo.get("respostas_inativas", {}).pop(campo_id, []),
-        })
-    conteudo["extensao_guarda"] = {
-        "versao": VERSAO_GUARDA, "matriz": definicao_guarda()["matriz_id"],
-        "adotada_por": pessoa_id, "papel": "ARP", "adotada_em": momento.isoformat(),
-        "legado": legado,
-    }
+    incorporar_guarda(conteudo, rascunho, snapshot, pessoa_id, momento)
     resultado = _salvar_conteudo(
         sessao, comando=comando, registro=registro, rascunho=rascunho,
         pessoa_id=pessoa_id, versao_lida=versao_lida, conteudo=conteudo,

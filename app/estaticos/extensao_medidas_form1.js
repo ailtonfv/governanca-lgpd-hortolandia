@@ -16,4 +16,5 @@
   }
   protegerAdocao(document.querySelector('[data-adotar-medidas]'));
   protegerAdocao(document.querySelector('[data-adotar-guarda]'));
+  protegerAdocao(document.querySelector('[data-adotar-rev18]'));
 })();

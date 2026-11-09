@@ -1,6 +1,20 @@
 <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-{{ numero_bloco }}">
   <p class="etiqueta">FORM 1 — Etapa {{ etapa_bloco }} de 4 — Bloco {{ numero_bloco }} de 14</p>
   <h3 id="titulo-bloco-{{ numero_bloco }}">{{ titulo_bloco }}</h3>
+  {% if numero_bloco == 11 and registro.form1_integral.pode_editar and not registro.form1_integral.rascunho.conteudo.get('revisao_18') %}
+  <details>
+    <summary>Adotar a REV18 neste rascunho</summary>
+    <p>A REV18 acrescenta a pergunta 11.2.5 e atualiza o Bloco 14. A versão atual ficará preservada. Se GUARDA ou MEDIDAS ainda não tiver sido adotada, as respostas agregadas ficam no histórico e as perguntas desmembradas começam vazias.</p>
+    <form method="post" action="{{ url_for('adotar_revisao_18', registro_id=registro.id) }}" data-adotar-rev18>
+      <input type="hidden" name="conta_id" value="{{ conta_id }}">
+      <input type="hidden" name="comando_id" value="{{ comando_adotar_rev18 }}">
+      <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
+      <label class="opcao"><input type="checkbox" name="confirmar" value="sim" required> Confirmo a adoção da REV18, incluindo GUARDA e MEDIDAS.</label>
+      <button type="submit">Adotar REV18 neste Registro</button>
+      <p role="status" tabindex="-1" data-aviso-adocao></p>
+    </form>
+  </details>
+  {% endif %}
   {% if numero_bloco == 12 %}{% include '_extensao_guarda_form1.html' %}{% endif %}
   {% if numero_bloco == 13 %}{% include '_extensao_medidas_form1.html' %}{% endif %}
   {% include '_leitura_bloco_form1.html' %}
@@ -10,7 +24,7 @@
     <input type="hidden" name="conta_id" value="{{ conta_id }}">
     <input type="hidden" name="comando_id" value="{{ comando_bloco }}">
     <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
-    {% if numero_bloco in (12, 13) %}<input type="hidden" name="estrutura_lida" value="{{ registro.form1_integral.versao_estrutura }}">{% endif %}
+    {% if numero_bloco in (11, 12, 13, 14) %}<input type="hidden" name="estrutura_lida" value="{{ registro.form1_integral.versao_estrutura }}">{% endif %}
     {% if numero_bloco == 10 %}
     <p class="ajuda ajuda-compartilhamento"><strong>Destinatários do tratamento:</strong> diferencie circulação interna entre unidades ou Secretarias da Prefeitura, compartilhamento com órgão ou entidade pública externa e compartilhamento com entidade privada. A função concreta deve ser registrada; contrato ou parceria não torna automaticamente uma entidade Operadora LGPD. Não confunda este compartilhamento de dados com a tramitação administrativa do Registro LGPD.</p>
     {% endif %}

@@ -7,6 +7,7 @@ from functools import lru_cache
 from pathlib import Path
 
 from app.form1_integral import campos_por_id
+from app import rev18_form1
 
 VERSAO_BASE = "F1-C3-REV13"
 VERSAO_EXTENSAO = "F1-C3-REV13-EXT-MEDIDAS-v1"
@@ -29,7 +30,16 @@ def versao_medidas(conteudo=None):
 def versao_estrutura(conteudo=None):
     from app.extensao_guarda_form1 import usa_guarda, VERSAO_GUARDA, VERSAO_COMBINADA
     medidas = versao_medidas(conteudo)
-    if usa_guarda(conteudo):
+    guarda = usa_guarda(conteudo)
+    if "revisao_18" in (conteudo or {}):
+        revisao = conteudo["revisao_18"]
+        if (not isinstance(revisao, dict)
+                or revisao.get("versao") != rev18_form1.VERSAO_REV18
+                or revisao.get("politica") != rev18_form1.POLITICA_REV18
+                or not guarda or medidas != VERSAO_EXTENSAO):
+            raise ValueError("composição REV18 não reconhecida")
+        return rev18_form1.VERSAO_REV18
+    if guarda:
         return VERSAO_COMBINADA if medidas == VERSAO_EXTENSAO else VERSAO_GUARDA
     return medidas
 
@@ -37,6 +47,9 @@ def versao_estrutura(conteudo=None):
 def conteudo_da_estrutura(versao):
     """Interpreta o perfil declarado; o domínio ainda confere o perfil persistido."""
     from app.extensao_guarda_form1 import VERSAO_GUARDA, VERSAO_COMBINADA
+    if versao == rev18_form1.VERSAO_REV18:
+        return {**conteudo_da_estrutura(VERSAO_COMBINADA),
+                "revisao_18": {"versao": versao, "politica": rev18_form1.POLITICA_REV18}}
     if versao not in (VERSAO_BASE, VERSAO_EXTENSAO, VERSAO_GUARDA, VERSAO_COMBINADA):
         raise ValueError("versão da estrutura não reconhecida")
     conteudo = {}
@@ -50,6 +63,7 @@ def conteudo_da_estrutura(versao):
 def catalogo_efetivo(conteudo=None):
     base = campos_por_id()
     from app.extensao_guarda_form1 import estender_catalogo_guarda
+    estrutura = versao_estrutura(conteudo)
     if versao_medidas(conteudo) == VERSAO_BASE:
         return estender_catalogo_guarda(base, conteudo)
     definicao = definicao_extensao()
@@ -63,7 +77,8 @@ def catalogo_efetivo(conteudo=None):
                 campo, id=item["id"], pergunta=item["pergunta"],
                 alternativas=tuple(definicao["alternativas"]), instrucao="",
             )
-    return estender_catalogo_guarda(resultado, conteudo)
+    resultado = estender_catalogo_guarda(resultado, conteudo)
+    return rev18_form1.estender_catalogo(resultado) if estrutura == rev18_form1.VERSAO_REV18 else resultado
 
 
 def matriz_efetiva(conteudo=None):
@@ -71,6 +86,7 @@ def matriz_efetiva(conteudo=None):
     from app.pre_validacao_form1_integral import carregar_matriz_obrigatoriedade
     base = carregar_matriz_obrigatoriedade()
     from app.extensao_guarda_form1 import estender_matriz_guarda
+    estrutura = versao_estrutura(conteudo)
     if versao_medidas(conteudo) == VERSAO_BASE:
         return estender_matriz_guarda(base, conteudo)
     resultado = {}
@@ -83,7 +99,27 @@ def matriz_efetiva(conteudo=None):
                 regra, campo_id=item["id"], classe=item["classe"],
                 condicao=item["condicao"], observacao=definicao_extensao()["observacao"],
             )
-    return estender_matriz_guarda(resultado, conteudo)
+    resultado = estender_matriz_guarda(resultado, conteudo)
+    return rev18_form1.estender_matriz(resultado) if estrutura == rev18_form1.VERSAO_REV18 else resultado
+
+
+def incorporar_medidas(conteudo, rascunho, snapshot, pessoa_id, momento):
+    estrutura_anterior = versao_estrutura(rascunho.conteudo)
+    anterior = conteudo.get("respostas", {}).pop("13.2", None)
+    conteudo["extensao_medidas"] = {
+        "versao": VERSAO_EXTENSAO,
+        "matriz": definicao_extensao()["matriz_id"],
+        "adotada_por": pessoa_id, "papel": "ARP", "adotada_em": momento.isoformat(),
+        "legado": {
+            "versao_estrutura": estrutura_anterior,
+            "campo_id": "13.2", "pergunta": campos_por_id()["13.2"].pergunta,
+            "resposta": anterior, "snapshot_id": snapshot.id,
+            "numero_snapshot": snapshot.numero, "lacre_snapshot": snapshot.lacre,
+            "versao_rascunho": rascunho.versao_rascunho,
+            "rascunho_salvo_por": rascunho.salvo_por,
+            "rascunho_salvo_em": rascunho.salvo_em.isoformat(),
+        },
+    }
 
 
 def adotar_extensao_medidas(sessao, *, comando_id, conta_id, registro_id,
@@ -119,22 +155,7 @@ def adotar_extensao_medidas(sessao, *, comando_id, conta_id, registro_id,
         pessoa_id=pessoa_id, momento=momento, reusar_existente=True,
     )
     conteudo = deepcopy(rascunho.conteudo)
-    estrutura_anterior = versao_estrutura(conteudo)
-    anterior = conteudo.get("respostas", {}).pop("13.2", None)
-    conteudo["extensao_medidas"] = {
-        "versao": VERSAO_EXTENSAO,
-        "matriz": definicao_extensao()["matriz_id"],
-        "adotada_por": pessoa_id, "papel": "ARP", "adotada_em": momento.isoformat(),
-        "legado": {
-            "versao_estrutura": estrutura_anterior,
-            "campo_id": "13.2", "pergunta": campos_por_id()["13.2"].pergunta,
-            "resposta": anterior, "snapshot_id": snapshot.id,
-            "numero_snapshot": snapshot.numero, "lacre_snapshot": snapshot.lacre,
-            "versao_rascunho": versao_lida,
-            "rascunho_salvo_por": rascunho.salvo_por,
-            "rascunho_salvo_em": rascunho.salvo_em.isoformat(),
-        },
-    }
+    incorporar_medidas(conteudo, rascunho, snapshot, pessoa_id, momento)
     resultado = _salvar_conteudo(
         sessao, comando=comando, registro=registro, rascunho=rascunho,
         pessoa_id=pessoa_id, versao_lida=versao_lida, conteudo=conteudo,

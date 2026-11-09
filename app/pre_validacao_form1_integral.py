@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 from app.extensao_medidas_form1 import catalogo_efetivo, matriz_efetiva, versao_estrutura
+from app.rev18_form1 import POLITICA_REV18
 
 from app.form1_integral import (
     CONDICOES_BLOCO_1, CONDICOES_BLOCO_2, CONDICOES_BLOCO_4,
@@ -401,7 +402,7 @@ def pre_validar_form1_integral(conteudo: dict, *, nome_institucional: str | None
 
     return {
         "consultiva": True, "submissao_habilitada": False,
-        "versao_politica": VERSAO_POLITICA_FORM1_8V,
+        "versao_politica": POLITICA_REV18 if "revisao_18" in (conteudo or {}) else VERSAO_POLITICA_FORM1_8V,
         "matriz_base": VERSAO_MATRIZ_BASE_FORM1_8V,
         "versao_estrutura": versao_estrutura(conteudo),
         "matriz_extensao": (conteudo or {}).get("extensao_medidas", {}).get("matriz"),
