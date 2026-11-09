@@ -9,6 +9,13 @@
 .form2-demo summary { cursor: pointer; padding-block: .5rem; }
 #unidade-guarda .detalhe dl { display: block; }
 #unidade-guarda .detalhe dd { margin: .25rem 0 .8rem; }
+#unidade-guarda .fato-guarda { border-block-end: 1px solid #cbd5df; padding-block: .4rem; }
+#unidade-guarda .fato-guarda dt { color: #173950; font-size: 1rem; text-transform: none; letter-spacing: normal; }
+.mapa-form2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(12rem, 100%), 1fr)); gap: 1rem; padding-left: 1.5rem; }
+.mapa-form2 li { padding-right: .8rem; }
+.mapa-form2 span { display: block; margin-top: .25rem; }
+.perguntas-guarda { list-style: none; padding-left: 0; }
+.perguntas-guarda > li { border-left: 3px solid #337192; padding: .35rem 1rem; margin-block: 1rem; }
 .form2-demo dt { font-weight: 600; margin-top: 1rem; }
 .form2-demo dd { margin-inline-start: 1rem; }
 .form2-demo .botao-primario, .form2-demo .botao-secundario { min-width: 0; max-width: 100%; min-height: 44px; }

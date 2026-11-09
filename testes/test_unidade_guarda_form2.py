@@ -15,6 +15,7 @@ def test_unidade_isola_origens_e_reutiliza_anotacao(sessao, monkeypatch):
     # A instalação pública pode executar este cenário sem material editorial local.
     itens = [{"id": id_, "enunciado": f"Enunciado fictício {id_}"} for id_ in
              ("F2-2.9", "F2-2.9.1", "F2-2.9.2", "F2-2.9.3")]
+    itens[0]["escolha_documental"] = {"modo": "unica", "alternativas": ["Alternativa sintética"]}
     for filha, pai in ((1, 0), (3, 2)):
         itens[filha]["condicao_documental"] = {"origem": itens[pai]["id"], "resposta": "Sim"}
     monkeypatch.setattr(apresentacao_form2, "carregar_catalogo",
@@ -45,6 +46,12 @@ def test_unidade_isola_origens_e_reutiliza_anotacao(sessao, monkeypatch):
         pagina = cliente.get(url, params={**aal, "preparacao_id": pid})
         assert pagina.status_code == 200
         unidade = pagina.text.split('id="unidade-guarda"', 1)[1].split('id="anotacoes"', 1)[0]
+        assert pagina.text.count('href="#unidade-guarda"') == 1
+        assert pagina.text.index('id="mapa-etapas"') < pagina.text.index('href="#unidade-guarda"')
+        assert "Alternativa sintética" in unidade
+        assert ("Não há prazo de guarda informado" in unidade) == (numero == 1)
+        assert unidade.count('class="fato-guarda"') == unidade.count("data-fato-guarda=") == 21
+        assert "Mostrar também as não informadas" in pagina.text
         assert f"Versão histórica nº {numero} " in unidade
         assert "F1-12.1.3" in unidade and "<input" not in unidade and "<textarea" not in unidade
         prazo = unidade.split('data-fato-guarda="12.1.1"', 1)[1].split("</dd>", 1)[0]
@@ -112,3 +119,7 @@ def test_edicao_local_renderiza_enunciados_validados(sessao):
     bloco = next(b for b in catalogo_form2_rev18.carregar_catalogo()["blocos"] if b["numero"] == 2)
     perguntas = [q for q in bloco["itens"] if q["id"] == "F2-2.9" or q["id"].startswith("F2-2.9.")]
     assert len(perguntas) == 4 and all(q["enunciado"] in pagina.text for q in perguntas)
+    for questao in perguntas:
+        for alternativa in questao["escolha_documental"]["alternativas"]:
+            assert alternativa in pagina.text
+    assert "Lei nº 8.159/1991" in pagina.text

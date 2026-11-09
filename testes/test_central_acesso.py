@@ -36,10 +36,10 @@ def test_cartoes_explicam_disponibilidade_sem_oferecer_acesso_direto():
     pagina = TestClient(app).get("/central").text
     cartoes = re.findall(r'<li class="cartao-central [^"]+">(.*?)</li>', pagina, re.S)
     esperados = [
-        ("FORM 1", "Levantamento do tratamento", "Como os dados pessoais", "Disponível conforme autorização do Registro"),
-        ("FORM 2", "Validação jurídica e institucional", "Por que o tratamento", "Análise jurídica completa ainda não implementada"),
-        ("FORM 3", "Avaliação de riscos e controles", "O que pode afetar", "Planejado"),
-        ("FORM 4", "Providências e acompanhamento", "O que será feito", "Planejado"),
+        ("FORM 1", "Levantamento do tratamento", "Como esse processo", "Disponível conforme autorização do Registro"),
+        ("FORM 2", "Validação jurídica e institucional", "Por que e em que condições", "Análise jurídica completa ainda não implementada"),
+        ("FORM 3", "Avaliação de riscos e controles", "Que riscos o tratamento", "Planejado"),
+        ("FORM 4", "Providências e acompanhamento", "O que precisa ser feito", "Planejado"),
         ("Dashboard LGPD", "Indicadores consolidados", "Planejado"),
         ("Administração Central — TI", "18 Secretarias", "Planejada", "habilitação específica"),
     ]
@@ -56,7 +56,7 @@ def test_cartoes_explicam_disponibilidade_sem_oferecer_acesso_direto():
 
 @pytest.mark.parametrize("conta,rotulo", [
     ("CONTA-A1", "Acompanhar preparação"),
-    ("CONTA-G1", "Retomar preparação"),
+    ("CONTA-G1", "Iniciar preparação"),
 ])
 def test_escolha_explicita_filtra_form2_e_retorna_ao_contexto(sessao, conta, rotulo):
     from testes.test_form2_preparacao import base, iniciar
@@ -100,7 +100,7 @@ def test_escolha_explicita_filtra_form2_e_retorna_ao_contexto(sessao, conta, rot
         assert f"{rotulo_sessao}:</strong> {identidade}" in pagina.text
         if filtro == "form2":
             assert "APA responsável:" in pagina.text and "Função nesta atividade:" in pagina.text
-            assert "versão histórica nº 1" in tela.text and "Último registro em" in tela.text
+            assert "versão histórica nº 1" in tela.text and "Designação em" in tela.text
         assert f"Voltar à lista de Registros do FORM {filtro[-1]}" in pagina.text
         volta = unescape(re.search(r'href="([^"]+/painel\?[^"]+)"', pagina.text).group(1))
         assert dict(cliente.get(volta).url.params) == {**contexto, "instrumento": filtro}

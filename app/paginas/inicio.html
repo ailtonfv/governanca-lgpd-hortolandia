@@ -103,11 +103,13 @@
           <p><strong>Situação do Registro:</strong> <span class="estado estado-{{ registro.estado_codigo }}">{{ registro.estado }}</span></p>
           {% if instrumento == 'form2' %}
           {% set acesso = registro.navegacao_form2 %}
-          <p><strong>Situação da preparação:</strong> {{ 'Rascunho ' ~ acesso.resumo.rascunho if acesso.resumo else 'Ainda não iniciada' }}.</p>
+          <p><strong>Situação da preparação:</strong> {% if not acesso.resumo %}Ainda sem designação.{% elif acesso.resumo.trabalhada %}Em preparação pelo AAL.{% else %}Designada ao AAL — ainda não iniciada.{% endif %}</p>
           {% if acesso.resumo %}
-          <p>FORM 1 · versão histórica nº {{ acesso.resumo.origem }}. Último registro em {{ acesso.resumo.salvo_em|data_local }}{% if acesso.resumo.autor %} por {{ acesso.resumo.autor.removesuffix(' (fictício)') }}{% endif %}.</p>
+          <p><strong>Origem:</strong> FORM 1, versão histórica nº {{ acesso.resumo.origem }}, registrada em {{ acesso.resumo.origem_em|data_local }}.</p>
+          <p><strong>Preparação do FORM 2:</strong> rascunho {{ acesso.resumo.rascunho }}.
+            {{ 'Último salvamento' if acesso.resumo.salva else 'Designação' }} em {{ acesso.resumo.salvo_em|data_local }} por {{ acesso.resumo.autor or 'autor indisponível' }} ({{ 'AAL' if acesso.resumo.salva else 'APA' }}).</p>
           {% endif %}
-          {% if acesso.pode_editar %}<p>Função nesta atividade: você está designado como AAL. Retome o rascunho para consultar os fatos e anotar sua análise.</p>
+          {% if acesso.pode_editar %}<p>Função nesta atividade: você está designado como AAL. Abra a preparação para consultar a origem e registrar observações.</p>
           {% elif acesso.e_apa and acesso.preparacao_id %}<p>Função nesta atividade: você pode acompanhar esta preparação como APA. Abra o rascunho para consulta.</p>
           {% elif acesso.pode_iniciar %}<p>Função nesta atividade: APA. Para iniciar, consulte as versões de origem e designe um AAL habilitado.</p>
           {% elif acesso.e_apa %}<p>Função nesta atividade: APA. Consulte a disponibilidade da origem e da designação.</p>

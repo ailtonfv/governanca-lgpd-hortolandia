@@ -3,6 +3,7 @@ from copy import deepcopy
 from html import unescape
 from pathlib import Path
 import re
+import json
 
 import pytest
 
@@ -39,6 +40,9 @@ def test_consulta_http_quatro_estruturas_sem_reinterpretar_origem(sessao, perfil
     assert 'class="botao-secundario">Consultar origem' in html
     assert '<details class="form2-tecnico"><summary>Detalhes técnicos (auditoria)' in html
     assert '"submissao_habilitada": false' in html
+    bruto = html.split("<pre>", 1)[1].split("</pre>", 1)[0]
+    assert json.loads(unescape(bruto)) == origem["snapshot"].conteudo
+    assert any(ord(letra) > 127 for letra in bruto)
     sessao.expire_all()
     snap = sessao.get(VersaoForm1Integral, sid)
     assert (snap.conteudo, snap.lacre) == antes
@@ -87,7 +91,7 @@ def test_proxima_acao_corresponde_a_origem_e_ao_papel(sessao):
     sessao.commit()
     s2 = _snapshot(sessao, {"registro_id": rid}, "FICT-UX09-S2", versao=2)["snapshot_id"]
 
-    for conta, rotulo in (("CONTA-A1", "Acompanhar preparação"), ("CONTA-G1", "Retomar preparação")):
+    for conta, rotulo in (("CONTA-A1", "Acompanhar preparação"), ("CONTA-G1", "Iniciar preparação")):
         tela = abrir(conta, snapshot_id=s1)
         assert 'id="preparador"' not in tela
         destino = unescape(re.search(rf'class="botao-link" href="([^"]+)">{rotulo}</a>', tela).group(1))
@@ -105,7 +109,7 @@ def test_proxima_acao_corresponde_a_origem_e_ao_papel(sessao):
     sessao.get(Registro, rid).estado_atual = "suspenso"
     sessao.commit()
     consulta = abrir("CONTA-G1", preparacao_id=p1)
-    assert '>Consultar preparação</a>' in consulta
+    assert '>Consultar anotação geral</a>' in consulta
     assert "Retomar preparação" not in consulta and 'id="anotacao"' not in consulta
 
 

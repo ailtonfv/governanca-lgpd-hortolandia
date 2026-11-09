@@ -311,7 +311,7 @@ def test_substituicao_apa_preserva_finalidades_e_designacoes_pessoais(sessao):
     assert substituto.status_code == 200 and "Acompanhar preparação" in substituto.text
     assert "Designar AAL e iniciar preparação" not in substituto.text
     designado = consultar("CONTA-A1")
-    assert designado.status_code == 200 and "Retomar preparação" in designado.text
+    assert designado.status_code == 200 and "Iniciar preparação" in designado.text
     assert "Designar AAL e iniciar preparação" not in designado.text
     assert salvar(sessao, rid, pid, conta_id="CONTA-A1")["permitido"]
     assert not salvar(sessao, rid, pid, conta_id="CONTA-F1", comando_id="SUPLENTE")["permitido"]
@@ -365,7 +365,7 @@ def test_t14_t16_http_acesso_salvamento_erros_e_ausencia_de_submissao(sessao):
     assert consulta.status_code == 200 and "Designar AAL e iniciar preparação" in consulta.text
     resposta = cliente.post(url+"/iniciar", data={"conta_id":"CONTA-A1", "comando_id":"HTTP-I",
                             "snapshot_id":sid, "preparador_id":"PESSOA-G"}, follow_redirects=False)
-    assert resposta.status_code == 303 and resposta.headers["location"].endswith("#anotacoes")
+    assert resposta.status_code == 303 and "#" not in resposta.headers["location"]
     sessao.expire_all()
     pid = sessao.scalar(select(PreparacaoForm2.id))
     consulta = cliente.get(url, params={"conta_id":"CONTA-G1", "preparacao_id":pid})

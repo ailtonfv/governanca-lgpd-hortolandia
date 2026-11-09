@@ -55,8 +55,12 @@ def apresentar_origem(origem):
     if not origem:
         return {"rotulos": rotulos, "grupos": []}
     rotulos.update({p["id"]: f'{p["id"]} — {p["pergunta"]}' for p in origem["perguntas"]})
+    respondidas, vazias = [], []
+    for pergunta in origem["perguntas"]:
+        destino = respondidas if pergunta.get("valor") not in (None, "", [], {}) else vazias
+        destino.append(pergunta)
     fonte = origem["conteudo"]
-    return {"rotulos": rotulos, "grupos": [
+    return {"respondidas": respondidas, "vazias": vazias, "rotulos": rotulos, "grupos": [
         {"titulo": titulo, "valor": fonte[chave]} for chave, titulo in GRUPOS if chave in fonte
     ]}
 
@@ -97,7 +101,11 @@ def unidade_guarda(dados):
         fatos.append({"id": chave, "campo": perguntas.get(chave),
                       "complemento": origem["conteudo"].get("complementos", {}).get(chave)})
     bloco = next(b for b in catalogo["blocos"] if b["numero"] == 2)
-    return {"versao": catalogo["versao"], "fatos": fatos, "questoes": [
+    return {"versao": catalogo["versao"], "fatos": fatos,
+            "sem_prazo": perguntas.get("12.1.1", {}).get("valor") in (None, "", [], {}) and not origem["conteudo"].get("complementos", {}).get("12.1.1"),
+            "notas": [nota["texto"] for nota in bloco.get("notas_documentais", [])
+                      if "8.159/1991" in nota["texto"]],
+            "questoes": [
         q for q in bloco["itens"] if q["id"] in ("F2-2.9", "F2-2.9.1", "F2-2.9.2", "F2-2.9.3")
     ]}
 
@@ -106,6 +114,8 @@ def identificar_agentes(sessao, dados):
     """Resolve somente autores já presentes na consulta autorizada, sem ampliar acesso."""
     ids = {dados["pessoa"].id}
     preparacao, origem = dados.get("preparacao"), dados.get("origem")
+    for visivel in dados.get("preparacoes", []):
+        ids.update((visivel.designado_por, visivel.salvo_por))
     if preparacao:
         ids.update((preparacao.preparador_id, preparacao.salvo_por))
     if origem:

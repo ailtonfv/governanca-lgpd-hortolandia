@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from copy import deepcopy
 import uuid
 
-from sqlalchemy import inspect, select, text
+from sqlalchemy import func, inspect, select, text
 
 from app.comandos import abrir_comando, fechar_comando
 from app.continuidade_apa import pessoa_e_apa_em_exercicio
@@ -286,6 +286,20 @@ def _ciclo_em_andamento(sessao, registro):
     ))
 
 
+def _trabalho_aal(sessao, preparacoes):
+    """Distingue designação, salvamento vazio e observação já registrada, inclusive apagada depois."""
+    if not preparacoes:
+        return {}
+    anotacao = Evento.conteudo["conteudo"]["anotacao_preparatoria"].as_string()
+    consulta = select(Evento.cadeia_id, func.bool_or(anotacao.regexp_match(r"\S"))).where(
+        Evento.cadeia_tipo == "form2_preparacao",
+        Evento.cadeia_id.in_([p.id for p in preparacoes]),
+        Evento.tipo_evento == "form2_preparacao_salva",
+        Evento.conteudo["papel_exercido"].as_string() == "preparador_demonstrativo",
+    ).group_by(Evento.cadeia_id)
+    return dict(sessao.execute(consulta).all())
+
+
 def projetar_navegacao_preparacao(sessao, *, conta_id, registro_id, momento=None):
     """Somente links autorizados; não consulta conteúdo nem produz ato/auditoria."""
     if not all(inspect(sessao.connection()).has_table(t) for t in
@@ -302,10 +316,13 @@ def projetar_navegacao_preparacao(sessao, *, conta_id, registro_id, momento=None
     prep = editaveis[-1] if editaveis else visiveis[-1] if visiveis else None
     resumo = None
     if prep:
-        versao = sessao.scalar(select(VersaoForm1Integral.numero).where(
-            VersaoForm1Integral.id == prep.snapshot_id, VersaoForm1Integral.registro_id == registro.id))
+        versao, registrada_em = sessao.execute(select(
+            VersaoForm1Integral.numero, VersaoForm1Integral.preparado_em).where(
+            VersaoForm1Integral.id == prep.snapshot_id, VersaoForm1Integral.registro_id == registro.id)).one()
+        trabalho = _trabalho_aal(sessao, [prep])
         autor = sessao.get(Pessoa, prep.salvo_por)
-        resumo = {"origem": versao, "rascunho": prep.versao_rascunho, "salvo_em": prep.salvo_em,
+        resumo = {"origem": versao, "origem_em": registrada_em, "salva": prep.id in trabalho,
+                  "trabalhada": trabalho.get(prep.id, False), "rascunho": prep.versao_rascunho, "salvo_em": prep.salvo_em,
                   "autor": f"{autor.matricula} — {autor.nome}" if autor else None}
     pode_iniciar = bool(not prep and e_apa and _ciclo_em_andamento(sessao, registro)
                         and sessao.scalar(select(VersaoForm1Integral.id).where(
@@ -355,6 +372,7 @@ def consultar_preparacao(sessao, *, conta_id, registro_id, preparacao_id=None,
                 "snapshots": snapshots, "candidatos": candidatos, "e_apa": e_apa,
                 "ciclo_em_andamento": _ciclo_em_andamento(sessao, registro) if e_apa else False,
                 "pode_editar": pode_editar, "preparacoes_editaveis": editaveis,
+                "trabalho_aal": _trabalho_aal(sessao, visiveis),
                 "historico": historico, "politica": POLITICA}
     except (PermissionError, ValueError) as erro:
         return _negar(sessao, conta_id, registro_id, str(erro))

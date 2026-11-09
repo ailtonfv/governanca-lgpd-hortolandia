@@ -3,6 +3,12 @@
   const input = document.getElementById('anotacao');
   const saved = document.getElementById('form2-conteudo-salvo');
   const destinosLocais = ['#anotacoes', '#unidade-guarda'];
+  const contador = document.getElementById('contador-anotacao');
+  if (input && contador) {
+    const atualizar = () => { contador.textContent = input.value.length + ' de 2.000 caracteres utilizados'; };
+    input.addEventListener('input', atualizar);
+    atualizar();
+  }
   let submitting = false;
   const dirty = () => Boolean(input && saved && input.value !== JSON.parse(saved.textContent));
   window.addEventListener('beforeunload', event => {

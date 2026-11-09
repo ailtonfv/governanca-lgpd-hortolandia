@@ -18,6 +18,7 @@ from app.form2_preparacao import consultar_preparacao, iniciar_preparacao, salva
 
 router = APIRouter()
 paginas = Jinja2Templates(directory=Path(__file__).parent / "paginas")
+paginas.env.policies["json.dumps_kwargs"] = {**paginas.env.policies["json.dumps_kwargs"], "ensure_ascii": False}
 paginas.env.filters.update(data_local=data_local, rotulo_f2=rotulo_demonstrativo)
 
 
@@ -79,10 +80,10 @@ def consultar(request: Request, registro_id: str, conta_id: str = Query(max_leng
                    snapshot_id=snapshot_id)
 
 
-def _redirecionar(request, registro_id, conta_id, preparacao_id):
+def _redirecionar(request, registro_id, conta_id, preparacao_id, fragmento=''):
     url = str(request.url_for("form2_preparacao", registro_id=registro_id))
     return RedirectResponse(url + "?" + urlencode({"conta_id": conta_id,
-        "preparacao_id": preparacao_id, **_contexto_navegacao(request)}) + "#anotacoes", status_code=303)
+        "preparacao_id": preparacao_id, **_contexto_navegacao(request)}) + fragmento, status_code=303)
 
 
 @router.post("/registros/{registro_id}/form2/preparacao/iniciar", name="iniciar_form2_demo")
@@ -116,6 +117,6 @@ async def salvar(request: Request, registro_id: str, preparacao_id: str,
         conteudo={"anotacao_preparatoria": form["anotacao_preparatoria"]})
     sessao.commit()
     if resultado["permitido"]:
-        return _redirecionar(request, registro_id, form["conta_id"], preparacao_id)
+        return _redirecionar(request, registro_id, form["conta_id"], preparacao_id, "#anotacoes")
     return _pagina(request, sessao, registro_id, form["conta_id"], preparacao_id=preparacao_id,
         erro=resultado["motivo"], anotacao_tentada=form["anotacao_preparatoria"], versao_tentada=versao)

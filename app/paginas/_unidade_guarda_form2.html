@@ -1,8 +1,9 @@
 <section class="form1" id="unidade-guarda" tabindex="-1" aria-labelledby="titulo-guarda">
   <p class="etiqueta">FORM 2 · Etapa 1 · Bloco 2</p>
   <h2 id="titulo-guarda">Fundamento do prazo de guarda</h2>
+  <p>Esta é a primeira unidade demonstrativa disponível. Os demais blocos serão implementados posteriormente.</p>
   {% if guarda.aviso %}
-  <p role="status">{{ guarda.aviso }} A anotação geral continua disponível.</p>
+  <p role="status">A anotação geral continua disponível.</p>
   {% else %}
   <a href="#anotacoes">Ir à anotação geral</a>
   <section class="detalhe somente-leitura" aria-labelledby="fatos-guarda">
@@ -10,23 +11,30 @@
     <p>Somente leitura · Versão histórica nº {{ origem.snapshot.numero }} do FORM 1.</p>
     {% macro listar_fatos(fatos) %}
     <dl>{% for fato in fatos %}
-      <dt data-fato-guarda="{{ fato.id }}">F1-{{ fato.id }}{% if fato.campo %} — {{ fato.campo.pergunta }}{% endif %}</dt>
+      <div class="fato-guarda"><dt data-fato-guarda="{{ fato.id }}">F1-{{ fato.id }}{% if fato.campo %} — {{ fato.campo.pergunta }}{% endif %}</dt>
       <dd>{% if not fato.campo %}Pergunta inexistente nesta versão.{% elif not fato.campo.respondida or fato.campo.valor in (none, '', [], {}) %}Sem resposta nesta versão.{% else %}{{ valor(fato.campo.valor, consulta_historica.rotulos, agentes) }}{% endif %}
-      {% if fato.complemento %}<p>Complemento registrado: {{ fato.complemento }}</p>{% endif %}</dd>
+      {% if fato.complemento %}<p>Complemento registrado: {{ fato.complemento }}</p>{% endif %}</dd></div>
     {% endfor %}</dl>
     {% endmacro %}
     {{ listar_fatos(guarda.fatos[:5]) }}
     <details><summary>Consultar procedimentos de guarda e destinação</summary>
-      {{ listar_fatos(guarda.fatos[5:]) }}
+      {{ listar_fatos(guarda.fatos[5:]|selectattr('campo')) }}
     </details>
+    {% set ausentes = guarda.fatos[5:]|rejectattr('campo')|list %}
+    {% if ausentes %}<details><summary>{{ ausentes|length }} perguntas inexistentes nesta versão — consultar identificadores</summary>
+      {{ listar_fatos(ausentes) }}
+    </details>{% endif %}
   </section>
   <section aria-labelledby="orientacoes-guarda">
     <h3 id="orientacoes-guarda">Área B — Orientações e perguntas do FORM 2</h3>
-    <p>Perguntas para orientar a análise do AAL. Catálogo {{ guarda.versao }}.</p>
-    <ul>
+    {% if guarda.sem_prazo %}<p class="aviso-leitura">Não há prazo de guarda informado na versão consultada do FORM 1. Considere registrar uma necessidade de esclarecimento factual.</p>{% endif %}
+    {% for nota in guarda.notas %}<p>{{ nota }}</p>{% endfor %}
+    <ul class="perguntas-guarda">
     {% for questao in guarda.questoes %}
       <li><p><strong>{{ questao.id }}</strong> — {{ questao.enunciado }}</p>
         {% if questao.condicao_documental %}<p>Aplicável se {{ questao.condicao_documental.origem }} receber a resposta “{{ questao.condicao_documental.resposta }}”.</p>{% endif %}
+        {% if questao.escolha_documental %}<p><strong>Alternativas documentadas</strong> ({{ 'seleção múltipla' if questao.escolha_documental.modo == 'multipla' else 'seleção única' }})</p>
+        <ul>{% for alternativa in questao.escolha_documental.alternativas %}<li>{{ alternativa }}</li>{% endfor %}</ul>{% endif %}
         {% if questao.orientacao %}<p>{{ questao.orientacao }}</p>{% endif %}
       </li>
     {% endfor %}

@@ -9,7 +9,7 @@ from sqlalchemy import select, func
 
 from app.form2_preparacao import projetar_navegacao_preparacao, agora
 from app.modelos import HabilitacaoForm2Preparacao, EventoAuditoria, Evento, Comando, Conta, Pessoa, Registro
-from testes.test_form2_preparacao import base, iniciar, cliente, habilitar
+from testes.test_form2_preparacao import base, iniciar, cliente, habilitar, salvar
 
 
 def artigo(html, numero):
@@ -29,7 +29,7 @@ def test_painel_registro_form2_retorno_apa_e_preparador(sessao):
     rid, sid = base(sessao)
     pid = iniciar(sessao, rid, sid)["preparacao_id"]
     for conta, texto, editavel in [("CONTA-A1", "Acompanhar preparação", False),
-                                   ("CONTA-G1", "Retomar preparação", True)]:
+                                   ("CONTA-G1", "Iniciar preparação", True)]:
         central = cliente.get("/central", params={"conta_id": conta})
         destino_painel = re.search(r'<form action="([^"]+/painel)"', central.text).group(1)
         painel = cliente.get(destino_painel,
@@ -46,8 +46,7 @@ def test_painel_registro_form2_retorno_apa_e_preparador(sessao):
         assert 'id="titulo-form1-integral" tabindex="-1"' in pagina.text
         destino = destino_form2(pagina.text)
         assert f"/registros/{rid}/form2/preparacao?conta_id={conta}" in destino
-        ancora = "unidade-guarda" if editavel else "anotacoes"
-        assert f"preparacao_id={pid}#{ancora}" in destino
+        assert f"preparacao_id={pid}" in destino and "#" not in destino
         form2 = cliente.get(destino)
         assert form2.status_code == 200
         assert ('id="anotacao"' in form2.text) is editavel
@@ -97,6 +96,28 @@ def test_preparador_sem_designacao_nao_recebe_link_listagem_ou_origem(sessao):
     assert contagens(sessao) == (eventos, auditorias + 2, comandos)
     autorizado = cliente.get(url, params={"conta_id": "CONTA-A1", "snapshot_id": sid})
     assert autorizado.status_code == 200 and "Designar AAL e iniciar preparação" in autorizado.text
+
+
+def test_inicio_e_retomada_seguem_o_historico_do_aal(sessao):
+    from app.apresentacao_form2 import data_local
+    from app.modelos import VersaoForm1Integral
+    rid, sid = base(sessao)
+    pid = iniciar(sessao, rid, sid)["preparacao_id"]
+    origem_em = sessao.get(VersaoForm1Integral, sid).preparado_em
+    params = {"conta_id": "CONTA-G1", "secretaria_id": "UNID-NORTE", "instrumento": "form2"}
+    for versao, texto, iniciada in [(1, " ", False), (2, "Observação fictícia.", True), (3, "", True)]:
+        momento = agora() + timedelta(minutes=versao * 10)
+        assert salvar(sessao, rid, pid, versao_lida=versao, comando_id=f"FICT-UX07-{versao}",
+                      momento=momento, conteudo={"anotacao_preparatoria": texto})["permitido"]
+        lista = cliente.get("/painel", params=params)
+        assert "#" not in destino_form2(lista.text)
+        assert ("Retomar preparação" in lista.text) is iniciada
+        assert ("Designada ao AAL — ainda não iniciada" in lista.text) is not iniciada
+        for resposta in (lista, cliente.get(destino_form2(lista.text))):
+            assert resposta.status_code == 200
+            assert f"versão histórica nº 1, registrada em {data_local(origem_em)}" in resposta.text
+            assert f"Último salvamento em {data_local(momento)}" in resposta.text
+            assert "Servidor Épsilon (fictício) (AAL)" in resposta.text
 
 
 def test_acao_de_inicio_depende_do_estado_real(sessao):

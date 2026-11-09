@@ -1,5 +1,13 @@
 # Acompanhamento dos ajustes da PoC ampliada
 
+## INSTRUÇÃO_FORM02_07 · consolidação visual dos quatro instrumentos
+
+Pendências P2 para revisão conjunta:
+
+- Padronizar os comandos “Acessar FORM 1”, “Acessar FORM 2”, “Acessar FORM 3” e “Acessar FORM 4”. Os dois últimos devem permanecer indisponíveis até a implementação autorizada.
+- Organizar as listagens pela próxima providência do servidor. Avaliar busca, filtros e ordenação com volume representativo de Registros.
+- Harmonizar com o Documento-Mestre o título candidato do FORM 4, “Plano de ação, monitoramento e aprendizagem institucional”, antes de adotá-lo.
+
 ## INSTRUÇÃO_FORM02_06 · seleção do Registro e Etapa 1
 
 - **Interface.** Seleção e preparação distinguem servidor, função, APA, estado e versão histórica. A unidade de guarda identifica dados ausentes ou sem resposta. Aceite humano pendente nas duas larguras e nos papéis APA/AAL.
