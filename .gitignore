@@ -37,3 +37,4 @@ documentos_locais/
 
 # Catálogo editorial do FORM 2 disponibilizado apenas na instalação local autorizada.
 /app/catalogos/form2_rev18_v1.json
+/app/catalogos/form2_controles_rev18_candidata_v2.json

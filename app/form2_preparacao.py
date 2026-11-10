@@ -15,9 +15,11 @@ from app.eventos import registrar_evento, registrar_auditoria, lacre, verificar_
 from app.modelos import (Conta, Pessoa, Registro, Ciclo, Evento, VersaoForm1Integral,
                         HabilitacaoForm2Preparacao, PreparacaoForm2)
 from app.origem_form2 import canonico, ler_origem
+from app.respostas_form2 import ENVELOPE_V2, aplicar_bloco
 
 POLITICA = "F2-DEMO-05-v1"
 ENVELOPE = "F2-DEMO-PREP-v1"
+ENVELOPES_LEGIVEIS = {ENVELOPE, ENVELOPE_V2}
 LIMITE_ANOTACAO = 2000
 
 
@@ -131,7 +133,7 @@ def _evento_preparacao(sessao, comando, prep, tipo):
 
 
 def _historico_integro(sessao, prep):
-    if (prep.versao_envelope != ENVELOPE or prep.versao_politica != POLITICA
+    if (prep.versao_envelope not in ENVELOPES_LEGIVEIS or prep.versao_politica != POLITICA
             or prep.lacre_conteudo != lacre(canonico(prep.conteudo))
             or not verificar_cadeia(sessao, prep.id)[0]):
         raise ValueError("Integridade ou versão da preparação não confere.")
@@ -239,14 +241,70 @@ def salvar_preparacao(sessao, *, comando_id, conta_id, registro_id, preparacao_i
         return _negar(sessao, conta_id, registro_id, "Anotação inválida: texto simples de até 2.000 caracteres, sem campos extras.", comando)
     if prep.lacre_conteudo != lacre(canonico(prep.conteudo)):
         return _negar(sessao, conta_id, registro_id, "Integridade do rascunho não confere.", comando)
-    prep.conteudo = deepcopy(conteudo)
+    novo_conteudo = deepcopy(prep.conteudo)
+    novo_conteudo["anotacao_preparatoria"] = conteudo["anotacao_preparatoria"]
+    prep.conteudo = novo_conteudo
     prep.versao_rascunho += 1
     prep.salvo_por, prep.salvo_em = pessoa.id, momento
-    prep.lacre_conteudo = lacre(canonico(conteudo))
+    prep.lacre_conteudo = lacre(canonico(novo_conteudo))
     _evento_preparacao(sessao, comando, prep, "form2_preparacao_salva")
     sessao.flush()
     return fechar_comando(comando, {"permitido": True, "preparacao_id": prep.id,
         "versao": prep.versao_rascunho, "motivo": "Anotação salva no rascunho demonstrativo, sem submissão."})
+
+
+def salvar_respostas_bloco(sessao, *, comando_id, conta_id, registro_id, preparacao_id,
+                           bloco, versao_lida, alteracoes, complementos=None,
+                           reativar=None, momento=None):
+    """Salva respostas homologadas do bloco sem concluir ou submeter o FORM 2."""
+    momento = momento or agora()
+    _travar(sessao, registro_id)
+    try:
+        pessoa, registro, hab = _acesso(sessao, conta_id, registro_id, momento)
+        prep = sessao.get(PreparacaoForm2, preparacao_id, populate_existing=True)
+        if (not prep or prep.registro_id != registro_id or prep.preparador_id != pessoa.id
+                or hab.finalidade != "preparar" or hab.id != prep.habilitacao_id):
+            raise PermissionError("Somente o preparador designado e habilitado pode editar.")
+        ciclo = sessao.get(Ciclo, prep.ciclo_id)
+        if (registro.estado_atual != "em_andamento" or not ciclo or ciclo.situacao != "ativo"
+                or ciclo.numero != registro.ciclo_atual):
+            raise PermissionError("Preparação fora do ciclo ativo do Registro.")
+        origem = ler_origem(sessao, registro_id, prep.snapshot_id)
+        if origem["snapshot"].lacre != prep.lacre_origem or origem["estrutura"] != prep.estrutura_origem:
+            raise ValueError("Referência histórica da preparação não confere.")
+        _historico_integro(sessao, prep)
+    except (PermissionError, ValueError) as erro:
+        return _negar(sessao, conta_id, registro_id, str(erro))
+    parametros = dict(conta_id=conta_id, registro_id=registro_id, preparacao_id=preparacao_id,
+                      bloco=bloco, versao_lida=versao_lida, alteracoes=alteracoes,
+                      complementos=complementos or {}, reativar=sorted(reativar or []))
+    comando, repeticao = abrir_comando(sessao, comando_id, "salvar_form2_respostas_bloco",
+                                       parametros, "pessoa", pessoa.id, conta_id)
+    if repeticao is not None:
+        return repeticao
+    if type(versao_lida) is not int or versao_lida != prep.versao_rascunho:
+        return _negar(sessao, conta_id, registro_id,
+                      "Rascunho desatualizado; recarregue antes de salvar.", comando)
+    if prep.lacre_conteudo != lacre(canonico(prep.conteudo)):
+        return _negar(sessao, conta_id, registro_id, "Integridade do rascunho não confere.", comando)
+    try:
+        novo_conteudo, resumo = aplicar_bloco(
+            prep.conteudo, bloco=bloco, alteracoes=alteracoes,
+            complementos=complementos, reativar=reativar,
+            proxima_versao=prep.versao_rascunho + 1,
+        )
+    except (PermissionError, ValueError, FileNotFoundError, OSError, KeyError, TypeError) as erro:
+        return _negar(sessao, conta_id, registro_id, str(erro), comando)
+    prep.conteudo = novo_conteudo
+    prep.versao_envelope = ENVELOPE_V2
+    prep.versao_rascunho += 1
+    prep.salvo_por, prep.salvo_em = pessoa.id, momento
+    prep.lacre_conteudo = lacre(canonico(novo_conteudo))
+    _evento_preparacao(sessao, comando, prep, "form2_respostas_bloco_salvas")
+    sessao.flush()
+    return fechar_comando(comando, {"permitido": True, "preparacao_id": prep.id,
+        "versao": prep.versao_rascunho, "bloco": bloco, "resumo": resumo,
+        "motivo": "Respostas salvas no rascunho, sem conclusão, parecer ou submissão."})
 
 
 def _preparacoes_visiveis(sessao, hab, e_apa):

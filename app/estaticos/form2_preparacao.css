@@ -20,6 +20,13 @@
 .mapa-form2 a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; }
 .perguntas-guarda { list-style: none; padding-left: 0; }
 .perguntas-guarda > li { border-left: 3px solid #337192; padding: .35rem 1rem; margin-block: 1rem; }
+.resposta-form2 { margin-block: 1rem; padding: 1rem; border: 1px solid var(--borda); border-radius: .5rem; }
+.resposta-form2 legend { padding-inline: .35rem; font-weight: 700; color: #173950; }
+.resposta-form2[disabled] { background: #f4f7f9; color: #475569; }
+.form2-demo .opcao-form2, .form2-demo .reativar-form2 { display: flex; align-items: flex-start; gap: .55rem; font-weight: 400; }
+.form2-demo .opcao-form2 input, .form2-demo .reativar-form2 input { flex: 0 0 auto; margin-top: .2rem; }
+.acoes-form2 { display: flex; justify-content: flex-end; }
+.apoio-juridico { border: 1px solid var(--borda); border-radius: .5rem; padding-inline: 1rem; }
 .form2-demo dt { font-weight: 600; margin-top: 1rem; }
 .form2-demo dd { margin-inline-start: 1rem; }
 .form2-demo .botao-primario, .form2-demo .botao-secundario { min-width: 0; max-width: 100%; min-height: 44px; }

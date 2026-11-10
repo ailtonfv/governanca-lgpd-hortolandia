@@ -49,12 +49,19 @@
       <ul aria-label="Blocos da etapa {{ loop.index }}">
         {% for numero in blocos %}
         <li>{% if numero == 2 and guarda_disponivel %}<a class="botao-link" href="#unidade-guarda">Ir para o Bloco 2 — Guarda</a>
+          {% elif numero in [3, 4] %}Bloco {{ numero }} · aguarda decisão jurídica D11
           {% else %}Bloco {{ numero }}{{ ' — Guarda' if numero == 2 else '' }} · indisponível{% endif %}</li>
         {% endfor %}
       </ul>
     </li>
     {% endfor %}
   </ol>
+  <details class="apoio-juridico"><summary>Referências oficiais para os temas jurídicos</summary>
+    <p>Material de apoio. As referências não preenchem respostas, não classificam automaticamente e não substituem manifestação do Jurídico.</p>
+    {% for grupo in apoio_juridico %}<h3>Bloco(s) {{ grupo.blocos }}</h3><ul>
+      {% for fonte in grupo.fontes %}<li><a href="{{ fonte.url }}" target="_blank" rel="noopener noreferrer">{{ fonte.titulo }}</a> — {{ fonte.versao }}</li>{% endfor %}
+    </ul>{% endfor %}
+  </details>
   {% if guarda_disponivel %}<p>Consulte os fatos sobre guarda na origem do FORM 1 e registre suas observações na anotação geral.</p>
   {% elif guarda %}<p role="status">{{ guarda.aviso }}</p>
   {% elif preparacao %}<p>Você pode consultar a anotação geral e o histórico desta preparação. A unidade demonstrativa está disponível ao AAL com edição autorizada.</p>{% endif %}

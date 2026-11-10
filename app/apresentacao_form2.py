@@ -4,9 +4,11 @@ from zoneinfo import ZoneInfo
 
 from sqlalchemy import select
 
-from app.catalogo_form2_rev18 import carregar_catalogo
+from app.catalogo_form2_rev18 import VERSAO as VERSAO_CATALOGO, carregar_catalogo
+from app.contrato_form2_respostas import referencias_anpd
 from app.extensao_guarda_form1 import definicao_guarda
 from app.modelos import Pessoa
+from app.respostas_form2 import projetar_bloco
 
 
 ROTULOS = {
@@ -87,6 +89,10 @@ def unidade_guarda(dados):
         return None
     try:
         catalogo = carregar_catalogo()
+        try:
+            respostas = projetar_bloco(dados["preparacao"].conteudo, 2) if catalogo["versao"] == VERSAO_CATALOGO else None
+        except (FileNotFoundError, OSError, ValueError, KeyError, TypeError):
+            respostas = None
     except FileNotFoundError:
         return {"aviso": "O catálogo de guarda documental está indisponível nesta instalação."}
     except (OSError, ValueError, KeyError, TypeError):
@@ -101,13 +107,54 @@ def unidade_guarda(dados):
         fatos.append({"id": chave, "campo": perguntas.get(chave),
                       "complemento": origem["conteudo"].get("complementos", {}).get(chave)})
     bloco = next(b for b in catalogo["blocos"] if b["numero"] == 2)
+    if respostas is None:
+        questoes = []
+        for q in bloco["itens"]:
+            if q["id"] not in ("F2-2.9", "F2-2.9.1", "F2-2.9.2", "F2-2.9.3"):
+                continue
+            condicao = q.get("condicao_documental")
+            questoes.append({**q, "modo": q.get("escolha_documental", {}).get("modo"),
+                "alternativas": [{"codigo": a, "rotulo": a} for a in q.get("escolha_documental", {}).get("alternativas", [])],
+                "condicoes": [] if not condicao else [{"origem": condicao["origem"], "operador": "IGUAL", "codigo_valor": condicao["resposta"]}],
+                "edicao": "somente_leitura", "ativa": False, "valor": None,
+                "valor_inativo": None, "complementos_ativos": {}})
+    else:
+        questoes = [q for q in respostas["itens"] if q["edicao"] == "habilitada"]
     return {"versao": catalogo["versao"], "fatos": fatos,
             "sem_prazo": perguntas.get("12.1.1", {}).get("valor") in (None, "", [], {}) and not origem["conteudo"].get("complementos", {}).get("12.1.1"),
             "notas": [nota["texto"] for nota in bloco.get("notas_documentais", [])
                       if "8.159/1991" in nota["texto"]],
-            "questoes": [
-        q for q in bloco["itens"] if q["id"] in ("F2-2.9", "F2-2.9.1", "F2-2.9.2", "F2-2.9.3")
-    ]}
+            "questoes": questoes,
+            "edicao_disponivel": bool(respostas and respostas["edicao_disponivel"]),
+            "sinalizadores": dados["preparacao"].conteudo.get("sinalizadores_etapa1", [])}
+
+
+def reapresentar_tentativa_guarda(guarda, alteracoes, complementos=None):
+    """Preserva no HTML uma tentativa rejeitada, sem tratá-la como dado salvo."""
+    if not guarda or guarda.get("aviso") or not guarda.get("edicao_disponivel"):
+        return guarda
+    valores = {q["id"]: q.get("valor") for q in guarda["questoes"]}
+    valores.update(alteracoes)
+    for questao in guarda["questoes"]:
+        item_id = questao["id"]
+        if item_id in alteracoes:
+            questao["valor"] = alteracoes[item_id]
+        if item_id in (complementos or {}):
+            questao["complementos_ativos"] = complementos[item_id]
+        if item_id == "F2-2.9.1":
+            questao["ativa"] = valores.get("F2-2.9") == "SIM"
+        elif item_id == "F2-2.9.3":
+            questao["ativa"] = valores.get("F2-2.9.2") == "SIM"
+    return guarda
+
+
+def apoio_juridico_etapa1():
+    """Referências públicas orientativas; D11 continua impedindo edição jurídica."""
+    return [
+        {"blocos": "3 e 4", "fontes": referencias_anpd(["ANPD-PP", "ANPD-LI"])},
+        {"blocos": "5", "fontes": referencias_anpd(["ANPD-PP"])},
+        {"blocos": "10", "fontes": referencias_anpd(["ANPD-AG"])},
+    ]
 
 
 def identificar_agentes(sessao, dados):

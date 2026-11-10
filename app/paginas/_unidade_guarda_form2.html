@@ -32,13 +32,48 @@
     <ul class="perguntas-guarda">
     {% for questao in guarda.questoes %}
       <li><p><strong>{{ questao.id }}</strong> — {{ questao.enunciado }}</p>
-        {% if questao.condicao_documental %}<p>Aplicável se {{ questao.condicao_documental.origem }} receber a resposta “{{ questao.condicao_documental.resposta }}”.</p>{% endif %}
-        {% if questao.escolha_documental %}<p><strong>Alternativas documentadas</strong> ({{ 'seleção múltipla' if questao.escolha_documental.modo == 'multipla' else 'seleção única' }})</p>
-        <ul>{% for alternativa in questao.escolha_documental.alternativas %}<li>{{ alternativa }}</li>{% endfor %}</ul>{% endif %}
+        {% for condicao in questao.condicoes if condicao.operador != 'SEMPRE' %}<p>Aplicável se {{ condicao.origem }} receber a resposta “{{ condicao.codigo_valor }}”.</p>{% endfor %}
+        <p><strong>Alternativas documentadas</strong> ({{ 'seleção múltipla' if questao.modo == 'multipla' else 'seleção única' }})</p>
+        <ul>{% for alternativa in questao.alternativas %}<li>{{ alternativa.rotulo }}</li>{% endfor %}</ul>
         {% if questao.orientacao %}<p>{{ questao.orientacao }}</p>{% endif %}
       </li>
     {% endfor %}
     </ul>
   </section>
+  {% if guarda.edicao_disponivel %}
+  <section aria-labelledby="respostas-guarda">
+    <h3 id="respostas-guarda">Área C — Respostas da preparação</h3>
+    <p>O AAL pode salvar um rascunho incompleto. Salvar não conclui, não submete e não produz parecer jurídico.</p>
+    <form id="form2-bloco-2" method="post" action="{{ url_for('salvar_bloco_form2', registro_id=registro.id, preparacao_id=preparacao.id, bloco=2).include_query_params(**contexto_navegacao) }}">
+      <input type="hidden" name="conta_id" value="{{ conta_id }}">
+      <input type="hidden" name="comando_id" value="{{ comando_id }}">
+      <input type="hidden" name="versao_lida" value="{{ preparacao.versao_rascunho }}">
+      {% for questao in guarda.questoes %}
+      <fieldset class="resposta-form2" data-resposta-form2="{{ questao.id }}"{% if not questao.ativa %} disabled{% endif %}>
+        <legend>{{ questao.id }} — {{ questao.enunciado }}</legend>
+        {% if not questao.ativa %}<p>Resposta inativa pela condição documental. O valor anterior permanece preservado e não participa da avaliação ativa.</p>{% endif %}
+        {% if questao.modo == 'unica' %}
+        <label for="resposta-{{ questao.id }}">Resposta</label>
+        <select id="resposta-{{ questao.id }}" name="resposta_{{ questao.id }}">
+          <option value="">Sem resposta</option>
+          {% for alternativa in questao.alternativas %}<option value="{{ alternativa.codigo }}"{% if questao.valor == alternativa.codigo %} selected{% endif %}>{{ alternativa.rotulo }}</option>{% endfor %}
+        </select>
+        {% else %}
+        <p>Selecione uma ou mais alternativas. “A CONFIRMAR” não pode ser combinada com as demais.</p>
+        <input type="hidden" name="resposta_{{ questao.id }}" value="">
+        {% for alternativa in questao.alternativas %}<label class="opcao-form2"><input type="checkbox" name="resposta_{{ questao.id }}" value="{{ alternativa.codigo }}"{% if alternativa.codigo in (questao.valor or []) %} checked{% endif %}> {{ alternativa.rotulo }}</label>{% endfor %}
+        <label for="complemento-{{ questao.id }}">Descrição de “Outro”, quando selecionado</label>
+        <input id="complemento-{{ questao.id }}" name="complemento_{{ questao.id }}_ALT_05" maxlength="1000" value="{{ questao.complementos_ativos.get('ALT_05', '') }}">
+        {% endif %}
+      </fieldset>
+      {% if not questao.ativa and questao.valor_inativo %}<label class="reativar-form2"><input type="checkbox" name="reativar_{{ questao.id }}" value="1"> Reativar o valor anterior quando a condição voltar a ser atendida</label>{% endif %}
+      {% endfor %}
+      {% if guarda.sinalizadores %}<div class="aviso-leitura"><strong>Sinalizadores do rascunho</strong><ul>
+        {% for sinal in guarda.sinalizadores %}<li>{{ sinal.item_id }} — {{ 'informação factual a confirmar' if sinal.classe == 'factual' else 'análise especializada pendente' }}. Nenhum encaminhamento automático foi realizado.</li>{% endfor %}
+      </ul></div>{% endif %}
+      <div class="acoes-form2"><button type="submit" class="botao-primario">Salvar respostas do Bloco 2</button></div>
+    </form>
+  </section>
+  {% endif %}
   {% endif %}
 </section>
