@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from '_links_instrumentos.html' import identificacao_servidor, link_form2 with context %}
+{% from '_links_instrumentos.html' import identificacao_servidor, link_form2, situacao_preparacao with context %}
 {% set titulo_pagina = 'Selecionar Registro — FORM 2' if instrumento == 'form2' else 'Selecionar Registro — FORM 1' if instrumento == 'form1' else 'Painel de Registros' %}
 {% block titulo %}{{ titulo_pagina }} · Governança LGPD{% endblock %}
 {% block conteudo %}
@@ -103,11 +103,11 @@
           <p><strong>Situação do Registro:</strong> <span class="estado estado-{{ registro.estado_codigo }}">{{ registro.estado }}</span></p>
           {% if instrumento == 'form2' %}
           {% set acesso = registro.navegacao_form2 %}
-          <p><strong>Situação da preparação:</strong> {% if not acesso.resumo %}Ainda sem designação.{% elif acesso.resumo.trabalhada %}Em preparação pelo AAL.{% else %}Designada ao AAL — ainda não iniciada.{% endif %}</p>
-          {% if acesso.resumo %}
-          <p><strong>Origem:</strong> FORM 1, versão histórica nº {{ acesso.resumo.origem }}, registrada em {{ acesso.resumo.origem_em|data_local }}.</p>
+          <p><strong>Situação da preparação:</strong> {% if acesso.preparacao_id %}{{ situacao_preparacao(acesso.resumo.trabalhada if acesso.resumo is mapping else none) }}.{% else %}Ainda sem designação.{% endif %}</p>
+          {% if acesso.resumo is mapping %}
+          <p><strong>Origem:</strong> FORM 1, versão histórica nº {{ acesso.resumo.origem }}{% if acesso.resumo.origem_em %}, registrada em {{ acesso.resumo.origem_em|data_local }}{% endif %}.</p>
           <p><strong>Preparação do FORM 2:</strong> rascunho {{ acesso.resumo.rascunho }}.
-            {{ 'Último salvamento' if acesso.resumo.salva else 'Designação' }} em {{ acesso.resumo.salvo_em|data_local }} por {{ acesso.resumo.autor or 'autor indisponível' }} ({{ 'AAL' if acesso.resumo.salva else 'APA' }}).</p>
+            {% if acesso.resumo.salva is boolean %}{{ 'Último salvamento' if acesso.resumo.salva else 'Designação' }} em {{ acesso.resumo.salvo_em|data_local }} por {{ acesso.resumo.autor or 'autor indisponível' }} ({{ 'AAL' if acesso.resumo.salva else 'APA' }}).{% endif %}</p>
           {% endif %}
           {% if acesso.pode_editar %}<p>Função nesta atividade: você está designado como AAL. Abra a preparação para consultar a origem e registrar observações.</p>
           {% elif acesso.e_apa and acesso.preparacao_id %}<p>Função nesta atividade: você pode acompanhar esta preparação como APA. Abra o rascunho para consulta.</p>

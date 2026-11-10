@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from '_links_instrumentos.html' import acao_preparacao, identificacao_servidor %}
+{% from '_links_instrumentos.html' import acao_preparacao, identificacao_servidor, situacao_preparacao %}
 {% from "_consulta_historica_form2.html" import valor %}
 {% block titulo %}FORM 2 — Validação jurídica e institucional{% endblock %}
 {% block conteudo %}
@@ -26,8 +26,8 @@
     {% set versao_factual = origem.snapshot if origem else snapshots | selectattr('id', 'equalto', alvo.snapshot_id) | first %}
     <p><strong>Origem:</strong> FORM 1, versão histórica nº {{ versao_factual.numero }}, registrada em {{ versao_factual.preparado_em|data_local }}.</p>
   {% else %}<p><strong>Origem:</strong> selecione uma versão histórica autorizada do FORM 1.</p>{% endif %}
-  <p><strong>Preparação do FORM 2:</strong> {% if alvo %}{{ 'Em preparação pelo AAL' if trabalho_aal.get(alvo.id) else 'Designada ao AAL — ainda não iniciada' }} · rascunho {{ alvo.versao_rascunho }}.
-    {% if alvo.id in trabalho_aal %}Último salvamento em {{ alvo.salvo_em|data_local }} por {{ agentes.get(alvo.salvo_por, 'autor indisponível') }} (AAL).
+  <p><strong>Preparação do FORM 2:</strong> {% if alvo %}{{ situacao_preparacao(trabalho_aal.get(alvo.id, false) if trabalho_aal is mapping else none) }} · rascunho {{ alvo.versao_rascunho }}.
+    {% if trabalho_aal is mapping and alvo.id in trabalho_aal %}Último salvamento em {{ alvo.salvo_em|data_local }} por {{ agentes.get(alvo.salvo_por, 'autor indisponível') }} (AAL).
     {% else %}Designação em {{ alvo.designado_em|data_local }} por {{ agentes.get(alvo.designado_por, 'autor indisponível') }} (APA).{% endif %}
     {% elif origem %}Ainda sem designação para a origem selecionada.{% else %}Selecione a origem para consultar sua situação.{% endif %}</p>
   <p class="ajuda">Preparação da validação. Não é parecer jurídico, decisão institucional nem submissão.</p>
@@ -52,7 +52,7 @@
     {% if pode_editar %}<a href="#anotacoes">Abrir anotação geral</a>
     {% else %}<a href="#anotacoes">Consultar anotação geral</a>{% endif %}
   {% elif alvo %}
-    <a class="botao-link" href="{{ url_preparacao.include_query_params(conta_id=conta_id, preparacao_id=alvo.id, **contexto_navegacao) }}">{{ acao_preparacao(alvo.id in preparacoes_editaveis, e_apa, trabalho_aal.get(alvo.id)) }}</a>
+    <a class="botao-link" href="{{ url_preparacao.include_query_params(conta_id=conta_id, preparacao_id=alvo.id, **contexto_navegacao) }}">{{ acao_preparacao(alvo.id in preparacoes_editaveis, e_apa, trabalho_aal.get(alvo.id, false) if trabalho_aal is mapping else none) }}</a>
   {% elif e_apa and origem %}
     {% if not ciclo_em_andamento %}<p>A preparação só pode ser iniciada com o Registro em andamento e o ciclo ativo.</p>
     {% elif candidatos %}
@@ -84,7 +84,7 @@
   <details><summary>Preparações disponíveis</summary><ul>
     {% for item in preparacoes %}
     {% set versao = snapshots | selectattr('id', 'equalto', item.snapshot_id) | first %}
-    <li><a href="{{ url_preparacao.include_query_params(conta_id=conta_id, preparacao_id=item.id, **contexto_navegacao) }}">{{ acao_preparacao(item.id in preparacoes_editaveis, e_apa, trabalho_aal.get(item.id)) }} · origem {{ versao.numero }} · rascunho {{ item.versao_rascunho }}</a></li>
+    <li><a href="{{ url_preparacao.include_query_params(conta_id=conta_id, preparacao_id=item.id, **contexto_navegacao) }}">{{ acao_preparacao(item.id in preparacoes_editaveis, e_apa, trabalho_aal.get(item.id, false) if trabalho_aal is mapping else none) }} · origem {{ versao.numero }} · rascunho {{ item.versao_rascunho }}</a></li>
     {% endfor %}
   </ul></details>{% endif %}
 </section>

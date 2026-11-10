@@ -120,6 +120,51 @@ def test_inicio_e_retomada_seguem_o_historico_do_aal(sessao):
             assert "Servidor Épsilon (fictício) (AAL)" in resposta.text
 
 
+def test_paginas_form2_com_contexto_anterior(sessao, monkeypatch):
+    import app.main as principal
+    import app.rotas_form2_preparacao as rotas
+
+    rid, sid = base(sessao)
+    pid = iniciar(sessao, rid, sid)["preparacao_id"]
+    consulta_atual = rotas.consultar_preparacao
+    projecao_atual = principal.projetar_navegacao_preparacao
+
+    def consulta_anterior(*args, **kwargs):
+        dados = consulta_atual(*args, **kwargs)
+        dados.pop("trabalho_aal", None)
+        return dados
+
+    def projecao_anterior(*args, **kwargs):
+        dados = projecao_atual(*args, **kwargs)
+        if dados:
+            dados.pop("resumo")
+        return dados
+
+    monkeypatch.setattr(rotas, "consultar_preparacao", consulta_anterior)
+    monkeypatch.setattr(principal, "projetar_navegacao_preparacao", projecao_anterior)
+    rota = f"/registros/{rid}/form2/preparacao"
+    for salva in (False, True):
+        if salva:
+            assert salvar(sessao, rid, pid)["permitido"]
+        for conta in ("CONTA-A1", "CONTA-G1"):
+            params = {"conta_id": conta, "secretaria_id": "UNID-NORTE", "instrumento": "form2"}
+            lista = cliente.get("/painel", params=params)
+            assert lista.status_code == 200 and "Situação da preparação indisponível" in lista.text
+            assert "Ainda sem designação" not in lista.text
+            destino = destino_form2(lista.text)
+            assert "#" not in destino
+            pagina = cliente.get(destino)
+            assert pagina.status_code == 200
+            assert ("Em preparação pelo AAL" if salva else "Designada ao AAL — ainda não iniciada") in pagina.text
+            assert ('id="anotacao"' in pagina.text) == (conta == "CONTA-G1")
+            contexto = dict(pagina.context)
+            contexto.pop("trabalho_aal")
+            html = pagina.template.render(contexto)
+            assert "Situação da preparação indisponível" in html
+            assert "Designada ao AAL — ainda não iniciada" not in html and "Em preparação pelo AAL" not in html
+    assert cliente.get(rota, params={"conta_id": "CONTA-B1", "preparacao_id": pid}).status_code == 403
+
+
 def test_acao_de_inicio_depende_do_estado_real(sessao):
     rid, sid = base(sessao)
     params = {"conta_id": "CONTA-A1", "secretaria_id": "UNID-NORTE", "instrumento": "form2"}

@@ -14,7 +14,7 @@ from app.modelos import Pessoa, Unidade
 from app.continuidade_apa import apa_em_exercicio
 from app.consultas_interface import pode_consultar_registro
 from app.apresentacao_form2 import apresentar_origem, identificar_agentes, unidade_guarda, data_local, rotulo_demonstrativo, PAPEIS
-from app.form2_preparacao import consultar_preparacao, iniciar_preparacao, salvar_preparacao
+from app.form2_preparacao import consultar_preparacao, iniciar_preparacao, projetar_trabalho_aal, salvar_preparacao
 
 router = APIRouter()
 paginas = Jinja2Templates(directory=Path(__file__).parent / "paginas")
@@ -49,6 +49,9 @@ def _pagina(request, sessao, registro_id, conta_id, *, preparacao_id=None,
         return paginas.TemplateResponse(request=request, name="erro.html", status_code=403,
             context={"titulo": "Consulta não autorizada ou indisponível", "mensagem": dados["motivo"]})
     visiveis = dados["preparacoes"]
+    trabalho = dados.get("trabalho_aal")
+    if trabalho is None:
+        trabalho = projetar_trabalho_aal(sessao, visiveis)
     alvo = dados["preparacao"]
     if alvo is None and dados["origem"]:
         sid = dados["origem"]["snapshot"].id
@@ -59,7 +62,7 @@ def _pagina(request, sessao, registro_id, conta_id, *, preparacao_id=None,
     exercicio = apa_em_exercicio(sessao, dados["registro"].unidade_principal_atual_id)
     return paginas.TemplateResponse(request=request, name="form2_preparacao.html",
         status_code=409 if erro else 200,
-        context={**dados, "contexto_navegacao": _contexto_navegacao(request), "alvo": alvo,
+        context={**dados, "trabalho_aal": trabalho, "contexto_navegacao": _contexto_navegacao(request), "alvo": alvo,
                  "secretaria": sessao.get(Unidade, dados["registro"].unidade_principal_atual_id),
                  "apa": sessao.get(Pessoa, exercicio["pessoa_id"]) if exercicio else None,
                  "consulta_historica": apresentar_origem(dados.get("origem")),

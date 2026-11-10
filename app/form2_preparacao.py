@@ -286,7 +286,7 @@ def _ciclo_em_andamento(sessao, registro):
     ))
 
 
-def _trabalho_aal(sessao, preparacoes):
+def projetar_trabalho_aal(sessao, preparacoes):
     """Distingue designação, salvamento vazio e observação já registrada, inclusive apagada depois."""
     if not preparacoes:
         return {}
@@ -319,7 +319,7 @@ def projetar_navegacao_preparacao(sessao, *, conta_id, registro_id, momento=None
         versao, registrada_em = sessao.execute(select(
             VersaoForm1Integral.numero, VersaoForm1Integral.preparado_em).where(
             VersaoForm1Integral.id == prep.snapshot_id, VersaoForm1Integral.registro_id == registro.id)).one()
-        trabalho = _trabalho_aal(sessao, [prep])
+        trabalho = projetar_trabalho_aal(sessao, [prep])
         autor = sessao.get(Pessoa, prep.salvo_por)
         resumo = {"origem": versao, "origem_em": registrada_em, "salva": prep.id in trabalho,
                   "trabalhada": trabalho.get(prep.id, False), "rascunho": prep.versao_rascunho, "salvo_em": prep.salvo_em,
@@ -372,7 +372,7 @@ def consultar_preparacao(sessao, *, conta_id, registro_id, preparacao_id=None,
                 "snapshots": snapshots, "candidatos": candidatos, "e_apa": e_apa,
                 "ciclo_em_andamento": _ciclo_em_andamento(sessao, registro) if e_apa else False,
                 "pode_editar": pode_editar, "preparacoes_editaveis": editaveis,
-                "trabalho_aal": _trabalho_aal(sessao, visiveis),
+                "trabalho_aal": projetar_trabalho_aal(sessao, visiveis),
                 "historico": historico, "politica": POLITICA}
     except (PermissionError, ValueError) as erro:
         return _negar(sessao, conta_id, registro_id, str(erro))
