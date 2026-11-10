@@ -1,16 +1,14 @@
 {% extends "base.html" %}
 {% from '_links_instrumentos.html' import identificacao_servidor %}
 {% block titulo %}Central de Acesso LGPD{% endblock %}
-{% macro cartao(area, titulo, objetivo, situacao, icone, numero='') %}
+{% macro cartao(area, titulo, objetivo, situacao, icone, numero='', acesso='') %}
 <li class="cartao-central area-{{ area }}">
   <svg class="icone-central" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="{{ icone }}"/></svg>
   <div>
     <h3>{% if numero %}<span class="numero-form">FORM {{ numero }}<span class="sr-apenas"> — </span></span>{% endif %}{{ titulo }}</h3>
     <p>{{ objetivo }}</p>
     <p class="situacao-instrumento">{{ situacao }}</p>
-    {% if numero %}
-    <button class="botao-link-secundario acesso-instrumento" {% if secretarias and numero in (1, 2) %}type="submit" form="abrir-painel" name="instrumento" value="form{{ numero }}"{% else %}type="button" disabled{% endif %}>Acessar FORM {{ numero }}</button>
-    {% endif %}
+    <button class="botao-link-secundario acesso-instrumento" {% if secretarias and numero in (1, 2) %}type="submit" form="abrir-painel" name="instrumento" value="form{{ numero }}"{% else %}type="button" disabled{% endif %}>{{ 'Acessar FORM ' ~ numero if numero else acesso }}</button>
   </div>
 </li>
 {% endmacro %}
@@ -82,8 +80,8 @@
   <section class="gestao-central" aria-labelledby="titulo-gestao">
     <h2 id="titulo-gestao">Áreas de Gestão</h2>
     <ul class="lista-instrumentos-registro">
-      {{ cartao('dashboard', 'Dashboard LGPD', 'Indicadores consolidados de governança, Registros, pendências, riscos e providências.', 'Planejado', 'M3 3v17h18 M7 16v-4 M12 16V6 M17 16V9') }}
-      {{ cartao('ti', 'Administração Central — TI', 'Gestão técnica das 18 Secretarias: administração autorizada, monitoramento, integridade, configurações e auditoria.', 'Planejada. O acesso futuro exigirá habilitação específica e autenticação reforçada.', 'M3 3h18v7H3z M3 14h18v7H3z M6 6.5h1 M6 17.5h1') }}
+      {{ cartao('dashboard', 'Dashboard LGPD', 'Indicadores consolidados de governança, Registros, pendências, riscos e providências.', 'Planejado', 'M3 3v17h18 M7 16v-4 M12 16V6 M17 16V9', acesso='Acessar Dashboard') }}
+      {{ cartao('ti', 'Administração Central — TI', 'Gestão técnica das 18 Secretarias: administração autorizada, monitoramento, integridade, configurações e auditoria.', 'Planejada. O acesso futuro exigirá habilitação específica e autenticação reforçada.', 'M3 3h18v7H3z M3 14h18v7H3z M6 6.5h1 M6 17.5h1', acesso='Acessar Administração Central') }}
     </ul>
   </section>
 </div>

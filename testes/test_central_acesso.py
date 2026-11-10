@@ -55,7 +55,9 @@ def test_cartoes_explicam_disponibilidade_sem_oferecer_acesso_direto():
             assert f'type="button" disabled>Acessar FORM {numero}</button>' in cartao
             assert 'form="abrir-painel"' not in cartao
         else:
-            assert '<button' not in cartao
+            rotulo = 'Acessar Dashboard' if numero == 5 else 'Acessar Administração Central'
+            assert f'type="button" disabled>{rotulo}</button>' in cartao
+            assert 'form="abrir-painel"' not in cartao
 
 
 @pytest.mark.parametrize("conta,rotulo", [
@@ -92,7 +94,15 @@ def test_escolha_explicita_filtra_form2_e_retorna_ao_contexto(sessao, conta, rot
     assert "Última atividade:" in form1.text
     assert outro not in form2.text and rotulo in form2.text
     assert form2.url.path == "/painel" and contagens(sessao) == antes
-    link1 = unescape(re.search(r'href="([^"]+instrumento=form1#titulo-form1-integral)"', form1.text).group(1))
+    cartao = form1.text.split(f'id="cartao-registro-{rid}"', 1)[1].split("</article>", 1)[0]
+    principais = re.findall(r'<a class="botao-link"[^>]*href="([^"]+)"', cartao)
+    assert len(principais) == 1
+    link1 = unescape(principais[0])
+    assert 'Abrir FORM 1 para preenchimento' not in cartao
+    assert ('>Continuar FORM 1</a>' in cartao) == (conta == "CONTA-A1")
+    for lista in (form1, form2):
+        assert "Escolha um Registro</h2>" not in lista.text
+        assert lista.text.count(">Voltar ao Painel geral de Registros</a>") == 1
     if conta == "CONTA-A1":  # Nesta massa, Alfa é o ARP do FORM 1 e Épsilon é o AAL do FORM 2.
         retomadas = re.findall(r'href="([^"]+/registros/' + re.escape(rid) + r'\?[^"]+#titulo-bloco-\d+)"', form1.text)
         assert retomadas and all("instrumento=form1" in href and "secretaria_id=UNID-NORTE" in href for href in retomadas)

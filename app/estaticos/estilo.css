@@ -240,7 +240,7 @@ legend { padding: 0 .4rem; color: var(--azul-escuro); font-weight: 800; }
 .rodape-formulario p { margin: 0; color: #526475; }
 .formulario-integral .rodape-formulario { display: block; }
 .acoes-bloco-form1 { display: grid; grid-template-columns: minmax(0, 1fr); gap: .5rem; width: 100%; min-width: 0; flex: 1 1 100%; margin-top: .75rem; container-type: inline-size; }
-.acoes-salvamento-bloco { display: grid; grid-template-columns: repeat(3, minmax(0, max-content)); align-items: stretch; gap: .65rem; margin: 0; }
+.acoes-salvamento-bloco { display: grid; justify-content: end; grid-auto-flow: column; grid-auto-columns: minmax(0, max-content); align-items: stretch; gap: .65rem; margin: 0; }
 .acoes-salvamento-bloco > button { flex: 0 1 auto; width: auto; min-width: 0; min-height: 2.75rem; margin: 0; padding: .65rem 1rem; font: inherit; font-weight: 700; }
 .formulario-integral .rodape-formulario .destino-acao-bloco { margin-top: .5rem; }
 .form1-integral { overflow-anchor: none; }
@@ -290,7 +290,7 @@ legend { padding: 0 .4rem; color: var(--azul-escuro); font-weight: 800; }
 .alternativas-conferencia .opcao-devolucao-conferencia { border-color: #92400e; background: #fffbeb; }
 #dialogo-confirmar-conferencia { width: min(40rem, calc(100% - 2rem)); max-height: calc(100dvh - 2rem); overflow: auto; border: 2px solid var(--azul); border-radius: .6rem; padding: 1.25rem; color: var(--texto); background: white; }
 #dialogo-confirmar-conferencia::backdrop { background: rgb(12 59 90 / 55%); }
-.acoes-decisao-conferencia { display: grid; gap: .75rem; }
+.acoes-decisao-conferencia { display: grid; justify-items: end; gap: .75rem; }
 @media (max-width: 700px) { .trajeto-conferencia, .ramificacoes-conferencia, .alternativas-conferencia { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 700px) {
   .trajeto-conferencia li:not(:last-child)::after { content: '↓'; right: calc(50% - .4rem); top: auto; bottom: -.9rem; }
@@ -305,7 +305,7 @@ legend { padding: 0 .4rem; color: var(--azul-escuro); font-weight: 800; }
 .retorno-painel-form1 a { display: inline-block; padding: .25rem .5rem; }
 #dialogo-saida-form1 { width: min(36rem, calc(100% - 2rem)); max-height: calc(100dvh - 2rem); overflow: auto; box-sizing: border-box; border: 2px solid #075985; border-radius: .5rem; color: #17212B; background: white; padding: 1.25rem; }
 #dialogo-saida-form1::backdrop { background: rgb(12 59 90 / 55%); }
-.acoes-saida-form1 { display: flex; flex-wrap: wrap; gap: .75rem; }
+.acoes-saida-form1 { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: .75rem; }
 @media (max-width: 600px) { .acoes-saida-form1 { flex-direction: column; } .acoes-saida-form1 button { width: 100%; } }
 .mensagem-sucesso { border: 1px solid #86b99a; background: #ecfdf3; color: #14532d; }
 .mensagem-erro { border: 1px solid #e5a3a3; background: #fff1f2; color: #881337; }
@@ -331,7 +331,7 @@ dd { margin: .25rem 0 0; }
   .rodape-formulario { align-items: stretch; flex-direction: column; }
   .botao-primario, .botao-secundario { width: 100%; }
   .acoes-salvamento-bloco { width: 100%; }
-  .acoes-salvamento-bloco { grid-template-columns: minmax(0, 1fr); }
+  .acoes-salvamento-bloco { grid-auto-flow: row; grid-template-columns: minmax(0, 1fr); }
   .acoes-salvamento-bloco > button { width: 100%; }
   .cabecalho-form1 { grid-template-columns: 1fr; }
   .identidades-form1, .etapas-form1 { grid-template-columns: 1fr; }
@@ -342,7 +342,7 @@ dd { margin: .25rem 0 0; }
   th:nth-child(3), td:nth-child(3) { display: none; }
 }
 @container (max-width: 34rem) {
-  .acoes-salvamento-bloco { grid-template-columns: minmax(0, 1fr); }
+  .acoes-salvamento-bloco { grid-auto-flow: row; grid-template-columns: minmax(0, 1fr); }
   .acoes-salvamento-bloco > button { width: 100%; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -395,4 +395,20 @@ dd { margin: .25rem 0 0; }
   .topo { background: white; color: #17212B; break-inside: avoid; }
   .topo .selo { border-color: #D6E0E6; }
   .brasao-institucional { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
+
+/* Comandos isolados acompanham a borda da sua região. Grupos de campos e réguas
+   de navegação conservam a disposição e a ordem de teclado próprias. */
+:where(form, section, .acao-painel, .lista-conflitos-duplicidade > li, .lista-instrumentos-registro > li) > :is(button[type="submit"], .botao-primario, .botao-link, .botao-link-secundario),
+p > a.voltar:only-child, .form2-demo section > a[href="#anotacoes"] {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin-inline-start: auto;
+}
+.acoes-cartao-registro form > button { width: 100%; }
+.mapa-form2 li:has(> a), .navegacao-governanca .outros-destinos { text-align: end; }
+@media (max-width: 650px) {
+  :where(form, section, .acao-painel) > :is(button[type="submit"], .botao-primario, .botao-link),
+  .navegacao-governanca > a { width: 100%; text-align: center; }
 }

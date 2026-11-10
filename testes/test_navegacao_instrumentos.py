@@ -168,11 +168,11 @@ def test_paginas_form2_com_contexto_anterior(sessao, monkeypatch):
 def test_acao_de_inicio_depende_do_estado_real(sessao):
     rid, sid = base(sessao)
     params = {"conta_id": "CONTA-A1", "secretaria_id": "UNID-NORTE", "instrumento": "form2"}
-    assert "Iniciar preparação" in cliente.get("/painel", params=params).text
+    assert "Selecionar versão do FORM 1" in cliente.get("/painel", params=params).text
     sessao.get(Registro, rid).estado_atual = "suspenso"
     sessao.commit()
     lista = cliente.get("/painel", params=params)
-    assert "Consultar disponibilidade" in lista.text and "Iniciar preparação" not in lista.text
+    assert "Consultar disponibilidade" in lista.text and "Selecionar versão do FORM 1" not in lista.text
     origem = cliente.get(f"/registros/{rid}/form2/preparacao", params={**params, "snapshot_id": sid})
     assert origem.status_code == 200 and 'id="preparador"' not in origem.text
 

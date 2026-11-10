@@ -23,6 +23,10 @@ Leia este arquivo antes de alterar código ou documentação. Em seguida, leia s
 
 - Código implementado não significa funcionalidade aceita. Distinguir: **implementado** — código desenvolvido e testes automatizados executados; **verificado funcionalmente** — comportamento confrontado com requisitos aprovados; **aceito** — utilização demonstrada e validada para o escopo previsto.
 - Não declarar facilidade de uso apenas pela aprovação de testes automatizados. Quando a inspeção visual não puder ocorrer, registrar explicitamente **NÃO VERIFICADA**.
+**Padrão institucional de ações e navegação.**
+
+- Nos quatro FORMs, no Dashboard, na Administração Central e nas telas compartilhadas, alinhar os comandos à direita da respectiva região. Em telas estreitas, permitir a largura total. Manter ordem lógica de leitura e teclado, foco visível e permissões vigentes.
+- Cada cartão de Registro deve destacar uma ação principal conforme o papel e o estado, com nomenclatura uniforme, próxima providência e ações secundárias distintas. Cada destino de retorno deve aparecer uma única vez na região.
 - Cada tela operacional deve esclarecer onde o usuário está, qual papel exerce, o que precisa fazer, qual ação está disponível e o que acontecerá ao executá-la.
 - Informações institucionais devem apoiar o trabalho sem dificultar o acesso às perguntas e ações principais. Distinguir claramente o FORM 1 Integral do questionário sintético legado.
 

@@ -6,6 +6,9 @@
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/instrumentos_registro.css') }}">
 <nav class="navegacao-governanca" aria-label="Navegação principal">
   <a class="botao-link-secundario" href="{{ url_for('central') }}?conta_id={{ conta_id|urlencode }}&amp;secretaria_id={{ secretaria.id|urlencode }}">{{ 'Trocar Secretaria' if pode_trocar_secretaria else 'Voltar à Central de Acesso' }}</a>
+  {% if instrumento %}
+  <a class="botao-link-secundario" href="{{ url_for('painel_registros') }}?conta_id={{ conta_id|urlencode }}&amp;secretaria_id={{ secretaria.id|urlencode }}">Voltar ao Painel geral de Registros</a>
+  {% endif %}
 </nav>
 <section class="abertura">
   <div>
@@ -25,11 +28,10 @@
 <p class="aviso-leitura acao-painel">Seu papel atual permite consultar ou atuar nos mapeamentos disponíveis, mas não abrir um novo Registro LGPD. A criação fica disponível ao Agente Público Autorizado responsável pelo Registro.</p>
 {% endif %}
 
-<section class="painel-inicial painel-registros-unificado" aria-labelledby="titulo-registros">
+<section class="painel-inicial painel-registros-unificado" {% if instrumento %}aria-label="Registros autorizados"{% else %}aria-labelledby="titulo-registros"{% endif %}>
     {% if instrumento %}
     <header class="cabecalho-trabalho">
-      <h2 id="titulo-registros">Escolha um Registro</h2>
-      <p>{{ 'Abra a preparação para trabalhar como AAL ou acompanhá-la como APA, conforme a ação indicada.' if instrumento == 'form2' else 'Abra o levantamento para preencher, conferir ou consultar, conforme a ação indicada.' }}</p>
+      <p>{{ 'Selecione um Registro para preparar ou acompanhar o FORM 2.' if instrumento == 'form2' else 'Selecione um Registro para preencher, conferir ou consultar o FORM 1.' }}</p>
       <small>{{ registros_exibidos|length }} {{ 'Registro disponível' if registros_exibidos|length == 1 else 'Registros disponíveis' }}</small>
     </header>
     {% if instrumento == 'form1' %}
@@ -93,6 +95,7 @@
       {% for registro in registros_exibidos %}
       {% set url_registro = url_for('detalhe_registro', registro_id=registro.id).include_query_params(conta_id=conta_id) %}
       {% if instrumento %}{% set url_registro = url_registro.include_query_params(secretaria_id=secretaria.id, instrumento=instrumento) %}{% endif %}
+      {% set tarefas = registro.providencias | rejectattr('categoria', 'equalto', 'alerta') | list %}
       <article class="cartao-mapeamento" id="cartao-registro-{{ registro.id }}" tabindex="-1">
         <div class="cartao-mapeamento-conteudo">
           <p class="etiqueta codigo-registro">{{ registro.codigo_lgpd }}</p>
@@ -132,7 +135,7 @@
             {% include '_fluxo_conferencia.html' %}
             {% if fluxo.tem_historico %}<a href="{{ url_for('detalhe_registro', registro_id=registro.id) }}?conta_id={{ conta_id }}#historico-conferencias-form1">Consultar histórico deste Registro</a>{% endif %}
           </details>
-          {% set providencias = registro.providencias | rejectattr('categoria', 'equalto', 'alerta') | list if instrumento == 'form1' else registro.providencias %}
+          {% set providencias = tarefas if instrumento == 'form1' else registro.providencias %}
           {% if providencias %}
           <div class="providencias-registro" aria-label="Providências do Registro {{ registro.codigo_lgpd }}">
             {% for providencia in providencias %}
@@ -150,19 +153,6 @@
               <p>Nenhum campo obrigatório ativo incompleto; revise a pré-validação consultiva.</p>
               {% endif %}
               {% if providencia.rotulo %}<p><strong>Próxima ação:</strong> {{ providencia.rotulo }}.</p>{% endif %}
-              {% if providencia.categoria == 'conferencia_form1' %}
-              <a class="botao-link" href="{{ url_for('consultar_conferencia_interna', registro_id=registro.id) }}?conta_id={{ conta_id }}">{{ providencia.acao_rotulo }}</a>
-              {% elif providencia.categoria == 'preenchimento_form1' and providencia.acao_tipo == 'iniciar' %}
-              <form class="acao-iniciar-form1-integral" method="post" action="{{ url_for('iniciar_form1_integral', registro_id=registro.id) }}">
-                <input type="hidden" name="conta_id" value="{{ conta_id }}">
-                <input type="hidden" name="comando_id" value="{{ providencia.comando_id }}">
-                <button class="botao-link" aria-label="{{ providencia.acao_rotulo }} do Registro {{ registro.codigo_lgpd }}" type="submit">{{ providencia.acao_rotulo }}</button>
-              </form>
-              {% elif providencia.categoria == 'preenchimento_form1' %}
-              <a class="botao-link" aria-label="{{ providencia.acao_rotulo }} do Registro {{ registro.codigo_lgpd }}" href="{{ url_registro }}#{{ providencia.ancora }}">{{ providencia.acao_rotulo }}</a>
-              {% else %}
-              <a class="botao-link" aria-label="Ver providência do Registro {{ registro.codigo_lgpd }}" href="{{ url_for('detalhe_registro', registro_id=registro.id) }}?conta_id={{ conta_id }}">{{ providencia.acao_rotulo }}</a>
-              {% endif %}
             </div>
             {% endfor %}
           </div>
@@ -177,19 +167,36 @@
           {% endif %}
         </div>
         <div class="acoes-cartao-registro">
+          {% set retomar = registro.preenchimento_arp and not registro.preenchimento_arp.nao_iniciado and registro.fluxo_conferencia.atual == 'confirmar' %}
           {% if instrumento == 'form2' %}
           {{ link_form2(registro, registro.navegacao_form2, conta_id, secretaria.id) }}
-          {% elif instrumento == 'form1' %}
-          <a class="{{ 'botao-link-secundario' if providencias or (registro.preenchimento_arp and registro.fluxo_conferencia.atual == 'confirmar') else 'botao-link' }}" href="{{ url_registro }}#titulo-form1-integral">{{ 'Abrir FORM 1 para preenchimento' if registro.preenchimento_arp else 'Consultar FORM 1' }}<span class="sr-apenas"> do Registro {{ registro.codigo_lgpd }}</span></a>
-          {% endif %}
-          {% if instrumento != 'form2' and registro.preenchimento_arp and not registro.preenchimento_arp.nao_iniciado and registro.fluxo_conferencia.atual == 'confirmar' %}
-          <a class="botao-link" aria-label="Retomar rascunho do Registro {{ registro.codigo_lgpd }}" href="{{ url_registro }}#{{ registro.preenchimento_arp.ancora }}">Retomar rascunho do FORM 1</a>
+          {% else %}
+          {% for tarefa in tarefas %}
+            {% if tarefa.categoria == 'conferencia_form1' %}
+            <a class="botao-link" href="{{ url_for('consultar_conferencia_interna', registro_id=registro.id) }}?conta_id={{ conta_id }}">{{ tarefa.acao_rotulo }}</a>
+            {% elif tarefa.acao_tipo == 'iniciar' %}
+            {% set rotulo = 'Iniciar FORM 1' if instrumento else tarefa.acao_rotulo %}
+            <form class="acao-iniciar-form1-integral" method="post" action="{{ url_for('iniciar_form1_integral', registro_id=registro.id) }}">
+              <input type="hidden" name="conta_id" value="{{ conta_id }}">
+              <input type="hidden" name="comando_id" value="{{ tarefa.comando_id }}">
+              <button class="botao-link" aria-label="{{ rotulo }} do Registro {{ registro.codigo_lgpd }}" type="submit">{{ rotulo }}</button>
+            </form>
+            {% else %}
+            {% set rotulo = 'Continuar FORM 1' if instrumento and tarefa.acao_tipo == 'continuar' else tarefa.acao_rotulo %}
+            <a class="botao-link" aria-label="{{ rotulo }} do Registro {{ registro.codigo_lgpd }}" href="{{ url_registro }}#{{ tarefa.ancora }}">{{ rotulo }}</a>
+            {% endif %}
+          {% endfor %}
+          {% if retomar %}
+          <a class="botao-link" aria-label="{{ 'Continuar FORM 1' if instrumento else 'Retomar rascunho' }} do Registro {{ registro.codigo_lgpd }}" href="{{ url_registro }}#{{ registro.preenchimento_arp.ancora }}">{{ 'Continuar FORM 1' if instrumento else 'Retomar rascunho do FORM 1' }}</a>
           <p class="ajuda">A conferência preservou a versão apresentada. Seu rascunho continua editável; alterações não modificam aquela versão.</p>
+          {% elif instrumento == 'form1' and not tarefas | selectattr('categoria', 'equalto', 'preenchimento_form1') | list %}
+          <a class="{{ 'botao-link-secundario' if tarefas else 'botao-link' }}" href="{{ url_registro }}#titulo-form1-integral">{{ 'Continuar FORM 1' if registro.preenchimento_arp else 'Consultar FORM 1' }}<span class="sr-apenas"> do Registro {{ registro.codigo_lgpd }}</span></a>
+          {% endif %}
           {% endif %}
           {% if instrumento == 'form2' %}
           <a class="botao-link-secundario" href="{{ url_registro }}#instrumentos-registro">Consultar detalhes e instrumentos do Registro</a>
           {% else %}
-          <a class="botao-link-secundario" aria-label="Ver detalhes do Registro {{ registro.codigo_lgpd }}" aria-describedby="ajuda-detalhes-{{ registro.id }}" href="{{ url_registro }}">Ver detalhes do Registro</a>
+          <a class="{{ 'botao-link' if not instrumento and not tarefas and not retomar else 'botao-link-secundario' }}" aria-label="Ver detalhes do Registro {{ registro.codigo_lgpd }}" aria-describedby="ajuda-detalhes-{{ registro.id }}" href="{{ url_registro }}">Ver detalhes do Registro</a>
           <p class="ajuda" id="ajuda-detalhes-{{ registro.id }}">Consulte a identificação, os responsáveis e a situação geral deste Registro.</p>
           <a class="botao-link-secundario" href="{{ url_registro }}#instrumentos-registro" aria-label="Consultar instrumentos do Registro {{ registro.codigo_lgpd }}" aria-describedby="ajuda-instrumentos-{{ registro.id }}">Instrumentos deste Registro</a>
           <p class="ajuda" id="ajuda-instrumentos-{{ registro.id }}">Veja os quatro FORMs e quais estão disponíveis para seu perfil.</p>
@@ -202,9 +209,4 @@
     <p class="vazio">{% if instrumento == 'form2' %}Nenhum Registro acessível para preparação do FORM 2 nesta Secretaria com seu acesso atual. A consulta como AAL depende de habilitação vigente e de designação pelo APA.{% else %}Nenhum Registro LGPD está disponível para consulta por este agente.{% endif %}</p>
     {% endif %}
 </section>
-{% if instrumento %}
-<nav class="navegacao-governanca" aria-label="Consulta transversal">
-  <a class="botao-link-secundario" href="{{ url_for('painel_registros') }}?conta_id={{ conta_id|urlencode }}&amp;secretaria_id={{ secretaria.id|urlencode }}">Voltar ao Painel geral de Registros</a>
-</nav>
-{% endif %}
 {% endblock %}

@@ -122,6 +122,6 @@ def test_rodapes_dos_blocos_longo_e_curto_tem_mesma_estrutura(sessao):
         assert botoes[2]['value'] == 'proximo'
         assert botoes[2]['class'] == 'botao-primario'
     css = TestClient(app).get('/estaticos/estilo.css').text
-    assert 'grid-template-columns: repeat(3, minmax(0, max-content))' in css
+    assert 'grid-auto-columns: minmax(0, max-content)' in css
     assert '@container (max-width: 34rem)' in css
     assert 'min-height: calc(100svh' not in css

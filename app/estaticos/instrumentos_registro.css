@@ -5,7 +5,7 @@
 .instrumentos-registro :focus-visible { outline: 3px solid var(--azul); outline-offset: 3px; }
 #instrumentos-registro, #titulo-form1-integral { scroll-margin-top: calc(var(--altura-retorno-form1, 4rem) + 1rem); }
 @media (max-width: 650px) { .lista-instrumentos-registro { grid-template-columns: minmax(0, 1fr); } }
-.navegacao-governanca { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1.25rem; margin-bottom: 1rem; overflow-wrap: anywhere; }
+.navegacao-governanca { display: flex; justify-content: flex-end; flex-wrap: wrap; align-items: center; gap: .6rem 1.25rem; margin-bottom: 1rem; overflow-wrap: anywhere; }
 .navegacao-governanca > * { min-width: 0; max-width: 100%; }
 .navegacao-governanca a { padding-block: .5rem; }
 .navegacao-governanca :focus-visible { outline: 3px solid var(--azul); outline-offset: 3px; }
@@ -24,8 +24,9 @@
 .contexto-central legend { font-weight: 700; }
 .contexto-central label:has(input[type=radio]) { display: flex; align-items: center; gap: .6rem; min-height: 44px; cursor: pointer; }
 .identidade-demonstrativa { margin-top: .85rem; border-top: 1px solid var(--borda); }
-.identidade-demonstrativa summary { width: fit-content; min-height: 44px; margin-top: .7rem; box-sizing: border-box; cursor: pointer; }
-.identidade-demonstrativa form { max-width: 32rem; padding-block: .5rem; }
+.identidade-demonstrativa summary { margin-inline-start: auto; width: fit-content; min-height: 44px; margin-top: .7rem; box-sizing: border-box; cursor: pointer; }
+.identidade-demonstrativa > summary { display: block; }
+.identidade-demonstrativa form { margin-inline-start: auto; max-width: 32rem; padding-block: .5rem; }
 .identidade-demonstrativa select { max-width: 100%; margin-bottom: .5rem; }
 .central-acesso .lista-instrumentos-registro { margin: .8rem 0 0; gap: .8rem; }
 #titulo-instrumentos-central + .lista-instrumentos-registro { grid-auto-rows: 1fr; }
@@ -36,7 +37,7 @@
 .cartao-central h3 { margin: 0; font-size: 1.16rem; line-height: 1.3; color: var(--acento); }
 .numero-form { display: block; margin-bottom: .45rem; }
 .cartao-central > div { display: flex; flex-direction: column; min-width: 0; flex: 1; align-self: stretch; }
-.cartao-central .acesso-instrumento { align-self: flex-start; margin-top: auto; }
+.cartao-central .acesso-instrumento { align-self: flex-end; margin-top: auto; }
 .cartao-central:has(.acesso-instrumento) .situacao-instrumento { margin-bottom: 1rem; }
 .cartao-central p { margin: .35rem 0 0; }
 .cartao-central .situacao-instrumento { margin-top: .75rem; color: #394958; font-size: .88rem; }

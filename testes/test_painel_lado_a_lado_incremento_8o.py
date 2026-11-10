@@ -160,7 +160,10 @@ def test_contador_considera_registro_unico_quando_ha_varios_alertas(sessao):
     assert "Providência de outra unidade recebida" in pagina.text
     assert "Conclusão bloqueada" in pagina.text
     assert 'aria-label="0 providência(s) de conferência">0</span>' in pagina.text
-    assert pagina.text.count(">Ver providência no Registro</a>") == 2
+    cartao = pagina.text.split(f'id="cartao-registro-{registro["registro_id"]}"', 1)[1].split("</article>", 1)[0]
+    assert cartao.count(">Ver detalhes do Registro</a>") == 1
+    assert cartao.count('class="botao-link"') == 1
+    assert ">Ver providência no Registro</a>" not in cartao
 
 
 def test_layout_unificado_empilha_cartao_em_tela_pequena_sem_biblioteca_externa():
