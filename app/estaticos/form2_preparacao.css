@@ -11,9 +11,13 @@
 #unidade-guarda .detalhe dd { margin: .25rem 0 .8rem; }
 #unidade-guarda .fato-guarda { border-block-end: 1px solid #cbd5df; padding-block: .4rem; }
 #unidade-guarda .fato-guarda dt { color: #173950; font-size: 1rem; text-transform: none; letter-spacing: normal; }
-.mapa-form2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(12rem, 100%), 1fr)); gap: 1rem; padding-left: 1.5rem; }
-.mapa-form2 li { padding-right: .8rem; }
-.mapa-form2 span { display: block; margin-top: .25rem; }
+.mapa-form2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(13rem, 100%), 1fr)); gap: .75rem; padding: 0; list-style: none; }
+.mapa-form2 > li { min-width: 0; padding: .85rem; border: 1px solid var(--borda); border-radius: .5rem; background: #f4f7f9; }
+.mapa-form2 > [aria-current="step"] { border-color: var(--azul); background: #edf6fb; }
+.mapa-form2 .numero-etapa { display: block; margin-bottom: .25rem; color: #425466; font-size: .88rem; }
+.mapa-form2 ul { list-style: none; padding: 0; margin-top: .65rem; }
+.mapa-form2 ul li { padding-block: .15rem; color: #394958; font-size: .9rem; }
+.mapa-form2 a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; }
 .perguntas-guarda { list-style: none; padding-left: 0; }
 .perguntas-guarda > li { border-left: 3px solid #337192; padding: .35rem 1rem; margin-block: 1rem; }
 .form2-demo dt { font-weight: 600; margin-top: 1rem; }

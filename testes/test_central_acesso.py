@@ -17,7 +17,7 @@ def test_entrada_sem_listagem_identifica_apa_e_reserva_planejados():
     pagina = cliente.get("/")
     assert pagina.url.path == "/central"
     assert pagina.status_code == 200
-    assert pagina.text.index("Secretaria de atuação") < pagina.text.index("Servidor identificado") < pagina.text.index("APA em exercício")
+    assert pagina.text.index("Secretaria de atuação") < pagina.text.index("Servidor em sessão") < pagina.text.index("APA em exercício")
     assert 'MAT-FICT-0001 — Servidor Alfa (titular)' in pagina.text
     assert 'name="secretaria_id" value="UNID-NORTE"' in pagina.text
     assert "Registros disponíveis" not in pagina.text and "Resumo do painel" not in pagina.text
@@ -39,7 +39,7 @@ def test_cartoes_explicam_disponibilidade_sem_oferecer_acesso_direto():
         ("FORM 1", "Levantamento do tratamento", "Como esse processo", "Disponível conforme autorização do Registro"),
         ("FORM 2", "Validação jurídica e institucional", "Por que e em que condições", "Análise jurídica completa ainda não implementada"),
         ("FORM 3", "Avaliação de riscos e controles", "Que riscos o tratamento", "Planejado"),
-        ("FORM 4", "Providências e acompanhamento", "O que precisa ser feito", "Planejado"),
+        ("FORM 4", "Plano de ação, monitoramento e aprendizagem institucional", "O que precisa ser feito", "Planejado"),
         ("Dashboard LGPD", "Indicadores consolidados", "Planejado"),
         ("Administração Central — TI", "18 Secretarias", "Planejada", "habilitação específica"),
     ]
@@ -49,7 +49,11 @@ def test_cartoes_explicam_disponibilidade_sem_oferecer_acesso_direto():
         assert 'aria-hidden="true" focusable="false"' in cartao
         assert '<a ' not in cartao
         if numero in (1, 2):
+            assert f'>Acessar FORM {numero}</button>' in cartao
             assert f'form="abrir-painel" name="instrumento" value="form{numero}"' in cartao
+        elif numero in (3, 4):
+            assert f'type="button" disabled>Acessar FORM {numero}</button>' in cartao
+            assert 'form="abrir-painel"' not in cartao
         else:
             assert '<button' not in cartao
 
@@ -73,16 +77,19 @@ def test_escolha_explicita_filtra_form2_e_retorna_ao_contexto(sessao, conta, rot
     form1 = cliente.get("/painel", params={**contexto, "instrumento": "form1"})
     form2 = cliente.get("/painel", params={**contexto, "instrumento": "form2"})
     assert "<h1>Painel de Registros</h1>" in geral.text
-    assert "<h1>Selecionar Registro — FORM 1</h1>" in form1.text
-    assert "<h1>Selecionar Registro</h1>" in form2.text
+    assert "<h1>Meus levantamentos</h1>" in form1.text
+    assert "<h1>Minhas preparações</h1>" in form2.text
     for pagina in (geral, form1):
         assert rid in pagina.text and outro in pagina.text
         for indicador in ("Registros disponíveis", "Providências de conferência", "Campos obrigatórios pendentes"):
             assert indicador in pagina.text and indicador not in form2.text
         assert "Dashboard LGPD" not in pagina.text
     assert "Dashboard LGPD" not in form2.text and "Situação do FORM 1" not in form2.text
-    assert "Registros com acesso ao FORM 2 (1)" in form2.text
+    assert "<small>1 Registro disponível</small>" in form2.text
     assert ("designado como AAL" if conta == "CONTA-G1" else "acompanhar esta preparação como APA") in form2.text
+    assert "APA responsável:" not in form2.text.split("<article", 1)[0]
+    assert "APA responsável:" in form2.text.split("<article", 1)[1]
+    assert "Última atividade:" in form1.text
     assert outro not in form2.text and rotulo in form2.text
     assert form2.url.path == "/painel" and contagens(sessao) == antes
     link1 = unescape(re.search(r'href="([^"]+instrumento=form1#titulo-form1-integral)"', form1.text).group(1))
@@ -96,8 +103,7 @@ def test_escolha_explicita_filtra_form2_e_retorna_ao_contexto(sessao, conta, rot
         pagina = cliente.get(destino)
         assert pagina.status_code == 200
         identidade = "Servidor Alfa — MAT-FICT-0001" if conta == "CONTA-A1" else "Servidor Épsilon — MAT-FICT-0007"
-        rotulo_sessao = "Servidor em sessão" if filtro == "form2" else "Servidor identificado"
-        assert f"{rotulo_sessao}:</strong> {identidade}" in pagina.text
+        assert f"Servidor em sessão:</strong> {identidade}" in pagina.text
         if filtro == "form2":
             assert "APA responsável:" in pagina.text and "Função nesta atividade:" in pagina.text
             assert "versão histórica nº 1" in tela.text and "Designação em" in tela.text
@@ -126,7 +132,7 @@ def test_form2_sem_habilitacao_e_filtro_invalido():
     contexto = {"conta_id": "CONTA-A1", "secretaria_id": "UNID-NORTE"}
     pagina = cliente.get("/painel", params={**contexto, "instrumento": "form2"})
     assert pagina.status_code == 200 and "Nenhum Registro acessível" in pagina.text
-    assert "Registros com acesso ao FORM 2 (0)" in pagina.text
+    assert "<small>0 Registros disponíveis</small>" in pagina.text
     assert "habilitação vigente e de designação pelo APA" in pagina.text
     assert registro["registro_id"] not in pagina.text and "data-acesso-form2" not in pagina.text
     assert cliente.get("/painel", params={**contexto, "instrumento": "form3"}).status_code == 422

@@ -19,3 +19,20 @@ Este registro documenta decisões de interface sem criar requisito funcional ou 
 - Procedimento e ferramenta de regressão visual.
 - Indicadores e identidade de eventual dashboard de coordenação.
 
+
+## Áreas de trabalho dos instrumentos · 10/11/2026
+
+Na Central, os quatro cartões compartilham perguntas centrais do Mestre, alinhamento e comando de acesso. Um instrumento planejado tem comando desabilitado. A seleção abre a área de trabalho no contexto autorizado.
+
+| Instrumento | Área | Situação |
+| --- | --- | --- |
+| FORM 1 | Meus levantamentos | Listagem por Registro e atos de preenchimento ou conferência |
+| FORM 2 | Minhas preparações | Preparação demonstrativa, com acompanhamento ou edição conforme a autorização |
+| FORM 3 | Minhas avaliações de riscos | Planejada |
+| FORM 4 | Meus planos e acompanhamentos | Planejada. Nome ampliado do instrumento candidato à harmonização editorial |
+
+A área de trabalho prioriza Registro, situação, atividade conhecida, responsável e ação permitida. O cabeçalho identifica a sessão e a Secretaria. Cada cartão identifica o APA do respectivo Registro. O resumo numérico é secundário.
+
+O mapa abre pela visão geral e agrupa os blocos nas etapas próprias de cada catálogo, na ordem editorial. A etapa disponível e os destinos autorizados recebem indicações textuais. Um link depende da disponibilidade efetiva da unidade. O número de blocos depende do instrumento.
+
+**Backlog de navegação.** Reutilizar o cabeçalho da lista antes dos cartões para pesquisa, filtros e ordenação quando o volume de Registros justificar. Aplicar filtros somente sobre o conjunto autorizado, conservar o contexto nas voltas e testar o estado sem resultados e o acesso por teclado.

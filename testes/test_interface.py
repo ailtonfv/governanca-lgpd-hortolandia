@@ -29,7 +29,7 @@ def test_painel_identifica_agente_e_mostra_apenas_seu_escopo():
     assert 'lang="pt-BR"' in resposta.text
     assert "Ambiente de demonstração — utilize exclusivamente dados fictícios." in resposta.text
     assert "Servidor Alfa" in resposta.text
-    assert "Servidor identificado:</strong> Servidor Alfa — MAT-FICT-0001" in resposta.text
+    assert "Servidor em sessão:</strong> Servidor Alfa — MAT-FICT-0001" in resposta.text
     assert "Agente simulado" not in resposta.text
     for ajuda in ("ajuda-detalhes", "ajuda-instrumentos"):
         alvo = f"{ajuda}-{norte['registro_id']}"

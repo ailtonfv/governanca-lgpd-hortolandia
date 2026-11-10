@@ -64,6 +64,16 @@ A Cartilha LGPD é uma referência institucional versionada, integrada às ajuda
 
 A publicação externa da Cartilha exige autorização institucional específica. Sua disponibilização na PoC permanece local e somente para leitura, conforme a configuração vigente.
 
+## Publicação e continuidade técnica da PoC
+
+O repositório público `ailtonfv/governanca-lgpd-hortolandia` deverá reunir progressivamente o código versionado dos quatro FORMs e do dashboard demonstrativo, os testes automatizados e a documentação técnica publicável. A meta é permitir a continuidade técnica pela Prefeitura em outra estação de desenvolvimento.
+
+- Publicar seletivamente o que estiver implementado e verificado, após revisão de segurança de todos os commits a enviar.
+- Manter fora do GitHub Documentos-Mestres protegidos, catálogos privados (inclusive o catálogo operacional de 250 perguntas do FORM 2), dados pessoais reais, segredos, credenciais e outros artefatos restritos.
+- Usar conteúdo sintético nos testes públicos. Instalações sem os catálogos privados devem indicar quais unidades estão indisponíveis e preservar o restante da navegação autorizada.
+- Distinguir implementação, testes, homologação humana e publicação. A implantação institucional em produção depende de decisão própria.
+- Preservar o vínculo dos quatro instrumentos ao mesmo Registro LGPD.
+
 ## Ao alterar código
 
 - Antes de modificar, identificar o requisito funcional, inspecionar a implementação existente, determinar a causa do problema e propor a menor correção necessária, com testes e critérios objetivos de aceite. Preservar contratos, dados históricos e permissões.

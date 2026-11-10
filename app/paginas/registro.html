@@ -24,7 +24,7 @@
   <h1 id="titulo-registro">{{ registro.codigo_lgpd }}</h1>
   <p class="destaque">{{ registro.titulo }}</p>
   {% if not modo_legado %}
-  <p><strong>Servidor identificado:</strong> {{ identificacao_servidor(identidade) }} · <strong>Secretaria responsável:</strong> {{ registro.unidade }}</p>
+  <p><strong>Servidor em sessão:</strong> {{ identificacao_servidor(identidade) }} · <strong>Secretaria responsável:</strong> {{ registro.unidade }}</p>
   {% endif %}
 </section>
 

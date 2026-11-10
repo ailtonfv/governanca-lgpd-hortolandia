@@ -34,14 +34,28 @@
 </section>
 <section class="form1" aria-labelledby="mapa-etapas">
   <h2 id="mapa-etapas">Etapas do FORM 2</h2>
+  {% set etapas = [
+    ('Finalidade, guarda e fundamento jurídico', [1, 2, 3, 4]),
+    ('Situações especiais e direitos do titular', [5, 6, 7, 13]),
+    ('Circulação dos dados, agentes e instrumentos', [8, 9, 10, 11, 12]),
+    ('Resultado e encaminhamentos', [14])
+  ] %}
+  {% set guarda_disponivel = guarda and not guarda.aviso %}
+  <p>{% if guarda_disponivel %}Etapa atual: 1 de 4. Somente a unidade de guarda do Bloco 2 está disponível.{% else %}Visão geral das quatro etapas. Não há bloco aberto para preenchimento nesta consulta.{% endif %}</p>
   <ol class="mapa-form2">
-    <li><strong>Finalidade, guarda e fundamento jurídico</strong><span>Consulta demonstrativa apenas no Bloco 2.</span></li>
-    <li><strong>Situações especiais e direitos do titular</strong><span>Ainda não disponível na PoC.</span></li>
-    <li><strong>Circulação dos dados, agentes e instrumentos</strong><span>Ainda não disponível na PoC.</span></li>
-    <li><strong>Resultado e encaminhamentos</strong><span>Ainda não disponível na PoC.</span></li>
+    {% for titulo, blocos in etapas %}
+    <li{% if loop.first and guarda_disponivel %} aria-current="step"{% endif %}>
+      <span class="numero-etapa">Etapa {{ loop.index }}</span><strong>{{ titulo }}</strong>
+      <ul aria-label="Blocos da etapa {{ loop.index }}">
+        {% for numero in blocos %}
+        <li>{% if numero == 2 and guarda_disponivel %}<a class="botao-link" href="#unidade-guarda">Ir para o Bloco 2 — Guarda</a>
+          {% else %}Bloco {{ numero }}{{ ' — Guarda' if numero == 2 else '' }} · indisponível{% endif %}</li>
+        {% endfor %}
+      </ul>
+    </li>
+    {% endfor %}
   </ol>
-  {% if guarda and not guarda.aviso %}<p>Nesta demonstração, você consulta os fatos do FORM 1 sobre guarda, lê as perguntas correspondentes do FORM 2 e registra observações na anotação geral.</p>
-  <a class="botao-link" href="#unidade-guarda">Ir para o Bloco 2 — Guarda</a>
+  {% if guarda_disponivel %}<p>Consulte os fatos sobre guarda na origem do FORM 1 e registre suas observações na anotação geral.</p>
   {% elif guarda %}<p role="status">{{ guarda.aviso }}</p>
   {% elif preparacao %}<p>Você pode consultar a anotação geral e o histórico desta preparação. A unidade demonstrativa está disponível ao AAL com edição autorizada.</p>{% endif %}
 </section>

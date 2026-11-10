@@ -1,5 +1,11 @@
 # Acompanhamento dos ajustes da PoC ampliada
 
+## GOV_FORMS_08 · marco de controle de 10/11/2026
+
+- Central e áreas de trabalho dos FORMs 1 e 2 padronizadas. Mapa demonstrativo do FORM 2 com quatro etapas e 14 blocos. Homologação humana do novo conjunto pendente.
+- Avaliar pesquisa, filtros e ordenação sobre Registros autorizados após ensaio com volume representativo. Confirmar o título candidato do FORM 4 na revisão editorial.
+- Aplicar o padrão aos FORMs 3 e 4 quando houver autorização própria. O dashboard essencial permanece planejado. Referência de planejamento da PoC integrada: cinco semanas e 120 horas.
+
 ## INSTRUÇÃO_FORM02_07 · consolidação visual dos quatro instrumentos
 
 Pendências P2 para revisão conjunta:

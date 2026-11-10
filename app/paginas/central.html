@@ -8,8 +8,8 @@
     <h3>{% if numero %}<span class="numero-form">FORM {{ numero }}<span class="sr-apenas"> — </span></span>{% endif %}{{ titulo }}</h3>
     <p>{{ objetivo }}</p>
     <p class="situacao-instrumento">{{ situacao }}</p>
-    {% if secretarias and numero in (1, 2) %}
-    <button class="botao-link-secundario acesso-instrumento" type="submit" form="abrir-painel" name="instrumento" value="form{{ numero }}">{{ 'Acessar FORM 1' if numero == 1 else 'Acessar preparação do FORM 2' }}</button>
+    {% if numero %}
+    <button class="botao-link-secundario acesso-instrumento" {% if secretarias and numero in (1, 2) %}type="submit" form="abrir-painel" name="instrumento" value="form{{ numero }}"{% else %}type="button" disabled{% endif %}>Acessar FORM {{ numero }}</button>
     {% endif %}
   </div>
 </li>
@@ -18,7 +18,7 @@
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/instrumentos_registro.css') }}">
 <div class="central-acesso">
   <h1>Central de Acesso LGPD</h1>
-  <p>Abra o painel da sua Secretaria para consultar os Registros e acessar os instrumentos disponíveis.</p>
+  <p>Escolha um instrumento para ver os Registros autorizados na sua Secretaria.</p>
   <section class="contexto-central" aria-labelledby="titulo-contexto">
     <h2 id="titulo-contexto">Secretaria de atuação</h2>
     {% if secretarias %}
@@ -41,9 +41,9 @@
     <p class="aviso-leitura">Nenhuma Secretaria com vínculo vigente para esta identidade.</p>
     {% endif %}
     <dl class="agentes-central">
-      <div><dt>Servidor identificado</dt><dd>{{ identificacao_servidor(identidade) }}</dd></div>
+      <div><dt>Servidor em sessão</dt><dd>{{ identificacao_servidor(identidade) }}</dd></div>
       {% if secretarias %}
-      <div><dt>APA em exercício · Agente Público Autorizado</dt>
+      <div><dt>APA em exercício na Secretaria</dt>
         {% for secretaria in secretarias.values() %}
         <dd id="apa-{{ loop.index }}">{% if secretarias|length > 1 %}<strong>{{ secretaria.nome }}</strong> · {% endif %}{{ secretaria.apa or 'Sem identificação vigente' }}{% if secretaria.apa and secretaria.modalidade_apa == 'titular' %} (titular){% elif secretaria.apa and secretaria.modalidade_apa == 'substituicao_temporaria' %} (em substituição temporária){% endif %}</dd>
         {% endfor %}
@@ -76,7 +76,7 @@
       {{ cartao('levantamento', 'Levantamento do tratamento', 'Como esse processo, atividade ou serviço funciona hoje?', 'Disponível conforme autorização do Registro.', 'M6 3h9l4 4v14H6z M14 3v5h5 M9 12h7 M9 16h7', 1) }}
       {{ cartao('legitimidade', 'Validação jurídica e institucional', 'Por que e em que condições esse tratamento pode ocorrer?', 'Preparação demonstrativa disponível conforme habilitação. Análise jurídica completa ainda não implementada.', 'M12 3v16 M7 21h10 M4 7l16-2 M5 7l-3 7h6z M19 5l-3 7h6z', 2) }}
       {{ cartao('riscos', 'Avaliação de riscos e controles', 'Que riscos o tratamento apresenta e quais controles existem?', 'Planejado', 'M12 2l8 3v6c0 5-3 8-8 11-5-3-8-6-8-11V5z M12 7v5 M12 16h.01', 3) }}
-      {{ cartao('providencias', 'Providências e acompanhamento', 'O que precisa ser feito, por quem, até quando e como comprovar?', 'Planejado', 'M4 6l1.5 1.5L8 4 M11 6h9 M4 12l1.5 1.5L8 10 M11 12h9 M4 18l1.5 1.5L8 16 M11 18h9', 4) }}
+      {{ cartao('providencias', 'Plano de ação, monitoramento e aprendizagem institucional', 'O que precisa ser feito, por quem, até quando e como comprovar?', 'Planejado', 'M4 6l1.5 1.5L8 4 M11 6h9 M4 12l1.5 1.5L8 10 M11 12h9 M4 18l1.5 1.5L8 16 M11 18h9', 4) }}
     </ul>
   </section>
   <section class="gestao-central" aria-labelledby="titulo-gestao">

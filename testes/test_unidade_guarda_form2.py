@@ -1,5 +1,6 @@
 """Unidade consultiva, com origens e preparações fictícias."""
 from copy import deepcopy
+import re
 
 import pytest
 
@@ -48,6 +49,12 @@ def test_unidade_isola_origens_e_reutiliza_anotacao(sessao, monkeypatch):
         unidade = pagina.text.split('id="unidade-guarda"', 1)[1].split('id="anotacoes"', 1)[0]
         assert pagina.text.count('href="#unidade-guarda"') == 1
         assert pagina.text.index('id="mapa-etapas"') < pagina.text.index('href="#unidade-guarda"')
+        mapa = pagina.text.split('<ol class="mapa-form2">', 1)[1].split('</ol>', 1)[0]
+        etapas = re.findall(r'<ul aria-label="Blocos da etapa [1-4]">(.*?)</ul>', mapa, re.S)
+        assert [re.findall(r'Bloco (\d+)', e) for e in etapas] == [
+            ["1", "2", "3", "4"], ["5", "6", "7", "13"], ["8", "9", "10", "11", "12"], ["14"]]
+        assert mapa.count("<a ") == mapa.count('aria-current="step"') == 1
+        assert 'href="#unidade-guarda"' not in apa.text
         assert "Alternativa sintética" in unidade
         assert ("Não há prazo de guarda informado" in unidade) == (numero == 1)
         assert unidade.count('class="fato-guarda"') == unidade.count("data-fato-guarda=") == 21

@@ -388,7 +388,15 @@ def projetar_fluxo_conferencia(sessao, registro_id, unidade_id):
             "Sem providência de conferência pendente",
         )
     referencia = pendente or historico
+    atividades = [
+        (rascunho.salvo_em if rascunho else None, "Rascunho salvo"),
+        (referencia.solicitada_em if referencia else None, "Versão apresentada"),
+        (historico.devolvida_em if historico else None, "Devolução para ajustes"),
+        (historico.confirmada_em if historico else None, "Conferência confirmada"),
+    ]
+    ultima = max((a for a in atividades if a[0] is not None), default=None)
     return {
+        "ultima_atividade": ultima,
         "atual": atual, "estado": estado, "proxima": proxima, "responsavel": responsavel,
         "apa": apa, "arp": arp,
         "versao": referencia.versao_rascunho if referencia else None,
