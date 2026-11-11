@@ -36,5 +36,18 @@ docs/operacao/COLA_COMANDOS.md
 documentos_locais/
 
 # Catálogo editorial do FORM 2 disponibilizado apenas na instalação local autorizada.
+/app/catalogos/form2_revisao_rev20.json
 /app/catalogos/form2_rev18_v1.json
 /app/catalogos/form2_controles_rev18_candidata_v2.json
+
+/app/catalogos/form2_rev21_2_privado.json
+
+/app/catalogos/form1_rev22_privado.json
+
+# Derivados documentais privados: não publicar enunciados nem matrizes integrais.
+/docs/planejamento/FORM2_REV17_MATRIZ_CORRESPONDENCIA_CANDIDATA.md
+/docs/planejamento/GOV_FORMS_REV18_02/
+# Saídas e cópias locais de conferência
+/output/
+/outputs/
+/work/

@@ -1,7 +1,7 @@
+{% from '_identificador_pergunta.html' import codigo_pergunta %}
 <section class="form1" id="unidade-guarda" tabindex="-1" aria-labelledby="titulo-guarda">
   <p class="etiqueta">FORM 2 · Etapa 1 · Bloco 2</p>
   <h2 id="titulo-guarda">Fundamento do prazo de guarda</h2>
-  <p>Esta é a primeira unidade demonstrativa disponível. Os demais blocos serão implementados posteriormente.</p>
   {% if guarda.aviso %}
   <p role="status">A anotação geral continua disponível.</p>
   {% else %}
@@ -11,7 +11,7 @@
     <p>Somente leitura · Versão histórica nº {{ origem.snapshot.numero }} do FORM 1.</p>
     {% macro listar_fatos(fatos) %}
     <dl>{% for fato in fatos %}
-      <div class="fato-guarda"><dt data-fato-guarda="{{ fato.id }}">F1-{{ fato.id }}{% if fato.campo %} — {{ fato.campo.pergunta }}{% endif %}</dt>
+      <div class="fato-guarda"><dt data-fato-guarda="{{ fato.id }}">{{ codigo_pergunta(fato.id, 1) }}{% if fato.campo %} — {{ fato.campo.pergunta }}{% endif %}</dt>
       <dd>{% if not fato.campo %}Pergunta inexistente nesta versão.{% elif not fato.campo.respondida or fato.campo.valor in (none, '', [], {}) %}Sem resposta nesta versão.{% else %}{{ valor(fato.campo.valor, consulta_historica.rotulos, agentes) }}{% endif %}
       {% if fato.complemento %}<p>Complemento registrado: {{ fato.complemento }}</p>{% endif %}</dd></div>
     {% endfor %}</dl>

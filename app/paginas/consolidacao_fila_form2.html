@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block conteudo %}
+<link rel="stylesheet" href="{{ url_for('estaticos', path='/filas_form2.css') }}">
+<div class="filas-form2">
+<h1>Conferência da consolidação</h1>
+<p><strong>{{ registro.codigo_lgpd }}</strong> · FORM 2 · {{ pessoa.nome }}</p>
+{% include '_regua_fila_form2.html' %}
+<p>Esta conferência reúne o que está salvo. Pode ser registrada mesmo com pontos em aberto, para acompanhar a evolução. Não conclui o processo nem homologa a análise.</p>
+{% if ultima %}<article aria-label="Última conferência">
+<h2>Conferência {{ ultima.numero }}</h2>
+<p>{{ 'Há alterações posteriores. Revise os dados atuais e registre uma nova conferência.' if desatualizada else 'As fontes permanecem iguais às da última conferência registrada.' }}</p>
+<p class="texto-preservado">{{ ultima.sintese }}</p>
+</article>{% endif %}
+<article><h2>Pontos para conferência</h2>
+<p><strong>{{ resumo.blocos_com_respostas|length }} de 14 blocos</strong> têm respostas salvas. Esse número não mede completude ou obrigatoriedade.</p>
+{% if resumo.blocos_sem_respostas %}<p>Blocos sem respostas salvas: {{ resumo.blocos_sem_respostas|join(', ') }}.</p>{% endif %}
+<h3>F2-14.1 · Resultado candidato, não homologado</h3><p>{{ resumo.resultado_candidato|join(", ") or "Ainda não informado." }}</p>{% if resumo.resultado_complemento %}<p class="texto-preservado">{{ resumo.resultado_complemento }}</p>{% endif %}
+<h3>Itens a confirmar</h3>
+{% if resumo.itens_a_confirmar %}<ul>{% for item in resumo.links_a_confirmar %}<li><a href="/form2/participacoes/{{ p.id }}/blocos/{{ item.bloco }}?conta_id={{ conta_id|urlencode }}#{{ item.ancora }}">{{ item.item }}</a></li>{% endfor %}</ul>{% else %}<p>Nenhuma alternativa “A confirmar” registrada nas respostas ativas.</p>{% endif %}
+<h3>Complementação da origem · 1.3.1 → 14.2</h3>
+{% for c in resumo.complementos %}<p><strong>{{ {'aberta': 'Aguardando resposta da origem', 'respondida': 'Aguardando conferência do AAL', 'resolvida': 'Resolução registrada pelo AAL'}.get(c.estado, c.estado) }}</strong></p><p class="texto-preservado">{{ c.solicitacao }}</p>{% else %}<p>Nenhuma complementação registrada.</p>{% endfor %}
+<h3>Pendências declaradas no Bloco 14</h3>
+{% for pendencia in resumo.pendencias_declaradas %}<section class="manifestacao-consolidada"><h4>Item {{ pendencia.conjunto }}</h4><p class="texto-preservado">{{ pendencia.texto }}</p><p>Área ou função: {{ pendencia.area or 'Ainda não informada' }}.</p><p>Destinos: {{ pendencia.destinos|join(', ') or 'Ainda não informados' }}.</p><p>Destino principal: {{ pendencia.principal or 'Ainda não informado' }}.</p></section>{% else %}<p>Nenhuma pendência declarada em 14.2.</p>{% endfor %}
+<h3>Indicações para os FORMs 3 e 4</h3>
+{% for e in resumo.encaminhamentos %}<p><strong>FORM {{ e.form }}:</strong> {{ e.resposta|join(', ') or 'Ainda não informado' }}</p>{% if e.justificativa %}<p class="texto-preservado">{{ e.justificativa }}</p>{% endif %}{% endfor %}
+<p>São indicações salvas no rascunho. Esta tela não efetua o encaminhamento.</p>
+<h3>Limites do encerramento</h3><ul>{% for limite in resumo.limites %}<li>{{ limite }}</li>{% endfor %}</ul>
+</article>
+<article><h2>Manifestações das áreas</h2>
+{% for grupo, titulo in [(resumo.consultas_abertas, 'Aguardando manifestação'), (resumo.consultas_concluidas, 'Manifestações concluídas')] %}
+<h3>{{ titulo }} · {{ grupo|length }}</h3>
+{% for c in grupo %}
+<section class="manifestacao-consolidada"><h4>{{ {'dpo':'DPO', 'juridico':'Jurídico', 'tematica':'Área temática'}.get(c.tipo,c.tipo) }} · {{ unidades.get(c.unidade_id,c.unidade_id) }}</h4>
+<p>Responsável: {{ agentes.get(c.responsavel_id, 'Aguardando responsável') }}.</p>
+<p class="texto-preservado"><strong>Questão:</strong> {{ c.questao }}</p>
+<p class="texto-preservado"><strong>{{ 'Manifestação' if c.estado == 'concluida' else 'Rascunho da manifestação' }}:</strong> {{ c.manifestacao or 'Ainda não registrada.' }}</p>
+</section>{% else %}<p>Nenhuma.</p>{% endfor %}{% endfor %}
+</article>
+{% if p.estado == 'em_atendimento' %}<article><h2>Registrar conferência</h2>
+<form method="post" id="conferencia-consolidacao">
+<input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="comando_id" value="{{ comando_id }}">
+<input type="hidden" name="versao" value="{{ p.versao }}"><input type="hidden" name="hash_fontes" value="{{ hash_fontes }}">
+<label for="sintese-consolidacao">Síntese do AAL</label>
+<textarea id="sintese-consolidacao" name="sintese" rows="6" maxlength="10000" required aria-describedby="ajuda-sintese"></textarea>
+<p id="ajuda-sintese">Registre o que foi conferido e o que precisa de continuidade. As versões anteriores serão preservadas.</p>
+<button type="submit" class="botao-primario">Registrar conferência demonstrativa</button>
+</form></article>{% endif %}
+<details><summary>Histórico das conferências · {{ historico|length }}</summary>
+{% for h in historico %}<section class="manifestacao-consolidada"><h3>Conferência {{ h.numero }}</h3>
+<p>{{ h.em }} · {{ agentes.get(h.ator_id, h.ator_id) }}</p><p class="texto-preservado">{{ h.sintese }}</p>
+<p>{{ h.resumo.consultas_abertas|length }} manifestação(ões) aguardada(s) e {{ h.resumo.itens_a_confirmar|length }} item(ns) a confirmar naquele momento.</p>
+</section>{% else %}<p>Nenhuma conferência registrada.</p>{% endfor %}</details>
+</div><script defer src="{{ url_for('estaticos', path='/consolidacao_form2.js') }}"></script>{% endblock %}

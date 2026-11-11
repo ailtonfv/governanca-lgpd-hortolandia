@@ -433,6 +433,10 @@ def confirmar_conferencia_interna_form1_integral(
         ciclo_id=_ciclo(sessao, registro).id,
         versao_esquema_evento=2,
     )
+    from sqlalchemy import inspect
+    if inspect(sessao.connection()).has_table("participacao_form2"):
+        from app.fila_form2 import ingresso
+        ingresso(sessao, registro, historico.snapshot_id, comando, momento)
     historico.situacao = SITUACAO_CONFIRMADA
     historico.versao += 1
     historico.confirmada_por_id = pessoa_id

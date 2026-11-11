@@ -1,3 +1,4 @@
+{% from '_identificador_pergunta.html' import codigo_pergunta %}
 {% extends "base.html" %}
 {% from '_links_instrumentos.html' import identificacao_servidor, retorno_painel with context %}
 {% block titulo %}{% if modo_legado %}Questionário sintético legado · {% endif %}{{ registro.codigo_lgpd }} · Governança LGPD{% endblock %}
@@ -36,6 +37,7 @@
 {% if not modo_legado %}
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/instrumentos_registro.css') }}">
 {% include '_instrumentos_registro.html' %}
+<div class="acoes-fila-form2"><a class="botao-link-secundario" href="/registros/{{ registro.id }}/form1-rev22?conta_id={{ conta_id|urlencode }}">Abrir edição candidata REV22 do FORM 1</a></div>
 <section data-modo-consulta="{{ 'false' if registro.form1_integral.pode_editar else 'true' }}" class="form1 form1-integral" aria-labelledby="titulo-form1-integral" data-registro-id="{{ registro.id }}">
   <div class="cabecalho-secao cabecalho-form1">
     <div>
@@ -242,7 +244,7 @@
                   data-pendencia-etapa="{{ proxima_pendencia.etapa }}"
                   data-pendencia-destino="{{ proxima_pendencia.destino_tipo }}">
             <span>Próxima pergunta pendente</span>
-            <strong>{{ proxima_pendencia.campo_id }} — {{ proxima_pendencia.pergunta }}</strong>
+            <strong>{{ codigo_pergunta(proxima_pendencia.campo_id, 1) }} — {{ proxima_pendencia.pergunta }}</strong>
             <span class="rotulo-destino-pendencia">{{ 'Ir à pergunta' if registro.form1_integral.pode_editar else 'Consultar pergunta' }}</span>
           </button>
           {% endif %}
@@ -362,12 +364,12 @@
                     data-pendencia-bloco="{{ item.bloco }}"
                     data-pendencia-etapa="{{ item.etapa }}"
                     data-pendencia-destino="{{ item.destino_tipo }}"
-                    aria-label="{{ 'Ir para' if registro.form1_integral.pode_editar else 'Consultar' }} {{ 'a seção relacionada à' if item.destino_tipo == 'secao' else 'a pergunta' }} {{ item.campo_id }} no Bloco {{ item.bloco }}">
-              <strong>{{ item.campo_id }}</strong> — {{ item.pergunta }}{% if item.ocorrencia %} (participante {{ item.ocorrencia }}){% endif %}
+                    aria-label="{{ 'Ir para' if registro.form1_integral.pode_editar else 'Consultar' }} {{ 'a seção relacionada à' if item.destino_tipo == 'secao' else 'a pergunta' }} {{ codigo_pergunta(item.campo_id, 1) }} no Bloco {{ item.bloco }}">
+              <strong>{{ codigo_pergunta(item.campo_id, 1) }}</strong> — {{ item.pergunta }}{% if item.ocorrencia %} (participante {{ item.ocorrencia }}){% endif %}
               <span class="rotulo-destino-pendencia">{{ ('Consultar seção' if item.destino_tipo == 'secao' else 'Consultar pergunta') if not registro.form1_integral.pode_editar else ('Ir à seção relacionada' if item.destino_tipo == 'secao' else 'Ir à pergunta') }}</span>
             </button>
             {% else %}
-            <strong>{{ item.campo_id }}</strong> — {{ item.pergunta }} <span class="ajuda">Sem destino editável neste formulário.</span>
+            <strong>{{ codigo_pergunta(item.campo_id, 1) }}</strong> — {{ item.pergunta }} <span class="ajuda">Sem destino editável neste formulário.</span>
             {% endif %}
           </li>
           {% endfor %}
@@ -393,12 +395,12 @@
                     data-pendencia-bloco="{{ item.bloco }}"
                     data-pendencia-etapa="{{ item.etapa }}"
                     data-pendencia-destino="{{ item.destino_tipo }}"
-                    aria-label="{{ 'Ir para' if registro.form1_integral.pode_editar else 'Consultar' }} {{ 'a seção relacionada à' if item.destino_tipo == 'secao' else 'a pergunta' }} {{ item.campo_id }} no Bloco {{ item.bloco }}">
-              <strong>{{ item.campo_id }}</strong> — {{ item.descricao if item.descricao else item.detalhe }}
+                    aria-label="{{ 'Ir para' if registro.form1_integral.pode_editar else 'Consultar' }} {{ 'a seção relacionada à' if item.destino_tipo == 'secao' else 'a pergunta' }} {{ codigo_pergunta(item.campo_id, 1) }} no Bloco {{ item.bloco }}">
+              <strong>{{ codigo_pergunta(item.campo_id, 1) }}</strong> — {{ item.descricao if item.descricao else item.detalhe }}
               <span class="rotulo-destino-pendencia">{{ ('Consultar seção' if item.destino_tipo == 'secao' else 'Consultar pergunta') if not registro.form1_integral.pode_editar else ('Ir à seção relacionada' if item.destino_tipo == 'secao' else 'Ir à pergunta') }}</span>
             </button>
             {% else %}
-            {% if item.campo_id %}<strong>{{ item.campo_id }}</strong> — {% endif %}{{ item.descricao if item.descricao else item.detalhe }}
+            {% if item.campo_id %}<strong>{{ codigo_pergunta(item.campo_id, 1) }}</strong> — {% endif %}{{ item.descricao if item.descricao else item.detalhe }}
             <span class="ajuda">Sem destino editável neste formulário.</span>
             {% endif %}
           </li>
@@ -420,7 +422,7 @@
         <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
 
         {% set campo = registro.form1_integral.campos_bloco_1['1.1'] %}
-        <label for="integral-1-1"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</label>
+        <label for="integral-1-1"><strong>{{ codigo_pergunta(campo.id, 1) }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</label>
         <select id="integral-1-1" name="referencia_existente" data-controla="integral-1-1-1">
           <option value="">Ainda não respondido</option>
           {% for opcao in campo.alternativas %}
@@ -430,18 +432,18 @@
 
         {% set campo = registro.form1_integral.campos_bloco_1['1.1.1'] %}
         <div id="integral-1-1-1" class="campo-condicional" data-visivel-quando="Sim">
-          <label for="integral-referencia"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</label>
+          <label for="integral-referencia"><strong>{{ codigo_pergunta(campo.id, 1) }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</label>
           <input id="integral-referencia" aria-describedby="instrucao-integral-1-1-1" name="referencia_institucional" maxlength="500" value="{{ respostas_integral.get('1.1.1', '') }}">
           <p class="ajuda" id="instrucao-integral-1-1-1">{{ campo.instrucao }}</p>
         </div>
 
         <div class="campos-reaproveitados">
-          {% set campo = registro.form1_integral.campos_bloco_1['1.2'] %}<div><strong>1.2 — O que está sendo analisado?</strong> {% include '_obrigatoriedade_form1.html' %}<br>{{ respostas_integral.get('1.2') }} <small>Reaproveitado da abertura</small></div>
-          {% set campo = registro.form1_integral.campos_bloco_1['1.3'] %}<div><strong>1.3 — Nome do objeto</strong> {% include '_obrigatoriedade_form1.html' %}<br>{{ respostas_integral.get('1.3') }} <small>Reaproveitado da abertura</small></div>
+          {% set campo = registro.form1_integral.campos_bloco_1['1.2'] %}<div><strong>{{ codigo_pergunta('1.2', 1) }} — O que está sendo analisado?</strong> {% include '_obrigatoriedade_form1.html' %}<br>{{ respostas_integral.get('1.2') }} <small>Reaproveitado da abertura</small></div>
+          {% set campo = registro.form1_integral.campos_bloco_1['1.3'] %}<div><strong>{{ codigo_pergunta('1.3', 1) }} — Nome do objeto</strong> {% include '_obrigatoriedade_form1.html' %}<br>{{ respostas_integral.get('1.3') }} <small>Reaproveitado da abertura</small></div>
         </div>
 
         {% set campo = registro.form1_integral.campos_bloco_1['1.4'] %}
-        <label for="integral-1-4"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</label>
+        <label for="integral-1-4"><strong>{{ codigo_pergunta(campo.id, 1) }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</label>
         <select id="integral-1-4" name="fluxo_recorrente">
           <option value="">Ainda não respondido</option>
           {% for opcao in campo.alternativas %}
@@ -469,7 +471,7 @@
       {% set campo_2_1 = registro.form1_integral.campos_bloco_2['2.1'] %}
       {% if leitura_2_1.somente_leitura or not registro.form1_integral.pode_editar %}
       <div id="consulta-integral-2.1" class="campo-integral respostas-somente-leitura area-somente-leitura" tabindex="-1" data-canais-2-1-estado="{{ leitura_2_1.estado }}">
-        <p class="selo-somente-leitura">Somente leitura</p>{% set campo = campo_2_1 %}<p><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</p>
+        <p class="selo-somente-leitura">Somente leitura</p>{% set campo = campo_2_1 %}<p><strong>{{ codigo_pergunta(campo.id, 1) }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</p>
         {% include '_ajuda_cartilha_form1.html' %}
         {% if leitura_2_1.estado == 'canais_confirmados' %}
         <p>Canais declarados pelo APA na abertura:</p>
@@ -496,7 +498,7 @@
         {% if (campo.id != '2.1' or not leitura_2_1.somente_leitura) and campo.condicao_canal_ativa is not sameas false %}
         <div class="campo-integral{% if campo.condicao and campo.condicao_canal_ativa is none %} campo-condicional{% endif %}"
              {% if campo.condicao and campo.condicao_canal_ativa is none %}data-depende-de="campo__{{ campo.condicao[0] }}" data-valores="{{ campo.condicao[1] | join('||') }}"{% endif %}>
-          <div id="rotulo-integral-{{ campo.id }}" class="rotulo-campo"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</div>
+          <div id="rotulo-integral-{{ campo.id }}" class="rotulo-campo"><strong>{{ codigo_pergunta(campo.id, 1) }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</div>
           {% include '_ajuda_cartilha_form1.html' %}
           {% if campo.controle == 'seleção múltipla (combo com marcações)' %}
           <div class="grade-opcoes" role="group" aria-labelledby="rotulo-integral-{{ campo.id }}" {% if campo.ajuda_cartilha %}aria-describedby="ajuda-cartilha-{{ campo.id }}"{% endif %}>
@@ -546,7 +548,7 @@
         <input type="hidden" name="comando_id" value="{{ comando_salvar_bloco_3 }}">
         <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
         {% set campo = registro.form1_integral.campo_3_1 %}
-        <label for="integral-3-1"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</label>
+        <label for="integral-3-1"><strong>{{ codigo_pergunta(campo.id, 1) }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</label>
         <select id="integral-3-1" name="resposta_3_1" data-controla="participantes-integral">
           <option value="">Ainda não respondido</option>
           {% for valor, rotulo in campo.alternativas %}
@@ -564,7 +566,7 @@
           <h4>Participante {{ loop.index }}</h4>
           <dl class="resumo respostas-somente-leitura">
             {% for campo_id, valor in participante.respostas.items() %}
-            <div><dt>{{ campo_id }} — {{ registro.form1_integral.campos_participante[campo_id].pergunta }}</dt><dd>{{ valor | join(', ') if valor is not string else valor }}{% if participante.get('complementos', {}).get(campo_id) %}<br><span class="ajuda">Complemento: {{ participante.complementos[campo_id] }}</span>{% endif %}</dd></div>
+            <div><dt>{{ codigo_pergunta(campo_id, 1) }} — {{ registro.form1_integral.campos_participante[campo_id].pergunta }}</dt><dd>{{ valor | join(', ') if valor is not string else valor }}{% if participante.get('complementos', {}).get(campo_id) %}<br><span class="ajuda">Complemento: {{ participante.complementos[campo_id] }}</span>{% endif %}</dd></div>
             {% endfor %}
           </dl>
           {% if registro.form1_integral.pode_editar %}
@@ -587,7 +589,7 @@
             <legend>Adicionar participante</legend>
             {% for campo in registro.form1_integral.campos_participante.values() %}
             <div class="campo-integral{% if campo.id == '3.5.1' %} campo-condicional{% endif %}" {% if campo.id == '3.5.1' %}data-depende-de="campo__3.5" data-valores="Sim"{% endif %}>
-              <div id="rotulo-integral-{{ campo.id }}" class="rotulo-campo"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</div>
+              <div id="rotulo-integral-{{ campo.id }}" class="rotulo-campo"><strong>{{ codigo_pergunta(campo.id, 1) }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</div>
               {% include '_ajuda_cartilha_form1.html' %}
               {% if campo.controle == 'seleção múltipla (combo com marcações)' %}
               <div class="grade-opcoes" role="group" aria-labelledby="rotulo-integral-{{ campo.id }}" {% if campo.ajuda_cartilha %}aria-describedby="ajuda-cartilha-{{ campo.id }}"{% endif %}>{% for valor, rotulo in campo.alternativas %}<label class="opcao"><input type="checkbox" id="opcao-integral-{{ campo.id }}-{{ loop.index }}" name="campo__{{ campo.id }}" value="{{ valor }}"> <span>{{ rotulo }}</span></label>{% endfor %}</div>
@@ -624,7 +626,7 @@
         {% for campo in registro.form1_integral.campos_bloco_4.values() %}
         <div class="campo-integral{% if campo.condicao %} campo-condicional{% endif %}"
              {% if campo.condicao %}data-depende-de="campo__{{ campo.condicao[0] }}" data-valores="{{ campo.condicao[1] | join('||') }}"{% endif %}>
-          <div id="rotulo-integral-{{ campo.id }}" class="rotulo-campo"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</div>
+          <div id="rotulo-integral-{{ campo.id }}" class="rotulo-campo"><strong>{{ codigo_pergunta(campo.id, 1) }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</div>
           {% include '_ajuda_cartilha_form1.html' %}
           {% if campo.controle == 'seleção múltipla (combo com marcações)' or campo.id == '4.2.5.1' %}
           <div class="grade-opcoes" role="group" aria-labelledby="rotulo-integral-{{ campo.id }}" {% if campo.ajuda_cartilha %}aria-describedby="ajuda-cartilha-{{ campo.id }}"{% endif %}>
@@ -666,7 +668,7 @@
         <input type="hidden" name="comando_id" value="{{ comando_salvar_bloco_5 }}">
         <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
         <fieldset>
-          <legend id="rotulo-integral-{{ campo.id }}"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</legend>
+          <legend id="rotulo-integral-{{ campo.id }}"><strong>{{ codigo_pergunta(campo.id, 1) }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</legend>
           {% include '_ajuda_cartilha_form1.html' %}
           <div class="grade-opcoes" role="group" aria-labelledby="rotulo-integral-{{ campo.id }}" {% if campo.ajuda_cartilha %}aria-describedby="ajuda-cartilha-{{ campo.id }}"{% endif %}>
             {% for valor, rotulo in campo.alternativas %}
@@ -702,7 +704,7 @@
         {% for campo in registro.form1_integral.campos_bloco_6.values() %}
         <div class="campo-integral{% if campo.condicao %} campo-condicional{% endif %}"
              {% if campo.condicao %}data-depende-de="campo__{{ campo.condicao[0] }}" data-valores="{{ campo.condicao[1] | join('||') }}"{% endif %}>
-          <div id="rotulo-integral-{{ campo.id }}" class="rotulo-campo"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</div>
+          <div id="rotulo-integral-{{ campo.id }}" class="rotulo-campo"><strong>{{ codigo_pergunta(campo.id, 1) }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</div>
           {% include '_ajuda_cartilha_form1.html' %}
           {% if campo.controle == 'seleção múltipla (combo com marcações)' or campo.id == '6.2.2' %}
           <div class="grade-opcoes" role="group" aria-labelledby="rotulo-integral-{{ campo.id }}" {% if campo.ajuda_cartilha %}aria-describedby="ajuda-cartilha-{{ campo.id }}"{% endif %}>
@@ -746,7 +748,7 @@
         <input type="hidden" name="comando_id" value="{{ comando_salvar_bloco_7 }}">
         <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
         <fieldset>
-          <legend id="rotulo-integral-{{ campo.id }}"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</legend>
+          <legend id="rotulo-integral-{{ campo.id }}"><strong>{{ codigo_pergunta(campo.id, 1) }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</legend>
           {% include '_ajuda_cartilha_form1.html' %}
           <div class="grade-opcoes" role="group" aria-labelledby="rotulo-integral-{{ campo.id }}" {% if campo.ajuda_cartilha %}aria-describedby="ajuda-cartilha-{{ campo.id }}"{% endif %}>
           {% for valor, rotulo in campo.alternativas %}

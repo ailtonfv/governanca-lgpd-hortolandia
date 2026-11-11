@@ -1,0 +1,45 @@
+.filas-form2 article, .filas-form2 details {
+  background: #fff;
+  border: 1px solid #d6e0e6;
+  border-radius: 10px;
+  margin-block: 16px;
+  padding: 20px;
+}
+.filas-form2 h2 { margin-top: 24px; }
+.filas-form2 form { display: flex; flex-direction: column; gap: 16px; }
+.filas-form2 form button { align-self: flex-end; width: auto; max-width: 100%; }
+.filas-form2 label { display: block; }
+.filas-form2 textarea, .filas-form2 select { max-width: 100%; }
+.filas-form2 nav { display: flex; gap: 10px; overflow-x: auto; margin-block: 20px; padding: 8px; }
+.filas-form2 nav a { flex-shrink: 0; padding: 12px 18px; border: 1px solid #d6e0e6; border-radius: 8px; background: white; }
+.filas-form2 fieldset { margin-block: 12px; }
+.tabela-filas { max-width: 100%; overflow-x: auto; }
+@media (max-width: 600px) {
+  .filas-form2 form button { width: 100%; }
+}
+
+.filas-form2 .acoes-fila-form2 { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 12px; }
+.filas-form2 .acoes-fila-form2 a { margin: 0; text-align: center; }
+@media (max-width: 600px) {
+  .filas-form2 .acoes-fila-form2 a { width: 100%; box-sizing: border-box; }
+}
+
+.filas-form2 nav.regua-navegacao-blocos { display: block; }
+.filas-form2 .mapa-blocos-form1 .cartao-bloco { display: block; box-sizing: border-box; width: 4.65rem; min-height: 7rem; padding: .4rem .3rem; text-decoration: none; }
+.filas-form2 .mapa-blocos-form1 .cartao-bloco[aria-current="page"] { border-color: var(--azul); box-shadow: 0 0 0 .15rem rgba(7,89,133,.16); }
+.filas-form2 .consultas-form2 summary { cursor: pointer; color: var(--azul-escuro); font-weight: 700; }
+
+/* Os marcadores ocultos não podem ser reexibidos pelo display do estado-bloco. */
+.filas-form2 .estado-bloco[hidden] { display: none; }
+.filas-form2 .mapa-blocos-form1 > li { display: flex; }
+.filas-form2 .mapa-blocos-form1 .cartao-bloco { height: 100%; }
+.filas-form2 .texto-preservado { white-space: pre-wrap; overflow-wrap: anywhere; }
+.filas-form2 .manifestacao-consolidada { padding-block: 12px; border-top: 1px solid var(--borda); }
+.filas-form2 a:focus-visible, .filas-form2 button:focus-visible, .filas-form2 summary:focus-visible { outline: 3px solid var(--azul); outline-offset: 3px; }
+
+.filas-form2 .respostas-origem-form2 { display: block; margin: 0; }
+.filas-form2 .item-origem-form2 { padding-block: 14px; border-top: 1px solid var(--borda); }
+.filas-form2 .respostas-origem-form2 dt { margin: 0 0 6px; font-weight: 700; }
+.filas-form2 .respostas-origem-form2 dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.filas-form2 .confirmacao-salvamento { padding: 1rem; border-left: 4px solid #166534; background: #edf7ef; color: #14532d; font-weight: 600; }

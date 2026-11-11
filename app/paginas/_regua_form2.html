@@ -1,0 +1,32 @@
+{% set estados_regua = estados_regua|default({}) %}
+{% set etapas_por_bloco = [1,1,1,1,2,2,2,3,3,3,3,3,2,4] %}
+<nav data-preparacao="{{ prep_id or None }}" data-conta="{{ conta_id }}" class="regua-navegacao-blocos" aria-label="Navegação horizontal pelos 14 blocos do FORM 2">
+  <ol class="mapa-blocos-form1 regua-form2">
+    {% for n in range(1, 15) %}
+    {% set etapa = etapas_por_bloco[n-1] %}
+    {% set juridico = n in (3,4,5,10) %}
+    {% set salvo = n|string in estados_regua.salvos|default([]) %}
+    {% set pendente = n|string in estados_regua.pendentes|default([]) %}
+    <li data-etapa="{{ etapa }}">
+      {% if revisao %}<a data-numero="{{ n }}" class="cartao-bloco{{ ' bloco-com-respostas' if salvo else '' }}{{ ' bloco-com-pendencias' if pendente else '' }}" href="{{ url_for('revisao_form2', registro_id=registro.id, preparacao_id=prep_id, bloco=n).include_query_params(conta_id=conta_id, **parametros) }}" aria-describedby="estados-form2-{{ n }}" aria-label="Ir ao Bloco {{ n }}, etapa {{ etapa }}{{ ', revisão jurídica D11' if juridico else '' }}"{% if bloco_atual|default(0) == n %} aria-current="page"{% endif %}>
+      {% else %}<span class="bloco-indisponivel">{% endif %}
+        <strong class="numero-bloco">{{ n }}</strong>
+        {% if revisao %}<span id="estados-form2-{{ n }}">
+        <small class="estado-bloco {{ 'salvo' if salvo else 'a-percorrer' }}">{{ 'Respostas salvas' if salvo else 'Ainda não preenchido' }}</small>
+        {% if pendente %}<small class="estado-bloco com-pendencias">Com pendências</small>{% endif %}
+        <small class="estado-bloco visitado" data-visitado hidden>Visitado nesta sessão</small></span>
+        {% else %}<small class="estado-bloco">Etapa {{ etapa }}</small>{% endif %}
+      {% if revisao %}</a>{% else %}</span>{% endif %}
+    </li>
+    {% endfor %}
+  </ol>
+</nav>
+{% if revisao %}<script defer src="{{ url_for('estaticos', path='/regua_form2.js') }}"></script>{% endif %}
+<details class="etapas-form2"><summary>Consultar as quatro etapas</summary>
+  <ol>
+    <li>Finalidade, guarda e fundamento jurídico · blocos 1 a 4</li>
+    <li>Situações especiais e direitos do titular · blocos 5, 6, 7 e 13</li>
+    <li>Circulação dos dados, agentes e instrumentos · blocos 8 a 12</li>
+    <li>Resultado e encaminhamentos · bloco 14</li>
+  </ol>
+</details>

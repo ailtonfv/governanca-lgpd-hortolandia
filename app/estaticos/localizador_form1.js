@@ -10,7 +10,7 @@ window.iniciarLocalizadorForm1 = function (raiz) {
     return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR').trim();
   }
   entrada.addEventListener('input', function () {
-    var busca = normalizar(entrada.value);
+    var busca = normalizar(entrada.value).replace(/^f1-/, '');
     var exato = itens.some(function (item) { return item.dataset.localizarId === busca; });
     var encontrados = 0;
     itens.forEach(function (item) {

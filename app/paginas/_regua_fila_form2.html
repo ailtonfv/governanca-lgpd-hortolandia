@@ -1,0 +1,16 @@
+<section aria-label="Preenchimento do FORM 2">
+<h2>Blocos do FORM 2</h2>
+<p>Selecione um bloco para preencher ou revisar. Respostas salvas não significam conclusão ou homologação.</p>
+<nav data-preparacao="fila-{{ p.id }}" data-conta="{{ conta_id }}" class="regua-navegacao-blocos" aria-label="Navegação pelos 14 blocos do FORM 2">
+<ol class="mapa-blocos-form1 regua-form2">
+{% for n in range(1,15) %}
+{% set salvo = n|string in estados_regua.salvos %}{% set pendente = n|string in estados_regua.pendentes %}
+<li><a data-numero="{{ n }}" class="cartao-bloco{{ ' bloco-com-respostas' if salvo else '' }}{{ ' bloco-com-pendencias' if pendente else '' }}" href="/form2/participacoes/{{ p.id }}/blocos/{{ n }}?conta_id={{ conta_id|urlencode }}" aria-label="Ir ao Bloco {{ n }}"{% if numero|default(0) == n %} aria-current="page"{% endif %}>
+<strong class="numero-bloco">{{ n }}</strong>
+<small class="estado-bloco {{ 'salvo' if salvo else 'a-percorrer' }}">{{ 'Respostas salvas' if salvo else 'Ainda não preenchido' }}</small>
+{% if pendente %}<small class="estado-bloco com-pendencias">Com pendências</small>{% endif %}
+{% if n in (3,4,5,10) %}<small class="estado-bloco">D11 pendente</small>{% endif %}
+<small class="estado-bloco visitado" data-visitado hidden>Visitado nesta sessão</small>
+</a></li>{% endfor %}</ol></nav>
+</section>
+<script defer src="{{ url_for('estaticos', path='/regua_form2.js') }}"></script>

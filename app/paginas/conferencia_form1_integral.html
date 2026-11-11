@@ -1,3 +1,4 @@
+{% from '_identificador_pergunta.html' import codigo_pergunta %}
 {% extends "base.html" %}
 {% block titulo %}Conferência interna · {{ registro.codigo_lgpd }}{% endblock %}
 {% block conteudo %}
@@ -29,7 +30,7 @@
   {% if respostas %}
   <dl class="resumo-respostas-conferencia">
     {% for item in respostas %}
-    <div><dt>{{ item.id }} — {{ item.pergunta }}</dt><dd>{{ item.valor }}</dd></div>
+    <div><dt>{{ codigo_pergunta(item.id, 1) }}{% if item.conjunto %} · conjunto {{ item.conjunto }}{% endif %} — {{ item.pergunta }}</dt><dd>{{ item.valor }}</dd></div>
     {% endfor %}
   </dl>
   {% else %}<p>Nenhuma resposta foi registrada nesta versão.</p>{% endif %}

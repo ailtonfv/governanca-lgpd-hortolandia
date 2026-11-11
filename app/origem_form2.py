@@ -55,5 +55,8 @@ def ler_origem(sessao, registro_id, snapshot_id):
          "respondida": campo.id in respostas, "valor": deepcopy(respostas.get(campo.id))}
         for campo in catalogo.values()
     ]
+    if "revisao_22" in fonte:
+        from app.rev22_form1 import respostas_conjuntos
+        perguntas.extend(respostas_conjuntos(fonte))
     return {"snapshot": snapshot, "estrutura": estrutura, "perguntas": perguntas,
             "conteudo": deepcopy(fonte), "canais": deepcopy(pacote.get("retrato_canais", {}))}

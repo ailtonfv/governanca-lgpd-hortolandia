@@ -70,6 +70,10 @@ from app.rotas_form2_preparacao import router as rotas_form2_preparacao
 from app.form2_preparacao import projetar_navegacao_preparacao
 from app.apresentacao_form2 import data_local, rotulo_demonstrativo
 app.include_router(rotas_form2_preparacao)
+from app.rotas_fila_form2 import router as rotas_fila_form2
+app.include_router(rotas_fila_form2)
+from app.rotas_rev22_form1 import router as router_rev22_form1
+app.include_router(router_rev22_form1)
 paginas = Jinja2Templates(directory=PASTA_APP / "paginas")
 paginas.env.globals["consulta_cartilha_local"] = acesso_local_cartilha
 paginas.env.filters.update(data_local=data_local, rotulo_f2=rotulo_demonstrativo)
@@ -462,6 +466,10 @@ def detalhe_registro(
     erro: bool = Query(default=False),
     sessao: Session = Depends(obter_sessao),
 ):
+    from app.modelos import RascunhoForm1Integral
+    r22 = sessao.get(RascunhoForm1Integral, registro_id)
+    if r22 and "revisao_22" in r22.conteudo:
+        return RedirectResponse('/registros/'+registro_id+'/form1-rev22?'+urlencode({'conta_id':conta_id}), status_code=303)
     identidade, registro = carregar_registro(sessao, conta_id, registro_id)
     if identidade is None:
         return paginas.TemplateResponse(
@@ -1314,6 +1322,8 @@ def consultar_conferencia_interna(
     respostas = snapshot.conteudo.get("form1_integral", {}).get("respostas", {})
     conteudo_snapshot = snapshot.conteudo.get("form1_integral", {})
     catalogo = catalogo_efetivo(conteudo_snapshot)
+    from app.rev22_form1 import respostas_conjuntos
+    conjuntos_rev22 = respostas_conjuntos(conteudo_snapshot) if "revisao_22" in conteudo_snapshot else []
     return paginas.TemplateResponse(
         request=request,
         name="conferencia_form1_integral.html",
@@ -1331,7 +1341,7 @@ def consultar_conferencia_interna(
                 {"id": campo_id, "pergunta": catalogo[campo_id].pergunta, "valor": valor}
                 for campo_id, valor in sorted(respostas.items())
                 if campo_id in catalogo
-            ],
+            ] + conjuntos_rev22,
             "participantes": snapshot.conteudo.get("form1_integral", {}).get("participantes", []),
             "destinatarios": snapshot.conteudo.get("form1_integral", {}).get("destinatarios_10_2_1", []),
             "comando_devolver_conferencia": str(uuid.uuid4()),

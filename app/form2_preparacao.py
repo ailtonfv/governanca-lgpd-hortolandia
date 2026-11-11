@@ -15,7 +15,8 @@ from app.eventos import registrar_evento, registrar_auditoria, lacre, verificar_
 from app.modelos import (Conta, Pessoa, Registro, Ciclo, Evento, VersaoForm1Integral,
                         HabilitacaoForm2Preparacao, PreparacaoForm2)
 from app.origem_form2 import canonico, ler_origem
-from app.respostas_form2 import ENVELOPE_V2, aplicar_bloco
+from app.form2_rev212 import ramos_origem
+from app.respostas_form2 import ENVELOPE_V2, aplicar_bloco, aplicar_revisao
 
 POLITICA = "F2-DEMO-05-v1"
 ENVELOPE = "F2-DEMO-PREP-v1"
@@ -255,7 +256,7 @@ def salvar_preparacao(sessao, *, comando_id, conta_id, registro_id, preparacao_i
 
 def salvar_respostas_bloco(sessao, *, comando_id, conta_id, registro_id, preparacao_id,
                            bloco, versao_lida, alteracoes, complementos=None,
-                           reativar=None, momento=None):
+                           reativar=None, momento=None, revisao=False):
     """Salva respostas homologadas do bloco sem concluir ou submeter o FORM 2."""
     momento = momento or agora()
     _travar(sessao, registro_id)
@@ -278,7 +279,8 @@ def salvar_respostas_bloco(sessao, *, comando_id, conta_id, registro_id, prepara
     parametros = dict(conta_id=conta_id, registro_id=registro_id, preparacao_id=preparacao_id,
                       bloco=bloco, versao_lida=versao_lida, alteracoes=alteracoes,
                       complementos=complementos or {}, reativar=sorted(reativar or []))
-    comando, repeticao = abrir_comando(sessao, comando_id, "salvar_form2_respostas_bloco",
+    operacao = "salvar_form2_rascunho_rev212" if revisao else "salvar_form2_respostas_bloco"
+    comando, repeticao = abrir_comando(sessao, comando_id, operacao,
                                        parametros, "pessoa", pessoa.id, conta_id)
     if repeticao is not None:
         return repeticao
@@ -288,11 +290,14 @@ def salvar_respostas_bloco(sessao, *, comando_id, conta_id, registro_id, prepara
     if prep.lacre_conteudo != lacre(canonico(prep.conteudo)):
         return _negar(sessao, conta_id, registro_id, "Integridade do rascunho não confere.", comando)
     try:
-        novo_conteudo, resumo = aplicar_bloco(
-            prep.conteudo, bloco=bloco, alteracoes=alteracoes,
-            complementos=complementos, reativar=reativar,
-            proxima_versao=prep.versao_rascunho + 1,
-        )
+        if revisao:
+            novo_conteudo, resumo = aplicar_revisao(prep.conteudo, bloco, alteracoes, ramos_origem(origem))
+        else:
+            novo_conteudo, resumo = aplicar_bloco(
+                prep.conteudo, bloco=bloco, alteracoes=alteracoes,
+                complementos=complementos, reativar=reativar,
+                proxima_versao=prep.versao_rascunho + 1,
+            )
     except (PermissionError, ValueError, FileNotFoundError, OSError, KeyError, TypeError) as erro:
         return _negar(sessao, conta_id, registro_id, str(erro), comando)
     prep.conteudo = novo_conteudo
@@ -300,7 +305,7 @@ def salvar_respostas_bloco(sessao, *, comando_id, conta_id, registro_id, prepara
     prep.versao_rascunho += 1
     prep.salvo_por, prep.salvo_em = pessoa.id, momento
     prep.lacre_conteudo = lacre(canonico(novo_conteudo))
-    _evento_preparacao(sessao, comando, prep, "form2_respostas_bloco_salvas")
+    _evento_preparacao(sessao, comando, prep, "form2_rascunho_rev212_salvo" if revisao else "form2_respostas_bloco_salvas")
     sessao.flush()
     return fechar_comando(comando, {"permitido": True, "preparacao_id": prep.id,
         "versao": prep.versao_rascunho, "bloco": bloco, "resumo": resumo,
@@ -349,10 +354,12 @@ def projetar_trabalho_aal(sessao, preparacoes):
     if not preparacoes:
         return {}
     anotacao = Evento.conteudo["conteudo"]["anotacao_preparatoria"].as_string()
-    consulta = select(Evento.cadeia_id, func.bool_or(anotacao.regexp_match(r"\S"))).where(
+    tipos_estruturados = ("form2_respostas_bloco_salvas", "form2_rascunho_rev212_salvo")
+    estruturado = Evento.tipo_evento.in_(tipos_estruturados)
+    consulta = select(Evento.cadeia_id, func.bool_or(estruturado | anotacao.regexp_match(r"\S"))).where(
         Evento.cadeia_tipo == "form2_preparacao",
         Evento.cadeia_id.in_([p.id for p in preparacoes]),
-        Evento.tipo_evento == "form2_preparacao_salva",
+        Evento.tipo_evento.in_(("form2_preparacao_salva", *tipos_estruturados)),
         Evento.conteudo["papel_exercido"].as_string() == "preparador_demonstrativo",
     ).group_by(Evento.cadeia_id)
     return dict(sessao.execute(consulta).all())

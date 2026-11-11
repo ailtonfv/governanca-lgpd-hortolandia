@@ -21,6 +21,9 @@ from app.modelos import (
     HistoricoConferenciaForm1Integral,
     Instrumento,
     PreparacaoForm2,
+    ParticipacaoForm2,
+    AvisoDpo,
+    ComplementoForm2,
     RascunhoForm1Integral,
     Registro,
     VersaoForm1Integral,
@@ -260,6 +263,11 @@ def test_snapshot_nao_possui_endpoint_nem_acao_na_interface(sessao):
 def test_migracao_cria_tabela_reversivel_e_snapshot_e_imutavel_no_banco(sessao):
     with motor.begin() as conexao:
         # Reconstituir a base anterior à migração 17, sem dependentes posteriores.
+        # A fila REV22 também referencia snapshots. Remover seus dependentes
+        # explicitamente no banco de teste, sem CASCADE nem relaxar as FKs.
+        ComplementoForm2.__table__.drop(bind=conexao)
+        AvisoDpo.__table__.drop(bind=conexao)
+        ParticipacaoForm2.__table__.drop(bind=conexao)
         PreparacaoForm2.__table__.drop(bind=conexao)
         HistoricoConferenciaForm1Integral.__table__.drop(bind=conexao)
         ConferenciaInternaForm1Integral.__table__.drop(bind=conexao)
@@ -276,6 +284,9 @@ def test_migracao_cria_tabela_reversivel_e_snapshot_e_imutavel_no_banco(sessao):
         ConferenciaInternaForm1Integral.__table__.create(bind=conexao)
         HistoricoConferenciaForm1Integral.__table__.create(bind=conexao)
         PreparacaoForm2.__table__.create(bind=conexao)
+        ParticipacaoForm2.__table__.create(bind=conexao)
+        AvisoDpo.__table__.create(bind=conexao)
+        ComplementoForm2.__table__.create(bind=conexao)
 
     registro = _preparar(sessao, "F18C-IMUTAVEL")
     resultado = _snapshot(sessao, registro, "F18C-IMUTAVEL-SNAPSHOT")

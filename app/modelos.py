@@ -1012,3 +1012,63 @@ class RegistroCanal(Base):
             name="ck_registro_canal_origem",
         ),
     )
+
+class ParticipacaoForm2(Base):
+    """Fila institucional demonstrativa com autoria e origem preservadas."""
+    __tablename__ = "participacao_form2"
+    id = Column(String(36), primary_key=True)
+    registro_id = Column(String(36), ForeignKey("registro.id"), nullable=False)
+    snapshot_id = Column(String(36), ForeignKey("versao_form1_integral.id"), nullable=False)
+    unidade_id = Column(String(50), ForeignKey("unidade.id"), nullable=False)
+    origem_id = Column(String(36), ForeignKey("participacao_form2.id"))
+    tipo = Column(String(20), nullable=False)
+    estado = Column(String(20), nullable=False, default="aguardando")
+    responsavel_id = Column(String(50), ForeignKey("pessoa.id"))
+    entrada_em = Column(DateTime(timezone=True), nullable=False)
+    assumida_em = Column(DateTime(timezone=True))
+    concluida_em = Column(DateTime(timezone=True))
+    versao = Column(Integer, nullable=False, default=1)
+    questao = Column(Text, nullable=False, default="")
+    manifestacao = Column(Text, nullable=False, default="")
+    conteudo = Column(JSON, nullable=False, default=dict)
+    __table_args__ = (
+        CheckConstraint("tipo IN ('principal','tematica','juridico','dpo')"),
+        CheckConstraint("estado IN ('aguardando','em_atendimento','concluida')"),
+        Index("uq_fila_form2_ingresso", "snapshot_id", unique=True,
+              postgresql_where=(tipo == "principal")),
+    )
+
+
+class AvisoDpo(Base):
+    """Saída transacional de avisos, com chave única por ingresso ou consulta."""
+    __tablename__ = "aviso_dpo"
+    id = Column(String(36), primary_key=True)
+    participacao_id = Column(String(36), ForeignKey("participacao_form2.id"), nullable=False)
+    tipo = Column(String(20), nullable=False)
+    criado_em = Column(DateTime(timezone=True), nullable=False)
+    metadados = Column(JSON, nullable=False)
+    estado = Column(String(20), nullable=False, default="pendente")
+    enviado_em = Column(DateTime(timezone=True))
+    erro = Column(String(200))
+    __table_args__ = (UniqueConstraint("participacao_id", "tipo"),)
+
+
+class ResumoDpo(Base):
+    __tablename__ = "resumo_dpo"
+    periodo = Column(String(10), primary_key=True)
+    estado = Column(String(20), nullable=False, default="pendente")
+    enviado_em = Column(DateTime(timezone=True))
+
+
+class ComplementoForm2(Base):
+    __tablename__ = "complemento_form2"
+    id = Column(String(36), primary_key=True)
+    participacao_id = Column(String(36), ForeignKey("participacao_form2.id"), nullable=False, unique=True)
+    snapshot_origem_id = Column(String(36), ForeignKey("versao_form1_integral.id"), nullable=False)
+    snapshot_resposta_id = Column(String(36), ForeignKey("versao_form1_integral.id"))
+    solicitacao = Column(Text, nullable=False)
+    estado = Column(String(20), nullable=False, default="aberta")
+    criada_em = Column(DateTime(timezone=True), nullable=False)
+    respondida_em = Column(DateTime(timezone=True))
+    resolvida_em = Column(DateTime(timezone=True))
+    __table_args__ = (CheckConstraint("estado IN ('aberta','respondida','resolvida')"),)

@@ -37,7 +37,7 @@
       var orientacao = seletor.closest('[data-destinatario-editor]').querySelector('[data-orientacao-categoria]');
       orientacao.textContent = inconsistente
         ? 'Esta categoria deixou de estar selecionada em 10.2. Reveja a seleção antes de editar o destinatário. O salvamento preserva a ocorrência no histórico, conforme as regras atuais.'
-        : !categorias.length ? 'Responda à pergunta 10.2 antes de adicionar um destinatário.'
+        : !categorias.length ? 'Responda à pergunta F1-10.2 antes de adicionar um destinatário.'
         : categorias.length === 1 ? 'Única categoria marcada em 10.2: ' + categorias[0] + '. Identifique abaixo a unidade ou entidade.'
         : 'Escolha, entre as categorias marcadas em 10.2, a correspondente a este destinatário.';
       seletor.setCustomValidity(inconsistente ? 'Reveja a categoria deste destinatário e a resposta 10.2.' : '');

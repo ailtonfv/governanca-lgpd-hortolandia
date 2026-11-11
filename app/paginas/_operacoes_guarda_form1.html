@@ -1,3 +1,4 @@
+{% from '_identificador_pergunta.html' import codigo_pergunta %}
 <div class="operacoes-guarda-form1" aria-label="Procedimentos e evidências por operação">
   <p class="ajuda">Responda cada dimensão separadamente. Um procedimento não comprova a existência de evidência. “Não se aplica” e “A confirmar” dizem respeito somente à resposta selecionada.</p>
   {% for operacao in registro.form1_integral.operacoes_guarda %}
@@ -7,7 +8,7 @@
     {% for chave in ('procedimento', 'evidencia', 'localizacao') %}
       {% set campo = campos_bloco[operacao[chave]] %}
       <div class="campo-integral{% if campo.condicoes %} campo-condicional{% endif %}"{% if campo.condicoes %} data-condicoes='{{ campo.condicoes | tojson }}'{% endif %}>
-        <div id="rotulo-integral-{{ campo.id }}" class="rotulo-campo"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</div>
+        <div id="rotulo-integral-{{ campo.id }}" class="rotulo-campo"><strong>{{ codigo_pergunta(campo.id, 1) }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</div>
         {% if campo.alternativas %}
         <select name="campo__{{ campo.id }}" {% include '_atributos_controle_form1.html' %}>
           <option value="">Ainda não respondido</option>

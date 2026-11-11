@@ -30,6 +30,17 @@ Leia este arquivo antes de alterar código ou documentação. Em seguida, leia s
 - Cada tela operacional deve esclarecer onde o usuário está, qual papel exerce, o que precisa fazer, qual ação está disponível e o que acontecerá ao executá-la.
 - Informações institucionais devem apoiar o trabalho sem dificultar o acesso às perguntas e ações principais. Distinguir claramente o FORM 1 Integral do questionário sintético legado.
 
+## Identificação visível das perguntas — decisão de 11/11/2026
+
+- Exibir cada pergunta e referência a pergunta no formato `F{número do FORM}-{identificador editorial} — enunciado`. Exemplos: `F1-1.2`, `F2-1.2`, `F2-9W.1`. Conservar integralmente o identificador editorial: no FORM 3, o item `3.55` aparece como `F3-3.55`; no FORM 4, `4.25` aparece como `F4-4.25`.
+- Aplicar o padrão aos rótulos de preenchimento, consultas de origem e histórico, pendências, consolidação, ajudas e referências cruzadas, inclusive nos documentos gerados em novas versões. Uma pergunta da origem FORM 1 mantém o prefixo `F1-` quando exibida dentro do FORM 2.
+- Acrescentar o prefixo uma única vez. Um identificador já qualificado, como `F2-1.2`, não pode virar `F2-F2-1.2`. Preservar os sufixos dos ramos temáticos e distinguir o número do conjunto repetido do identificador da pergunta.
+- Esta é uma regra de apresentação. Não renomear chaves de banco, catálogo privado, parâmetros dos formulários, contratos, eventos, snapshots ou âncoras existentes. Não migrar respostas nem reescrever documentos históricos publicados por causa do prefixo visual.
+- Manter a régua com números de blocos (1 a 14); ela identifica blocos, não perguntas. Não alterar o Identificador LGPD do processo.
+- Centralizar a formatação em recurso reutilizável da apresentação, evitando regras divergentes entre telas. Conferir também os nomes acessíveis e preservar o funcionamento dos links.
+- Critério de conferência: a mesma pergunta tem o mesmo identificador visível no preenchimento, na consulta histórica e na pendência; prefixo não duplicado, ramos preservados e respostas antigas continuam acessíveis.
+- Situação em 11/11/2026: aplicada às telas do FORM 1 (preenchimento, consulta, conferência e pendências) e às referências de origem exibidas no FORM 2. Formatação centralizada em macro de apresentação. Documentos publicados permanecem intactos; revisão das demais saídas e aplicação futura aos FORMs 3 e 4 devem ser registradas separadamente.
+
 ## Regras que nunca podem ser inferidas ou flexibilizadas
 
 - Use exclusivamente dados fictícios. Nunca grave nome, matrícula, CPF, senha, token ou outro dado pessoal real no código, testes, documentos, logs ou evidências.

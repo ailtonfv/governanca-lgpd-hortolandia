@@ -34,14 +34,8 @@ def reverter(sessao):
     """Remove somente a infraestrutura vazia desta migração em desenvolvimento."""
 
     conexao = sessao.connection()
-    quantidade = conexao.scalar(text(
-        "SELECT count(*) FROM versao_form1_integral"
-    ))
-    if quantidade:
-        raise RuntimeError(
-            "reversão recusada: versao_form1_integral contém snapshots"
-        )
-    conexao.execute(text("DROP TABLE IF EXISTS versao_form1_integral"))
+    from migracoes.reversao_segura import reverter_tabelas_vazias
+    reverter_tabelas_vazias(sessao, ['versao_form1_integral'])
     conexao.execute(text(
         "DROP FUNCTION IF EXISTS impedir_alteracao_versao_form1_integral()"
     ))

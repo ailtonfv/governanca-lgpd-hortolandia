@@ -11,13 +11,6 @@
 #unidade-guarda .detalhe dd { margin: .25rem 0 .8rem; }
 #unidade-guarda .fato-guarda { border-block-end: 1px solid #cbd5df; padding-block: .4rem; }
 #unidade-guarda .fato-guarda dt { color: #173950; font-size: 1rem; text-transform: none; letter-spacing: normal; }
-.mapa-form2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(13rem, 100%), 1fr)); gap: .75rem; padding: 0; list-style: none; }
-.mapa-form2 > li { min-width: 0; padding: .85rem; border: 1px solid var(--borda); border-radius: .5rem; background: #f4f7f9; }
-.mapa-form2 > [aria-current="step"] { border-color: var(--azul); background: #edf6fb; }
-.mapa-form2 .numero-etapa { display: block; margin-bottom: .25rem; color: #425466; font-size: .88rem; }
-.mapa-form2 ul { list-style: none; padding: 0; margin-top: .65rem; }
-.mapa-form2 ul li { padding-block: .15rem; color: #394958; font-size: .9rem; }
-.mapa-form2 a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; }
 .perguntas-guarda { list-style: none; padding-left: 0; }
 .perguntas-guarda > li { border-left: 3px solid #337192; padding: .35rem 1rem; margin-block: 1rem; }
 .resposta-form2 { margin-block: 1rem; padding: 1rem; border: 1px solid var(--borda); border-radius: .5rem; }
@@ -39,3 +32,11 @@
 .form2-demo :focus-visible { outline: 3px solid #075985; outline-offset: 3px; }
 @media (max-width: 600px) { .form2-demo section { padding: 1rem; } }
 @media (prefers-reduced-motion: reduce) { .form2-demo * { scroll-behavior: auto; transition: none; } }
+.regua-form2 .cartao-bloco, .regua-form2 .bloco-indisponivel { display: block; box-sizing: border-box; border: 1px solid var(--borda); border-radius: .4rem; text-align: center; text-decoration: none; }
+.regua-form2 .cartao-bloco:hover, .regua-form2 .cartao-bloco[aria-current="page"] { border-color: var(--azul); }
+.regua-form2 .cartao-bloco:focus-visible { outline: 3px solid var(--azul); outline-offset: 1px; }
+.regua-form2 .bloco-indisponivel { width: 4.65rem; padding: .4rem .3rem; color: #526475; }
+.regua-form2 [hidden] { display: none; }
+
+.controle-condicional { border: 0; margin: 0; padding: 0; min-width: 0; }
+.legenda-condicional { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }

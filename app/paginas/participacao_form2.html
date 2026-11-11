@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block conteudo %}
+{% set situacoes = {'aguardando': 'aguardando responsável', 'em_atendimento': 'em atendimento', 'concluida': 'concluída'} %}
+<link rel="stylesheet" href="{{ url_for('estaticos', path='/filas_form2.css') }}"><div class="filas-form2">
+<h1>{{ registro.codigo_lgpd }} · Participação {{ p.tipo }}</h1>
+<div class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/filas?conta_id={{ conta_id|urlencode }}">Voltar às filas</a></div>
+<p>Situação: {{ situacoes.get(p.estado, p.estado) }}</p>{% if p.responsavel_id == pessoa.id %}<p>{{ p.questao }}</p>{% endif %}
+{% if p.tipo == 'principal' and p.responsavel_id == pessoa.id %}{% include '_regua_fila_form2.html' %}
+<div class="acoes-fila-form2"><a class="botao-link" href="/form2/participacoes/{{ p.id }}/consolidacao?conta_id={{ conta_id|urlencode }}">Conferir consolidação</a></div>{% endif %}
+{% if p.tipo == 'principal' and p.estado == 'em_atendimento' and p.responsavel_id == pessoa.id %}
+<details class="consultas-form2"><summary>Consultas ao DPO, ao Jurídico e às áreas temáticas</summary>
+<p>Use esta seção quando precisar de uma manifestação de outra área. O preenchimento do FORM 2 é feito nos blocos acima.</p>
+{% endif %}
+<form method="post">
+<input type="hidden" name="conta_id" value="{{ conta_id }}">
+<input type="hidden" name="comando_id" value="{{ comando_id }}">
+<input type="hidden" name="versao" value="{{ p.versao }}">
+{% if p.estado == 'aguardando' %}
+<button type="submit" class="botao-primario" name="acao" value="assumir">Assumir participação</button>
+{% elif p.estado == 'em_atendimento' and p.responsavel_id == pessoa.id %}
+<label>Manifestação ou questão <textarea name="texto" rows="10" maxlength="10000">{{ p.manifestacao }}</textarea></label>
+<button type="submit" class="botao-primario" name="acao" value="salvar">Salvar manifestação</button>
+{% if p.tipo == 'principal' %}
+<label>Tipo de consulta <select name="tipo"><option value="dpo">DPO</option><option value="juridico">Jurídico</option><option value="tematica">Área temática</option></select></label>
+<label>Unidade destinatária <select name="unidade_id">{% for u in unidades %}<option value="{{ u.id }}">{{ u.nome }}</option>{% endfor %}</select></label>
+<button type="submit" class="botao-primario" name="acao" value="consultar">Encaminhar questão</button>
+{% else %}<button type="submit" class="botao-primario" name="acao" value="concluir">Concluir manifestação</button>{% endif %}
+{% else %}<p>{{ p.manifestacao }}</p>{% endif %}
+</form>
+{% if p.tipo == 'principal' and p.estado == 'em_atendimento' and p.responsavel_id == pessoa.id %}</details>{% endif %}
+{% if consultas %}<h2>Manifestações solicitadas</h2>{% for consulta in consultas %}<article><h3>{{ consulta.tipo }} · {{ situacoes.get(consulta.estado, consulta.estado) }}</h3><p>{{ consulta.questao }}</p><p>{{ consulta.manifestacao }}</p><p>Responsável · {{ consulta.responsavel_id or 'Aguardando assunção' }} · {{ consulta.concluida_em or '' }}</p></article>{% endfor %}{% endif %}
+</div>{% endblock %}

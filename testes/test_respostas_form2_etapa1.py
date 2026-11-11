@@ -166,7 +166,7 @@ def test_http_preserva_tentativa_rejeitada_para_correcao(sessao):
              "complemento_F2-2.9.1_ALT_05": ""}
     resposta = cliente.post(url, data=dados)
     assert resposta.status_code == 409
-    assert "A CONFIRMAR deve ser exclusiva" in resposta.text
+    assert "A confirmar deve ser exclusiva" in resposta.text
     assert 'value="SIM" selected' in resposta.text
     assert 'value="ALT_01" checked' in resposta.text
     assert 'value="A_CONFIRMAR" checked' in resposta.text

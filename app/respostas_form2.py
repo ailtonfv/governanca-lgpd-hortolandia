@@ -5,6 +5,10 @@ escrita. O módulo não conclui análise, não cria parecer e não encaminha pen
 """
 
 from copy import deepcopy
+import re
+import json
+from app.form2_rev212 import (RASCUNHO, montar_bloco, indice_valores, mapa_regras,
+                              aplicavel, conjunto_da_chave, catalogo)
 
 from app.catalogo_form2_rev18 import carregar_catalogo
 from app.contrato_form2_respostas import (CONTRATO_RESPOSTAS, VERSAO as VERSAO_CONTROLES,
@@ -13,6 +17,8 @@ from app.contrato_form2_respostas import (CONTRATO_RESPOSTAS, VERSAO as VERSAO_C
 
 ENVELOPE_V2 = "F2-DEMO-PREP-v2"
 LIMITE_COMPLEMENTO = 1000
+MODOS_IDENTIFICACAO = {"F2-1.2": "unica", "F2-1.2.1": "texto",
+                       "F2-1.3": "unica", "F2-1.3.1": "texto"}
 
 
 def _indice_catalogo(catalogo):
@@ -44,7 +50,122 @@ def definicao_bloco(numero: int) -> dict:
             "condicoes": deepcopy(condicoes.get(item["id"], [])),
             "fontes_publicas": referencias_anpd(item.get("referencias_anpd")),
         })
-    return {"numero": numero, "versao": contrato["versao"], "itens": itens}
+    if numero == 1:
+        for item in itens:
+            if item["id"] in MODOS_IDENTIFICACAO:
+                item.update(edicao="habilitada", modo=MODOS_IDENTIFICACAO[item["id"]])
+    titulo = next((b.get("titulo", "") for b in catalogo["blocos"] if b["numero"] == numero), "")
+    return {"numero": numero, "titulo": titulo, "versao": contrato["versao"], "itens": itens}
+
+
+CADERNO_REV20 = "revisao_blocos_rev20"
+CONSULTAS_REV20 = {"F2-13.9", "F2-14.8.1", "F2-14.8.2"}
+
+
+def estados_regua_form2(conteudo):
+    salvos = set()
+    pendentes = set()
+    for chave, valor in conteudo.get("respostas_etapa1", {}).items():
+        if valor:
+            salvos.add(chave.split(".")[0].removeprefix("F2-"))
+    if conteudo.get("respostas_etapa1", {}).get("F2-1.3.1"):
+        pendentes.add("1")
+    for sinal in conteudo.get("sinalizadores_etapa1", []):
+        pendentes.add(sinal["item_id"].split(".")[0].removeprefix("F2-"))
+    for bloco, campos in conteudo.get(RASCUNHO, {}).items():
+        for chave, valor in campos.items():
+            if chave.startswith(("texto:", "opcao:")) and (valor.strip() if isinstance(valor, str) else valor):
+                salvos.add(bloco)
+            if chave.startswith("opcao:") and "A_CONFIRMAR" in valor:
+                pendentes.add(bloco)
+    return {"salvos": salvos, "pendentes": pendentes}
+
+
+def definicao_revisao(numero):
+    return montar_bloco(definicao_bloco(numero))
+
+
+def aplicar_revisao(conteudo, bloco, campos, ramos=(), *, demonstrativo=False):
+    """Guarda o ensaio e os comentários à parte das respostas homologadas."""
+    definicao = definicao_revisao(bloco)
+    if not definicao["itens"]:
+        raise ValueError("Bloco indisponível.")
+    itens = {q["id"]: q for q in definicao["itens"]}
+    novo = deepcopy(conteudo)
+    if demonstrativo:
+        novo["regime_respostas"] = {"uso": "demonstracao_ficticia", "homologado": False, "versao": "REV22-DEMO-2"}
+    revisao = novo.setdefault(RASCUNHO, {}).setdefault(str(bloco), {})
+    regras = mapa_regras(carregar_contrato())
+    antes = indice_valores(conteudo)
+    for nome, valores in campos.items():
+        tipo, _, chave = nome.partition(":")
+        item_id, separador, ocorrencia = chave.partition("#")
+        q = itens.get(item_id)
+        if not q or not isinstance(valores, list) or not all(isinstance(v, str) and "\x00" not in v for v in valores):
+            raise ValueError("Campo de revisão inválido.")
+        if separador and (not q["repetivel"] or tipo == "comentario"
+                          or not re.fullmatch(r"[1-9][0-9]?", ocorrencia)):
+            raise ValueError("Ocorrência inválida.")
+        if tipo != "comentario" and q["repetivel"] and not separador:
+            raise ValueError("Identifique o conjunto da resposta.")
+        if tipo == "comentario":
+            limite = 2000
+        elif q["edicao"] in ("habilitada", "consulta") or bloco == 1 or (not demonstrativo and (bloco in (3, 4, 5, 10) or q["edicao"] == "bloqueada_d11")):
+            raise ValueError("Este campo admite somente comentários na revisão.")
+        elif tipo == "principal" and item_id == "F2-14.3.1":
+            if len(valores) != 1:
+                raise ValueError("Selecione um único destino principal.")
+            revisao[nome] = valores[0]
+            continue
+        elif tipo == "opcao" and q["alternativas"]:
+            opcoes = [v for v in valores if v]
+            permitidas = {a["codigo"] for a in q["alternativas"]}
+            multipla = "múltipla" in q["controle"].lower()
+            if (not set(opcoes) <= permitidas or len(set(opcoes)) != len(opcoes)
+                    or (not multipla and len(opcoes) > 1) or ("A_CONFIRMAR" in opcoes and len(opcoes) > 1)):
+                raise ValueError(f"Confira a seleção de {chave}.")
+            revisao[nome] = opcoes
+            continue
+        elif tipo == "texto" and (not q["alternativas"] or "texto" in q["controle"].lower()
+                                  or any(a["complemento"].startswith("Texto condicionado") for a in q["alternativas"])):
+            limite = limite_texto_revisao(q)
+        else:
+            raise ValueError("Controle de revisão inválido.")
+        if len(valores) != 1 or len(valores[0]) > limite:
+            raise ValueError(f"Limite de {limite} caracteres por campo.")
+        revisao[nome] = valores[0]
+    for nome, valor in revisao.items():
+        if nome.startswith("principal:") and valor and valor not in revisao.get(nome.replace("principal:", "opcao:", 1), []):
+            raise ValueError("O destino principal deve constar entre os destinos selecionados.")
+    depois = indice_valores(novo)
+    for nome in campos:
+        tipo, chave = nome.split(":", 1)
+        if tipo == "comentario":
+            continue
+        item = chave.partition("#")[0]
+        sufixo = conjunto_da_chave(chave)
+        if not aplicavel(item, sufixo, depois, ramos, regras):
+            if revisao[nome] and revisao[nome] != antes.get(nome):
+                raise ValueError(f"{item} depende de resposta anterior. Salve a pergunta de origem.")
+            if nome in antes:
+                revisao[nome] = antes[nome]
+            else:
+                revisao.pop(nome, None)
+    for nome in list(revisao):
+        if nome.startswith("comentario:"):
+            continue
+        chave = nome.partition(":")[2]
+        if not aplicavel(chave.partition("#")[0], conjunto_da_chave(chave), depois, ramos, regras):
+            valor = revisao.pop(nome)
+            if valor:
+                arquivo = novo.setdefault("respostas_inativas_rev212", {}).setdefault(str(bloco), {})
+                arquivo[nome] = valor
+    return novo, {"edicao": "REV21.2", "bloco": bloco, "campos_revisados": len(campos)}
+
+
+def limite_texto_revisao(item):
+    limite = re.search(r"até ([\d.]+) caracteres", item.get("dominio", ""), re.IGNORECASE)
+    return int(limite[1].replace(".", "")) if limite else 2000
 
 
 def _habilitados(definicao):
@@ -72,6 +193,11 @@ def _validar_valor(item, valor):
     if valor is None:
         return None
     permitidos = {alternativa["codigo"] for alternativa in item["alternativas"]}
+    if item["modo"] == "texto":
+        limite = 200 if item["id"] == "F2-1.3.1" else 1000
+        if not isinstance(valor, str) or len(valor) > limite or "\x00" in valor:
+            raise ValueError(f"Texto inválido para {item['id']}. Limite de {limite} caracteres.")
+        return valor.strip() or None
     if item["modo"] == "unica":
         if not isinstance(valor, str) or valor not in permitidos:
             raise ValueError(f"Valor desconhecido para {item['id']}.")
@@ -80,7 +206,7 @@ def _validar_valor(item, valor):
         if not isinstance(valor, list) or len(valor) != len(set(valor)) or any(v not in permitidos for v in valor):
             raise ValueError(f"Seleção múltipla inválida para {item['id']}.")
         if "A_CONFIRMAR" in valor and len(valor) > 1:
-            raise ValueError("A CONFIRMAR deve ser exclusiva das alternativas substantivas.")
+            raise ValueError("A confirmar deve ser exclusiva das alternativas substantivas.")
         return list(valor)
     raise ValueError(f"O controle de {item['id']} não está habilitado para escrita.")
 
@@ -132,7 +258,7 @@ def aplicar_bloco(conteudo, *, bloco, alteracoes, complementos=None, reativar=No
         if any(codigo not in selecionados for codigo in informados):
             raise ValueError("Complemento informado para alternativa não selecionada.")
         exigidos = {a["codigo"] for a in item["alternativas"]
-                    if a["complemento"] not in ("", "—") and a["codigo"] in selecionados}
+                    if a["complemento"].startswith("Texto condicionado") and a["codigo"] in selecionados}
         existentes = complementos_ativos.get(item_id, {})
         if any(not str(informados.get(codigo, existentes.get(codigo, ""))).strip() for codigo in exigidos):
             raise ValueError("A alternativa selecionada exige complemento.")
@@ -146,6 +272,9 @@ def aplicar_bloco(conteudo, *, bloco, alteracoes, complementos=None, reativar=No
                 continue
             raise ValueError(f"{item_id} está inativo pela resposta de sua origem.")
         if valor is None:
+            if item_id == "F2-1.3.1" and item_id in inativas and item_id not in respostas:
+                # Um campo vazio ao reabrir o ramo não descarta o histórico pendente.
+                continue
             respostas.pop(item_id, None)
             inativas.pop(item_id, None)
             complementos_ativos.pop(item_id, None)
@@ -173,8 +302,10 @@ def aplicar_bloco(conteudo, *, bloco, alteracoes, complementos=None, reativar=No
 
     novo["versao_contrato_respostas"] = CONTRATO_RESPOSTAS
     novo["versao_controles_form2"] = VERSAO_CONTROLES
-    sinais = []
+    sinais = [s for s in novo.get("sinalizadores_etapa1", []) if s["item_id"] not in habilitados]
     for item_id, valor in respostas.items():
+        if item_id not in habilitados or habilitados[item_id]["modo"] == "texto":
+            continue
         codigos = valor if isinstance(valor, list) else [valor]
         if "A_CONFIRMAR" in codigos:
             sinais.append({"item_id": item_id, "classe": "factual", "efeito": "relacionar_no_bloco_14"})
@@ -192,7 +323,10 @@ def projetar_bloco(conteudo, numero: int) -> dict:
     inativas = conteudo.get("respostas_inativas_etapa1", {})
     complementos = conteudo.get("complementos_etapa1", {})
     complementos_inativos = conteudo.get("complementos_inativos_etapa1", {})
+    redacao = catalogo() if numero == 1 else {}
     for item in definicao["itens"]:
+        if item["id"] in redacao:
+            item["enunciado"] = redacao[item["id"]]["enunciado"]
         item["ativa"] = _ativa(item, respostas) if item["edicao"] == "habilitada" else False
         item["valor"] = deepcopy(respostas.get(item["id"]))
         item["valor_inativo"] = deepcopy(inativas.get(item["id"]))

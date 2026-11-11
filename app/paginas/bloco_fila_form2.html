@@ -1,0 +1,86 @@
+{% from '_identificador_pergunta.html' import codigo_pergunta %}
+{% extends "base.html" %}{% block conteudo %}
+<link rel="stylesheet" href="{{ url_for('estaticos', path='/filas_form2.css') }}"><div class="filas-form2">
+<h1>FORM 2 · Bloco {{ numero }}</h1>
+{% if confirmacao %}<p id="confirmacao-salvamento" class="confirmacao-salvamento" role="status">{{ confirmacao }}</p>{% endif %}
+<p><strong>{{ registro.codigo_lgpd }}</strong> · {{ pessoa.nome }}</p>
+<div class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/participacoes/{{ p.id }}?conta_id={{ conta_id|urlencode }}">Voltar à participação</a></div>
+{% include '_regua_fila_form2.html' %}
+{% if numero == 14 %}<article><h2>Conferência da consolidação</h2><p>Reúna as respostas salvas, as complementações e as manifestações das áreas. Salve o bloco antes de abrir a conferência.</p><div class="acoes-fila-form2"><a class="botao-link" href="/form2/participacoes/{{ p.id }}/consolidacao?conta_id={{ conta_id|urlencode }}">Conferir consolidação</a></div></article>{% endif %}
+<p>Demonstração com dados fictícios. As respostas candidatas, inclusive as jurídicas e o resultado em F2-14.1, são rascunhos não homologados. Salvar não conclui a validação institucional.</p>
+<details class="origem-fila-form2"><summary>Versão de origem do FORM 1 · versão {{ numero_origem }}</summary>
+<p>Respostas da versão de origem, somente para consulta.</p>
+<dl class="respostas-origem-form2">{% for q in perguntas_origem %}<div class="item-origem-form2"><dt>{{ codigo_pergunta(q.id, 1) }}{% if q.conjunto %} · conjunto {{ q.conjunto }}{% endif %} · {{ q.pergunta }}</dt><dd>{{ q.valor|join(', ') if q.valor is sequence and q.valor is not string and q.valor is not mapping else q.valor }}</dd></div>{% else %}<div><dt>Respostas</dt><dd>Nenhuma resposta registrada nesta versão.</dd></div>{% endfor %}</dl></details>
+<form method="post" id="revisao-bloco"><input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="comando_id" value="{{ comando_id }}"><input type="hidden" name="versao" value="{{ p.versao }}">
+<fieldset {% if p.responsavel_id != pessoa.id or p.estado != 'em_atendimento' %}disabled{% endif %}>
+{% if numero in (1,2) %}
+{% set fatos = fatos_origem.get('respostas', {}) %}
+{% set unidade_origem = fatos.get('2.4.2') if fatos.get('2.4') == 'Não' else fatos.get('2.3') %}
+{% for q in bloco.itens %}<fieldset id="{{ q.id }}" {% if q.edicao == "habilitada" and not q.ativa %}disabled{% endif %}><legend>{{ q.id }} · {{ q.enunciado }}</legend>
+{% if q.id == 'F2-1.2' %}<p>Secretaria do Registro: <strong>{{ secretaria.nome }}</strong>.</p>{% endif %}
+{% if q.id == 'F2-1.2.1' %}<p>Unidade informada na versão {{ numero_origem }} do FORM 1: {{ unidade_origem or 'Sem informação' }}.</p>{% endif %}
+{% if q.edicao == 'habilitada' %}
+{% if q.alternativas %}
+{% if q.id == 'F2-2.9.1' %}<input type="hidden" name="resposta_{{ q.id }}" value="">{% for a in q.alternativas %}<label><input type="checkbox" name="resposta_{{ q.id }}" value="{{ a.codigo }}" {% if a.codigo in (q.valor or []) %}checked{% endif %}>{{ a.rotulo }}</label>{% endfor %}
+<label>Outro <input name="complemento_outro" value="{{ q.complementos_ativos.get('ALT_05','') }}"></label>
+{% else %}<select aria-label="{{ q.enunciado }}" name="resposta_{{ q.id }}"><option value="">Sem resposta</option>{% for a in q.alternativas %}<option value="{{ a.codigo }}" {% if q.valor == a.codigo %}selected{% endif %}>{{ a.rotulo }}</option>{% endfor %}</select>{% endif %}
+{% else %}<textarea aria-label="{{ q.enunciado }}" name="resposta_{{ q.id }}">{{ q.valor or '' }}</textarea>{% endif %}
+{% elif numero == 2 %}
+{% set op = 'opcao:' ~ q.id %}{% set tx = 'texto:' ~ q.id %}
+<fieldset {% if not ativa(q.id, '') %}disabled{% endif %}>
+{% if not ativa(q.id, '') %}<p>Disponível após salvar a resposta que ativa esta pergunta.</p>{% endif %}
+{% if q.alternativas %}<select aria-label="{{ q.enunciado }}" name="{{ op }}"><option value="">Sem resposta</option>{% for a in q.alternativas %}<option value="{{ a.codigo }}" {% if a.codigo in valores.get(op,[]) %}selected{% endif %}>{{ a.rotulo }}</option>{% endfor %}</select>
+{% else %}<textarea aria-label="{{ q.enunciado }}" name="{{ tx }}" maxlength="{{ limite_texto(q) }}">{{ valores.get(tx,'') }}</textarea>{% endif %}
+</fieldset>
+{% else %}
+{% if q.id == 'F2-1.1' %}<p><strong>{{ registro.codigo_lgpd }}</strong></p><p class="ajuda">Identificador do processo, preenchido automaticamente.</p>
+{% elif q.id == 'F2-1.4' %}<p>{{ pessoa.nome }}</p><p class="ajuda">Agente responsável pela participação.</p>
+{% elif q.id in ('F2-1.5', 'F2-1.6') %}<p>Cadastro funcional autorizado indisponível nesta demonstração.</p>
+{% else %}<p>{{ q.controle }}</p>{% endif %}
+{% endif %}</fieldset>{% endfor %}
+{% else %}
+
+{% for q in bloco.itens %}
+{% set op = 'opcao:' ~ q.id %}{% set txt = 'texto:' ~ q.id %}{% set com = 'comentario:' ~ q.id %}
+{% set bloqueada = numero == 1 or q.edicao in ('habilitada', 'consulta') %}
+{% if q.id in ('F2-9W.1','F2-11S.1','F2-12A.1') %}<h2>{{ {'F2-9W.1':'Ramificação 9W — Wi-Fi','F2-11S.1':'Ramificação 11S — Informações de saúde','F2-12A.1':'Ramificação 12A — Alta sensibilidade'}[q.id] }}</h2>{% endif %}
+<fieldset class="resposta-form2" id="{{ q.id }}"><legend>{{ q.id }} — {{ q.enunciado }}</legend>
+{% if q.id == 'F2-14.2' and complementacao %}<p><strong>Complementação do FORM 1 · origem 1.3.1</strong><br>{{ complementacao }}</p>{% endif %}
+{% if q.id == 'F2-13.9' %}<p>{{ revogacao|join(', ') if revogacao else 'F2-5.7 ainda sem resposta candidata.' }} Consulta ao rascunho, sem homologação D11.</p>{% endif %}
+{% if q.id in ('F2-14.8.1','F2-14.8.2') %}<p>A classificação de pendências impeditivas aguarda definição institucional.</p>{% endif %}
+{% if q.id == 'F2-6.4' %}<p>Faixas etárias na versão de origem (F1-4.1.1): {{ fatos_origem.get('respostas',{}).get('4.1.1',[])|join(', ') or 'Não informadas nesta versão. Ausência não significa inexistência de crianças ou adolescentes. Solicite complemento em F2-1.3.1 quando necessário.' }}</p>{% endif %}
+{% if q.orientacao %}<p>{{ q.orientacao }}</p>{% endif %}
+<p class="ajuda">{{ q.instrucao }}</p>
+{% if q.id == 'F2-14.2' and pendencias %}<p>Itens a confirmar</p><ul>{% for chave in pendencias %}<li>{{ chave }}</li>{% endfor %}</ul>{% endif %}
+{% if bloqueada %}
+<p>{{ q.controle }}</p>
+{% if q.alternativas %}<ul>{% for a in q.alternativas %}<li>{{ a.rotulo }}</li>{% endfor %}</ul>{% endif %}
+{% else %}
+{% set repetivel = q.repetivel %}
+{% for n in (ocorrencias if repetivel else [0]) %}
+{% if repetivel %}<div data-ocorrencia="{{ n }}"><strong>Conjunto <span>{{ n }}</span></strong>{% endif %}
+{% set op = op ~ ('#' ~ n if repetivel else '') %}{% set txt = txt ~ ('#' ~ n if repetivel else '') %}
+{% set sufixo = '#' ~ n if repetivel else '' %}
+<fieldset class="controle-condicional" data-condicional{% if repetivel and q.condicoes|selectattr("origem","in",origens_repetiveis)|list %} data-dependencia-local{% endif %}{% if not ativa(q.id, sufixo) %} disabled{% endif %}><legend class="legenda-condicional">Resposta para {{ q.id }}</legend>
+{% if not ativa(q.id, sufixo) %}<p>Disponível quando a condição da pergunta for atendida.</p>{% endif %}
+{% if q.alternativas %}
+{% if 'múltipla' in q.controle|lower %}
+<input type="hidden" name="{{ op }}" value="">
+{% for a in q.alternativas %}<label class="opcao-form2"><input type="checkbox" name="{{ op }}" value="{{ a.codigo }}"{% if a.codigo in valores.get(op,[]) %} checked{% endif %}> {{ a.rotulo }}</label>{% endfor %}
+{% else %}
+<label>Resposta<select name="{{ op }}"><option value="">Sem resposta</option>{% for a in q.alternativas %}<option value="{{ a.codigo }}"{% if a.codigo in valores.get(op,[]) %} selected{% endif %}>{{ a.rotulo }}</option>{% endfor %}</select></label>
+{% endif %}{% endif %}
+{% if not q.alternativas or 'texto' in q.controle|lower or q.alternativas|selectattr('complemento','in',['Texto condicionado (R13)'])|list %}
+<label>{{ 'Complemento' if q.alternativas else q.controle }}<textarea name="{{ txt }}" rows="2" maxlength="{{ limite_texto(q) }}">{{ valores.get(txt,'') }}</textarea></label>
+{% endif %}
+{% if q.id == 'F2-14.3.1' %}<label>Destino principal<select name="principal:{{ q.id }}{{ sufixo }}"><option value="">A definir</option>{% for a in q.alternativas %}<option value="{{ a.codigo }}"{% if valores.get('principal:' ~ q.id ~ sufixo) == a.codigo %} selected{% endif %}>{{ a.rotulo }}</option>{% endfor %}</select></label>{% endif %}
+</fieldset>
+{% if repetivel %}</div>{% endif %}
+{% endfor %}
+{% if q.id in ('F2-8.10', 'F2-9.12', 'F2-14.3.1') %}<button type="button" id="adicionar-ocorrencia">Adicionar conjunto</button>{% endif %}
+{% endif %}
+{% if q.fontes_publicas %}<p>Apoio da ANPD</p><ul>{% for f in q.fontes_publicas %}<li><a href="{{ f.url }}" target="_blank" rel="noopener noreferrer">{{ f.titulo }}</a></li>{% endfor %}</ul>{% endif %}
+<label>Comentário sobre {{ q.id }}<textarea name="{{ com }}" rows="2" maxlength="2000">{{ valores.get(com,'') }}</textarea></label>
+</fieldset>
+{% endfor %}
+{% endif %}<div class="acoes-fila-form2"><button type="submit" class="botao-primario">Salvar bloco</button></div></fieldset></form></div><script defer src="{{ url_for('estaticos', path='/form2_revisao.js') }}"></script>{% endblock %}

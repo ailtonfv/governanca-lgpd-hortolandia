@@ -1,9 +1,10 @@
+{% from '_identificador_pergunta.html' import codigo_pergunta %}
 {% if not registro.form1_integral.pode_editar %}
 <div class="area-somente-leitura leitura-bloco-form1">
   <p class="selo-somente-leitura">Somente leitura · respostas salvas</p>
   {% for campo in registro.form1_integral.campos_leitura[numero_bloco] %}
   <section id="consulta-integral-{{ campo.id }}" class="campo-integral pergunta-consulta" tabindex="-1" aria-labelledby="rotulo-consulta-{{ campo.id }}">
-    <h4 id="rotulo-consulta-{{ campo.id }}">{{ campo.id }} — {{ campo.pergunta }}</h4>
+    <h4 id="rotulo-consulta-{{ campo.id }}">{{ codigo_pergunta(campo.id, 1) }} — {{ campo.pergunta }}</h4>
     {% include '_ajuda_cartilha_form1.html' %}
     {% if campo.ajuda_contextual %}<p class="ajuda">{{ campo.ajuda_contextual }}</p>{% endif %}
     {% for leitura in campo.leituras %}

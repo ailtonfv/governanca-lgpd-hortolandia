@@ -2,7 +2,7 @@
   <p class="ajuda">“Corrigir FORM 1 Integral” retoma o levantamento pela primeira pendência disponível. Não identifica automaticamente uma pergunta mencionada na justificativa.</p>
   <label for="localizar-pergunta-devolucao"><strong>Localizar pergunta por número ou título</strong></label>
   <input type="search" id="localizar-pergunta-devolucao" aria-describedby="orientacao-localizador" aria-controls="resultados-localizador" autocomplete="off">
-  <p id="orientacao-localizador" class="ajuda">Digite, por exemplo, 2.4, ou parte do título. Escolha o destino. Perguntas condicionais continuam dependentes das respostas; perguntas somente leitura e ocorrências levam à seção correspondente.</p>
+  <p id="orientacao-localizador" class="ajuda">Digite, por exemplo, F1-2.4 (ou 2.4), ou parte do título. Escolha o destino. Perguntas condicionais continuam dependentes das respostas; perguntas somente leitura e ocorrências levam à seção correspondente.</p>
   <p role="status" aria-live="polite" data-resultado-localizador>Digite para localizar uma pergunta.</p>
   <ul id="resultados-localizador" hidden>
     {% for item in registro.form1_integral.perguntas_localizacao %}

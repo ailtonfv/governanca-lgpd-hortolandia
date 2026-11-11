@@ -1,3 +1,4 @@
+{% from '_identificador_pergunta.html' import codigo_pergunta %}
 {% extends "base.html" %}
 {% from '_links_instrumentos.html' import acao_preparacao, identificacao_servidor, situacao_preparacao %}
 {% from "_consulta_historica_form2.html" import valor %}
@@ -33,29 +34,19 @@
   <p class="ajuda">Preparação da validação. Não é parecer jurídico, decisão institucional nem submissão.</p>
 </section>
 <section class="form1" aria-labelledby="mapa-etapas">
-  <h2 id="mapa-etapas">Etapas do FORM 2</h2>
-  {% set etapas = [
-    ('Finalidade, guarda e fundamento jurídico', [1, 2, 3, 4]),
-    ('Situações especiais e direitos do titular', [5, 6, 7, 13]),
-    ('Circulação dos dados, agentes e instrumentos', [8, 9, 10, 11, 12]),
-    ('Resultado e encaminhamentos', [14])
-  ] %}
+  <h2 id="mapa-etapas">Etapas do FORM 2 · REV21.2</h2>
   {% set guarda_disponivel = guarda and not guarda.aviso %}
-  <p>{% if guarda_disponivel %}Etapa atual: 1 de 4. Somente a unidade de guarda do Bloco 2 está disponível.{% else %}Visão geral das quatro etapas. Não há bloco aberto para preenchimento nesta consulta.{% endif %}</p>
-  <ol class="mapa-form2">
-    {% for titulo, blocos in etapas %}
-    <li{% if loop.first and guarda_disponivel %} aria-current="step"{% endif %}>
-      <span class="numero-etapa">Etapa {{ loop.index }}</span><strong>{{ titulo }}</strong>
-      <ul aria-label="Blocos da etapa {{ loop.index }}">
-        {% for numero in blocos %}
-        <li>{% if numero == 2 and guarda_disponivel %}<a class="botao-link" href="#unidade-guarda">Ir para o Bloco 2 — Guarda</a>
-          {% elif numero in [3, 4] %}Bloco {{ numero }} · aguarda decisão jurídica D11
-          {% else %}Bloco {{ numero }}{{ ' — Guarda' if numero == 2 else '' }} · indisponível{% endif %}</li>
-        {% endfor %}
-      </ul>
-    </li>
-    {% endfor %}
-  </ol>
+  {% set revisao = identificacao and preparacao %}
+  {% set prep_id = preparacao.id if preparacao else none %}
+  {% set parametros = contexto_navegacao %}
+  {% include '_regua_form2.html' %}
+  {% if identificacao or guarda_disponivel %}
+  <p>Atalhos de preenchimento:
+    {% if identificacao %}<a href="#identificacao">Identificação</a>{% endif %}
+    {% if identificacao and guarda_disponivel %} · {% endif %}
+    {% if guarda_disponivel %}<a href="#unidade-guarda">Guarda</a>{% endif %}
+  </p>
+  {% endif %}
   <details class="apoio-juridico"><summary>Referências oficiais para os temas jurídicos</summary>
     <p>Material de apoio. As referências não preenchem respostas, não classificam automaticamente e não substituem manifestação do Jurídico.</p>
     {% for grupo in apoio_juridico %}<h3>Bloco(s) {{ grupo.blocos }}</h3><ul>
@@ -110,6 +101,7 @@
   </ul></details>{% endif %}
 </section>
 {% if preparacao %}
+{% if identificacao %}{% include "_identificacao_form2.html" %}{% endif %}
 {% if guarda %}{% include "_unidade_guarda_form2.html" %}{% endif %}
 <section class="form1" id="anotacoes" tabindex="-1" aria-labelledby="titulo-anotacoes">
 {% if guarda and not guarda.aviso %}<p class="etiqueta">Área C — Trabalho do AAL</p>{% endif %}
@@ -136,7 +128,7 @@
   <p>Versão histórica nº {{ origem.snapshot.numero }}, registrada em {{ origem.snapshot.preparado_em|data_local }}. Os atos de conferência podem ser consultados no FORM 1.</p>
   {% if preparacao and snapshots and snapshots[-1].numero > origem.snapshot.numero %}<p>Há uma versão histórica posterior. Esta preparação continua vinculada à origem acima; nenhuma resposta foi substituída.</p>{% endif %}
   {% macro listar_historico(campos, respondidas) %}
-    <dl>{% for campo in campos %}<div data-pergunta-historica="{{ campo.id }}"><dt>F1-{{ campo.id }} — {{ campo.pergunta }}</dt><dd>{{ valor(campo.valor, consulta_historica.rotulos, agentes) if respondidas else 'Sem resposta nesta versão.' }}</dd></div>{% endfor %}</dl>
+    <dl>{% for campo in campos %}<div data-pergunta-historica="{{ campo.id }}"><dt>{{ codigo_pergunta(campo.id, 1) }} — {{ campo.pergunta }}</dt><dd>{{ valor(campo.valor, consulta_historica.rotulos, agentes) if respondidas else 'Sem resposta nesta versão.' }}</dd></div>{% endfor %}</dl>
   {% endmacro %}
   <details><summary>Consultar perguntas e respostas históricas</summary>
     {% if consulta_historica.respondidas %}{{ listar_historico(consulta_historica.respondidas, true) }}{% else %}<p>Nenhuma resposta informada nesta versão.</p>{% endif %}

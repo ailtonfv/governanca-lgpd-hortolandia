@@ -1,0 +1,30 @@
+<section id="identificacao" class="form1" tabindex="-1" aria-labelledby="titulo-identificacao">
+  <h2 id="titulo-identificacao">Bloco 1 — Identificação</h2>
+  {% set fatos = origem.conteudo.respostas|default({}) %}
+  {% set unidade = fatos.get('2.4.2') if fatos.get('2.4') == 'Não' else fatos.get('2.3') %}
+  <form id="form2-bloco-1" method="post" action="{{ url_for('salvar_bloco_form2', registro_id=registro.id, preparacao_id=preparacao.id, bloco=1).include_query_params(**contexto_navegacao) }}">
+    <input type="hidden" name="conta_id" value="{{ conta_id }}">
+    <input type="hidden" name="comando_id" value="{{ comando_id }}">
+    <input type="hidden" name="versao_lida" value="{{ versao_identificacao if versao_identificacao is not none else preparacao.versao_rascunho }}">
+    {% for q in identificacao %}
+    {% if q.edicao == 'habilitada' %}
+    <fieldset data-identificacao="{{ q.id }}"{% if not q.ativa %} disabled{% endif %}>
+      <legend>{{ q.id }} — {{ q.enunciado }}</legend>
+      {% if q.id == 'F2-1.2' %}<p>Secretaria do Registro: {{ secretaria.nome }}.</p>{% endif %}
+      {% if q.id == 'F2-1.2.1' %}<p>Unidade na versão {{ origem.snapshot.numero }} do FORM 1: {{ unidade or 'Sem informação' }}.</p>{% endif %}
+      {% if q.modo == 'unica' %}
+      <select aria-label="{{ q.enunciado }}" name="resposta_{{ q.id }}"><option value="">Sem resposta</option>
+        {% for a in q.alternativas %}<option value="{{ a.codigo }}"{% if q.valor == a.codigo %} selected{% endif %}>{{ a.rotulo }}</option>{% endfor %}
+      </select>
+      {% else %}
+      <input aria-label="{{ q.enunciado }}" name="resposta_{{ q.id }}" maxlength="{{ 200 if q.id == 'F2-1.3.1' else 1000 }}" value="{{ q.valor if q.valor is not none else ((unidade or '') if q.id == 'F2-1.2.1' else '') }}">
+      {% endif %}
+    </fieldset>
+    {% if q.valor_inativo %}<label><input type="checkbox" name="reativar_{{ q.id }}" value="1">Reutilizar a resposta anterior quando a pergunta voltar a se aplicar</label>{% endif %}
+    {% else %}
+    <p><strong>{{ q.id }} — {{ q.enunciado }}</strong><br>{{ registro.codigo_lgpd if q.id == 'F2-1.1' else pessoa.nome if q.id == 'F2-1.4' else 'Cadastro funcional autorizado indisponível' }}</p>
+    {% endif %}
+    {% endfor %}
+    <button type="submit" class="botao-primario">Salvar respostas do Bloco 1</button>
+  </form>
+</section>

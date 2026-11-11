@@ -1,0 +1,76 @@
+{% from '_identificador_pergunta.html' import codigo_pergunta %}
+{% extends "base.html" %}
+{% block titulo %}Rascunho do FORM 2 · Bloco {{ bloco.numero }}{% endblock %}
+{% block conteudo %}
+<link rel="stylesheet" href="{{ url_for('estaticos', path='/form2_preparacao.css') }}">
+{% set numero = bloco.numero %}
+{% set juridico = numero in (3,4,5,10) %}
+{% set preparacao_url = url_for('form2_preparacao', registro_id=registro.id).include_query_params(conta_id=conta_id, preparacao_id=prep.id, **navegacao) %}
+<div class="form2-demo">
+<a href="{{ preparacao_url }}">Voltar à preparação do FORM 2</a>
+<section class="form1">
+<p>{{ registro.codigo_lgpd }} · FORM 2 · REV21.2</p>
+{% set revisao = true %}
+{% set prep_id = prep.id %}
+{% set parametros = navegacao %}
+{% set bloco_atual = numero %}
+{% include '_regua_form2.html' %}
+<h1>Bloco {{ numero }} — {{ bloco.titulo }}</h1>
+<p>{{ bloco.itens|length }} itens. Salve o rascunho para atualizar as perguntas aplicáveis.</p>
+{% if juridico %}<p>Alternativas em avaliação pelo Jurídico (D11). Você pode comentar cada item.</p>
+{% else %}<p>O rascunho pode ser retomado pela régua dos blocos.</p>{% endif %}
+{% if numero in (1,2) %}<a href="{{ preparacao_url }}#{{ 'identificacao' if numero == 1 else 'unidade-guarda' }}">Abrir preenchimento já habilitado</a>{% endif %}
+</section>
+{% if fatos_origem %}<details><summary>Consultar fatos do FORM 1 de origem</summary><dl>{% for fato in fatos_origem %}<dt>{{ codigo_pergunta(fato.id, 1) }} · {{ fato.pergunta }}</dt><dd>{{ fato.valor|join(', ') if fato.valor is sequence and fato.valor is not string and fato.valor is not mapping else fato.valor }}</dd>{% endfor %}</dl></details>{% endif %}
+{% if inativas %}<details><summary>Consultar respostas de ramos inativos</summary><dl>{% for campo, valor in inativas.items() %}<dt>{{ campo }}</dt><dd>{{ valor|join(', ') if valor is not string else valor }}</dd>{% endfor %}</dl></details>{% endif %}
+{% if historico20 %}<details><summary>Consultar ensaio anterior · REV20</summary><dl>{% for campo, valor in historico20.items() %}{% if valor %}<dt>{{ campo }}</dt><dd>{{ valor|join(', ') if valor is not string else valor }}</dd>{% endif %}{% endfor %}</dl></details>{% endif %}
+{% if legado %}<details><summary>Consultar revisão anterior · REV18</summary><dl>{% for campo, valor in legado.items() %}{% if valor %}<dt>{{ campo }}</dt><dd>{{ valor|join(', ') if valor is not string else valor }}</dd>{% endif %}{% endfor %}</dl></details>{% endif %}
+{% if erro %}<p role="alert">{{ erro }}</p>{% endif %}
+<form method="post" class="form1" id="revisao-bloco">
+<input type="hidden" name="edicao" value="REV21.2"><input type="hidden" name="comando_id" value="{{ comando_id }}"><input type="hidden" name="versao_lida" value="{{ versao }}">
+{% for q in bloco.itens %}
+{% set op = 'opcao:' ~ q.id %}{% set txt = 'texto:' ~ q.id %}{% set com = 'comentario:' ~ q.id %}
+{% set bloqueada = juridico or numero == 1 or q.edicao in ('habilitada', 'consulta', 'bloqueada_d11') %}
+{% if q.id in ('F2-9W.1','F2-11S.1','F2-12A.1') %}<h2>{{ {'F2-9W.1':'Ramificação 9W — Wi-Fi','F2-11S.1':'Ramificação 11S — Informações de saúde','F2-12A.1':'Ramificação 12A — Alta sensibilidade'}[q.id] }}</h2>{% endif %}
+<fieldset class="resposta-form2"><legend>{{ q.id }} — {{ q.enunciado }}</legend>
+{% if q.id == 'F2-14.2' and complementacao %}<p><strong>Complementação do FORM 1 · origem 1.3.1</strong><br>{{ complementacao }}</p>{% endif %}
+{% if q.id == 'F2-13.9' %}<p>{{ revogacao|join(', ') if revogacao else 'Sem resposta homologada em 5.7. A avaliação de consentimento aguarda D11.' }}</p>{% endif %}
+{% if q.id in ('F2-14.8.1','F2-14.8.2') %}<p>A classificação de pendências impeditivas aguarda definição institucional.</p>{% endif %}
+{% if q.orientacao %}<p>{{ q.orientacao }}</p>{% endif %}
+<p class="ajuda">{{ q.instrucao }}</p>
+{% if q.id == 'F2-14.2' and pendencias %}<p>Itens a confirmar</p><ul>{% for chave in pendencias %}<li>{{ chave }}</li>{% endfor %}</ul>{% endif %}
+{% if bloqueada %}
+<p>{{ q.controle }}</p>
+{% if q.alternativas %}<ul>{% for a in q.alternativas %}<li>{{ a.rotulo }}</li>{% endfor %}</ul>{% endif %}
+{% else %}
+{% set repetivel = q.repetivel %}
+{% for n in (ocorrencias if repetivel else [0]) %}
+{% if repetivel %}<div data-ocorrencia="{{ n }}"><strong>Conjunto <span>{{ n }}</span></strong>{% endif %}
+{% set op = op ~ ('#' ~ n if repetivel else '') %}{% set txt = txt ~ ('#' ~ n if repetivel else '') %}
+{% set sufixo = '#' ~ n if repetivel else '' %}
+<fieldset class="controle-condicional" data-condicional{% if repetivel and q.condicoes|selectattr("origem","in",origens_repetiveis)|list %} data-dependencia-local{% endif %}{% if not ativa(q.id, sufixo) %} disabled{% endif %}><legend class="legenda-condicional">Resposta para {{ q.id }}</legend>
+{% if not ativa(q.id, sufixo) %}<p>Disponível quando a condição da pergunta for atendida.</p>{% endif %}
+{% if q.alternativas %}
+{% if 'múltipla' in q.controle|lower %}
+<input type="hidden" name="{{ op }}" value="">
+{% for a in q.alternativas %}<label class="opcao-form2"><input type="checkbox" name="{{ op }}" value="{{ a.codigo }}"{% if a.codigo in valores.get(op,[]) %} checked{% endif %}> {{ a.rotulo }}</label>{% endfor %}
+{% else %}
+<label>Resposta<select name="{{ op }}"><option value="">Sem resposta</option>{% for a in q.alternativas %}<option value="{{ a.codigo }}"{% if a.codigo in valores.get(op,[]) %} selected{% endif %}>{{ a.rotulo }}</option>{% endfor %}</select></label>
+{% endif %}{% endif %}
+{% if not q.alternativas or 'texto' in q.controle|lower or q.alternativas|selectattr('complemento','in',['Texto condicionado (R13)'])|list %}
+<label>{{ 'Complemento' if q.alternativas else q.controle }}<textarea name="{{ txt }}" rows="2" maxlength="{{ limite_texto(q) }}">{{ valores.get(txt,'') }}</textarea></label>
+{% endif %}
+{% if q.id == 'F2-14.3.1' %}<label>Destino principal<select name="principal:{{ q.id }}{{ sufixo }}"><option value="">A definir</option>{% for a in q.alternativas %}<option value="{{ a.codigo }}"{% if valores.get('principal:' ~ q.id ~ sufixo) == a.codigo %} selected{% endif %}>{{ a.rotulo }}</option>{% endfor %}</select></label>{% endif %}
+</fieldset>
+{% if repetivel %}</div>{% endif %}
+{% endfor %}
+{% if q.id in ('F2-8.10', 'F2-9.12', 'F2-14.3.1') %}<button type="button" id="adicionar-ocorrencia">Adicionar conjunto</button>{% endif %}
+{% endif %}
+{% if q.fontes_publicas %}<p>Apoio da ANPD</p><ul>{% for f in q.fontes_publicas %}<li><a href="{{ f.url }}" target="_blank" rel="noopener noreferrer">{{ f.titulo }}</a></li>{% endfor %}</ul>{% endif %}
+<label>Comentário sobre {{ q.id }}<textarea name="{{ com }}" rows="2" maxlength="2000">{{ valores.get(com,'') }}</textarea></label>
+</fieldset>
+{% endfor %}
+<button type="submit" class="botao-primario">Salvar rascunho do Bloco {{ numero }}</button>
+</form></div>
+<script defer src="{{ url_for('estaticos', path='/form2_revisao.js') }}"></script>
+{% endblock %}

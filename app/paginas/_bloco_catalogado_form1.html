@@ -1,10 +1,11 @@
+{% from '_identificador_pergunta.html' import codigo_pergunta %}
 <section class="bloco-form1-integral" aria-labelledby="titulo-bloco-{{ numero_bloco }}">
   <p class="etiqueta">FORM 1 — Etapa {{ etapa_bloco }} de 4 — Bloco {{ numero_bloco }} de 14</p>
   <h3 id="titulo-bloco-{{ numero_bloco }}">{{ titulo_bloco }}</h3>
   {% if numero_bloco == 11 and registro.form1_integral.pode_editar and not registro.form1_integral.rascunho.conteudo.get('revisao_18') %}
   <details>
     <summary>Adotar a REV18 neste rascunho</summary>
-    <p>A REV18 acrescenta a pergunta 11.2.5 e atualiza o Bloco 14. A versão atual ficará preservada. Se GUARDA ou MEDIDAS ainda não tiver sido adotada, as respostas agregadas ficam no histórico e as perguntas desmembradas começam vazias.</p>
+    <p>A REV18 acrescenta a pergunta {{ codigo_pergunta('11.2.5', 1) }} e atualiza o Bloco 14. A versão atual ficará preservada. Se GUARDA ou MEDIDAS ainda não tiver sido adotada, as respostas agregadas ficam no histórico e as perguntas desmembradas começam vazias.</p>
     <form method="post" action="{{ url_for('adotar_revisao_18', registro_id=registro.id) }}" data-adotar-rev18>
       <input type="hidden" name="conta_id" value="{{ conta_id }}">
       <input type="hidden" name="comando_id" value="{{ comando_adotar_rev18 }}">
@@ -36,7 +37,7 @@
     {% set formulario_associado = 'formulario-bloco-10' if numero_bloco == 10 and campo.id not in ('10.1', '10.2', '10.2.1') else none %}
     <div class="campo-integral{% if campo.condicoes %} campo-condicional{% endif %}"
          {% if campo.condicoes %}data-condicoes='{{ campo.condicoes | tojson }}'{% endif %}>
-      <div id="rotulo-integral-{{ campo.id }}" class="rotulo-campo"><strong>{{ campo.id }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</div>
+      <div id="rotulo-integral-{{ campo.id }}" class="rotulo-campo"><strong>{{ codigo_pergunta(campo.id, 1) }} — {{ campo.pergunta }}</strong> {% include '_obrigatoriedade_form1.html' %}</div>
       {% include '_ajuda_cartilha_form1.html' %}
       {% if campo.ajuda_contextual %}<p class="ajuda">{{ campo.ajuda_contextual }}</p>{% endif %}
       {% if campo.estrutura_destinatarios %}

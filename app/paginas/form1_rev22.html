@@ -1,0 +1,45 @@
+{% extends 'base.html' %}{% block conteudo %}
+<link rel="stylesheet" href="{{ url_for('estaticos',path='/filas_form2.css') }}">
+<div class="filas-form2"><h1>FORM 1 · Bloco {{ bloco }}</h1>
+<p><strong>{{ registro.codigo_lgpd }}</strong> · {{ identidade.nome }} · REV22 candidata</p>
+<div class="acoes-fila-form2"><a class="botao-link-secundario" href="/painel?conta_id={{ conta_id|urlencode }}">Voltar ao Painel</a></div>
+{% if not adotada %}
+<article><h2>Atualização do rascunho</h2><p>A adoção preserva uma versão histórica anterior. Campos novos ficam sem resposta. Respostas incompatíveis e conjuntos anteriores permanecem no histórico da adoção para conferência. O Identificador LGPD não muda.</p>
+<p>Esta é uma edição candidata para dados fictícios. Não autoriza submissão institucional.</p>
+{% if pode %}<form method="post"><input type="hidden" name="acao" value="adotar"><input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="comando_id" value="{{ comando_id }}"><input type="hidden" name="versao" value="{{ r.versao_rascunho }}"><label><input type="checkbox" name="confirmar" value="sim" required>Preservar a versão anterior e adotar a REV22 neste rascunho.</label><div class="acoes-fila-form2"><button>Adotar REV22</button></div></form>{% else %}<p>A adoção cabe ao ARP atual.</p>{% endif %}</article>
+{% else %}
+{% if conferencia %}<p>Aguardando conferência interna pelo APA. Edição suspensa até a conferência ou devolução.</p><div class="acoes-fila-form2"><a class="botao-link-secundario" href="/registros/{{ registro.id }}/form1-integral/conferencia-interna?conta_id={{ conta_id|urlencode }}">Consultar conferência interna</a></div>{% endif %}
+<nav data-preparacao="f1-rev22-{{ registro.id }}" data-conta="{{ conta_id }}" class="regua-navegacao-blocos" aria-label="Blocos do FORM 1"><ol class="mapa-blocos-form1 regua-form2">{% for b in range(1,15) %}<li><a data-numero="{{ b }}" class="cartao-bloco{{ ' bloco-com-respostas' if b in respondidos else '' }}" href="?conta_id={{ conta_id|urlencode }}&bloco={{ b }}" {% if bloco==b %}aria-current="page"{% endif %}><strong class="numero-bloco">{{ b }}</strong><small class="estado-bloco">{{ 'Respostas salvas' if b in respondidos else 'Ainda não preenchido' }}</small><small class="estado-bloco visitado" data-visitado hidden>Visitado nesta sessão</small></a></li>{% endfor %}</ol></nav><script defer src="{{ url_for('estaticos',path='/regua_form2.js') }}"></script>
+<p>Salve antes de mudar de bloco. A versão de origem já encaminhada ao FORM 2 permanece preservada; esta edição não a substitui automaticamente.</p>
+{% if bloco==1 %}<details><summary>Identificação do preenchimento</summary>{% for q in metadados %}<p><strong>F1-{{ q.id }} — {{ q.question }}</strong></p><p>{{ identidade.nome if q.id=='0.1' else 'Cadastro funcional autorizado indisponível nesta demonstração.' }}</p>{% endfor %}</details>{% endif %}
+{% if bloco in (3,10) %}<p>Conjuntos: {% for c in range(1,quantidade_conjuntos+2) %}<a href="?conta_id={{ conta_id|urlencode }}&bloco={{ bloco }}&conjunto={{ c }}">{{ c if c<=quantidade_conjuntos else 'Novo conjunto' }}</a> {% endfor %}</p>{% endif %}
+{% for repetida in ([false,true] if bloco in (3,10) else [false]) %}
+<form method="post"><input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="comando_id" value="{{ comando_id }}-{{ 'conjunto' if repetida else 'bloco' }}"><input type="hidden" name="versao" value="{{ r.versao_rascunho }}"><input type="hidden" name="bloco" value="{{ bloco }}">{% if repetida %}<input type="hidden" name="conjunto" value="{{ conjunto }}"><h2>Conjunto {{ conjunto }}</h2>{% endif %}
+<fieldset {% if not pode %}disabled{% endif %}>
+{% for q in campos if q.repetida==repetida %}<fieldset {% if not q.ativa %}disabled{% endif %}><legend>F1-{{ q.id }} — {{ q.question }}</legend>
+{% if not q.ativa %}<p>Disponível após salvar a resposta de origem correspondente.</p>{% endif %}
+{% if q.id=='9.2.2' %}<p>F1-9.2.1 foi retirada; suas respostas antigas permanecem no histórico.</p>{% endif %}
+{% if q.kind=='multi' %}<input type="hidden" name="r:{{ q.id }}" value="">{% for a in q.options %}<label><input type="checkbox" name="r:{{ q.id }}" value="{{ a }}" {% if a in (q.valor or []) %}checked{% endif %}>{{ a }}</label>{% endfor %}
+{% elif q.kind in ('single','unit') %}<select aria-label="{{ q.question }}" name="r:{{ q.id }}"><option value="">Sem resposta</option>{% if q.kind=='unit' %}{% for u in unidades %}<option value="{{ u.id }}" {% if q.valor==u.id %}selected{% endif %}>{{ u.nome }}</option>{% endfor %}{% else %}{% for a in q.options %}<option {% if q.valor==a %}selected{% endif %}>{{ a }}</option>{% endfor %}{% endif %}</select>
+{% else %}<textarea name="r:{{ q.id }}" aria-label="{{ q.question }}" maxlength="2000">{{ q.valor or '' }}</textarea>{% endif %}
+{% if q.options %}<label>Complemento, quando solicitado pela alternativa<input name="c:{{ q.id }}" value="{{ q.complemento }}" maxlength="1000"></label>{% endif %}
+<details><summary>Orientação do item</summary><p style="white-space:pre-line">{{ q.help }}</p></details></fieldset>{% endfor %}
+<div class="acoes-fila-form2"><button>Salvar {{ 'conjunto' if repetida else 'bloco' }}</button></div></fieldset></form>
+{% endfor %}
+{% if pode %}<form method="post"><input type="hidden" name="acao" value="conferir"><input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="comando_id" value="{{ comando_id }}-conferir"><input type="hidden" name="versao" value="{{ r.versao_rascunho }}"><p>Salve as alterações antes de apresentar o rascunho ao APA. A conferência interna não é homologação institucional.</p><div class="acoes-fila-form2"><button>Apresentar ao APA para conferência</button></div></form>{% endif %}
+<details><summary>Respostas preservadas na adoção</summary><p>Versão anterior: {{ r.conteudo.revisao_22.snapshot_anterior_id }}. Estes valores são históricos, não respostas ativas da REV22.</p><dl>{% for q in historico.perguntas if q.respondida %}<dt>F1-{{ q.id }} — {{ q.pergunta }}</dt><dd>{{ q.valor }}</dd>{% endfor %}</dl>
+{% for campo,titulo in [('participantes','Participantes anteriores'),('destinatarios_10_2_1','Destinatários anteriores'),('complementos','Complementos anteriores')] %}{% if historico.conteudo.get(campo) %}<h3>{{ titulo }}</h3><pre class="texto-preservado">{{ historico.conteudo.get(campo)|tojson(indent=2) }}</pre>{% endif %}{% endfor %}</details>
+{% endif %}</div>
+<script>
+(() => {
+  let alterado = false;
+  document.querySelectorAll('.filas-form2 form').forEach(form => {
+    form.addEventListener('input', () => { alterado = true; });
+    form.addEventListener('change', () => { alterado = true; });
+    form.addEventListener('submit', () => { alterado = false; });
+  });
+  window.addEventListener('beforeunload', event => {
+    if (alterado) { event.preventDefault(); event.returnValue = ''; }
+  });
+})();
+</script>{% endblock %}

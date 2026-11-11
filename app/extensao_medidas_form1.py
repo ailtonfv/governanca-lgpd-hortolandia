@@ -28,6 +28,11 @@ def versao_medidas(conteudo=None):
 
 
 def versao_estrutura(conteudo=None):
+    if "revisao_22" in (conteudo or {}):
+        from app.rev22_form1 import VERSAO,LACRE
+        if conteudo["revisao_22"].get("versao") != VERSAO or conteudo["revisao_22"].get("catalogo_sha256") != LACRE:
+            raise ValueError("Estrutura REV22 divergente.")
+        return VERSAO
     from app.extensao_guarda_form1 import usa_guarda, VERSAO_GUARDA, VERSAO_COMBINADA
     medidas = versao_medidas(conteudo)
     guarda = usa_guarda(conteudo)
@@ -47,6 +52,9 @@ def versao_estrutura(conteudo=None):
 def conteudo_da_estrutura(versao):
     """Interpreta o perfil declarado; o domínio ainda confere o perfil persistido."""
     from app.extensao_guarda_form1 import VERSAO_GUARDA, VERSAO_COMBINADA
+    from app.rev22_form1 import VERSAO,LACRE
+    if versao == VERSAO:
+        return {"revisao_22":{"versao":VERSAO,"catalogo_sha256":LACRE}}
     if versao == rev18_form1.VERSAO_REV18:
         return {**conteudo_da_estrutura(VERSAO_COMBINADA),
                 "revisao_18": {"versao": versao, "politica": rev18_form1.POLITICA_REV18}}
@@ -61,6 +69,10 @@ def conteudo_da_estrutura(versao):
 
 
 def catalogo_efetivo(conteudo=None):
+    if "revisao_22" in (conteudo or {}):
+        versao_estrutura(conteudo)
+        from app.rev22_form1 import catalogo
+        return catalogo()
     base = campos_por_id()
     from app.extensao_guarda_form1 import estender_catalogo_guarda
     estrutura = versao_estrutura(conteudo)

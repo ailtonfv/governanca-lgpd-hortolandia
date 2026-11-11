@@ -1,0 +1,6 @@
+{% extends "base.html" %}{% block conteudo %}
+<h1>A conferência não foi registrada</h1><p role="alert">{{ erro }}</p>
+<p>Seu texto está abaixo para que você possa copiá-lo antes de atualizar a conferência.</p>
+<label for="sintese-preservada">Síntese informada</label><textarea id="sintese-preservada" rows="8" readonly>{{ sintese }}</textarea>
+<a class="botao-link-secundario" href="/form2/participacoes/{{ participacao_id }}/consolidacao?conta_id={{ conta_id|urlencode }}">Atualizar conferência</a>
+{% endblock %}

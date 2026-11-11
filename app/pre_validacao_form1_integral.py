@@ -288,6 +288,9 @@ def pre_validar_form1_integral(conteudo: dict, *, nome_institucional: str | None
                                respostas_somente_leitura: dict | None = None) -> dict:
     """Calcula pendências sem escrever estado ou declarar aptidão à submissão."""
 
+    if "revisao_22" in (conteudo or {}):
+        from app.rev22_form1 import pre_validar
+        return pre_validar(conteudo)
     regras = matriz_efetiva(conteudo)
     catalogo = catalogo_efetivo(conteudo)
     from app.extensao_guarda_form1 import condicoes_guarda

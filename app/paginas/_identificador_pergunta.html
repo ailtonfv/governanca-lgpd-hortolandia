@@ -1,0 +1,6 @@
+{%- macro codigo_pergunta(identificador, formulario=1) -%}
+{%- set codigo = identificador|string|trim -%}
+{%- if codigo -%}
+{{- codigo if codigo[:3] in ('F1-', 'F2-', 'F3-', 'F4-') else 'F' ~ formulario ~ '-' ~ codigo -}}
+{%- endif -%}
+{%- endmacro -%}

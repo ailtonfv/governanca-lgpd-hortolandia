@@ -567,6 +567,9 @@ def _preparar_alteracao(
             sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
             tipo_comando, "inicie o rascunho integral antes de salvar",
         )
+    if "revisao_22" in rascunho.conteudo and tipo_comando not in ("adotar_rev22_form1", "salvar_bloco_rev22_form1"):
+        return None, None, None, comando, _negar(sessao, comando, ator_tipo, ator_id, conta_id,
+            registro_id, tipo_comando, "Abra a edição REV22 para alterar este rascunho.")
     if rascunho.versao_rascunho != versao_lida:
         return None, None, None, comando, _negar(
             sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
