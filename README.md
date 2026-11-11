@@ -4,6 +4,34 @@
 
 > ⚠️ **Somente dados fictícios.** Nenhum dado pessoal real, CPF, matrícula, senha ou token entra neste repositório, no código, nos testes ou nos logs.
 
+## Os quatro FORMs e o dashboard — situação em 11/11/2026
+
+Os quatro instrumentos integram o mesmo Registro e conservam o **Identificador LGPD** durante o ciclo. Cada participação, versão, risco e ação deve manter sua própria rastreabilidade, sem criar outro processo apenas porque mudou o formulário ou o responsável. O desenho completo abaixo não significa que todos os instrumentos já estejam implementados.
+
+| Instrumento | Finalidade | Atuação prevista | Situação e próxima entrega |
+|---|---|---|---|
+| **FORM 1 — Levantamento do tratamento** | Registrar como o processo, atividade ou serviço funciona e quais dados utiliza. | O APA pode preencher ou designar um ARP autorizado; o ARP apresenta e o APA realiza a conferência interna. | Fluxo demonstrativo implementado. Edição candidata REV22 implementada e testada; faltam inspeção visual integral dos 14 blocos e consolidação das orientações APA/ARP antes da apresentação dessa edição. |
+| **FORM 2 — Validação jurídica e institucional** | Analisar finalidade, necessidade, fundamento, compartilhamento e guarda a partir de uma versão identificada do FORM 1. | AAL da unidade executora principal consolida; outras unidades, Jurídico e DPO atuam em participações próprias conforme autorização e demanda. Interpretações jurídicas dependem do Jurídico. | Filas, controles candidatos, complementação, consultas e conferência da consolidação implementados e testados na demonstração. Faltam fechamento funcional/visual integral, homologação D11 e deliberações de encerramento. Resposta salva não é validação concluída. |
+| **FORM 3 — Riscos, lacunas e controles** | Avaliar cada risco, seus controles, risco residual e encaminhamentos. | A unidade fornece os fatos; a atuação avaliativa do DPO/Comitê e a autoridade que aceita o risco precisam ser delimitadas na proposta e deliberadas. | Instrumento ainda não implementado. Primeiro: consolidar os comentários recebidos, individualizar os riscos, harmonizar escalas e entregar novo caderno com tratamento de cada observação. |
+| **FORM 4 — Providências e acompanhamento** | Acompanhar ações, responsáveis, prazos, evidências e verificação dos resultados. | Execução pela área responsável; verificador, autoridade de cancelamento e aceitação de risco ainda dependem de definição institucional. | Instrumento ainda não implementado. Primeiro: consolidar os comentários, identificar cada ação, prever histórico e harmonizar origens, prioridades e escalas com o FORM 3. |
+| **Dashboard LGPD** | Permitir visão de cobertura, fluxo, pendências, riscos e providências, respeitando a visibilidade de cada papel. | Perfis e acesso ao detalhamento dependem da matriz institucional; administrar o sistema não concede leitura indiscriminada. | Dashboard completo ainda não implementado. Há painel demonstrativo do DPO; ele não equivale à proposta integrada de sete telas. |
+
+### Como os instrumentos se conectam
+
+No desenho candidato, o levantamento conferido do FORM 1 ingressa no FORM 2 pela fila institucional. A análise pode solicitar complementação à origem, preservando a versão anterior e o vínculo com a pendência. A consolidação reúne as manifestações pertinentes sob o mesmo Identificador LGPD.
+
+Os encaminhamentos aos FORMs 3 e 4 ocorrem quando pertinentes: o FORM 3 trata a avaliação de riscos; o FORM 4 pode receber uma providência conhecida diretamente do FORM 2 ou uma ação resultante da avaliação de riscos, inclusive relacionada à elaboração ou revisão de RIPD. Esses encaminhamentos continuam como desenho candidato; a conferência demonstrativa atual não os executa. Mudanças relevantes exigem revisão dos instrumentos afetados e preservação do histórico.
+
+A proposta de dashboard apresentada em 11/11/2026 contém sete telas: abertura com visão da Prefeitura; cobertura por Secretaria; circulação dos dados com indicador de contratos; operação; risco; correção; e aprendizados. Para apresentação, propõe-se uma tela de 1920 × 1080 por visão, sem rolagem e com um gráfico principal. O detalhamento dos processos abre ao selecionar um indicador. Na operação cotidiana, a lista do canvas de operação poderá ter rolagem. Trata-se de proposta de interface, ainda sujeita à análise dos indicadores, fontes e permissões; nenhuma dessas sete telas é declarada entregue por este registro.
+
+### Estado, execução e documentação privada
+
+**Implementado**, **testado**, **verificado visualmente** e **homologado** são estados distintos. As entradas datadas ao longo deste README conservam o histórico dos incrementos; esta síntese apresenta a situação dos quatro instrumentos nesta data. A bateria automatizada aprovada não substitui aceite humano, homologação jurídica ou autorização para uso real.
+
+Para executar e testar, consultar [Instalação e execução](docs/operacao/INSTALACAO.md), [Estratégia de testes](docs/contexto/testing.md) e [Filas do FORM 2](docs/arquitetura/FILAS_FORM2_REV22.md). As limitações de reprodução da bateria sem insumos privados estão no final deste README, em **Pacote público de continuidade**. As entregas restantes são acompanhadas no [backlog](docs/planejamento/BACKLOG_AJUSTES_POC_AMPLIADA.md).
+
+Este README público descreve finalidade, fluxo, responsabilidades propostas e estado da implementação. **Não publica o conteúdo integral das perguntas, alternativas, catálogos, Documentos-Mestres ou cadernos internos.** Esses materiais permanecem na documentação autorizada, fora do GitHub. Configurações locais e credenciais também não acompanham o repositório.
+
 ## Filas institucionais do FORM 2 — incremento demonstrativo REV22
 
 A Central inclui acesso às filas por unidade e ao painel do DPO. A confirmação
@@ -92,7 +120,7 @@ flowchart TB
 - **Série SAD** — especifica o sistema que apoia esse trabalho: requisitos, papéis, workflow, dados, segurança e decisões de arquitetura.
 - **PoC nuclear e PoC ampliada** — verificam, sempre com dados fictícios, se o desenho dos SADs funciona (nuclear, marco M1a) e se resiste às situações difíceis da administração (ampliada, marcos M1b, M2 e M3A). O aceite da nuclear é condição necessária, mas a ampliada só começa após decisão expressa própria.
 
-A Cartilha e os SADs serão publicados neste repositório na próxima etapa.
+A documentação técnica publicável é disponibilizada neste repositório. A Cartilha interna, os Documentos-Mestres e os derivados privados permanecem fora do GitHub; eventual publicação exige autorização institucional específica.
 
 ## Quem faz o quê
 
