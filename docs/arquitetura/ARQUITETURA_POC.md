@@ -144,7 +144,7 @@ Os quatro instrumentos compartilham o identificador do Registro LGPD. Cada área
 | FORM 3 | Avaliação de riscos e controles. Os papéis e as competências aguardam definição. |
 | FORM 4 | Providências e acompanhamento. Os papéis e as competências aguardam definição. |
 
-A participação em um instrumento não concede acesso aos demais. Quando faltar acesso ou atividade, a tela explica a situação apenas até onde a consulta autorizada a distingue. Por exemplo, os campos obrigatórios pendentes do FORM 1 pertencem ao levantamento e ficam fora da seleção de Registros do FORM 2.
+A participação em um instrumento não concede acesso aos demais. Quando faltar acesso ou atividade, a tela explica a situação apenas até onde a consulta autorizada a distingue. Por exemplo, os campos obrigatórios pendentes do FORM 1 pertencem ao levantamento e ficam fora da seleção de Registros do FORM 2. Os próximos incrementos reutilizarão o padrão de seleção e retorno descrito no [planejamento da navegação](../planejamento/CONSOLIDACAO_NAVEGACAO_GOVERNANCA_LGPD_2026_11_06_CANDIDATA.md#nav_forms_01).
 
 ## 7. NAV_FORMS_02 — Próxima ação por instrumento
 

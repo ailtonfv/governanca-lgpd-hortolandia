@@ -430,3 +430,108 @@ Regras deste diário: sem senhas, tokens ou dados pessoais; cada entrada com dat
 - Autoria do ARP, autorização, versão lida, idempotência, atomicidade, lacre e cadeia de eventos foram preservados. Blocos 1 a 4 e o envelope REV13 continuam no mesmo rascunho.
 - Os 13 testes específicos e a regressão completa de **246 de 246 testes** foram aprovados no banco exclusivo `lgpd_poc_teste`; permaneceu somente o aviso conhecido de descontinuação do `TestClient`.
 - Os Blocos 6 a 14 e a submissão integral continuam pendentes. O FORM 1 sintético, o contrato 2, os FORMS 2 a 4, a Cartilha e a apresentação não foram alterados.
+
+### 07/11/2026 — FORM2_07 · Consulta da origem por designação
+
+O APA em exercício com habilitação vigente continua a escolher a versão factual do Registro. Para quem atua exclusivamente como preparador, a primeira designação pelo APA libera a consulta à origem daquela preparação. Se houver outras designações no mesmo Registro, cada uma acrescenta sua respectiva origem. A regra vale no painel, no detalhe do Registro e na consulta direta no servidor. A edição continua restrita ao preparador designado e às condições do ciclo. A submissão institucional permanece bloqueada.
+
+Verificação automatizada em `lgpd_poc_teste`: 103 testes aprovados nas suítes de preparação e apresentação do FORM 2, navegação, Central, continuidade do APA e snapshots do FORM 1. Um aviso de depreciação do TestClient. Aceitação visual na porta 8001: NÃO VERIFICADA.
+
+## 11/11/2026 — Filas demonstrativas da candidata REV22
+
+Implementadas tabelas aditivas de participação, complemento e avisos do DPO.
+Confirmação interna alimenta a fila como ensaio do ingresso. Assunção com
+controle otimista e bloqueio concorrente, papéis explícitos, segregação do
+apresentador, manifestação por unidade, reatribuição pelo gestor, edição pelos
+contratos existentes, consulta auditada e ligação 1.3.1/14.2.
+
+Rodada focalizada de 33 testes aprovada no banco lgpd_poc_teste.
+Verificados por HTTP os acessos APA, AAL e DPO na base demonstrativa.
+Inspeção visual desktop do painel DPO realizada. Mobile e uso integral dos
+14 blocos NÃO VERIFICADOS visualmente. Nenhum aceite institucional inferido.
+
+Instaladas duas participações principais de origens fictícias já confirmadas,
+com duas ciências registradas. SMTP e agendamento aguardam configuração
+institucional. E-mails reais ainda não enviados. Consolidação final e FORMs 3/4
+permanecem pendentes. Ver FILAS_FORM2_REV22.md.
+
+### 11/11/2026 — Ações da fila do FORM 2
+Abertura de participação e retorno convertidos para botões do padrão existente, alinhados à direita; em telas estreitas ocupam a largura disponível. Retorno da participação segue o mesmo padrão. Sem mudança em permissões ou dados. Verificação visual em navegador: NÃO VERIFICADA nesta alteração.
+
+
+11/11/2026 — Correção complementar: botões de ação da participação recebem o estilo primário; largura automática no desktop e total abaixo de 600px. Corrige largura herdada que impedia o alinhamento visual à direita. Inspeção visual após alteração: NÃO VERIFICADA.
+
+11/11/2026 — Redação aprovada: Situação: aguardando responsável. Rótulos em atendimento e concluída apresentados em linguagem natural na fila e na participação do FORM 2, sem alterar estados internos. Templates validados.
+
+### 11/11/2026 — Navegação do FORM 2 nas filas
+Aplicados cartões no padrão visual do FORM 1, na participação e nos 14 blocos. Indicadores reutilizam estados_regua_form2; visitas por conta/participação na sessão do navegador. Ausência de sinalizadores não representa homologação nem validação de completude. Consultas em seção própria recolhida. Retorno e salvamento à direita. Teste HTTP dos 14 blocos passou no banco de testes; aplicação local respondeu 200 e apresentou os 14 cartões. Inspeção visual após alteração: NÃO VERIFICADA; aguarda conferência do usuário. Servidor local atualizado, sem alteração de respostas.
+
+### 11/11/2026 — Conferência versionada da consolidação do FORM 2
+
+Implementada conferência demonstrativa, acessível pela participação e pelo Bloco 14,
+com síntese, fontes preservadas no evento, histórico, detecção de desatualização,
+controle de versão e pedido idempotente. Consolida itens a confirmar, manifestações,
+complementações, pendências repetíveis e indicações dos FORMs 3/4. Mantém D11 e
+encerramento institucional bloqueados; não introduz matriz de obrigatoriedade.
+
+Corrigida a precedência CSS que exibia marcadores hidden e uniformizada a altura
+dos cartões. Conferência no navegador: todos os cartões com 112px; somente o Bloco
+14 marcado após sua abertura; tela de consolidação sem transbordamento horizontal
+em viewport 390px. Conferência visual e leitura no navegador realizadas; não constitui
+aceite do usuário. Corrigida também a leitura das respostas da versão factual do
+FORM 1 no detalhe dos blocos (origem.conteudo, preservando o snapshot original).
+
+Regressão: 45 casos passaram nos módulos consolidação, filas, confirmação interna,
+REV21.2, HTTP e Cartilha. Cobertura nova inclui autorização, concorrência, idempotência,
+rollback após evento, histórico preservado, condicionais, conjuntos independentes,
+alterações posteriores nas manifestações e conflito HTTP com texto preservado.
+A suíte utilizou exclusivamente o banco terminado em _teste. Nenhuma resposta ou
+conferência foi inserida nos processos demonstrativos usados pelo usuário durante
+a inspeção visual. Sem migração adicional, sem envio de e-mail e sem publicação Git.
+
+Próxima conferência humana: LGPD-2026-00001 → Conferir consolidação; preencher os
+blocos, registrar uma síntese fictícia, alterar uma resposta e verificar o aviso de
+desatualização e a preservação da versão anterior. Decisões institucionais e D11
+continuam necessárias para o encerramento definitivo.
+
+11/11/2026 — Consolidação passou a reutilizar a régua dos 14 blocos em lugar do retorno exclusivo ao Bloco 14. Navegação direta preserva conta e participação; proteção de síntese não salva permanece. Template validado.
+
+11/11/2026 — Correção do Bloco 1 nas filas: origem histórica agora apresenta pares de pergunta e resposta em ordem editorial, com enunciados e agrupamento vertical responsivo. Identificador LGPD e nome do AAL são exibidos nos campos automáticos; Secretaria e unidade de origem aparecem junto às confirmações. Cargo/unidade funcional permanecem explicitamente sem fonte autorizada. Nenhuma resposta foi alterada. Teste de acesso aos 14 blocos passou; HTTP local 200. Inspeção visual da nova disposição aguarda conferência.
+
+
+11/11/2026 — Registrada no AGENTS.md a regra aprovada de identificação visual das perguntas com prefixo do FORM. Resumo visual aponta para a regra central. Preservados identificadores internos, ramos, histórico e dados. Esta alteração é documental; padronização integral das telas permanece pendente.
+
+11/11/2026 — Prefixos visíveis F1 aplicados nas telas de preenchimento, consulta, conferência, pendências, participantes e origem no FORM 2. Macro reutilizável preserva prefixo existente e ramos; busca aceita número com ou sem prefixo F1-. Atributos internos de identificação e envio comparados antes/depois e preservados. 28 testes existentes passaram (leitura/preenchimento, etapa 1, interface dos 14 blocos e Cartilha). HTTP local 200, prefixos presentes sem F1-F1. Inspeção visual desta alteração: NÃO VERIFICADA. Nenhum dado ou documento histórico modificado.
+
+## 11/11/2026 — FORM 1 candidato REV22 e respostas demonstrativas do FORM 2
+
+Autorização: continuidade expressa do trabalho pelo responsável do projeto. Fonte: Mestre REV22 candidata v5; SHA-256 913cc22b7a57fe717f85a1cb64c3bbf5dfc278c645a827e46acea6fcadb12370. Conteúdo privado não reproduzido neste diário.
+
+Entregue adoção explícita com preservação histórica, conjuntos independentes, confirmação interna e origem REV22 consultável pelo FORM 2. Habilitados controles candidatos do Bloco 2 e D11 no percurso demonstrativo, com resultado não homologado. Permissões, idempotência, controle de versão e rollback foram exercitados. Nenhum registro operacional foi adotado automaticamente.
+
+Verificação: 73 testes passaram; cinco testes do incremento repetidos após ajustes finais também passaram. XML privado em work/rev22_implementacao.xml no workspace de elaboração. Servidor local reiniciado na porta 8001. Bloco 2 conferido visualmente; apresentação integral da nova edição FORM 1 ainda não verificada. Ver README para escopo, suítes e limites. Sem commit/push, envio SMTP ou autorização institucional implícita.
+
+## 11/11/2026 — Auditoria integral e cadernos v3
+
+Bateria integral: 821 testes nomeados (819 passaram, uma falha na preparação da migração e um cotejo histórico ignorado), mais 254 subtestes aprovados. O XML contabiliza 1.075 verificações. Corrigida somente a preparação do teste para incluir dependentes REV22; recusa de alteração/exclusão de snapshot e reversão com dados preservadas. Rodada complementar de snapshots, catálogo, filas e consolidação passou, agora incluindo cotejo com o Mestre REV18. Sem nova execução integral após a correção; evidências separadas no manifesto privado v3. Nenhum dado da base demonstrativa alterado pela suíte.
+
+Cadernos v3 corrigem 16 informativos/3 consultas da fotografia anterior e explicitam o estado implementado depois dela; registro autônomo RD-DPO-2026-11-11 formaliza as duas orientações demonstrativas sem atribuir homologação institucional. Material privado fora do Git. Ver README para limites e advertências.
+
+
+
+### Estabilização e execução integral única — 11/11/2026
+
+Após os ajustes, uma única bateria integral concluiu com **844 testes nomeados e 254 subtestes aprovados**, sem falhas, erros ou testes ignorados (1.098 verificações no XML; 777,691 segundos). O Mestre REV18 foi informado explicitamente por MESTRE_REV18_DOCX. Este resultado substitui o uso de cobertura reconciliada como evidência corrente; não soma a rodada anterior com a complementar. HEAD: 6829688c4349e8ea419cda7343d104fb18c1e845 mais alterações locais. Os hashes dos 257 arquivos registrados, inclusive migracoes/, permaneceram iguais durante a execução.
+
+Foram acrescentados 23 casos nomeados em test_estabilizacao_form2.py e test_reversao_segura_form2.py: persistência e reabertura dos 12 campos do Bloco 2 pela rota HTTP; respostas D11 não homologadas; F2-14.1 sem encerramento; F2-1.3.1 por divergência mesmo com origem suficiente; complemento de F2-9.7.2; rótulos estáveis; recusa de reversão com dados/dependentes e reversão transacional da infraestrutura vazia. Reversão não foi executada na base demonstrativa.
+
+Os 176 rótulos operacionais “A CONFIRMAR” foram corrigidos para “A confirmar”, preservando códigos, condições e demais campos; a mensagem de exclusividade acompanha a grafia. F2-9.7.2 exibe “Outra hipótese do art. 33 (especificar)” e conserva o complemento salvo. A alteração dos rótulos do catálogo privado foi documentada com hashes anterior/posterior e checksum atualizado, sem reescrever documentos históricos.
+
+Os quatro catálogos privados continuam ignorados e não versionados. Manifesto, lista nominal, log e XML neutro encontram-se em work/estabilizacao do workspace de elaboração, para uso interno. Nenhum push, envio SMTP ou nova rodada de PDFs. Permanecem os avisos de depreciação AnyIO e operação OpenAPI duplicada, registrados sem ocultação. A inspeção visual integral do FORM 1 REV22 e a documentação do percurso APA/ARP estão pendentes; sua adoção permanece fora da apresentação. Aprovação automatizada não equivale à D11 ou ao aceite institucional.
+
+
+## 11/11/2026 — Revisão para publicação do código demonstrativo
+
+Publicação autorizada pelo responsável pelo projeto. A revisão identificou duas matrizes documentais que reproduziam enunciados do catálogo privado; elas permaneceram locais e receberam exclusões explícitas. Nenhum catálogo, Mestre, PDF, credencial ou saída de teste integra o pacote público. Um teste passou a comparar o SHA-256 do enunciado, mantendo a igualdade exata sem transcrevê-lo; os 12 casos desse arquivo passaram após o ajuste. A bateria integral anterior de 844 testes e 254 subtestes permanece identificada como execução anterior a essa alteração exclusivamente de teste e às exclusões/documentação de publicação. Não foi atribuída nova execução integral ao pacote.
+
+A implementação funcional permanece a examinada na estabilização; apenas espaços finais foram removidos de um módulo. Os commits separam código/testes de documentação. O envio ao GitHub não homologa a PoC, não conclui as pendências listadas no backlog e não disponibiliza os insumos documentais privados. A reprodução integral dos testes exige esses insumos por canal autorizado, conforme README.

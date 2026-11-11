@@ -16,6 +16,13 @@ Este documento orienta a evolução visual da PoC ampliada. Ele não substitui o
 - Movimento somente para indicar continuidade, mudança ou confirmação.
 - Brasão preservado sem distorção e com área de respiro.
 
+## Identificadores das perguntas
+
+Seguir a regra de identificação visível em `AGENTS.md`, aprovada em 11/11/2026:
+`F1-1.2`, `F2-1.2` etc., com prefixo do formulário de origem, sem duplicação e
+sem alterar identificadores internos, histórico ou numeração dos blocos.
+A documentação da regra não significa que todas as telas já foram adaptadas.
+
 ## Base visual já existente
 
 | Token atual | Valor | Uso |

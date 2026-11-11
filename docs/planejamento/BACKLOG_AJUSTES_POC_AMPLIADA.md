@@ -189,11 +189,11 @@ Por autorização específica posterior ao diagnóstico, foram revisadas as cinc
 
 Regressão proporcional: **109 testes aprovados, zero falhas**, em 67,79 segundos. Um aviso preexistente: depreciação de `anyio.abc.BlockingPortal` em `starlette.testclient`; não impediu a execução. Não foi executada a suíte integral.
 
-Comando PowerShell executado na raiz do repositório, com o ambiente `lgpd-poc` ativado:
+Comando PowerShell executado na raiz do repositório:
 
 ```powershell
 $env:LGPD_BANCO_TESTE='lgpd_poc_teste'
-python -m pytest -q -o addopts= -p no:cacheprovider testes/test_ordenacao_pendencias_form1.py testes/test_pre_validacao_form1_integral.py testes/test_complementos_outro_form1_integral.py testes/test_destinatarios_10_2_1_form1_integral.py testes/test_usabilidade_blocos_9_10.py testes/test_jornada_destinatarios_form1.py testes/test_painel_progresso_incremento_8k.py testes/test_tres_contadores_painel.py testes/test_politica_p0_incremento_8v.py testes/test_leitura_preenchimento_form1.py testes/test_p1_usabilidade_form1.py testes/test_bloco10_form1_integral.py testes/test_continuidade_navegacao_incremento_8m.py testes/test_etapa1_form1_integral.py testes/test_snapshot_form1_integral.py
+& 'D:\Vendramini\anaconda3\envs\lgpd-poc\python.exe' -m pytest -q -o addopts= -p no:cacheprovider testes/test_ordenacao_pendencias_form1.py testes/test_pre_validacao_form1_integral.py testes/test_complementos_outro_form1_integral.py testes/test_destinatarios_10_2_1_form1_integral.py testes/test_usabilidade_blocos_9_10.py testes/test_jornada_destinatarios_form1.py testes/test_painel_progresso_incremento_8k.py testes/test_tres_contadores_painel.py testes/test_politica_p0_incremento_8v.py testes/test_leitura_preenchimento_form1.py testes/test_p1_usabilidade_form1.py testes/test_bloco10_form1_integral.py testes/test_continuidade_navegacao_incremento_8m.py testes/test_etapa1_form1_integral.py testes/test_snapshot_form1_integral.py
 ```
 
 A rodada abrange ordem canônica, condicionais, participantes/destinatários repetíveis, rascunhos, navegação, pré-validação, snapshots e bloqueio da submissão institucional. As rotinas da suíte preparam somente o banco isolado `lgpd_poc_teste`; o banco demonstrativo e suas respostas não foram alterados. Não houve alteração funcional posterior aos testes. A verificação `git diff --check` passou e os 13 IDs do backlog e o link do README foram conferidos.
@@ -323,3 +323,113 @@ Implementado cabeçalho compartilhado com brasão oficial, nome da Prefeitura e 
 **Inspeção real focalizada:** realizada no navegador integrado em servidor isolado `127.0.0.1:8016`, usando somente `lgpd_poc_teste`, com APA/ARP e Registro fictícios. Larguras efetivas medidas no navegador: 1821 px (larga) e 400 px (estreita). Cabeçalho legível, sem sobreposição ou rolagem horizontal nos painéis examinados; abertura em tela estreita e consulta de versão apresentada em tela larga também inspecionadas. Tab manteve foco visível no seletor de entrada do painel; a imagem não acrescenta uma parada de teclado. Evidências locais, ignoradas pelo Git, em `evidencias/forms01_06/`: `painel-arp-largo.png`, `painel-arp-estreito.png`, `painel-apa-estreito.png`, `painel-teclado.png`, `abertura-estreita.png` e `cabecalho-conferencia.png`. O servidor isolado foi encerrado após a inspeção.
 
 **Limitações e aceite:** impressão/PDF, leitor de tela e zoom ampliado NÃO VERIFICADOS; CSS de impressão preparado sem criar exportador. A inspeção confirma apenas a apresentação do cabeçalho e o foco examinados, não conformidade WCAG integral nem homologação funcional pelo responsável. Não encerra a aceitação visual das extensões MEDIDAS/GUARDA e demais cenários pendentes do FORMS01_05. Para aceite humano deste cabeçalho: conferir painéis APA/ARP e formulário em tela larga/estreita, Tab, leitura do título/brasão e prévia de impressão sem cortes. Commit local autorizado; push não autorizado e não realizado.
+
+## Revisão focalizada dos Blocos 12 e 13 — 06/11/2026
+
+Origem: instrução anexada denominada INSTRUÇÃO_FORMS01_06 — Revisão focalizada dos Blocos 12 e 13 (distinta da instrução de identidade institucional com a mesma numeração). Base limpa `664f4b3ca97f95139fdb0f66abf15cc18aac58a4`, nove commits à frente da referência local de origin/main; sem consulta remota.
+
+### Etapa A — Impacto e compatibilidade
+
+| Item | REV13 original | Extensão GUARDA-v1 já implementada | Resultado desta revisão |
+|---|---|---|---|
+| 12.3 | Pergunta agregada sobre procedimento de eliminação, arquivamento, devolução ou transferência; seleção única: Sim, Não, A confirmar. | Quatro procedimentos independentes em 12.3/12.3.1/12.3.2/12.3.3; Sim, Não, Não se aplica, A confirmar. Facultativos. | Seleção múltipla proposta não é alteração editorial: modifica tipo e significado. Suspensa, sem reinterpretação dos valores anteriores. |
+| 12.4 / 12.4.1 | Evidência agregada de eliminação/devolução/transferência; Sim, Não, Em alguns casos, A confirmar, Não se aplica. Localização somente com Sim/Em alguns casos. | Evidência individual por operação, incluindo guarda/arquivamento; mesmas alternativas, localização independente por evidência. | Condicional correta. Não se exige localização com Não se aplica, Não ou A confirmar. Nenhum catálogo oferece opção explícita “operação ainda não ocorreu”; não equiparar automaticamente esse fato a Não se aplica. |
+| 12.5 / 12.5.1 | Transferência para sistema/arquivo: Sim, Não, A confirmar; destino textual quando Sim. | Existência de transferência em 12.5; modalidades múltiplas em 12.5.1; complemento em 12.5.1.1 e destino em 12.5.2. Procedimento de transferência definido é tratado separadamente em 12.3.3. | Trocar 12.5.1 por destino reinterpretaria uma lista como texto na extensão. Ampliar transferência atual para atual ou prevista também exige decisão versionada. Não alterado. |
+| 12.1 / 12.2 | Prazo Em definição e permanência sem destinação definida são opções existentes. | Preservadas. Operações independentes podem coexistir, sem deduzir eliminação na origem de uma transferência. | Teste novo reproduz 12.1 Em definição, 12.2 permanência sem destinação, 12.3 vazia, 12.4 Não se aplica e 12.5 Não; salva/reabre sem pendências artificiais do Bloco 12, mantendo a resposta factual identificável. |
+| 13.1 | Ajuda com definições distintas e opções especiais isoladas. | Independente das extensões. | Defeito visual comprovado: dt e dd eram filhos diretos de dl, sujeitos ao grid global de três colunas. Agrupados por definição e apresentados verticalmente, com CSS restrito ao componente. |
+
+Fontes verificadas: `app/catalogos/form1_rev13.csv`; `app/form1_integral.py` (`CONDICOES_BLOCO_12`); `app/catalogos/form1_rev13_ext_guarda_v1.json`; `app/extensao_guarda_form1.py` (`estender_catalogo_guarda`, `estender_matriz_guarda`, `condicoes_guarda` e adoção que arquiva snapshot/enunciados/respostas); `docs/arquitetura/EXTENSAO_FORM1_REV13_GUARDA_V1.md`; `app/ajudas_cartilha_form1.py` (`AJUDAS_ALTERNATIVAS_FORM1`); componente `_ajuda_cartilha_form1.html`; regras globais dl/dt/dd de `estilo.css`. O contrato/catálogo efetivo é escolhido pela versão preservada no JSON; não se pode alterar apenas o rótulo de uma resposta histórica com significado diferente.
+
+### Etapas B e C — Entrega segura
+
+Implementado somente o ajuste de apresentação da ajuda 13.1. Preservadas integralmente as três definições aprovadas, seleção isolada, IDs, respostas, permissões, histórico e links existentes. Alterados CSS, componente da ajuda, testes dos Blocos 12/13, README e este backlog. Nenhuma alteração de catálogo, matriz, contrato, banco demonstrativo ou migração. Submissão institucional bloqueada.
+
+Regressão pertinente: **94 aprovados**, zero falhas, em 95,56 s; um aviso preexistente Starlette/AnyIO. Comando com `LGPD_BANCO_TESTE=lgpd_poc_teste`: `python -m pytest testes/test_bloco12_form1_integral.py testes/test_bloco13_form1_integral.py testes/test_extensao_guarda_form1.py testes/test_extensao_medidas_form1.py testes/test_cartilha_local_form1.py testes/test_interface.py -q --tb=short -o addopts= -p no:cacheprovider`. Cobre respostas simples/múltiplas, especiais e condicionais, persistência, legado, adoção autorizada, concorrência/rollback, vínculos da Cartilha e fluxo nuclear HTTP. Não é regressão integral. Um teste foi acrescentado e o teste da ajuda foi ampliado para conferir os três pares título/descrição.
+
+Inspeção real focalizada em base isolada `lgpd_poc_teste`: ajuda aberta no Bloco 13, layout vertical em tela larga e estreita (400 px), sem transbordamento horizontal na largura estreita medida; fechamento/abertura por Enter e retorno de foco por Shift+Tab. Capturas em `evidencias/revisao_blocos12_13/`, fora do Git; `ajuda-verificada.png` mostra os três pares em tela larga, e `ajuda-estreita-consulta.png` registra a leitura estreita. Capturas intermediárias recortadas não foram usadas como prova de visibilidade integral. A massa de inspeção precisou ser reinicializada na base de teste após conflito com resíduos da suíte; nenhuma falha da aplicação foi inferida disso. Servidor temporário encerrado. Aceite humano e inspeção visual completa do Bloco 12 continuam pendentes; esta verificação não homologa as extensões.
+
+### Decisão confirmada sobre o Bloco 12
+
+Recomendação mínima: manter a extensão GUARDA-v1, já autorizada e implementada, e verificar se o Registro em avaliação ainda usa a REV13 original, sem adotar versões automaticamente. A nova instrução não identifica qual versão estava em uso na tela observada. Se for mantida a preferência por 12.3 como seleção múltipla, preparar nova especificação versionada para base e extensão, preservando snapshots e enunciados anteriores, sem converter Sim/Não em listas. Definir também se haverá estado explícito de operação ainda não executada e como distinguir transferência prevista de atual. Essa mudança não foi executada. Após o diagnóstico, o responsável funcional decidiu expressamente: **“Manter GUARDA-v1 e sua adoção explícita”**. Portanto, a proposta de seleção múltipla em 12.3 não será implementada nesta revisão. Permanecem o catálogo vigente, a adoção explícita pelo ARP e a preservação do histórico, sem adoção automática ou alteração de Registros. A recomendação e as alternativas acima registram a análise anterior à decisão; não constituem pendência de autorização desta revisão.
+
+Alterações mantidas localmente para avaliação. Nenhum novo commit ou push nesta revisão; nenhuma outra funcionalidade iniciada.
+
+## INSTRUÇÃO_FORMS01_07 — Fechamento técnico e inventário do FORM 2 — 06/11/2026
+
+### Parecer e alcance do aceite
+
+**FORM 1 apto para encerramento desta etapa de homologação da PoC demonstrativa**, com as ressalvas não impeditivas abaixo. Nenhum impedimento técnico concreto foi identificado nos cenários executados. O responsável funcional informou ter concluído a inspeção visual dos 14 blocos e aprovado a apresentação dos Blocos 13/14 e a manutenção da GUARDA-v1. Isso atualiza o estado de aceite relatado, sem apagar as evidências históricas de inspeção não realizada. Não se declara aceite institucional da matriz, liberação de submissão, conformidade jurídica ou prontidão dos FORMs 2–4.
+
+### GUARDA-v1 no Registro utilizado na homologação
+
+Consulta exclusivamente de leitura, protegida por `SET TRANSACTION READ ONLY`, à base demonstrativa `lgpd_poc_v2`: Registro fictício `LGPD-2026-00004`, ID `8a155fa2-2b33-4b8a-b482-8e1333cc9068`, rascunho 14, estrutura `F1-C3-REV13`, ARP `PESSOA-G` (Épsilon/CONTA-G1). A projeção `carregar_registro` confirmou `pode_editar=True`; extensão GUARDA ainda não adotada. Os dois snapshots técnicos existentes têm lacres SHA-256 correspondentes ao conteúdo canônico. Nenhuma resposta, adoção ou decisão foi gravada.
+
+Localização: **Etapa 4 → Bloco 12 → “Adotar procedimentos e evidências separados por operação”**, no início do bloco. O ARP deve salvar alterações locais, expandir a seção, marcar **“Confirmo a adoção da extensão de guarda com novas respostas inicialmente vazias”** e acionar **“Adotar revisão da guarda no Bloco 12”**. Esse Registro reúne as condições atuais para oferecer a ação. Após adoção, o componente mostra as operações independentes e o acesso **“Consultar respostas anteriores à revisão da guarda — somente leitura”**. Não executar adoção automaticamente, nem confundir aprovação da solução com adoção em um Registro.
+
+Evidências: `_bloco_catalogado_form1.html`, `_extensao_guarda_form1.html`, `_legado_guarda_form1.html`, projeção de consulta e testes `test_extensao_guarda_form1.py`. A tentativa adicional de GET na porta 8000 foi recusada (WinError 10061, serviço sem resposta); portanto não houve nova inspeção visual desse acesso no ambiente demonstrativo. O acesso foi confirmado tecnicamente pelo estado/projeção e pela condição de renderização; o botão não foi acionado. A adoção e o preenchimento da extensão nesse Registro ainda não constituem aceite manual demonstrado. Isso não impede encerrar a inspeção da REV13 original, que continua suportada.
+
+Histórico preservado: catálogo REV13 original com 128 IDs; perfis optativos MEDIDAS com 129, GUARDA com 139 e composição com 140. Adoção explícita preserva snapshot completo, autoria, lacre, enunciados/respostas agregadas e valores condicionais inativos. Novos campos começam vazios; não há conversão de respostas. Testes de ambas as ordens de adoção, consultas históricas, permissões, idempotência, concorrência e rollback aprovados nesta rodada.
+
+### Cartilha e pendências não impeditivas
+
+| Pendência | Situação comprovada e próximo critério de aceite | Prioridade/limite |
+|---|---|---|
+| AJ-009 — incorporação da REV30.14 | REV30.13 local existe, hash corresponde ao configurado e 12/12 seções estão disponíveis para as 22 ajudas. REV30.14 consolidada existe no conjunto SAD, com SHA-256 `3bc5df4c2751fd2f24ec9abdded59e436d00aaf893b6b411aa6c364d801baadf`, igual à comparação editorial anterior deste backlog. Preservada a referência explícita à edição realmente servida. Incorporar a nova edição em tarefa autorizada, conferindo especialmente seções 5.1/5.2 e mantendo destinos históricos. Não houve substituição de documento ou mapa. | P1 editorial, não impeditiva da demonstração com REV30.13 identificada. |
+| Detalhamento dos indicadores de progresso por Registro | A distribuição de campos pendentes por Registro já existe em AJ-005 e seus testes passaram; não apresentá-la como recurso ausente. Fica registrado o detalhamento adicional da jornada: diferenciar posição/visita, respostas salvas e pendências para cada Registro, sem total fictício de conclusão. Antes de implementar, definir o que já é verificável e o que exigiria persistir visitas entre sessões; cada indicador deve identificar seu Registro e fonte. | P2, sem nova implementação nesta etapa. |
+| Adoção demonstrativa da GUARDA-v1 | Solução mantida por decisão expressa. Quando o ARP decidir adotá-la no Registro 00004, conferir campos novos vazios e consulta do legado; nenhuma adoção automática. Serviço da aplicação precisa estar iniciado para a conferência pela tela. | Verificação operacional não impeditiva do encerramento da etapa atual; não equivale a aceite manual já realizado da extensão nesse Registro. |
+| AJ-007/AJ-008 e harmonização editorial | SAA não cria perfil; manter harmonização posterior da Cartilha/apresentação e reconciliação de WhatsApp corporativo, sem retirar avisos por suposição. | P2, preservadas as pendências anteriores. |
+| AJ-010 — matriz e liberação institucional | Submissão permanece bloqueada. Conferência interna não homologa juridicamente nem autoriza o FORM 2 automaticamente. | P0 para futura submissão institucional, não para esta demonstração. |
+
+### Regressão desta rodada
+
+**155 testes aprovados, zero falhas, em 146,06 s**, com um aviso preexistente de descontinuação Starlette/AnyIO. Regressão pertinente, não integral. Execução exclusivamente em `lgpd_poc_teste`, com `LGPD_BANCO_TESTE=lgpd_poc_teste`:
+
+`python -m pytest testes/test_bloco12_form1_integral.py testes/test_bloco13_form1_integral.py testes/test_extensao_guarda_form1.py testes/test_extensao_medidas_form1.py testes/test_cartilha_local_form1.py testes/test_ajudas_cartilha_incremento_8w.py testes/test_ensaio_form1_integral.py testes/test_conferencia_interna_form1_integral_8ac.py testes/test_devolucao_reapresentacao_form1_integral_8af.py testes/test_confirmacao_conferencia_form1_integral_8ag.py testes/test_leitura_preenchimento_form1.py testes/test_distribuicao_pendencias_painel.py testes/test_interface.py testes/test_pre_validacao_form1_integral.py testes/test_idempotencia.py -q --tb=short -o addopts= -p no:cacheprovider`
+
+Abrange o ensaio dos 14 blocos, versões/legado, condicionais, ajudas e links, leitura/edição autorizadas, apresentação/devolução/reapresentação/confirmação, pré-validação consultiva, painel, idempotência e percurso nuclear HTTP. Não substitui inspeção visual nem reabre o aceite manual informado pelo usuário.
+
+### Inventário do FORM 2 no repositório — sem implementação
+
+| Aspecto | O que existe | O que não foi localizado/limite |
+|---|---|---|
+| Estrutura | `AGENTS.md` e README definem FORM 2 como análise/validação jurídica e institucional do mesmo Registro. `app/modelos.py` contém Instrumento, RascunhoInstrumento, VersaoInstrumento e AnaliseInstrumento; o comentário de tipo prevê FORM1–FORM4. | Nenhum módulo, rota ou template específico de FORM 2 localizado. A coluna genérica não significa formulário implementado. |
+| Contrato | Diretrizes de integração no README; decisões em `CONSOLIDACAO_FORM1_DECISOES_PENDENCIAS_2026-10-31.md` e `FLUXO_CONCLUSAO_FORM1_INTEGRAL_8T.md`. | Nenhum contrato próprio executável/versionado de FORM 2 localizado. `app/instrumentos.py` ainda importa validador/versão do FORM 1 sintético; não pode ser tratado como contrato pronto do FORM 2. |
+| Campos | A documentação descreve objetivos (competências, papéis, hipóteses legais e legitimidade); ajudas do FORM 1 delimitam a futura análise. | Nenhum catálogo canônico, IDs, matriz de obrigatoriedade ou esquema de respostas específico de FORM 2 localizado no repositório. Objetivos não equivalem a campos aprovados. |
+| Dependência do FORM 1 | Mesmo Registro e versões auditáveis; README prevê liberação após submissão válida do FORM 1, sem atribuição automática. Snapshots técnicos e conferência interna existem. | A submissão integral está bloqueada; fronteira de liberação, responsáveis e competências precisam de definição/autorização. Confirmação interna não libera FORM 2. |
+| Testes | Infraestrutura genérica e nuclear de comandos, idempotência, análise, versões e permissões; testes do FORM 1 e de sua conferência. | Nenhum teste funcional específico de FORM 2 localizado. Testar análise nuclear não prova implementação de FORM 2. |
+
+Inventário limitado ao repositório: não afirma inexistência de modelos editoriais nos documentos externos. Nenhum FORM 2 foi iniciado ou alterado.
+
+### Git e preservação do trabalho
+
+`main`, HEAD `664f4b3ca97f95139fdb0f66abf15cc18aac58a4`. Nove commits à frente, zero atrás da referência **local** `origin/main` (`26b9e97f0d6cdca4a19b342929128591947bab13`); sem fetch, sem confirmação nova do remoto e sem push:
+
+- `cea01e2` — ordenação canônica das pendências;
+- `e52c4af` — distinção APA/SAA;
+- `10bc4e9` — backlog da ampliação;
+- `c9af327` — explicações de 13.1;
+- `687dd3a` — pendências por Registro;
+- `4d886aa` — extensão MEDIDAS;
+- `9970803` — extensão GUARDA;
+- `1b070d5` — verificação FORMS01_05;
+- `664f4b3` — brasão institucional.
+
+Seis arquivos já estavam modificados antes desta verificação: README, CSS, componente da ajuda, testes dos Blocos 12/13 e este backlog. Foram preservados; somente este backlog recebeu conteúdo novo nesta tarefa. Alterações da ajuda 13.1 continuam sem commit. Nenhum novo código, contrato, migração ou funcionalidade, nenhum commit e nenhum push no FORMS01_07. A consolidação/versionamento das alterações locais pode ser autorizada separadamente.
+
+
+## 11/11/2026 — Estabilização após a revisão dos cadernos v3
+
+Esta entrada atualiza o inventário antigo acima; não o reescreve. Fonte: revisão do responsável pelo projeto sobre o pacote v3 e autorização de continuidade de 11/11/2026. A aprovação é técnica e demonstrativa; não equivale à deliberação institucional ou à D11.
+
+| Prioridade | Pendência | Critério verificável | Situação |
+|---|---|---|---|
+| P0 | Reversão das migrações | Recusar dados e dependentes antes de remover tabelas; reverter somente infraestrutura vazia, em transação, sem CASCADE | Implementada e verificada na execução integral de 11/11/2026 |
+| P0 | Controles candidatos do FORM 2 | Testes nomeados de D11 não homologada, F2-14.1 sem conclusão, F2-1.3.1 por divergência e persistência dos 12 campos do Bloco 2 | Testes específicos e bateria integral aprovados em 11/11/2026 |
+| P1 | Rótulos operacionais | “A confirmar” e complemento de F2-9.7.2; códigos e condições preservados | Corrigidos; verificação específica aprovada |
+| P1 | Adoção do FORM 1 REV22 | Inspecionar visualmente os 14 blocos e documentar o percurso do APA/ARP antes da apresentação | Pendente; fora da apresentação; não migrar registros automaticamente |
+| P1 | Caderno da D11 | Campos de manifestação também no quadro de abertura, além dos 71 itens | Pendente para a próxima rodada documental |
+| P1 | Referências da ANPD | Legenda orientativa clara e revisão dos vínculos no caderno | Pendente para a próxima rodada documental |
+| P1 | Evidência de regressão | Uma execução integral concluída após os ajustes, lista nominal e hashes inclusive de migracoes/; nenhuma soma de rodadas usada como aprovação | Concluída: 844 testes e 254 subtestes aprovados |
+| P1 | Publicação Git | Revisar o conjunto de alterações locais, separar arquivos publicáveis e confirmar exclusão dos catálogos | Pendente; nenhum push neste lote |
+
+A próxima rodada de PDFs depende da estabilização; não gerar nova versão apenas para repetir os resultados técnicos. Sigilo dos catálogos e dos cadernos permanece obrigatório.

@@ -4,6 +4,19 @@
 
 > ⚠️ **Somente dados fictícios.** Nenhum dado pessoal real, CPF, matrícula, senha ou token entra neste repositório, no código, nos testes ou nos logs.
 
+## Filas institucionais do FORM 2 — incremento demonstrativo REV22
+
+A Central inclui acesso às filas por unidade e ao painel do DPO. A confirmação
+interna do FORM 1 alimenta a fila demonstrativa e registra a ciência. O agente
+autorizado assume sua participação, usa os controles disponíveis dos 14 blocos
+e solicita manifestações próprias ao Jurídico, ao DPO ou a outra unidade.
+
+O instalador, as contas fictícias, a migração, os limites e a configuração de
+e-mail estão em [Filas do FORM 2 REV22](docs/arquitetura/FILAS_FORM2_REV22.md).
+A ciência por e-mail é configurável. A entrega real exige SMTP e agendamento.
+A conclusão institucional e os controles jurídicos continuam sujeitos à D11.
+As seções históricas abaixo descrevem os incrementos anteriores.
+
 ## Consulta à preparação do FORM 2
 
 O servidor seleciona um Registro autorizado e vê seu papel, o APA responsável, a versão histórica de origem e o último registro de autoria. O AAL designado pode retomar a anotação geral. Na unidade de guarda, os fatos são lidos segundo a edição da origem. O histórico integral e os detalhes de auditoria ficam disponíveis para consulta. A ausência do catálogo editorial local gera um aviso e mantém a anotação disponível. Respostas individualizadas da Etapa 1 ainda dependem de aprovação de contrato.
@@ -34,7 +47,9 @@ O APA acompanha administrativamente o Registro e pode assumir o preenchimento do
 
 No FORM 2 demonstrativo, o **AAL — Agente de Análise de Legitimidade** prepara a análise a partir de uma versão factual do FORM 1. A política `F2-DEMO-05-v1` exige habilitação individual vigente por Registro e finalidade. O APA em exercício autorizado a acompanhar seleciona a origem e designa o AAL previamente habilitado. Como AAL, a pessoa consulta somente as origens das preparações que lhe foram atribuídas e edita o respectivo rascunho. O servidor verifica essas autorizações. Cada preparação conserva autoria, histórico e vínculo com o snapshot identificado e lacrado.
 
-A denominação AAL foi aprovada no desenho funcional da PoC. Sua instituição como atribuição administrativa municipal depende de validação e ato competente.
+A denominação AAL foi aprovada no desenho funcional da PoC. Sua instituição como atribuição administrativa municipal depende de validação e ato competente. As atribuições previstas, os limites e a correspondência com os nomes históricos estão na [decisão AAL_01](docs/arquitetura/DECISAO_AAL_01_FORM2.md) e no [glossário de papéis](docs/contexto/glossary.md).
+
+Na futura análise de legitimidade, cabe ao Jurídico habilitado a manifestação jurídica, ao DPO a orientação de proteção de dados e à TI o subsídio técnico. A autoridade administrativa decide conforme a competência formal. GOV-09 distingue direitos do titular, incidentes e outros expedientes da ANPD. A proposta de assinatura conjunta depende de ato competente. GOV-10 distingue o acesso simplificado imediato e a declaração completa em até 15 dias (LGPD, art. 19), os procedimentos próprios da LAI e do habeas data e a comunicação de incidentes regulamentada pela ANPD. A definição do prazo depende do objeto, da norma aplicável e, no Poder Público, do art. 23, § 3º, da LGPD.
 
 O Dashboard LGPD é uma visão gerencial planejada. A Administração Central da TI é uma área técnica planejada para as 18 Secretarias, com controle de contas e vínculos, disponibilidade, integridade, auditoria e backups. O desenho prevê autenticação individual reforçada, preferencialmente com múltiplos fatores, e autorização específica para conteúdos e operações privilegiadas.
 
@@ -292,6 +307,10 @@ A sequência abaixo descreve o desenho institucional futuro. No ensaio atual, um
 Excepcionalmente, uma providência identificada no FORM 2 poderá ser registrada no FORM 4 antes da conclusão integral do FORM 3, desde que haja justificativa, autorização competente e rastreabilidade.
 
 A futura implementação deverá separar permissões de abertura, preenchimento, análise e validação; identificar a autoria de cada atuação; preservar versões, submissões, decisões e evidências; registrar pendências sem paralisar automaticamente etapas independentes; permitir a reavaliação das etapas afetadas por correções posteriores; e acompanhar as ações do FORM 4 até sua conclusão ou encerramento formal.
+
+O Bloco 1 do FORM 2 permite ao AAL confirmar a Secretaria, ajustar a unidade informada e avaliar a suficiência da origem histórica. A pergunta 1.3.1 abre por divergência da Secretaria ou quando o levantamento recebe “Não” ou “Parcialmente”. O rascunho aceita preenchimento parcial. Cargo e unidade funcional aguardam fonte autorizada.
+
+Na preparação, “Revisar os 14 blocos” abre o caderno local da REV18. A régua numerada permite selecionar o bloco. Cada item admite comentário, inclusive nos blocos jurídicos sujeitos à D11. O botão de salvamento registra uma revisão da preparação. As condições candidatas aparecem para conferência inclusive quando o ramo ainda não tem respostas.
 
 > **Limite do ensaio demonstrativo.** A preparação do FORM 2 preserva o contrato nuclear e o FORM 1 REV13. O uso institucional depende de autorização específica. FORMs 3 e 4 permanecem planejados.
 
@@ -874,7 +893,7 @@ O Encarregado de Dados registrou o aceite do M1a em 22/10/2026, com as limitaç�
 
 ### Legenda operacional: agentes e funções
 
-A tabela e o diagrama abaixo preservam as funções descritas no desenho anterior da PoC. Na nomenclatura funcional vigente, **APA** designa o agente autorizado a abrir e acompanhar o Registro. O **ARP** responde pelo levantamento factual e o **AAL** pela preparação da análise de legitimidade. A mesma pessoa pode exercer essas funções com as autorizações correspondentes e com identificação do papel em cada ato.
+A tabela e o diagrama abaixo preservam as funções descritas no desenho anterior da PoC. Na nomenclatura funcional vigente, **APA** designa o agente autorizado a abrir e acompanhar o Registro. O **ARP** responde pelo levantamento factual e o **AAL** pela preparação da análise de legitimidade. A mesma pessoa pode exercer essas funções com as autorizações correspondentes e com identificação do papel em cada ato. A participação do Jurídico, do DPO e da TI segue as competências descritas na [decisão AAL_01](docs/arquitetura/DECISAO_AAL_01_FORM2.md).
 
 Na organização municipal prevista para o levantamento, o **Agente Público Autorizado responsável pelo Registro** é o ponto focal da LGPD designado pela Secretaria. Ele abre o Registro, coordena o levantamento local, acompanha pendências e encaminha o FORM 1. O próprio Agente pode também integrar a equipe e preencher o formulário quando possuir essa autorização. A **equipe responsável pelo preenchimento** reúne ainda outros servidores que executam ou conhecem o serviço, processo ou atividade e descrevem a rotina real sob a coordenação funcional desse Agente. Essa coordenação não altera a subordinação administrativa existente na Secretaria.
 
@@ -965,7 +984,7 @@ No Incremento 6, os **Blocos 11 a 14** completaram os 128 identificadores do ras
 
 **INSTRUÇÃO_FORMS01_01 — Etapa A (05/11/2026):** a ajuda “Entenda esta pergunta” de `13.1` diferencia ausência de exposição identificada, não aplicabilidade e informação ainda a confirmar. Reutiliza o componente existente, sem criar referência editorial à Cartilha e sem alterar alternativas, exclusividade, matriz ou respostas. Verificação focal e regressão pertinente: **51 testes aprovados**; aceitação visual **NÃO VERIFICADA**.
 
-**Revisão focalizada dos Blocos 12 e 13 (06/11/2026, instrução também denominada FORMS01_06):** corrigida a ajuda de `13.1`: cada título e explicação formam um grupo vertical, isolado do estilo global de listas em três colunas. Textos, alternativas e exclusividade permanecem iguais. Inspeção focal no navegador com dados fictícios em base de teste confirmou a disposição vertical em tela larga/estreita e abertura/fechamento por teclado; não equivale a aceite humano integral. **94 testes aprovados**, com um aviso preexistente Starlette/AnyIO. Decisão funcional confirmada em 06/11/2026: manter a extensão GUARDA-v1 e sua adoção explícita pelo ARP, sem implementar a proposta de seleção múltipla em `12.3`. A REV13 original continua preservada; a extensão separa as quatro operações sem conversão automática de respostas. Não houve mudança de enunciados, opções, contratos, matriz ou persistência do Bloco 12. O cenário sem destinação definida foi reproduzido por teste de salvamento, reabertura e pré-validação, sem exigência artificial de evidência/destino.
+**Revisão focalizada dos Blocos 12 e 13 (06/11/2026, instrução também denominada FORMS01_06):** corrigida a ajuda de `13.1`: cada título e explicação formam um grupo vertical, isolado do estilo global de listas em três colunas. Textos, alternativas e exclusividade permanecem iguais. Inspeção focal no navegador com dados fictícios em base de teste confirmou a disposição vertical em tela larga/estreita e abertura/fechamento por teclado; não equivale a aceite humano integral. **94 testes aprovados**, com um aviso preexistente Starlette/AnyIO. Decisão funcional confirmada em 06/11/2026: manter a extensão GUARDA-v1 e sua adoção explícita pelo ARP, sem implementar a proposta de seleção múltipla em `12.3`. A REV13 original continua preservada; a extensão separa as quatro operações sem conversão automática de respostas. Não houve mudança de enunciados, opções, contratos, matriz ou persistência do Bloco 12. O cenário sem destinação definida foi reproduzido por teste de salvamento, reabertura e pré-validação, sem exigência artificial de evidência/destino. Diagnóstico e decisão registrada no [backlog](docs/planejamento/BACKLOG_AJUSTES_POC_AMPLIADA.md#revisão-focalizada-dos-blocos-12-e-13--06112026).
 
 **INSTRUÇÃO_FORMS01_03 — Extensão optativa do Bloco 13 (05/11/2026):** a versão `F1-C3-REV13-EXT-MEDIDAS-v1`, com matriz própria `MATRIZ-F1-REV13-EXT-MEDIDAS-v1`, separa guarda física (`13.2`) e bloqueio de estações (`13.2.1`), ambas facultativas e independentes. A REV13 original conserva seus 128 IDs; a extensão tem 129 IDs efetivos. O ARP autorizado adota explicitamente a extensão, preservando snapshot, enunciado e resposta agregada anteriores; as novas respostas começam vazias. Rascunhos, snapshots, consultas e eventos identificam a versão. Não há conversão automática, migração ou liberação de submissão. O catálogo/matriz declarativo e a compatibilidade estão na [especificação da extensão](docs/arquitetura/EXTENSAO_FORM1_REV13_MEDIDAS_V1.md). Verificação: **32 testes focalizados** e **624/624 na regressão integral**, sem falhas, somente em `lgpd_poc_teste`. Aceitação visual **NÃO VERIFICADA**.
 
@@ -1713,3 +1732,72 @@ Os SADs numerados e a Cartilha LGPD continuam como fontes oficiais no pacote ins
 ## Autoria
 
 Elaboração: **Ailton Vendramini** — Encarregado de Dados da Prefeitura Municipal de Hortolândia (Decreto Municipal nº 5.200/2023).
+
+## FORM 2 REV21.2 na demonstração local
+
+A preparação do AAL abre os 14 blocos pela régua numerada. O rascunho REV21.2 usa 255 identificadores do Mestre, conserva a origem vinculada e permite salvar blocos parciais. Salvar atualiza as perguntas dependentes. O caderno REV20 fica disponível para consulta na preparação. Os itens sujeitos à D11 admitem comentário para conferência. O catálogo REV21.2 fica em app/catalogos, fora da área estática.
+
+
+### Conferência demonstrativa da consolidação do FORM 2 — 11/11/2026
+
+Na fila do AAL, abrir uma participação assumida e selecionar **Conferir consolidação**
+(também acessível pelo Bloco 14). A página reúne pendências, complementações,
+manifestações e indicações para os FORMs 3 e 4. **Registrar conferência demonstrativa**
+preserva uma versão da síntese e das fontes, com autoria e histórico. Mudanças nas
+fontes exigem nova conferência. O registro não encerra o FORM 2 nem substitui D11;
+obrigatoriedade e classificação impeditiva ainda dependem de deliberação.
+
+As visitas na navegação são indicadas somente nos blocos abertos nesta sessão,
+e os cartões têm altura uniforme. O resumo não exige migração adicional.
+Detalhes: [contrato das filas](docs/arquitetura/FILAS_FORM2_REV22.md).
+
+
+### Identificação visual das perguntas — 11/11/2026
+
+As telas do FORM 1 apresentam prefixos como F1-1.2 no preenchimento, consulta, conferência e pendências, inclusive na origem consultada pelo FORM 2. A busca aceita F1-2.4 e 2.4. O formato é centralizado na macro de apresentação; chaves internas, campos enviados, âncoras e respostas existentes permanecem preservados. A numeração dos blocos não mudou. Documentos históricos publicados não foram reescritos.
+
+### Confirmação de salvamento do FORM 2 — 11/11/2026
+Após salvar um bloco, a própria tela confirma o salvamento. No Bloco 1, se a complementação estiver aberta, informa também: ‘Complementação solicitada à origem.’ O aviso é conferido contra o comando persistido, responsável, participação, bloco e versão. Não exige abrir a consolidação. Sete testes de filas passaram; inspeção visual desta alteração ainda não realizada.
+
+
+### Incremento demonstrativo REV22 — 11/11/2026
+
+Implementado por autorização do responsável pelo projeto nesta conversa: edição candidata do FORM 1 e respostas candidatas do FORM 2. Esta entrada atualiza o estado demonstrativo descrito anteriormente, sem modificar homologações históricas.
+
+- FORM 1: catálogo privado de 145 identificadores; adoção explícita pelo ARP atual, snapshot anterior preservado, equivalência WPP, retirada sem apagamento da 9.2.1 e arquivamento de respostas incompatíveis. Cinco campos novos começam vazios. Conjuntos dos blocos 3 e 10 possuem identidade própria. A edição antiga não pode sobrescrever rascunho adotado.
+- Acesso: no Registro, usar “Abrir edição candidata REV22 do FORM 1”. Depois de adotado, o Registro direciona à nova edição. A versão já vinculada ao FORM 2 não é substituída automaticamente. O fluxo de apresentação e confirmação interna pelo APA continua separado da homologação.
+- FORM 2: os 12 controles antes informativos do Bloco 2 recebem respostas; itens D11 aceitam respostas candidatas somente no percurso demonstrativo por filas. O resultado em F2-14.1 pode aparecer na consolidação como não homologado. A API antiga conserva a restrição D11.
+- Integração: origem REV22 inclui respostas dos conjuntos; faixa etária ausente em origem antiga é indicada como informação não disponível, sem inferência. Consulta F2-13.9 utiliza a resposta candidata de F2-5.7.
+- Evidência: 73 testes passaram, sem falha, erro ou salto; após ajustes finais de apresentação e entrada inválida, os cinco testes do incremento passaram novamente. Suítes: test_rev22_candidata, test_rev18_form1, test_leitura_preenchimento_form1, test_etapa1_form1_integral, test_respostas_form2_etapa1, test_form2_rev212, test_http_form2_rev212, test_filas_form2_rev22 e test_consolidacao_form2. Execução exclusiva em lgpd_poc_teste.
+- Referência de código: HEAD 6829688c4349e8ea419cda7343d104fb18c1e845 mais alterações locais não commitadas. Os testes se referem à árvore local, não somente ao HEAD. Catálogo privado e cadernos não foram publicados.
+- Conferência visual: Bloco 2 inspecionado no navegador lateral; inspeção visual integral dos 14 blocos da nova edição do FORM 1 NÃO VERIFICADA. Rotas dos 14 blocos e percurso até origem do FORM 2 verificados por testes.
+- Limites: obrigatoriedade e encerramento institucional continuam pendentes; pré-validação REV22 é consultiva. A cobertura não é uma homologação semântica exaustiva de todas as condições. Não houve envio de e-mail, implantação dos FORMs 3/4, alteração de credenciais ou migração automática dos registros existentes.
+
+### Auditoria dos cadernos v3 — 11/11/2026
+
+Executada a bateria integral: 821 testes nomeados (819 passaram, uma falha e um ignorado), mais 254 subtestes aprovados. O XML contabiliza 1.075 verificações ao incluir os subtestes. A falha em test_snapshot_form1_integral era a preparação da base anterior à migração: as tabelas REV22 dependentes do snapshot não eram removidas antes dele. O teste foi corrigido com remoção e recriação explícitas dos dependentes, exclusivamente na base de testes, mantendo as verificações de imutabilidade e recusa de reversão com snapshots.
+
+A rodada complementar abrangeu test_snapshot_form1_integral, test_catalogo_form2_rev18, test_filas_form2_rev22 e test_consolidacao_form2, com o Mestre REV18 correto configurado. Todos passaram. Os resultados da rodada integral e da complementar permanecem separados no manifesto privado v3; não se declara nova rodada integral após corrigir o teste. Nenhum código de aplicação foi alterado nesta correção.
+
+O manifesto inclui hashes de migracoes/, .gitignore, estados anteriores e posteriores à correção e cada resultado de teste. Os três catálogos privados foram conferidos por git check-ignore e git ls-files: ignorados e não versionados. A comparação privada dos 255 itens confirma os enunciados e instruções; há uma diferença de rótulo em F2-9.7.2 (ausência de “especificar” no sistema), registrada para correção editorial. Advertências da rodada: depreciação de alias AnyIO e identificador de operação OpenAPI duplicado em rota legada; não foram tratadas como testes aprovados nem corrigidas neste incremento.
+
+
+
+### Estabilização e execução integral única — 11/11/2026
+
+Após os ajustes, uma única bateria integral concluiu com **844 testes nomeados e 254 subtestes aprovados**, sem falhas, erros ou testes ignorados (1.098 verificações no XML; 777,691 segundos). O Mestre REV18 foi informado explicitamente por MESTRE_REV18_DOCX. Este resultado substitui o uso de cobertura reconciliada como evidência corrente; não soma a rodada anterior com a complementar. HEAD: 6829688c4349e8ea419cda7343d104fb18c1e845 mais alterações locais. Os hashes dos 257 arquivos registrados, inclusive migracoes/, permaneceram iguais durante a execução.
+
+Foram acrescentados 23 casos nomeados em test_estabilizacao_form2.py e test_reversao_segura_form2.py: persistência e reabertura dos 12 campos do Bloco 2 pela rota HTTP; respostas D11 não homologadas; F2-14.1 sem encerramento; F2-1.3.1 por divergência mesmo com origem suficiente; complemento de F2-9.7.2; rótulos estáveis; recusa de reversão com dados/dependentes e reversão transacional da infraestrutura vazia. Reversão não foi executada na base demonstrativa.
+
+Os 176 rótulos operacionais “A CONFIRMAR” foram corrigidos para “A confirmar”, preservando códigos, condições e demais campos; a mensagem de exclusividade acompanha a grafia. F2-9.7.2 exibe “Outra hipótese do art. 33 (especificar)” e conserva o complemento salvo. A alteração dos rótulos do catálogo privado foi documentada com hashes anterior/posterior e checksum atualizado, sem reescrever documentos históricos.
+
+Os quatro catálogos privados continuam ignorados e não versionados. Manifesto, lista nominal, log e XML neutro encontram-se em work/estabilizacao do workspace de elaboração, para uso interno. Nenhum push, envio SMTP ou nova rodada de PDFs. Permanecem os avisos de depreciação AnyIO e operação OpenAPI duplicada, registrados sem ocultação. A inspeção visual integral do FORM 1 REV22 e a documentação do percurso APA/ARP estão pendentes; sua adoção permanece fora da apresentação. Aprovação automatizada não equivale à D11 ou ao aceite institucional.
+
+
+### Pacote público de continuidade — 11/11/2026
+
+O repositório publica a implementação demonstrativa, os testes e a documentação técnica. Catálogos privados, Documentos-Mestres, cadernos e matrizes integrais de correspondência permanecem na instalação autorizada e não acompanham o clone. Os diretórios locais output/, outputs/ e work/ também não são publicados. A edição candidata não constitui entrega institucional concluída.
+
+A bateria integral de 844 testes e 254 subtestes foi executada na instalação autorizada, com os insumos privados. Para reproduzi-la é necessário obter os catálogos por canal autorizado, a matriz documental em docs/planejamento/GOV_FORMS_REV18_02/correspondencia_v1.csv e configurar MESTRE_REV18_DOCX. Esses dados não devem ser adicionados ao Git para fazer os testes passarem. Um clone público sem esses insumos não reproduz integralmente a bateria documental e das edições candidatas. Os testes públicos usam dados fictícios; a verificação literal de um enunciado privado foi substituída pela comparação do seu SHA-256, preservando a exigência de igualdade sem reproduzir o texto.
+
+A publicação não migra registros existentes, não envia e-mails e não habilita produção. Permanecem pendentes a revisão visual integral do FORM 1, o fechamento funcional/visual do FORM 2, a consolidação documental dos FORMs 3 e 4 e as decisões institucionais/D11. A configuração SMTP permanece externa ao código.

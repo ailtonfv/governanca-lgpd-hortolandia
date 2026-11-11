@@ -3,7 +3,7 @@
 | Termo | Significado neste projeto |
 |---|---|
 | Agente | Pessoa que atua no sistema com identidade, designação e alcance institucional |
-| AAL — Agente de Análise de Legitimidade | Prepara a análise do FORM 2 mediante habilitação vigente e designação pelo APA para o Registro e a origem factual correspondentes. Papel aprovado no desenho da PoC. Sua instituição administrativa municipal depende de validação e ato competente. |
+| AAL — Agente de Análise de Legitimidade | Prepara a análise do FORM 2 mediante habilitação vigente e designação pelo APA para o Registro e a origem factual correspondentes. Papel aprovado no desenho da PoC. Sua instituição administrativa municipal depende de validação e ato competente. Ver [decisão AAL_01](../arquitetura/DECISAO_AAL_01_FORM2.md). |
 | Alcance institucional | Secretarias e funções em que o agente pode atuar naquele momento |
 | APA — Agente Público Autorizado | Abre o Registro, acompanha seu ciclo administrativo e, quando em exercício e autorizado, designa o AAL previamente habilitado. |
 | ARP — Agente Responsável pelo Preenchimento | Preenche o levantamento factual do FORM 1 e apresenta uma versão para conferência interna. |
