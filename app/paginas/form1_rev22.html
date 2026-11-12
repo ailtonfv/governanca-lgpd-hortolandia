@@ -1,6 +1,6 @@
 {% extends 'base.html' %}{% block conteudo %}
-<link rel="stylesheet" href="{{ url_for('estaticos',path='/filas_form2.css') }}">
-<div class="filas-form2"><h1>FORM 1 · Bloco {{ bloco }}</h1>
+<link rel="stylesheet" href="{{ url_for('estaticos',path='/filas_form2.css') }}?v=20261112">
+<div class="filas-form2 form1-rev22"><h1>FORM 1 · Bloco {{ bloco }}</h1>
 <p><strong>{{ registro.codigo_lgpd }}</strong> · {{ identidade.nome }} · REV22 candidata</p>
 <div class="acoes-fila-form2"><a class="botao-link-secundario" href="/painel?conta_id={{ conta_id|urlencode }}">Voltar ao Painel</a></div>
 {% if not adotada %}
@@ -20,9 +20,9 @@
 {% if not q.ativa %}<p>Disponível após salvar a resposta de origem correspondente.</p>{% endif %}
 {% if q.id=='9.2.2' %}<p>F1-9.2.1 foi retirada; suas respostas antigas permanecem no histórico.</p>{% endif %}
 {% if q.kind=='multi' %}<input type="hidden" name="r:{{ q.id }}" value="">{% for a in q.options %}<label><input type="checkbox" name="r:{{ q.id }}" value="{{ a }}" {% if a in (q.valor or []) %}checked{% endif %}>{{ a }}</label>{% endfor %}
-{% elif q.kind in ('single','unit') %}<select aria-label="{{ q.question }}" name="r:{{ q.id }}"><option value="">Sem resposta</option>{% if q.kind=='unit' %}{% for u in unidades %}<option value="{{ u.id }}" {% if q.valor==u.id %}selected{% endif %}>{{ u.nome }}</option>{% endfor %}{% else %}{% for a in q.options %}<option {% if q.valor==a %}selected{% endif %}>{{ a }}</option>{% endfor %}{% endif %}</select>
-{% else %}<textarea name="r:{{ q.id }}" aria-label="{{ q.question }}" maxlength="2000">{{ q.valor or '' }}</textarea>{% endif %}
-{% if q.options %}<label>Complemento, quando solicitado pela alternativa<input name="c:{{ q.id }}" value="{{ q.complemento }}" maxlength="1000"></label>{% endif %}
+{% elif q.kind in ('single','unit') %}<select aria-label="F1-{{ q.id }} — {{ q.question }}" name="r:{{ q.id }}"><option value="">Sem resposta</option>{% if q.kind=='unit' %}{% for u in unidades %}<option value="{{ u.id }}" {% if q.valor==u.id %}selected{% endif %}>{{ u.nome }}</option>{% endfor %}{% else %}{% for a in q.options %}<option {% if q.valor==a %}selected{% endif %}>{{ a }}</option>{% endfor %}{% endif %}</select>
+{% else %}<textarea name="r:{{ q.id }}" aria-label="F1-{{ q.id }} — {{ q.question }}" maxlength="2000">{{ q.valor or '' }}</textarea>{% endif %}
+{% if q.options %}<label>Complemento, quando solicitado pela alternativa<input type="text" name="c:{{ q.id }}" value="{{ q.complemento }}" maxlength="1000"></label>{% endif %}
 <details><summary>Orientação do item</summary><p style="white-space:pre-line">{{ q.help }}</p></details></fieldset>{% endfor %}
 <div class="acoes-fila-form2"><button>Salvar {{ 'conjunto' if repetida else 'bloco' }}</button></div></fieldset></form>
 {% endfor %}

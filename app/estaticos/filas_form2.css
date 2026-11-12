@@ -43,3 +43,5 @@
 .filas-form2 .respostas-origem-form2 dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 
 .filas-form2 .confirmacao-salvamento { padding: 1rem; border-left: 4px solid #166534; background: #edf7ef; color: #14532d; font-weight: 600; }
+
+.form1-rev22 input[type="text"] { display: block; box-sizing: border-box; width: 100%; max-width: 100%; margin-top: .4rem; padding: .65rem; border: 1px solid var(--borda); border-radius: 8px; font: inherit; }

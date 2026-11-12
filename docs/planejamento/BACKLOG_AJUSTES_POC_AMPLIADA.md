@@ -433,3 +433,25 @@ Esta entrada atualiza o inventário antigo acima; não o reescreve. Fonte: revis
 | P1 | Publicação Git | Revisar o conjunto de alterações locais, separar arquivos publicáveis e confirmar exclusão dos catálogos | Pendente; nenhum push neste lote |
 
 A próxima rodada de PDFs depende da estabilização; não gerar nova versão apenas para repetir os resultados técnicos. Sigilo dos catálogos e dos cadernos permanece obrigatório.
+
+## 12/11/2026 — Retomada das pendências e limites da entrega
+
+Atualização do estado corrente, preservando os registros anteriores. Os commits 81d8245, 357631f e b115b31 já haviam publicado o conjunto permitido de 11/11; a indicação anterior de push pendente não é mais o estado corrente.
+
+| Pendência | Resultado desta rodada | O que permanece |
+|---|---|---|
+| FORM 1 REV22: inspeção e percurso | Abertura dos 14 blocos em duas larguras, capturas e medidas locais; complemento ampliado e prefixo F1 nos nomes acessíveis; guia APA/ARP documentado | Não cobre todas as ramificações, leitor de tela ou aceite humano; nenhuma adoção na base do usuário |
+| FORM 2: conferência | Abertura dos 14 blocos nas mesmas duas larguras; regressão de filas e consolidação | Ensaio humano completo, deliberação institucional e D11 |
+| Caderno D11 | Edição privada v4 com manifestação nas decisões iniciais e nos 71 itens; legenda orientativa e três links oficiais | Homologação; conteúdo integral de dois PDFs ANPD não recuperado automaticamente por timeout/tamanho |
+| FORMs 3/4: comentários | Cadernos privados candidatos v4: 77 e 39 identificadores, preservando os 67 e 31 da fonte e propondo 10 e 8 subcampos | Discussão das competências, aprovação e incorporação ao Mestre; implementação não realizada |
+| Dashboard | Especificação candidata de sete telas, fontes, contagens e ajustes dos casos de demonstração | Implementação e testes das sete telas não realizados |
+| SMTP | Nenhum envio real nesta rodada | Configuração autorizada e teste institucional com a TI |
+| Cartilha integral | Mantida a decisão de incorporar os quatro FORMs ao terminarem | Não reproduzir catálogo privado no repositório público |
+
+Em 12/11, o responsável pelo projeto informou não haver ato definindo autoridade para aceitar risco, verificar ação e aprovar cancelamento/prorrogação, e pediu discussão detalhada. Não houve atribuição dessas competências ao DPO ou a outro papel. O relato não substitui pesquisa normativa nem ato de designação.
+
+Regressão proporcional à correção de apresentação: **24 testes aprovados**, 37,85 s, em `lgpd_poc_teste`: `test_rev22_candidata.py`, `test_filas_form2_rev22.py`, `test_consolidacao_form2.py`. Um aviso preexistente de depreciação AnyIO. Esta execução não é outra bateria integral. A evidência integral de 11/11 permanece separada.
+
+Inspeção: 56 aberturas (28 blocos × duas larguras), 1706 e 533 pixels CSS efetivos, sem transbordamento horizontal da página nas medidas. A régua possui rolagem própria. Capturas e documentos integrais ficam no workspace privado. Verificar todas as combinações condicionais e obter aceite continuam pendentes.
+
+Referências: [percurso APA/ARP/AAL](../operacao/PERCURSO_REV22_APA_ARP_AAL.md) e [dashboard candidato](DASHBOARD_SETE_TELAS_CANDIDATA.md). Não declarar as pendências integralmente encerradas.
