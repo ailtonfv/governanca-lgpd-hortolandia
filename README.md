@@ -1835,3 +1835,11 @@ A publicação não migra registros existentes, não envia e-mails e não habili
 A conferência demonstrativa abriu os 14 blocos de cada um dos FORMs 1 e 2 em duas larguras. O campo de complemento da edição REV22 do FORM 1 foi ampliado; os nomes acessíveis das seleções e textos incluem F1. Foram aprovados 24 testes focalizados de adoção, filas e consolidação, exclusivamente na base de testes. Não se trata de nova bateria integral nem aceite de todas as ramificações.
 
 O [percurso APA/ARP/AAL](docs/operacao/PERCURSO_REV22_APA_ARP_AAL.md) e a [especificação candidata das sete telas do dashboard](docs/planejamento/DASHBOARD_SETE_TELAS_CANDIDATA.md) estão documentados. Os cadernos privados dos FORMs 3/4 e da D11 foram revisados; não integram o clone público. FORMs 3/4 e dashboard continuam sem implementação nesta rodada; competências, homologação e SMTP permanecem pendentes. O [registro atualizado de pendências](docs/planejamento/BACKLOG_AJUSTES_POC_AMPLIADA.md#12112026--retomada-das-pendências-e-limites-da-entrega) distingue entregas e limites.
+
+### Atualização coordenada dos documentos — 12/11/2026
+
+Cartilha REV30.16 candidata, Mestre REV22.0 candidata v6 e palestra v16.8 candidata passam a compartilhar a mesma orientação sobre papéis, filas, ciência do DPO, risco residual, verificação e prazos. As versões anteriores e os controles históricos foram preservados. O [registro técnico de governança candidata](docs/planejamento/GOVERNANCA_RISCOS_ACOES_CANDIDATA.md) distingue propostas, estado demonstrativo e decisões pendentes.
+
+O Mestre reúne 145 itens do FORM 1, 255 do FORM 2, 77 propostos do FORM 3 e 39 propostos do FORM 4. As contagens dos FORMs 3/4 representam especificação, não implementação. Autoridades, delegações, escala e triagem, verificador, prazos e escalonamento dependem de deliberação; D11 permanece pendente. O DPO orienta e manifesta-se, sem receber automaticamente competência para aceitar risco ou aprovar prorrogação/cancelamento.
+
+Esta atualização é documental: não migra respostas, não substitui a Cartilha servida pelas ajudas, não ativa SMTP e não implementa FORMs 3/4 ou dashboard. Os documentos integrais e seus catálogos continuam privados. A incorporação futura da Cartilha na aplicação exige mapa de vínculos versionado e testes dos destinos. Não foi executada nova bateria de aplicação nesta revisão.
