@@ -1,7 +1,7 @@
 <div class="fluxo-conferencia{% if fluxo_compacto %} fluxo-conferencia-compacto{% endif %}" role="group" aria-label="Percurso da conferência interna">
   <ol class="trajeto-conferencia">
     <li {% if fluxo.atual == 'preencher' %}aria-current="step"{% endif %}><strong>ARP preenche</strong>{% if fluxo.atual == 'preencher' %}<span>Etapa atual</span>{% endif %}</li>
-    <li><strong>ARP apresenta uma versão</strong><span>{% if fluxo.versao is not none %}Apresentação registrada · rascunho {{ fluxo.versao }}{% else %}Ao apresentar, preserva a versão para consulta{% endif %}</span></li>
+    <li><strong>ARP apresenta uma versão</strong><span>{% if fluxo.versao is not none %}Apresentação registrada{% if not ocultar_numeros_versao|default(false) %} · rascunho {{ fluxo.versao }}{% endif %}{% else %}Ao apresentar, preserva a versão para consulta{% endif %}</span></li>
     <li {% if fluxo.atual == 'conferir' %}aria-current="step"{% endif %}><strong>APA confere</strong>{% if fluxo.atual == 'conferir' %}<span>Etapa atual — decidir</span>{% endif %}</li>
   </ol>
   <svg class="conexoes-decisao-conferencia" viewBox="0 0 600 32" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M500 0 V10 H300 V22 M150 32 V22 H450 V32" /></svg>
@@ -10,7 +10,7 @@
     <li {% if fluxo.atual == 'devolver' %}aria-current="step"{% endif %}><strong>Devolver para ajustes</strong><span>APA justifica → ARP corrige → ARP pode reapresentar nova versão.</span>{% if fluxo.atual == 'devolver' %}<strong>Situação atual</strong>{% endif %}</li>
     <li {% if fluxo.atual == 'confirmar' %}aria-current="step"{% endif %}><strong>Confirmar conferência interna</strong><span>APA confere aquela versão → histórico preservado → continuidade conforme o fluxo vigente.</span>{% if fluxo.atual == 'confirmar' %}<strong>Situação atual</strong>{% endif %}</li>
   </ul>
-  <p><strong>Agora:</strong> {{ fluxo.estado }}.{% if fluxo.versao is not none %} {{ "Versão conferida" if fluxo.atual == "confirmar" else "Versão apresentada" }}: <strong>{{ fluxo.versao }}</strong>.{% endif %}</p>
+  <p><strong>Agora:</strong> {{ fluxo.estado }}.{% if fluxo.versao is not none and not ocultar_numeros_versao|default(false) %} {{ "Versão conferida" if fluxo.atual == "confirmar" else "Versão apresentada" }}: <strong>{{ fluxo.versao }}</strong>.{% endif %}</p>
   {% if fluxo.decidida_por %}<p><strong>Decisão registrada por:</strong> {{ fluxo.decidida_por }}{% if not fluxo_compacto %} · {{ fluxo.decidida_em }}{% endif %}.</p>{% endif %}
   {% if fluxo_compacto %}
   {% if fluxo.atual == 'confirmar' %}<p>A conferência desta apresentação foi encerrada. Não existe decisão de conferência pendente. O ARP {{ fluxo.arp }} permanece responsável pelo rascunho, conforme as permissões vigentes.</p>
@@ -20,6 +20,6 @@
   <p><strong>Responsável atual:</strong> {{ fluxo.responsavel }}</p>
   <p class="ajuda"><strong>APA em exercício:</strong> {{ fluxo.apa }}<br><strong>ARP vigente:</strong> {{ fluxo.arp }}</p>
   {% endif %}
-  {% if fluxo.versao is not none and fluxo.versao_atual != fluxo.versao %}<p class="aviso-leitura">O rascunho atual está na versão {{ fluxo.versao_atual }}. A conferência refere-se exclusivamente à versão {{ fluxo.versao }}, sem confirmar alterações posteriores.</p>{% endif %}
+  {% if fluxo.versao is not none and fluxo.versao_atual != fluxo.versao %}<p class="aviso-leitura">O rascunho recebeu alterações posteriores. Esta conferência se refere exclusivamente às informações apresentadas, sem confirmar alterações posteriores.</p>{% endif %}
   <p class="ajuda">{% if not fluxo_compacto %}Este desenho explica o percurso; somente a indicação “atual” representa a situação registrada. {% endif %}Conferência, devolução e confirmação são atos internos: não são aprovação jurídica, homologação, submissão institucional ou declaração de conformidade à LGPD.</p>
 </div>

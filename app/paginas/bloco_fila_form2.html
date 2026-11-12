@@ -2,10 +2,12 @@
 {% extends "base.html" %}{% block conteudo %}
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/filas_form2.css') }}"><div class="filas-form2">
 <h1>FORM 2 · Bloco {{ numero }}</h1>
+{% include '_atuacao_form2.html' %}
 {% if confirmacao %}<p id="confirmacao-salvamento" class="confirmacao-salvamento" role="status">{{ confirmacao }}</p>{% endif %}
 <p><strong>{{ registro.codigo_lgpd }}</strong> · {{ pessoa.nome }}</p>
 <div class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/participacoes/{{ p.id }}?conta_id={{ conta_id|urlencode }}">Voltar à participação</a></div>
 {% include '_regua_fila_form2.html' %}
+{% if numero in (1,14) %}<div class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/participacoes/{{ p.id }}/governanca?conta_id={{ conta_id|urlencode }}">Ver pendências e respostas</a></div>{% endif %}
 {% if numero == 14 %}<article><h2>Conferência da consolidação</h2><p>Reúna as respostas salvas, as complementações e as manifestações das áreas. Salve o bloco antes de abrir a conferência.</p><div class="acoes-fila-form2"><a class="botao-link" href="/form2/participacoes/{{ p.id }}/consolidacao?conta_id={{ conta_id|urlencode }}">Conferir consolidação</a></div></article>{% endif %}
 <p>Demonstração com dados fictícios. As respostas candidatas, inclusive as jurídicas e o resultado em F2-14.1, são rascunhos não homologados. Salvar não conclui a validação institucional.</p>
 <details class="origem-fila-form2"><summary>Versão de origem do FORM 1 · versão {{ numero_origem }}</summary>

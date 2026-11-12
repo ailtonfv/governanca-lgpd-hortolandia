@@ -22,6 +22,8 @@ def montar_aviso(aviso, base_url):
         f"Fila destinatária: {dados['fila_id']}\n"
         f"Entrada: {dados['entrada_em']}\n"
         f"Situação no encaminhamento: {titulo}\n"
+        + (f"Complemento de manifestação: {dados['manifestacao_anterior_id']}\n" if dados.get("complemento") else "")
+        +
         f"Acesso institucional: {base_url.rstrip('/')}/form2/filas\n")
     return mensagem
 

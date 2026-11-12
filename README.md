@@ -1843,3 +1843,46 @@ Cartilha REV30.16 candidata, Mestre REV22.0 candidata v6 e palestra v16.8 candid
 O Mestre reúne 145 itens do FORM 1, 255 do FORM 2, 77 propostos do FORM 3 e 39 propostos do FORM 4. As contagens dos FORMs 3/4 representam especificação, não implementação. Autoridades, delegações, escala e triagem, verificador, prazos e escalonamento dependem de deliberação; D11 permanece pendente. O DPO orienta e manifesta-se, sem receber automaticamente competência para aceitar risco ou aprovar prorrogação/cancelamento.
 
 Esta atualização é documental: não migra respostas, não substitui a Cartilha servida pelas ajudas, não ativa SMTP e não implementa FORMs 3/4 ou dashboard. Os documentos integrais e seus catálogos continuam privados. A incorporação futura da Cartilha na aplicação exige mapa de vínculos versionado e testes dos destinos. Não foi executada nova bateria de aplicação nesta revisão.
+
+### Fila do FORM 2 — ajuste de apresentação de 12/11/2026
+
+Um cartão por Registro reúne as participações autorizadas e o acesso secundário “Ver pendências e respostas”. “Abrir FORM 2” é a ação principal. O encaminhamento da origem confirmada só aparece para APA em exercício; a autorização por Registro continua sendo verificada no servidor. Não altera respostas ou histórico.
+
+Na tela de pendências, a linguagem visível usa “nova versão do FORM 1”. Os comandos ficam à direita, os identificadores técnicos no histórico e a decisão de versão só aparece quando há resposta aceita. A fila distingue destinatário não definido de espera de resposta. Inspeção visual deste ajuste: pendente de vistoria com o usuário.
+
+As telas de participação, blocos e pendências identificam o servidor, a função assumida e a unidade. A indicação de edição depende de responsabilidade, autorização vigente e estado em atendimento; origem e participação ainda não assumida não são apresentadas como AAL em exercício.
+
+O contrato de pendências e retorno está em `docs/arquitetura/CONTRATO_PENDENCIAS_FORM2_V9.md`. Na vistoria de 12/11/2026, foram separados responsável/prazo, vínculos e retirada; a chave interna de cada formulário foi ajustada ao limite de 64 caracteres. A inspeção visual com massa sintética em 1366 e 600 pixels verificou alinhamento dos comandos e ausência de rolagem horizontal. A bateria completa tem resultado próprio; isso não representa homologação D11.
+
+Verificação de 12/11/2026: bateria completa com 1.118 aprovados, 2 expectativas de interface desatualizadas e 1 cotejo REV18 pulado. Após correções, rodada final dos módulos afetados: 61 aprovados, sem falhas. Não equivale a uma segunda execução integral nem à homologação institucional.
+
+### Retorno da origem — navegação (12/11/2026)
+
+A tela de pendências oferece à origem o botão **Complementar FORM 1**, à direita, para a edição REV22 do mesmo Registro e conta, com a régua existente dos 14 blocos. A orientação distingue complementar/apresentar ao APA/devolver da conferência e escolha de versão pelo AAL. A adoção da REV22, quando necessária, permanece explícita; o link não altera respostas, permissões ou versões históricas.
+
+A preparação do rascunho usa linguagem orientada ao servidor: **Preparar o FORM 1 para complementação** e **Atualizar e continuar**. A revisão candidata fica em Detalhes da versão. Mantidos a confirmação obrigatória, o comando de adoção explícita e a preservação histórica (12/11/2026).
+
+Na preparação e no Bloco 1, retirado o painel Detalhes da versão e incluído acesso contextual ao tópico Levantamento da realidade da Cartilha local conferida (REV30.13). Link em outra aba, somente quando a seção está disponível e o acesso é local. Não representa atualização da integração para edições posteriores da Cartilha.
+
+FORM 1 REV22: salvamento fixo no rodapé, à direita, disponível somente durante edição autorizada. Botões associados aos formulários existentes; conjuntos dos blocos 3 e 10 têm comando separado. A apresentação ao APA aparece na mesma barra após salvar, conforme a sequência descrita abaixo.
+
+Apresentação ao APA: botão azul exibido após salvamento bem-sucedido da versão corrente. Nova edição o oculta até salvar novamente. Indicador de navegação não concede autorização; validações de domínio permanecem vigentes.
+
+Barra de ações do FORM 1: Salvar bloco precede Apresentar ao APA, que aparece na mesma barra após salvar e é ocultado por nova edição; em tela estreita, a ordem permanece vertical. Comandos continuam em formulários separados.
+
+Padrão global de cursor: mãozinha em ações habilitadas, indisponível em controles desabilitados e espera durante processamento sinalizado. Campos de texto preservam o cursor de edição.
+
+Durante a espera pela conferência, o botão Consultar conferência interna no FORM 1 REV22 aparece somente ao APA em exercício da unidade do Registro. A origem mantém o aviso de espera; autorização do destino permanece inalterada.
+
+Retorno da origem (12/11/2026): a seleção da apresentação confirmada identifica autor, data da apresentação e data de confirmação pelo APA; o número interno continua preservado. A ação foi denominada Enviar resposta ao solicitante. Envio, aceite e adoção da nova fonte continuam atos distintos.
+
+Conferência da resposta pelo AAL: antes da justificativa e das ações de aceite ou novo complemento, a tela apresenta o texto enviado pela origem e sua autoria. Uma consulta expansível permite ler o FORM 1 confirmado vinculado àquela resposta, incluindo itens sem resposta. A leitura usa a apresentação histórica com verificação de integridade, não o rascunho atual. O acesso integral permanece restrito ao AAL principal autorizado; não amplia o escopo das participações temáticas. Respostas legadas sem texto de envio identificável recebem aviso explícito, sem reconstrução inventada.
+
+Verificação focal de 12/11/2026: 50 testes passaram nos módulos test_rev22_candidata, test_governanca_form2_v9, test_confirmacao_conferencia_form1_integral_8ag e test_conferencia_interna_form1_integral_8ac. Evidência: evidencias/retorno_vistoria_2026_11_12.xml. O teste de adoção foi ampliado e reexecutado com sucesso para conferir ordem e unicidade dos botões, apresentação oculta antes de salvar e acesso à conferência exclusivo do APA (evidencias/barra_apa_vistoria_2026_11_12.xml). Banco isolado de testes, com dados fictícios. Esta bateria é parcial, não substitui a suíte completa nem a vistoria visual; os novos rótulos ainda aguardam conferência visual no navegador. O processo demonstrativo do usuário não foi enviado ou decidido por esta verificação.
+
+
+### Verificação antes da publicação — 12/11/2026
+
+Executada a bateria integral na base isolada de testes: 1.125 verificações no XML, sendo 1.119 aprovadas, cinco falhas e um cotejo documental ignorado por ausência da configuração do Mestre REV18. As falhas identificaram uma expectativa antiga do diálogo e quatro consultas históricas sem a identificação da estrutura. A identificação, o número interno e o lacre foram restaurados em uma seção recolhida de histórico, preservando autor e data nas decisões do APA.
+
+Após a correção, os seis módulos envolvidos foram reexecutados integralmente: `test_clareza_conferencia`, `test_extensao_guarda_form1`, `test_extensao_medidas_form1`, `test_rev18_form1`, `test_confirmacao_conferencia_form1_integral_8ag` e `test_conferencia_interna_form1_integral_8ac`. Resultado: 77 testes aprovados, sem falhas, erros ou testes ignorados. A evidência está no XML local `evidencias/pre_push_correcao_2026_11_12.xml`; a rodada inicial está em `evidencias/pre_push_2026_11_12.xml`. Esta repetição focal não é uma segunda bateria integral. As evidências e os catálogos privados permanecem fora do Git; os testes não modificaram a base demonstrativa nem enviaram e-mails. Permanecem os avisos de depreciação e de identificadores OpenAPI duplicados, além das pendências de homologação e aceite visual.

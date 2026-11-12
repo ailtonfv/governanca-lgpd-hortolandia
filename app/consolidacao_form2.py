@@ -16,6 +16,9 @@ CHAVE = "consolidacao_demonstrativa_v1"
 
 def _principal(sessao, conta_id, participacao_id, bloquear=False):
     pessoa = pessoa_ativa(sessao, conta_id)
+    if bloquear:
+        from app.segregacao_form2_v9 import bloquear_registro
+        bloquear_registro(sessao, sessao.get(ParticipacaoForm2, participacao_id))
     consulta = select(ParticipacaoForm2).where(ParticipacaoForm2.id == participacao_id)
     if bloquear:
         consulta = consulta.with_for_update().execution_options(populate_existing=True)
@@ -28,6 +31,7 @@ def _principal(sessao, conta_id, participacao_id, bloquear=False):
 
 def _fontes(sessao, p, bloquear=False):
     from app.origem_form2 import ler_origem
+    from app.governanca_form2_v9 import estado
     origem = ler_origem(sessao, p.registro_id, p.snapshot_id)
     conteudo = deepcopy(p.conteudo or {})
     conteudo.pop(CHAVE, None)
@@ -44,9 +48,11 @@ def _fontes(sessao, p, bloquear=False):
         "ramos_origem": sorted(ramos_origem(origem)), "regras": mapa_regras(carregar_contrato()),
         "responsavel_id": p.responsavel_id, "estado": p.estado,
         "conteudo": conteudo, "manifestacao_principal": p.manifestacao,
+        "governanca_v9": estado(sessao, p),
         "alternativas_bloco14": {q["id"]: {a["codigo"]: a["rotulo"] for a in q["alternativas"]}
             for q in definicao_revisao(14)["itens"]},
         "consultas": [{"id": c.id, "tipo": c.tipo, "unidade_id": c.unidade_id,
+            "snapshot_id": c.snapshot_id, "contexto_form2": c.conteudo or {},
             "responsavel_id": c.responsavel_id, "estado": c.estado, "versao": c.versao,
             "questao": c.questao, "manifestacao": c.manifestacao,
             "concluida_em": c.concluida_em.isoformat() if c.concluida_em else None}
@@ -97,6 +103,9 @@ def montar_resumo(fontes):
                 "principal": rotulos.get("F2-14.3.1", {}).get(principal, principal)})
     pendencias_declaradas.sort(key=lambda p: int(p["conjunto"]))
     return {
+        "governanca_v9": fontes.get("governanca_v9", {}),
+        "reavaliacoes_pendentes": [i for i in fontes.get("governanca_v9", {}).get("impactos", {}).values()
+            if i["estado"] in {"pendente", "complemento_necessario"}],
         "resultado_candidato": escolhas("F2-14.1"),
         "resultado_complemento": campos14.get("texto:F2-14.1", ""),
         "blocos_com_respostas": sorted(estados["salvos"], key=int),

@@ -8,7 +8,11 @@
     <h3>{% if numero %}<span class="numero-form">FORM {{ numero }}<span class="sr-apenas"> — </span></span>{% endif %}{{ titulo }}</h3>
     <p>{{ objetivo }}</p>
     <p class="situacao-instrumento">{{ situacao }}</p>
+    {% if numero == 2 %}
+    <a class="botao-link-secundario acesso-instrumento" href="{{ url_for('filas_form2') }}?conta_id={{ conta_id|urlencode }}">Acessar FORM 2</a>
+    {% else %}
     <button class="botao-link-secundario acesso-instrumento" {% if secretarias and numero in (1, 2) %}type="submit" form="abrir-painel" name="instrumento" value="form{{ numero }}"{% else %}type="button" disabled{% endif %}>{{ 'Acessar FORM ' ~ numero if numero else acesso }}</button>
+    {% endif %}
   </div>
 </li>
 {% endmacro %}

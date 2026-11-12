@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block conteudo %}
+<link rel="stylesheet" href="{{ url_for('estaticos', path='/filas_form2.css') }}">
+<div class="filas-form2"><h1>Pendências e retorno da origem</h1>
+{% include '_atuacao_form2.html' %}
+<p><strong>{{ registro.codigo_lgpd }}</strong> · FORM 2</p>
+<div class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/filas?conta_id={{ conta_id|urlencode }}">Voltar às filas</a>
+{% if e_aal %}<a class="botao-link-secundario" href="/form2/participacoes/{{ p.id }}?conta_id={{ conta_id|urlencode }}">Voltar ao FORM 2</a>{% endif %}</div>
+{% if e_aal and tem_retorno_institucional %}<p class="acoes-fila-form2"><a class="botao-link-secundario" href="/registros/{{ registro.id }}/unidade-retorno?conta_id={{ conta_id|urlencode }}">Conferir unidade de retorno de Ouvidoria/e-SIC</a></p>{% endif %}
+{% if e_origem and not e_aal %}
+<p>Leia as solicitações abaixo e complemente as respostas nos 14 blocos do FORM 1 deste processo. Apresente as alterações ao APA para conferência. Depois da confirmação, volte a esta tela para enviar a resposta a cada solicitação. O histórico permanece preservado.</p>
+<div class="acoes-fila-form2"><a class="botao-link" href="/registros/{{ registro.id }}/form1-rev22?conta_id={{ conta_id|urlencode }}&amp;bloco=1">Complementar FORM 1</a></div>
+{% elif e_aal %}
+<p>Acompanhe o que foi solicitado ao responsável pelo FORM 1. Quando a resposta chegar, confira se ela atende ao pedido. Depois, decida qual versão do FORM 1 será usada na análise. O histórico permanece preservado.</p>
+{% else %}
+<p>Confira as respostas às solicitações da sua participação. Registre se atendem ao pedido ou se precisam de novo complemento. A escolha da versão usada na análise cabe ao AAL da participação principal.</p>
+{% endif %}
+{% macro cabecalho(chave, pendencia='') %}
+<input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="versao" value="{{ p.versao }}">
+<input type="hidden" name="comando_id" value="{{ (comando_id ~ "-" ~ chave)|chave_comando }}"><input type="hidden" name="pendencia_id" value="{{ pendencia }}">
+{% endmacro %}
+{% macro motivo() %}<label>Justificativa<textarea name="motivo" required maxlength="2000" rows="2"></textarea></label>{% endmacro %}
+{% macro fontes(lista) %}<label>Apresentação do FORM 1 confirmada pelo APA<select name="snapshot_id" required><option value="">Selecione</option>{% for v in lista %}<option value="{{ v.id }}">{{ v.rotulo }}</option>{% endfor %}</select></label>{% endmacro %}
+{% macro respostas_confirmadas(perguntas) %}
+<dl class="respostas-origem-form2">{% for q in perguntas %}<div class="item-origem-form2"><dt>F1-{{ q.id }} · {{ q.pergunta }}</dt><dd>{% if not q.respondida %}Sem resposta nesta apresentação.{% elif q.valor is sequence and q.valor is not string and q.valor is not mapping %}{{ q.valor|join('; ') }}{% else %}{{ q.valor }}{% endif %}</dd></div>{% endfor %}</dl>
+{% endmacro %}
+{% for d in pendencias %}<article><h2>Solicitação {{ loop.index }} · {{ {'aberta': 'aguardando resposta' if d.unidade_id else 'aguardando definição do destinatário', 'respondida': 'resposta recebida para conferência', 'resolvida': 'resposta aceita', 'retirada': 'retirada com justificativa'}.get(d.estado, d.estado) }}</h2>
+<p>{{ d.texto }}</p><p>Origem do pedido: {% for o in d.origens %}{{ o.item.split("#")[0] }}{% if not loop.last %} · {% endif %}{% endfor %}</p>
+<p>Unidade responsável pela resposta: {{ d.area or 'a definir' }}.</p>
+<p>{{ d.prazo_rotulo }} · {{ d.dias_em_aberto }} dia(s) desde a abertura.</p>
+{% if e_aal and not d.unidade_id and d.estado == 'aberta' %}<p><strong>Próximo passo:</strong> defina a unidade responsável pela resposta e, se houver, o prazo acordado.</p>{% endif %}
+<details><summary>Acompanhamento de atrasos</summary><p>A regra de encaminhamento à instância superior ainda não foi configurada. A definição cabe à gestão responsável; o sistema não encaminha atrasos automaticamente.</p></details>
+{% if d.atrasada %}<p role="status"><strong>Prazo vencido.</strong> Encaminhamento superior depende da política institucional; não há aprovação automática.</p>{% endif %}
+{% if e_aal %}<details><summary>Definir responsável e prazo</summary>
+<form method="post">{{ cabecalho('destino-' ~ d.id,d.id) }}<label>Unidade responsável pela resposta<select name="unidade_id" required><option value="">Selecione</option>{% for u in unidades %}<option value="{{ u.id }}"{% if d.unidade_id == u.id %} selected{% endif %}>{{ u.nome }}</option>{% endfor %}</select></label>
+<p>A indicação da unidade não concede acesso ao conteúdo.</p><label>Prazo (opcional)<input name="prazo" type="date" value="{{ d.prazo or '' }}"></label>
+{{ motivo() }}<button class="botao-link" name="acao" value="destinar">Salvar responsável e prazo</button></form></details>
+<details><summary>Relacionar solicitações da mesma necessidade</summary>
+<p>Use apenas quando dois pedidos tratam da mesma necessidade. O histórico de ambos será preservado.</p>
+<form method="post">{{ cabecalho('vinculo-' ~ d.id,d.id) }}<label>Referência da mesma necessidade (F1-item ou referência de outra pendência)<input name="referencia" required maxlength="80"></label>
+{{ motivo() }}<button class="botao-link" name="acao" value="vincular">Vincular à mesma necessidade</button></form>
+{% if solicitantes %}<form method="post">{{ cabecalho('solicitante-' ~ d.id,d.id) }}<label>Outra participação que precisa conferir a mesma resposta<select name="solicitante_id">{% for s in solicitantes %}<option value="{{ s.id }}">{{ s.tipo }} · {{ s.unidade_id }}</option>{% endfor %}</select></label>{{ motivo() }}<button class="botao-link" name="acao" value="solicitante">Vincular participação solicitante</button></form>{% endif %}
+</details>
+{% if d.estado in ['aberta','respondida'] %}<details><summary>Retirar esta solicitação</summary><p>Informe por que o pedido deixou de ser necessário. A retirada fica registrada no histórico.</p><form method="post">{{ cabecalho('retirar-' ~ d.id,d.id) }}{{ motivo() }}<button class="botao-link" name="acao" value="retirar">Retirar solicitação com justificativa</button></form></details>{% endif %}{% endif %}
+{% if e_origem and d.estado == 'aberta' and not d.versoes_resposta %}<p>Para responder, complemente o FORM 1 e obtenha a confirmação do APA. Depois, volte aqui para enviar a versão confirmada.</p>{% endif %}
+{% if e_origem and d.estado == 'aberta' and d.versoes_resposta %}<form method="post">{{ cabecalho('responder-' ~ d.id,d.id) }}{{ fontes(d.versoes_resposta) }}{{ motivo() }}<button class="botao-link" name="acao" value="responder">Enviar resposta ao solicitante</button></form>{% endif %}
+{% if e_participante and d.solicitantes.get(alvo.id) == 'respondida' %}
+<section aria-label="Resposta da origem"><h3>Resposta enviada pela origem</h3>
+{% if d.resposta_recebida %}<p><strong>Enviada por:</strong> {{ d.resposta_recebida.autor }}</p>
+<p style="white-space:pre-wrap">{{ d.resposta_recebida.texto }}</p>
+<p>{{ d.resposta_recebida.apresentacao }}</p>
+{% else %}<p>O texto do envio não está disponível neste registro histórico.</p>{% endif %}
+{% if d.form1_confirmado %}<details><summary>Consultar o FORM 1 confirmado enviado nesta resposta</summary>
+<p>Somente leitura. Estas são as informações preservadas na apresentação enviada, não o rascunho atual.</p>
+{{ respostas_confirmadas(d.form1_confirmado.perguntas) }}</details>{% endif %}
+</section>
+<p>Resposta recebida. Aceitar a resposta não muda automaticamente a versão do FORM 1 usada na análise.</p><form method="post">{{ cabecalho('conferir-' ~ d.id,d.id) }}{{ motivo() }}
+<button class="botao-link" name="acao" value="aceitar">Aceitar resposta desta participação</button><button class="botao-link" name="acao" value="rejeitar">Solicitar novo complemento</button></form>{% endif %}
+<details><summary>Histórico e referências da solicitação</summary><p>Referência para rastreabilidade: {{ d.id }}</p><ul>{% for h in d.historico %}<li>{{ h.em|default('Legado') }} · {{ h.ato }} · {{ h.motivo|default('') }}</li>{% endfor %}</ul></details>
+</article>{% else %}<p>Nenhuma pendência no seu escopo.</p>{% endfor %}
+{% if e_aal %}
+<details><summary>F2-1.3.1 · Acrescentar outra necessidade</summary><p>Uma necessidade por registro. Salve primeiro a divergência ou insuficiência no Bloco 1.</p><form method="post">{{ cabecalho('nova') }}
+<label>Complementação<textarea name="descricao" required maxlength="200"></textarea></label>{{ motivo() }}<button class="botao-link" name="acao" value="adicionar">Registrar outra necessidade</button></form></details>
+<article><h2>Nova versão do FORM 1</h2>
+<p>A resposta precisa ser confirmada pelo APA e conferida por quem a solicitou. Aceitar uma resposta não substitui automaticamente a versão usada na análise.</p>
+{% if versoes_aceitas %}<form method="post">{{ cabecalho('fonte') }}{{ fontes(versoes_aceitas) }}{{ motivo() }}<button class="botao-link" name="acao" value="fonte">Usar nova versão na análise</button><button class="botao-link" name="acao" value="manter_fonte">Continuar usando a versão atual</button></form>
+{% else %}<p>Nenhuma nova versão com resposta aceita está disponível para esta decisão. Continue acompanhando as solicitações acima.</p>{% endif %}
+{% for c in comparacao %}<details><summary>Consultar FORM 1 · versão {{ c.numero }}{{ ' · usada nesta análise' if c.ativa else '' }}</summary>{{ respostas_confirmadas(c.perguntas) }}</details>{% endfor %}</article>
+{% if g.impactos %}<article><h2>Conferir as análises afetadas pela nova versão</h2>
+{% for chave,i in g.impactos.items() %}<section><h3>{{ 'Respostas próprias do AAL' if i.participacao_id == p.id else 'Manifestação ' ~ i.participacao_id }}</h3>
+<p>Situação: {{ i.estado }}. A conclusão anterior continua no histórico.</p><form method="post">{{ cabecalho('impacto-' ~ loop.index) }}<input type="hidden" name="impacto_id" value="{{ chave }}">
+<label>Resultado da avaliação<select name="decisao"><option value="nao_afetada">Não afetada, com justificativa</option>
+{% if i.participacao_id == p.id %}<option value="reavaliada">Respostas próprias reavaliadas</option>{% else %}<option value="complemento_necessario">Pedir complemento à mesma unidade</option>{% endif %}</select></label>
+{{ motivo() }}<button class="botao-link" name="acao" value="impacto">Registrar avaliação de impacto</button></form></section>{% else %}<p>Nenhum retorno recebido para reavaliação.</p>{% endfor %}</article>{% endif %}
+{% endif %}</div>{% endblock %}

@@ -36,7 +36,9 @@ def unidades(sessao, pessoa_id, papel):
 
 
 def autorizado(sessao, pessoa, participacao):
-    return participacao.unidade_id in unidades(sessao, pessoa.id, PAPEIS[participacao.tipo])
+    from app.segregacao_form2_v9 import impedido
+    return (participacao.unidade_id in unidades(sessao, pessoa.id, PAPEIS[participacao.tipo])
+        and not impedido(sessao, pessoa.id, participacao))
 
 
 def ingresso(sessao, registro, snapshot_id, comando, momento=None):
@@ -46,6 +48,15 @@ def ingresso(sessao, registro, snapshot_id, comando, momento=None):
         ParticipacaoForm2.snapshot_id == snapshot_id, ParticipacaoForm2.tipo == "principal"))
     if existente:
         return existente
+    anteriores = sessao.scalars(select(ParticipacaoForm2).where(
+        ParticipacaoForm2.registro_id == registro.id, ParticipacaoForm2.tipo == "principal",
+        ParticipacaoForm2.estado != "concluida").with_for_update()).all()
+    if len(anteriores) > 1:
+        raise ValueError("Há participações principais históricas concorrentes. Reconcilie-as antes de encaminhar nova origem.")
+    if anteriores:
+        from app.governanca_form2_v9 import receber_confirmacao
+        receber_confirmacao(sessao, anteriores[0], snapshot_id, comando)
+        return anteriores[0]
     p = ParticipacaoForm2(id=str(uuid4()), registro_id=registro.id,
         snapshot_id=snapshot_id, unidade_id=registro.unidade_principal_atual_id,
         tipo="principal", estado="aguardando", entrada_em=momento, versao=1,
@@ -66,11 +77,15 @@ def ingresso(sessao, registro, snapshot_id, comando, momento=None):
 
 def aviso(sessao, p, tipo):
     registro = sessao.get(Registro, p.registro_id)
-    sessao.add(AvisoDpo(id=str(uuid4()), participacao_id=p.id, tipo=tipo,
-        criado_em=agora(), metadados={"identificador_lgpd": registro.codigo_lgpd,
+    metadados={"identificador_lgpd": registro.codigo_lgpd,
         "secretaria_id": registro.unidade_principal_atual_id,
         "fila_id": p.unidade_id, "entrada_em": p.entrada_em.isoformat(),
-        "participacao_id": p.id}))
+        "participacao_id": p.id}
+    anterior = (p.conteudo or {}).get("reavalia_manifestacao_id")
+    if anterior:
+        metadados.update(complemento=True, manifestacao_anterior_id=anterior, snapshot_id=p.snapshot_id)
+    sessao.add(AvisoDpo(id=str(uuid4()), participacao_id=p.id, tipo=tipo,
+        criado_em=agora(), metadados=metadados))
 
 
 def evento(sessao, comando, p, tipo, ordem=20):
@@ -88,10 +103,16 @@ def evento(sessao, comando, p, tipo, ordem=20):
 def executar(sessao, *, conta_id, comando_id, participacao_id, acao, versao,
              texto="", unidade_id=None, tipo=None):
     pessoa = pessoa_ativa(sessao, conta_id)
+    alvo = sessao.get(ParticipacaoForm2, participacao_id)
+    from app.segregacao_form2_v9 import bloquear_registro
+    bloquear_registro(sessao, alvo)
+    if alvo and alvo.origem_id:
+        sessao.scalar(select(ParticipacaoForm2).where(ParticipacaoForm2.id == alvo.origem_id)
+            .with_for_update().execution_options(populate_existing=True))
     p = sessao.scalar(select(ParticipacaoForm2).where(
-        ParticipacaoForm2.id == participacao_id).with_for_update())
+        ParticipacaoForm2.id == participacao_id).with_for_update().execution_options(populate_existing=True))
     if not p or not autorizado(sessao, pessoa, p):
-        raise PermissionError("A participação exige autorização vigente na unidade destinatária.")
+        raise PermissionError("A participação exige autorização vigente e segregação: quem apresentou ou confirmou a origem não pode validá-la.")
     parametros = dict(conta_id=conta_id, participacao_id=participacao_id,
         acao=acao, versao=versao, texto=texto, unidade_id=unidade_id, tipo=tipo)
     comando, resposta = abrir_comando(sessao, comando_id, "fila_form2_"+acao,
@@ -130,6 +151,8 @@ def executar(sessao, *, conta_id, comando_id, participacao_id, acao, versao,
                 snapshot_id=p.snapshot_id, unidade_id=unidade_id, origem_id=p.id,
                 tipo=tipo, estado="aguardando", entrada_em=agora(), versao=1,
                 questao=texto.strip(), manifestacao="")
+            filho.conteudo = {"contexto_form2": {k: deepcopy(v) for k, v in (p.conteudo or {}).items()
+                if k not in {"governanca_v9", "consolidacao_demonstrativa_v1"}}}
             sessao.add(filho)
             sessao.flush()
             if tipo == "dpo":
@@ -146,6 +169,17 @@ def executar(sessao, *, conta_id, comando_id, participacao_id, acao, versao,
             p.manifestacao = texto.strip()
             p.estado = "concluida"
             p.concluida_em = agora()
+            if p.origem_id and (p.conteudo or {}).get("reavalia_manifestacao_id"):
+                from app.governanca_form2_v9 import estado, guardar, registrar
+                principal = sessao.get(ParticipacaoForm2, p.origem_id)
+                g = estado(sessao, principal)
+                for impacto in g["impactos"].values():
+                    if impacto.get("suplemento_id") == p.id:
+                        impacto["estado"] = "complementada"
+                        registrar(impacto, "complemento_concluido", pessoa.id, participacao_id=p.id)
+                guardar(principal, g)
+                principal.versao += 1
+                evento(sessao, comando, principal, "form2_reavaliacao_recebida", ordem=19)
         else:
             raise ValueError("Operação desconhecida.")
     p.versao += 1
@@ -190,8 +224,10 @@ def salvar_bloco(sessao, *, conta_id, comando_id, participacao_id, versao,
     from app.origem_form2 import ler_origem
     from app.form2_rev212 import ramos_origem
     pessoa = pessoa_ativa(sessao, conta_id)
+    from app.segregacao_form2_v9 import bloquear_registro
+    bloquear_registro(sessao, sessao.get(ParticipacaoForm2, participacao_id))
     p = sessao.scalar(select(ParticipacaoForm2).where(
-        ParticipacaoForm2.id == participacao_id).with_for_update())
+        ParticipacaoForm2.id == participacao_id).with_for_update().execution_options(populate_existing=True))
     if (not p or not autorizado(sessao, pessoa, p) or p.tipo != "principal"
             or p.estado != "em_atendimento" or p.responsavel_id != pessoa.id):
         raise PermissionError("Somente o AAL responsável edita o formulário principal.")
@@ -216,7 +252,7 @@ def salvar_bloco(sessao, *, conta_id, comando_id, participacao_id, versao,
         novo, _ = aplicar_revisao(p.conteudo or {}, bloco, campos, ramos_origem(origem), demonstrativo=True)
     complemento_solicitado = False
     texto_complemento = novo.get("respostas_etapa1", {}).get("F2-1.3.1")
-    if texto_complemento:
+    if texto_complemento and bloco == 1:
         from app.modelos import ComplementoForm2
         pendencia = sessao.scalar(select(ComplementoForm2).where(
             ComplementoForm2.participacao_id == p.id))
@@ -233,6 +269,8 @@ def salvar_bloco(sessao, *, conta_id, comando_id, participacao_id, versao,
             pendencia.resolvida_em = None
     if texto_complemento and bloco == 1:
         complemento_solicitado = pendencia.estado == "aberta"
+    from app.governanca_form2_v9 import sincronizar
+    sincronizar(sessao, p, novo, bloco, pessoa.id)
     p.conteudo = novo
     p.versao += 1
     evento(sessao, comando, p, "form2_bloco_salvo")
@@ -244,8 +282,10 @@ def salvar_bloco(sessao, *, conta_id, comando_id, participacao_id, versao,
 def reatribuir(sessao, *, conta_id, comando_id, participacao_id, versao,
                responsavel_id, motivo):
     pessoa = pessoa_ativa(sessao, conta_id)
+    from app.segregacao_form2_v9 import bloquear_registro
+    bloquear_registro(sessao, sessao.get(ParticipacaoForm2, participacao_id))
     p = sessao.scalar(select(ParticipacaoForm2).where(
-        ParticipacaoForm2.id == participacao_id).with_for_update())
+        ParticipacaoForm2.id == participacao_id).with_for_update().execution_options(populate_existing=True))
     if not p or p.unidade_id not in unidades(sessao, pessoa.id, "gestor_fila"):
         raise PermissionError("A reatribuição exige gestor autorizado da fila.")
     alvo = sessao.get(Pessoa, responsavel_id)
@@ -275,58 +315,12 @@ def reatribuir(sessao, *, conta_id, comando_id, participacao_id, versao,
     return fechar_comando(comando, {"permitido": True, "participacao_id": p.id})
 
 
-def complementar(sessao, *, conta_id, comando_id, participacao_id, acao, snapshot_id=None):
-    from app.modelos import ComplementoForm2, AtribuicaoForm1Integral, VersaoForm1Integral
-    pessoa = pessoa_ativa(sessao, conta_id)
-    p = sessao.scalar(select(ParticipacaoForm2).where(
-        ParticipacaoForm2.id == participacao_id).with_for_update())
-    if not p:
-        raise ValueError("Participação inexistente.")
-    pendencia = sessao.scalar(select(ComplementoForm2).where(
-        ComplementoForm2.participacao_id == p.id).with_for_update())
-    if not pendencia:
-        raise ValueError("Nenhuma complementação solicitada.")
-    registro = sessao.get(Registro, p.registro_id)
-    atribuicao = sessao.get(AtribuicaoForm1Integral, registro.id)
-    origem_autorizada = pessoa_e_apa_em_exercicio(
-        sessao, pessoa.id, registro.unidade_principal_atual_id) or (
-        atribuicao and atribuicao.arp_atual_id == pessoa.id
-        and registro.unidade_principal_atual_id in unidades(sessao, pessoa.id, "preenchedor"))
-    if acao == "responder":
-        if not origem_autorizada:
-            raise PermissionError("Somente APA ou ARP atual pode responder pela origem.")
-    elif acao == "resolver":
-        if not autorizado(sessao, pessoa, p) or p.responsavel_id != pessoa.id:
-            raise PermissionError("Somente o AAL responsável confere a resposta.")
-    else:
-        raise ValueError("Operação inválida.")
-    comando, repeticao = abrir_comando(sessao, comando_id, "complemento_form2_"+acao,
-        dict(conta_id=conta_id, participacao_id=p.id, acao=acao, snapshot_id=snapshot_id),
-        "pessoa", pessoa.id, conta_id)
-    if repeticao is not None:
-        return repeticao
-    if acao == "responder":
-        historico = sessao.scalar(select(HistoricoConferenciaForm1Integral).where(
-            HistoricoConferenciaForm1Integral.registro_id == registro.id,
-            HistoricoConferenciaForm1Integral.snapshot_id == snapshot_id,
-            HistoricoConferenciaForm1Integral.situacao == "conferencia_interna_confirmada"))
-        anterior = sessao.get(VersaoForm1Integral, pendencia.snapshot_origem_id)
-        resposta = sessao.get(VersaoForm1Integral, snapshot_id)
-        if (not historico or not resposta or resposta.numero <= anterior.numero
-                or pendencia.estado != "aberta"):
-            raise ValueError("A resposta exige nova versão confirmada do FORM 1.")
-        pendencia.snapshot_resposta_id = snapshot_id
-        pendencia.respondida_em = agora()
-        pendencia.estado = "respondida"
-    else:
-        if pendencia.estado != "respondida":
-            raise ValueError("A complementação ainda aguarda resposta.")
-        pendencia.estado = "resolvida"
-        pendencia.resolvida_em = agora()
-    p.versao += 1
-    registrar_evento(sessao, comando, "participacao_form2", p.id, "form2_complemento_"+acao,
-        {"pendencia_id": pendencia.id, "origem_1_3_1": pendencia.solicitacao,
-         "destino_14_2": True, "snapshot_origem_id": pendencia.snapshot_origem_id,
-         "snapshot_resposta_id": pendencia.snapshot_resposta_id, "estado": pendencia.estado},
-        registro_id=p.registro_id, versao_regra="F2-FILA-REV22")
-    return fechar_comando(comando, {"permitido": True, "participacao_id": p.id})
+def complementar(sessao, *, conta_id, comando_id, participacao_id, acao, snapshot_id=None,
+                 versao=None, pendencia_id=None, motivo=""):
+    """Compatibilidade explícita: não permite resolução sem versão, motivo e solicitação."""
+    if versao is None or not pendencia_id or not motivo:
+        raise ValueError("Use o contrato v9: versão, pendência e justificativa são obrigatórias.")
+    from app.governanca_form2_v9 import executar as executar_v9
+    return executar_v9(sessao, conta_id=conta_id, comando_id=comando_id,
+        participacao_id=participacao_id, versao=versao, pendencia_id=pendencia_id,
+        acao={"resolver": "aceitar"}.get(acao, acao), dados={"snapshot_id": snapshot_id, "motivo": motivo})

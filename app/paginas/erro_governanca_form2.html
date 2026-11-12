@@ -1,0 +1,3 @@
+{% extends 'base.html' %}{% block conteudo %}<h1>Confira antes de continuar</h1><p role="alert">{{ erro }}</p>
+<p>Seu texto foi mantido abaixo para consulta. Reabra o processo para conferir a versão atual.</p><pre>{{ descricao }}</pre><pre>{{ motivo }}</pre>
+<a href="/form2/participacoes/{{ participacao_id }}/governanca?conta_id={{ conta_id|urlencode }}">Voltar às pendências</a>{% endblock %}

@@ -8,10 +8,13 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from app.banco import motor
+from app.continuidade_apa import pessoa_e_apa_em_exercicio
 from app.modelos import Registro,RascunhoForm1Integral,Unidade,ConferenciaInternaForm1Integral
 from app.consultas_interface import _identidade, _ids_visiveis
 from app.rascunho_form1_integral import _contexto_autorizado
 from app.rev22_form1 import definicoes, ativa, adotar, salvar
+from app.cartilha_local import acesso_local_cartilha, secoes_cartilha_disponiveis
+from app.ajudas_cartilha_form1 import VERSAO_CARTILHA_AJUDAS_FORM1
 
 router=APIRouter()
 paginas=Jinja2Templates(directory=Path(__file__).parent/'paginas')
@@ -53,6 +56,10 @@ def pagina(request:Request,registro_id:str,conta_id:str,bloco:int=1,conjunto:int
         q['complemento']=origem.get('complementos',{}).get(q['id'],'')
         q['ativa']=ativa(q['id'],contexto)
     return paginas.TemplateResponse(request=request,name='form1_rev22.html',context=dict(
+        orientacao_levantamento=acesso_local_cartilha(request) and "levantamento" in secoes_cartilha_disponiveis(),
+        edicao_cartilha=VERSAO_CARTILHA_AJUDAS_FORM1,
+        salvamento_confirmado=request.query_params.get("salvo") == str(r.versao_rascunho),
+        e_apa=pessoa_e_apa_em_exercicio(sessao,identidade["pessoa_id"],reg.unidade_principal_atual_id),
         registro=reg,r=r,identidade=identidade,conta_id=conta_id,bloco=bloco,conjunto=conjunto,
         historico=historico,respondidos=respondidos,conferencia=conferencia,quantidade_conjuntos=len(rows),campos=campos,metadados=[q for q in defs.values() if q['block']==0],pode=pode,adotada=adotada,comando_id=str(uuid4()),
         unidades=sessao.scalars(select(Unidade).where(Unidade.ativa.is_(True),Unidade.id!='UNID-GOV').order_by(Unidade.nome)).all()))
@@ -85,4 +92,7 @@ async def gravar(request:Request,registro_id:str,sessao:Session=Depends(sessao_r
         sessao.commit()
     except (ValueError,PermissionError) as e:
         sessao.rollback();raise HTTPException(409,str(e))
-    return RedirectResponse('/registros/'+registro_id+'/form1-rev22?'+urlencode(dict(conta_id=conta,bloco=bloco,conjunto=conjunto or 1)),status_code=303)
+    destino=dict(conta_id=conta,bloco=bloco,conjunto=conjunto or 1)
+    if d.get('acao') not in ('adotar','conferir'):
+        destino['salvo']=sessao.get(RascunhoForm1Integral,registro_id).versao_rascunho
+    return RedirectResponse('/registros/'+registro_id+'/form1-rev22?'+urlencode(destino),status_code=303)

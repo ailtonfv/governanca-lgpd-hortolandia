@@ -1,0 +1,9 @@
+<section class="contexto-atuacao-form2" aria-label="Sua atuação neste processo">
+<p><strong>Servidor em sessão:</strong> {{ atuacao.servidor }}</p>
+{% if atuacao.funcao %}
+<p><strong>Sua função neste processo:</strong> {{ atuacao.funcao }}</p>
+<p><strong>Unidade de atuação:</strong> {{ atuacao.unidade }}</p>
+<p>{{ 'Você é responsável por esta participação e pode editar suas respostas.' if atuacao.editavel else 'Esta participação está concluída. As respostas ficam disponíveis para consulta.' }}</p>
+{% elif e_origem|default(false) %}<p>Você está acessando as solicitações de complementação dirigidas à origem do FORM 1.</p>
+{% else %}<p>Você ainda não assumiu esta participação.</p>{% endif %}
+</section>

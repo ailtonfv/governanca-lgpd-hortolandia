@@ -78,6 +78,20 @@ def estados_regua_form2(conteudo):
                 salvos.add(bloco)
             if chave.startswith("opcao:") and "A_CONFIRMAR" in valor:
                 pendentes.add(bloco)
+    governanca = conteudo.get("governanca_v9")
+    if governanca is not None:
+        # A lista formal é independente da visibilidade e do texto da pergunta.
+        referenciados = set()
+        ativos = set()
+        for d in governanca.get("pendencias", {}).values():
+            for origem in d.get("origens", []):
+                match = re.match(r"F2-(\d+)", origem.get("item", ""))
+                if match:
+                    referenciados.add(match[1])
+                    if d["estado"] in {"aberta", "respondida"}:
+                        ativos.add(match[1])
+        pendentes.difference_update(referenciados)
+        pendentes.update(ativos)
     return {"salvos": salvos, "pendentes": pendentes}
 
 

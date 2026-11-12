@@ -1,0 +1,11 @@
+{% extends 'base.html' %}{% block conteudo %}
+<link rel="stylesheet" href="{{ url_for('estaticos', path='/filas_form2.css') }}"><div class="filas-form2">
+<h1>Unidade de retorno institucional</h1><p>{{ r.codigo_lgpd }}</p>
+<p>Quando o levantamento indicar Ouvidoria ou e-SIC, o APA informa a unidade responsável pelo retorno. O AAL confirma no ingresso no FORM 2. Essa indicação não é o destinatário dos dados nem concede acesso ao processo.</p>
+<p>{{ atual.situacao }} · {{ atual.canal|default('Canal não informado') }} · {{ atual.unidade_id|default('Unidade não informada') }}</p>
+<div class="acoes-fila-form2"><a class="botao-link-secundario" href="/registros/{{ r.id }}?conta_id={{ conta_id|urlencode }}">Voltar ao Registro</a><a class="botao-link-secundario" href="/form2/filas?conta_id={{ conta_id|urlencode }}">Ir às filas</a></div>
+<form method="post"><input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="versao" value="{{ atual.versao }}"><input type="hidden" name="comando_id" value="{{ comando_id }}">
+{% if e_apa %}<label>Canal<select name="canal"><option value="OUV">Ouvidoria</option><option value="ESIC">e-SIC</option></select></label><label>Unidade responsável pelo retorno<select name="unidade_id">{% for u in unidades %}<option value="{{ u.id }}">{{ u.nome }}</option>{% endfor %}</select></label>{% endif %}
+<label>Justificativa<textarea name="motivo" required maxlength="2000"></textarea></label>
+{% if e_apa %}<button name="acao" value="informar">Registrar unidade de retorno</button>{% endif %}
+{% if e_aal %}<button name="acao" value="confirmar">Confirmar unidade de retorno</button>{% endif %}</form></div>{% endblock %}

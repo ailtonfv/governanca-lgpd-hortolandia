@@ -412,3 +412,16 @@ p > a.voltar:only-child, .form2-demo section > a[href="#anotacoes"] {
   :where(form, section, .acao-painel) > :is(button[type="submit"], .botao-primario, .botao-link),
   .navegacao-governanca > a { width: 100%; text-align: center; }
 }
+
+/* Cursor institucional para ações em todo o sistema. */
+button:enabled:not([aria-disabled="true"]),
+input:is([type="button"], [type="submit"], [type="reset"]):enabled:not([aria-disabled="true"]),
+a[href]:not([aria-disabled="true"]),
+[role="button"]:not([aria-disabled="true"]):not(:disabled),
+summary { cursor: pointer; }
+button:disabled,
+input:is([type="button"], [type="submit"], [type="reset"]):disabled,
+[aria-disabled="true"] { cursor: not-allowed; }
+/* Durante um envio, preservar a indicação de processamento. */
+.formulario button[aria-disabled="true"],
+button[aria-busy="true"] { cursor: wait; }

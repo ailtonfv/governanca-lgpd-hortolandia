@@ -47,8 +47,13 @@ def test_cartoes_explicam_disponibilidade_sem_oferecer_acesso_direto():
     for numero, (cartao, textos) in enumerate(zip(cartoes, esperados), 1):
         assert all(texto in cartao for texto in textos)
         assert 'aria-hidden="true" focusable="false"' in cartao
-        assert '<a ' not in cartao
-        if numero in (1, 2):
+        if numero != 2:
+            assert '<a ' not in cartao
+        if numero == 2:
+            assert '>Acessar FORM 2</a>' in cartao
+            assert '/form2/filas?conta_id=' in cartao
+            assert 'form="abrir-painel"' not in cartao
+        elif numero == 1:
             assert f'>Acessar FORM {numero}</button>' in cartao
             assert f'form="abrir-painel" name="instrumento" value="form{numero}"' in cartao
         elif numero in (3, 4):

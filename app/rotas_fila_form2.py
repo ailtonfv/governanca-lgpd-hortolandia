@@ -1,6 +1,8 @@
 """Interface de filas institucionais demonstrativas."""
 from pathlib import Path
+from hashlib import sha256
 from uuid import uuid4
+from zoneinfo import ZoneInfo
 from urllib.parse import urlencode
 from fastapi import APIRouter, Depends, Request, HTTPException
 from fastapi.responses import RedirectResponse
@@ -16,6 +18,162 @@ from app.respostas_form2 import estados_regua_form2
 
 router = APIRouter()
 paginas = Jinja2Templates(directory=Path(__file__).parent / "paginas")
+paginas.env.filters["chave_comando"] = lambda valor: sha256(str(valor).encode("utf-8")).hexdigest()
+
+
+def contexto_atuacao(sessao, pessoa, participacao):
+    """Identificação visível; não concede permissões."""
+    assumida = participacao.responsavel_id == pessoa.id and autorizado(sessao, pessoa, participacao)
+    rotulos = {"principal": "AAL — Agente de Análise de Legitimidade",
+        "tematica": "AAL — Agente de Análise de Legitimidade",
+        "juridico": "Responsável pela manifestação do Jurídico",
+        "dpo": "DPO — Encarregado de proteção de dados"}
+    return {"servidor": pessoa.nome,
+        "funcao": rotulos.get(participacao.tipo) if assumida else None,
+        "unidade": sessao.get(Unidade, participacao.unidade_id).nome if assumida else None,
+        "editavel": assumida and participacao.estado == "em_atendimento"}
+
+
+@router.api_route("/registros/{registro_id}/unidade-retorno", methods=["GET", "POST"])
+async def unidade_retorno(request: Request, registro_id: str):
+    from app.unidade_retorno_institucional import consultar, registrar
+    dados = await request.form() if request.method == "POST" else request.query_params
+    conta = str(dados.get("conta_id", ""))
+    with Session(motor) as s:
+        pessoa = pessoa_ativa(s, conta)
+        r = s.get(Registro, registro_id)
+        if not r:
+            raise HTTPException(404, "Registro inexistente.")
+        e_apa = pessoa_e_apa_em_exercicio(s,pessoa.id,r.unidade_principal_atual_id)
+        p = s.scalar(select(ParticipacaoForm2).where(ParticipacaoForm2.registro_id == registro_id,
+            ParticipacaoForm2.tipo == "principal", ParticipacaoForm2.responsavel_id == pessoa.id,
+            ParticipacaoForm2.estado == "em_atendimento").limit(1))
+        e_aal = bool(p and autorizado(s,pessoa,p))
+        if not (e_apa or e_aal):
+            raise HTTPException(403, "Somente o APA ou o AAL responsável acessa esta definição.")
+        if request.method == "POST":
+            try:
+                resultado = registrar(s,conta_id=conta,comando_id=dados.get("comando_id"),registro_id=registro_id,
+                    versao=int(dados.get("versao",0)),acao=dados.get("acao"),unidade_id=dados.get("unidade_id"),
+                    canal=dados.get("canal"),motivo=dados.get("motivo",""))
+                if not resultado["permitido"]:
+                    raise ValueError(resultado.get("motivo"))
+                s.commit()
+            except (ValueError,PermissionError) as e:
+                s.rollback()
+                raise HTTPException(409,str(e))
+            return RedirectResponse(f"/registros/{registro_id}/unidade-retorno?"+urlencode({"conta_id":conta}),status_code=303)
+        return paginas.TemplateResponse(request=request,name="unidade_retorno_institucional.html",context={
+            "r":r,"conta_id":conta,"e_apa":e_apa,"e_aal":e_aal,"atual":consultar(s,registro_id),
+            "unidades":s.scalars(select(Unidade).where(Unidade.ativa.is_(True))).all(),"comando_id":str(uuid4())})
+
+
+@router.get("/form2/participacoes/{participacao_id}/governanca", name="governanca_form2")
+def governanca(request: Request, participacao_id: str, conta_id: str):
+    from app.governanca_form2_v9 import resumo, origem_autorizada
+    from app.modelos import VersaoForm1Integral
+    with Session(motor) as sessao:
+        pessoa = pessoa_ativa(sessao, conta_id)
+        alvo = sessao.get(ParticipacaoForm2, participacao_id)
+        if not alvo:
+            raise HTTPException(404, "Participação inexistente.")
+        p = sessao.get(ParticipacaoForm2, alvo.origem_id or alvo.id)
+        e_aal = autorizado(sessao, pessoa, p) and p.responsavel_id == pessoa.id
+        e_origem = origem_autorizada(sessao, pessoa, p)
+        e_participante = autorizado(sessao, pessoa, alvo) and alvo.responsavel_id == pessoa.id
+        if not (e_aal or e_origem or e_participante):
+            raise HTTPException(403, "Retorno fora do seu escopo.")
+        g = resumo(sessao, p)
+        pendencias = [d for d in g["pendencias"].values() if d["estado"] != "vinculada"]
+        if not e_aal:
+            pendencias = [d for d in pendencias if (e_origem and any(o["item"].startswith("F2-1.3.1") for o in d["origens"]))
+                or (e_participante and alvo.id in d["solicitantes"])]
+        versoes = sessao.execute(select(VersaoForm1Integral.id, VersaoForm1Integral.numero,
+                HistoricoConferenciaForm1Integral.solicitada_em,
+                HistoricoConferenciaForm1Integral.solicitada_por_id,
+                HistoricoConferenciaForm1Integral.confirmada_em)
+            .join(HistoricoConferenciaForm1Integral, HistoricoConferenciaForm1Integral.snapshot_id == VersaoForm1Integral.id)
+            .where(VersaoForm1Integral.registro_id == p.registro_id,
+                HistoricoConferenciaForm1Integral.situacao == "conferencia_interna_confirmada")
+            .order_by(VersaoForm1Integral.numero.desc())).all()
+        from types import SimpleNamespace
+        versoes = [SimpleNamespace(id=v.id, numero=v.numero,
+            rotulo="Apresentado por " + (sessao.get(Pessoa, v.solicitada_por_id).nome) +
+                " em " + v.solicitada_em.astimezone(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y às %H:%M:%S") +
+                " · confirmado pelo APA" +
+                (" em " + v.confirmada_em.astimezone(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y às %H:%M:%S") if v.confirmada_em else ""))
+            for v in versoes]
+        for d in pendencias:
+            origem_pedido = sessao.get(VersaoForm1Integral, d["origens"][0]["snapshot_id"])
+            d["versoes_resposta"] = [v for v in versoes
+                if origem_pedido and v.numero > origem_pedido.numero]
+            envio = next((h for h in reversed(d.get("historico", []))
+                if h.get("ato") == "responder" and
+                h.get("dados", {}).get("snapshot_id") == d.get("snapshot_resposta_id")), None)
+            d["resposta_recebida"] = None
+            if envio:
+                autor = sessao.get(Pessoa, envio.get("ator"))
+                d["resposta_recebida"] = {"autor": autor.nome if autor else "Origem do FORM 1",
+                    "texto": envio.get("motivo", ""),
+                    "apresentacao": next((v.rotulo for v in versoes if v.id == d.get("snapshot_resposta_id")), "")}
+            d["form1_confirmado"] = None
+            if e_aal and d.get("snapshot_resposta_id") in {v.id for v in versoes}:
+                from app.origem_form2 import ler_origem
+                d["form1_confirmado"] = ler_origem(sessao, p.registro_id, d["snapshot_resposta_id"])
+        numero_atual = next((v.numero for v in versoes if v.id == p.snapshot_id), 0)
+        novas_versoes = [v for v in versoes if v.numero > numero_atual]
+        versoes_aceitas = [v for v in novas_versoes if any(
+            d.get("snapshot_resposta_id") == v.id and d["estado"] == "resolvida"
+            for d in pendencias)]
+        from app.unidade_retorno_institucional import consultar as consultar_retorno
+        retorno_institucional = consultar_retorno(sessao, p.registro_id)
+        comparacao = []
+        if e_aal:
+            from app.origem_form2 import ler_origem
+            for v in versoes:
+                consulta = ler_origem(sessao, p.registro_id, v.id)
+                comparacao.append({"numero": v.numero, "ativa": v.id == p.snapshot_id,
+                    "perguntas": [q for q in consulta["perguntas"] if q["respondida"]]})
+        from app.eventos import registrar_auditoria
+        registrar_auditoria(sessao, "consulta_governanca_form2_v9", "pessoa", pessoa.id,
+            {"participacao_id": alvo.id, "finalidade": "resposta ou conferência de pendências no escopo autorizado"})
+        sessao.commit()
+        return paginas.TemplateResponse(request=request, name="governanca_form2_v9.html", context={
+            "p": p, "alvo": alvo, "registro": sessao.get(Registro, p.registro_id), "conta_id": conta_id,
+            "e_aal": e_aal, "e_origem": e_origem, "e_participante": e_participante,
+            "atuacao": contexto_atuacao(sessao, pessoa, alvo),
+            "pendencias": pendencias, "g": g if e_aal else {}, "versoes": versoes,
+            "comparacao": comparacao, "novas_versoes": novas_versoes,
+            "versoes_aceitas": versoes_aceitas,
+            "tem_retorno_institucional": retorno_institucional.get("canal") in {"OUV", "ESIC"},
+            "solicitantes": sessao.scalars(select(ParticipacaoForm2).where(
+                ParticipacaoForm2.origem_id == p.id, ParticipacaoForm2.estado != "concluida")).all() if e_aal else [],
+            "unidades": sessao.scalars(select(Unidade).where(Unidade.ativa.is_(True))).all(),
+            "comando_id": str(uuid4())})
+
+
+@router.post("/form2/participacoes/{participacao_id}/governanca")
+async def agir_governanca(request: Request, participacao_id: str):
+    from app.governanca_form2_v9 import executar as executar_v9
+    dados = await request.form()
+    conta = str(dados.get("conta_id", ""))
+    with Session(motor) as sessao:
+        try:
+            campos = {k: str(v) for k, v in dados.items()
+                if k not in {"conta_id", "comando_id", "versao", "acao", "pendencia_id"}}
+            resultado = executar_v9(sessao, conta_id=conta, comando_id=dados.get("comando_id"),
+                participacao_id=participacao_id, versao=int(dados.get("versao", 0)),
+                acao=dados.get("acao"), pendencia_id=dados.get("pendencia_id"), dados=campos)
+            if not resultado["permitido"]:
+                raise ValueError(resultado.get("motivo"))
+            sessao.commit()
+        except (PermissionError, ValueError) as erro:
+            sessao.rollback()
+            return paginas.TemplateResponse(request=request, name="erro_governanca_form2.html", context={
+                "erro": str(erro), "participacao_id": participacao_id, "conta_id": conta,
+                "motivo": dados.get("motivo", ""), "descricao": dados.get("descricao", "")},
+                status_code=403 if isinstance(erro, PermissionError) else 409)
+    return RedirectResponse(f"/form2/participacoes/{participacao_id}/governanca?"+urlencode({"conta_id": conta}), status_code=303)
 
 
 def sessao_fila():
@@ -89,30 +247,50 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
             "situacao": "Aguardando manifestação" if consultas else "Para ciência"})
     cobertura = [{"nome": u.nome, "total": sum(registros[p.registro_id].unidade_principal_atual_id == u.id for p in principais)}
         for u in unidades.values() if u.ativa] if dpo else []
+    from app.governanca_form2_v9 import estado as estado_v9, origem_autorizada
+    from app.segregacao_form2_v9 import impedido
     complementos = []
-    for pendencia in sessao.scalars(select(ComplementoForm2).where(ComplementoForm2.estado != "resolvida")):
-        participacao = sessao.get(ParticipacaoForm2, pendencia.participacao_id)
+    impedimentos = {}
+    for participacao in sessao.scalars(select(ParticipacaoForm2)):
+        if participacao.responsavel_id and impedido(sessao, participacao.responsavel_id, participacao):
+            impedimentos[participacao.id] = "Designação pendente por impedimento"
+        if participacao.tipo != "principal":
+            continue
         registro = registros[participacao.registro_id]
-        atribuicao = sessao.get(AtribuicaoForm1Integral, registro.id)
-        e_origem = pessoa_e_apa_em_exercicio(sessao, pessoa.id, registro.unidade_principal_atual_id) or (
-            atribuicao and atribuicao.arp_atual_id == pessoa.id
-            and registro.unidade_principal_atual_id in unidades_autorizadas(sessao, pessoa.id, "preenchedor"))
+        e_origem = origem_autorizada(sessao, pessoa, participacao)
         e_aal = participacao.responsavel_id == pessoa.id and autorizado(sessao, pessoa, participacao)
-        if e_origem or e_aal:
-            versoes = sessao.scalars(select(HistoricoConferenciaForm1Integral).where(
-                HistoricoConferenciaForm1Integral.registro_id == registro.id,
-                HistoricoConferenciaForm1Integral.situacao == "conferencia_interna_confirmada")).all()
-            complementos.append(dict(p=participacao, pendencia=pendencia, registro=registro,
-                e_origem=e_origem, e_aal=e_aal, versoes=versoes))
+        if (e_origem or e_aal) and estado_v9(sessao, participacao)["pendencias"]:
+            pendencias = [d for d in estado_v9(sessao, participacao)["pendencias"].values()
+                if any(o["item"].startswith("F2-1.3.1") for o in d["origens"])]
+            estados = {d["estado"] for d in pendencias}
+            situacao = ("definir unidade responsável pela resposta" if any(d["estado"] == "aberta" and not d.get("unidade_id") for d in pendencias) else
+                "aguardando resposta" if "aberta" in estados else
+                "resposta recebida, aguardando conferência" if "respondida" in estados else
+                "consulte o histórico")
+            complementos.append(dict(p=participacao, registro=registro,
+                situacao=situacao if pendencias else None))
+    for l in linhas:
+        if l["p"].id in impedimentos:
+            l["situacao"] = impedimentos[l["p"].id]
     gestores = unidades_autorizadas(sessao, pessoa.id, "gestor_fila")
     gerenciaveis = sessao.scalars(select(ParticipacaoForm2).where(
         ParticipacaoForm2.unidade_id.in_(gestores),
         ParticipacaoForm2.estado != "concluida")).all() if gestores else []
     agentes = sessao.scalars(select(Pessoa).where(Pessoa.ativa.is_(True))).all() if gestores else []
+    cartoes = {}
+    for p in participacoes:
+        cartoes.setdefault(p.registro_id, dict(registro=registros[p.registro_id],
+            participacoes=[], complementos=[]))["participacoes"].append(p)
+    for c in complementos:
+        cartoes.setdefault(c["registro"].id, dict(registro=c["registro"],
+            participacoes=[], complementos=[]))["complementos"].append(c)
+    pode_encaminhar = any(pessoa_e_apa_em_exercicio(sessao, pessoa.id, u.id)
+        for u in unidades.values() if u.ativa)
     return paginas.TemplateResponse(request=request, name="filas_form2.html",
-        context={"conta_id": conta_id, "pessoa": pessoa, "participacoes": participacoes,
+        context={"cartoes": list(cartoes.values()), "pode_encaminhar": pode_encaminhar,
+                 "conta_id": conta_id, "pessoa": pessoa, "participacoes": participacoes,
                  "registros": registros, "unidades": unidades, "linhas": linhas,
-                 "complementos": complementos, "gerenciaveis": gerenciaveis, "agentes": agentes,
+                 "impedimentos": impedimentos, "complementos": complementos, "gerenciaveis": gerenciaveis, "agentes": agentes,
                  "dpo": dpo, "cobertura": cobertura, "comando_id": str(uuid4())})
 
 
@@ -131,7 +309,7 @@ def participacao(request: Request, participacao_id: str, conta_id: str,
         {"participacao_id": p.id, "finalidade": "atendimento da participação atribuída à unidade"})
     sessao.commit()
     return paginas.TemplateResponse(request=request, name="participacao_form2.html",
-        context={"conta_id": conta_id, "p": p, "estados_regua": estados_regua_form2(p.conteudo or {}), "pessoa": pessoa,
+        context={"atuacao": contexto_atuacao(sessao, pessoa, p), "conta_id": conta_id, "p": p, "estados_regua": estados_regua_form2(p.conteudo or {}), "pessoa": pessoa,
                  "registro": sessao.get(Registro, p.registro_id),
                  "unidades": sessao.scalars(select(Unidade).where(Unidade.ativa.is_(True))).all(),
                  "consultas": sessao.scalars(select(ParticipacaoForm2).where(ParticipacaoForm2.origem_id == p.id)).all(),
@@ -212,7 +390,7 @@ def bloco_fila(request: Request, participacao_id: str, bloco: int, conta_id: str
             if resultado_salvo.get("complemento_solicitado"):
                 confirmacao += " Complementação solicitada à origem."
     return paginas.TemplateResponse(request=request, name="bloco_fila_form2.html",
-        context={"p": p, "estados_regua": estados_regua_form2(p.conteudo or {}), "pessoa": pessoa, "conta_id": conta_id, "bloco": definicao,
+        context={"atuacao": contexto_atuacao(sessao, pessoa, p), "p": p, "estados_regua": estados_regua_form2(p.conteudo or {}), "pessoa": pessoa, "conta_id": conta_id, "bloco": definicao,
         "numero": bloco, "confirmacao": confirmacao, "ocorrencias": ocorrencias, "origens_repetiveis": origens_repetiveis,
         "comando_id": str(uuid4()),
         "fatos_origem": origem["conteudo"],
@@ -260,19 +438,8 @@ async def salvar_bloco_fila(request: Request, participacao_id: str, bloco: int,
 @router.post("/form2/participacoes/{participacao_id}/complemento")
 async def resposta_complemento(request: Request, participacao_id: str,
                                sessao: Session = Depends(sessao_fila)):
-    from app.fila_form2 import complementar
-    dados = await request.form()
-    try:
-        resultado = complementar(sessao, conta_id=dados.get("conta_id"),
-            comando_id=dados.get("comando_id"), participacao_id=participacao_id,
-            acao=dados.get("acao"), snapshot_id=dados.get("snapshot_id"))
-        if not resultado["permitido"]:
-            raise ValueError(resultado.get("motivo"))
-        sessao.commit()
-    except (ValueError, PermissionError) as erro:
-        sessao.rollback()
-        raise HTTPException(409, str(erro))
-    return RedirectResponse("/form2/filas?"+urlencode({"conta_id": dados.get("conta_id")}),status_code=303)
+    # Endereço antigo não pode contornar o contrato v9 e o controle de versão.
+    raise HTTPException(409, "Abra Ver pendências e respostas para conferir a versão e registrar a justificativa.")
 
 
 @router.post("/form2/participacoes/{participacao_id}/reatribuir")

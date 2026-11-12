@@ -43,6 +43,20 @@ def test_adocao_preserva_snapshot_e_controla_versao(sessao):
     assert draft.conteudo['respostas']['4.1.1']==[valor]
     sessao.commit()
     c=TestClient(app)
+    from html.parser import HTMLParser
+    class Botoes(HTMLParser):
+        def __init__(self, html):
+            super().__init__();self.itens=[];self.feed(html)
+        def handle_starttag(self, tag, attrs):
+            if tag=='button':self.itens.append(dict(attrs))
+    url=f'/registros/{rid}/form1-rev22?conta_id=CONTA-G1&bloco=2'
+    tela=Botoes(c.get(url).text)
+    assert 'hidden' in next(b for b in tela.itens if b.get('id')=='apresentacao-apa')
+    tela_salva=Botoes(c.get(url+f'&salvo={draft.versao_rascunho}').text)
+    botoes=[b for b in tela_salva.itens if b.get('form')]
+    assert [b.get('form') for b in botoes]==['respostas-bloco','form-apresentar-apa']
+    assert 'hidden' not in botoes[1]
+    assert len([b for b in tela_salva.itens if b.get('form')=='respostas-bloco'])==1
     for b in range(1,15):
         response=c.get(f'/registros/{rid}/form1-rev22?conta_id=CONTA-G1&bloco={b}')
         assert response.status_code==200,response.text
@@ -53,6 +67,11 @@ def test_adocao_preserva_snapshot_e_controla_versao(sessao):
     assert solicitar_conferencia_interna_form1_integral(sessao,conta_id='CONTA-G1',comando_id='PRESENT22',registro_id=rid,versao_lida=v)['permitido']
     sessao.commit()
     assert c.get(f'/registros/{rid}/form1-integral/conferencia-interna?conta_id=CONTA-A1').status_code==200
+    origem_tela=c.get(url).text
+    assert 'Aguardando conferência do APA' in origem_tela
+    assert 'Consultar conferência interna' not in origem_tela
+    assert 'salvamento-fixo-form1" role=' not in origem_tela
+    assert 'Consultar conferência interna' in c.get(url.replace('CONTA-G1','CONTA-A1')).text
     assert confirmar_conferencia_interna_form1_integral(sessao,conta_id='CONTA-A1',comando_id='CONF22',registro_id=rid,versao_lida=1)['permitido']
     sessao.commit()
     participation=sessao.scalar(select(ParticipacaoForm2).where(ParticipacaoForm2.registro_id==rid))

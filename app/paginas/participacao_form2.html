@@ -3,7 +3,9 @@
 {% set situacoes = {'aguardando': 'aguardando responsável', 'em_atendimento': 'em atendimento', 'concluida': 'concluída'} %}
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/filas_form2.css') }}"><div class="filas-form2">
 <h1>{{ registro.codigo_lgpd }} · Participação {{ p.tipo }}</h1>
+{% include '_atuacao_form2.html' %}
 <div class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/filas?conta_id={{ conta_id|urlencode }}">Voltar às filas</a></div>
+<p class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/participacoes/{{ p.id }}/governanca?conta_id={{ conta_id|urlencode }}">Ver pendências e respostas</a></p>
 <p>Situação: {{ situacoes.get(p.estado, p.estado) }}</p>{% if p.responsavel_id == pessoa.id %}<p>{{ p.questao }}</p>{% endif %}
 {% if p.tipo == 'principal' and p.responsavel_id == pessoa.id %}{% include '_regua_fila_form2.html' %}
 <div class="acoes-fila-form2"><a class="botao-link" href="/form2/participacoes/{{ p.id }}/consolidacao?conta_id={{ conta_id|urlencode }}">Conferir consolidação</a></div>{% endif %}

@@ -73,7 +73,11 @@ def test_decisoes_distintas_com_ciencia_dialogo_e_autorizacao_preservada(sessao)
     assert 'Opção B — Devolver para ajustes' in html
     assert 'id="ciencia-confirmacao" required' in html
     assert 'name="ciencia-confirmacao"' not in html
-    assert 'Confirmar a conferência da versão 1?' in html
+    assert 'Confirmar a conferência interna?' in html
+    assert 'Confirmar a conferência da versão 1?' not in html
+    assert 'informações apresentadas por' in html
+    assert 'id="historico-apresentacao-conferida"' in html
+    assert 'Rascunho 1 · snapshot técnico' in html
     assert 'data-cancelar-confirmacao autofocus' in html
     assert 'name="justificativa" maxlength="2000" required' in html
     assert 'decisao_conferencia.js' in html

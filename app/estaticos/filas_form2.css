@@ -45,3 +45,38 @@
 .filas-form2 .confirmacao-salvamento { padding: 1rem; border-left: 4px solid #166534; background: #edf7ef; color: #14532d; font-weight: 600; }
 
 .form1-rev22 input[type="text"] { display: block; box-sizing: border-box; width: 100%; max-width: 100%; margin-top: .4rem; padding: .65rem; border: 1px solid var(--borda); border-radius: 8px; font: inherit; }
+
+/* Campos de apoio usam a mesma leitura dos demais formulários. */
+.filas-form2 input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]) {
+  display: block; box-sizing: border-box; width: 100%; max-width: 100%;
+  margin-top: .4rem; padding: .65rem; border: 1px solid var(--borda);
+  border-radius: 8px; font: inherit;
+}
+.filas-form2 input[type="date"] { max-width: 16rem; }
+.filas-form2 summary { cursor: pointer; }
+
+/* Salvamento visível, separado da apresentação ao APA. */
+.form1-rev22:has(.salvamento-fixo-form1) { padding-bottom: 160px; }
+.filas-form2 .salvamento-fixo-form1 {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+  display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 12px;
+  padding: 12px 24px; padding-bottom: max(12px, env(safe-area-inset-bottom));
+  background: #fff; border-top: 1px solid #d6e0e6;
+  box-shadow: 0 -2px 8px rgba(0,0,0,.08);
+}
+.salvamento-fixo-form1 button { margin: 0; }
+@media (max-width: 600px) {
+  .filas-form2 .salvamento-fixo-form1 { padding-inline: 12px; }
+  .salvamento-fixo-form1 button { width: 100%; }
+}
+
+.salvamento-fixo-form1 button[hidden] { display: none !important; }
+.form1-rev22 #form-apresentar-apa[hidden] { display: none; }
+@media (max-width: 600px) {
+  .form1-rev22:has(.salvamento-fixo-form1) { padding-bottom: 240px; }
+}
+
+/* Situação de espera com texto explícito, sem depender apenas da cor. */
+.filas-form2 .aviso-conferencia-apa { margin-block: 20px; padding: 18px 20px; border: 1px solid #d6ad53; border-left: 6px solid #946200; border-radius: 8px; background: #fff8e6; color: #553900; }
+.filas-form2 .aviso-conferencia-apa strong { display: block; font-size: 1.2rem; }
+.filas-form2 .aviso-conferencia-apa p { margin: .5rem 0 0; }

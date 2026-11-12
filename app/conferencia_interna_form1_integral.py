@@ -72,6 +72,10 @@ def solicitar_conferencia_interna_form1_integral(
             sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
             TIPO_COMANDO, problema,
         )
+    from app.segregacao_form2_v9 import aal_em_exercicio
+    if aal_em_exercicio(sessao, registro_id, pessoa_id):
+        return _negar(sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
+            TIPO_COMANDO, "O AAL em exercício não pode apresentar nem confirmar a origem do mesmo processo.")
     rascunho = _rascunho_bloqueado(sessao, registro_id)
     if rascunho is None:
         return _negar(
@@ -378,6 +382,10 @@ def confirmar_conferencia_interna_form1_integral(
             TIPO_COMANDO_CONFIRMACAO,
             "somente o APA em exercício pode confirmar a conferência interna",
         )
+    from app.segregacao_form2_v9 import aal_em_exercicio
+    if aal_em_exercicio(sessao, registro_id, pessoa_id):
+        return _negar(sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
+            TIPO_COMANDO_CONFIRMACAO, "O AAL em exercício não pode apresentar nem confirmar a origem do mesmo processo.")
     conferencia = sessao.scalars(
         select(ConferenciaInternaForm1Integral)
         .where(ConferenciaInternaForm1Integral.registro_id == registro_id)
