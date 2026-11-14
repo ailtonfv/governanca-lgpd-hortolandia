@@ -69,11 +69,12 @@ def test_decisoes_distintas_com_ciencia_dialogo_e_autorizacao_preservada(sessao)
     # Assert: mesmos destinos e parâmetros, ciência somente na interação.
     assert pagina.status_code == 200
     html = pagina.text
-    assert 'Opção A — Confirmar conferência interna' in html
+    assert 'Opção A — Confirmar e encaminhar ao FORM 2' in html
     assert 'Opção B — Devolver para ajustes' in html
     assert 'id="ciencia-confirmacao" required' in html
     assert 'name="ciencia-confirmacao"' not in html
-    assert 'Confirmar a conferência interna?' in html
+    assert 'Confirmar e encaminhar ao FORM 2?' in html
+    assert 'entra automaticamente na fila do FORM 2' in html
     assert 'Confirmar a conferência da versão 1?' not in html
     assert 'informações apresentadas por' in html
     assert 'id="historico-apresentacao-conferida"' in html

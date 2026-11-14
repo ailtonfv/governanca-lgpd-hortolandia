@@ -1329,6 +1329,13 @@ def consultar_conferencia_interna(
     conteudo_snapshot = snapshot.conteudo.get("form1_integral", {})
     catalogo = catalogo_efetivo(conteudo_snapshot)
     from app.rev22_form1 import respostas_conjuntos, blocos_com_respostas
+    from sqlalchemy import select
+    from app.modelos import ParticipacaoForm2
+    participacao = sessao.scalar(select(ParticipacaoForm2).where(
+        ParticipacaoForm2.registro_id == registro.id,
+        ParticipacaoForm2.tipo == "principal",
+        ParticipacaoForm2.estado != "concluida",
+    ).limit(1))
     conjuntos_rev22 = respostas_conjuntos(conteudo_snapshot) if "revisao_22" in conteudo_snapshot else []
     return paginas.TemplateResponse(
         request=request,
@@ -1353,6 +1360,7 @@ def consultar_conferencia_interna(
             "destinatarios": snapshot.conteudo.get("form1_integral", {}).get("destinatarios_10_2_1", []),
             "comando_devolver_conferencia": str(uuid.uuid4()),
             "comando_confirmar_conferencia": str(uuid.uuid4()),
+            "primeiro_ingresso": participacao is None,
             "conferencia_pendente": (
                 conferencia.situacao == "aguardando_conferencia_interna_apa"
             ),

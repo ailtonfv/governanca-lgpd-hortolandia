@@ -132,16 +132,34 @@ def marcar_impactos(sessao, p, g, snapshot_id):
 
 
 def receber_confirmacao(sessao, p, snapshot_id, comando):
-    """Confirmar S2 informa disponibilidade, não responde nem troca a fonte ativa."""
+    """Atualiza a referência enquanto a fila ainda aguarda a primeira assunção."""
     from app.fila_form2 import evento
     if snapshot_id == p.snapshot_id:
         return
+    atual = sessao.get(VersaoForm1Integral, p.snapshot_id)
+    nova = sessao.get(VersaoForm1Integral, snapshot_id)
+    if not nova or nova.registro_id != p.registro_id:
+        raise ValueError("A nova referência deve pertencer ao mesmo Registro.")
+    if nova.numero <= atual.numero:
+        return
+
     g = estado(sessao, p)
-    if snapshot_id not in g["retornos"]:
-        g["retornos"][snapshot_id] = dict(estado="confirmada_disponivel", em=instante())
-        guardar(p, g)
-        p.versao += 1
-        evento(sessao, comando, p, "form2_nova_origem_disponivel")
+    momento = instante()
+    if p.estado == "aguardando" and p.assumida_em is None and p.responsavel_id is None:
+        g["fontes"].append(dict(anterior=atual.id, nova=nova.id,
+            rascunho_anterior=atual.versao_rascunho, rascunho_novo=nova.versao_rascunho,
+            em=momento, decisao="atualizacao_automatica", ator="sistema",
+            motivo="Nova apresentação confirmada antes da primeira assunção pelo AAL."))
+        p.snapshot_id = nova.id
+        tipo_evento = "form2_referencia_atualizada_antes_assuncao"
+    elif snapshot_id not in g["retornos"]:
+        tipo_evento = "form2_nova_origem_disponivel"
+    else:
+        return
+    g["retornos"].setdefault(snapshot_id, dict(estado="confirmada_disponivel", em=momento))
+    guardar(p, g)
+    p.versao += 1
+    evento(sessao, comando, p, tipo_evento)
 
 
 def executar(sessao, *, conta_id, comando_id, participacao_id, versao, acao,

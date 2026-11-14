@@ -517,3 +517,26 @@ def test_HTTP_resposta_pendente_continua_disponivel_apos_adotar_versao(sessao, p
             'CONTA-G1','responder',snapshot_id=s2)
     sessao.expire_all()
     assert estado(sessao,p)['pendencias'][segunda_pendencia]['estado']=='respondida'
+
+def test_confirmacao_atualiza_fila_sem_assuncao(sessao):
+    registro = origem(sessao)
+    p = sessao.scalars(select(ParticipacaoForm2).where(
+        ParticipacaoForm2.registro_id == registro["registro_id"])).one()
+    anterior, entrada = p.snapshot_id, p.entrada_em
+    nova = segunda(sessao, p, confirmar=False)
+    pagina = TestClient(app).get(
+        f"/registros/{p.registro_id}/form1-integral/conferencia-interna?conta_id=CONTA-A1")
+    assert pagina.status_code == 200
+    assert "Confirmar nova versão do FORM 1?" in pagina.text
+    assert p.snapshot_id == anterior
+    assert _confirmar(sessao, registro, comando="P17-CONF")["permitido"]
+    sessao.refresh(p)
+    assert p.snapshot_id == nova
+    assert p.estado == "aguardando" and p.entrada_em == entrada
+    assert p.assumida_em is None and p.responsavel_id is None
+    fontes = estado(sessao, p)["fontes"]
+    assert [(f["anterior"], f["nova"]) for f in fontes] == [(anterior, nova)]
+    from migracoes.reconciliar_referencia_form2 import reconciliar
+    from app.modelos import Registro
+    assert not reconciliar(sessao, sessao.get(Registro, p.registro_id).codigo_lgpd)
+    assert sessao.scalars(select(AvisoDpo.tipo).where(AvisoDpo.participacao_id == p.id)).all() == ["ciencia"]
