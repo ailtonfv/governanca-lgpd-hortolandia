@@ -7,9 +7,11 @@ from urllib.parse import urlencode
 from fastapi import APIRouter, Depends, Request, HTTPException
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
+from app.catalogo_form2_rev18 import titulos_blocos_form2
 from sqlalchemy import select, inspect
 from sqlalchemy.orm import Session
 from app.banco import motor
+from app.apresentacoes_form1 import rotulo_apresentacao
 from app.modelos import (ParticipacaoForm2, Registro, Unidade, ComplementoForm2,
     AtribuicaoForm1Integral, HistoricoConferenciaForm1Integral, Pessoa)
 from app.fila_form2 import painel, pessoa_ativa, autorizado, executar, importar_confirmada, agora, unidades as unidades_autorizadas
@@ -18,6 +20,7 @@ from app.respostas_form2 import estados_regua_form2
 
 router = APIRouter()
 paginas = Jinja2Templates(directory=Path(__file__).parent / "paginas")
+paginas.env.globals["titulos_blocos_form2"] = titulos_blocos_form2
 paginas.env.filters["chave_comando"] = lambda valor: sha256(str(valor).encode("utf-8")).hexdigest()
 
 
@@ -89,6 +92,7 @@ def governanca(request: Request, participacao_id: str, conta_id: str):
             pendencias = [d for d in pendencias if (e_origem and any(o["item"].startswith("F2-1.3.1") for o in d["origens"]))
                 or (e_participante and alvo.id in d["solicitantes"])]
         versoes = sessao.execute(select(VersaoForm1Integral.id, VersaoForm1Integral.numero,
+                HistoricoConferenciaForm1Integral.numero_apresentacao, HistoricoConferenciaForm1Integral.versao_rascunho,
                 HistoricoConferenciaForm1Integral.solicitada_em,
                 HistoricoConferenciaForm1Integral.solicitada_por_id,
                 HistoricoConferenciaForm1Integral.confirmada_em)
@@ -98,7 +102,8 @@ def governanca(request: Request, participacao_id: str, conta_id: str):
             .order_by(VersaoForm1Integral.numero.desc())).all()
         from types import SimpleNamespace
         versoes = [SimpleNamespace(id=v.id, numero=v.numero,
-            rotulo="Apresentado por " + (sessao.get(Pessoa, v.solicitada_por_id).nome) +
+            nome_apresentacao=rotulo_apresentacao(v),
+            rotulo=rotulo_apresentacao(v) + " · Apresentado por " + (sessao.get(Pessoa, v.solicitada_por_id).nome) +
                 " em " + v.solicitada_em.astimezone(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y às %H:%M:%S") +
                 " · confirmado pelo APA" +
                 (" em " + v.confirmada_em.astimezone(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y às %H:%M:%S") if v.confirmada_em else ""))
@@ -132,7 +137,7 @@ def governanca(request: Request, participacao_id: str, conta_id: str):
             from app.origem_form2 import ler_origem
             for v in versoes:
                 consulta = ler_origem(sessao, p.registro_id, v.id)
-                comparacao.append({"numero": v.numero, "ativa": v.id == p.snapshot_id,
+                comparacao.append({"rotulo": v.nome_apresentacao, "ativa": v.id == p.snapshot_id,
                     "perguntas": [q for q in consulta["perguntas"] if q["respondida"]]})
         from app.eventos import registrar_auditoria
         registrar_auditoria(sessao, "consulta_governanca_form2_v9", "pessoa", pessoa.id,
@@ -277,6 +282,8 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
         ParticipacaoForm2.unidade_id.in_(gestores),
         ParticipacaoForm2.estado != "concluida")).all() if gestores else []
     agentes = sessao.scalars(select(Pessoa).where(Pessoa.ativa.is_(True))).all() if gestores else []
+    responsaveis = dict(sessao.execute(select(Pessoa.id, Pessoa.nome).where(
+        Pessoa.id.in_({p.responsavel_id for p in participacoes if p.responsavel_id}))).all())
     cartoes = {}
     for p in participacoes:
         cartoes.setdefault(p.registro_id, dict(registro=registros[p.registro_id],
@@ -291,7 +298,7 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
                  "conta_id": conta_id, "pessoa": pessoa, "participacoes": participacoes,
                  "registros": registros, "unidades": unidades, "linhas": linhas,
                  "impedimentos": impedimentos, "complementos": complementos, "gerenciaveis": gerenciaveis, "agentes": agentes,
-                 "dpo": dpo, "cobertura": cobertura, "comando_id": str(uuid4())})
+                 "responsaveis": responsaveis, "dpo": dpo, "cobertura": cobertura, "comando_id": str(uuid4())})
 
 
 @router.get("/form2/participacoes/{participacao_id}", name="participacao_form2")
@@ -300,6 +307,15 @@ def participacao(request: Request, participacao_id: str, conta_id: str,
     try:
         pessoa = pessoa_ativa(sessao, conta_id)
         p = sessao.get(ParticipacaoForm2, participacao_id)
+        if p and p.estado == "aguardando":
+            from app.segregacao_form2_v9 import impedido
+            from app.fila_form2 import PAPEIS
+            from app.governanca_form2_v9 import origem_autorizada
+            if p.unidade_id in unidades_autorizadas(sessao, pessoa.id, PAPEIS[p.tipo]) or (
+                    p.tipo == "principal" and origem_autorizada(sessao, pessoa, p)):
+                if impedido(sessao, pessoa.id, p):
+                    return paginas.TemplateResponse(request=request, name="impedimento_assuncao_form2.html",
+                        status_code=403, context={"conta_id": conta_id})
         if not p or not autorizado(sessao, pessoa, p) or (p.responsavel_id and p.responsavel_id != pessoa.id):
             raise PermissionError("Participação fora do seu escopo.")
     except PermissionError as erro:
@@ -308,8 +324,19 @@ def participacao(request: Request, participacao_id: str, conta_id: str,
     registrar_auditoria(sessao, "consulta_participacao_form2", "pessoa", pessoa.id,
         {"participacao_id": p.id, "finalidade": "atendimento da participação atribuída à unidade"})
     sessao.commit()
+    from app.modelos import Comando, VersaoForm1Integral
+    snapshot = sessao.get(VersaoForm1Integral, p.snapshot_id)
+    data_confirmacao = snapshot.apresentacao.confirmada_em if snapshot.apresentacao else None
+    chave = request.query_params.get("assumida")
+    comando = sessao.get(Comando, chave) if chave and p.responsavel_id == pessoa.id else None
+    assumida = (comando and comando.tipo == "fila_form2_assumir" and comando.conta_id == conta_id
+                and comando.ator_id == pessoa.id and (comando.resultado or {}).get("participacao_id") == p.id
+                and comando.resultado.get("permitido"))
     return paginas.TemplateResponse(request=request, name="participacao_form2.html",
         context={"atuacao": contexto_atuacao(sessao, pessoa, p), "conta_id": conta_id, "p": p, "estados_regua": estados_regua_form2(p.conteudo or {}), "pessoa": pessoa,
+                 "rotulo_origem": rotulo_apresentacao(snapshot),
+                 "confirmada_em": data_confirmacao.astimezone(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y às %Hh%M") if data_confirmacao else None,
+                 "assumida": assumida,
                  "registro": sessao.get(Registro, p.registro_id),
                  "unidades": sessao.scalars(select(Unidade).where(Unidade.ativa.is_(True))).all(),
                  "consultas": sessao.scalars(select(ParticipacaoForm2).where(ParticipacaoForm2.origem_id == p.id)).all(),
@@ -332,6 +359,9 @@ async def agir(request: Request, participacao_id: str,
     except (ValueError, PermissionError) as erro:
         sessao.rollback()
         raise HTTPException(409 if isinstance(erro, ValueError) else 403, str(erro))
+    if dados.get("acao") == "assumir":
+        destino = request.url_for("participacao_form2", participacao_id=participacao_id)
+        return RedirectResponse(str(destino)+"?"+urlencode({"conta_id": conta_id, "assumida": dados["comando_id"]}), status_code=303)
     return RedirectResponse("/form2/filas?"+urlencode({"conta_id": conta_id}), status_code=303)
 
 
@@ -396,7 +426,7 @@ def bloco_fila(request: Request, participacao_id: str, bloco: int, conta_id: str
         "fatos_origem": origem["conteudo"],
         "registro": sessao.get(Registro, p.registro_id),
         "secretaria": sessao.get(Unidade, sessao.get(Registro, p.registro_id).unidade_principal_atual_id),
-        "numero_origem": origem["snapshot"].numero,
+        "rotulo_origem": rotulo_apresentacao(origem["snapshot"]),
         "perguntas_origem": [q for q in origem["perguntas"] if q["respondida"]],
         "revogacao": [a["rotulo"] for q in definicao_revisao(5)["itens"] if q["id"] == "F2-5.7" for a in q["alternativas"] if a["codigo"] in valores.get("opcao:F2-5.7", [])],
         "complementacao": conteudo.get("respostas_etapa1", {}).get("F2-1.3.1"),

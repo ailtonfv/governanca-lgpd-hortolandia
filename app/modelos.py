@@ -311,6 +311,7 @@ class VersaoForm1Integral(Base):
     2 continua usando ``VersaoInstrumento`` de forma independente.
     """
     __tablename__ = "versao_form1_integral"
+    apresentacao = relationship("HistoricoConferenciaForm1Integral", uselist=False, viewonly=True)
 
     id = Column(String(36), primary_key=True)
     registro_id = Column(String(36), ForeignKey("registro.id"), nullable=False)

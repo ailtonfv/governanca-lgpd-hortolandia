@@ -75,10 +75,12 @@ def test_decisoes_distintas_com_ciencia_dialogo_e_autorizacao_preservada(sessao)
     assert 'name="ciencia-confirmacao"' not in html
     assert 'Confirmar e encaminhar ao FORM 2?' in html
     assert 'entra automaticamente na fila do FORM 2' in html
+    assert 'O encarregado (DPO) recebe ciência do ingresso.' in html
     assert 'Confirmar a conferência da versão 1?' not in html
     assert 'informações apresentadas por' in html
     assert 'id="historico-apresentacao-conferida"' in html
-    assert 'Rascunho 1 · snapshot técnico' in html
+    assert 'Apresentação 1 (rascunho 1)' in html
+    assert '<details><summary>Dados técnicos</summary>' in html and '<dt>Snapshot técnico</dt>' in html
     assert 'data-cancelar-confirmacao autofocus' in html
     assert 'name="justificativa" maxlength="2000" required' in html
     assert 'decisao_conferencia.js' in html
@@ -155,7 +157,7 @@ def test_fluxo_operacional_direto_em_todos_estados_sem_duplicar_historico(sessao
         assert 'Devolver para ajustes' in fluxo['texto'] and 'Confirmar conferência interna' in fluxo['texto']
         assert not any(e['tag'] in {'button', 'input', 'form', 'select'} for e in internos)
         assert any(e['tag'] == 'svg' and e['attrs'].get('aria-hidden') == 'true' for e in internos)
-        assert ('Apresentação registrada · rascunho 1' in fluxo['texto']) is com_versao
+        assert ('Apresentação 1 (rascunho 1)' in fluxo['texto']) is com_versao
         assert 'não são aprovação jurídica' in fluxo['texto']
         historicos = [e for e in estrutura.elementos if e['attrs'].get('id') == 'historico-conferencias-form1']
         assert all(not any(a is fluxo for a in h['ancestrais']) for h in historicos)
@@ -177,3 +179,13 @@ def test_fluxo_operacional_direto_em_todos_estados_sem_duplicar_historico(sessao
     painel = _EstruturaFluxo(cliente.get('/?conta_id=CONTA-G1').text)
     fluxo_painel = next(e for e in painel.elementos if 'fluxo-conferencia' in e['attrs'].get('class', '').split())
     assert any(e['tag'] == 'details' for e in fluxo_painel['ancestrais'])
+
+
+def test_rotulo_da_apresentacao_usa_numeros_do_historico_e_do_rascunho():
+    from app.apresentacoes_form1 import rotulo_apresentacao
+    from app.modelos import HistoricoConferenciaForm1Integral, VersaoForm1Integral
+
+    versao = VersaoForm1Integral(numero=5, versao_rascunho=9)
+    assert rotulo_apresentacao(versao) == "Rascunho 9 (sem apresentação registrada)"
+    versao.apresentacao = HistoricoConferenciaForm1Integral(numero_apresentacao=4, versao_rascunho=9)
+    assert rotulo_apresentacao(versao) == "Apresentação 4 (rascunho 9)"

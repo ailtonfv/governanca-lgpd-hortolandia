@@ -25,11 +25,14 @@
 <details class="form1" id="historico-apresentacao-conferida">
   <summary>Histórico e identificação da apresentação</summary>
   <dl>
-    <div><dt>Versão da estrutura consultada</dt><dd>{{ versao_estrutura }}</dd></div>
-    <div><dt>Versão apresentada</dt><dd>Rascunho {{ conferencia.versao_rascunho }} · snapshot técnico {{ snapshot.numero }}</dd></div>
+    <div><dt>Apresentação</dt><dd>{{ snapshot|rotulo_apresentacao }}</dd></div>
     <div><dt>Apresentada em</dt><dd>{{ conferencia.solicitada_em.strftime('%d/%m/%Y às %H:%M') }}</dd></div>
-    <div><dt>Lacre de integridade</dt><dd>Identifica o conteúdo preservado desta apresentação.<br><code style="overflow-wrap:anywhere">{{ snapshot.lacre }}</code></dd></div>
   </dl>
+  <details><summary>Dados técnicos</summary><dl>
+    <div><dt>Versão da estrutura consultada</dt><dd>{{ versao_estrutura }}</dd></div>
+    <div><dt>Snapshot técnico</dt><dd>{{ snapshot.numero }}</dd></div>
+    <div><dt>Lacre de integridade</dt><dd>Identifica o conteúdo preservado desta apresentação.<br><code style="overflow-wrap:anywhere">{{ snapshot.lacre }}</code></dd></div>
+  </dl></details>
 </details>
 
 <section class="form1" aria-labelledby="titulo-conteudo-apresentado">
@@ -52,7 +55,7 @@
 
 {% if conferencia_pendente %}
 {% set acao_apa = 'Confirmar e encaminhar ao FORM 2' if primeiro_ingresso else 'Confirmar nova versão do FORM 1' %}
-{% set efeito_apa = 'Ao confirmar, o Registro entra automaticamente na fila do FORM 2 para validação institucional.' if primeiro_ingresso else 'Ao confirmar, a nova versão fica disponível no FORM 2. Até a primeira assunção pelo AAL, a última versão confirmada passa a ser a referência. Após a assunção, a escolha cabe ao AAL.' %}
+{% set efeito_apa = 'Ao confirmar, o Registro entra automaticamente na fila do FORM 2 para validação institucional. O encarregado (DPO) recebe ciência do ingresso.' if primeiro_ingresso else 'Ao confirmar, a nova versão fica disponível no FORM 2. Até a primeira assunção pelo AAL, a última versão confirmada passa a ser a referência. Após a assunção, a escolha cabe ao AAL.' %}
 <section class="form1" aria-labelledby="titulo-decidir-conferencia">
   <p class="etiqueta">Ato do APA · conferência interna</p>
   <h2 id="titulo-decidir-conferencia">Decisão da conferência interna</h2>

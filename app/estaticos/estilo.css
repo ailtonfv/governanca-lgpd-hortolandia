@@ -145,6 +145,8 @@ th { color: #425466; font-size: .8rem; text-transform: uppercase; letter-spacing
 .regua-navegacao-blocos { margin-top: 1rem; padding: .55rem; overflow-x: auto; border: 1px solid var(--borda); border-radius: .6rem; background: #f8fbfd; scrollbar-gutter: stable; }
 .mapa-blocos-form1 { display: flex; gap: .4rem; min-width: max-content; margin: 0; padding: 0; list-style: none; }
 .mapa-blocos-form1 :is(button, .cartao-bloco) { width: 4.65rem; min-height: 5.2rem; padding: .4rem .3rem; background: white; color: var(--texto); cursor: pointer; text-align: center; }
+.mapa-blocos-form1.regua-com-titulos-form2 li :is(.cartao-bloco, .bloco-indisponivel) { width: 9rem; }
+.titulo-bloco-form2 { display: block; white-space: normal; overflow-wrap: anywhere; }
 .mapa-blocos-form1 .numero-bloco { display: block; font-size: 1.05rem; }
 .mapa-blocos-form1 :is(button, .cartao-bloco)[aria-current="step"] { border-color: var(--azul); box-shadow: 0 0 0 .15rem rgba(7, 89, 133, .16); }
 .mapa-blocos-form1 :is(button, .cartao-bloco).bloco-com-respostas { border-bottom: .3rem solid var(--azul); }

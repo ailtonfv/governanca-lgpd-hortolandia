@@ -283,17 +283,17 @@
       {% set fluxo = registro.form1_integral.fluxo_conferencia %}
       <div class="area-somente-leitura"><p class="selo-somente-leitura">Somente leitura · situação da conferência</p>{% with fluxo_compacto=true %}{% include '_fluxo_conferencia.html' %}{% endwith %}</div>
       {% if registro.form1_integral.conferencia_interna %}
-      <p class="aviso-leitura"><strong>FORM 1 aguardando conferência interna.</strong> A versão {{ registro.form1_integral.conferencia_interna.versao_rascunho }} foi preservada em snapshot técnico {{ registro.form1_integral.conferencia_interna.numero_snapshot }} por {{ registro.form1_integral.conferencia_interna.solicitada_por }}.</p>
+      <p class="aviso-leitura"><strong>FORM 1 aguardando conferência interna.</strong> A {{ registro.form1_integral.conferencia_interna.rotulo_apresentacao }} foi apresentada por {{ registro.form1_integral.conferencia_interna.solicitada_por }}.</p>
       <p class="ajuda">Este encaminhamento não é submissão, homologação, conclusão institucional nem envio à T.I.</p>
       {% if registro.form1_integral.conferencia_interna.pode_consultar %}
       <a class="botao-link" href="{{ url_for('consultar_conferencia_interna', registro_id=registro.id) }}?conta_id={{ conta_id }}">Conferir versão apresentada</a>
       {% endif %}
       {% elif registro.form1_integral.confirmacao_interna %}
-      <p class="sucesso"><strong>Conferência interna confirmada.</strong> Apresentação {{ registro.form1_integral.confirmacao_interna.numero_apresentacao }}, referente ao rascunho {{ registro.form1_integral.confirmacao_interna.versao_rascunho }}.</p>
+      <p class="sucesso"><strong>Conferência interna confirmada.</strong> {{ registro.form1_integral.confirmacao_interna.rotulo_apresentacao }}.</p>
       <p class="ajuda">Confirmação registrada por {{ registro.form1_integral.confirmacao_interna.confirmada_por }}. Este ato não é submissão, homologação ou declaração de conformidade.</p>
       <a class="botao-link" href="{{ url_for('consultar_conferencia_interna', registro_id=registro.id) }}?conta_id={{ conta_id }}">Consultar versão confirmada</a>
       {% elif registro.form1_integral.devolucao_interna %}
-      <p class="aviso-leitura"><strong>Devolvido para ajustes pelo APA.</strong> Apresentação {{ registro.form1_integral.devolucao_interna.numero_apresentacao }}, referente ao rascunho {{ registro.form1_integral.devolucao_interna.versao_rascunho }}.</p>
+      <p class="aviso-leitura"><strong>Devolvido para ajustes pelo APA.</strong> {{ registro.form1_integral.devolucao_interna.rotulo_apresentacao }}.</p>
       <p><strong>Justificativa:</strong> {{ registro.form1_integral.devolucao_interna.justificativa }}</p>
       {% if registro.form1_integral.pode_editar %}{% include '_localizador_pergunta_form1.html' %}{% endif %}
       <p class="ajuda">Devolução registrada por {{ registro.form1_integral.devolucao_interna.devolvida_por }}. O snapshot apresentado permanece imutável.</p>
@@ -326,7 +326,8 @@
         <ol>
           {% for item in registro.form1_integral.historico_conferencias %}
           <li>
-            <strong>Apresentação {{ item.numero_apresentacao }}</strong> — rascunho {{ item.versao_rascunho }}, snapshot {{ item.numero_snapshot }} · {{ item.situacao }}.
+            <strong>{{ item.rotulo_apresentacao }}</strong> · {{ item.situacao }}.
+            <details><summary>Dados técnicos</summary>Snapshot {{ item.numero_snapshot }}</details>
             {% if item.justificativa_devolucao %}<br><span>Justificativa da devolução: {{ item.justificativa_devolucao }}</span>{% endif %}
             {% if item.confirmada_por %}<br><span>Confirmada por: {{ item.confirmada_por }}</span>{% endif %}
           </li>

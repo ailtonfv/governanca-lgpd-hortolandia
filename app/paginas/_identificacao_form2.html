@@ -11,7 +11,7 @@
     <fieldset data-identificacao="{{ q.id }}"{% if not q.ativa %} disabled{% endif %}>
       <legend>{{ q.id }} — {{ q.enunciado }}</legend>
       {% if q.id == 'F2-1.2' %}<p>Secretaria do Registro: {{ secretaria.nome }}.</p>{% endif %}
-      {% if q.id == 'F2-1.2.1' %}<p>Unidade na versão {{ origem.snapshot.numero }} do FORM 1: {{ unidade or 'Sem informação' }}.</p>{% endif %}
+      {% if q.id == 'F2-1.2.1' %}<p>Unidade na {{ origem.snapshot|rotulo_apresentacao }} do FORM 1: {{ unidade or 'Sem informação' }}.</p>{% endif %}
       {% if q.modo == 'unica' %}
       <select aria-label="{{ q.enunciado }}" name="resposta_{{ q.id }}"><option value="">Sem resposta</option>
         {% for a in q.alternativas %}<option value="{{ a.codigo }}"{% if q.valor == a.codigo %} selected{% endif %}>{{ a.rotulo }}</option>{% endfor %}

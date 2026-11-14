@@ -10,6 +10,7 @@ import uuid
 from fastapi import Depends, FastAPI, Form, Query, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
+from app.apresentacoes_form1 import rotulo_apresentacao
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
@@ -71,10 +72,12 @@ from app.form2_preparacao import projetar_navegacao_preparacao
 from app.apresentacao_form2 import data_local, rotulo_demonstrativo
 app.include_router(rotas_form2_preparacao)
 from app.rotas_fila_form2 import router as rotas_fila_form2
+from app.fila_form2 import PAPEIS, unidades
 app.include_router(rotas_fila_form2)
 from app.rotas_rev22_form1 import router as router_rev22_form1
 app.include_router(router_rev22_form1)
 paginas = Jinja2Templates(directory=PASTA_APP / "paginas")
+paginas.env.filters["rotulo_apresentacao"] = rotulo_apresentacao
 paginas.env.globals["consulta_cartilha_local"] = acesso_local_cartilha
 paginas.env.filters.update(data_local=data_local, rotulo_f2=rotulo_demonstrativo)
 FUSO_OFICIAL = ZoneInfo("America/Sao_Paulo")
@@ -170,8 +173,11 @@ def central(
         return _erro_acesso_central(request, conta_indisponivel=True)
     if secretaria_id is not None and secretaria_id not in acesso["secretarias"]:
         return _erro_acesso_central(request)
+    pessoa_id = acesso["identidade"]["pessoa_id"]
     return paginas.TemplateResponse(request=request, name="central.html", context={
         **acesso, "conta_id": conta_id,
+        "exibir_fila_form2": bool(unidades(sessao, pessoa_id, PAPEIS["principal"])),
+        "exibir_painel_dpo": bool(unidades(sessao, pessoa_id, PAPEIS["dpo"])),
         "selecao": secretaria_id or request.cookies.get(f"secretaria_{conta_id}"),
     })
 

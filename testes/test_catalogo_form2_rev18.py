@@ -39,6 +39,22 @@ class TestCatalogoForm2(unittest.TestCase):
             for item in bloco["itens"]:
                 self.assertRegex(item["id"], rf"^F2-{bloco['numero']}[A-Z]?\.\d+(?:\.\d+)*$")
 
+    def test_as_duas_reguas_exibem_os_quatorze_titulos_na_ordem(self):
+        from app.rotas_fila_form2 import paginas as fila
+        from app.rotas_form2_preparacao import paginas as preparacao
+
+        titulos = leitor.titulos_blocos_form2()
+        self.assertEqual(list(titulos), list(range(1, 15)))
+        for bloco in self.blocos:
+            self.assertTrue(bloco["titulo"].casefold().startswith(titulos[bloco["numero"]].casefold()))
+        for paginas, nome in ((fila, "_regua_fila_form2.html"), (preparacao, "_regua_form2.html")):
+            html = paginas.get_template(nome).render(
+                p={"id": "participacao"}, conta_id="conta", estados_regua={},
+                revisao=False, url_for=lambda *args, **kwargs: "/estaticos/regua_form2.js",
+            )
+            self.assertEqual(re.findall(r'<small class="titulo-bloco-form2">([^<]+)</small>', html),
+                             list(titulos.values()))
+
     def test_correspondencia_dos_250_itens_com_a_matriz(self):
         with MATRIZ.open(encoding="utf-8-sig", newline="") as arquivo:
             linhas = list(csv.DictReader(arquivo, delimiter=";"))

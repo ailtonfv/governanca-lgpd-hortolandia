@@ -528,6 +528,7 @@ def test_confirmacao_atualiza_fila_sem_assuncao(sessao):
         f"/registros/{p.registro_id}/form1-integral/conferencia-interna?conta_id=CONTA-A1")
     assert pagina.status_code == 200
     assert "Confirmar nova versão do FORM 1?" in pagina.text
+    assert "O encarregado (DPO) recebe ciência do ingresso." not in pagina.text
     assert p.snapshot_id == anterior
     assert _confirmar(sessao, registro, comando="P17-CONF")["permitido"]
     sessao.refresh(p)

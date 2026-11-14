@@ -39,3 +39,19 @@ def carregar_catalogo() -> dict:
     catalogo = json.loads(ARQUIVO.read_text(encoding="utf-8"))
     _validar(catalogo)
     return catalogo
+
+
+def titulos_blocos_form2():
+    """Usa o primeiro tema dos títulos extensos na régua dos blocos."""
+    try:
+        blocos = carregar_catalogo()["blocos"]
+    except FileNotFoundError:
+        return {}
+    titulos = {}
+    for bloco in blocos:
+        titulo = bloco["titulo"]
+        curto = titulo
+        if len(titulo) > 27:
+            curto = titulo.split(",")[0].split(" E ")[0]
+        titulos[bloco["numero"]] = curto.capitalize().replace("form 1", "FORM 1")
+    return titulos

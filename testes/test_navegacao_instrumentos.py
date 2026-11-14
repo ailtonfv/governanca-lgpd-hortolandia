@@ -115,7 +115,7 @@ def test_inicio_e_retomada_seguem_o_historico_do_aal(sessao):
         assert ("Designada ao AAL — ainda não iniciada" in lista.text) is not iniciada
         for resposta in (lista, cliente.get(destino_form2(lista.text))):
             assert resposta.status_code == 200
-            assert f"versão histórica nº 1, registrada em {data_local(origem_em)}" in resposta.text
+            assert f"Rascunho 1 (sem apresentação registrada), registrada em {data_local(origem_em)}" in resposta.text
             assert f"Último salvamento em {data_local(momento)}" in resposta.text
             assert "Servidor Épsilon (fictício) (AAL)" in resposta.text
 

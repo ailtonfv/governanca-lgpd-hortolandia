@@ -108,7 +108,7 @@
           {% set acesso = registro.navegacao_form2 %}
           <p><strong>Situação da preparação:</strong> {% if acesso.preparacao_id %}{{ situacao_preparacao(acesso.resumo.trabalhada if acesso.resumo is mapping else none) }}.{% else %}Ainda sem designação.{% endif %}</p>
           {% if acesso.resumo is mapping %}
-          <p><strong>Origem:</strong> FORM 1, versão histórica nº {{ acesso.resumo.origem }}{% if acesso.resumo.origem_em %}, registrada em {{ acesso.resumo.origem_em|data_local }}{% endif %}.</p>
+          <p><strong>Origem:</strong> FORM 1, {{ acesso.resumo.rotulo_apresentacao }}{% if acesso.resumo.origem_em %}, registrada em {{ acesso.resumo.origem_em|data_local }}{% endif %}.</p>
           <p><strong>Preparação do FORM 2:</strong> rascunho {{ acesso.resumo.rascunho }}.
             {% if acesso.resumo.salva is boolean %}{{ 'Último salvamento' if acesso.resumo.salva else 'Designação' }} em {{ acesso.resumo.salvo_em|data_local }} por {{ acesso.resumo.autor or 'autor indisponível' }} ({{ 'AAL' if acesso.resumo.salva else 'APA' }}).{% endif %}</p>
           {% endif %}
@@ -130,7 +130,7 @@
           <p><strong>Última atividade:</strong> {{ fluxo.ultima_atividade[1] }} em {{ fluxo.ultima_atividade[0]|data_local }}.</p>
           {% endif %}
           <p><strong>Responsável pelo rascunho:</strong> {{ fluxo.arp }}</p>
-          <p class="resumo-conferencia-cartao"><strong>Conferência interna:</strong> {{ fluxo.estado }}{% if fluxo.versao is not none %} · versão apresentada {{ fluxo.versao }}{% endif %}.</p>
+          <p class="resumo-conferencia-cartao"><strong>Conferência interna:</strong> {{ fluxo.estado }}{% if fluxo.rotulo_apresentacao %} · {{ fluxo.rotulo_apresentacao }}{% endif %}.</p>
           <details class="percurso-conferencia-cartao">
             <summary>Entender o percurso ARP → APA → ARP</summary>
             {% include '_fluxo_conferencia.html' %}

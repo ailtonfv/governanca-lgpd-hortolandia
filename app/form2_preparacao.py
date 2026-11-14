@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from copy import deepcopy
 import uuid
 
+from app.apresentacoes_form1 import rotulo_apresentacao
 from sqlalchemy import func, inspect, select, text
 
 from app.comandos import abrir_comando, fechar_comando
@@ -381,12 +382,11 @@ def projetar_navegacao_preparacao(sessao, *, conta_id, registro_id, momento=None
     prep = editaveis[-1] if editaveis else visiveis[-1] if visiveis else None
     resumo = None
     if prep:
-        versao, registrada_em = sessao.execute(select(
-            VersaoForm1Integral.numero, VersaoForm1Integral.preparado_em).where(
+        versao = sessao.scalars(select(VersaoForm1Integral).where(
             VersaoForm1Integral.id == prep.snapshot_id, VersaoForm1Integral.registro_id == registro.id)).one()
         trabalho = projetar_trabalho_aal(sessao, [prep])
         autor = sessao.get(Pessoa, prep.salvo_por)
-        resumo = {"origem": versao, "origem_em": registrada_em, "salva": prep.id in trabalho,
+        resumo = {"origem": versao.numero, "rotulo_apresentacao": rotulo_apresentacao(versao), "origem_em": versao.preparado_em, "salva": prep.id in trabalho,
                   "trabalhada": trabalho.get(prep.id, False), "rascunho": prep.versao_rascunho, "salvo_em": prep.salvo_em,
                   "autor": f"{autor.matricula} — {autor.nome}" if autor else None}
     pode_iniciar = bool(not prep and e_apa and _ciclo_em_andamento(sessao, registro)

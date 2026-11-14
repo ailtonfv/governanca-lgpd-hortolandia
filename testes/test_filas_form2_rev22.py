@@ -59,6 +59,46 @@ def test_interface_e_blocos(sessao):
         assert response.status_code == 200, response.text
     assert client.get(f"/form2/participacoes/{p.id}/blocos/1?conta_id=CONTA-G1").status_code == 403
 
+def test_assuncao_explicada_confirmada_e_identificada_na_fila(sessao):
+    from fastapi.testclient import TestClient
+    from app.apresentacoes_form1 import rotulo_apresentacao
+    from app.fila_form2 import unidades
+    from app.main import app
+    from app.modelos import Pessoa, VersaoForm1Integral
+
+    registro = origem(sessao)
+    p = sessao.scalar(select(ParticipacaoForm2).where(
+        ParticipacaoForm2.registro_id == registro["registro_id"]))
+    for papel in ("aal_form2", "gestor_fila"):
+        if p.unidade_id not in unidades(sessao, "PESSOA-B", papel):
+            sessao.add(Designacao(pessoa_id="PESSOA-B", unidade_id=p.unidade_id, papel=papel, ativa=True))
+    sessao.commit()
+    cliente = TestClient(app)
+    url = f"/form2/participacoes/{p.id}"
+    fila = "/form2/filas?conta_id=CONTA-B1"
+    antes = cliente.get(fila)
+    assert "Atribuir responsável" in antes.text and "conta como primeira assunção" in antes.text
+    detalhe = cliente.get(url, params={"conta_id": "CONTA-B1"})
+    assert detalhe.status_code == 200
+    referencia = rotulo_apresentacao(sessao.get(VersaoForm1Integral, p.snapshot_id))
+    assert referencia in detalhe.text and "Assumir a participação?" in detalhe.text
+    for conta in ("CONTA-G1", "CONTA-A1"):
+        impedido = cliente.get(url, params={"conta_id": conta})
+        assert impedido.status_code == 403
+        assert "Você apresentou ou confirmou" in impedido.text
+        assert "Assumir participação" not in impedido.text
+    assert sessao.get(ParticipacaoForm2, p.id).assumida_em is None
+    resposta = cliente.post(url, data={"conta_id": "CONTA-B1", "comando_id": "VISTORIA-ASSUME",
+        "acao": "assumir", "versao": p.versao}, follow_redirects=True)
+    assert resposta.status_code == 200
+    assert resposta.url.path == url
+    assert "Você assumiu a participação principal" in resposta.text and referencia in resposta.text
+    nome = sessao.get(Pessoa, "PESSOA-B").nome
+    depois = cliente.get(fila)
+    assert f"Responsável: {nome}" in depois.text
+    assert "Reatribuir" in depois.text and "conta como primeira assunção" not in depois.text
+
+
 def test_envio_configuravel_e_reprocessamento(sessao):
     from app.avisos_dpo import entregar_pendentes
     r=origem(sessao)

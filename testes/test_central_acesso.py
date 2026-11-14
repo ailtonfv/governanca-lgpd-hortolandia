@@ -32,6 +32,32 @@ def test_entrada_sem_listagem_identifica_apa_e_reserva_planejados():
     assert '<a ' not in alterada.text.split('id="titulo-gestao"', 1)[1]
 
 
+def test_atalhos_da_central_por_papel_vigente(sessao):
+    cliente = TestClient(app)
+    sessao.add(Designacao(pessoa_id="PESSOA-B", unidade_id="UNID-NORTE", papel="aal_form2", ativa=True))
+    sessao.commit()
+
+    def conferir(conta, fila, painel):
+        resposta = cliente.get("/central", params={"conta_id": conta})
+        assert resposta.status_code == 200
+        quadro = resposta.text.split('<section class="contexto-central"', 1)[1].split("</section>", 1)[0]
+        assert (f'filas?conta_id={conta}">Abrir fila do FORM 2</a>' in quadro) == fila
+        assert (f'filas?conta_id={conta}#painel-dpo">Abrir painel do DPO</a>' in quadro) == painel
+        assert "Filas institucionais do FORM 2 e painel do DPO" not in resposta.text
+
+    conferir("CONTA-G1", fila=False, painel=False)
+    conferir("CONTA-B1", fila=True, painel=False)
+    conferir("CONTA-E1", fila=False, painel=True)
+    assert 'id="painel-dpo"' in cliente.get("/form2/filas?conta_id=CONTA-E1").text
+    aal = Designacao(pessoa_id="PESSOA-E", unidade_id="UNID-NORTE", papel="aal_form2", ativa=True)
+    sessao.add(aal)
+    sessao.commit()
+    conferir("CONTA-E1", fila=True, painel=True)
+    aal.vigente_ate = datetime.now(timezone.utc) - timedelta(days=1)
+    sessao.commit()
+    conferir("CONTA-E1", fila=False, painel=True)
+
+
 def test_cartoes_explicam_disponibilidade_sem_oferecer_acesso_direto():
     pagina = TestClient(app).get("/central").text
     cartoes = re.findall(r'<li class="cartao-central [^"]+">(.*?)</li>', pagina, re.S)
@@ -121,7 +147,7 @@ def test_escolha_explicita_filtra_form2_e_retorna_ao_contexto(sessao, conta, rot
         assert f"Servidor em sessão:</strong> {identidade}" in pagina.text
         if filtro == "form2":
             assert "APA responsável:" in pagina.text and "Função nesta atividade:" in pagina.text
-            assert "versão histórica nº 1" in tela.text and "Designação em" in tela.text
+            assert "Rascunho 1 (sem apresentação registrada)" in tela.text and "Designação em" in tela.text
         assert f"Voltar à lista de Registros do FORM {filtro[-1]}" in pagina.text
         volta = unescape(re.search(r'href="([^"]+/painel\?[^"]+)"', pagina.text).group(1))
         assert dict(cliente.get(volta).url.params) == {**contexto, "instrumento": filtro}

@@ -57,7 +57,7 @@ def test_unidade_isola_origens_e_reutiliza_anotacao(sessao, monkeypatch):
         assert ("Não há prazo de guarda informado" in unidade) == (numero == 1)
         assert unidade.count('class="fato-guarda"') == unidade.count("data-fato-guarda=") == 21
         assert "Mostrar também as não informadas" in pagina.text
-        assert f"Versão histórica nº {numero} " in unidade
+        assert f"Rascunho {numero} (sem apresentação registrada)" in unidade
         assert "F1-12.1.3" in unidade and "<input" not in unidade and "<textarea" not in unidade
         prazo = unidade.split('data-fato-guarda="12.1.1"', 1)[1].split("</dd>", 1)[0]
         assert ("Sem resposta nesta versão" in prazo) == (numero == 1)

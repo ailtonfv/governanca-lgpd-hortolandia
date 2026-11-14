@@ -20,7 +20,6 @@
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/instrumentos_registro.css') }}">
 <div class="central-acesso">
   <h1>Central de Acesso LGPD</h1>
-  <p><a href="/form2/filas?conta_id={{ conta_id|urlencode }}">Filas institucionais do FORM 2 e painel do DPO</a></p>
   <p>Escolha um instrumento para ver os Registros autorizados na sua Secretaria.</p>
   <section class="contexto-central" aria-labelledby="titulo-contexto">
     <h2 id="titulo-contexto">Secretaria de atuação</h2>
@@ -53,9 +52,17 @@
       </div>
       {% endif %}
     </dl>
-    {% if secretarias %}
-    <button class="botao-primario" type="submit" form="abrir-painel">Abrir Painel de Registros</button>
-    {% endif %}
+    <div class="navegacao-governanca">
+      {% if secretarias %}
+      <button class="botao-primario" type="submit" form="abrir-painel">Abrir Painel de Registros</button>
+      {% endif %}
+      {% if exibir_fila_form2 %}
+      <a class="botao-link-secundario" href="{{ url_for('filas_form2') }}?conta_id={{ conta_id|urlencode }}">Abrir fila do FORM 2</a>
+      {% endif %}
+      {% if exibir_painel_dpo %}
+      <a class="botao-link-secundario" href="{{ url_for('filas_form2') }}?conta_id={{ conta_id|urlencode }}#painel-dpo">Abrir painel do DPO</a>
+      {% endif %}
+    </div>
     <details class="identidade-demonstrativa">
       <summary class="botao-link-secundario">Trocar usuário fictício — demonstração</summary>
       <form action="{{ url_for('central') }}" method="get">

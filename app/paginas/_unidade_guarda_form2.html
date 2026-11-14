@@ -8,7 +8,7 @@
   <a href="#anotacoes">Ir à anotação geral</a>
   <section class="detalhe somente-leitura" aria-labelledby="fatos-guarda">
     <h3 id="fatos-guarda">Área A — Informações do FORM 1</h3>
-    <p>Somente leitura · Versão histórica nº {{ origem.snapshot.numero }} do FORM 1.</p>
+    <p>Somente leitura · {{ origem.snapshot|rotulo_apresentacao }} do FORM 1.</p>
     {% macro listar_fatos(fatos) %}
     <dl>{% for fato in fatos %}
       <div class="fato-guarda"><dt data-fato-guarda="{{ fato.id }}">{{ codigo_pergunta(fato.id, 1) }}{% if fato.campo %} — {{ fato.campo.pergunta }}{% endif %}</dt>

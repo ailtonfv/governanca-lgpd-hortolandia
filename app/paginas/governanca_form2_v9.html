@@ -65,7 +65,7 @@
 <p>A resposta precisa ser confirmada pelo APA e conferida por quem a solicitou. Aceitar uma resposta não substitui automaticamente a versão usada na análise.</p>
 {% if versoes_aceitas %}<form method="post">{{ cabecalho('fonte') }}{{ fontes(versoes_aceitas) }}{{ motivo() }}<button class="botao-link" name="acao" value="fonte">Usar nova versão na análise</button><button class="botao-link" name="acao" value="manter_fonte">Continuar usando a versão atual</button></form>
 {% else %}<p>Nenhuma nova versão com resposta aceita está disponível para esta decisão. Continue acompanhando as solicitações acima.</p>{% endif %}
-{% for c in comparacao %}<details><summary>Consultar FORM 1 · versão {{ c.numero }}{{ ' · usada nesta análise' if c.ativa else '' }}</summary>{{ respostas_confirmadas(c.perguntas) }}</details>{% endfor %}</article>
+{% for c in comparacao %}<details><summary>Consultar FORM 1 · {{ c.rotulo }}{{ ' · usada nesta análise' if c.ativa else '' }}</summary>{{ respostas_confirmadas(c.perguntas) }}</details>{% endfor %}</article>
 {% if g.impactos %}<article><h2>Conferir as análises afetadas pela nova versão</h2>
 {% for chave,i in g.impactos.items() %}<section><h3>{{ 'Respostas próprias do AAL' if i.participacao_id == p.id else 'Manifestação ' ~ i.participacao_id }}</h3>
 <p>Situação: {{ i.estado }}. A conclusão anterior continua no histórico.</p><form method="post">{{ cabecalho('impacto-' ~ loop.index) }}<input type="hidden" name="impacto_id" value="{{ chave }}">

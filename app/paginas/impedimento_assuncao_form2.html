@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block conteudo %}
+<h1>Participação indisponível para assunção</h1>
+<p role="alert">Você apresentou ou confirmou o FORM 1 deste processo. A validação exige outra pessoa habilitada.</p>
+<div class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/filas?conta_id={{ conta_id|urlencode }}">Voltar às filas</a></div>
+{% endblock %}

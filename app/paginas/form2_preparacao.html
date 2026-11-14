@@ -25,7 +25,7 @@
   <p><strong>APA responsável:</strong> {{ identificacao_servidor(apa) if apa else 'Sem APA vigente identificado' }}</p>
   {% if origem or alvo %}
     {% set versao_factual = origem.snapshot if origem else snapshots | selectattr('id', 'equalto', alvo.snapshot_id) | first %}
-    <p><strong>Origem:</strong> FORM 1, versão histórica nº {{ versao_factual.numero }}, registrada em {{ versao_factual.preparado_em|data_local }}.</p>
+    <p><strong>Origem:</strong> FORM 1, {{ versao_factual|rotulo_apresentacao }}, registrada em {{ versao_factual.preparado_em|data_local }}.</p>
   {% else %}<p><strong>Origem:</strong> selecione uma versão histórica autorizada do FORM 1.</p>{% endif %}
   <p><strong>Preparação do FORM 2:</strong> {% if alvo %}{{ situacao_preparacao(trabalho_aal.get(alvo.id, false) if trabalho_aal is mapping else none) }} · rascunho {{ alvo.versao_rascunho }}.
     {% if trabalho_aal is mapping and alvo.id in trabalho_aal %}Último salvamento em {{ alvo.salvo_em|data_local }} por {{ agentes.get(alvo.salvo_por, 'autor indisponível') }} (AAL).
@@ -86,7 +86,7 @@
       <label for="snapshot-origem">Versão do FORM 1 para esta preparação</label>
       <select id="snapshot-origem" name="snapshot_id" required>
         <option value="">Selecione a versão</option>
-        {% for item in snapshots %}<option value="{{ item.id }}" {% if origem and origem.snapshot.id == item.id %}selected{% endif %}>Versão {{ item.numero }} · rascunho {{ item.versao_rascunho }} · {{ item.preparado_em|data_local }}</option>{% endfor %}
+        {% for item in snapshots %}<option value="{{ item.id }}" {% if origem and origem.snapshot.id == item.id %}selected{% endif %}>{{ item|rotulo_apresentacao }} · {{ item.preparado_em|data_local }}</option>{% endfor %}
       </select>
       <button type="submit" class="{{ 'botao-primario' if selecao_principal else 'botao-secundario' }}">{{ 'Selecionar versão do FORM 1' if selecao_principal else 'Consultar origem' }}</button>
     </form>
@@ -96,7 +96,7 @@
   <details><summary>Preparações disponíveis</summary><ul>
     {% for item in preparacoes %}
     {% set versao = snapshots | selectattr('id', 'equalto', item.snapshot_id) | first %}
-    <li><a href="{{ url_preparacao.include_query_params(conta_id=conta_id, preparacao_id=item.id, **contexto_navegacao) }}">{{ acao_preparacao(item.id in preparacoes_editaveis, e_apa, trabalho_aal.get(item.id, false) if trabalho_aal is mapping else none) }} · origem {{ versao.numero }} · rascunho {{ item.versao_rascunho }}</a></li>
+    <li><a href="{{ url_preparacao.include_query_params(conta_id=conta_id, preparacao_id=item.id, **contexto_navegacao) }}">{{ acao_preparacao(item.id in preparacoes_editaveis, e_apa, trabalho_aal.get(item.id, false) if trabalho_aal is mapping else none) }} · origem {{ versao|rotulo_apresentacao }} · rascunho {{ item.versao_rascunho }}</a></li>
     {% endfor %}
   </ul></details>{% endif %}
 </section>
@@ -125,7 +125,7 @@
 <section class="form1 somente-leitura" aria-labelledby="titulo-origem">
   <p class="etiqueta">Somente leitura · fatos da versão identificada</p>
   <h2 id="titulo-origem">Origem e histórico do FORM 1</h2>
-  <p>Versão histórica nº {{ origem.snapshot.numero }}, registrada em {{ origem.snapshot.preparado_em|data_local }}. Os atos de conferência podem ser consultados no FORM 1.</p>
+  <p>{{ origem.snapshot|rotulo_apresentacao }}, registrada em {{ origem.snapshot.preparado_em|data_local }}. Os atos de conferência podem ser consultados no FORM 1.</p>
   {% if preparacao and snapshots and snapshots[-1].numero > origem.snapshot.numero %}<p>Há uma versão histórica posterior. Esta preparação continua vinculada à origem acima; nenhuma resposta foi substituída.</p>{% endif %}
   {% macro listar_historico(campos, respondidas) %}
     <dl>{% for campo in campos %}<div data-pergunta-historica="{{ campo.id }}"><dt>{{ codigo_pergunta(campo.id, 1) }} — {{ campo.pergunta }}</dt><dd>{{ valor(campo.valor, consulta_historica.rotulos, agentes) if respondidas else 'Sem resposta nesta versão.' }}</dd></div>{% endfor %}</dl>

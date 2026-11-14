@@ -9,7 +9,7 @@
 {% for c in cartoes %}
 <article data-registro="{{ c.registro.id }}"><h3>{{ c.registro.codigo_lgpd }}</h3>
 {% for p in c.participacoes %}
-<p>{{ unidades[p.unidade_id].nome }} · {{ p.tipo }} · Situação: {{ impedimentos.get(p.id, situacoes.get(p.estado, p.estado)) }}</p>
+<p>{{ unidades[p.unidade_id].nome }} · {{ p.tipo }} · Situação: {{ impedimentos.get(p.id, situacoes.get(p.estado, p.estado)) }}{% if p.responsavel_id %} · <strong>Responsável: {{ responsaveis[p.responsavel_id] }}</strong>{% endif %}</p>
 <div class="acoes-fila-form2"><a class="botao-link" href="/form2/participacoes/{{ p.id }}?conta_id={{ conta_id|urlencode }}">Abrir FORM 2{% if c.participacoes|length > 1 %} · {{ p.tipo }}{% endif %}</a></div>
 {% endfor %}
 {% for complemento in c.complementos %}
@@ -26,14 +26,24 @@
 <label>Identificador técnico do registro <input name="registro_id" required></label>
 <button>Encaminhar para a fila</button></form></details>
 {% endif %}
-{% if dpo %}<h2>Acompanhamento do DPO</h2>
+{% if dpo %}<h2 id="painel-dpo">Acompanhamento do DPO</h2>
 <div class="tabela-filas"><table><thead><tr><th>Processo</th><th>Secretaria</th><th>Fila</th><th>Entrada</th><th>Horas sem responsável</th><th>Horas aguardando DPO</th><th>Situação</th></tr></thead>
 <tbody>{% for l in linhas %}<tr><td>{{ l.registro.codigo_lgpd }}</td><td>{{ l.secretaria }}</td><td>{{ l.fila }}</td><td>{{ l.p.entrada_em.strftime('%d/%m/%Y %H:%M') }}</td><td>{{ l.espera }}</td><td>{{ l.dpo }}</td><td>{{ l.situacao }}</td></tr>{% endfor %}</tbody></table></div>
 <h2>Ingresso por unidade ativa</h2><ul>{% for u in cobertura %}<li>{{ u.nome }} · {{ u.total }} ingresso(s)</li>{% endfor %}</ul>{% endif %}
 
-{% for p in gerenciaveis %}<details><summary>Reatribuir {{ registros[p.registro_id].codigo_lgpd }} · {{ p.tipo }}</summary>
+{% for p in gerenciaveis %}
+{% set acao = 'Atribuir responsável' if p.assumida_em is none else 'Reatribuir' %}
+<details><summary>{{ acao }} — {{ registros[p.registro_id].codigo_lgpd }} · {{ p.tipo }}</summary>
 <form method="post" action="/form2/participacoes/{{ p.id }}/reatribuir">
 <input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="comando_id" value="{{ (comando_id ~ "-" ~ p.id)|chave_comando }}"><input type="hidden" name="versao" value="{{ p.versao }}">
 <label>Novo responsável <select name="responsavel_id">{% for a in agentes %}<option value="{{ a.id }}">{{ a.nome }}</option>{% endfor %}</select></label>
-<label>Motivo <textarea name="motivo" required maxlength="2000"></textarea></label><button>Reatribuir</button></form></details>{% endfor %}
-</div>{% endblock %}
+<label>Motivo <textarea name="motivo" required maxlength="2000"></textarea></label>
+<div class="acoes-fila-form2"><button type="button" class="botao-primario" data-abrir-dialogo="atribuir-{{ p.id }}">{{ acao }}</button></div>
+<dialog class="dialogo-acao-fila" id="atribuir-{{ p.id }}" aria-labelledby="titulo-{{ p.id }}">
+  <h2 id="titulo-{{ p.id }}">{{ acao }}?</h2>
+  <p>{{ registros[p.registro_id].codigo_lgpd }} · {{ p.tipo }} · <span data-nome-agente></span></p>
+  {% if p.assumida_em is none %}<p>Esta atribuição conta como primeira assunção.{% if p.tipo == 'principal' %} A partir daqui, novas versões do FORM 1 dependerão da decisão do responsável.{% endif %}</p>{% endif %}
+  <div class="acoes-fila-form2"><button type="button" data-fechar-dialogo autofocus>Cancelar</button>
+  <button type="submit" class="botao-primario">{{ acao }}</button></div>
+</dialog></form></details>{% endfor %}
+</div><script src="{{ url_for('estaticos', path='/confirmar_acao_fila.js') }}" defer></script>{% endblock %}

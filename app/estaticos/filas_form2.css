@@ -80,3 +80,5 @@
 .filas-form2 .aviso-conferencia-apa { margin-block: 20px; padding: 18px 20px; border: 1px solid #d6ad53; border-left: 6px solid #946200; border-radius: 8px; background: #fff8e6; color: #553900; }
 .filas-form2 .aviso-conferencia-apa strong { display: block; font-size: 1.2rem; }
 .filas-form2 .aviso-conferencia-apa p { margin: .5rem 0 0; }
+.dialogo-acao-fila {width: min(40rem, calc(100% - 2rem)); max-height: calc(100dvh - 2rem); box-sizing: border-box; overflow: auto; border: 2px solid #075985; border-radius: .6rem; padding: 1.25rem; color: #17212b; background: white;}
+.dialogo-acao-fila::backdrop {background: rgb(12 59 90 / 55%);}

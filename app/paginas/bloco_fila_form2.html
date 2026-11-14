@@ -10,7 +10,7 @@
 {% if numero in (1,14) %}<div class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/participacoes/{{ p.id }}/governanca?conta_id={{ conta_id|urlencode }}">Ver pendências e respostas</a></div>{% endif %}
 {% if numero == 14 %}<article><h2>Conferência da consolidação</h2><p>Reúna as respostas salvas, as complementações e as manifestações das áreas. Salve o bloco antes de abrir a conferência.</p><div class="acoes-fila-form2"><a class="botao-link" href="/form2/participacoes/{{ p.id }}/consolidacao?conta_id={{ conta_id|urlencode }}">Conferir consolidação</a></div></article>{% endif %}
 <p>Demonstração com dados fictícios. As respostas candidatas, inclusive as jurídicas e o resultado em F2-14.1, são rascunhos não homologados. Salvar não conclui a validação institucional.</p>
-<details class="origem-fila-form2"><summary>Versão de origem do FORM 1 · versão {{ numero_origem }}</summary>
+<details class="origem-fila-form2"><summary>Versão de origem do FORM 1 · {{ rotulo_origem }}</summary>
 <p>Respostas da versão de origem, somente para consulta.</p>
 <dl class="respostas-origem-form2">{% for q in perguntas_origem %}<div class="item-origem-form2"><dt>{{ codigo_pergunta(q.id, 1) }}{% if q.conjunto %} · conjunto {{ q.conjunto }}{% endif %} · {{ q.pergunta }}</dt><dd>{{ q.valor|join(', ') if q.valor is sequence and q.valor is not string and q.valor is not mapping else q.valor }}</dd></div>{% else %}<div><dt>Respostas</dt><dd>Nenhuma resposta registrada nesta versão.</dd></div>{% endfor %}</dl></details>
 <form method="post" id="revisao-bloco"><input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="comando_id" value="{{ comando_id }}"><input type="hidden" name="versao" value="{{ p.versao }}">
@@ -20,7 +20,7 @@
 {% set unidade_origem = fatos.get('2.4.2') if fatos.get('2.4') == 'Não' else fatos.get('2.3') %}
 {% for q in bloco.itens %}<fieldset id="{{ q.id }}" {% if q.edicao == "habilitada" and not q.ativa %}disabled{% endif %}><legend>{{ q.id }} · {{ q.enunciado }}</legend>
 {% if q.id == 'F2-1.2' %}<p>Secretaria do Registro: <strong>{{ secretaria.nome }}</strong>.</p>{% endif %}
-{% if q.id == 'F2-1.2.1' %}<p>Unidade informada na versão {{ numero_origem }} do FORM 1: {{ unidade_origem or 'Sem informação' }}.</p>{% endif %}
+{% if q.id == 'F2-1.2.1' %}<p>Unidade informada na {{ rotulo_origem }} do FORM 1: {{ unidade_origem or 'Sem informação' }}.</p>{% endif %}
 {% if q.edicao == 'habilitada' %}
 {% if q.alternativas %}
 {% if q.id == 'F2-2.9.1' %}<input type="hidden" name="resposta_{{ q.id }}" value="">{% for a in q.alternativas %}<label><input type="checkbox" name="resposta_{{ q.id }}" value="{{ a.codigo }}" {% if a.codigo in (q.valor or []) %}checked{% endif %}>{{ a.rotulo }}</label>{% endfor %}

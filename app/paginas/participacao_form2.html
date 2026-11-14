@@ -3,6 +3,7 @@
 {% set situacoes = {'aguardando': 'aguardando responsável', 'em_atendimento': 'em atendimento', 'concluida': 'concluída'} %}
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/filas_form2.css') }}"><div class="filas-form2">
 <h1>{{ registro.codigo_lgpd }} · Participação {{ p.tipo }}</h1>
+{% if assumida %}<p class="mensagem mensagem-sucesso" role="status">Você assumiu a participação {{ p.tipo }} do {{ registro.codigo_lgpd }}. A análise usa a {{ rotulo_origem }}.</p>{% endif %}
 {% include '_atuacao_form2.html' %}
 <div class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/filas?conta_id={{ conta_id|urlencode }}">Voltar às filas</a></div>
 <p class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/participacoes/{{ p.id }}/governanca?conta_id={{ conta_id|urlencode }}">Ver pendências e respostas</a></p>
@@ -18,7 +19,18 @@
 <input type="hidden" name="comando_id" value="{{ comando_id }}">
 <input type="hidden" name="versao" value="{{ p.versao }}">
 {% if p.estado == 'aguardando' %}
-<button type="submit" class="botao-primario" name="acao" value="assumir">Assumir participação</button>
+{% set orientacao = 'Ao assumir, você passa a ser o AAL responsável pela validação deste Registro no FORM 2. A análise usará a versão indicada. Se a origem confirmar uma nova versão, você decidirá se a adota e registrará o motivo.' if p.tipo == 'principal' else 'Ao assumir, você passa a responder pela manifestação da sua unidade sobre a versão indicada do FORM 1.' %}
+{% set referencia %}{{ rotulo_origem }}{% if confirmada_em %}, confirmada em {{ confirmada_em }}{% endif %}{% endset %}
+<p><strong>Versão do FORM 1 a ser analisada:</strong> {{ referencia }}.</p>
+<p>{{ orientacao }}</p>
+<input type="hidden" name="acao" value="assumir">
+<button type="button" class="botao-primario" data-abrir-dialogo="confirmar-assuncao">Assumir participação</button>
+<dialog class="dialogo-acao-fila" id="confirmar-assuncao" aria-labelledby="titulo-assuncao">
+  <h2 id="titulo-assuncao">Assumir a participação?</h2>
+  <p>{{ orientacao }}</p><p><strong>Versão do FORM 1 a ser analisada:</strong> {{ referencia }}.</p>
+  <div class="acoes-fila-form2"><button type="button" data-fechar-dialogo autofocus>Cancelar</button>
+  <button type="submit" class="botao-primario">Confirmar assunção</button></div>
+</dialog>
 {% elif p.estado == 'em_atendimento' and p.responsavel_id == pessoa.id %}
 <label>Manifestação ou questão <textarea name="texto" rows="10" maxlength="10000">{{ p.manifestacao }}</textarea></label>
 <button type="submit" class="botao-primario" name="acao" value="salvar">Salvar manifestação</button>
@@ -31,4 +43,4 @@
 </form>
 {% if p.tipo == 'principal' and p.estado == 'em_atendimento' and p.responsavel_id == pessoa.id %}</details>{% endif %}
 {% if consultas %}<h2>Manifestações solicitadas</h2>{% for consulta in consultas %}<article><h3>{{ consulta.tipo }} · {{ situacoes.get(consulta.estado, consulta.estado) }}</h3><p>{{ consulta.questao }}</p><p>{{ consulta.manifestacao }}</p><p>Responsável · {{ consulta.responsavel_id or 'Aguardando assunção' }} · {{ consulta.concluida_em or '' }}</p></article>{% endfor %}{% endif %}
-</div>{% endblock %}
+</div><script src="{{ url_for('estaticos', path='/confirmar_acao_fila.js') }}" defer></script>{% endblock %}

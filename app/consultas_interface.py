@@ -1,6 +1,7 @@
 """Consultas preparadas para a interface, sem regras de negócio nos templates."""
 
 from app.extensao_medidas_form1 import catalogo_efetivo, versao_estrutura
+from app.apresentacoes_form1 import rotulo_apresentacao
 from app.rev18_form1 import TITULO_BLOCO_14
 from app.extensao_guarda_form1 import condicoes_guarda, definicao_guarda, usa_guarda
 
@@ -231,8 +232,7 @@ def _projetar_proxima_providencia_form1_integral(
             "tipo": "conferencia_confirmada",
             "rotulo": None,
             "descricao": (
-                f"A conferência interna da apresentação "
-                f"{confirmacao['numero_apresentacao']} foi confirmada pelo APA. "
+                f"O APA confirmou a {confirmacao['rotulo_apresentacao']}. "
                 "Este ato não representa submissão ou homologação institucional."
             ),
             "retomada": None,
@@ -257,7 +257,7 @@ def _projetar_proxima_providencia_form1_integral(
             "tipo": "corrigir",
             "rotulo": "Corrigir FORM 1 Integral",
             "descricao": (
-                f"O APA devolveu a apresentação {devolucao['numero_apresentacao']} "
+                f"O APA devolveu a {devolucao['rotulo_apresentacao']} "
                 f"para ajustes. Justificativa: {devolucao['justificativa']}"
             ),
             "retomada": retomada,
@@ -399,6 +399,7 @@ def projetar_fluxo_conferencia(sessao, registro_id, unidade_id):
         "ultima_atividade": ultima,
         "atual": atual, "estado": estado, "proxima": proxima, "responsavel": responsavel,
         "apa": apa, "arp": arp,
+        "rotulo_apresentacao": rotulo_apresentacao(historico) if historico else None,
         "versao": referencia.versao_rascunho if referencia else None,
         "versao_atual": rascunho.versao_rascunho if rascunho else None,
         "tem_historico": historico is not None,
@@ -419,6 +420,7 @@ def _devolucao_para_interface(sessao, registro_id):
         return None
     devolvedor = sessao.get(Pessoa, historico.devolvida_por_id)
     return {
+        "rotulo_apresentacao": rotulo_apresentacao(historico),
         "numero_apresentacao": historico.numero_apresentacao,
         "snapshot_id": historico.snapshot_id,
         "versao_rascunho": historico.versao_rascunho,
@@ -438,6 +440,7 @@ def _confirmacao_para_interface(sessao, registro_id):
         return None
     confirmador = sessao.get(Pessoa, historico.confirmada_por_id)
     return {
+        "rotulo_apresentacao": rotulo_apresentacao(historico),
         "numero_apresentacao": historico.numero_apresentacao,
         "snapshot_id": historico.snapshot_id,
         "versao_rascunho": historico.versao_rascunho,
@@ -1336,6 +1339,7 @@ def carregar_registro(sessao, conta_id, registro_id):
             None if conferencia_integral is None else {
                 "situacao": conferencia_integral.situacao,
                 "snapshot_id": conferencia_integral.snapshot_id,
+                "rotulo_apresentacao": rotulo_apresentacao(snapshot_conferencia),
                 "numero_snapshot": snapshot_conferencia.numero,
                 "versao_rascunho": conferencia_integral.versao_rascunho,
                 "solicitada_em": conferencia_integral.solicitada_em,
@@ -1354,6 +1358,7 @@ def carregar_registro(sessao, conta_id, registro_id):
         "confirmacao_interna": confirmacao_integral,
         "historico_conferencias": [
             {
+                "rotulo_apresentacao": rotulo_apresentacao(item),
                 "numero_apresentacao": item.numero_apresentacao,
                 "versao_rascunho": item.versao_rascunho,
                 "numero_snapshot": (

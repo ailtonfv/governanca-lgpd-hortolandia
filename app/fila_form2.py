@@ -134,7 +134,7 @@ def executar(sessao, *, conta_id, comando_id, participacao_id, acao, versao,
         if p.estado != "aguardando":
             raise ValueError("Participação já assumida.")
         p.responsavel_id = pessoa.id
-        p.assumida_em = agora()
+        p.assumida_em = p.assumida_em or agora()
         p.estado = "em_atendimento"
     else:
         if p.estado != "em_atendimento" or p.responsavel_id != pessoa.id:
