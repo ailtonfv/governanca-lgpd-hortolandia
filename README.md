@@ -4,7 +4,7 @@
 
 > ⚠️ **Somente dados fictícios.** Nenhum dado pessoal real, CPF, matrícula, senha ou token entra neste repositório, no código, nos testes ou nos logs.
 
-## Para quem está chegando — atualização de 13/11/2026
+## Para quem está chegando — atualização de 14/11/2026
 
 ### Para que serve
 
@@ -12,7 +12,7 @@ A Prefeitura trata dados pessoais em muitos serviços, processos e atividades de
 
 ### Os quatro FORMs
 
-**FORM 1 — Levantamento do tratamento.** Descreve como o serviço, processo ou atividade funciona e quais dados utiliza. *Na demonstração:* funciona, da abertura do Registro à conferência interna da versão apresentada. A edição REV22 está implementada e testada; a inspeção visual integral dos 14 blocos ainda deve ser confirmada.
+**FORM 1 — Levantamento do tratamento.** Descreve como o serviço, processo ou atividade funciona e quais dados utiliza. *Na demonstração:* funciona, da abertura do Registro à conferência interna da versão apresentada. A edição REV22 está implementada e testada. Em 14/11/2026, o ciclo de apresentação, devolução com justificativa, reapresentação e confirmação foi vistoriado em tela com o Registro fictício LGPD-2026-00005; a inspeção visual integral dos 14 blocos ainda deve ser confirmada.
 
 **FORM 2 — Validação jurídica e institucional.** Analisa finalidade, necessidade, fundamento, compartilhamento e guarda a partir de uma versão identificada do FORM 1. *Na demonstração:* estão implementados e testados a fila da unidade, a assunção pelo AAL, a ciência ao DPO, as consultas a outras áreas, o pedido de complemento à origem e a consolidação. *Previsto:* a conclusão institucional, que depende da deliberação sobre obrigatoriedade e pendências impeditivas, além da homologação D11. As interpretações jurídicas cabem ao Jurídico; uma resposta salva no sistema não equivale a validação concluída.
 
@@ -33,8 +33,9 @@ A Prefeitura trata dados pessoais em muitos serviços, processos e atividades de
 Fluxo de referência: os encaminhamentos aos FORMs 3 e 4 e a conclusão institucional ainda não estão disponíveis na demonstração.
 
 1. O APA abre o Registro escolhendo o objeto em um catálogo controlado. O sistema atribui o Identificador LGPD.
-2. O ARP preenche o FORM 1 e apresenta a versão; o APA confere e confirma. A versão confirmada fica preservada.
-3. A confirmação leva o Registro à fila da unidade executora principal, e o DPO recebe ciência do ingresso.
+2. O ARP preenche o FORM 1 e apresenta a versão; o APA confere e confirma ou devolve para ajustes com justificativa. O ARP lê a justificativa no cartão do painel, na página do Registro e no topo do FORM 1, corrige e reapresenta. Cada versão apresentada fica preservada, e o histórico de apresentações reúne resultados e justificativas.
+3. A primeira confirmação leva automaticamente o Registro à fila da unidade executora principal, sem comando adicional de encaminhamento, e o DPO recebe uma única ciência do ingresso.
+   - *Confirmações posteriores — regra decidida em 14/11/2026, implementação pendente:* enquanto nenhum AAL tiver assumido o processo pela primeira vez, a versão mais recente confirmada pelo APA passa automaticamente a ser a referência do FORM 2, sem nova ciência ao DPO e sem mudar a posição na fila. A partir da primeira assunção, o AAL compara as versões e registra a decisão de adotar a nova ou manter a anterior, com justificativa, inclusive quando a nova versão não responde a uma pendência. O ARP e o APA consultam essa decisão no Registro. Uma participação temporariamente sem responsável durante uma substituição continua protegida.
 4. O AAL assume a participação e prepara a validação no FORM 2. Quando precisa, pede manifestações às áreas consultadas, que respondem.
 5. **Retorno à origem**, quando falta informação: o AAL solicita complemento e a origem registra uma nova versão. Seguem três atos distintos: ① o APA confirma a nova versão; ② o AAL aceita ou rejeita a resposta; ③ o AAL decide qual versão vale, adotando a nova ou mantendo a anterior com justificativa. Se a mudança afetar manifestações já dadas, elas são reavaliadas. Um complemento de manifestação abre nova solicitação para a mesma unidade, sem repetir a ciência de ingresso ao DPO. Quando o complemento é dirigido ao DPO, há novo aviso de manifestação solicitada; na demonstração, os avisos ficam na caixa local de testes.
 6. O AAL consolida e encaminha: ao FORM 3, se há risco a avaliar; ao FORM 4, se a ação já é conhecida; ou à conclusão, se não há necessidade de avaliação adicional de riscos ou de ações.
@@ -45,13 +46,15 @@ Em todo o percurso, **o Identificador LGPD não muda**. Nova versão, nova parti
 ### O que ainda falta
 
 **Implementação**
+- FORM 1 × FORM 2, a partir da vistoria de 14/11/2026: distinguir no botão e na caixa de confirmação a primeira confirmação ("Confirmar e encaminhar ao FORM 2") das seguintes ("Confirmar nova versão do FORM 1"); atualizar automaticamente a referência antes da primeira assunção, inclusive para versões já confirmadas, com registro datado da aplicação da regra no histórico; aviso e comparação de versões no cartão da fila; decisão do AAL sobre a versão também sem pendência; decisão visível à origem. Lista completa em `PENDENCIAS_rodada2_2026-11-14` (P1 a P24), mantida pelo Encarregado de Dados.
 - FORM 2: verificar e corrigir o comportamento relatado na revisão de código de 13/11/2026, em que editar uma solicitação já respondida reabre a pendência e oculta a resposta na tela; confirmar a cobertura e acrescentar, se ausente, teste próprio para "mantém a versão anterior"; avaliar avisos a outros papéis além do DPO; implementar a conclusão consolidada.
 - FORM 3, FORM 4 e o dashboard integrado: não implementados.
 - Envio real de e-mail: ativação e teste institucional pendentes com a TI. Na demonstração, manter avisos locais, sem SMTP; confirmar separadamente o agendamento do resumo periódico.
 
 **Vistoria em tela**
+- FORM 1 REV22, ciclo ARP/APA: vistoriado em 14/11/2026 (itens 1 a 4 do procedimento de aceite manual da conferência interna). Falta o item 5: APA igual ao ARP, tela estreita e navegação somente por teclado.
 - FORM 1 REV22, 14 blocos: confirmar.
-- FORM 2 de ponta a ponta, conforme o roteiro de testes T01–T10: pendente. A conferência de 13/11/2026 foi feita por leitura do código.
+- FORM 2 de ponta a ponta, conforme o roteiro de testes T01–T10: pendente. A conferência de 13/11/2026 foi feita por leitura do código. A assunção do Registro de teste LGPD-2026-00005 foi adiada de propósito: ele deve servir para verificar a atualização automática da referência antes da primeira assunção.
 - Impressão e PDF: não verificados.
 
 **Decisões institucionais**
@@ -62,7 +65,7 @@ Em todo o percurso, **o Identificador LGPD não muda**. Nova versão, nova parti
 
 ### Onde buscar orientação
 
-- **Cartilha LGPD REV30.19** (candidata, 13/11/2026, referência informada pelo autor nesta abertura; conteúdo ainda não reconferido nesta atualização): orienta os servidores. As seções 5.4, "Os quatro FORMs, bloco a bloco", e 5.5, "Um caso do começo ao fim", seguem o percurso acima.
+- **Cartilha LGPD REV30.20** (candidata, 14/11/2026; a REV30.20 alinha as seções 3.1, 5.4 e 5.5 e o glossário do ciclo do FORM 1 ao encaminhamento automático e à devolução com motivo visível): orienta os servidores. A **palestra v16.12 candidata** (14/11/2026) registra o ingresso automático no fluxo do slide 28. As seções 5.4, "Os quatro FORMs, bloco a bloco", e 5.5, "Um caso do começo ao fim", seguem o percurso acima.
 - **Documento-Mestre REV22.0 v9:** referência das perguntas e regras dos quatro FORMs. Ambos são internos, mantidos fora do GitHub; solicite-os ao Encarregado de Dados.
 - Neste repositório: [glossário de papéis](docs/contexto/glossary.md), [Filas do FORM 2](docs/arquitetura/FILAS_FORM2_REV22.md), [Mapa do M1a](docs/arquitetura/MAPA_M1a.md) e [backlog](docs/planejamento/BACKLOG_AJUSTES_POC_AMPLIADA.md).
 
@@ -1965,3 +1968,14 @@ A abertura explica Serviço, Processo e Atividade com exemplos e apresenta Servi
 O cartão do FORM 2 conduz à fila institucional e explica a assunção por agente autorizado. Na demonstração, a conta explícita no endereço continua determinando o perfil daquela aba: trocar o usuário na Central não muda abas antigas. A Central informa essa limitação. Não houve mudança nas permissões ou autenticação.
 
 Verificação: seis módulos, 69 testes, dos quais 68 passaram na rodada inicial; um teste ainda esperava a antiga expressão de designação do AAL pelo APA. Atualizada somente essa expectativa e reexecutado o módulo completo da Central: 15 testes passaram. Evidências locais: `evidencias/entrada_registro_2026_11_13.xml` e `evidencias/entrada_registro_central_2026_11_13.xml`. Banco isolado de testes; nenhuma execução da suíte integral ou aceite visual no navegador é afirmado nesta rodada. A nova disposição aguarda a vistoria do usuário. Sem commit ou push, conforme solicitado.
+
+
+### Conferência, devolução e encaminhamento — 14/11/2026
+
+**Implementado (commit `fbac689`).** A justificativa da devolução aparece ao ARP no cartão do painel ("Justificativa do APA"), na próxima providência do Registro e no topo do FORM 1 ("Devolvido para ajustes pelo APA"). Na conferência, o APA vê quantos e quais blocos estão sem respostas na versão apresentada. Apresentar ao APA e devolver para ajustes passaram a pedir confirmação; a confirmação de apresentação informa os blocos sem respostas. Depois de confirmar, o APA retorna à página do Registro com mensagem de sucesso. "Ver detalhes do Registro" leva à página do Registro. A página do Registro oferece "Encaminhar ao FORM 2" ao APA em exercício quando o Registro ainda não ingressou na fila e informa "Este Registro já ingressou no FORM 2" quando já ingressou. No FORM 1 REV22, a régua mostra o nome de cada bloco, os conjuntos dos blocos 3 e 10 são explicados, o aviso de espera muda conforme o perfil, a frase sobre a versão encaminhada ao FORM 2 só aparece quando há encaminhamento e o histórico anterior à atualização só aparece quando existe. Na edição REV22, o cartão do ARP mostra blocos sem respostas e "Obrigatoriedade em definição", em lugar da contagem de obrigatórios. Na consulta histórica, a data da apresentação é legível e o lacre de integridade tem explicação.
+
+**Verificado em tela, 14/11/2026,** com o Encarregado de Dados e dados fictícios (LGPD-2026-00005; ARP Servidor Épsilon, APA Servidor Alfa): apresentação, devolução com justificativa, leitura da justificativa pelo ARP, reapresentação, confirmação, retorno à página do Registro, contagem de blocos vazios na conferência e caixa de confirmação ao apresentar. A caixa de confirmação da devolução não foi revista depois da correção. "Ver detalhes do Registro", "Instrumentos deste Registro" e "Consultar histórico de apresentações deste Registro" levam aos destinos corretos; o histórico lista as quatro apresentações, com resultados e justificativas. O Registro ingressou na fila do FORM 2 pela confirmação da apresentação 2 (rascunho 7), às 11h21, e aguarda responsável.
+
+**Decisão de 14/11/2026.** A primeira confirmação do APA encaminha automaticamente; um segundo comando criaria o risco de o levantamento confirmado ficar parado na origem. Para as confirmações seguintes vale a regra descrita em "Como o processo caminha", item 3. *Implementação pendente:* a referência do LGPD-2026-00005 continua sendo o rascunho 7, embora o rascunho 9 tenha sido confirmado. A atualização deve alcançar também versões já confirmadas e registrar no histórico a data real e o motivo da passagem, sem simular que ocorreu na confirmação. Registros que já tiveram AAL não devem mudar de referência.
+
+**Limites.** Atualização documental: não foi executada bateria de testes nesta revisão do README. As observações remanescentes da vistoria — entre elas, caixas de confirmação do navegador em lugar do modelo institucional, numeração dupla de apresentação e rascunho, reapresentação sem destaque das mudanças, nomes de blocos cortados na régua, rolagem do link de histórico, data técnica em "Decisão registrada por" e "Reatribuir" exibido para participação nunca atribuída — estão na lista P1 a P24, fora do Git. Não há aceite institucional nem homologação D11.
