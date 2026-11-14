@@ -57,9 +57,9 @@
       <legend>2. Tipo de objeto <span class="marcador-obrigatorio" aria-label="obrigatório">*</span></legend>
       <p class="ajuda">Escolha a natureza do item que será documentado.</p>
       <div class="grade-opcoes grade-tipos">
-        <label class="opcao"><input type="radio" name="tipo_objeto" value="servico" required {% if valores.tipo_objeto == 'servico' %}checked{% endif %}> <span><strong>Serviço</strong><br>O que é entregue ao cidadão.</span></label>
-        <label class="opcao"><input type="radio" name="tipo_objeto" value="processo" required {% if valores.tipo_objeto == 'processo' %}checked{% endif %}> <span><strong>Processo</strong><br>Sequência que produz um resultado.</span></label>
-        <label class="opcao"><input type="radio" name="tipo_objeto" value="atividade" required {% if valores.tipo_objeto == 'atividade' %}checked{% endif %}> <span><strong>Atividade</strong><br>Etapa concreta de execução.</span></label>
+        <label class="opcao"><input type="radio" name="tipo_objeto" value="servico" required {% if valores.tipo_objeto == 'servico' %}checked{% endif %}> <span><strong>Serviço</strong><br>Entrega ao cidadão, como oficinas culturais ou atendimento ao contribuinte.</span></label>
+        <label class="opcao"><input type="radio" name="tipo_objeto" value="processo" required {% if valores.tipo_objeto == 'processo' %}checked{% endif %}> <span><strong>Processo</strong><br>Sequência de etapas, como análise de um pedido de licença.</span></label>
+        <label class="opcao"><input type="radio" name="tipo_objeto" value="atividade" required {% if valores.tipo_objeto == 'atividade' %}checked{% endif %}> <span><strong>Atividade</strong><br>Uma etapa do trabalho, como conferir documentos de uma inscrição.</span></label>
       </div>
       {% if 'tipo_objeto' in erros_campos %}<p class="erro-campo">Escolha Serviço, Processo ou Atividade.</p>{% endif %}
     </fieldset>
@@ -69,7 +69,7 @@
             {% if 'objeto_principal_id' in erros_campos %}aria-invalid="true" aria-describedby="erro-objeto_principal_id"{% endif %}>
       <option value="">Selecione depois de escolher o tipo</option>
       {% for objeto in objetos %}
-      <option value="{{ objeto.id }}" data-tipo="{{ objeto.tipo_objeto }}" data-unidades="{{ objeto.unidades|join(',') }}" {% if valores.objeto_principal_id == objeto.id %}selected{% endif %}>{{ objeto.tipo_objeto|capitalize }} · {{ objeto.nome_canonico }}</option>
+      <option value="{{ objeto.id }}" data-tipo="{{ objeto.tipo_objeto }}" data-unidades="{{ objeto.unidades|join(',') }}" {% if valores.objeto_principal_id == objeto.id %}selected{% endif %}>{{ {'servico': 'Serviço', 'processo': 'Processo', 'atividade': 'Atividade'}.get(objeto.tipo_objeto|lower, objeto.tipo_objeto) }} · {{ objeto.nome_canonico }}</option>
       {% endfor %}
     </select>
     {% if 'objeto_principal_id' in erros_campos %}<p id="erro-objeto_principal_id" class="erro-campo">Selecione um item cadastrado para a Secretaria e o tipo escolhidos.</p>{% endif %}
@@ -161,7 +161,7 @@
   function atualizarAjudaContexto() {
     const opcoes = [...contexto.options].filter(opcao => opcao.value && !opcao.hidden);
     ajudaContexto.textContent = contexto.value ? contexto.selectedOptions[0].textContent :
-      opcoes.length === 1 ? 'Único contexto cadastrado para este item. Selecione para confirmar: ' + opcoes[0].textContent : '';
+      opcoes.length === 1 ? 'Confirme o contexto antes de criar o Registro. Único contexto cadastrado para este item. Selecione para confirmar: ' + opcoes[0].textContent : 'Selecione o contexto deste item. Ao trocar o item, escolha o contexto novamente.';
   }
   function filtrarCanais(limpar = true) {
     document.getElementById('canais-habituais').disabled = !objeto.value;

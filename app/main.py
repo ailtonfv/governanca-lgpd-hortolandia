@@ -735,9 +735,11 @@ def iniciar_form1_integral(
         registro_id=registro_id,
     )
     sessao.commit()
+    if resultado['permitido']:
+        return RedirectResponse('/registros/'+registro_id+'/form1-rev22?'+urlencode({'conta_id':conta_id}), status_code=303)
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, "Rascunho do FORM 1 iniciado.",
-        ancora="titulo-bloco-1",
+        ancora="titulo-proxima-providencia",
     )
 
 

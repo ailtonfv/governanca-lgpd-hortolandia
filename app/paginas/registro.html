@@ -21,7 +21,7 @@
 </dialog>
 {% endif %}
 <section class="identificacao-registro" aria-labelledby="titulo-registro">
-  <p class="etiqueta">{{ registro.tipo }} · ciclo {{ registro.ciclo }}</p>
+  <p class="etiqueta">{{ {'servico': 'Serviço', 'processo': 'Processo', 'atividade': 'Atividade'}.get(registro.tipo|lower, registro.tipo) }} · ciclo {{ registro.ciclo }}</p>
   <h1 id="titulo-registro">{{ registro.codigo_lgpd }}</h1>
   <p class="destaque">{{ registro.titulo }}</p>
   {% if not modo_legado %}
@@ -36,28 +36,10 @@
 
 {% if not modo_legado %}
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/instrumentos_registro.css') }}">
-{% include '_instrumentos_registro.html' %}
-<div class="acoes-fila-form2"><a class="botao-link-secundario" href="/registros/{{ registro.id }}/form1-rev22?conta_id={{ conta_id|urlencode }}">Abrir edição candidata REV22 do FORM 1</a></div>
 <section data-modo-consulta="{{ 'false' if registro.form1_integral.pode_editar else 'true' }}" class="form1 form1-integral" aria-labelledby="titulo-form1-integral" data-registro-id="{{ registro.id }}">
-  <div class="cabecalho-secao cabecalho-form1">
-    <div>
-      <h2 id="titulo-form1-integral" tabindex="-1">FORM 1 — Levantamento Inicial do Tratamento de Dados Pessoais</h2>
-    </div>
-    <p class="objetivo-form1"><strong>Objetivo:</strong> Descreva como este serviço, processo ou atividade coleta, utiliza, compartilha, armazena e protege dados pessoais.</p>
-    <span class="estado">{% if registro.form1_integral.rascunho %}Rascunho {{ registro.form1_integral.rascunho.versao }}{% else %}Não iniciado{% endif %}</span>
-  </div>
-  <p class="aviso-leitura status-submissao-form1"><strong>Situação operacional:</strong> os 14 blocos estão disponíveis para preenchimento e revisão. A conclusão institucional do FORM 1 ainda não está habilitada nesta versão. O rascunho pode ser salvo e retomado mesmo incompleto.</p>
-  <p class="ajuda"><strong>Rascunho e apresentação:</strong> o rascunho é a versão de trabalho editável pelo ARP autorizado. Salvar pode atualizar essa versão, mas não altera apresentações históricas nem solicita nova conferência ao APA. Uma apresentação conferida permanece imutável; conferência interna não equivale a homologação ou submissão institucional.</p>
-
-  {% if not registro.form1_integral.pode_editar %}
-  <div class="area-somente-leitura modo-consulta-form1" role="note">
-    <strong>Somente leitura — modo de consulta.</strong> Você pode consultar as perguntas e respostas salvas, mas não editar este rascunho.
-    {% if registro.form1_integral.arp_atual %}<p>Responsável pelo preenchimento: matrícula {{ registro.form1_integral.arp_atual.matricula }} — {{ registro.form1_integral.arp_atual.nome }}.</p>{% endif %}
-  </div>
-  {% endif %}
   {% set proxima = registro.form1_integral.proxima_providencia %}
   <section class="proxima-providencia" aria-labelledby="titulo-proxima-providencia">
-    <p class="etiqueta">Orientação conforme o estado e as permissões atuais</p>
+    <p class="etiqueta">O que fazer agora</p>
     <h3 id="titulo-proxima-providencia">Próxima providência</h3>
     <p><strong>Seu papel neste Registro:</strong> {{ proxima.papel }}.</p>
     <p>{{ proxima.descricao }}</p>
@@ -65,24 +47,10 @@
     <form method="post" action="{{ url_for('iniciar_form1_integral', registro_id=registro.id) }}">
       <input type="hidden" name="conta_id" value="{{ conta_id }}">
       <input type="hidden" name="comando_id" value="{{ comando_iniciar_integral }}">
-      <button class="botao-primario" type="submit">{{ proxima.rotulo }}</button>
+      <button class="botao-primario" type="submit">Iniciar FORM 1</button>
     </form>
-    {% elif proxima.tipo in ['continuar', 'corrigir'] %}
-      {% if proxima.retomada %}
-      <button type="button" class="botao-primario"
-              data-pendencia-campo="{{ proxima.retomada.campo_id }}"
-              data-pendencia-bloco="{{ proxima.retomada.bloco }}"
-              data-pendencia-etapa="{{ proxima.retomada.etapa }}"
-              data-pendencia-destino="{{ proxima.retomada.destino_tipo }}">
-        {{ proxima.rotulo }}
-      </button>
-      {% else %}
-      <button type="button" class="botao-primario" data-continuar-revisao>
-        {{ proxima.rotulo }}
-      </button>
-      {% endif %}
-    {% elif proxima.tipo == 'consultar' %}
-      <button type="button" class="botao-primario" data-consultar-form1>Consultar FORM 1 Integral</button>
+    {% elif proxima.tipo in ['continuar', 'corrigir', 'consultar'] and registro.form1_integral.rascunho %}
+      <a class="botao-link botao-primario" href="/registros/{{ registro.id }}/form1-rev22?conta_id={{ conta_id|urlencode }}">{{ 'Preencher FORM 1' if registro.form1_integral.pode_editar else 'Consultar FORM 1' }}</a>
     {% elif proxima.tipo == 'conferir' %}
       <a class="botao-link botao-primario" href="{{ url_for('consultar_conferencia_interna', registro_id=registro.id) }}?conta_id={{ conta_id }}">{{ proxima.rotulo }}</a>
     {% endif %}
@@ -112,13 +80,14 @@
       <div class="controle-designacao-arp" data-painel-modo-arp="outro" hidden>
         <div>
           <label for="arp_pessoa_id">ARP selecionado para designação</label>
-          <select id="arp_pessoa_id" name="arp_pessoa_id" disabled>
+          <select id="arp_pessoa_id" name="arp_pessoa_id" aria-describedby="nome-arp-selecionado" disabled>
             <option value="">Selecione somente para designar outro agente</option>
             {% for pessoa in registro.form1_integral.candidatos_arp %}
             <option value="{{ pessoa.id }}">Matrícula {{ pessoa.matricula }} · {{ pessoa.nome }}</option>
             {% endfor %}
           </select>
         </div>
+        <p id="nome-arp-selecionado" aria-live="polite">Nenhum agente selecionado.</p>
         <button class="botao-primario" type="submit">Confirmar designação do ARP</button>
       </div>
       <p class="ajuda">A designação atual permanece válida até a confirmação. Selecionar uma pessoa não concede acesso: o agente precisa possuir previamente conta ativa e autorização de preenchimento nesta Secretaria.</p>
@@ -156,6 +125,24 @@
     </div>
     <p class="ajuda">Cargo/função e e-mail institucional não são inventados quando não constam do cadastro disponível.</p>
   </details>
+
+  <div class="cabecalho-secao cabecalho-form1">
+    <div>
+      <h2 id="titulo-form1-integral" tabindex="-1">FORM 1 — Levantamento Inicial do Tratamento de Dados Pessoais</h2>
+    </div>
+    <p class="objetivo-form1"><strong>Objetivo:</strong> Descreva como este serviço, processo ou atividade coleta, utiliza, compartilha, armazena e protege dados pessoais.</p>
+    <span class="estado">{% if registro.form1_integral.rascunho %}Rascunho {{ registro.form1_integral.rascunho.versao }}{% else %}Não iniciado{% endif %}</span>
+  </div>
+  <p class="aviso-leitura status-submissao-form1">{% if not registro.form1_integral.rascunho %}O rascunho ainda não foi iniciado{% if registro.form1_integral.arp_atual %} pelo ARP {{ registro.form1_integral.arp_atual.nome }}{% endif %}. Depois de iniciado, os 14 blocos poderão ser acessados conforme seu papel.{% else %}O FORM 1 pode ser salvo e retomado mesmo incompleto. Salvar não conclui a análise institucional.{% endif %}</p>
+  <p class="ajuda"><strong>Rascunho e apresentação:</strong> o rascunho é a versão de trabalho editável pelo ARP autorizado. Salvar pode atualizar essa versão, mas não altera apresentações históricas nem solicita nova conferência ao APA. Uma apresentação conferida permanece imutável; conferência interna não equivale a homologação ou submissão institucional.</p>
+
+  {% if not registro.form1_integral.pode_editar %}
+  <div class="area-somente-leitura modo-consulta-form1" role="note">
+    <strong>Somente leitura — modo de consulta.</strong> Você pode consultar as perguntas e respostas salvas, mas não editar este rascunho.
+    {% if registro.form1_integral.arp_atual %}<p>Responsável pelo preenchimento: matrícula {{ registro.form1_integral.arp_atual.matricula }} — {{ registro.form1_integral.arp_atual.nome }}.</p>{% endif %}
+  </div>
+  {% endif %}
+
 
   <h3 id="titulo-etapas-form1">Etapas do FORM 1</h3>
   <ol class="etapas-form1" aria-labelledby="titulo-etapas-form1">
@@ -820,9 +807,10 @@
     </div>
   {% endif %}
 
-  <p class="ajuda">Os 14 blocos estão disponíveis para preenchimento e revisão. A conclusão institucional do FORM 1 ainda não está habilitada nesta versão.</p>
+
 </section>
 
+{% include '_instrumentos_registro.html' %}
 <script src="{{ url_for('estaticos', path='/formulario_associado_form1.js') }}"></script>
 <script src="{{ url_for('estaticos', path='/saida_form1.js') }}"></script>
 <script src="{{ url_for('estaticos', path='/extensao_medidas_form1.js') }}"></script>
@@ -982,6 +970,11 @@
       }
     }
 
+    if (selecao) selecao.addEventListener('change', function () {
+      document.getElementById('nome-arp-selecionado').textContent = selecao.value
+        ? 'Agente selecionado: ' + selecao.options[selecao.selectedIndex].text
+        : 'Nenhum agente selecionado.';
+    });
     modos.forEach(function (modo) { modo.addEventListener('change', atualizarModo); });
     atualizarModo();
   })();

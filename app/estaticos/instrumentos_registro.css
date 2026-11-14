@@ -61,3 +61,14 @@
   .central-acesso button { width: 100%; }
   .agentes-central { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* A próxima ação precede a consulta aos instrumentos e mantém comandos à direita. */
+.proxima-providencia { border-left: 5px solid var(--azul, #085d80); padding: 1rem; margin-bottom: 1rem; }
+.proxima-providencia > .botao-primario { display: table; margin-left: auto; }
+.proxima-providencia form { display: flex; justify-content: flex-end; }
+.controle-designacao-arp { width: 100%; min-width: 0; }
+.controle-designacao-arp select { width: 100%; max-width: 100%; }
+#nome-arp-selecionado { overflow-wrap: anywhere; font-weight: 700; }
+@media (max-width: 650px) {
+  .proxima-providencia .botao-primario { width: 100%; box-sizing: border-box; text-align: center; }
+}

@@ -27,7 +27,7 @@ def pagina(request:Request,registro_id:str,conta_id:str,bloco:int=1,conjunto:int
     if not identidade or registro_id not in _ids_visiveis(sessao,identidade):raise HTTPException(403,'Registro fora do seu acesso.')
     if not 1<=bloco<=14 or not 1<=conjunto<=100:raise HTTPException(400,'Bloco ou conjunto inválido.')
     r=sessao.get(RascunhoForm1Integral,registro_id)
-    if not r:raise HTTPException(409,'Inicie o rascunho pelo Registro antes de adotar a REV22.')
+    if not r:return RedirectResponse('/registros/'+registro_id+'?'+urlencode({'conta_id':conta_id})+'#titulo-proxima-providencia',status_code=303)
     reg=sessao.get(Registro,registro_id)
     pode=_contexto_autorizado(sessao,conta_id,registro_id)[-1] is None and reg.estado_atual=='em_andamento'
     conferencia=sessao.get(ConferenciaInternaForm1Integral,registro_id)

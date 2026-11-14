@@ -4,6 +4,72 @@
 
 > ⚠️ **Somente dados fictícios.** Nenhum dado pessoal real, CPF, matrícula, senha ou token entra neste repositório, no código, nos testes ou nos logs.
 
+## Para quem está chegando — atualização de 13/11/2026
+
+### Para que serve
+
+A Prefeitura trata dados pessoais em muitos serviços, processos e atividades de suas Secretarias. A LGPD exige saber o que é tratado, para quê, com que fundamento, que riscos existem e o que está sendo feito a respeito. O sistema reúne esse trabalho em um **Registro LGPD** por objeto, com **Identificador LGPD** próprio, histórico preservado e responsável identificado em cada ato. Esta é uma prova de conceito: funciona somente com dados fictícios e não está autorizada para uso real.
+
+### Os quatro FORMs
+
+**FORM 1 — Levantamento do tratamento.** Descreve como o serviço, processo ou atividade funciona e quais dados utiliza. *Na demonstração:* funciona, da abertura do Registro à conferência interna da versão apresentada. A edição REV22 está implementada e testada; a inspeção visual integral dos 14 blocos ainda deve ser confirmada.
+
+**FORM 2 — Validação jurídica e institucional.** Analisa finalidade, necessidade, fundamento, compartilhamento e guarda a partir de uma versão identificada do FORM 1. *Na demonstração:* estão implementados e testados a fila da unidade, a assunção pelo AAL, a ciência ao DPO, as consultas a outras áreas, o pedido de complemento à origem e a consolidação. *Previsto:* a conclusão institucional, que depende da deliberação sobre obrigatoriedade e pendências impeditivas, além da homologação D11. As interpretações jurídicas cabem ao Jurídico; uma resposta salva no sistema não equivale a validação concluída.
+
+**FORM 3 — Riscos, lacunas e controles.** Avalia cada risco, seus controles e o risco residual. *Previsto, não implementado.* Quem aceita o risco residual depende de deliberação institucional.
+
+**FORM 4 — Providências e acompanhamento.** Acompanha ações, responsáveis, prazos, evidências e a verificação dos resultados. Recebe ações vindas do FORM 3 ou uma providência já conhecida diretamente do FORM 2. *Previsto, não implementado.*
+
+### Quem participa
+
+- **APA — Agente Público Autorizado:** abre o Registro da sua Secretaria, acompanha o ciclo, indica quem preenche e confere a versão apresentada.
+- **ARP — Agente Responsável pelo Preenchimento:** preenche o levantamento do FORM 1 e o apresenta para conferência. Pode ser o próprio APA.
+- **AAL — Agente de Análise de Legitimidade:** na unidade executora principal, assume o FORM 2, pede manifestações, avalia as respostas e consolida. Não pode ter apresentado nem confirmado a versão do FORM 1 em análise.
+- **Áreas consultadas:** outras Secretarias, o Jurídico e a TI respondem ao que lhes foi perguntado, cada uma em participação própria. A manifestação jurídica é do Jurídico.
+- **DPO — Encarregado de Dados:** recebe ciência do ingresso, orienta sobre proteção de dados e acompanha o conjunto. Não substitui a decisão da autoridade competente.
+
+### Como o processo caminha
+
+Fluxo de referência: os encaminhamentos aos FORMs 3 e 4 e a conclusão institucional ainda não estão disponíveis na demonstração.
+
+1. O APA abre o Registro escolhendo o objeto em um catálogo controlado. O sistema atribui o Identificador LGPD.
+2. O ARP preenche o FORM 1 e apresenta a versão; o APA confere e confirma. A versão confirmada fica preservada.
+3. A confirmação leva o Registro à fila da unidade executora principal, e o DPO recebe ciência do ingresso.
+4. O AAL assume a participação e prepara a validação no FORM 2. Quando precisa, pede manifestações às áreas consultadas, que respondem.
+5. **Retorno à origem**, quando falta informação: o AAL solicita complemento e a origem registra uma nova versão. Seguem três atos distintos: ① o APA confirma a nova versão; ② o AAL aceita ou rejeita a resposta; ③ o AAL decide qual versão vale, adotando a nova ou mantendo a anterior com justificativa. Se a mudança afetar manifestações já dadas, elas são reavaliadas. Um complemento de manifestação abre nova solicitação para a mesma unidade, sem repetir a ciência de ingresso ao DPO. Quando o complemento é dirigido ao DPO, há novo aviso de manifestação solicitada; na demonstração, os avisos ficam na caixa local de testes.
+6. O AAL consolida e encaminha: ao FORM 3, se há risco a avaliar; ao FORM 4, se a ação já é conhecida; ou à conclusão, se não há necessidade de avaliação adicional de riscos ou de ações.
+7. *Previsto:* no FORM 3, a gestão competente decide sobre o risco residual; se exigir ação, segue ao FORM 4, onde a ação é verificada e a gestão decide sobre prazo ou cancelamento.
+
+Em todo o percurso, **o Identificador LGPD não muda**. Nova versão, nova participação ou novo FORM não criam outro processo, e as versões anteriores permanecem no histórico.
+
+### O que ainda falta
+
+**Implementação**
+- FORM 2: verificar e corrigir o comportamento relatado na revisão de código de 13/11/2026, em que editar uma solicitação já respondida reabre a pendência e oculta a resposta na tela; confirmar a cobertura e acrescentar, se ausente, teste próprio para "mantém a versão anterior"; avaliar avisos a outros papéis além do DPO; implementar a conclusão consolidada.
+- FORM 3, FORM 4 e o dashboard integrado: não implementados.
+- Envio real de e-mail: ativação e teste institucional pendentes com a TI. Na demonstração, manter avisos locais, sem SMTP; confirmar separadamente o agendamento do resumo periódico.
+
+**Vistoria em tela**
+- FORM 1 REV22, 14 blocos: confirmar.
+- FORM 2 de ponta a ponta, conforme o roteiro de testes T01–T10: pendente. A conferência de 13/11/2026 foi feita por leitura do código.
+- Impressão e PDF: não verificados.
+
+**Decisões institucionais**
+- Homologação D11 dos controles jurídicos e instituição formal da atribuição de AAL.
+- Se o APA que preencheu o FORM 1 pode confirmar a própria apresentação.
+- Quem aceita o risco residual, quem verifica as ações e quem autoriza prazo ou cancelamento.
+- Perfis de acesso do dashboard.
+
+### Onde buscar orientação
+
+- **Cartilha LGPD REV30.19** (candidata, 13/11/2026, referência informada pelo autor nesta abertura; conteúdo ainda não reconferido nesta atualização): orienta os servidores. As seções 5.4, "Os quatro FORMs, bloco a bloco", e 5.5, "Um caso do começo ao fim", seguem o percurso acima.
+- **Documento-Mestre REV22.0 v9:** referência das perguntas e regras dos quatro FORMs. Ambos são internos, mantidos fora do GitHub; solicite-os ao Encarregado de Dados.
+- Neste repositório: [glossário de papéis](docs/contexto/glossary.md), [Filas do FORM 2](docs/arquitetura/FILAS_FORM2_REV22.md), [Mapa do M1a](docs/arquitetura/MAPA_M1a.md) e [backlog](docs/planejamento/BACKLOG_AJUSTES_POC_AMPLIADA.md).
+
+Esta atualização é documental: não acrescenta implementação nem execução de testes. Os resultados técnicos permanecem nos registros datados abaixo.
+
+As seções seguintes conservam a situação detalhada, o histórico dos incrementos, os testes e a instalação.
+
 ## Os quatro FORMs e o dashboard — situação em 11/11/2026
 
 Os quatro instrumentos integram o mesmo Registro e conservam o **Identificador LGPD** durante o ciclo. Cada participação, versão, risco e ação deve manter sua própria rastreabilidade, sem criar outro processo apenas porque mudou o formulário ou o responsável. O desenho completo abaixo não significa que todos os instrumentos já estejam implementados.
@@ -1886,3 +1952,16 @@ Verificação focal de 12/11/2026: 50 testes passaram nos módulos test_rev22_ca
 Executada a bateria integral na base isolada de testes: 1.125 verificações no XML, sendo 1.119 aprovadas, cinco falhas e um cotejo documental ignorado por ausência da configuração do Mestre REV18. As falhas identificaram uma expectativa antiga do diálogo e quatro consultas históricas sem a identificação da estrutura. A identificação, o número interno e o lacre foram restaurados em uma seção recolhida de histórico, preservando autor e data nas decisões do APA.
 
 Após a correção, os seis módulos envolvidos foram reexecutados integralmente: `test_clareza_conferencia`, `test_extensao_guarda_form1`, `test_extensao_medidas_form1`, `test_rev18_form1`, `test_confirmacao_conferencia_form1_integral_8ag` e `test_conferencia_interna_form1_integral_8ac`. Resultado: 77 testes aprovados, sem falhas, erros ou testes ignorados. A evidência está no XML local `evidencias/pre_push_correcao_2026_11_12.xml`; a rodada inicial está em `evidencias/pre_push_2026_11_12.xml`. Esta repetição focal não é uma segunda bateria integral. As evidências e os catálogos privados permanecem fora do Git; os testes não modificaram a base demonstrativa nem enviaram e-mails. Permanecem os avisos de depreciação e de identificadores OpenAPI duplicados, além das pendências de homologação e aceite visual.
+
+
+### Entrada do Registro — ajustes de usabilidade (13/11/2026)
+
+A página do Registro apresenta a próxima providência e o papel do usuário logo após a identificação e a mensagem de retorno. A designação do ARP precede as informações do Registro, a situação do FORM 1 e os demais instrumentos. O nome completo do agente selecionado também aparece abaixo da lista. Os comandos principais permanecem à direita.
+
+Antes do rascunho, aparece a orientação de que o ARP ainda não o iniciou. Iniciar FORM 1 conduz à edição atual; quando necessária, a preparação do rascunho continua explícita e preserva o histórico. O acesso direto autorizado à edição sem rascunho retorna à próxima providência do Registro, sem criar dados por uma consulta e sem mostrar a antiga resposta técnica. Os links de preenchimento e consulta não exibem a revisão interna.
+
+A abertura explica Serviço, Processo e Atividade com exemplos e apresenta Serviço com cedilha. Ao trocar o item do catálogo, o contexto continua sendo limpo para escolha explícita; a orientação agora informa esse comportamento. A Secretaria continua limitada à autorização do agente. Não foram acrescentados agentes fictícios na Cultura.
+
+O cartão do FORM 2 conduz à fila institucional e explica a assunção por agente autorizado. Na demonstração, a conta explícita no endereço continua determinando o perfil daquela aba: trocar o usuário na Central não muda abas antigas. A Central informa essa limitação. Não houve mudança nas permissões ou autenticação.
+
+Verificação: seis módulos, 69 testes, dos quais 68 passaram na rodada inicial; um teste ainda esperava a antiga expressão de designação do AAL pelo APA. Atualizada somente essa expectativa e reexecutado o módulo completo da Central: 15 testes passaram. Evidências locais: `evidencias/entrada_registro_2026_11_13.xml` e `evidencias/entrada_registro_central_2026_11_13.xml`. Banco isolado de testes; nenhuma execução da suíte integral ou aceite visual no navegador é afirmado nesta rodada. A nova disposição aguarda a vistoria do usuário. Sem commit ou push, conforme solicitado.

@@ -99,7 +99,7 @@
       <article class="cartao-mapeamento" id="cartao-registro-{{ registro.id }}" tabindex="-1">
         <div class="cartao-mapeamento-conteudo">
           <p class="etiqueta codigo-registro">{{ registro.codigo_lgpd }}</p>
-          <h3>{{ registro.tipo|rotulo_f2 if instrumento == 'form2' else registro.tipo }} · {{ registro.titulo|rotulo_f2 if instrumento == 'form2' else registro.titulo }}</h3>
+          <h3>{{ {'servico': 'Serviço', 'processo': 'Processo', 'atividade': 'Atividade'}.get(registro.tipo|lower, registro.tipo) }} · {{ registro.titulo|rotulo_f2 if instrumento == 'form2' else registro.titulo }}</h3>
           <p class="unidade-registro"><strong>Secretaria:</strong> {{ registro.unidade }}</p>
           <p><strong>Situação do Registro:</strong> <span class="estado estado-{{ registro.estado_codigo }}">{{ registro.estado }}</span></p>
           {% if instrumento %}<p><strong>APA responsável:</strong> {{ registro.fluxo_conferencia.apa }}</p>{% endif %}
@@ -206,7 +206,7 @@
       {% endfor %}
     </div>
     {% else %}
-    <p class="vazio">{% if instrumento == 'form2' %}Nenhum Registro acessível para preparação do FORM 2 nesta Secretaria com seu acesso atual. A consulta como AAL depende de habilitação vigente e de designação pelo APA.{% else %}Nenhum Registro LGPD está disponível para consulta por este agente.{% endif %}</p>
+    <p class="vazio">{% if instrumento == 'form2' %}Nenhum Registro acessível para preparação do FORM 2 nesta Secretaria com seu acesso atual. O agente autorizado assume a participação pela fila institucional de sua unidade.{% else %}Nenhum Registro LGPD está disponível para consulta por este agente.{% endif %}</p>
     {% endif %}
 </section>
 {% endblock %}

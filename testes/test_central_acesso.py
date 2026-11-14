@@ -148,7 +148,7 @@ def test_form2_sem_habilitacao_e_filtro_invalido():
     pagina = cliente.get("/painel", params={**contexto, "instrumento": "form2"})
     assert pagina.status_code == 200 and "Nenhum Registro acessível" in pagina.text
     assert "<small>0 Registros disponíveis</small>" in pagina.text
-    assert "habilitação vigente e de designação pelo APA" in pagina.text
+    assert "O agente autorizado assume a participação pela fila institucional de sua unidade." in pagina.text
     assert registro["registro_id"] not in pagina.text and "data-acesso-form2" not in pagina.text
     assert cliente.get("/painel", params={**contexto, "instrumento": "form3"}).status_code == 422
     assert cliente.get("/painel", params={**contexto, "instrumento": "form1", "secretaria_id": "UNID-SUL"}).status_code == 403

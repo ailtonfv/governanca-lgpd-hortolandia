@@ -47,12 +47,11 @@ def test_arp_autorizado_inicia_form1_e_chega_ao_primeiro_bloco(sessao):
     assert "Você é o ARP atual" in trecho
     assert 'disabled aria-disabled="true"' in pagina.text
     assert inicio.status_code == 303
-    assert inicio.headers["location"].endswith("#titulo-bloco-1")
+    assert "/form1-rev22?conta_id=CONTA-A1" in inicio.headers["location"]
     retomada = cliente.get(inicio.headers["location"])
-    assert "Rascunho 1" in retomada.text
-    assert 'id="titulo-bloco-1"' in retomada.text
-    assert "posicionarDestinoForm1(destinoInicial);" in retomada.text
-    assert 'disabled aria-disabled="true"' not in retomada.text
+    assert retomada.status_code == 200
+    assert "Preparar o FORM 1" in retomada.text
+    assert "Atualizar e continuar" in retomada.text
 
 
 def test_arp_com_rascunho_recebe_continuacao_para_pendencia_ativa(sessao):
@@ -66,11 +65,8 @@ def test_arp_com_rascunho_recebe_continuacao_para_pendencia_ativa(sessao):
 
     # Assert
     trecho = _trecho_proxima_providencia(pagina.text)
-    assert "Continuar FORM 1" in trecho
-    assert "Retome pela primeira pendência ativa" in trecho
-    assert "data-pendencia-campo=" in trecho
-    assert "data-pendencia-bloco=" in trecho
-    assert "data-pendencia-etapa=" in trecho
+    assert "Preencher FORM 1" in trecho
+    assert "/form1-rev22?conta_id=CONTA-A1" in trecho
     assert "Etapas do FORM 1" in pagina.text
     assert "Iniciar FORM 1" not in trecho
 
@@ -123,3 +119,20 @@ def test_registro_sem_arp_explica_por_que_nao_ha_acao_de_preenchimento(sessao):
     assert "Iniciar FORM 1" not in trecho
     assert "Continuar FORM 1" not in trecho
 
+
+
+def test_entrada_sem_rascunho_orienta_e_preserva_perfil(sessao):
+    registro = _registro("ENTRADA-SEM-RASCUNHO-G1")
+    rid = registro["registro_id"]
+    pagina = cliente.get(f"/registros/{rid}?conta_id=CONTA-A1")
+    assert pagina.status_code == 200
+    html = pagina.text
+    assert html.index('class="proxima-providencia"') < html.index('class="area-designacao-arp"') < html.index('id="instrumentos-registro"')
+    assert "O rascunho ainda não foi iniciado" in html
+    assert "Abrir edição candidata" not in html
+    assert 'href="/registros/'+rid+'/form1-rev22' not in html
+    acesso = cliente.get(f"/registros/{rid}/form1-rev22?conta_id=CONTA-A1", follow_redirects=False)
+    assert acesso.status_code == 303
+    assert acesso.headers['location'] == f"/registros/{rid}?conta_id=CONTA-A1#titulo-proxima-providencia"
+    assert "Inicie o rascunho pelo Registro" not in acesso.text
+    assert cliente.get(f"/registros/{rid}/form1-rev22?conta_id=CONTA-INEXISTENTE").status_code == 403

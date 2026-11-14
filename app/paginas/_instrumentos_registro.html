@@ -6,16 +6,14 @@
     <li data-instrumento="FORM1">
       <h3>FORM 1 — Levantamento do tratamento</h3>
       <p>Registra os fatos sobre coleta, uso, compartilhamento, guarda e proteção de dados pessoais.</p>
-      <a href="#titulo-form1-integral" class="botao-link-secundario">Acessar FORM 1 Integral</a>
+      <a href="#titulo-form1-integral" class="botao-link-secundario">Consultar situação do FORM 1</a>
       <p class="ajuda">{% if registro.form1_integral.pode_editar %}Preenchimento autorizado como ARP.{% else %}Consulta; edição somente pelo ARP autorizado.{% endif %}</p>
     </li>
     <li data-instrumento="FORM2">
       <h3>FORM 2 — Validação jurídica e institucional</h3>
       <p>Destina-se à análise jurídica e institucional do tratamento. Disponível neste momento: preparação demonstrativa, sem parecer ou decisão institucional.</p>
-      {% if navegacao_form2 %}
-      {{ link_form2(registro, navegacao_form2, conta_id, request.query_params.get('secretaria_id')) }}
-      <p class="ajuda">{% if navegacao_form2.pode_editar %}Edição pelo AAL designado e habilitado.{% elif navegacao_form2.e_apa %}O APA acompanha a preparação e pode designar um AAL previamente habilitado.{% else %}Preparação disponível somente para consulta no estado atual.{% endif %}</p>
-      {% else %}<p class="aviso-leitura">Sem acesso demonstrativo disponível para seu perfil neste Registro. Para consultar como AAL, são necessárias habilitação vigente e designação pelo APA.</p>{% endif %}
+      <a class="botao-link-secundario" href="/form2/filas?conta_id={{ conta_id|urlencode }}">Consultar fila do FORM 2</a>
+      <p class="ajuda">O agente autorizado assume a participação pela fila da unidade executora. A fila mostra somente as participações e solicitações acessíveis ao seu perfil.</p>
     </li>
     <li data-instrumento="FORM3"><h3>FORM 3 — Avaliação de riscos e controles</h3><p>Destina-se à avaliação dos riscos e das medidas de controle do tratamento.</p><p><strong>Planejado — indisponível nesta etapa.</strong></p></li>
     <li data-instrumento="FORM4"><h3>FORM 4 — Plano de ação, monitoramento e aprendizagem institucional</h3><p>Destina-se ao registro de providências, responsáveis, prazos, evidências e acompanhamento.</p><p><strong>Planejado — indisponível nesta etapa.</strong></p></li>
