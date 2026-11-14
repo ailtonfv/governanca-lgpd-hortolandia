@@ -34,6 +34,19 @@ def catalogo():
     tipos={'multi':'seleção múltipla (combo com marcações)', 'single':'seleção única (combo)', 'unit':'seleção única (combo)', 'text':'texto curto'}
     return {k:CampoForm1Integral(k, f"BLOCO {q['block']} — {q['title']}", q['question'],tipos[q['kind']],tuple(q['options']),q['help']) for k,q in definicoes().items()}
 
+def blocos_com_respostas(conteudo):
+    campos = definicoes()
+    blocos = set()
+    grupos = [conteudo]
+    for conjuntos in conteudo.get("conjuntos_rev22", {}).values():
+        grupos.extend(conjuntos)
+    for grupo in grupos:
+        for chave, valor in grupo.get("respostas", {}).items():
+            if chave in campos and campos[chave]["block"] and valor not in (None, "", []):
+                blocos.add(campos[chave]["block"])
+    return blocos
+
+
 def respostas_conjuntos(conteudo):
     defs=definicoes();itens=[]
     for bloco,rows in conteudo.get('conjuntos_rev22',{}).items():

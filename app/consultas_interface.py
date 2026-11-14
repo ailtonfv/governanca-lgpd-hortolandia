@@ -632,7 +632,12 @@ def carregar_painel(sessao, conta_id, *, secretaria_id=None):
             conteudo_inicial={"respostas": _respostas_reaproveitadas(registro)},
         )
         primeira = next((p for p in pre_validacao["incompletos"] if p["destino_navegavel"]), None)
+        blocos_vazios = None
+        if rascunho and "revisao_22" in rascunho.conteudo:
+            from app.rev22_form1 import blocos_com_respostas
+            blocos_vazios = sorted(set(range(1, 15)) - blocos_com_respostas(rascunho.conteudo))
         preenchimentos_arp[registro.id] = {
+            "blocos_vazios": blocos_vazios,
             "quantidade": pre_validacao["quantidades"]["incompletos"],
             "nao_iniciado": rascunho is None,
             "ancora": f"titulo-bloco-{primeira['bloco']}" if primeira else "titulo-bloco-1",
@@ -1192,7 +1197,7 @@ def carregar_registro(sessao, conta_id, registro_id):
     # Projeção de consulta: usa as mesmas condições e o mesmo catálogo da edição.
     # Não cria controles desabilitados nem altera o rascunho persistido.
     campos_leitura = {bloco: [] for bloco in range(1, 15)}
-    if rascunho_integral is not None and not pode_editar_integral:
+    if rascunho_integral is not None and not pode_editar_integral and "revisao_22" not in conteudo_integral:
         conteudo_leitura = rascunho_integral.conteudo
         respostas_leitura = conteudo_leitura.get("respostas", {})
 
@@ -1409,61 +1414,6 @@ def carregar_registro(sessao, conta_id, registro_id):
             devolucao=devolucao_integral,
             confirmacao=confirmacao_integral,
         ),
-        "campos_bloco_1": {
-            campo_id: {
-                "id": catalogo_integral[campo_id].id,
-                "pergunta": catalogo_integral[campo_id].pergunta,
-                "alternativas": catalogo_integral[campo_id].alternativas,
-                "instrucao": instrucao_para_interface(catalogo_integral[campo_id]),
-                "obrigatoriedade": metadado_visual_obrigatoriedade(campo_id, conteudo_integral),
-            }
-            for campo_id in ("1.1", "1.1.1", "1.2", "1.3", "1.4")
-        },
-        "campos_bloco_2": {
-            campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_2
-        },
-        "leitura_2_1": leitura_2_1,
-        "campo_3_1": metadado_integral("3.1"),
-        "campos_participante": {
-            campo_id: metadado_integral(campo_id)
-            for campo_id in IDS_PARTICIPANTE_BLOCO_3
-        },
-        "campos_bloco_4": {
-            campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_4
-        },
-        "campos_bloco_5": {
-            campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_5
-        },
-        "campos_bloco_6": {
-            campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_6
-        },
-        "campos_bloco_7": {
-            campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_7
-        },
-        "campos_bloco_8": {
-            campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_8
-        },
-        "campos_bloco_9": {
-            campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_9
-        },
-        "campos_bloco_10": {
-            campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_10
-        },
-        "unidades_destinatarios": [
-            {"id": item.id, "nome": item.nome} for item in secretarias_integral
-        ],
-        "campos_bloco_11": {
-            campo_id: metadado_integral(campo_id) for campo_id in catalogo_integral if campo_id.startswith("11.")
-        },
-        "campos_bloco_12": {
-            campo_id: metadado_integral(campo_id) for campo_id in catalogo_integral if campo_id.startswith("12.")
-        },
-        "campos_bloco_13": {
-            campo_id: metadado_integral(campo_id) for campo_id in catalogo_integral if campo_id.startswith("13.")
-        },
-        "campos_bloco_14": {
-            campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_14
-        },
         "etapas": (
             {"numero": 1, "titulo": "Identificação e funcionamento do serviço", "blocos": "1 a 3"},
             {"numero": 2, "titulo": "Dados pessoais e operações de tratamento", "blocos": "4 a 8"},
@@ -1471,6 +1421,64 @@ def carregar_registro(sessao, conta_id, registro_id):
             {"numero": 4, "titulo": "Guarda, situações observadas e pendências", "blocos": "12 a 14"},
         ),
     }
+    if "revisao_22" not in conteudo_integral:
+        resumo["form1_integral"].update({
+            "campos_bloco_1": {
+                campo_id: {
+                    "id": catalogo_integral[campo_id].id,
+                    "pergunta": catalogo_integral[campo_id].pergunta,
+                    "alternativas": catalogo_integral[campo_id].alternativas,
+                    "instrucao": instrucao_para_interface(catalogo_integral[campo_id]),
+                    "obrigatoriedade": metadado_visual_obrigatoriedade(campo_id, conteudo_integral),
+                }
+                for campo_id in ("1.1", "1.1.1", "1.2", "1.3", "1.4")
+            },
+            "campos_bloco_2": {
+                campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_2
+            },
+            "leitura_2_1": leitura_2_1,
+            "campo_3_1": metadado_integral("3.1"),
+            "campos_participante": {
+                campo_id: metadado_integral(campo_id)
+                for campo_id in IDS_PARTICIPANTE_BLOCO_3
+            },
+            "campos_bloco_4": {
+                campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_4
+            },
+            "campos_bloco_5": {
+                campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_5
+            },
+            "campos_bloco_6": {
+                campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_6
+            },
+            "campos_bloco_7": {
+                campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_7
+            },
+            "campos_bloco_8": {
+                campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_8
+            },
+            "campos_bloco_9": {
+                campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_9
+            },
+            "campos_bloco_10": {
+                campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_10
+            },
+            "unidades_destinatarios": [
+                {"id": item.id, "nome": item.nome} for item in secretarias_integral
+            ],
+            "campos_bloco_11": {
+                campo_id: metadado_integral(campo_id) for campo_id in catalogo_integral if campo_id.startswith("11.")
+            },
+            "campos_bloco_12": {
+                campo_id: metadado_integral(campo_id) for campo_id in catalogo_integral if campo_id.startswith("12.")
+            },
+            "campos_bloco_13": {
+                campo_id: metadado_integral(campo_id) for campo_id in catalogo_integral if campo_id.startswith("13.")
+            },
+            "campos_bloco_14": {
+                campo_id: metadado_integral(campo_id) for campo_id in IDS_BLOCO_14
+            },
+        })
     resumo["form1"] = {
         "id": instrumento.id,
         "estado": instrumento.estado_instrumento,

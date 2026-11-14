@@ -3,6 +3,7 @@
 {% set titulo_pagina = 'Minhas preparações' if instrumento == 'form2' else 'Meus levantamentos' if instrumento == 'form1' else 'Painel de Registros' %}
 {% block titulo %}{{ titulo_pagina }} · Governança LGPD{% endblock %}
 {% block conteudo %}
+{% set ha_matriz_pendente = registros|selectattr("preenchimento_arp")|map(attribute="preenchimento_arp")|rejectattr("blocos_vazios","none")|list|length > 0 %}
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/instrumentos_registro.css') }}">
 <nav class="navegacao-governanca" aria-label="Navegação principal">
   <a class="botao-link-secundario" href="{{ url_for('central') }}?conta_id={{ conta_id|urlencode }}&amp;secretaria_id={{ secretaria.id|urlencode }}">{{ 'Trocar Secretaria' if pode_trocar_secretaria else 'Voltar à Central de Acesso' }}</a>
@@ -36,7 +37,7 @@
     </header>
     {% if instrumento == 'form1' %}
     <details class="resumo-trabalho"><summary>Resumo dos levantamentos</summary>
-      <p>Registros disponíveis: {{ registros|length }} · Providências de conferência: {{ quantidade_providencias_conferencia }} · Campos obrigatórios pendentes: {{ quantidade_campos_obrigatorios_pendentes }}</p>
+      <p>Registros disponíveis: {{ registros|length }} · Providências de conferência: {{ quantidade_providencias_conferencia }} · Campos obrigatórios pendentes: {{ 'Parcial' if ha_matriz_pendente else quantidade_campos_obrigatorios_pendentes }}</p>
     </details>
     {% endif %}
     {% else %}
@@ -56,7 +57,7 @@
           <span>Providências de conferência</span>
         </div>
         <div>
-          <span id="contador-campos-pendentes" class="contador contador-campos" aria-label="{{ quantidade_campos_obrigatorios_pendentes }} campo(s) obrigatório(s) pendente(s)">{{ quantidade_campos_obrigatorios_pendentes }}</span>
+          <span id="contador-campos-pendentes" class="contador contador-campos" aria-label="{{ 'Parcial' if ha_matriz_pendente else quantidade_campos_obrigatorios_pendentes }} campo(s) obrigatório(s) pendente(s)">{{ 'Parcial' if ha_matriz_pendente else quantidade_campos_obrigatorios_pendentes }}</span>
           <span>Campos obrigatórios pendentes</span>
         </div>
       </div>
@@ -73,7 +74,7 @@
         <li data-registro-pendencias="{{ registro.id }}">
           <div>
             <strong>{{ registro.codigo_lgpd }}</strong> · {{ registro.tipo }} · {{ registro.titulo }}
-            <p>{{ registro.preenchimento_arp.quantidade }} campo(s) obrigatório(s) ativo(s) incompleto(s).</p>
+            <p>{% if registro.preenchimento_arp.blocos_vazios is not none %}{{ registro.preenchimento_arp.blocos_vazios|length }} de 14 blocos sem respostas. Obrigatoriedade em definição.{% else %}{{ registro.preenchimento_arp.quantidade }} campo(s) obrigatório(s) ativo(s) incompleto(s).{% endif %}</p>
             {% if registro.preenchimento_arp.nao_iniciado %}<p class="ajuda">Contagem inicial com os dados da abertura; rascunho ainda não iniciado.</p>{% endif %}
           </div>
           {% if registro.preenchimento_arp.nao_iniciado %}
@@ -122,7 +123,7 @@
           <p><strong>Atuação neste levantamento:</strong> {% if registro.preenchimento_arp %}preenchimento pelo ARP{% elif registro.providencias | selectattr('categoria', 'equalto', 'conferencia_form1') | list %}conferência pelo APA{% else %}consulta ao levantamento{% endif %}.</p>
           {% endif %}
           {% if registro.preenchimento_arp %}
-          <p><strong>Seu preenchimento:</strong> {{ registro.preenchimento_arp.quantidade }} campo(s) obrigatório(s) ativo(s) incompleto(s).{% if registro.preenchimento_arp.nao_iniciado %} Contagem inicial, com os dados da abertura; rascunho ainda não iniciado.{% endif %}</p>
+          <p><strong>Seu preenchimento:</strong> {% if registro.preenchimento_arp.blocos_vazios is not none %}{{ registro.preenchimento_arp.blocos_vazios|length }} de 14 blocos sem respostas. Obrigatoriedade em definição.{% else %}{{ registro.preenchimento_arp.quantidade }} campo(s) obrigatório(s) ativo(s) incompleto(s).{% endif %}{% if registro.preenchimento_arp.nao_iniciado %} Contagem inicial, com os dados da abertura; rascunho ainda não iniciado.{% endif %}</p>
           {% endif %}
           {% set fluxo = registro.fluxo_conferencia %}
           {% if instrumento and fluxo.ultima_atividade %}
@@ -145,7 +146,9 @@
               {% if providencia.justificativa_devolucao %}
               <p class="aviso-leitura"><strong>Justificativa do APA:</strong> {{ providencia.justificativa_devolucao }}</p>
               {% endif %}
-              {% if providencia.quantidade_pendencias is none and providencia.categoria == 'preenchimento_form1' %}
+              {% if registro.preenchimento_arp and registro.preenchimento_arp.blocos_vazios is not none and providencia.categoria == 'preenchimento_form1' %}
+              <p>A obrigatoriedade dos itens deste formulário está em definição.</p>
+              {% elif providencia.quantidade_pendencias is none and providencia.categoria == 'preenchimento_form1' %}
               <p>O rascunho do FORM 1 ainda não foi iniciado.</p>
               {% elif providencia.quantidade_pendencias is not none and providencia.quantidade_pendencias > 0 %}
               <p><strong>{{ providencia.quantidade_pendencias }}</strong> campo(s) obrigatório(s) ativo(s) incompleto(s).</p>

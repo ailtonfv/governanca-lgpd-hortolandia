@@ -3,7 +3,7 @@
 {% set situacoes = {'aguardando': 'aguardando responsável', 'em_atendimento': 'em atendimento', 'concluida': 'concluída'} %}
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/filas_form2.css') }}"><div class="filas-form2">
 <h1>Filas do FORM 2</h1>
-<p>{{ pessoa.nome }} · Ambiente demonstrativo da candidata REV22.</p>
+<p>{{ pessoa.nome }} · Demonstração com dados fictícios.</p>
 <div class="acoes-fila-form2"><a class="botao-link-secundario" href="/central?conta_id={{ conta_id|urlencode }}">Voltar à Central de Acesso</a></div>
 <h2>Participações da sua unidade</h2>
 {% for c in cartoes %}

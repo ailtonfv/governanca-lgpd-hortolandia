@@ -27,8 +27,8 @@
   <dl>
     <div><dt>Versão da estrutura consultada</dt><dd>{{ versao_estrutura }}</dd></div>
     <div><dt>Versão apresentada</dt><dd>Rascunho {{ conferencia.versao_rascunho }} · snapshot técnico {{ snapshot.numero }}</dd></div>
-    <div><dt>Apresentada em</dt><dd>{{ conferencia.solicitada_em }}</dd></div>
-    <div><dt>Lacre</dt><dd><code>{{ snapshot.lacre }}</code></dd></div>
+    <div><dt>Apresentada em</dt><dd>{{ conferencia.solicitada_em.strftime('%d/%m/%Y às %H:%M') }}</dd></div>
+    <div><dt>Lacre de integridade</dt><dd>Identifica o conteúdo preservado desta apresentação.<br><code style="overflow-wrap:anywhere">{{ snapshot.lacre }}</code></dd></div>
   </dl>
 </details>
 
@@ -36,10 +36,13 @@
   <h2 id="titulo-conteudo-apresentado">Conteúdo exato apresentado pelo ARP</h2>
   {% include '_legado_medidas_form1.html' %}
   {% include '_legado_guarda_form1.html' %}
+  {% if blocos_vazios is defined and blocos_vazios is not none %}
+  <p><strong>{{ blocos_vazios|length }} de 14 blocos sem respostas nesta apresentação.</strong>{% if blocos_vazios %} Blocos: {{ blocos_vazios|join(', ') }}.{% endif %}</p>
+  {% endif %}
   {% if respostas %}
   <dl class="resumo-respostas-conferencia">
     {% for item in respostas %}
-    <div><dt>{{ codigo_pergunta(item.id, 1) }}{% if item.conjunto %} · conjunto {{ item.conjunto }}{% endif %} — {{ item.pergunta }}</dt><dd>{{ item.valor }}</dd></div>
+    <div><dt>{{ codigo_pergunta(item.id, 1) }}{% if item.conjunto %} · conjunto {{ item.conjunto }}{% endif %} — {{ item.pergunta }}</dt><dd>{{ item.valor|join(', ') if item.valor is sequence and item.valor is not string and item.valor is not mapping else item.valor }}</dd></div>
     {% endfor %}
   </dl>
   {% else %}<p>Nenhuma resposta foi registrada nesta versão.</p>{% endif %}
@@ -67,7 +70,7 @@
   <section class="opcao-devolucao-conferencia" aria-labelledby="titulo-opcao-devolver">
   <h3 id="titulo-opcao-devolver">Opção B — Devolver para ajustes</h3>
   <p>Use esta ação quando o ARP precisar corrigir ou complementar o levantamento apresentado. As informações apresentadas permanecerão íntegras no histórico.</p>
-  <form class="formulario" method="post" action="{{ url_for('devolver_conferencia_interna', registro_id=registro.id) }}">
+  <form class="formulario" method="post" onsubmit="return window.confirm('Devolver o FORM 1 ao responsável com a justificativa informada?')" action="{{ url_for('devolver_conferencia_interna', registro_id=registro.id) }}">
     <input type="hidden" name="conta_id" value="{{ conta_id }}">
     <input type="hidden" name="comando_id" value="{{ comando_devolver_conferencia }}">
     <input type="hidden" name="versao_lida" value="{{ conferencia.versao_projecao }}">

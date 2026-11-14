@@ -466,10 +466,6 @@ def detalhe_registro(
     erro: bool = Query(default=False),
     sessao: Session = Depends(obter_sessao),
 ):
-    from app.modelos import RascunhoForm1Integral
-    r22 = sessao.get(RascunhoForm1Integral, registro_id)
-    if r22 and "revisao_22" in r22.conteudo:
-        return RedirectResponse('/registros/'+registro_id+'/form1-rev22?'+urlencode({'conta_id':conta_id}), status_code=303)
     identidade, registro = carregar_registro(sessao, conta_id, registro_id)
     if identidade is None:
         return paginas.TemplateResponse(
@@ -508,6 +504,12 @@ def detalhe_registro(
             },
             status_code=403,
         )
+    from sqlalchemy import select
+    from app.modelos import ParticipacaoForm2
+    participacao_principal = sessao.scalar(select(ParticipacaoForm2.id).where(
+        ParticipacaoForm2.registro_id == registro_id, ParticipacaoForm2.tipo == "principal",
+        ParticipacaoForm2.estado != "concluida",
+    ).limit(1))
     return paginas.TemplateResponse(
         request=request,
         name="registro.html",
@@ -518,6 +520,8 @@ def detalhe_registro(
             "mensagem": mensagem,
             "erro": erro,
             "modo_legado": False,
+            "esta_na_fila": participacao_principal,
+            "comando_encaminhar": str(uuid.uuid4()),
             "navegacao_form2": projetar_navegacao_preparacao(sessao, conta_id=conta_id, registro_id=registro_id),
             "comando_i1": str(uuid.uuid4()),
             "comando_i2": str(uuid.uuid4()),
@@ -1324,7 +1328,7 @@ def consultar_conferencia_interna(
     respostas = snapshot.conteudo.get("form1_integral", {}).get("respostas", {})
     conteudo_snapshot = snapshot.conteudo.get("form1_integral", {})
     catalogo = catalogo_efetivo(conteudo_snapshot)
-    from app.rev22_form1 import respostas_conjuntos
+    from app.rev22_form1 import respostas_conjuntos, blocos_com_respostas
     conjuntos_rev22 = respostas_conjuntos(conteudo_snapshot) if "revisao_22" in conteudo_snapshot else []
     return paginas.TemplateResponse(
         request=request,
@@ -1335,6 +1339,7 @@ def consultar_conferencia_interna(
             "registro": registro,
             "conferencia": conferencia,
             "snapshot": snapshot,
+            "blocos_vazios": sorted(set(range(1, 15)) - blocos_com_respostas(conteudo_snapshot)) if "revisao_22" in conteudo_snapshot else None,
             "versao_estrutura": versao_estrutura(conteudo_snapshot),
             "extensao_medidas": conteudo_snapshot.get("extensao_medidas"),
             "extensao_guarda": conteudo_snapshot.get("extensao_guarda"),

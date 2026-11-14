@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 from app.banco import motor
 from app.continuidade_apa import pessoa_e_apa_em_exercicio
-from app.modelos import Registro,RascunhoForm1Integral,Unidade,ConferenciaInternaForm1Integral
+from app.modelos import ParticipacaoForm2,Registro,RascunhoForm1Integral,Unidade,ConferenciaInternaForm1Integral
 from app.consultas_interface import _identidade, _ids_visiveis
 from app.rascunho_form1_integral import _contexto_autorizado
 from app.rev22_form1 import definicoes, ativa, adotar, salvar
@@ -46,8 +46,9 @@ def pagina(request:Request,registro_id:str,conta_id:str,bloco:int=1,conjunto:int
     row=rows[conjunto-1] if conjunto<=len(rows) else {'respostas':{},'complementos':{}}
     contexto={**valores,**row['respostas']}
     defs=definicoes()
-    respondidos={defs[k]["block"] for k,v in valores.items() if k in defs and v}
-    respondidos.update(int(b) for b,rs in conteudo.get("conjuntos_rev22",{}).items() if any(r.get("respostas") for r in rs))
+    from app.rev22_form1 import blocos_com_respostas
+    from app.consultas_interface import _devolucao_para_interface
+    respondidos = blocos_com_respostas(conteudo)
     campos=[q for q in defs.values() if q['block']==bloco]
     for q in campos:
         q['repetida']=bloco in (3,10) and q['id']!=f'{bloco}.1'
@@ -61,6 +62,8 @@ def pagina(request:Request,registro_id:str,conta_id:str,bloco:int=1,conjunto:int
         salvamento_confirmado=request.query_params.get("salvo") == str(r.versao_rascunho),
         e_apa=pessoa_e_apa_em_exercicio(sessao,identidade["pessoa_id"],reg.unidade_principal_atual_id),
         registro=reg,r=r,identidade=identidade,conta_id=conta_id,bloco=bloco,conjunto=conjunto,
+        devolucao=_devolucao_para_interface(sessao, registro_id),
+        encaminhado=bool(sessao.scalar(select(ParticipacaoForm2.id).where(ParticipacaoForm2.registro_id==registro_id).limit(1))),
         historico=historico,respondidos=respondidos,conferencia=conferencia,quantidade_conjuntos=len(rows),campos=campos,metadados=[q for q in defs.values() if q['block']==0],pode=pode,adotada=adotada,comando_id=str(uuid4()),
         unidades=sessao.scalars(select(Unidade).where(Unidade.ativa.is_(True),Unidade.id!='UNID-GOV').order_by(Unidade.nome)).all()))
 
