@@ -46,7 +46,7 @@ from app.pre_validacao_form1_integral import (
 from app.modelos import (AtribuicaoForm1Integral, ConferenciaInternaForm1Integral, HistoricoConferenciaForm1Integral, Conta, ContextoAtuacao, Designacao, Evento, Instrumento,
                          Canal, ConfirmacaoCanaisRegistro, ObjetoCanal,
                          ObjetoCatalogo, ObjetoContextoCatalogo, RegistroCanal,
-                         UnidadeObjetoCatalogo, Pendencia, Pessoa,
+                         UnidadeObjetoCatalogo, Pendencia, Pessoa, ParticipacaoForm2,
                           RascunhoForm1Integral, RascunhoInstrumento, Registro, Unidade,
                           VersaoForm1Integral)
 
@@ -834,8 +834,16 @@ def carregar_painel(sessao, conta_id, *, secretaria_id=None):
             ),
         })
 
+    unidades_apa = unidades_em_que_e_apa_atual(sessao, identidade["pessoa_id"])
+    entradas_form2 = dict(sessao.execute(
+        select(ParticipacaoForm2.registro_id, func.min(ParticipacaoForm2.entrada_em)).where(
+            ParticipacaoForm2.registro_id.in_([r["id"] for r in registros]),
+            ParticipacaoForm2.tipo == "principal",
+        ).group_by(ParticipacaoForm2.registro_id)
+    ).all())
     for resumo in registros:
         registro_id = resumo["id"]
+        resumo["ingresso_form2"] = entradas_form2.get(registro_id) if resumo["unidade_id"] in unidades_apa else None
         resumo["fluxo_conferencia"] = projetar_fluxo_conferencia(sessao, registro_id, resumo["unidade_id"])
         resumo["providencias"] = providencias_por_registro[registro_id]
         resumo["preenchimento_arp"] = preenchimentos_arp.get(registro_id)
@@ -868,7 +876,6 @@ def carregar_painel(sessao, conta_id, *, secretaria_id=None):
                 resumo["responsavel_proxima_etapa"] = (
                     f"{arp_atual.matricula} · {rotulo_interface(arp_atual.nome)} (ARP)"
                 )
-    unidades_apa = unidades_em_que_e_apa_atual(sessao, identidade["pessoa_id"])
     pode_criar_registro = bool(unidades_apa) if secretaria_id is None else secretaria_id in unidades_apa
     return {
         "identidade": identidade,
