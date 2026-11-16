@@ -6,7 +6,7 @@
 {% if mensagem_atribuicao %}<p role="status">{{ mensagem_atribuicao }}</p>{% endif %}
 <p>{{ pessoa.nome }} · Demonstração com dados fictícios.</p>
 <div class="acoes-fila-form2"><a class="botao-link-secundario" href="/central?conta_id={{ conta_id|urlencode }}">Voltar à Central de Acesso</a></div>
-<h2>Participações da sua unidade</h2>
+{% if cartoes or not gerenciaveis %}<h2>Participações da sua unidade</h2>
 {% for c in cartoes %}
 {% if loop.changed(c.aguardando is not none) %}<h3>{{ "Aguardando responsável" if c.aguardando else "Em acompanhamento" }}</h3>{% endif %}
 <article data-registro="{{ c.registro.id }}"><h3>{{ c.registro.codigo_lgpd }}</h3>
@@ -19,7 +19,7 @@
 {% if complemento.situacao %}<p>Complementação do FORM 1: {{ complemento.situacao }}.</p>{% endif %}
 <div class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/participacoes/{{ complemento.p.id }}/governanca?conta_id={{ conta_id|urlencode }}">Ver pendências e respostas</a></div>
 {% endfor %}</article>
-{% else %}<p>Nenhum Registro nas filas autorizadas para esta conta.</p>{% endfor %}
+{% else %}<p>Nenhum Registro nas filas autorizadas para esta conta.</p>{% endfor %}{% endif %}
 {% if pode_encaminhar %}
 <details><summary>Encaminhar versão do FORM 1 já confirmada</summary>
 <p>O APA pode encaminhar uma origem com conferência interna confirmada para o ensaio demonstrativo.</p>
@@ -34,7 +34,11 @@
 <tbody>{% for l in linhas %}<tr><td>{{ l.registro.codigo_lgpd }}</td><td>{{ l.secretaria }}</td><td>{{ l.fila }}</td><td>{{ l.p.entrada_em.strftime('%d/%m/%Y %H:%M') }}</td><td>{{ l.espera }}</td><td>{{ l.dpo }}</td><td>{{ l.situacao }}</td></tr>{% endfor %}</tbody></table></div>
 <h2>Ingresso por unidade ativa</h2><ul>{% for u in cobertura %}<li>{{ u.nome }} · {{ u.total }} ingresso(s)</li>{% endfor %}</ul>{% endif %}
 
+{% if gerenciaveis %}<h2>Gestão da fila</h2>{% endif %}
 {% for p in gerenciaveis %}
+{% if loop.changed(p.responsavel_id is none) %}<h3>{{ 'Aguardando responsável' if p.responsavel_id is none else 'Com responsável' }}</h3>{% endif %}
+<article><h4>{{ registros[p.registro_id].codigo_lgpd }} · {{ unidades[p.unidade_id].nome }}</h4>
+<p>{{ situacoes.get(p.estado, p.estado) }}{% if p.responsavel_id %} · Responsável: {{ responsaveis[p.responsavel_id] }}{% endif %}</p><p>{{ entradas[p.id] }}</p>
 {% set acao = 'Atribuir responsável' if p.assumida_em is none else 'Reatribuir' %}
 <details><summary>{{ acao }} — {{ registros[p.registro_id].codigo_lgpd }} · {{ p.tipo }}</summary>
 <form method="post" action="/form2/participacoes/{{ p.id }}/reatribuir">
@@ -47,5 +51,5 @@
   <p><span data-nome-agente></span> passa a responder {% if p.tipo in ('principal', 'tematica') %}como AAL {% endif %}pelo {{ registros[p.registro_id].codigo_lgpd }}. A análise usará a {{ referencias[p.id] }}.{% if p.tipo == 'principal' %} Novas versões do FORM 1 dependerão da decisão desse responsável.{% endif %}</p>
   <div class="acoes-fila-form2"><button type="button" data-fechar-dialogo autofocus>Cancelar</button>
   <button type="submit" class="botao-primario">{{ acao }}</button></div>
-</dialog></form></details>{% endfor %}
+</dialog></form></details></article>{% endfor %}
 </div><script src="{{ url_for('estaticos', path='/confirmar_acao_fila.js') }}" defer></script>{% endblock %}

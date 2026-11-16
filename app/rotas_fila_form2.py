@@ -292,7 +292,7 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
     gestores = unidades_autorizadas(sessao, pessoa.id, "gestor_fila")
     gerenciaveis = sessao.scalars(select(ParticipacaoForm2).where(
         ParticipacaoForm2.unidade_id.in_(gestores),
-        ParticipacaoForm2.estado != "concluida")).all() if gestores else []
+        ParticipacaoForm2.estado != "concluida").order_by(ParticipacaoForm2.responsavel_id.is_not(None), ParticipacaoForm2.entrada_em)).all() if gestores else []
     from app.modelos import Comando, VersaoForm1Integral
     referencias = {p.id: rotulo_apresentacao(sessao.get(VersaoForm1Integral, p.snapshot_id)) for p in gerenciaveis}
     chave = request.query_params.get("atribuicao")
@@ -304,7 +304,7 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
         mensagem = comando.resultado.get("mensagem")
     agentes = sessao.scalars(select(Pessoa).where(Pessoa.ativa.is_(True))).all() if gestores else []
     responsaveis = dict(sessao.execute(select(Pessoa.id, Pessoa.nome).where(
-        Pessoa.id.in_({p.responsavel_id for p in participacoes if p.responsavel_id}))).all())
+        Pessoa.id.in_({p.responsavel_id for p in [*participacoes, *gerenciaveis] if p.responsavel_id}))).all())
     cartoes = {}
     for p in participacoes:
         cartoes.setdefault(p.registro_id, dict(registro=registros[p.registro_id],
