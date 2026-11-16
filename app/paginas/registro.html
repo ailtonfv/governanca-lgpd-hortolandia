@@ -303,7 +303,11 @@
         <input type="hidden" name="conta_id" value="{{ conta_id }}">
         <input type="hidden" name="comando_id" value="{{ comando_solicitar_conferencia }}">
         <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
-        <button class="botao-primario" type="submit">Solicitar nova conferência interna do APA</button>
+        <button class="botao-primario" type="button" data-abrir-dialogo="apresentar-registro">Solicitar nova conferência interna do APA</button>
+        <dialog id="apresentar-registro" aria-labelledby="titulo-apresentar"><h2 id="titulo-apresentar">Apresentar o FORM 1 para conferência?</h2>
+        <p>O APA receberá as respostas salvas. A edição ficará suspensa até a decisão.</p>
+        <button type="button" data-fechar-dialogo autofocus>Continuar revisando</button>
+        <button class="botao-primario" type="submit">Apresentar ao APA</button></dialog>
       </form>
       {% else %}
       <p class="ajuda">Salve ao menos um ajuste no rascunho antes de solicitar nova conferência.</p>
@@ -315,7 +319,11 @@
         <input type="hidden" name="conta_id" value="{{ conta_id }}">
         <input type="hidden" name="comando_id" value="{{ comando_solicitar_conferencia }}">
         <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
-        <button class="botao-primario" type="submit">Solicitar conferência interna do APA</button>
+        <button class="botao-primario" type="button" data-abrir-dialogo="apresentar-registro">Solicitar conferência interna do APA</button>
+        <dialog id="apresentar-registro" aria-labelledby="titulo-apresentar"><h2 id="titulo-apresentar">Apresentar o FORM 1 para conferência?</h2>
+        <p>O APA receberá as respostas salvas. A edição ficará suspensa até a decisão.</p>
+        <button type="button" data-fechar-dialogo autofocus>Continuar revisando</button>
+        <button class="botao-primario" type="submit">Apresentar ao APA</button></dialog>
       </form>
       {% else %}
       <p class="ajuda">Nenhuma ação de conferência interna está disponível para seu perfil neste momento.</p>
@@ -837,6 +845,7 @@
 
 {% include '_instrumentos_registro.html' %}
 <script src="{{ url_for('estaticos', path='/formulario_associado_form1.js') }}"></script>
+<script defer src="{{ url_for('estaticos', path='/confirmar_acao_fila.js') }}"></script>
 <script src="{{ url_for('estaticos', path='/saida_form1.js') }}"></script>
 <script src="{{ url_for('estaticos', path='/extensao_medidas_form1.js') }}"></script>
 <script src="{{ url_for('estaticos', path='/posicao_form1.js') }}"></script>
