@@ -235,7 +235,7 @@ async def registrar_consolidacao_fila(request: Request, participacao_id: str,
 
 def duracao_fila(inicio, fim):
     horas = max(0, int((fim - inicio).total_seconds() // 3600))
-    return f"{horas // 24} d {horas % 24} h"
+    return f"{horas // 24} d {horas % 24} h" if horas >= 24 else f"{horas} h"
 
 
 def entrada_fila(p, momento):
@@ -329,7 +329,7 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
             unidade = minhas[ato.cadeia_id].unidade_id
             papel = "APA" if pessoa_e_apa_em_exercicio(sessao, ato.ator_id, unidade, ato.ocorrido_em) else "gestor da fila"
             data = ato.ocorrido_em.astimezone(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y às %Hh%M")
-            atribuidores[ato.cadeia_id] = f"Atribuído por {nome} ({papel}) em {data}"
+            atribuidores[ato.cadeia_id] = f"Atribuído por {nome}, {papel}, em {data}"
     cartoes = {}
     for p in participacoes:
         cartoes.setdefault(p.registro_id, dict(registro=registros[p.registro_id],

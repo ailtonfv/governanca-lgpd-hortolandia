@@ -33,13 +33,14 @@
 {% if q.edicao == 'habilitada' %}{{ ajuda(q, q.ativa) }}{% endif %}
 {% if q.id == 'F2-1.2' %}<p>Secretaria do Registro: <strong>{{ secretaria.nome }}</strong>.</p>{% endif %}
 {% if q.id in ('F2-2.1', 'F2-2.9') %}<aside><strong>No FORM 1 · {{ rotulo_origem }}</strong>
+{% if q.id == 'F2-2.9' and not perguntas_origem|selectattr('id', 'in', ['12.1','12.1.1','12.1.2','12.1.3'])|list %}<p>O FORM 1 não informou prazo de guarda nesta apresentação.</p>{% else %}
 {% for referencia in q.referencias_form1 %}{% set chave = referencia|replace('F1-', '') %}
 {% for item in perguntas_origem if item.id == chave %}<p>{{ referencia }}{% if item.conjunto %} · conjunto {{ item.conjunto }}{% endif %} — {{ item.valor|join(', ') if item.valor is sequence and item.valor is not string and item.valor is not mapping else item.valor }}</p>
 {% else %}<p>{{ referencia }} — Sem resposta nesta apresentação.</p>{% endfor %}{% endfor %}
 {% if q.id == 'F2-2.9' %}<strong>Prazo e fonte informados na mesma apresentação</strong>
 {% for chave, rotulo in [('12.1.1','Prazo praticado'), ('12.1.2','Unidade do prazo'), ('12.1.3','Referência utilizada')] %}
 {% for item in perguntas_origem if item.id == chave %}<p>{{ rotulo }} (F1-{{ chave }}){% if item.conjunto %} · conjunto {{ item.conjunto }}{% endif %} — {{ item.valor|join(', ') if item.valor is sequence and item.valor is not string and item.valor is not mapping else item.valor }}{% set complemento = item.complemento if item.conjunto else fatos_origem.get("complementos", {}).get(chave) %}{% if complemento %} · {{ complemento }}{% endif %}</p>
-{% else %}<p>{{ rotulo }} (F1-{{ chave }}) — Sem informação nesta apresentação.</p>{% endfor %}{% endfor %}{% endif %}</aside>{% endif %}
+{% else %}<p>{{ rotulo }} (F1-{{ chave }}) — Sem informação nesta apresentação.</p>{% endfor %}{% endfor %}{% endif %}{% endif %}</aside>{% endif %}
 {% if q.id == 'F2-1.2.1' %}<p>Unidade informada na {{ rotulo_origem }} do FORM 1: {{ unidade_origem or 'Sem informação' }}.</p>{% endif %}
 {% if q.id == 'F2-1.3.1' %}<p data-aviso-complemento {% if not q.ativa %}hidden{% endif %}>Ao salvar, esta resposta abre um pedido de complementação ao FORM 1.</p>{% endif %}
 {% if q.edicao == 'habilitada' %}
@@ -68,7 +69,7 @@
 {% set op = 'opcao:' ~ q.id %}{% set txt = 'texto:' ~ q.id %}{% set com = 'comentario:' ~ q.id %}
 {% set bloqueada = numero == 1 or q.edicao in ('habilitada', 'consulta') %}
 {% if q.id in ('F2-9W.1','F2-11S.1','F2-12A.1') %}<h2>{{ {'F2-9W.1':'Ramificação 9W — Wi-Fi','F2-11S.1':'Ramificação 11S — Informações de saúde','F2-12A.1':'Ramificação 12A — Alta sensibilidade'}[q.id] }}</h2>{% endif %}
-{% if q.id == 'F2-3.2.2' %}<aside>{% if finalidade_validada %}<strong>No bloco 2 (sua resposta)</strong><p>{{ finalidade_validada }}</p>{% else %}Finalidade ainda não validada no bloco 2.{% endif %}</aside>{% endif %}
+{% if q.id == 'F2-3.2.2' %}<aside>{% if finalidade_validada %}<strong>No bloco 2 (sua resposta)</strong><p>{{ finalidade_validada }}</p>{% else %}Finalidade ainda não validada no bloco 2.{% endif %}{% endif %}</aside>{% endif %}
 {% if q.id == 'F2-3.5' %}
 <p id="balanceamento-inativo" {% if ativa(q.id, '') %}hidden{% endif %}>Teste de balanceamento: não se aplica (Legítimo interesse não indicado na 3.1)</p>
 <section id="teste-balanceamento" {% if not ativa(q.id, '') %}hidden{% endif %}><h2>Teste de balanceamento — só para Legítimo interesse</h2>
