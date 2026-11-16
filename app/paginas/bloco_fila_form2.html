@@ -71,6 +71,7 @@
 {% if q.id == 'F2-13.9' %}<p>{{ revogacao|join(', ') if revogacao else 'F2-5.7 ainda sem resposta candidata.' }} Consulta ao rascunho, sem homologação D11.</p>{% endif %}
 {% if q.id in ('F2-14.8.1','F2-14.8.2') %}<p>A classificação de pendências impeditivas aguarda definição institucional.</p>{% endif %}
 {% if q.id == 'F2-6.4' %}<p>Faixas etárias no FORM 1 em análise (F1-4.1.1): {{ fatos_origem.get('respostas',{}).get('4.1.1',[])|join(', ') or 'Não informadas nesta versão. Ausência não significa inexistência de crianças ou adolescentes. Solicite complemento em F2-1.3.1 quando necessário.' }}</p>{% endif %}
+{% if q.id == 'F2-3.9' %}<p>Se Sim, o legítimo interesse não pode ser usado.</p>{% endif %}
 {% if q.id == 'F2-3.5' %}<p id="aviso-dados-sensiveis" role="status" hidden>Legítimo interesse não ampara dados pessoais sensíveis. Revise a hipótese na 3.1 ou consulte o Jurídico.</p>{% endif %}
 {% if q.orientacao %}<p>{{ q.orientacao }}</p>{% endif %}
 
