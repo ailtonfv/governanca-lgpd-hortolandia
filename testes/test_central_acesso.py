@@ -145,7 +145,7 @@ def test_escolha_explicita_filtra_form2_e_retorna_ao_contexto(sessao, conta, rot
     assert len(principais) == 1
     link1 = unescape(principais[0])
     assert 'Abrir FORM 1 para preenchimento' not in cartao
-    assert ('>Continuar FORM 1</a>' in cartao) == (conta == "CONTA-A1")
+    assert ('>Preencher FORM 1</a>' in cartao) == (conta == "CONTA-A1")
     for lista in (form1, form2):
         assert "Escolha um Registro</h2>" not in lista.text
         assert lista.text.count(">Voltar ao Painel geral de Registros</a>") == 1
