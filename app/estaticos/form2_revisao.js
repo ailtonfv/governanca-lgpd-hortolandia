@@ -21,6 +21,12 @@
       const aviso = grupo.querySelector('[data-aviso-complemento]');
       if (aviso) aviso.hidden = !ativa;
     }
+    const teste = document.getElementById('teste-balanceamento');
+    if (teste) {
+      const aplicavel = !document.getElementById('F2-3.5').querySelector('[data-gatilhos]').disabled;
+      teste.hidden = !aplicavel;
+      document.getElementById('balanceamento-inativo').hidden = aplicavel;
+    }
   }
   form.addEventListener('input', atualizarCondicoes);
   form.addEventListener('change', atualizarCondicoes);
