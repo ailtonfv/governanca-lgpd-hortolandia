@@ -1,0 +1,69 @@
+import pytest
+from fastapi.testclient import TestClient
+from sqlalchemy import select
+
+from app.main import app
+from app.fila_form2 import manifestar_de_oficio
+from app.modelos import Designacao, ParticipacaoForm2
+from app.conferencia_interna_form1_integral import (
+    solicitar_conferencia_interna_form1_integral, confirmar_conferencia_interna_form1_integral,
+    devolver_conferencia_interna_form1_integral,
+)
+from app.respostas_form2 import aplicar_bloco, aguarda_temporalidade, GUARDA_INSTITUCIONAL
+from carga_ficticia.pessoas import semear_eta
+from testes.test_form2_preparacao import base
+from testes.test_governanca_form2_v9 import principal
+
+
+def test_temporalidade_e_falta_factual():
+    for codigo in (GUARDA_INSTITUCIONAL, "A_CONFIRMAR"):
+        dados, _ = aplicar_bloco({}, bloco=2, alteracoes={"F2-2.9": codigo})
+        assert aguarda_temporalidade(dados) == (codigo == GUARDA_INSTITUCIONAL)
+        assert bool(dados["sinalizadores_etapa1"]) == (codigo == "A_CONFIRMAR")
+
+
+def test_eta_idempotente(sessao):
+    semear_eta(sessao)
+    semear_eta(sessao)
+    sessao.flush()
+    assert len(sessao.scalars(select(Designacao).where(
+        Designacao.pessoa_id == "PESSOA-I", Designacao.papel == "aal_form2")).all()) == 1
+
+
+def test_oficio_resposta_sem_modificar_principal(sessao, principal):
+    p = principal
+    estado = (p.snapshot_id, p.estado, p.versao)
+    c = TestClient(app)
+    url = f"/form2/participacoes/{p.id}/orientacao"
+    assert c.get(url, params={"conta_id":"CONTA-E1"}).status_code == 200
+    assert c.get(url, params={"conta_id":"CONTA-B1"}).status_code == 403
+    ato = dict(conta_id="CONTA-E1", participacao_id=p.id, comando_id="L4-DPO", texto="Rever a finalidade.")
+    r = manifestar_de_oficio(sessao, **ato)
+    sessao.commit()
+    assert manifestar_de_oficio(sessao, **ato) == r
+    cid = r["participacao_id"]
+    assert "Rever a finalidade." in c.get(url.removesuffix("/orientacao"), params={"conta_id":"CONTA-B1"}).text
+    assert c.post(f"/form2/participacoes/{cid}/orientacao",
+        data={"conta_id":"CONTA-B1","comando_id":"L4-DEC","texto":"Incluída na análise.","decisao":"Acolhida"}).status_code == 200
+    sessao.expire_all()
+    assert sessao.get(ParticipacaoForm2,cid).conteudo["resposta"]["decisao"] == "Acolhida"
+    assert (p.snapshot_id,p.estado,p.versao) == estado
+
+
+@pytest.mark.parametrize("suplente", [True, False])
+def test_segregacao_e_ausencia_de_conferente(sessao,suplente):
+    rid, _ = base(sessao)
+    if not suplente:
+        sessao.scalar(select(Designacao).where(Designacao.unidade_id=="UNID-NORTE",
+            Designacao.tipo_apa=="suplente")).ativa=False
+        sessao.commit()
+    args=dict(registro_id=rid,versao_lida=1)
+    assert solicitar_conferencia_interna_form1_integral(sessao,**args,conta_id="CONTA-A1",comando_id="L4-SOL")["permitido"]
+    sessao.commit()
+    assert not devolver_conferencia_interna_form1_integral(sessao,**args,conta_id="CONTA-A1",
+        comando_id="L4-DEV",justificativa="Revisar")["permitido"]
+    assert not confirmar_conferencia_interna_form1_integral(sessao,**args,conta_id="CONTA-A1",comando_id="L4-A")["permitido"]
+    if not suplente:
+        painel=TestClient(app).get("/form2/filas?conta_id=CONTA-E1")
+        assert "Aguardando definição de quem fará a conferência" in painel.text
+    assert confirmar_conferencia_interna_form1_integral(sessao,**args,conta_id="CONTA-F1",comando_id="L4-F")["permitido"] == suplente
