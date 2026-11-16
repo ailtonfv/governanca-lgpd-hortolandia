@@ -83,6 +83,9 @@ def test_decisoes_distintas_com_ciencia_dialogo_e_autorizacao_preservada(sessao)
     assert '<details><summary>Dados técnicos</summary>' in html and '<dt>Snapshot técnico</dt>' in html
     assert 'data-cancelar-confirmacao autofocus' in html
     assert 'name="justificativa" maxlength="2000" required' in html
+    form_devolver = html.split('id="form-devolver"', 1)[1].split('</form>', 1)[0]
+    assert 'data-abrir-dialogo="dialogo-form-devolver"' in form_devolver
+    assert 'type="submit" class="botao-primario" form="form-devolver"' in form_devolver
     assert 'decisao_conferencia.js' in html
     assert consulta + '/confirmar' in html and consulta + '/devolver' in html
     assert 'Conferir não exige que todos os campos obrigatórios estejam preenchidos.' in html

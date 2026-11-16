@@ -54,7 +54,9 @@ def test_adocao_preserva_snapshot_e_controla_versao(sessao):
     assert 'hidden' in next(b for b in tela.itens if b.get('id')=='apresentacao-apa')
     tela_salva=Botoes(c.get(url+f'&salvo={draft.versao_rascunho}').text)
     botoes=[b for b in tela_salva.itens if b.get('form')]
-    assert [b.get('form') for b in botoes]==['respostas-bloco','form-apresentar-apa']
+    assert [b.get('form') for b in botoes]==['respostas-bloco','form-apresentar-apa','form-apresentar-apa']
+    assert botoes[1]['data-abrir-dialogo'] == 'dialogo-form-apresentar-apa'
+    assert botoes[2]['type'] == 'submit'
     assert 'hidden' not in botoes[1]
     assert len([b for b in tela_salva.itens if b.get('form')=='respostas-bloco'])==1
     for b in range(1,15):
