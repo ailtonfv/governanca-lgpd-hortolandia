@@ -52,6 +52,9 @@
       </div>
       {% endif %}
     </dl>
+    {% if a_conferir %}<section><h2>Apresentações que aguardam sua conferência</h2>
+      {% for registro in a_conferir %}<p><a class="botao-link" href="{{ url_for('consultar_conferencia_interna', registro_id=registro.id) }}?conta_id={{ conta_id|urlencode }}">Conferir {{ registro.codigo_lgpd }}</a></p>{% endfor %}
+    </section>{% endif %}
     <div class="navegacao-governanca">
       {% if secretarias %}
       <button class="botao-primario" type="submit" form="abrir-painel">Abrir Painel de Registros</button>

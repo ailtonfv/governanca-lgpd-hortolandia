@@ -590,7 +590,15 @@ def carregar_central(sessao, conta_id):
             "apa": f"{apa.matricula} — {rotulo_interface(apa.nome)}" if apa and apa.ativa else None,
             "modalidade_apa": exercicio["modalidade"] if exercicio else None,
         }
-    return {"identidade": identidade, "secretarias": secretarias}
+    unidades_apa = select(Designacao.unidade_id).where(
+        Designacao.pessoa_id == identidade["pessoa_id"],
+        Designacao.papel == "responsavel_registro", Designacao.ativa.is_(True))
+    pendentes = sessao.execute(select(Registro, ConferenciaInternaForm1Integral)
+        .join(ConferenciaInternaForm1Integral, ConferenciaInternaForm1Integral.registro_id == Registro.id)
+        .where(Registro.unidade_principal_atual_id.in_(unidades_apa)).order_by(Registro.codigo_lgpd))
+    a_conferir = [registro for registro, pendente in pendentes
+                  if conferente_da_apresentacao(sessao, registro, pendente) == identidade["pessoa_id"]]
+    return {"identidade": identidade, "secretarias": secretarias, "a_conferir": a_conferir}
 
 
 def _ids_visiveis(sessao, identidade, secretaria_id=None):

@@ -71,6 +71,8 @@ def test_segregacao_e_ausencia_de_conferente(sessao,suplente):
     sessao.commit()
     cliente = TestClient(app)
     consulta = f"/registros/{rid}/form1-integral/conferencia-interna"
+    assert (consulta in cliente.get("/central?conta_id=CONTA-F1").text) == suplente
+    assert consulta not in cliente.get("/central?conta_id=CONTA-A1").text
     assert cliente.get(consulta, params={"conta_id":"CONTA-A1"}).status_code == 403
     assert cliente.get(consulta, params={"conta_id":"CONTA-F1"}).status_code == (200 if suplente else 403)
     if not suplente:
@@ -96,6 +98,7 @@ def test_guarda_no_bloco_fila_e_painel(sessao,principal):
 def test_reatribuicao_de_beta_para_eta(sessao,principal):
     p=principal
     semear_eta(sessao)
+    sessao.add(Designacao(pessoa_id="PESSOA-A", unidade_id=p.unidade_id, papel="gestor_fila"))
     sessao.commit()
     c=TestClient(app)
     fila=c.get("/form2/filas?conta_id=CONTA-A1")
