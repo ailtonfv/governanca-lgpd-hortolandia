@@ -127,6 +127,15 @@ EVENTOS_SALVAMENTO_BLOCO_FORM1_INTEGRAL = {
 }
 
 
+def _blocos_sem_respostas(conteudo):
+    if "revisao_22" in conteudo:
+        from app.rev22_form1 import blocos_com_respostas
+        salvos = blocos_com_respostas(conteudo)
+    else:
+        salvos = _blocos_com_respostas_salvas(conteudo)
+    return sorted(set(range(1, 15)) - set(salvos))
+
+
 def _blocos_com_respostas_salvas(conteudo):
     """Distingue conteúdo registrado de mero evento de salvamento vazio."""
 
@@ -676,10 +685,7 @@ def carregar_painel(sessao, conta_id, *, secretaria_id=None):
             conteudo_inicial={"respostas": _respostas_reaproveitadas(registro)},
         )
         primeira = next((p for p in pre_validacao["incompletos"] if p["destino_navegavel"]), None)
-        blocos_vazios = sorted(set(range(1, 15)) - set(_blocos_com_respostas_salvas(rascunho.conteudo if rascunho else {})))
-        if rascunho and "revisao_22" in rascunho.conteudo:
-            from app.rev22_form1 import blocos_com_respostas
-            blocos_vazios = sorted(set(range(1, 15)) - blocos_com_respostas(rascunho.conteudo))
+        blocos_vazios = _blocos_sem_respostas(rascunho.conteudo if rascunho else {})
         preenchimentos_arp[registro.id] = {
             "blocos_vazios": blocos_vazios,
             "quantidade": pre_validacao["quantidades"]["incompletos"],
@@ -741,19 +747,7 @@ def carregar_painel(sessao, conta_id, *, secretaria_id=None):
             continue
         snapshot = sessao.get(VersaoForm1Integral, conferencia.snapshot_id)
         solicitante = sessao.get(Pessoa, conferencia.solicitada_por_id)
-        pre_validacao = pre_validar_form1_integral(
-            snapshot.conteudo.get("form1_integral", {}),
-            nome_institucional=(None if solicitante is None else solicitante.nome),
-            cargo_funcao=None,
-            email_institucional=None,
-            respostas_somente_leitura={
-                "2.1": [
-                    item.get("classificacao_form1")
-                    for item in snapshot.conteudo.get("retrato_canais", {}).get("canais", [])
-                    if item.get("classificacao_form1")
-                ]
-            },
-        )
+        blocos_vazios = _blocos_sem_respostas(snapshot.conteudo.get("form1_integral", {}))
         proximas_conferencias_form1.append({
             "registro_id": registro.id,
             "codigo_lgpd": registro.codigo_lgpd,
@@ -762,7 +756,7 @@ def carregar_painel(sessao, conta_id, *, secretaria_id=None):
             "situacao": "FORM 1 aguardando conferência interna",
             "numero_snapshot": snapshot.numero,
             "versao_rascunho": conferencia.versao_rascunho,
-            "quantidade_pendencias": pre_validacao["quantidades"]["incompletos"],
+            "blocos_vazios": blocos_vazios,
         })
 
     resumos_por_id = {item["id"]: item for item in registros}
@@ -820,7 +814,7 @@ def carregar_painel(sessao, conta_id, *, secretaria_id=None):
             "categoria": "conferencia_form1",
             "formulario": "FORM 1",
             "situacao": item["situacao"],
-            "quantidade_pendencias": item["quantidade_pendencias"],
+            "blocos_vazios": item["blocos_vazios"],
             "acao_rotulo": "Conferir levantamento",
             "responsavel": (
                 f"{identidade['matricula']} · {identidade['nome']} (APA)"

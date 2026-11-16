@@ -74,7 +74,7 @@
         <li data-registro-pendencias="{{ registro.id }}">
           <div>
             <strong>{{ registro.codigo_lgpd }}</strong> · {{ registro.tipo }} · {{ registro.titulo }}
-            <p>{% if registro.preenchimento_arp.blocos_vazios is not none %}{{ registro.preenchimento_arp.blocos_vazios|length }} de 14 blocos sem respostas salvas.{% else %}{{ registro.preenchimento_arp.quantidade }} campo(s) obrigatório(s) ativo(s) incompleto(s).{% endif %}</p>
+            <p>{{ registro.preenchimento_arp.blocos_vazios|length }} de 14 blocos sem respostas salvas.</p>
             {% if registro.preenchimento_arp.nao_iniciado %}<p class="ajuda">Contagem inicial com os dados da abertura; rascunho ainda não iniciado.</p>{% endif %}
           </div>
           {% if registro.preenchimento_arp.nao_iniciado %}
@@ -123,7 +123,7 @@
           <p><strong>Atuação neste levantamento:</strong> {% if registro.preenchimento_arp %}preenchimento pelo ARP{% elif registro.providencias | selectattr('categoria', 'equalto', 'conferencia_form1') | list %}conferência pelo APA{% else %}consulta ao levantamento{% endif %}.</p>
           {% endif %}
           {% if registro.preenchimento_arp %}
-          <p><strong>Seu preenchimento:</strong> {% if registro.preenchimento_arp.blocos_vazios is not none %}{{ registro.preenchimento_arp.blocos_vazios|length }} de 14 blocos sem respostas salvas.{% else %}{{ registro.preenchimento_arp.quantidade }} campo(s) obrigatório(s) ativo(s) incompleto(s).{% endif %}{% if registro.preenchimento_arp.nao_iniciado %} Contagem inicial, com os dados da abertura; rascunho ainda não iniciado.{% endif %}</p>
+          <p><strong>Seu preenchimento:</strong> {{ registro.preenchimento_arp.blocos_vazios|length }} de 14 blocos sem respostas salvas.{% if registro.preenchimento_arp.nao_iniciado %} Contagem inicial, com os dados da abertura; rascunho ainda não iniciado.{% endif %}</p>
           {% endif %}
           {% set fluxo = registro.fluxo_conferencia %}
           {% if instrumento and fluxo.ultima_atividade %}
@@ -147,14 +147,8 @@
               {% if providencia.justificativa_devolucao %}
               <p class="aviso-leitura"><strong>Justificativa do APA:</strong> {{ providencia.justificativa_devolucao }}</p>
               {% endif %}
-              {% if registro.preenchimento_arp and registro.preenchimento_arp.blocos_vazios is not none and providencia.categoria == 'preenchimento_form1' %}
-              {# A contagem já consta em Seu preenchimento. #}
-              {% elif providencia.quantidade_pendencias is none and providencia.categoria == 'preenchimento_form1' %}
-              <p>O rascunho do FORM 1 ainda não foi iniciado.</p>
-              {% elif providencia.quantidade_pendencias is not none and providencia.quantidade_pendencias > 0 %}
-              <p><strong>{{ providencia.quantidade_pendencias }}</strong> campo(s) obrigatório(s) ativo(s) incompleto(s).</p>
-              {% elif providencia.quantidade_pendencias == 0 and providencia.categoria == 'preenchimento_form1' %}
-              <p>Nenhum campo obrigatório ativo incompleto; revise a pré-validação consultiva.</p>
+              {% if providencia.categoria == 'conferencia_form1' %}
+              <p>{{ providencia.blocos_vazios|length }} de 14 blocos sem respostas nesta apresentação.</p>
               {% endif %}
               {% if providencia.rotulo %}<p><strong>Próxima ação:</strong> {{ providencia.rotulo }}.</p>{% endif %}
             </div>
