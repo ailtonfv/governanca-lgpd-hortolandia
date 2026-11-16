@@ -37,6 +37,10 @@ def test_oficio_resposta_sem_modificar_principal(sessao, principal):
     url = f"/form2/participacoes/{p.id}/orientacao"
     assert c.get(url, params={"conta_id":"CONTA-E1"}).status_code == 200
     assert c.get(url, params={"conta_id":"CONTA-B1"}).status_code == 403
+    proibida = c.post(url.replace("/orientacao","/blocos/2"), data={
+        "conta_id":"CONTA-E1", "versao":p.versao, "comando_id":"L4-DPO-BLOCO",
+        "resposta_F2-2.9":GUARDA_INSTITUCIONAL})
+    assert proibida.status_code in (403, 409)
     ato = dict(conta_id="CONTA-E1", participacao_id=p.id, comando_id="L4-DPO", texto="Rever a finalidade.")
     r = manifestar_de_oficio(sessao, **ato)
     sessao.commit()
@@ -64,6 +68,10 @@ def test_segregacao_e_ausencia_de_conferente(sessao,suplente):
     assert not devolver_conferencia_interna_form1_integral(sessao,**args,conta_id="CONTA-A1",
         comando_id="L4-DEV",justificativa="Revisar")["permitido"]
     assert not confirmar_conferencia_interna_form1_integral(sessao,**args,conta_id="CONTA-A1",comando_id="L4-A")["permitido"]
+    cliente = TestClient(app)
+    consulta = f"/registros/{rid}/form1-integral/conferencia-interna"
+    assert cliente.get(consulta, params={"conta_id":"CONTA-A1"}).status_code == 403
+    assert cliente.get(consulta, params={"conta_id":"CONTA-F1"}).status_code == (200 if suplente else 403)
     if not suplente:
         painel=TestClient(app).get("/form2/filas?conta_id=CONTA-E1")
         assert "Aguardando definição de quem fará a conferência" in painel.text
