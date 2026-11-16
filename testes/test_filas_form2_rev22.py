@@ -108,7 +108,7 @@ def test_assuncao_explicada_confirmada_e_identificada_na_fila(sessao):
     nome = sessao.get(Pessoa, "PESSOA-B").nome
     depois = cliente.get(fila)
     assert f"Responsável: {nome}" in depois.text
-    assert "Reatribuir" in depois.text and "conta como primeira assunção" not in depois.text
+    assert "Não há outro AAL habilitado nesta fila" in depois.text and "conta como primeira assunção" not in depois.text
 
 
 def test_envio_configuravel_e_reprocessamento(sessao):
@@ -232,6 +232,15 @@ def test_lista_e_confirmacao_da_atribuicao(sessao):
     primeira = cliente.post(url, data={**dados, "responsavel_id": "PESSOA-B"})
     mensagem = primeira.context["mensagem_atribuicao"]
     assert "Servidor Beta" in mensagem and codigo in mensagem and "Apresentação" in mensagem
+    from app.modelos import Evento
+    def contar_atos():
+        return sessao.scalar(select(func.count()).select_from(Evento).where(Evento.cadeia_id == p.id))
+    antes = contar_atos()
+    mesmo = cliente.post(url, data={**dados, "versao": dados["versao"] + 1,
+        "comando_id": "MESMA-PESSOA", "responsavel_id": "PESSOA-B"})
+    assert mesmo.status_code == 409 and "já é responsável" in mesmo.text
+    assert contar_atos() == antes
+    assert {a.id for a in primeira.context["agentes"][p.id]} == {"PESSOA-F"}
     segunda = cliente.post(url, data={**dados, "versao": dados["versao"] + 1,
         "comando_id": "SUBSTITUIR", "responsavel_id": "PESSOA-F"})
     assert "Servidor Delta" in segunda.context["mensagem_atribuicao"]

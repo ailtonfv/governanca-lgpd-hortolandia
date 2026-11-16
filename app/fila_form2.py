@@ -307,6 +307,8 @@ def reatribuir(sessao, *, conta_id, comando_id, participacao_id, versao,
         return repeticao
     if p.versao != versao or p.estado == "concluida":
         raise ValueError("Participação alterada ou concluída.")
+    if p.responsavel_id == responsavel_id:
+        raise ValueError("Essa pessoa já é responsável por esta participação. Escolha outra pessoa.")
     anterior = sessao.get(Pessoa, p.responsavel_id) if p.responsavel_id else None
     p.responsavel_id = responsavel_id
     p.assumida_em = p.assumida_em or agora()

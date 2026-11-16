@@ -338,7 +338,7 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
         context={"referencias": referencias, "mensagem_atribuicao": mensagem, "atribuidores": atribuidores, "cartoes": ordenados, "entradas": entradas, "pode_encaminhar": pode_encaminhar,
                  "conta_id": conta_id, "pessoa": pessoa, "participacoes": participacoes,
                  "registros": registros, "unidades": unidades, "linhas": linhas,
-                 "impedimentos": impedimentos, "complementos": complementos, "gerenciaveis": gerenciaveis, "agentes": {p.id: [a for a in agentes if autorizado(sessao, a, p)] for p in gerenciaveis},
+                 "impedimentos": impedimentos, "complementos": complementos, "gerenciaveis": gerenciaveis, "agentes": {p.id: [a for a in agentes if a.id != p.responsavel_id and autorizado(sessao, a, p)] for p in gerenciaveis},
                  "responsaveis": responsaveis, "dpo": dpo, "cobertura": cobertura, "comando_id": str(uuid4())})
 
 

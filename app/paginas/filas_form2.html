@@ -41,6 +41,7 @@
 <article><h4>{{ registros[p.registro_id].codigo_lgpd }} · {{ unidades[p.unidade_id].nome }}</h4>
 <p>{{ situacoes.get(p.estado, p.estado) }}{% if p.responsavel_id %} · Responsável: {{ responsaveis[p.responsavel_id] }}{% endif %}</p><p>{{ entradas[p.id] }}</p>
 {% set acao = 'Atribuir responsável' if p.assumida_em is none else 'Reatribuir' %}
+{% if not agentes[p.id] %}<p>{{ 'Não há outro AAL habilitado nesta fila' if p.tipo in ('principal','tematica') else 'Não há outro responsável habilitado nesta fila' }}.</p>{% else %}
 <details><summary>{{ acao }} — {{ registros[p.registro_id].codigo_lgpd }} · {{ p.tipo }}</summary>
 <form method="post" action="/form2/participacoes/{{ p.id }}/reatribuir">
 <input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="comando_id" value="{{ (comando_id ~ "-" ~ p.id)|chave_comando }}"><input type="hidden" name="versao" value="{{ p.versao }}">
@@ -52,5 +53,5 @@
   <p><span data-nome-agente></span> passa a responder {% if p.tipo in ('principal', 'tematica') %}como AAL {% endif %}pelo {{ registros[p.registro_id].codigo_lgpd }}. A análise usará a {{ referencias[p.id] }}.{% if p.tipo == 'principal' %} Novas versões do FORM 1 dependerão da decisão desse responsável.{% endif %}</p>
   <div class="acoes-fila-form2"><button type="button" data-fechar-dialogo autofocus>Cancelar</button>
   <button type="submit" class="botao-primario">{{ acao }}</button></div>
-</dialog></form></details></article>{% endfor %}
+</dialog></form></details>{% endif %}</article>{% endfor %}
 </div><script src="{{ url_for('estaticos', path='/confirmar_acao_fila.js') }}" defer></script>{% endblock %}
