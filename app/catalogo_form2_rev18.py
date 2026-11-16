@@ -42,7 +42,7 @@ def carregar_catalogo() -> dict:
 
 
 def titulos_blocos_form2():
-    """Usa o primeiro tema dos títulos extensos na régua dos blocos."""
+    """Preserva o título completo de cada bloco na navegação."""
     try:
         blocos = carregar_catalogo()["blocos"]
     except FileNotFoundError:
@@ -50,8 +50,5 @@ def titulos_blocos_form2():
     titulos = {}
     for bloco in blocos:
         titulo = bloco["titulo"]
-        curto = titulo
-        if len(titulo) > 27:
-            curto = titulo.split(",")[0].split(" E ")[0]
-        titulos[bloco["numero"]] = curto.capitalize().replace("form 1", "FORM 1")
+        titulos[bloco["numero"]] = titulo.capitalize().replace("form 1", "FORM 1")
     return titulos

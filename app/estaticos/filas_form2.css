@@ -25,7 +25,7 @@
 }
 
 .filas-form2 nav.regua-navegacao-blocos { display: block; }
-.filas-form2 .mapa-blocos-form1 .cartao-bloco { display: block; box-sizing: border-box; width: 4.65rem; min-height: 7rem; padding: .4rem .3rem; text-decoration: none; }
+.filas-form2 .mapa-blocos-form1 .cartao-bloco { display: block; box-sizing: border-box; width: 100%; min-height: 7rem; padding: .4rem .3rem; text-decoration: none; }
 .filas-form2 .mapa-blocos-form1 .cartao-bloco[aria-current="page"] { border-color: var(--azul); box-shadow: 0 0 0 .15rem rgba(7,89,133,.16); }
 .filas-form2 .consultas-form2 summary { cursor: pointer; color: var(--azul-escuro); font-weight: 700; }
 

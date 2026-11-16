@@ -143,9 +143,9 @@ th { color: #425466; font-size: .8rem; text-transform: uppercase; letter-spacing
 .legenda-estados-bloco { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem .8rem; margin: .75rem 0; }
 .legenda-estados-bloco .estado-bloco { display: inline-block; margin: 0; }
 .regua-navegacao-blocos { margin-top: 1rem; padding: .55rem; overflow-x: auto; border: 1px solid var(--borda); border-radius: .6rem; background: #f8fbfd; scrollbar-gutter: stable; }
-.mapa-blocos-form1 { display: flex; gap: .4rem; min-width: max-content; margin: 0; padding: 0; list-style: none; }
-.mapa-blocos-form1 :is(button, .cartao-bloco) { width: 4.65rem; min-height: 5.2rem; padding: .4rem .3rem; background: white; color: var(--texto); cursor: pointer; text-align: center; }
-.mapa-blocos-form1.regua-com-titulos-form2 li :is(.cartao-bloco, .bloco-indisponivel) { width: 9rem; }
+.mapa-blocos-form1 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(9rem, 100%), 1fr)); gap: .4rem; min-width: 0; margin: 0; padding: 0; list-style: none; }
+.mapa-blocos-form1 :is(button, .cartao-bloco) { width: 100%; min-width: 0; white-space: normal; overflow-wrap: break-word; min-height: 5.2rem; padding: .4rem .3rem; background: white; color: var(--texto); cursor: pointer; text-align: center; }
+.mapa-blocos-form1.regua-com-titulos-form2 li :is(.cartao-bloco, .bloco-indisponivel) { width: 100%; }
 .titulo-bloco-form2 { display: block; white-space: normal; overflow-wrap: anywhere; }
 .mapa-blocos-form1 .numero-bloco { display: block; font-size: 1.05rem; }
 .mapa-blocos-form1 :is(button, .cartao-bloco)[aria-current="step"] { border-color: var(--azul); box-shadow: 0 0 0 .15rem rgba(7, 89, 133, .16); }
