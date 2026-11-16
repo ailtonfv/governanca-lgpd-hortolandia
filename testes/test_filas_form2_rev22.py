@@ -93,6 +93,18 @@ def test_assuncao_explicada_confirmada_e_identificada_na_fila(sessao):
     assert resposta.status_code == 200
     assert resposta.url.path == url
     assert "Você assumiu a participação principal" in resposta.text and referencia in resposta.text
+    assert "Começar pelo bloco 1" in resposta.text
+    codigo = resposta.context["registro"].codigo_lgpd
+    bloco = cliente.get(url + "/blocos/1?conta_id=CONTA-B1")
+    assert f"{codigo} · FORM 2 · Bloco 1 — Identificação" in bloco.text
+    for pagina in (resposta, bloco):
+        assert f"Versão do FORM 1 em análise:</strong> {referencia}" in pagina.text
+    assert "Analista de gestão (fictício)" in bloco.text and "Cargo não informado" not in bloco.text
+    assert "Aguarda homologação jurídica (D11)" in bloco.text
+    salvo = cliente.post(url + "/blocos/1", data={"conta_id":"CONTA-B1", "comando_id":"CONTINUAR",
+        "versao":2, "resposta_F2-1.3":"SIM"})
+    assert salvo.status_code == 200
+    assert "Continuar no bloco 2" in cliente.get(url + "?conta_id=CONTA-B1").text
     nome = sessao.get(Pessoa, "PESSOA-B").nome
     depois = cliente.get(fila)
     assert f"Responsável: {nome}" in depois.text
