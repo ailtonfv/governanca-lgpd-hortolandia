@@ -25,6 +25,8 @@
     if (teste) {
       const aplicavel = !document.getElementById('F2-3.5').querySelector('[data-gatilhos]').disabled;
       teste.hidden = !aplicavel;
+      const resposta = form.elements.namedItem('opcao:F2-3.5').value;
+      document.getElementById('aviso-dados-sensiveis').hidden = !aplicavel || !['NAO','PARCIAL'].includes(resposta);
       document.getElementById('balanceamento-inativo').hidden = aplicavel;
     }
   }
