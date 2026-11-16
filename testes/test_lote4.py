@@ -77,3 +77,32 @@ def test_segregacao_e_ausencia_de_conferente(sessao,suplente):
         painel=TestClient(app).get("/form2/filas?conta_id=CONTA-E1")
         assert "Aguardando definição de quem fará a conferência" in painel.text
     assert confirmar_conferencia_interna_form1_integral(sessao,**args,conta_id="CONTA-F1",comando_id="L4-F")["permitido"] == suplente
+
+
+def test_guarda_no_bloco_fila_e_painel(sessao,principal):
+    p=principal
+    c=TestClient(app)
+    resposta=c.post(f"/form2/participacoes/{p.id}/blocos/2", data={
+        "conta_id":"CONTA-B1","comando_id":"L4-GUARDA","versao":p.versao,
+        "resposta_F2-2.9":GUARDA_INSTITUCIONAL})
+    selo="Guarda: aguarda definição institucional"
+    assert resposta.status_code==200 and selo in resposta.text
+    assert selo in c.get("/form2/filas?conta_id=CONTA-B1").text
+    painel=c.get("/form2/filas?conta_id=CONTA-E1")
+    assert painel.context["aguardando_guarda"]==1
+    assert "Registros aguardando definição de temporalidade: 1" in painel.text
+
+
+def test_reatribuicao_de_beta_para_eta(sessao,principal):
+    p=principal
+    semear_eta(sessao)
+    sessao.commit()
+    c=TestClient(app)
+    fila=c.get("/form2/filas?conta_id=CONTA-A1")
+    assert {agente.id for agente in fila.context["agentes"][p.id]}=={"PESSOA-I"}
+    r=c.post(f"/form2/participacoes/{p.id}/reatribuir",data={
+        "conta_id":"CONTA-A1","comando_id":"L4-ETA","versao":p.versao,
+        "responsavel_id":"PESSOA-I","motivo":"Distribuição das oficinas fictícias."})
+    assert r.status_code==200 and "Servidor Eta" in r.context["mensagem_atribuicao"]
+    sessao.refresh(p)
+    assert p.responsavel_id=="PESSOA-I"
