@@ -56,9 +56,16 @@
 .filas-form2 summary { cursor: pointer; }
 
 /* Salvamento visível, separado da apresentação ao APA. */
-.form1-rev22:has(.salvamento-fixo-form1) { padding-bottom: 160px; }
+body:has(.salvamento-fixo-form1) { height: 100dvh; display: flex; flex-direction: column; }
+body:has(.salvamento-fixo-form1) > main { min-height: 0; flex: 1; }
+.form1-rev22:has(.salvamento-fixo-form1) { display: flex; flex-direction: column; height: 100%; }
+.form1-rev22:has(.salvamento-fixo-form1) .conteudo-bloco-form1 { flex: 1; min-height: 0; overflow-y: auto; }
+@media (max-height: 32rem) {
+  body:has(.salvamento-fixo-form1) { display: block; height: auto; }
+  .form1-rev22:has(.salvamento-fixo-form1) { height: auto; }
+}
 .filas-form2 .salvamento-fixo-form1 {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+  flex: none;
   display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 12px;
   padding: 12px 24px; padding-bottom: max(12px, env(safe-area-inset-bottom));
   background: #fff; border-top: 1px solid #d6e0e6;
@@ -72,10 +79,6 @@
 
 .salvamento-fixo-form1 button[hidden] { display: none !important; }
 .form1-rev22 #form-apresentar-apa[hidden] { display: none; }
-@media (max-width: 600px) {
-  .form1-rev22:has(.salvamento-fixo-form1) { padding-bottom: 240px; }
-}
-
 /* Situação de espera com texto explícito, sem depender apenas da cor. */
 .filas-form2 .aviso-conferencia-apa { margin-block: 20px; padding: 18px 20px; border: 1px solid #d6ad53; border-left: 6px solid #946200; border-radius: 8px; background: #fff8e6; color: #553900; }
 .filas-form2 .aviso-conferencia-apa strong { display: block; font-size: 1.2rem; }
