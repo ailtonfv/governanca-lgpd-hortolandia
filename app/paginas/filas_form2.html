@@ -34,8 +34,8 @@
 <button>Encaminhar para a fila</button></form>{% else %}<p>Nenhuma apresentação confirmada aguarda ingresso.</p>{% endif %}</details>
 {% endif %}
 {% if dpo %}<h2 id="painel-dpo">Acompanhamento do DPO</h2>
-<div class="tabela-filas"><table><thead><tr><th>Registro</th><th>Situação</th><th>Secretaria</th><th>Entrada</th><th>Tempo até ter responsável</th><th>Tempo aguardando DPO</th></tr></thead>
-<tbody>{% for l in linhas %}<tr><td>{{ l.registro.codigo_lgpd }}</td><td>{{ l.situacao }}</td><td>{{ l.secretaria }}</td><td>{{ l.p.entrada_em.strftime('%d/%m/%Y %H:%M') }}</td><td>{{ l.espera }}</td><td>{{ l.dpo }}</td></tr>{% endfor %}</tbody></table></div>
+<div class="tabela-filas"><table><thead><tr><th>Registro</th><th>Situação do Registro</th><th>Comunicado ao DPO em</th><th>Secretaria</th><th>Entrada</th><th>Tempo até ter responsável</th><th>Tempo aguardando DPO</th></tr></thead>
+<tbody>{% for l in linhas %}<tr><td>{{ l.registro.codigo_lgpd }}</td><td>{{ situacoes.get(l.situacao,l.situacao) }}{% if l.consulta_pendente %} · Aguardando manifestação{% endif %}</td><td>{{ l.comunicado_em.strftime("%d/%m/%Y às %Hh%M") if l.comunicado_em else "Sem comunicação registrada" }}</td><td>{{ l.secretaria }}</td><td>{{ l.p.entrada_em.strftime('%d/%m/%Y %H:%M') }}</td><td>{{ l.espera }}</td><td>{{ l.dpo }}</td></tr>{% endfor %}</tbody></table></div>
 <p>Registros aguardando definição de temporalidade: {{ aguardando_guarda }}</p><h2>Ingresso por unidade ativa</h2><ul>{% for u in cobertura if u.total %}<li>{{ u.nome }} · {{ u.total }} ingresso(s)</li>{% endfor %}</ul>
 {% set zeradas = cobertura|rejectattr('total')|list %}{% if zeradas %}<details><summary>Outras {{ zeradas|length }} unidades sem ingresso</summary><ul>{% for u in zeradas %}<li>{{ u.nome }}</li>{% endfor %}</ul></details>{% endif %}{% endif %}
 

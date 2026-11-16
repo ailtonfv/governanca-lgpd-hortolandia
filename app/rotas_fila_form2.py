@@ -252,6 +252,9 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
         raise HTTPException(403, str(erro))
     registros = {r.id: r for r in sessao.scalars(select(Registro))}
     unidades = {u.id: u for u in sessao.scalars(select(Unidade))}
+    from app.modelos import AvisoDpo
+    comunicados = dict(sessao.execute(select(AvisoDpo.participacao_id, AvisoDpo.criado_em).where(
+        AvisoDpo.tipo == "ciencia", AvisoDpo.participacao_id.in_([p.id for p in principais]))).all())
     linhas = []
     for p in principais:
         consultas = sessao.scalars(select(ParticipacaoForm2).where(
@@ -262,7 +265,7 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
             "fila": unidades[p.unidade_id].nome,
             "espera": duracao_fila(p.entrada_em, p.assumida_em or agora()),
             "dpo": duracao_fila(min(q.entrada_em for q in consultas), agora()) if consultas else "—",
-            "situacao": "Aguardando manifestação" if consultas else "Para ciência"})
+            "comunicado_em": comunicados.get(p.id), "consulta_pendente": bool(consultas), "situacao": p.estado})
     from carga_ficticia.pessoas import SECRETARIAS
     secretarias = {codigo for codigo, _ in SECRETARIAS}
     cobertura = [{"nome": u.nome, "total": sum(registros[p.registro_id].unidade_principal_atual_id == u.id for p in principais)}
