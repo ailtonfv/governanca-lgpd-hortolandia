@@ -68,6 +68,7 @@ def test_segregacao_e_ausencia_de_conferente(sessao,suplente):
     assert not devolver_conferencia_interna_form1_integral(sessao,**args,conta_id="CONTA-A1",
         comando_id="L4-DEV",justificativa="Revisar")["permitido"]
     assert not confirmar_conferencia_interna_form1_integral(sessao,**args,conta_id="CONTA-A1",comando_id="L4-A")["permitido"]
+    sessao.commit()
     cliente = TestClient(app)
     consulta = f"/registros/{rid}/form1-integral/conferencia-interna"
     assert cliente.get(consulta, params={"conta_id":"CONTA-A1"}).status_code == 403
