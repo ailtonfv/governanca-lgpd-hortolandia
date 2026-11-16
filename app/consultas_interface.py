@@ -862,13 +862,12 @@ def carregar_painel(sessao, conta_id, *, secretaria_id=None):
         resumo["responsavel_proxima_etapa"] = None
         if conferencia is not None:
             resumo["situacao_form1_integral"] = resumo["fluxo_conferencia"]["estado"]
-            exercicio = apa_em_exercicio(sessao, resumo["unidade_id"])
-            if exercicio is not None:
-                pessoa = sessao.get(Pessoa, exercicio["pessoa_id"])
-                if pessoa is not None:
-                    resumo["responsavel_proxima_etapa"] = (
-                        f"{pessoa.matricula} · {rotulo_interface(pessoa.nome)} (APA)"
-                    )
+            conferente_id = conferente_da_apresentacao(sessao, sessao.get(Registro, registro_id), conferencia)
+            pessoa = sessao.get(Pessoa, conferente_id) if conferente_id else None
+            resumo["responsavel_proxima_etapa"] = (
+                f"{pessoa.matricula} · {rotulo_interface(pessoa.nome)} (APA)"
+                if pessoa else AGUARDANDO_CONFERENTE
+            )
         elif confirmacao is not None:
             resumo["situacao_form1_integral"] = "Conferência interna confirmada"
         elif rascunho is not None:

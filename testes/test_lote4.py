@@ -40,7 +40,8 @@ def test_oficio_resposta_sem_modificar_principal(sessao, principal):
     ato = dict(conta_id="CONTA-E1", participacao_id=p.id, comando_id="L4-DPO", texto="Rever a finalidade.")
     r = manifestar_de_oficio(sessao, **ato)
     sessao.commit()
-    assert manifestar_de_oficio(sessao, **ato) == r
+    assert manifestar_de_oficio(sessao, **ato) == {**r, "reexecutado": True}
+    sessao.commit()
     cid = r["participacao_id"]
     assert "Rever a finalidade." in c.get(url.removesuffix("/orientacao"), params={"conta_id":"CONTA-B1"}).text
     assert c.post(f"/form2/participacoes/{cid}/orientacao",
