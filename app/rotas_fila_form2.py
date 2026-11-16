@@ -262,8 +262,11 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
             "espera": duracao_fila(p.entrada_em, p.assumida_em or agora()),
             "dpo": duracao_fila(min(q.entrada_em for q in consultas), agora()) if consultas else "—",
             "situacao": "Aguardando manifestação" if consultas else "Para ciência"})
+    from carga_ficticia.pessoas import SECRETARIAS
+    secretarias = {codigo for codigo, _ in SECRETARIAS}
     cobertura = [{"nome": u.nome, "total": sum(registros[p.registro_id].unidade_principal_atual_id == u.id for p in principais)}
-        for u in unidades.values() if u.ativa] if dpo else []
+        for u in unidades.values() if u.ativa and u.id in secretarias] if dpo else []
+    cobertura.sort(key=lambda u: (-u["total"], u["nome"]))
     from app.governanca_form2_v9 import estado as estado_v9, origem_autorizada
     from app.segregacao_form2_v9 import impedido
     complementos = []

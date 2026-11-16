@@ -56,7 +56,14 @@ def test_atalhos_da_central_por_papel_vigente(sessao):
     conferir("CONTA-G1", fila=False, painel=False)
     conferir("CONTA-B1", fila=True, painel=False)
     conferir("CONTA-E1", fila=False, painel=True)
-    assert 'id="painel-dpo"' in cliente.get("/form2/filas?conta_id=CONTA-E1").text
+    central = cliente.get("/central?conta_id=CONTA-E1")
+    assert "Atuação: Encarregado de Dados (DPO)" in central.text
+    assert "APA em exercício na Secretaria" not in central.text
+    painel_dpo = cliente.get("/form2/filas?conta_id=CONTA-E1")
+    assert 'id="painel-dpo"' in painel_dpo.text and "Tempo até ter responsável" in painel_dpo.text
+    cobertura = painel_dpo.context["cobertura"]
+    assert len(cobertura) == 18 and all("Governança de proteção" not in u["nome"] for u in cobertura)
+    assert "Outras 18 unidades sem ingresso" in painel_dpo.text
     aal = Designacao(pessoa_id="PESSOA-E", unidade_id="UNID-NORTE", papel="aal_form2", ativa=True)
     sessao.add(aal)
     sessao.commit()
