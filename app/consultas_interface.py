@@ -1410,6 +1410,9 @@ def carregar_registro(sessao, conta_id, registro_id):
                     if item.situacao == "devolvida_para_ajustes"
                     else "Conferência interna confirmada"
                 ),
+                "solicitada_em": item.solicitada_em,
+                "devolvida_em": item.devolvida_em,
+                "confirmada_em": item.confirmada_em,
                 "justificativa_devolucao": item.justificativa_devolucao,
                 "confirmada_por": (
                     None
