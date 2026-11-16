@@ -676,7 +676,7 @@ def carregar_painel(sessao, conta_id, *, secretaria_id=None):
             conteudo_inicial={"respostas": _respostas_reaproveitadas(registro)},
         )
         primeira = next((p for p in pre_validacao["incompletos"] if p["destino_navegavel"]), None)
-        blocos_vazios = None
+        blocos_vazios = sorted(set(range(1, 15)) - set(_blocos_com_respostas_salvas(rascunho.conteudo if rascunho else {})))
         if rascunho and "revisao_22" in rascunho.conteudo:
             from app.rev22_form1 import blocos_com_respostas
             blocos_vazios = sorted(set(range(1, 15)) - blocos_com_respostas(rascunho.conteudo))
