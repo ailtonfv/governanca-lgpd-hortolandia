@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/filas_form2.css') }}"><div class="filas-form2">
 <h1>{{ registro.codigo_lgpd }} · Participação {{ p.tipo }}</h1>
 {% if assumida %}<p class="mensagem mensagem-sucesso" role="status">Você assumiu a participação {{ p.tipo }} do {{ registro.codigo_lgpd }}. A análise usa a {{ rotulo_origem }}.</p>{% endif %}
+<p><strong>Versão do FORM 1 em análise:</strong> {{ rotulo_origem }}</p>
 {% include '_atuacao_form2.html' %}
 <div class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/filas?conta_id={{ conta_id|urlencode }}">Voltar às filas</a></div>
 <p class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/participacoes/{{ p.id }}/governanca?conta_id={{ conta_id|urlencode }}">Ver pendências e respostas</a></p>
@@ -21,13 +22,12 @@
 {% if p.estado == 'aguardando' %}
 {% set orientacao = 'Ao assumir, você passa a ser o AAL responsável pela validação deste Registro no FORM 2. A análise usará a versão indicada. Se a origem confirmar uma nova versão, você decidirá se a adota e registrará o motivo.' if p.tipo == 'principal' else 'Ao assumir, você passa a responder pela manifestação da sua unidade sobre a versão indicada do FORM 1.' %}
 {% set referencia %}{{ rotulo_origem }}{% if confirmada_em %}, confirmada em {{ confirmada_em }}{% endif %}{% endset %}
-<p><strong>Versão do FORM 1 a ser analisada:</strong> {{ referencia }}.</p>
 <p>{{ orientacao }}</p>
 <input type="hidden" name="acao" value="assumir">
 <button type="button" class="botao-primario" data-abrir-dialogo="confirmar-assuncao">Assumir participação</button>
 <dialog class="dialogo-acao-fila" id="confirmar-assuncao" aria-labelledby="titulo-assuncao">
   <h2 id="titulo-assuncao">Assumir a participação?</h2>
-  <p>{{ orientacao }}</p><p><strong>Versão do FORM 1 a ser analisada:</strong> {{ referencia }}.</p>
+  <p>{{ orientacao }}</p><p><strong>Versão do FORM 1 em análise:</strong> {{ referencia }}.</p>
   <div class="acoes-fila-form2"><button type="button" data-fechar-dialogo autofocus>Cancelar</button>
   <button type="submit" class="botao-primario">Confirmar assunção</button></div>
 </dialog>
