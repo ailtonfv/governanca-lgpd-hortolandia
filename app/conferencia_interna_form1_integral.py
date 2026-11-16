@@ -248,7 +248,7 @@ def devolver_conferencia_interna_form1_integral(
         select(Registro).where(Registro.id == registro_id).with_for_update()
     ).one_or_none()
     pendente = sessao.get(ConferenciaInternaForm1Integral, registro_id)
-    if registro is None or (pendente and (not pessoa_id or pessoa_id != conferente_da_apresentacao(sessao, registro, pendente))):
+    if registro is None or (not pendente and not pessoa_e_apa_em_exercicio(sessao, pessoa_id, registro.unidade_principal_atual_id)) or (pendente and (not pessoa_id or pessoa_id != conferente_da_apresentacao(sessao, registro, pendente))):
         return _negar(
             sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
             TIPO_COMANDO_DEVOLUCAO,
@@ -374,16 +374,16 @@ def confirmar_conferencia_interna_form1_integral(
         select(Registro).where(Registro.id == registro_id).with_for_update()
     ).one_or_none()
     pendente = sessao.get(ConferenciaInternaForm1Integral, registro_id)
-    if registro is None or (pendente and (not pessoa_id or pessoa_id != conferente_da_apresentacao(sessao, registro, pendente))):
+    from app.segregacao_form2_v9 import aal_em_exercicio
+    if aal_em_exercicio(sessao, registro_id, pessoa_id):
+        return _negar(sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
+            TIPO_COMANDO_CONFIRMACAO, "O AAL em exercício não pode apresentar nem confirmar a origem do mesmo Registro.")
+    if registro is None or (not pendente and not pessoa_e_apa_em_exercicio(sessao, pessoa_id, registro.unidade_principal_atual_id)) or (pendente and (not pessoa_id or pessoa_id != conferente_da_apresentacao(sessao, registro, pendente))):
         return _negar(
             sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
             TIPO_COMANDO_CONFIRMACAO,
             "somente o APA em exercício pode confirmar a conferência interna",
         )
-    from app.segregacao_form2_v9 import aal_em_exercicio
-    if aal_em_exercicio(sessao, registro_id, pessoa_id):
-        return _negar(sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
-            TIPO_COMANDO_CONFIRMACAO, "O AAL em exercício não pode apresentar nem confirmar a origem do mesmo Registro.")
     conferencia = sessao.scalars(
         select(ConferenciaInternaForm1Integral)
         .where(ConferenciaInternaForm1Integral.registro_id == registro_id)

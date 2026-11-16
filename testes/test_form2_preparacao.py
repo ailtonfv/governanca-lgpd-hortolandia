@@ -406,7 +406,7 @@ def test_t03_conferencia_nao_e_gate_institucional_form2(sessao, decisao):
         conta_id="CONTA-A1", registro_id=rid, versao_lida=1)
     assert solicitado["permitido"]
     sessao.commit()
-    args = dict(comando_id="F2-CONF-D", conta_id="CONTA-A1", registro_id=rid, versao_lida=1)
+    args = dict(comando_id="F2-CONF-D", conta_id="CONTA-F1", registro_id=rid, versao_lida=1)
     if decisao == "devolver":
         out = devolver_conferencia_interna_form1_integral(sessao, **args, justificativa="Rever informação fictícia")
     else:
