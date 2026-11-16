@@ -259,8 +259,8 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
         linhas.append({"p": p, "registro": registros[p.registro_id],
             "secretaria": unidades[registros[p.registro_id].unidade_principal_atual_id].nome,
             "fila": unidades[p.unidade_id].nome,
-            "espera": round(((p.assumida_em or agora())-p.entrada_em).total_seconds()/3600, 1),
-            "dpo": round(max(((agora()-q.entrada_em).total_seconds()/3600 for q in consultas), default=0), 1),
+            "espera": duracao_fila(p.entrada_em, p.assumida_em or agora()),
+            "dpo": duracao_fila(min(q.entrada_em for q in consultas), agora()) if consultas else "—",
             "situacao": "Aguardando manifestação" if consultas else "Para ciência"})
     cobertura = [{"nome": u.nome, "total": sum(registros[p.registro_id].unidade_principal_atual_id == u.id for p in principais)}
         for u in unidades.values() if u.ativa] if dpo else []
