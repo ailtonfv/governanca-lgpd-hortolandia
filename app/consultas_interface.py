@@ -524,6 +524,34 @@ def _identidade(sessao, conta_id, *, vinculos_vigentes=False):
     }
 
 
+def usuarios_demonstracao(sessao, conta_atual):
+    from app.modelos import Conta, Designacao, Pessoa, Unidade
+    from app.fila_form2 import agora
+    from sqlalchemy import or_, select
+
+    rotulos = {"responsavel_registro": "APA", "preenchedor": "ARP",
+               "aal_form2": "AAL", "gestor_fila": "gestor da fila",
+               "juridico_form2": "Jurídico", "governanca_protecao_dados": "DPO"}
+    momento = agora()
+    papeis = {}
+    for d in sessao.scalars(select(Designacao).join(Unidade).where(
+            Unidade.ativa.is_(True), Designacao.ativa.is_(True),
+            or_(Designacao.vigente_de.is_(None), Designacao.vigente_de <= momento),
+            or_(Designacao.vigente_ate.is_(None), Designacao.vigente_ate > momento))):
+        nome = rotulos.get(d.papel, d.papel.replace("_", " "))
+        if d.papel == "responsavel_registro" and d.tipo_apa:
+            nome += " " + d.tipo_apa
+        papeis.setdefault(d.pessoa_id, set()).add(nome)
+    usuarios = {}
+    for conta, pessoa in sessao.execute(select(Conta, Pessoa).join(Pessoa).where(
+            Conta.ativa.is_(True), Pessoa.ativa.is_(True), Pessoa.matricula.like("MAT-FICT-%")
+            ).order_by(Pessoa.matricula, Conta.id)):
+        if pessoa.id not in usuarios or conta.id == conta_atual:
+            funcoes = ", ".join(sorted(papeis.get(pessoa.id, ()))) or "sem designação vigente"
+            usuarios[pessoa.id] = (conta.id, f"{pessoa.matricula} · {pessoa.nome} — {funcoes}")
+    return list(usuarios.values())
+
+
 def carregar_central(sessao, conta_id):
     identidade = _identidade(sessao, conta_id, vinculos_vigentes=True)
     if identidade is None:

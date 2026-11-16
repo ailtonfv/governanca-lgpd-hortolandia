@@ -25,6 +25,11 @@ def test_entrada_sem_listagem_identifica_apa_e_reserva_planejados():
     assert '<label for="conta_id">Selecionar servidor por matrícula</label>' in pagina.text
     assert 'type="submit">Selecionar servidor e entrar</button>' in pagina.text
     assert 'A troca de servidor fictício é exclusiva da demonstração.' in pagina.text
+    usuarios = dict(pagina.context["usuarios_demonstracao"])
+    assert len(usuarios) == 8
+    assert "DPO" in usuarios["CONTA-E1"] and "curador" in usuarios["CONTA-D1"]
+    assert "ARP" in usuarios["CONTA-G1"] and "APA titular" in usuarios["CONTA-A1"]
+    assert all(" — " in nome for nome in usuarios.values())
     alterada = cliente.get("/central?conta_id=CONTA-G1&administracao_ti_autorizada=true&apa_id=PESSOA-G")
     assert 'Servidor Épsilon — MAT-FICT-0007</dd>' in alterada.text
     assert 'MAT-FICT-0001 — Servidor Alfa (titular)' in alterada.text

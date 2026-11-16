@@ -68,10 +68,7 @@
       <form action="{{ url_for('central') }}" method="get">
         <label for="conta_id">Selecionar servidor por matrícula</label>
         <select id="conta_id" name="conta_id">
-          {% if conta_id not in ['CONTA-A1', 'CONTA-G1', 'CONTA-B1', 'CONTA-C1'] %}
-          <option value="{{ conta_id }}" selected>{{ identidade.matricula }} · {{ identidade.nome }}</option>
-          {% endif %}
-          {% for id, nome in [('CONTA-A1', 'MAT-FICT-0001 · Alfa'), ('CONTA-G1', 'MAT-FICT-0007 · Épsilon'), ('CONTA-B1', 'MAT-FICT-0002 · Beta'), ('CONTA-C1', 'MAT-FICT-0003 · Gama')] %}
+          {% for id, nome in usuarios_demonstracao %}
           <option value="{{ id }}" {% if conta_id == id %}selected{% endif %}>{{ nome }}</option>
           {% endfor %}
         </select>
