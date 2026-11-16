@@ -82,3 +82,5 @@
 .filas-form2 .aviso-conferencia-apa p { margin: .5rem 0 0; }
 .dialogo-acao-fila {width: min(40rem, calc(100% - 2rem)); max-height: calc(100dvh - 2rem); box-sizing: border-box; overflow: auto; border: 2px solid #075985; border-radius: .6rem; padding: 1.25rem; color: #17212b; background: white;}
 .dialogo-acao-fila::backdrop {background: rgb(12 59 90 / 55%);}
+
+.filas-form2 textarea:disabled, .filas-form2 input:disabled { background-color: #edf1f4; color: #53616b; border-color: #c7d1d9; }

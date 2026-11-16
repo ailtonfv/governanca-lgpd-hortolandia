@@ -119,6 +119,7 @@ def condicoes_de_tela(itens, regras, valores, ramos):
                 c["fixa"] = aplicavel(q["id"], "", valores, ramos, isoladas)
             alternativas = locais.get(origem, {}).get("alternativas", [])
             rotulo = next((a["rotulo"] for a in alternativas if a["codigo"] == codigo), codigo)
+            c["rotulo"] = rotulo
             if op == "RAMO_PREENCHIDO":
                 c["descricao"] = f"o ramo {codigo} estiver preenchido no FORM 1"
             elif op == "POR_OCORRENCIA":
@@ -126,6 +127,18 @@ def condicoes_de_tela(itens, regras, valores, ramos):
             else:
                 c["descricao"] = f"{origem} estiver respondida com “{rotulo}”"
             condicoes.append(c)
+        conector = " ou " if any(r["combinar"] == "OU" for r in regras.get(q["id"], [])) else " e "
+        frases = []
+        grupos = {}
+        for c in condicoes:
+            if c["operador"] in ("IGUAL", "CONTEM"):
+                grupos.setdefault(c["origem"], []).append(c["rotulo"])
+            else:
+                frases.append(c["descricao"])
+        for origem, opcoes in grupos.items():
+            valores_rotulados = conector.join(f"“{opcao}”" for opcao in opcoes)
+            frases.append(f"a resposta a {origem} for {valores_rotulados}")
+        q["ajuda_condicao"] = conector.join(frases)
         q["gatilhos"] = condicoes
         q["qualquer"] = any(r["combinar"] == "OU" for r in regras.get(q["id"], []))
 
