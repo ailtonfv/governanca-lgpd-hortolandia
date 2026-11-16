@@ -16,6 +16,7 @@
 <dl class="respostas-origem-form2">{% for q in perguntas_origem %}<div class="item-origem-form2"><dt>{{ codigo_pergunta(q.id, 1) }}{% if q.conjunto %} · conjunto {{ q.conjunto }}{% endif %} · {{ q.pergunta }}</dt><dd>{{ q.valor|join(', ') if q.valor is sequence and q.valor is not string and q.valor is not mapping else q.valor }}</dd></div>{% else %}<div><dt>Respostas</dt><dd>Nenhuma resposta registrada nesta versão.</dd></div>{% endfor %}</dl></details>
 {% set guias = bloco.itens|map(attribute="fontes_publicas")|sum(start=[])|unique(attribute="url")|list %}
 {% if guias %}<aside id="apoio-anpd"><h2>Apoio da ANPD</h2><ul>{% for guia in guias %}<li><a href="{{ guia.url }}" target="_blank" rel="noopener noreferrer">{{ guia.titulo }}</a></li>{% endfor %}</ul></aside>{% endif %}
+<p>Não registre nomes, casos ou processos individuais. O Registro descreve o tratamento, não pessoas.</p>
 <form method="post" id="revisao-bloco"><input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="comando_id" value="{{ comando_id }}"><input type="hidden" name="versao" value="{{ p.versao }}">
 <fieldset {% if p.responsavel_id != pessoa.id or p.estado != 'em_atendimento' %}disabled{% endif %}>
 {% from '_condicoes_form2.html' import gatilhos, ajuda %}
@@ -97,7 +98,7 @@
 {% if q.id in ('F2-8.10', 'F2-9.12', 'F2-14.3.1') %}<button type="button" id="adicionar-ocorrencia">Adicionar conjunto</button>{% endif %}
 {% endif %}
 
-<label>Comentário sobre {{ q.id }}<textarea name="{{ com }}" rows="2" maxlength="2000">{{ valores.get(com,'') }}</textarea></label>
+<details {% if valores.get(com) %}open{% endif %}><summary>Adicionar comentário</summary><label>Comentário sobre {{ q.id }}<textarea name="{{ com }}" rows="2" maxlength="2000">{{ valores.get(com,'') }}</textarea></label></details>
 </fieldset>
 {% endfor %}
 {% endif %}<div class="acoes-fila-form2"><button type="submit" class="botao-primario">Salvar bloco</button></div></fieldset></form></div><script defer src="{{ url_for('estaticos', path='/form2_revisao.js') }}"></script>{% endblock %}
