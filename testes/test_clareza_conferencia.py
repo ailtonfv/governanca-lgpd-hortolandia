@@ -45,9 +45,11 @@ def test_fluxo_mostra_estado_versao_e_papel_sem_criar_providencia(sessao, mesma_
     assert fluxo()['atual'] == 'conferir'
     assert _confirmar(sessao, registro, comando='CLAREZA-CONF')['permitido']
     assert fluxo()['atual'] == 'confirmar'
+    rotulo = f"Apresentação 2 (rascunho {ajuste['versao_rascunho']})"
+    assert fluxo()['rotulo_apresentacao'] == rotulo
     assert fluxo()['devolucao_anterior'] is not None
     detalhe = TestClient(app).get(f"/registros/{registro['registro_id']}?conta_id=CONTA-A1")
-    for texto in ("Reapresentação (após devolução de ", "Apresentada em ", "Devolvida em "):
+    for texto in (rotulo, "Reapresentação (após devolução de ", "Apresentada em ", "Devolvida em "):
         assert texto in detalhe.text
     assert fluxo()['versao'] == ajuste['versao_rascunho']
     assert fluxo()['decidida_em'] is not None
