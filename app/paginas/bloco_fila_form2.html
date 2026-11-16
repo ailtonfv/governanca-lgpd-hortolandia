@@ -90,7 +90,7 @@
 {% if q.alternativas %}
 {% if 'múltipla' in q.controle|lower %}
 <input type="hidden" name="{{ op }}" value="">
-{% for a in q.alternativas %}<label class="opcao-form2"><input type="checkbox" name="{{ op }}" value="{{ a.codigo }}"{% if a.codigo in valores.get(op,[]) %} checked{% endif %}> {{ a.rotulo }}</label>{% endfor %}
+{% for a in q.alternativas %}<label class="opcao-form2"><input type="checkbox" name="{{ op }}" value="{{ a.codigo }}"{% if a.codigo in valores.get(op,[]) %} checked{% endif %}> {{ a.rotulo }}{% if q.id == "F2-3.1" and a.codigo in ("ALT_01","ALT_09") %} · Uso excepcional pelo Poder Público — <a href="#apoio-anpd">ver Guia ANPD</a>{% endif %}</label>{% endfor %}
 {% else %}
 <label><select aria-label="{{ q.enunciado }}" name="{{ op }}"><option value="">Sem resposta</option>{% for a in q.alternativas %}<option value="{{ a.codigo }}"{% if a.codigo in valores.get(op,[]) %} selected{% endif %}>{{ a.rotulo }}</option>{% endfor %}</select></label>
 {% endif %}{% endif %}
