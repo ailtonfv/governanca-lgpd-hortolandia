@@ -566,3 +566,20 @@ async def reatribuir_participacao(request: Request, participacao_id: str,
         return paginas.TemplateResponse(request=request, name="erro.html",
             context={"titulo": "Atribuição indisponível", "mensagem": str(erro)}, status_code=409)
     return RedirectResponse("/form2/filas?"+urlencode({"conta_id": dados.get("conta_id"), "atribuicao": dados["comando_id"]}),status_code=303)
+
+
+@router.post("/form2/participacoes/{participacao_id}/orientacao")
+async def registrar_orientacao(request: Request, participacao_id: str, sessao: Session = Depends(sessao_fila)):
+    from app.fila_form2 import manifestar_de_oficio
+    dados = await request.form()
+    conta = dados.get("conta_id", "")
+    try:
+        resultado = manifestar_de_oficio(sessao, conta_id=conta, participacao_id=participacao_id,
+            comando_id=dados.get("comando_id"), texto=dados.get("texto", ""), decisao=dados.get("decisao"))
+        consulta = sessao.get(ParticipacaoForm2, resultado["participacao_id"])
+        destino = f"/form2/participacoes/{consulta.origem_id}" if dados.get("decisao") else "/form2/filas"
+        sessao.commit()
+    except (PermissionError, ValueError) as erro:
+        sessao.rollback()
+        raise HTTPException(403 if isinstance(erro, PermissionError) else 409, str(erro))
+    return RedirectResponse(destino + "?" + urlencode({"conta_id": conta}), status_code=303)

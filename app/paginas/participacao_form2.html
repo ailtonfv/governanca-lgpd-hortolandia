@@ -45,5 +45,13 @@
 {% else %}<p>{{ p.manifestacao }}</p>{% endif %}
 </form>
 {% if p.tipo == 'principal' and p.estado == 'em_atendimento' and p.responsavel_id == pessoa.id %}</details>{% endif %}
-{% if consultas %}<h2>Manifestações solicitadas</h2>{% for consulta in consultas %}<article><h3>{{ consulta.tipo }} · {{ situacoes.get(consulta.estado, consulta.estado) }}</h3><p>{{ consulta.questao }}</p><p>{{ consulta.manifestacao }}</p><p>Responsável · {{ consulta.responsavel_id or 'Aguardando assunção' }} · {{ consulta.concluida_em or '' }}</p></article>{% endfor %}{% endif %}
+{% for consulta in consultas if consulta.conteudo and consulta.conteudo.de_oficio %}
+<article><h2>Manifestação do DPO (de ofício)</h2><p>{{ consulta.conteudo.autor }} · {{ consulta.entrada_em.strftime('%d/%m/%Y às %Hh%M') }}</p><p>{{ consulta.manifestacao }}</p>
+{% if consulta.conteudo.resposta %}<p>{{ consulta.conteudo.resposta.decisao }} · {{ consulta.conteudo.resposta.motivo }}</p>
+{% elif p.estado == 'em_atendimento' and p.responsavel_id == pessoa.id %}<strong>Nova orientação</strong><form method="post" action="/form2/participacoes/{{ consulta.id }}/orientacao">
+<input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="comando_id" value="{{ (comando_id ~ consulta.id ~ 'resposta')|chave_comando }}">
+<label>Decisão<select name="decisao" required><option value="">Escolha…</option><option>Acolhida</option><option>Acolhida em parte</option><option>Não acolhida</option></select></label>
+<label>Motivo<textarea name="texto" required maxlength="1000"></textarea></label><button>Registrar resposta</button></form>{% endif %}</article>
+{% endfor %}
+{% set consultas = consultas|rejectattr('conteudo.de_oficio')|list %}{% if consultas %}<h2>Manifestações solicitadas</h2>{% for consulta in consultas %}<article><h3>{{ consulta.tipo }} · {{ situacoes.get(consulta.estado, consulta.estado) }}</h3><p>{{ consulta.questao }}</p><p>{{ consulta.manifestacao }}</p><p>Responsável · {{ consulta.responsavel_id or 'Aguardando assunção' }} · {{ consulta.concluida_em or '' }}</p></article>{% endfor %}{% endif %}
 </div><script src="{{ url_for('estaticos', path='/confirmar_acao_fila.js') }}" defer></script>{% endblock %}

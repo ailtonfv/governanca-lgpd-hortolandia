@@ -343,3 +343,52 @@ def complementar(sessao, *, conta_id, comando_id, participacao_id, acao, snapsho
     return executar_v9(sessao, conta_id=conta_id, comando_id=comando_id,
         participacao_id=participacao_id, versao=versao, pendencia_id=pendencia_id,
         acao={"resolver": "aceitar"}.get(acao, acao), dados={"snapshot_id": snapshot_id, "motivo": motivo})
+
+
+def manifestar_de_oficio(sessao, *, conta_id, participacao_id, comando_id, texto, decisao=None):
+    """Registra o ato consultivo em participação própria, preservando o FORM e sua fila."""
+    from app.segregacao_form2_v9 import bloquear_registro
+    pessoa = pessoa_ativa(sessao, conta_id)
+    alvo = sessao.get(ParticipacaoForm2, participacao_id)
+    if not alvo:
+        raise ValueError("Participação indisponível.")
+    bloquear_registro(sessao, alvo)
+    principal = sessao.scalar(select(ParticipacaoForm2).where(
+        ParticipacaoForm2.id == (alvo.origem_id or alvo.id)).with_for_update().execution_options(populate_existing=True))
+    if principal.tipo != "principal":
+        raise ValueError("Registro indisponível.")
+    unidades_dpo = unidades(sessao, pessoa.id, "governanca_protecao_dados")
+    if decisao is None:
+        if not unidades_dpo or alvo.id != principal.id:
+            raise PermissionError("A manifestação de ofício exige atuação do DPO.")
+    else:
+        sessao.refresh(alvo)
+        if (alvo.tipo != "dpo" or not (alvo.conteudo or {}).get("de_oficio") or
+                principal.responsavel_id != pessoa.id or not autorizado(sessao, pessoa, principal)):
+            raise PermissionError("Somente o AAL responsável responde à orientação.")
+        if decisao not in ("Acolhida", "Acolhida em parte", "Não acolhida"):
+            raise ValueError("Escolha como a orientação foi considerada.")
+    if not texto.strip() or len(texto) > (1000 if decisao else 10000):
+        raise ValueError("Informe o texto da manifestação ou o motivo da decisão dentro do limite.")
+    comando, repeticao = abrir_comando(sessao, comando_id, "form2_orientacao_oficio",
+        dict(conta_id=conta_id, participacao_id=participacao_id, texto=texto, decisao=decisao),
+        "pessoa", pessoa.id, conta_id)
+    if repeticao is not None:
+        return repeticao
+    momento = agora()
+    if decisao is None:
+        alvo = ParticipacaoForm2(id=str(uuid4()), registro_id=principal.registro_id,
+            snapshot_id=principal.snapshot_id, unidade_id=sorted(unidades_dpo)[0], origem_id=principal.id,
+            tipo="dpo", estado="concluida", entrada_em=momento, assumida_em=momento, concluida_em=momento,
+            responsavel_id=pessoa.id, versao=1, questao="Manifestação do DPO (de ofício)",
+            manifestacao=texto.strip(), conteudo={"de_oficio": True, "autor": pessoa.nome})
+        sessao.add(alvo)
+        sessao.flush()
+    else:
+        if principal.estado != "em_atendimento" or alvo.conteudo.get("resposta"):
+            raise ValueError("A orientação já foi respondida ou a participação foi encerrada.")
+        alvo.conteudo = {**alvo.conteudo, "resposta": {"decisao": decisao, "motivo": texto.strip(),
+            "autor": pessoa.nome, "data": momento.isoformat()}}
+        alvo.versao += 1
+    evento(sessao, comando, alvo, "form2_orientacao_respondida" if decisao else "form2_orientacao_registrada")
+    return fechar_comando(comando, {"permitido": True, "participacao_id": alvo.id})
