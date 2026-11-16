@@ -230,6 +230,10 @@ def test_lista_e_confirmacao_da_atribuicao(sessao):
         assert "Atribuição indisponível" in resposta.text
     codigo = sessao.get(Registro, p.registro_id).codigo_lgpd
     primeira = cliente.post(url, data={**dados, "responsavel_id": "PESSOA-B"})
+    assert "Gestão da fila" in primeira.text and 'class="mensagem mensagem-sucesso"' in primeira.text
+    cartao_beta = cliente.get("/form2/filas?conta_id=CONTA-B1")
+    assert "Atribuído por Servidor Alfa" in cartao_beta.text and "(APA) em " in cartao_beta.text
+    assert "Entrou na fila em" in cartao_beta.text
     mensagem = primeira.context["mensagem_atribuicao"]
     assert "Servidor Beta" in mensagem and codigo in mensagem and "Apresentação" in mensagem
     from app.modelos import Evento

@@ -3,7 +3,7 @@
 {% set situacoes = {'aguardando': 'aguardando responsável', 'em_atendimento': 'em atendimento', 'concluida': 'concluída'} %}
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/filas_form2.css') }}"><div class="filas-form2">
 <h1>Filas do FORM 2</h1>
-{% if mensagem_atribuicao %}<p role="status">{{ mensagem_atribuicao }}</p>{% endif %}
+{% if mensagem_atribuicao %}<p class="mensagem mensagem-sucesso" role="status">{{ mensagem_atribuicao }}</p>{% endif %}
 <p>{{ pessoa.nome }} · Demonstração com dados fictícios.</p>
 <div class="acoes-fila-form2"><a class="botao-link-secundario" href="/central?conta_id={{ conta_id|urlencode }}">Voltar à Central de Acesso</a></div>
 {% if cartoes or not gerenciaveis %}<h2>Participações da sua unidade</h2>
