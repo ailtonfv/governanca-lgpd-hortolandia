@@ -20,8 +20,8 @@
 <details class="form1 percurso-conferencia-cartao" open>
   <summary>Situação atual e percurso da conferência interna</summary>
   {% with ocultar_numeros_versao=true %}{% include '_fluxo_conferencia.html' %}{% endwith %}
-  <a href="{{ url_for('detalhe_registro', registro_id=registro.id) }}?conta_id={{ conta_id }}#historico-conferencias-form1">Consultar histórico de apresentações deste Registro</a>
 </details>
+  <a href="{{ url_for('detalhe_registro', registro_id=registro.id) }}?conta_id={{ conta_id }}#historico-conferencias-form1">Consultar histórico de apresentações deste Registro</a>
 
 <details class="form1" id="historico-apresentacao-conferida">
   <summary>Histórico e identificação da apresentação</summary>

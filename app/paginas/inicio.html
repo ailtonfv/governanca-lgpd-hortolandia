@@ -134,8 +134,8 @@
           <details class="percurso-conferencia-cartao">
             <summary>Entender o percurso ARP → APA → ARP</summary>
             {% include '_fluxo_conferencia.html' %}
-            {% if fluxo.tem_historico %}<a href="{{ url_for('detalhe_registro', registro_id=registro.id) }}?conta_id={{ conta_id }}#historico-conferencias-form1">Consultar histórico deste Registro</a>{% endif %}
           </details>
+            {% if fluxo.tem_historico %}<a href="{{ url_for('detalhe_registro', registro_id=registro.id) }}?conta_id={{ conta_id }}#historico-conferencias-form1">Consultar histórico deste Registro</a>{% endif %}
           {% set providencias = tarefas if instrumento == 'form1' else registro.providencias %}
           {% if providencias %}
           <div class="providencias-registro" aria-label="Providências do Registro {{ registro.codigo_lgpd }}">

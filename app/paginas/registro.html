@@ -850,9 +850,8 @@
     destino.setAttribute('tabindex', '-1');
     destino.focus({ preventScroll: true });
     window.requestAnimationFrame(function () {
-      var mensagem = document.getElementById('mensagem-registro');
       var barra = document.getElementById('retorno-painel-form1');
-      var margem = 24 + (barra ? barra.getBoundingClientRect().height : 0) + (mensagem ? mensagem.getBoundingClientRect().height + 12 : 0);
+      var margem = 24 + (barra ? barra.getBoundingClientRect().height : 0);
       var inicio = destino.id === 'historico-conferencias-form1' ? destino : destino.closest('.bloco-form1-integral') || destino;
       var topo = window.scrollY + inicio.getBoundingClientRect().top - margem;
       window.scrollTo({ top: Math.max(0, topo), behavior: 'instant' });
@@ -1004,7 +1003,20 @@
     if (!raiz) return;
     var botoes = Array.from(raiz.querySelectorAll('[data-etapa-alvo]'));
     var paineis = Array.from(raiz.querySelectorAll('[data-etapa-painel]'));
-    if (!paineis.length) return;
+    if (!paineis.length) {
+      function abrirHistorico() {
+        if (window.location.hash !== '#historico-conferencias-form1') return;
+        var historico = document.getElementById('historico-conferencias-form1');
+        if (historico) {
+          historico.open = true;
+          posicionarDestinoForm1(historico);
+        }
+      }
+      abrirHistorico();
+      window.addEventListener('pageshow', abrirHistorico);
+      window.addEventListener('hashchange', abrirHistorico);
+      return;
+    }
     var chave = 'form1-integral-etapa-' + raiz.dataset.registroId;
     var chaveBloco = 'form1-integral-bloco-' + raiz.dataset.registroId;
     var chaveVisitados = 'form1-integral-visitados-' + raiz.dataset.registroId;
@@ -1247,7 +1259,7 @@
     exibirEtapa(etapaInicial, destinoInicial ? window.location.hash : null, blocoInicial);
     atualizarPainelJornada(blocoInicial);
     if (destinoInicial) {
-      if (retomada && retomada.posicao) {
+      if (retomada && retomada.posicao && destinoInicial.id !== "historico-conferencias-form1") {
         var hashRetomada = window.location.hash;
         var restaurarRegiao = function () {
           window.requestAnimationFrame(function () {
