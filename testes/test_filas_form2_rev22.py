@@ -295,7 +295,7 @@ def test_bloco_dois_exibe_respostas_da_apresentacao(sessao):
     assert salvar_bloco_2_form1_integral(sessao, **dados, comando_id="FINALIDADE", versao_lida=1,
         respostas={"2.11": "Organizar oficinas fictícias"})["permitido"]
     assert salvar_bloco_12_form1_integral(sessao, **dados, comando_id="GUARDA", versao_lida=2,
-        respostas={"12.1": "Em definição"})["permitido"]
+        respostas={"12.1": "Sim", "12.1.1": "9", "12.1.2": "Dias", "12.1.3": ["Outro", "Regra do sistema ou fornecedor"]}, complementos_outro={"12.1.3": "Fonte fictícia de teste"})["permitido"]
     sessao.commit()
     assert _solicitar(sessao, r, comando="FATOS-S", versao=3)["permitido"]
     assert _confirmar(sessao, r, comando="FATOS-C")["permitido"]
@@ -307,7 +307,9 @@ def test_bloco_dois_exibe_respostas_da_apresentacao(sessao):
     sessao.commit()
     pagina = TestClient(app).get(f"/form2/participacoes/{p.id}/blocos/2?conta_id=CONTA-B1")
     for pergunta, fato in (("F2-2.1", "F1-2.11 — Organizar oficinas fictícias"),
-                           ("F2-2.9", "F1-12.1 — Em definição")):
+                           ("F2-2.9", "F1-12.1 — Sim")):
         quadro = pagina.text.split(f'id="{pergunta}"', 1)[1].split("</aside>", 1)[0]
         assert f"No FORM 1 · {pagina.context['rotulo_origem']}" in quadro and fato in quadro
+    assert "F1-12.1.1) — 9" in quadro and "F1-12.1.2) — Dias" in quadro
+    assert "Regra do sistema ou fornecedor" in quadro and "Fonte fictícia de teste" in quadro
     assert "Alteração posterior" not in pagina.text

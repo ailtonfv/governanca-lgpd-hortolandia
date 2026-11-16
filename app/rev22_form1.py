@@ -54,6 +54,7 @@ def respostas_conjuntos(conteudo):
             for k,v in row.get('respostas',{}).items():
                 if k in defs:
                     itens.append({'id':k,'pergunta':defs[k]['question'], 'valor':deepcopy(v),
+                        'complemento':row.get('complementos',{}).get(k),
                         'respondida':True,'conjunto':indice,'conjunto_id':row['id']})
     return itens
 
