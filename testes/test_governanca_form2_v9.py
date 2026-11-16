@@ -494,14 +494,33 @@ def test_vinculo_item_FORM1_na_versao_preservada(sessao, principal):
 
 def test_HTTP_chave_reatribuicao_cabe_no_banco(sessao, principal):
     import re
-    p=principal
-    sessao.add(Designacao(pessoa_id='PESSOA-A',unidade_id='UNID-NORTE',papel='gestor_fila',ativa=True))
+    from html import unescape
+
+    p = principal
+    sessao.add_all([
+        Designacao(pessoa_id="PESSOA-A", unidade_id=p.unidade_id, papel="gestor_fila", ativa=True),
+        Designacao(pessoa_id="PESSOA-F", unidade_id=p.unidade_id, papel="aal_form2", ativa=True),
+    ])
     sessao.commit()
-    with TestClient(app) as c:
-        pagina=c.get('/form2/filas?conta_id=CONTA-A1')
-        assert pagina.status_code==200
-        chaves=re.findall(r'name="comando_id" value="([^"]+)"',pagina.text)
-        assert chaves and all(len(chave)<=64 for chave in chaves)
+
+    cliente = TestClient(app)
+    pagina = cliente.get("/form2/filas?conta_id=CONTA-A1")
+    assert pagina.status_code == 200
+    destino = f"/form2/participacoes/{p.id}/reatribuir"
+    formularios = re.findall(rf'<form method="post" action="{re.escape(destino)}">(.*?)</form>', pagina.text, re.S)
+    assert len(formularios) == 1
+    formulario = formularios[0]
+    assert 'value="PESSOA-F"' in formulario and 'value="PESSOA-B"' not in formulario
+    chaves = re.findall(r'name="comando_id" value="([^"]+)"', formulario)
+    assert len(chaves) == 1 and 0 < len(unescape(chaves[0])) <= 64
+
+    resposta = cliente.post(destino, data={
+        "conta_id": "CONTA-A1", "versao": p.versao, "comando_id": unescape(chaves[0]),
+        "responsavel_id": "PESSOA-F", "motivo": "Redistribuição fictícia para o teste.",
+    }, follow_redirects=False)
+    assert resposta.status_code == 303
+    sessao.refresh(p)
+    assert p.responsavel_id == "PESSOA-F"
 
 
 def test_HTTP_resposta_pendente_continua_disponivel_apos_adotar_versao(sessao, principal):
