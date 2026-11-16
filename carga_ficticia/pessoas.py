@@ -21,6 +21,11 @@ PESSOAS = [
     ("PESSOA-H", "MAT-FICT-0008", "Servidor Zeta (fictício)",        ["CONTA-H1"]),
 ]
 
+# Cargos de demonstração, sem efeito sobre as permissões.
+CARGOS_FICTICIOS = {pid: "Agente administrativo (fictício)" for pid, _, _, _ in PESSOAS}
+CARGOS_FICTICIOS.update({"PESSOA-B": "Analista de gestão (fictício)",
+                         "PESSOA-E": "Encarregado de dados (fictício)"})
+
 SECRETARIAS = [
     ("SEC-ADM-GP", "Administração e Gestão de Pessoal"),
     ("SEC-AJ", "Assuntos Jurídicos"),

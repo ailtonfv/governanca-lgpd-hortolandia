@@ -11,6 +11,7 @@ from app.catalogo_form2_rev18 import titulos_blocos_form2
 from sqlalchemy import select, inspect
 from sqlalchemy.orm import Session
 from app.banco import motor
+from carga_ficticia.pessoas import CARGOS_FICTICIOS
 from app.apresentacoes_form1 import rotulo_apresentacao
 from app.modelos import (ParticipacaoForm2, Registro, Unidade, ComplementoForm2,
     AtribuicaoForm1Integral, HistoricoConferenciaForm1Integral, Pessoa)
@@ -431,7 +432,7 @@ def bloco_fila(request: Request, participacao_id: str, bloco: int, conta_id: str
                 confirmacao += " Complementação solicitada à origem."
     return paginas.TemplateResponse(request=request, name="bloco_fila_form2.html",
         context={"atuacao": contexto_atuacao(sessao, pessoa, p), "p": p, "estados_regua": estados_regua_form2(p.conteudo or {}), "pessoa": pessoa, "conta_id": conta_id, "bloco": definicao,
-        "numero": bloco, "confirmacao": confirmacao, "ocorrencias": ocorrencias, "origens_repetiveis": origens_repetiveis,
+        "cargo": CARGOS_FICTICIOS.get(pessoa.id), "numero": bloco, "confirmacao": confirmacao, "ocorrencias": ocorrencias, "origens_repetiveis": origens_repetiveis,
         "comando_id": str(uuid4()),
         "fatos_origem": origem["conteudo"],
         "registro": sessao.get(Registro, p.registro_id),
