@@ -22,7 +22,7 @@
   <h1>Central de Acesso LGPD</h1>
   <p>Escolha um instrumento para ver os Registros autorizados na sua Secretaria.</p>
   <section class="contexto-central" aria-labelledby="titulo-contexto">
-    <h2 id="titulo-contexto">Secretaria de atuação</h2>
+    <h2 id="titulo-contexto">{{ "Atuação: Encarregado de Dados (DPO)" if exibir_painel_dpo else "Secretaria de atuação" }}</h2>
     {% if secretarias %}
     <form action="{{ url_for('painel_registros') }}" method="get" id="abrir-painel">
       <input type="hidden" name="conta_id" value="{{ conta_id }}">
@@ -31,7 +31,7 @@
         {% for id, secretaria in secretarias.items() %}
           {% if secretarias|length == 1 %}
           <input type="hidden" name="secretaria_id" value="{{ id }}">
-          <strong class="nome-secretaria">{{ secretaria.nome }}</strong>
+          {% if not exibir_painel_dpo %}<strong class="nome-secretaria">{{ secretaria.nome }}</strong>{% endif %}
           {% else %}
           <label for="secretaria-{{ loop.index }}"><input type="radio" name="secretaria_id" id="secretaria-{{ loop.index }}" aria-describedby="apa-{{ loop.index }}" value="{{ id }}" required {% if selecao == id %}checked{% endif %}>
             {{ secretaria.nome }}</label>
@@ -44,7 +44,7 @@
     {% endif %}
     <dl class="agentes-central">
       <div><dt>Servidor em sessão</dt><dd>{{ identificacao_servidor(identidade) }}</dd></div>
-      {% if secretarias %}
+      {% if secretarias and not exibir_painel_dpo %}
       <div><dt>APA em exercício na Secretaria</dt>
         {% for secretaria in secretarias.values() %}
         <dd id="apa-{{ loop.index }}">{% if secretarias|length > 1 %}<strong>{{ secretaria.nome }}</strong> · {% endif %}{{ secretaria.apa or 'Sem identificação vigente' }}{% if secretaria.apa and secretaria.modalidade_apa == 'titular' %} (titular){% elif secretaria.apa and secretaria.modalidade_apa == 'substituicao_temporaria' %} (em substituição temporária){% endif %}</dd>
