@@ -531,14 +531,16 @@ def usuarios_demonstracao(sessao, conta_atual):
 
     rotulos = {"responsavel_registro": "APA", "preenchedor": "ARP",
                "aal_form2": "AAL", "gestor_fila": "gestor da fila",
-               "juridico_form2": "Jurídico", "governanca_protecao_dados": "DPO"}
+               "juridico_form2": "Jurídico", "governanca_protecao_dados": "DPO", "curador": "Curador"}
     momento = agora()
     papeis = {}
     for d in sessao.scalars(select(Designacao).join(Unidade).where(
             Unidade.ativa.is_(True), Designacao.ativa.is_(True),
             or_(Designacao.vigente_de.is_(None), Designacao.vigente_de <= momento),
             or_(Designacao.vigente_ate.is_(None), Designacao.vigente_ate > momento))):
-        nome = rotulos.get(d.papel, d.papel.replace("_", " "))
+        if d.papel not in rotulos or (d.papel == "responsavel_registro" and not d.tipo_apa):
+            continue
+        nome = rotulos[d.papel]
         if d.papel == "responsavel_registro" and d.tipo_apa:
             nome += " " + d.tipo_apa
         papeis.setdefault(d.pessoa_id, set()).add(nome)
@@ -547,7 +549,7 @@ def usuarios_demonstracao(sessao, conta_atual):
             Conta.ativa.is_(True), Pessoa.ativa.is_(True), Pessoa.matricula.like("MAT-FICT-%")
             ).order_by(Pessoa.matricula, Conta.id)):
         if pessoa.id not in usuarios or conta.id == conta_atual:
-            funcoes = ", ".join(sorted(papeis.get(pessoa.id, ()))) or "sem designação vigente"
+            funcoes = ", ".join(sorted(papeis.get(pessoa.id, ()))) or "sem papel institucional vigente"
             usuarios[pessoa.id] = (conta.id, f"{pessoa.matricula} · {pessoa.nome} — {funcoes}")
     return list(usuarios.values())
 
