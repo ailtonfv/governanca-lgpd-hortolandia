@@ -21,6 +21,7 @@
 {% for q in bloco.itens %}<fieldset id="{{ q.id }}" {% if q.edicao == "habilitada" and not q.ativa %}disabled{% endif %}><legend>{{ q.id }} · {{ q.enunciado }}</legend>
 {% if q.id == 'F2-1.2' %}<p>Secretaria do Registro: <strong>{{ secretaria.nome }}</strong>.</p>{% endif %}
 {% if q.id == 'F2-1.2.1' %}<p>Unidade informada na {{ rotulo_origem }} do FORM 1: {{ unidade_origem or 'Sem informação' }}.</p>{% endif %}
+{% if q.id == 'F2-1.3.1' %}<p data-aviso-complemento {% if not q.ativa %}hidden{% endif %}>Ao salvar, esta resposta abre um pedido de complementação ao FORM 1.</p>{% endif %}
 {% if q.edicao == 'habilitada' %}
 {% if q.alternativas %}
 {% if q.id == 'F2-2.9.1' %}<input type="hidden" name="resposta_{{ q.id }}" value="">{% for a in q.alternativas %}<label><input type="checkbox" name="resposta_{{ q.id }}" value="{{ a.codigo }}" {% if a.codigo in (q.valor or []) %}checked{% endif %}>{{ a.rotulo }}</label>{% endfor %}
