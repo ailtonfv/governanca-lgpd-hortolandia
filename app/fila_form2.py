@@ -307,6 +307,7 @@ def reatribuir(sessao, *, conta_id, comando_id, participacao_id, versao,
         return repeticao
     if p.versao != versao or p.estado == "concluida":
         raise ValueError("Participação alterada ou concluída.")
+    anterior = sessao.get(Pessoa, p.responsavel_id) if p.responsavel_id else None
     p.responsavel_id = responsavel_id
     p.assumida_em = p.assumida_em or agora()
     p.estado = "em_atendimento"
@@ -314,7 +315,16 @@ def reatribuir(sessao, *, conta_id, comando_id, participacao_id, versao,
     evento(sessao, comando, p, "form2_reatribuida")
     registrar_auditoria(sessao, "motivo_reatribuicao_form2", "pessoa", pessoa.id,
         {"participacao_id": p.id, "motivo": motivo}, comando_id=comando.id)
-    return fechar_comando(comando, {"permitido": True, "participacao_id": p.id})
+    from app.apresentacoes_form1 import rotulo_apresentacao
+    from app.modelos import VersaoForm1Integral
+    registro = sessao.get(Registro, p.registro_id)
+    papel = "AAL responsável" if p.tipo in ("principal", "tematica") else "responsável"
+    mensagem = f"{alvo.nome} passou a ser o {papel} pelo {registro.codigo_lgpd}"
+    if anterior:
+        mensagem += f" no lugar de {anterior.nome}"
+    referencia = rotulo_apresentacao(sessao.get(VersaoForm1Integral, p.snapshot_id))
+    return fechar_comando(comando, {"permitido": True, "participacao_id": p.id,
+        "mensagem": f"{mensagem}. A análise usará a {referencia}."})
 
 
 def complementar(sessao, *, conta_id, comando_id, participacao_id, acao, snapshot_id=None,

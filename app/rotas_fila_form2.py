@@ -281,6 +281,14 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
     gerenciaveis = sessao.scalars(select(ParticipacaoForm2).where(
         ParticipacaoForm2.unidade_id.in_(gestores),
         ParticipacaoForm2.estado != "concluida")).all() if gestores else []
+    from app.modelos import Comando
+    chave = request.query_params.get("atribuicao")
+    comando = sessao.get(Comando, chave) if chave else None
+    mensagem = None
+    if (comando and comando.tipo == "reatribuir_fila_form2" and comando.conta_id == conta_id
+            and comando.ator_id == pessoa.id and comando.resultado
+            and comando.resultado.get("participacao_id") in {p.id for p in gerenciaveis}):
+        mensagem = comando.resultado.get("mensagem")
     agentes = sessao.scalars(select(Pessoa).where(Pessoa.ativa.is_(True))).all() if gestores else []
     responsaveis = dict(sessao.execute(select(Pessoa.id, Pessoa.nome).where(
         Pessoa.id.in_({p.responsavel_id for p in participacoes if p.responsavel_id}))).all())
@@ -294,7 +302,7 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
     pode_encaminhar = any(pessoa_e_apa_em_exercicio(sessao, pessoa.id, u.id)
         for u in unidades.values() if u.ativa)
     return paginas.TemplateResponse(request=request, name="filas_form2.html",
-        context={"cartoes": list(cartoes.values()), "pode_encaminhar": pode_encaminhar,
+        context={"mensagem_atribuicao": mensagem, "cartoes": list(cartoes.values()), "pode_encaminhar": pode_encaminhar,
                  "conta_id": conta_id, "pessoa": pessoa, "participacoes": participacoes,
                  "registros": registros, "unidades": unidades, "linhas": linhas,
                  "impedimentos": impedimentos, "complementos": complementos, "gerenciaveis": gerenciaveis, "agentes": {p.id: [a for a in agentes if autorizado(sessao, a, p)] for p in gerenciaveis},
@@ -489,4 +497,4 @@ async def reatribuir_participacao(request: Request, participacao_id: str,
         sessao.rollback()
         return paginas.TemplateResponse(request=request, name="erro.html",
             context={"titulo": "Atribuição indisponível", "mensagem": str(erro)}, status_code=409)
-    return RedirectResponse("/form2/filas?"+urlencode({"conta_id": dados.get("conta_id")}),status_code=303)
+    return RedirectResponse("/form2/filas?"+urlencode({"conta_id": dados.get("conta_id"), "atribuicao": dados["comando_id"]}),status_code=303)

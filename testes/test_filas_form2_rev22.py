@@ -192,3 +192,35 @@ def test_confirmacao_salvar_bloco_sem_consolidacao(sessao):
     assert 'role="status">Bloco salvo.</p>' in response.text
     assert 'Complementação solicitada à origem.' not in response.text
     assert 'id="confirmacao-salvamento"' not in client.get(url+'?conta_id=CONTA-B1&salvo=MSG-S').text
+
+
+def test_lista_e_confirmacao_da_atribuicao(sessao):
+    from fastapi.testclient import TestClient
+    from app.main import app
+    from app.modelos import Registro
+    registro = origem(sessao)
+    p = sessao.scalar(select(ParticipacaoForm2).where(
+        ParticipacaoForm2.registro_id == registro["registro_id"]))
+    for pessoa in ("PESSOA-A", "PESSOA-B", "PESSOA-G", "PESSOA-F"):
+        sessao.add(Designacao(pessoa_id=pessoa, unidade_id=p.unidade_id, papel="aal_form2"))
+    sessao.add(Designacao(pessoa_id="PESSOA-A", unidade_id=p.unidade_id, papel="gestor_fila"))
+    sessao.commit()
+    cliente = TestClient(app)
+    fila = cliente.get("/form2/filas?conta_id=CONTA-A1")
+    opcoes = fila.text.split('name="responsavel_id"', 1)[1].split('</select>', 1)[0]
+    assert 'value="">Escolha…' in opcoes
+    assert {a.id for a in fila.context["agentes"][p.id]} == {"PESSOA-B", "PESSOA-F"}
+    url = f"/form2/participacoes/{p.id}/reatribuir"
+    dados = {"conta_id": "CONTA-A1", "comando_id": "ESCOLHA", "versao": p.versao, "motivo": "Distribuição fictícia"}
+    for impedido in ("", "PESSOA-A", "PESSOA-G"):
+        resposta = cliente.post(url, data={**dados, "responsavel_id": impedido})
+        assert resposta.status_code == 409
+        assert "Atribuição indisponível" in resposta.text
+    codigo = sessao.get(Registro, p.registro_id).codigo_lgpd
+    primeira = cliente.post(url, data={**dados, "responsavel_id": "PESSOA-B"})
+    mensagem = primeira.context["mensagem_atribuicao"]
+    assert "Servidor Beta" in mensagem and codigo in mensagem and "Apresentação" in mensagem
+    segunda = cliente.post(url, data={**dados, "versao": dados["versao"] + 1,
+        "comando_id": "SUBSTITUIR", "responsavel_id": "PESSOA-F"})
+    assert "Servidor Delta" in segunda.context["mensagem_atribuicao"]
+    assert "no lugar de Servidor Beta" in segunda.context["mensagem_atribuicao"]
