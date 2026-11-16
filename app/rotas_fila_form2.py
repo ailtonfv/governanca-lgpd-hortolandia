@@ -232,6 +232,17 @@ async def registrar_consolidacao_fila(request: Request, participacao_id: str,
         participacao_id=participacao_id))+"?"+urlencode({"conta_id": conta_id}), status_code=303)
 
 
+def duracao_fila(inicio, fim):
+    horas = max(0, int((fim - inicio).total_seconds() // 3600))
+    return f"{horas // 24} d {horas % 24} h"
+
+
+def entrada_fila(p, momento):
+    data = p.entrada_em.astimezone(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y")
+    espera = duracao_fila(p.entrada_em, p.assumida_em or momento)
+    return f"Entrou na fila em {data} · " + (f"aguardou {espera}" if p.assumida_em else f"aguardando há {espera}")
+
+
 @router.get("/form2/filas", name="filas_form2")
 def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila)):
     try:
@@ -301,10 +312,16 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
     for c in complementos:
         cartoes.setdefault(c["registro"].id, dict(registro=c["registro"],
             participacoes=[], complementos=[]))["complementos"].append(c)
+    momento = agora()
+    entradas = {p.id: entrada_fila(p, momento) for p in [*participacoes, *gerenciaveis]}
+    for cartao in cartoes.values():
+        aguardando = [p.entrada_em for p in cartao["participacoes"] if not p.responsavel_id and p.estado == "aguardando"]
+        cartao["aguardando"] = min(aguardando) if aguardando else None
+    ordenados = sorted(cartoes.values(), key=lambda c: (c["aguardando"] is None, c["aguardando"] or momento))
     pode_encaminhar = any(pessoa_e_apa_em_exercicio(sessao, pessoa.id, u.id)
         for u in unidades.values() if u.ativa)
     return paginas.TemplateResponse(request=request, name="filas_form2.html",
-        context={"referencias": referencias, "mensagem_atribuicao": mensagem, "cartoes": list(cartoes.values()), "pode_encaminhar": pode_encaminhar,
+        context={"referencias": referencias, "mensagem_atribuicao": mensagem, "cartoes": ordenados, "entradas": entradas, "pode_encaminhar": pode_encaminhar,
                  "conta_id": conta_id, "pessoa": pessoa, "participacoes": participacoes,
                  "registros": registros, "unidades": unidades, "linhas": linhas,
                  "impedimentos": impedimentos, "complementos": complementos, "gerenciaveis": gerenciaveis, "agentes": {p.id: [a for a in agentes if autorizado(sessao, a, p)] for p in gerenciaveis},
