@@ -1,0 +1,2 @@
+{% macro gatilhos(q) %}{% if q.gatilhos %}data-gatilhos='{{ q.gatilhos|tojson }}' data-modo="{{ 'ou' if q.qualquer else 'e' }}"{% endif %}{% endmacro %}
+{% macro ajuda(q, ativa) %}{% if q.gatilhos %}<p data-ajuda-condicao {% if ativa %}hidden{% endif %}>Disponível quando {{ q.gatilhos|map(attribute='descricao')|join(' ou ' if q.qualquer else ' e ') }}.</p>{% endif %}{% endmacro %}

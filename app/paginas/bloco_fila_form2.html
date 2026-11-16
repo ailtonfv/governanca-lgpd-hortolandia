@@ -15,10 +15,12 @@
 <dl class="respostas-origem-form2">{% for q in perguntas_origem %}<div class="item-origem-form2"><dt>{{ codigo_pergunta(q.id, 1) }}{% if q.conjunto %} · conjunto {{ q.conjunto }}{% endif %} · {{ q.pergunta }}</dt><dd>{{ q.valor|join(', ') if q.valor is sequence and q.valor is not string and q.valor is not mapping else q.valor }}</dd></div>{% else %}<div><dt>Respostas</dt><dd>Nenhuma resposta registrada nesta versão.</dd></div>{% endfor %}</dl></details>
 <form method="post" id="revisao-bloco"><input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="comando_id" value="{{ comando_id }}"><input type="hidden" name="versao" value="{{ p.versao }}">
 <fieldset {% if p.responsavel_id != pessoa.id or p.estado != 'em_atendimento' %}disabled{% endif %}>
+{% from '_condicoes_form2.html' import gatilhos, ajuda %}
 {% if numero in (1,2) %}
 {% set fatos = fatos_origem.get('respostas', {}) %}
 {% set unidade_origem = fatos.get('2.4.2') if fatos.get('2.4') == 'Não' else fatos.get('2.3') %}
-{% for q in bloco.itens %}<fieldset id="{{ q.id }}" {% if q.edicao == "habilitada" and not q.ativa %}disabled{% endif %}><legend>{{ q.id }} · {{ q.enunciado }}</legend>
+{% for q in bloco.itens %}<fieldset id="{{ q.id }}" {% if q.edicao == "habilitada" %}{{ gatilhos(q) }}{% endif %} {% if q.edicao == "habilitada" and not q.ativa %}disabled{% endif %}><legend>{{ q.id }} · {{ q.enunciado }}</legend>
+{% if q.edicao == 'habilitada' %}{{ ajuda(q, q.ativa) }}{% endif %}
 {% if q.id == 'F2-1.2' %}<p>Secretaria do Registro: <strong>{{ secretaria.nome }}</strong>.</p>{% endif %}
 {% if q.id == 'F2-1.2.1' %}<p>Unidade informada na {{ rotulo_origem }} do FORM 1: {{ unidade_origem or 'Sem informação' }}.</p>{% endif %}
 {% if q.id == 'F2-1.3.1' %}<p data-aviso-complemento {% if not q.ativa %}hidden{% endif %}>Ao salvar, esta resposta abre um pedido de complementação ao FORM 1.</p>{% endif %}
@@ -30,8 +32,8 @@
 {% else %}<textarea aria-label="{{ q.enunciado }}" name="resposta_{{ q.id }}">{{ q.valor or '' }}</textarea>{% endif %}
 {% elif numero == 2 %}
 {% set op = 'opcao:' ~ q.id %}{% set tx = 'texto:' ~ q.id %}
-<fieldset {% if not ativa(q.id, '') %}disabled{% endif %}>
-{% if not ativa(q.id, '') %}<p>Disponível após salvar a resposta que ativa esta pergunta.</p>{% endif %}
+<fieldset {{ gatilhos(q) }} {% if not ativa(q.id, '') %}disabled{% endif %}>
+{{ ajuda(q, ativa(q.id, '')) }}
 {% if q.alternativas %}<select aria-label="{{ q.enunciado }}" name="{{ op }}"><option value="">Sem resposta</option>{% for a in q.alternativas %}<option value="{{ a.codigo }}" {% if a.codigo in valores.get(op,[]) %}selected{% endif %}>{{ a.rotulo }}</option>{% endfor %}</select>
 {% else %}<textarea aria-label="{{ q.enunciado }}" name="{{ tx }}" maxlength="{{ limite_texto(q) }}">{{ valores.get(tx,'') }}</textarea>{% endif %}
 </fieldset>
@@ -64,8 +66,8 @@
 {% if repetivel %}<div data-ocorrencia="{{ n }}"><strong>Conjunto <span>{{ n }}</span></strong>{% endif %}
 {% set op = op ~ ('#' ~ n if repetivel else '') %}{% set txt = txt ~ ('#' ~ n if repetivel else '') %}
 {% set sufixo = '#' ~ n if repetivel else '' %}
-<fieldset class="controle-condicional" data-condicional{% if repetivel and q.condicoes|selectattr("origem","in",origens_repetiveis)|list %} data-dependencia-local{% endif %}{% if not ativa(q.id, sufixo) %} disabled{% endif %}><legend class="legenda-condicional">Resposta para {{ q.id }}</legend>
-{% if not ativa(q.id, sufixo) %}<p>Disponível quando a condição da pergunta for atendida.</p>{% endif %}
+<fieldset class="controle-condicional" {{ gatilhos(q) }} data-condicional{% if repetivel and q.condicoes|selectattr("origem","in",origens_repetiveis)|list %} data-dependencia-local{% endif %}{% if not ativa(q.id, sufixo) %} disabled{% endif %}><legend class="legenda-condicional">Resposta para {{ q.id }}</legend>
+{{ ajuda(q, ativa(q.id, sufixo)) }}
 {% if q.alternativas %}
 {% if 'múltipla' in q.controle|lower %}
 <input type="hidden" name="{{ op }}" value="">

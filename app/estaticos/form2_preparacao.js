@@ -11,7 +11,8 @@
     const atualizar = () => {
       const ativa = campo('F2-1.2').value === 'DIVERGENTE' || ['NAO', 'PARCIAL'].includes(campo('F2-1.3').value);
       dependente.disabled = !ativa;
-      dependente.hidden = !ativa;
+      const ajuda = dependente.querySelector('[data-ajuda-condicao]');
+      if (ajuda) ajuda.hidden = ativa;
     };
     identificacao.addEventListener('change', atualizar);
     atualizar();
@@ -77,7 +78,11 @@
       ? document.querySelector(`[data-resposta-form2="${alvoId}"]`)
       : null;
     if (!origem || !alvo) return;
-    const atualizar = () => { alvo.disabled = origem.value !== 'SIM'; };
+    const atualizar = () => {
+      alvo.disabled = origem.value !== 'SIM';
+      const ajuda = alvo.querySelector('[data-ajuda-condicao]');
+      if (ajuda) ajuda.hidden = !alvo.disabled;
+    };
     origem.addEventListener('change', atualizar);
     atualizar();
   });

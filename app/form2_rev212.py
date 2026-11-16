@@ -101,6 +101,35 @@ def aplicavel(q, conjunto, valores, ramos, regras):
             else all(map(avaliar, condicoes)))
 
 
+def condicoes_de_tela(itens, regras, valores, ramos):
+    """Expõe os gatilhos locais e resolve na origem as condições externas ao bloco."""
+    locais = {q["id"]: q for q in itens}
+    for q in itens:
+        condicoes = []
+        for regra in regras.get(q["id"], []):
+            op, origem, codigo = (regra[k] for k in ("operador", "origem", "codigo_valor"))
+            if op == "SEMPRE":
+                continue
+            c = {"operador": op, "origem": origem, "codigo": codigo}
+            if origem in locais and op != "RAMO_PREENCHIDO":
+                c["local"] = True
+                c["repetivel"] = por_conjunto(origem)
+            else:
+                isoladas = {**regras, q["id"]: [regra]}
+                c["fixa"] = aplicavel(q["id"], "", valores, ramos, isoladas)
+            alternativas = locais.get(origem, {}).get("alternativas", [])
+            rotulo = next((a["rotulo"] for a in alternativas if a["codigo"] == codigo), codigo)
+            if op == "RAMO_PREENCHIDO":
+                c["descricao"] = f"o ramo {codigo} estiver preenchido no FORM 1"
+            elif op == "POR_OCORRENCIA":
+                c["descricao"] = f"{origem} estiver preenchida neste conjunto"
+            else:
+                c["descricao"] = f"{origem} estiver respondida com “{rotulo}”"
+            condicoes.append(c)
+        q["gatilhos"] = condicoes
+        q["qualquer"] = any(r["combinar"] == "OU" for r in regras.get(q["id"], []))
+
+
 def mapa_regras(contrato):
     regras = {}
     for c in contrato["condicoes"]:

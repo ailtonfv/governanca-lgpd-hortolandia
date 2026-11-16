@@ -51,7 +51,7 @@
       {% for questao in guarda.questoes %}
       <fieldset class="resposta-form2" data-resposta-form2="{{ questao.id }}"{% if not questao.ativa %} disabled{% endif %}>
         <legend>{{ questao.id }} — {{ questao.enunciado }}</legend>
-        {% if not questao.ativa %}<p>Resposta inativa pela condição documental. O valor anterior permanece preservado e não participa da avaliação ativa.</p>{% endif %}
+        {% for regra in questao.condicoes if regra.operador != 'SEMPRE' %}<p data-ajuda-condicao {% if questao.ativa %}hidden{% endif %}>Disponível quando {{ regra.origem }} estiver respondida com “Sim”.</p>{% endfor %}
         {% if questao.modo == 'unica' %}
         <label for="resposta-{{ questao.id }}">Resposta</label>
         <select id="resposta-{{ questao.id }}" name="resposta_{{ questao.id }}">

@@ -224,3 +224,35 @@ def test_lista_e_confirmacao_da_atribuicao(sessao):
         "comando_id": "SUBSTITUIR", "responsavel_id": "PESSOA-F"})
     assert "Servidor Delta" in segunda.context["mensagem_atribuicao"]
     assert "no lugar de Servidor Beta" in segunda.context["mensagem_atribuicao"]
+
+
+def test_condicionais_inativas_e_pedidos_de_origem(sessao):
+    from fastapi.testclient import TestClient
+    from app.main import app
+    from app.modelos import ComplementoForm2
+
+    registro = origem(sessao)
+    p = sessao.scalar(select(ParticipacaoForm2).where(ParticipacaoForm2.registro_id == registro["registro_id"]))
+    sessao.add(Designacao(pessoa_id="PESSOA-B", unidade_id=p.unidade_id, papel="aal_form2"))
+    sessao.flush()
+    executar(sessao, conta_id="CONTA-B1", comando_id="COND-ASSUME", participacao_id=p.id, acao="assumir", versao=1)
+    sessao.commit()
+    cliente = TestClient(app)
+    url = f"/form2/participacoes/{p.id}/blocos/"
+    def enviar(bloco, chave, campos):
+        return cliente.post(url + str(bloco), data={"conta_id": "CONTA-B1", "versao": 2,
+            "comando_id": chave, **campos}, follow_redirects=False)
+    resposta = enviar(1, "INATIVA", {"resposta_F2-1.3": "SIM", "resposta_F2-1.3.1": "Pedido fictício"})
+    assert resposta.status_code >= 400
+    assert sessao.scalar(select(ComplementoForm2)) is None
+    bloco = cliente.get(url + "2?conta_id=CONTA-B1")
+    dependentes = [q for q in bloco.context["bloco"]["itens"] if q["gatilhos"]]
+    assert {q["id"] for q in dependentes} == {f"F2-2.{i}" for i in ("1.1","4.1","6.1","7.1","9.1","9.3")}
+    for q in dependentes:
+        prefixo = "resposta_" if q["edicao"] == "habilitada" else ("opcao:" if q["alternativas"] else "texto:")
+        valor = q["alternativas"][0]["codigo"] if q["alternativas"] else "Texto fictício"
+        resposta = enviar(2, q["id"], {prefixo + q["id"]: valor})
+        assert resposta.status_code >= 400, q["id"]
+    resposta = enviar(1, "PEDIDO", {"resposta_F2-1.3": "NAO", "resposta_F2-1.3.1": "Pedido fictício"})
+    assert resposta.status_code == 303
+    assert sessao.scalar(select(ComplementoForm2)).solicitacao == "Pedido fictício"

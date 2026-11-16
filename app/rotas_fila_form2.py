@@ -413,6 +413,8 @@ def bloco_fila(request: Request, participacao_id: str, bloco: int, conta_id: str
     ocorrencias = range(1, max([1, *conjuntos]) + 1)
     origens_repetiveis = [item["id"] for item in definicao["itens"] if item.get("repetivel")]
     ramos = ramos_origem(origem)
+    from app.form2_rev212 import condicoes_de_tela
+    condicoes_de_tela(definicao["itens"], regras, valores, ramos)
     registrar_auditoria(sessao, "consulta_form2_fila", "pessoa", pessoa.id,
         {"participacao_id": p.id, "bloco": bloco})
     sessao.commit()

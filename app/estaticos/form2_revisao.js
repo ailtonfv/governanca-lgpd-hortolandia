@@ -1,5 +1,30 @@
 (() => {
   const form = document.getElementById('revisao-bloco');
+  if (!form) return;
+  function atualizarCondicoes() {
+    const campos = Array.from(form.elements);
+    for (const grupo of form.querySelectorAll('[data-gatilhos]')) {
+      const conjunto = grupo.closest('[data-ocorrencia]')?.dataset.ocorrencia;
+      const resultados = JSON.parse(grupo.dataset.gatilhos).map(regra => {
+        if (!regra.local) return regra.fixa;
+        const origem = regra.origem + (regra.repetivel && conjunto ? '#' + conjunto : '');
+        const prefixo = regra.operador === 'POR_OCORRENCIA' ? 'texto:' : 'opcao:';
+        return campos.some(campo => {
+          if (![prefixo + origem, 'resposta_' + origem].includes(campo.name)
+              || campo.matches(':disabled') || (campo.type === 'checkbox' && !campo.checked)) return false;
+          return regra.operador === 'POR_OCORRENCIA' ? Boolean(campo.value.trim()) : campo.value === regra.codigo;
+        });
+      });
+      const ativa = grupo.dataset.modo === 'ou' ? resultados.some(Boolean) : resultados.every(Boolean);
+      grupo.disabled = !ativa;
+      grupo.querySelector('[data-ajuda-condicao]').hidden = ativa;
+      const aviso = grupo.querySelector('[data-aviso-complemento]');
+      if (aviso) aviso.hidden = !ativa;
+    }
+  }
+  form.addEventListener('input', atualizarCondicoes);
+  form.addEventListener('change', atualizarCondicoes);
+  atualizarCondicoes();
   let alterado = false;
   document.getElementById('adicionar-ocorrencia')?.addEventListener('click', event => {
     const grupos = [...form.querySelectorAll('[data-ocorrencia]')];
@@ -20,6 +45,7 @@
       }
       grupo.after(novo);
     }
+    atualizarCondicoes();
     alterado = true;
     if (numero === 99) event.target.disabled = true;
   });

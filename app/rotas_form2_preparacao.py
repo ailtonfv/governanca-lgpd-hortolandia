@@ -157,6 +157,8 @@ async def revisao_form2(request: Request, registro_id: str, preparacao_id: str, 
     regras = mapa_regras(carregar_contrato())
     salvos = indice_valores(prep.conteudo)
     ramos = ramos_origem(dados["origem"])
+    from app.form2_rev212 import condicoes_de_tela
+    condicoes_de_tela(definicao["itens"], regras, salvos, ramos)
     def ativa(chave, conjunto):
         return aplicavel(chave, conjunto, salvos, ramos, regras)
     pendencias = []

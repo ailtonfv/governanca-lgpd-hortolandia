@@ -10,6 +10,7 @@
     {% if q.edicao == 'habilitada' %}
     <fieldset data-identificacao="{{ q.id }}"{% if not q.ativa %} disabled{% endif %}>
       <legend>{{ q.id }} — {{ q.enunciado }}</legend>
+      {% if q.id == 'F2-1.3.1' %}<p data-ajuda-condicao {% if q.ativa %}hidden{% endif %}>Disponível quando F2-1.3 estiver respondida com “Não” ou “Parcialmente”, ou F2-1.2 com “Divergente”.</p>{% endif %}
       {% if q.id == 'F2-1.2' %}<p>Secretaria do Registro: {{ secretaria.nome }}.</p>{% endif %}
       {% if q.id == 'F2-1.2.1' %}<p>Unidade na {{ origem.snapshot|rotulo_apresentacao }} do FORM 1: {{ unidade or 'Sem informação' }}.</p>{% endif %}
       {% if q.modo == 'unica' %}
