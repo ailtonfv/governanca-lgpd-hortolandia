@@ -140,3 +140,22 @@ def semear(sessao):
             designacao.autorizado_por_id = "PESSOA-E"
     sessao.flush()
     return novos
+
+
+def semear_eta(sessao):
+    """Carga adicional do ensaio de reatribuição, somente em banco de teste ou cópia."""
+    import re
+    banco = sessao.get_bind().url.database or ""
+    if not (banco.endswith("_teste") or re.fullmatch(r"lgpd_lote1_[0-9a-f]{12}", banco)):
+        raise ValueError("A carga de Eta exige a cópia da vistoria ou o banco de testes.")
+    pid = "PESSOA-I"
+    if sessao.get(Pessoa, pid) is None:
+        sessao.add(Pessoa(id=pid, matricula="MAT-FICT-0009", nome="Servidor Eta (fictício)"))
+        sessao.flush()
+    if sessao.get(Conta, "CONTA-I1") is None:
+        sessao.add(Conta(id="CONTA-I1", pessoa_id=pid))
+    habilitacao = select(Designacao).where(Designacao.pessoa_id == pid,
+        Designacao.unidade_id == "UNID-NORTE", Designacao.papel == "aal_form2")
+    if sessao.scalar(habilitacao) is None:
+        sessao.add(Designacao(pessoa_id=pid, unidade_id="UNID-NORTE", papel="aal_form2", ativa=True))
+    sessao.flush()
