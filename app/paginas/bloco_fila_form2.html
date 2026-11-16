@@ -14,6 +14,8 @@
 <details class="origem-fila-form2"><summary>Consultar respostas do FORM 1</summary>
 <p>Respostas do FORM 1 em análise, somente para consulta.</p>
 <dl class="respostas-origem-form2">{% for q in perguntas_origem %}<div class="item-origem-form2"><dt>{{ codigo_pergunta(q.id, 1) }}{% if q.conjunto %} · conjunto {{ q.conjunto }}{% endif %} · {{ q.pergunta }}</dt><dd>{{ q.valor|join(', ') if q.valor is sequence and q.valor is not string and q.valor is not mapping else q.valor }}</dd></div>{% else %}<div><dt>Respostas</dt><dd>Nenhuma resposta registrada nesta versão.</dd></div>{% endfor %}</dl></details>
+{% set guias = bloco.itens|map(attribute="fontes_publicas")|sum(start=[])|unique(attribute="url")|list %}
+{% if guias %}<aside id="apoio-anpd"><h2>Apoio da ANPD</h2><ul>{% for guia in guias %}<li><a href="{{ guia.url }}" target="_blank" rel="noopener noreferrer">{{ guia.titulo }}</a></li>{% endfor %}</ul></aside>{% endif %}
 <form method="post" id="revisao-bloco"><input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="comando_id" value="{{ comando_id }}"><input type="hidden" name="versao" value="{{ p.versao }}">
 <fieldset {% if p.responsavel_id != pessoa.id or p.estado != 'em_atendimento' %}disabled{% endif %}>
 {% from '_condicoes_form2.html' import gatilhos, ajuda %}
@@ -94,7 +96,7 @@
 {% endfor %}
 {% if q.id in ('F2-8.10', 'F2-9.12', 'F2-14.3.1') %}<button type="button" id="adicionar-ocorrencia">Adicionar conjunto</button>{% endif %}
 {% endif %}
-{% if q.fontes_publicas %}<p>Apoio da ANPD</p><ul>{% for f in q.fontes_publicas %}<li><a href="{{ f.url }}" target="_blank" rel="noopener noreferrer">{{ f.titulo }}</a></li>{% endfor %}</ul>{% endif %}
+
 <label>Comentário sobre {{ q.id }}<textarea name="{{ com }}" rows="2" maxlength="2000">{{ valores.get(com,'') }}</textarea></label>
 </fieldset>
 {% endfor %}
