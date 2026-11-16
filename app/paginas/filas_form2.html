@@ -13,11 +13,13 @@
 {% for p in c.participacoes %}
 <p>{{ entradas[p.id] }}</p>
 {% if p.id in atribuidores %}<p>{{ atribuidores[p.id] }}</p>{% endif %}
-<p>{{ unidades[p.unidade_id].nome }} · {{ p.tipo }} · Situação: {{ impedimentos.get(p.id, situacoes.get(p.estado, p.estado)) }}{% if p.responsavel_id %} · <strong>Responsável: {{ responsaveis[p.responsavel_id] }}</strong>{% endif %}</p>
+<p>{{ unidades[p.unidade_id].nome }} · {{ p.tipo }} · Situação da participação: {{ impedimentos.get(p.id, situacoes.get(p.estado, p.estado)) }}{% if p.responsavel_id %} · <strong>Responsável: {{ responsaveis[p.responsavel_id] }}</strong>{% endif %}</p>
+{% if c.origem %}<details><summary>Situação do FORM 1 na origem</summary><p>{{ c.origem }}</p></details>{% endif %}
 <div class="acoes-fila-form2"><a class="botao-link" href="/form2/participacoes/{{ p.id }}?conta_id={{ conta_id|urlencode }}">Abrir FORM 2{% if c.participacoes|length > 1 %} · {{ p.tipo }}{% endif %}</a></div>
 {% endfor %}
 {% for complemento in c.complementos %}
-{% if complemento.situacao %}<p>Complementação do FORM 1: {{ complemento.situacao }}.</p>{% endif %}
+{% if not c.participacoes %}<p>Situação da participação: {{ situacoes.get(complemento.p.estado, complemento.p.estado) }}.</p>{% endif %}
+{% if complemento.situacao %}<details><summary>Detalhes da origem</summary><p>Complementação do FORM 1: {{ complemento.situacao }}.</p></details>{% endif %}
 <div class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/participacoes/{{ complemento.p.id }}/governanca?conta_id={{ conta_id|urlencode }}">Ver pendências e respostas</a></div>
 {% endfor %}</article>
 {% else %}<p>Nenhum Registro nas filas autorizadas para esta conta.</p>{% endfor %}{% endif %}

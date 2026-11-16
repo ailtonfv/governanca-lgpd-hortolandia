@@ -331,6 +331,14 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
             participacoes=[], complementos=[]))["complementos"].append(c)
     momento = agora()
     entradas = {p.id: entrada_fila(p, momento) for p in [*participacoes, *gerenciaveis]}
+    historicos_origem = sessao.scalars(select(HistoricoConferenciaForm1Integral).where(
+        HistoricoConferenciaForm1Integral.registro_id.in_(cartoes)
+    ).order_by(HistoricoConferenciaForm1Integral.numero_apresentacao.desc()))
+    situacoes_origem = {"devolvida_para_ajustes": "Devolvido para ajustes",
+                        "conferencia_interna_confirmada": "Conferência interna confirmada",
+                        "aguardando_conferencia_interna_apa": "Aguardando conferência do APA"}
+    for historico in historicos_origem:
+        cartoes[historico.registro_id].setdefault("origem", situacoes_origem.get(historico.situacao))
     for cartao in cartoes.values():
         aguardando = [p.entrada_em for p in cartao["participacoes"] if not p.responsavel_id and p.estado == "aguardando"]
         cartao["aguardando"] = min(aguardando) if aguardando else None
