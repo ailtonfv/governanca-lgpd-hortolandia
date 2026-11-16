@@ -21,6 +21,8 @@ from app.respostas_form2 import estados_regua_form2, aguarda_temporalidade
 
 router = APIRouter()
 paginas = Jinja2Templates(directory=Path(__file__).parent / "paginas")
+from app.apresentacao_form2 import data_local
+paginas.env.filters["hora_local"] = data_local
 paginas.env.globals["aguarda_temporalidade"] = aguarda_temporalidade
 paginas.env.globals["titulos_blocos_form2"] = titulos_blocos_form2
 paginas.env.filters["chave_comando"] = lambda valor: sha256(str(valor).encode("utf-8")).hexdigest()
@@ -572,6 +574,24 @@ async def reatribuir_participacao(request: Request, participacao_id: str,
     return RedirectResponse("/form2/filas?"+urlencode({"conta_id": dados.get("conta_id"), "atribuicao": dados["comando_id"]}),status_code=303)
 
 
+@router.get("/form2/participacoes/{participacao_id}/orientacao")
+def consultar_orientacoes(request: Request, participacao_id: str, conta_id: str, sessao: Session = Depends(sessao_fila)):
+    pessoa = pessoa_ativa(sessao, conta_id)
+    if not unidades_autorizadas(sessao, pessoa.id, "governanca_protecao_dados"):
+        raise HTTPException(403, "Esta consulta exige o perfil do DPO.")
+    principal = sessao.get(ParticipacaoForm2, participacao_id)
+    if not principal or principal.tipo != "principal":
+        raise HTTPException(404, "Participação principal indisponível.")
+    consultas = sessao.scalars(select(ParticipacaoForm2).where(
+        ParticipacaoForm2.origem_id == principal.id, ParticipacaoForm2.tipo == "dpo"
+    ).order_by(ParticipacaoForm2.entrada_em.desc()))
+    return paginas.TemplateResponse(request=request, name="orientacao_dpo.html", context={
+        "registro": sessao.get(Registro, principal.registro_id), "conta_id": conta_id,
+        "orientacoes": [c for c in consultas if (c.conteudo or {}).get("de_oficio")],
+        "comando_id": str(uuid4()),
+    })
+
+
 @router.post("/form2/participacoes/{participacao_id}/orientacao")
 async def registrar_orientacao(request: Request, participacao_id: str, sessao: Session = Depends(sessao_fila)):
     from app.fila_form2 import manifestar_de_oficio
@@ -581,7 +601,7 @@ async def registrar_orientacao(request: Request, participacao_id: str, sessao: S
         resultado = manifestar_de_oficio(sessao, conta_id=conta, participacao_id=participacao_id,
             comando_id=dados.get("comando_id"), texto=dados.get("texto", ""), decisao=dados.get("decisao"))
         consulta = sessao.get(ParticipacaoForm2, resultado["participacao_id"])
-        destino = f"/form2/participacoes/{consulta.origem_id}" if dados.get("decisao") else "/form2/filas"
+        destino = f"/form2/participacoes/{consulta.origem_id}" if dados.get("decisao") else f"/form2/participacoes/{consulta.origem_id}/orientacao"
         sessao.commit()
     except (PermissionError, ValueError) as erro:
         sessao.rollback()

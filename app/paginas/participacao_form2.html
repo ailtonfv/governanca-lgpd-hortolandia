@@ -8,6 +8,7 @@
 {% include '_atuacao_form2.html' %}
 <div class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/filas?conta_id={{ conta_id|urlencode }}">Voltar às filas</a>
 <a class="botao-link-secundario" href="/form2/participacoes/{{ p.id }}/governanca?conta_id={{ conta_id|urlencode }}">Ver pendências e respostas</a></div>
+{% if aguarda_temporalidade(p.conteudo) %}<p>Guarda: aguarda definição institucional</p>{% endif %}
 <p>Situação: {{ situacoes.get(p.estado, p.estado) }}</p>{% if p.responsavel_id == pessoa.id %}<p>{{ p.questao }}</p>{% endif %}
 {% if p.tipo == 'principal' and p.responsavel_id == pessoa.id %}{% include '_regua_fila_form2.html' %}
 {% set proximo = namespace(numero=none) %}
@@ -46,7 +47,7 @@
 </form>
 {% if p.tipo == 'principal' and p.estado == 'em_atendimento' and p.responsavel_id == pessoa.id %}</details>{% endif %}
 {% for consulta in consultas if consulta.conteudo and consulta.conteudo.de_oficio %}
-<article><h2>Manifestação do DPO (de ofício)</h2><p>{{ consulta.conteudo.autor }} · {{ consulta.entrada_em.strftime('%d/%m/%Y às %Hh%M') }}</p><p>{{ consulta.manifestacao }}</p>
+<article><h2>Manifestação do DPO (de ofício)</h2><p>{{ consulta.conteudo.autor }} · {{ consulta.entrada_em|hora_local }}</p><p>{{ consulta.manifestacao }}</p>
 {% if consulta.conteudo.resposta %}<p>{{ consulta.conteudo.resposta.decisao }} · {{ consulta.conteudo.resposta.motivo }}</p>
 {% elif p.estado == 'em_atendimento' and p.responsavel_id == pessoa.id %}<strong>Nova orientação</strong><form method="post" action="/form2/participacoes/{{ consulta.id }}/orientacao">
 <input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="comando_id" value="{{ (comando_id ~ consulta.id ~ 'resposta')|chave_comando }}">

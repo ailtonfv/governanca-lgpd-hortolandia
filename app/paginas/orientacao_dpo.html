@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block conteudo %}
+<h1>{{ registro.codigo_lgpd }} · Consultas ao DPO, ao Jurídico e às áreas temáticas</h1>
+<a href="/form2/filas?conta_id={{ conta_id|urlencode }}#painel-dpo">Voltar ao painel do DPO</a>
+<section id="manifestacao"><h2>Manifestação do DPO (de ofício)</h2>
+<p>Não informe nomes, CPF, protocolos de atendimento ou dados de casos concretos.</p>
+<form method="post"><input type="hidden" name="conta_id" value="{{ conta_id }}">
+<input type="hidden" name="comando_id" value="{{ comando_id }}">
+<label>Orientação<textarea name="texto" required maxlength="10000"></textarea></label>
+<button type="submit">Registrar manifestação</button></form></section>
+{% for c in orientacoes %}<article><h3>{{ c.conteudo.autor }} · {{ c.entrada_em|hora_local }}</h3><p>{{ c.manifestacao }}</p>
+{% if c.conteudo.resposta %}<p>{{ c.conteudo.resposta.autor }} · {{ c.conteudo.resposta.data|hora_local }} · {{ c.conteudo.resposta.decisao }}</p><p>{{ c.conteudo.resposta.motivo }}</p>{% endif %}</article>{% endfor %}
+{% endblock %}

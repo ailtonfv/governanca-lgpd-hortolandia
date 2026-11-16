@@ -75,7 +75,7 @@ def data_local(momento):
             return momento
     if not isinstance(momento, datetime) or momento.tzinfo is None:
         return momento
-    return momento.astimezone(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y às %H:%M")
+    return momento.astimezone(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y às %Hh%M")
 
 
 def rotulo_demonstrativo(valor):
