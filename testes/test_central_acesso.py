@@ -45,6 +45,9 @@ def test_atalhos_da_central_por_papel_vigente(sessao):
         assert (f'filas?conta_id={conta}#painel-dpo">Abrir painel do DPO</a>' in quadro) == painel
         assert "Filas institucionais do FORM 2 e painel do DPO" not in resposta.text
 
+    sessao.add(Designacao(pessoa_id="PESSOA-A", unidade_id="UNID-NORTE", papel="gestor_fila", ativa=True))
+    sessao.commit()
+    conferir("CONTA-A1", fila=True, painel=False)
     conferir("CONTA-G1", fila=False, painel=False)
     conferir("CONTA-B1", fila=True, painel=False)
     conferir("CONTA-E1", fila=False, painel=True)

@@ -176,7 +176,7 @@ def central(
     pessoa_id = acesso["identidade"]["pessoa_id"]
     return paginas.TemplateResponse(request=request, name="central.html", context={
         **acesso, "conta_id": conta_id,
-        "exibir_fila_form2": bool(unidades(sessao, pessoa_id, PAPEIS["principal"])),
+        "exibir_fila_form2": bool(unidades(sessao, pessoa_id, PAPEIS["principal"]) or unidades(sessao, pessoa_id, "gestor_fila")),
         "exibir_painel_dpo": bool(unidades(sessao, pessoa_id, PAPEIS["dpo"])),
         "selecao": secretaria_id or request.cookies.get(f"secretaria_{conta_id}"),
     })
