@@ -147,7 +147,7 @@
               <p class="aviso-leitura"><strong>Justificativa do APA:</strong> {{ providencia.justificativa_devolucao }}</p>
               {% endif %}
               {% if registro.preenchimento_arp and registro.preenchimento_arp.blocos_vazios is not none and providencia.categoria == 'preenchimento_form1' %}
-              <p>A obrigatoriedade dos itens deste formulário está em definição.</p>
+              {# A contagem já consta em Seu preenchimento. #}
               {% elif providencia.quantidade_pendencias is none and providencia.categoria == 'preenchimento_form1' %}
               <p>O rascunho do FORM 1 ainda não foi iniciado.</p>
               {% elif providencia.quantidade_pendencias is not none and providencia.quantidade_pendencias > 0 %}
