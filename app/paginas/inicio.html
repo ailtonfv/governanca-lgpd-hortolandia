@@ -164,7 +164,7 @@
           <div class="sem-providencia-registro">
             {% if registro.ingresso_form2 %}<p>Ingressou na fila do FORM 2 em {{ (registro.ingresso_form2|data_local).split(" ")[0] }}.</p>{% else %}<p>Nenhuma providência de conferência pendente para seu perfil neste momento. Isso não significa que o FORM 1 esteja completo.</p>{% endif %}
             {% if registro.responsavel_proxima_etapa %}
-            <p><strong>{% if fluxo.atual == 'confirmar' %}ARP responsável pelo rascunho (sem conferência pendente):{% else %}Responsável pela próxima etapa:{% endif %}</strong> {{ registro.responsavel_proxima_etapa }}</p>
+            <p><strong>Responsável pela próxima etapa:</strong> {{ registro.responsavel_proxima_etapa }}</p>
             {% endif %}
           </div>
           {% endif %}

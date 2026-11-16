@@ -10,16 +10,13 @@
     <li {% if fluxo.atual == 'devolver' %}aria-current="step"{% endif %}><strong>Devolver para ajustes</strong><span>APA justifica → ARP corrige → ARP pode reapresentar nova versão.</span>{% if fluxo.atual == 'devolver' %}<strong>Situação atual</strong>{% endif %}</li>
     <li {% if fluxo.atual == 'confirmar' %}aria-current="step"{% endif %}><strong>Confirmar conferência interna</strong><span>APA confere aquela versão → histórico preservado → continuidade conforme o fluxo vigente.</span>{% if fluxo.atual == 'confirmar' %}<strong>Situação atual</strong>{% endif %}</li>
   </ul>
-  <p><strong>Agora:</strong> {{ fluxo.estado }}.{% if fluxo.versao is not none and not ocultar_numeros_versao|default(false) %} {{ "Versão conferida" if fluxo.atual == "confirmar" else "Versão apresentada" }}: <strong>{{ fluxo.rotulo_apresentacao }}</strong>.{% endif %}</p>
+  {% if not fluxo_compacto %}<p><strong>Agora:</strong> {{ fluxo.estado }}.{% if fluxo.versao is not none and not ocultar_numeros_versao|default(false) %} {{ "Versão conferida" if fluxo.atual == "confirmar" else "Versão apresentada" }}: <strong>{{ fluxo.rotulo_apresentacao }}</strong>.{% endif %}</p>
+  {% endif %}
   {% if fluxo.decidida_por %}<p><strong>Decisão registrada por:</strong> {{ fluxo.decidida_por }} em {{ fluxo.decidida_em|data_local|replace(":", "h") }}.</p>{% endif %}
-  {% if fluxo_compacto %}
-  {% if fluxo.atual == 'confirmar' %}<p>A conferência desta apresentação foi encerrada. Não existe decisão de conferência pendente. O ARP {{ fluxo.arp }} permanece responsável pelo rascunho, conforme as permissões vigentes.</p>
-  {% else %}<p><strong>Responsável pela próxima ação:</strong> {{ fluxo.responsavel }}.</p>{% endif %}
-  {% else %}
+  {% if not fluxo_compacto %}
   <p><strong>Próxima providência:</strong> {{ fluxo.proxima }}</p>
-  <p><strong>Responsável atual:</strong> {{ fluxo.responsavel }}</p>
+  <p><strong>Responsável pela próxima etapa:</strong> {{ fluxo.responsavel }}</p>
   <p class="ajuda"><strong>APA em exercício:</strong> {{ fluxo.apa }}<br><strong>ARP vigente:</strong> {{ fluxo.arp }}</p>
   {% endif %}
   {% if fluxo.versao is not none and fluxo.versao_atual != fluxo.versao %}<p class="aviso-leitura">O rascunho recebeu alterações posteriores. Esta conferência se refere exclusivamente às informações apresentadas, sem confirmar alterações posteriores.</p>{% endif %}
-  <p class="ajuda">{% if not fluxo_compacto %}Este desenho explica o percurso; somente a indicação “atual” representa a situação registrada. {% endif %}Conferência, devolução e confirmação são atos internos: não são aprovação jurídica, homologação, submissão institucional ou declaração de conformidade à LGPD.</p>
 </div>
