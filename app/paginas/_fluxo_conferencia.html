@@ -11,7 +11,7 @@
     <li {% if fluxo.atual == 'confirmar' %}aria-current="step"{% endif %}><strong>Confirmar conferência interna</strong><span>APA confere aquela versão → histórico preservado → continuidade conforme o fluxo vigente.</span>{% if fluxo.atual == 'confirmar' %}<strong>Situação atual</strong>{% endif %}</li>
   </ul>
   <p><strong>Agora:</strong> {{ fluxo.estado }}.{% if fluxo.versao is not none and not ocultar_numeros_versao|default(false) %} {{ "Versão conferida" if fluxo.atual == "confirmar" else "Versão apresentada" }}: <strong>{{ fluxo.rotulo_apresentacao }}</strong>.{% endif %}</p>
-  {% if fluxo.decidida_por %}<p><strong>Decisão registrada por:</strong> {{ fluxo.decidida_por }}{% if not fluxo_compacto %} · {{ fluxo.decidida_em|data_local|replace(":", "h") }}{% endif %}.</p>{% endif %}
+  {% if fluxo.decidida_por %}<p><strong>Decisão registrada por:</strong> {{ fluxo.decidida_por }} em {{ fluxo.decidida_em|data_local|replace(":", "h") }}.</p>{% endif %}
   {% if fluxo_compacto %}
   {% if fluxo.atual == 'confirmar' %}<p>A conferência desta apresentação foi encerrada. Não existe decisão de conferência pendente. O ARP {{ fluxo.arp }} permanece responsável pelo rascunho, conforme as permissões vigentes.</p>
   {% else %}<p><strong>Responsável pela próxima ação:</strong> {{ fluxo.responsavel }}.</p>{% endif %}
