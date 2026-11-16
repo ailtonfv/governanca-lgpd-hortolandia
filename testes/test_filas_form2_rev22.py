@@ -57,6 +57,9 @@ def test_interface_e_blocos(sessao):
     for numero in range(1,15):
         response=client.get(f"/form2/participacoes/{p.id}/blocos/{numero}?conta_id=CONTA-B1")
         assert response.status_code == 200, response.text
+        import re
+        for link in re.findall(r'<a [^>]*href="https?://(?!testserver)[^"]+"[^>]*>', response.text):
+            assert 'target="_blank"' in link and 'noopener' in link
     assert client.get(f"/form2/participacoes/{p.id}/blocos/1?conta_id=CONTA-G1").status_code == 403
 
 def test_assuncao_explicada_confirmada_e_identificada_na_fila(sessao):
