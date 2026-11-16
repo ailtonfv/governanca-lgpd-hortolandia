@@ -4,7 +4,9 @@
   <summary>Consultar a resposta agregada anterior à extensão — somente leitura</summary>
   <p><strong>{{ codigo_pergunta('13.2', 1) }} — {{ extensao_medidas.legado.pergunta }}</strong></p>
   <p>{{ extensao_medidas.legado.resposta or 'Não respondida na versão anterior.' }}</p>
+  <details><summary>Dados técnicos</summary>
   <p>REV13 original · rascunho {{ extensao_medidas.legado.versao_rascunho }} · snapshot técnico {{ extensao_medidas.legado.numero_snapshot }}.</p>
+  </details>
   <p class="ajuda">O snapshot preserva o conteúdo anterior completo, sua autoria e seu lacre. Esta resposta não foi convertida nas duas respostas da extensão.</p>
 </details>
 {% endif %}
