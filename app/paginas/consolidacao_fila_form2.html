@@ -5,7 +5,7 @@
 <h1>Conferência da consolidação</h1>
 <p><strong>{{ registro.codigo_lgpd }}</strong> · FORM 2 · {{ pessoa.nome }}</p>
 {% include '_regua_fila_form2.html' %}
-<p>Esta conferência reúne o que está salvo. Pode ser registrada mesmo com pontos em aberto, para acompanhar a evolução. Não conclui o processo nem homologa a análise.</p>
+<p>Esta conferência reúne o que está salvo. Pode ser registrada mesmo com pontos em aberto, para acompanhar a evolução. Não conclui o Registro nem homologa a análise.</p>
 {% if ultima %}<article aria-label="Última conferência">
 <h2>Conferência {{ ultima.numero }}</h2>
 <p>{{ 'Há alterações posteriores. Revise os dados atuais e registre uma nova conferência.' if desatualizada else 'As fontes permanecem iguais às da última conferência registrada.' }}</p>

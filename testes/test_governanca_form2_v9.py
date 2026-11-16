@@ -255,7 +255,7 @@ def test_HTTP_lista_retorno_e_negacao(sessao,principal):
         assert 'AAL — Agente de Análise de Legitimidade' not in origem.text
         assert 'Complementar FORM 1' in origem.text
         assert f'/registros/{p.registro_id}/form1-rev22?conta_id=CONTA-A1&amp;bloco=1' in origem.text
-        assert '14 blocos do FORM 1 deste processo' in origem.text
+        assert '14 blocos do FORM 1 deste Registro' in origem.text
         assert 'decida qual versão' not in origem.text
         assert 'Complementar FORM 1' not in pagina.text
         assert 'Retorno da S2' not in pagina.text

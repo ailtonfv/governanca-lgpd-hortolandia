@@ -35,7 +35,7 @@
 {% else %}<textarea aria-label="{{ q.enunciado }}" name="{{ tx }}" maxlength="{{ limite_texto(q) }}">{{ valores.get(tx,'') }}</textarea>{% endif %}
 </fieldset>
 {% else %}
-{% if q.id == 'F2-1.1' %}<p><strong>{{ registro.codigo_lgpd }}</strong></p><p class="ajuda">Identificador do processo, preenchido automaticamente.</p>
+{% if q.id == 'F2-1.1' %}<p><strong>{{ registro.codigo_lgpd }}</strong></p><p class="ajuda">Identificador do Registro, preenchido automaticamente.</p>
 {% elif q.id == 'F2-1.4' %}<p>{{ pessoa.nome }}</p><p class="ajuda">Agente responsável pela participação.</p>
 {% elif q.id in ('F2-1.5', 'F2-1.6') %}<p>Cadastro funcional autorizado indisponível nesta demonstração.</p>
 {% else %}<p>{{ q.controle }}</p>{% endif %}

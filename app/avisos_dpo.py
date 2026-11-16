@@ -17,7 +17,7 @@ def montar_aviso(aviso, base_url):
     mensagem["Subject"] = f"[LGPD] {titulo} — {dados['identificador_lgpd']}"
     mensagem["Message-ID"] = f"<lgpd-aviso-{aviso.id}@hortolandia.sp.gov.br>"
     mensagem.set_content(
-        f"Processo: {dados['identificador_lgpd']}\n"
+        f"Registro: {dados['identificador_lgpd']}\n"
         f"Secretaria de origem: {dados['secretaria_id']}\n"
         f"Fila destinatária: {dados['fila_id']}\n"
         f"Entrada: {dados['entrada_em']}\n"

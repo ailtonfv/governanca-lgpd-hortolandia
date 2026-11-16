@@ -198,13 +198,13 @@ def executar(sessao, *, conta_id, comando_id, participacao_id, versao, acao,
     if repeticao is not None:
         return repeticao
     if p.versao != versao:
-        raise ValueError("O processo mudou. Atualize a página antes de agir.")
+        raise ValueError("O Registro mudou. Atualize a página antes de agir.")
     if p.estado != "em_atendimento" or sessao.get(Registro, p.registro_id).estado_atual != "em_andamento":
         raise ValueError("A operação exige atendimento em andamento.")
     g = estado(sessao, p)
     pend = g["pendencias"].get(pendencia_id)
     if acao in {"destinar", "responder", "aceitar", "rejeitar", "retirar", "vincular", "solicitante"} and not pend:
-        raise ValueError("Pendência inexistente neste processo.")
+        raise ValueError("Pendência inexistente neste Registro.")
     motivo = texto(dados.get("motivo", ""))
     if acao == "adicionar":
         r = (p.conteudo or {}).get("respostas_etapa1", {})
@@ -241,7 +241,7 @@ def executar(sessao, *, conta_id, comando_id, participacao_id, versao, acao,
         else:
             outra = g["pendencias"].get(ref)
             if not outra or outra is pend or outra["estado"] not in {"aberta", "respondida"} or pend["estado"] not in {"aberta", "respondida"}:
-                raise ValueError("Escolha outra pendência ativa deste processo.")
+                raise ValueError("Escolha outra pendência ativa deste Registro.")
             for o in outra["origens"]:
                 if o not in pend["origens"]:
                     pend["origens"].append(o)
@@ -252,7 +252,7 @@ def executar(sessao, *, conta_id, comando_id, participacao_id, versao, acao,
     elif acao == "solicitante":
         participante = sessao.get(ParticipacaoForm2, dados.get("solicitante_id"))
         if not participante or participante.origem_id != p.id or participante.estado == "concluida":
-            raise ValueError("Selecione uma participação aberta deste processo.")
+            raise ValueError("Selecione uma participação aberta deste Registro.")
         if pend["estado"] not in {"aberta", "respondida"}:
             raise ValueError("Vínculo exige pendência ativa.")
         pend["solicitantes"].setdefault(participante.id, pend["estado"])

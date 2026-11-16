@@ -16,7 +16,7 @@
 {% if complemento.situacao %}<p>Complementação do FORM 1: {{ complemento.situacao }}.</p>{% endif %}
 <div class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/participacoes/{{ complemento.p.id }}/governanca?conta_id={{ conta_id|urlencode }}">Ver pendências e respostas</a></div>
 {% endfor %}</article>
-{% else %}<p>Nenhum processo nas filas autorizadas para esta conta.</p>{% endfor %}
+{% else %}<p>Nenhum Registro nas filas autorizadas para esta conta.</p>{% endfor %}
 {% if pode_encaminhar %}
 <details><summary>Encaminhar versão do FORM 1 já confirmada</summary>
 <p>O APA pode encaminhar uma origem com conferência interna confirmada para o ensaio demonstrativo.</p>
@@ -27,7 +27,7 @@
 <button>Encaminhar para a fila</button></form></details>
 {% endif %}
 {% if dpo %}<h2 id="painel-dpo">Acompanhamento do DPO</h2>
-<div class="tabela-filas"><table><thead><tr><th>Processo</th><th>Secretaria</th><th>Fila</th><th>Entrada</th><th>Horas sem responsável</th><th>Horas aguardando DPO</th><th>Situação</th></tr></thead>
+<div class="tabela-filas"><table><thead><tr><th>Registro</th><th>Secretaria</th><th>Fila</th><th>Entrada</th><th>Horas sem responsável</th><th>Horas aguardando DPO</th><th>Situação</th></tr></thead>
 <tbody>{% for l in linhas %}<tr><td>{{ l.registro.codigo_lgpd }}</td><td>{{ l.secretaria }}</td><td>{{ l.fila }}</td><td>{{ l.p.entrada_em.strftime('%d/%m/%Y %H:%M') }}</td><td>{{ l.espera }}</td><td>{{ l.dpo }}</td><td>{{ l.situacao }}</td></tr>{% endfor %}</tbody></table></div>
 <h2>Ingresso por unidade ativa</h2><ul>{% for u in cobertura %}<li>{{ u.nome }} · {{ u.total }} ingresso(s)</li>{% endfor %}</ul>{% endif %}
 

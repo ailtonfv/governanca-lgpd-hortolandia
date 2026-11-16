@@ -8,7 +8,7 @@
 {% if e_aal %}<a class="botao-link-secundario" href="/form2/participacoes/{{ p.id }}?conta_id={{ conta_id|urlencode }}">Voltar ao FORM 2</a>{% endif %}</div>
 {% if e_aal and tem_retorno_institucional %}<p class="acoes-fila-form2"><a class="botao-link-secundario" href="/registros/{{ registro.id }}/unidade-retorno?conta_id={{ conta_id|urlencode }}">Conferir unidade de retorno de Ouvidoria/e-SIC</a></p>{% endif %}
 {% if e_origem and not e_aal %}
-<p>Leia as solicitações abaixo e complemente as respostas nos 14 blocos do FORM 1 deste processo. Apresente as alterações ao APA para conferência. Depois da confirmação, volte a esta tela para enviar a resposta a cada solicitação. O histórico permanece preservado.</p>
+<p>Leia as solicitações abaixo e complemente as respostas nos 14 blocos do FORM 1 deste Registro. Apresente as alterações ao APA para conferência. Depois da confirmação, volte a esta tela para enviar a resposta a cada solicitação. O histórico permanece preservado.</p>
 <div class="acoes-fila-form2"><a class="botao-link" href="/registros/{{ registro.id }}/form1-rev22?conta_id={{ conta_id|urlencode }}&amp;bloco=1">Complementar FORM 1</a></div>
 {% elif e_aal %}
 <p>Acompanhe o que foi solicitado ao responsável pelo FORM 1. Quando a resposta chegar, confira se ela atende ao pedido. Depois, decida qual versão do FORM 1 será usada na análise. O histórico permanece preservado.</p>
