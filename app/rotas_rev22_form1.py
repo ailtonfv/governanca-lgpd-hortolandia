@@ -31,6 +31,7 @@ def pagina(request:Request,registro_id:str,conta_id:str,bloco:int=1,conjunto:int
     reg=sessao.get(Registro,registro_id)
     pode=_contexto_autorizado(sessao,conta_id,registro_id)[-1] is None and reg.estado_atual=='em_andamento'
     conferencia=sessao.get(ConferenciaInternaForm1Integral,registro_id)
+    conferente = conferente_da_apresentacao(sessao, reg, conferencia)
     pode=pode and conferencia is None
     from app.eventos import registrar_auditoria
     registrar_auditoria(sessao,'consulta_form1_rev22','pessoa',identidade['pessoa_id'],{'registro_id':registro_id,'bloco':bloco})
@@ -60,7 +61,7 @@ def pagina(request:Request,registro_id:str,conta_id:str,bloco:int=1,conjunto:int
         orientacao_levantamento=acesso_local_cartilha(request) and "levantamento" in secoes_cartilha_disponiveis(),
         edicao_cartilha=VERSAO_CARTILHA_AJUDAS_FORM1,
         salvamento_confirmado=request.query_params.get("salvo") == str(r.versao_rascunho),
-        e_apa=identidade["pessoa_id"] == conferente_da_apresentacao(sessao,reg,conferencia),
+        e_apa=identidade["pessoa_id"] == conferente, falta_conferente=conferencia and not conferente,
         registro=reg,r=r,identidade=identidade,conta_id=conta_id,bloco=bloco,conjunto=conjunto,
         devolucao=_devolucao_para_interface(sessao, registro_id),
         encaminhado=bool(sessao.scalar(select(ParticipacaoForm2.id).where(ParticipacaoForm2.registro_id==registro_id).limit(1))),

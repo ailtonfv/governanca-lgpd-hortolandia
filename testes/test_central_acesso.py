@@ -129,7 +129,7 @@ def test_escolha_explicita_filtra_form2_e_retorna_ao_contexto(sessao, conta, rot
     assert "<h1>Minhas preparações</h1>" in form2.text
     for pagina in (geral, form1):
         assert rid in pagina.text and outro in pagina.text
-        for indicador in ("Registros disponíveis", "Providências de conferência", "Campos obrigatórios pendentes"):
+        for indicador in ("Registros disponíveis", "Providências de conferência", "Blocos sem respostas salvas"):
             assert indicador in pagina.text and indicador not in form2.text
         assert "Dashboard LGPD" not in pagina.text
     assert "Dashboard LGPD" not in form2.text and "Situação do FORM 1" not in form2.text

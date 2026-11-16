@@ -395,7 +395,8 @@ def test_fila_cartao_unico_e_encaminhamento_so_APA(sessao, principal):
         assert alfa.status_code == 200
         assert alfa.text.count('data-registro="' + principal.registro_id + '"') == 1
         assert 'Ver pendências e respostas' in alfa.text
-        assert 'Encaminhar versão do FORM 1 já confirmada' in alfa.text
+        assert not alfa.context['encaminhaveis']
+        assert 'Encaminhar versão do FORM 1 já confirmada' not in alfa.text
 
 
 def test_HTTP_destinar_com_chave_real_da_tela_e_repeticao(sessao, principal):

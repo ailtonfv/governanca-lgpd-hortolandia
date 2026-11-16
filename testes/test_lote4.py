@@ -17,7 +17,7 @@ from testes.test_governanca_form2_v9 import principal
 
 def test_temporalidade_e_falta_factual():
     for codigo in (GUARDA_INSTITUCIONAL, "A_CONFIRMAR"):
-        dados, _ = aplicar_bloco({}, bloco=2, alteracoes={"F2-2.9": codigo})
+        dados, _ = aplicar_bloco({}, bloco=2, proxima_versao=1, alteracoes={"F2-2.9": codigo})
         assert aguarda_temporalidade(dados) == (codigo == GUARDA_INSTITUCIONAL)
         assert bool(dados["sinalizadores_etapa1"]) == (codigo == "A_CONFIRMAR")
 

@@ -338,7 +338,8 @@ def test_lista_de_origens_confirmadas_do_apa(sessao, monkeypatch):
     assert negada.status_code == 400
     enviada = cliente.post(fila + "/encaminhar", data={**dados, "conta_id": "CONTA-A1"})
     assert enviada.status_code == 200
-    assert "Nenhuma apresentação confirmada aguarda ingresso" in enviada.text
+    assert not enviada.context["encaminhaveis"]
+    assert "Encaminhar versão do FORM 1 já confirmada" not in enviada.text
     detalhe = cliente.get("/registros/" + registro["registro_id"], params={"conta_id": "CONTA-A1"})
     assert "Fila do FORM 2:" in detalhe.text and "Aguardando responsável" in detalhe.text
     painel = cliente.get("/painel", params={"conta_id": "CONTA-A1"})

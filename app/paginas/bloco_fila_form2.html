@@ -69,7 +69,7 @@
 {% set op = 'opcao:' ~ q.id %}{% set txt = 'texto:' ~ q.id %}{% set com = 'comentario:' ~ q.id %}
 {% set bloqueada = numero == 1 or q.edicao in ('habilitada', 'consulta') %}
 {% if q.id in ('F2-9W.1','F2-11S.1','F2-12A.1') %}<h2>{{ {'F2-9W.1':'Ramificação 9W — Wi-Fi','F2-11S.1':'Ramificação 11S — Informações de saúde','F2-12A.1':'Ramificação 12A — Alta sensibilidade'}[q.id] }}</h2>{% endif %}
-{% if q.id == 'F2-3.2.2' %}<aside>{% if finalidade_validada %}<strong>No bloco 2 (sua resposta)</strong><p>{{ finalidade_validada }}</p>{% else %}Finalidade ainda não validada no bloco 2.{% endif %}{% endif %}</aside>{% endif %}
+{% if q.id == 'F2-3.2.2' %}<aside>{% if finalidade_validada %}<strong>No bloco 2 (sua resposta)</strong><p>{{ finalidade_validada }}</p>{% else %}Finalidade ainda não validada no bloco 2.{% endif %}</aside>{% endif %}
 {% if q.id == 'F2-3.5' %}
 <p id="balanceamento-inativo" {% if ativa(q.id, '') %}hidden{% endif %}>Teste de balanceamento: não se aplica (Legítimo interesse não indicado na 3.1)</p>
 <section id="teste-balanceamento" {% if not ativa(q.id, '') %}hidden{% endif %}><h2>Teste de balanceamento — só para Legítimo interesse</h2>
