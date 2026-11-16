@@ -383,3 +383,30 @@ def substituir_apa_definitivamente(
     })
     sessao.flush()
     return resultado
+
+
+AGUARDANDO_CONFERENTE = "Aguardando definição de quem fará a conferência"
+
+
+def conferente_da_apresentacao(sessao, registro, conferencia):
+    """Resolve a competência apenas para a apresentação pendente deste Registro."""
+    if not registro or not conferencia:
+        return None
+    unidade = registro.unidade_principal_atual_id
+    agora = _agora_utc()
+    exercicio = apa_em_exercicio(sessao, unidade, agora)
+    if not exercicio:
+        return None
+    candidato = exercicio["pessoa_id"]
+    if candidato == conferencia.solicitada_por_id:
+        tipo = "titular" if candidato != exercicio["titular_id"] else "suplente"
+        alternativo = _designacao_apa(sessao, unidade, tipo)
+        if not _designacao_vigente(alternativo, agora):
+            return None
+        candidato = alternativo.pessoa_id
+    pessoa = sessao.get(Pessoa, candidato)
+    from app.segregacao_form2_v9 import aal_em_exercicio
+    if (not pessoa or not pessoa.ativa or candidato == conferencia.solicitada_por_id
+            or aal_em_exercicio(sessao, registro.id, candidato)):
+        return None
+    return candidato

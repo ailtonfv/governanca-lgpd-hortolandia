@@ -5,7 +5,7 @@ import uuid
 from sqlalchemy import select
 
 from app.comandos import abrir_comando, fechar_comando
-from app.continuidade_apa import apa_em_exercicio, pessoa_e_apa_em_exercicio
+from app.continuidade_apa import apa_em_exercicio, pessoa_e_apa_em_exercicio, conferente_da_apresentacao
 from app.eventos import registrar_auditoria, registrar_evento
 from app.permissoes import tem_papel
 from app.modelos import (
@@ -247,9 +247,8 @@ def devolver_conferencia_interna_form1_integral(
     registro = sessao.scalars(
         select(Registro).where(Registro.id == registro_id).with_for_update()
     ).one_or_none()
-    if registro is None or not pessoa_e_apa_em_exercicio(
-        sessao, pessoa_id, registro.unidade_principal_atual_id
-    ):
+    pendente = sessao.get(ConferenciaInternaForm1Integral, registro_id)
+    if registro is None or (pendente and (not pessoa_id or pessoa_id != conferente_da_apresentacao(sessao, registro, pendente))):
         return _negar(
             sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
             TIPO_COMANDO_DEVOLUCAO,
@@ -374,9 +373,8 @@ def confirmar_conferencia_interna_form1_integral(
     registro = sessao.scalars(
         select(Registro).where(Registro.id == registro_id).with_for_update()
     ).one_or_none()
-    if registro is None or not pessoa_e_apa_em_exercicio(
-        sessao, pessoa_id, registro.unidade_principal_atual_id
-    ):
+    pendente = sessao.get(ConferenciaInternaForm1Integral, registro_id)
+    if registro is None or (pendente and (not pessoa_id or pessoa_id != conferente_da_apresentacao(sessao, registro, pendente))):
         return _negar(
             sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
             TIPO_COMANDO_CONFIRMACAO,
@@ -497,6 +495,8 @@ def carregar_versao_para_conferencia(sessao, *, conta_id, registro_id):
         None if registro is None
         else sessao.get(ConferenciaInternaForm1Integral, registro_id)
     )
+    if conferencia is not None:
+        e_apa = bool(pessoa_id and pessoa_id == conferente_da_apresentacao(sessao, registro, conferencia))
     historico_confirmado = None
     if registro is not None and conferencia is None:
         historico_confirmado = sessao.scalars(

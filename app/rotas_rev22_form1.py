@@ -8,7 +8,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from app.banco import motor
-from app.continuidade_apa import pessoa_e_apa_em_exercicio
+from app.continuidade_apa import conferente_da_apresentacao
 from app.modelos import ParticipacaoForm2,Registro,RascunhoForm1Integral,Unidade,ConferenciaInternaForm1Integral
 from app.consultas_interface import _identidade, _ids_visiveis
 from app.rascunho_form1_integral import _contexto_autorizado
@@ -60,7 +60,7 @@ def pagina(request:Request,registro_id:str,conta_id:str,bloco:int=1,conjunto:int
         orientacao_levantamento=acesso_local_cartilha(request) and "levantamento" in secoes_cartilha_disponiveis(),
         edicao_cartilha=VERSAO_CARTILHA_AJUDAS_FORM1,
         salvamento_confirmado=request.query_params.get("salvo") == str(r.versao_rascunho),
-        e_apa=pessoa_e_apa_em_exercicio(sessao,identidade["pessoa_id"],reg.unidade_principal_atual_id),
+        e_apa=identidade["pessoa_id"] == conferente_da_apresentacao(sessao,reg,conferencia),
         registro=reg,r=r,identidade=identidade,conta_id=conta_id,bloco=bloco,conjunto=conjunto,
         devolucao=_devolucao_para_interface(sessao, registro_id),
         encaminhado=bool(sessao.scalar(select(ParticipacaoForm2.id).where(ParticipacaoForm2.registro_id==registro_id).limit(1))),

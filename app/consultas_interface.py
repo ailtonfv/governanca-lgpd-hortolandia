@@ -1,6 +1,7 @@
 """Consultas preparadas para a interface, sem regras de negócio nos templates."""
 
 from app.extensao_medidas_form1 import catalogo_efetivo, versao_estrutura
+from app.continuidade_apa import AGUARDANDO_CONFERENTE, conferente_da_apresentacao
 from app.apresentacoes_form1 import rotulo_apresentacao
 from app.rev18_form1 import TITULO_BLOCO_14
 from app.extensao_guarda_form1 import condicoes_guarda, definicao_guarda, usa_guarda
@@ -391,6 +392,11 @@ def projetar_fluxo_conferencia(sessao, registro_id, unidade_id):
         HistoricoConferenciaForm1Integral.registro_id == registro_id,
         HistoricoConferenciaForm1Integral.numero_apresentacao < historico.numero_apresentacao
     ).order_by(HistoricoConferenciaForm1Integral.numero_apresentacao.desc()).limit(1)) if historico and historico.numero_apresentacao > 1 else None
+    if pendente:
+        conferente = conferente_da_apresentacao(sessao, sessao.get(Registro, registro_id), pendente)
+        responsavel = rotulo(conferente, "APA") if conferente else AGUARDANDO_CONFERENTE
+        if not conferente:
+            estado = proxima = AGUARDANDO_CONFERENTE
     referencia = pendente or historico
     atividades = [
         (rascunho.salvo_em if rascunho else None, "Rascunho salvo"),
@@ -730,11 +736,8 @@ def carregar_painel(sessao, conta_id, *, secretaria_id=None):
         })
 
     for registro, unidade in linhas:
-        exercicio = apa_em_exercicio(sessao, registro.unidade_principal_atual_id)
-        if exercicio is None or exercicio["pessoa_id"] != identidade["pessoa_id"]:
-            continue
         conferencia = sessao.get(ConferenciaInternaForm1Integral, registro.id)
-        if conferencia is None:
+        if not conferencia or conferente_da_apresentacao(sessao, registro, conferencia) != identidade["pessoa_id"]:
             continue
         snapshot = sessao.get(VersaoForm1Integral, conferencia.snapshot_id)
         solicitante = sessao.get(Pessoa, conferencia.solicitada_por_id)
@@ -858,7 +861,7 @@ def carregar_painel(sessao, conta_id, *, secretaria_id=None):
         confirmacao = _confirmacao_para_interface(sessao, registro_id)
         resumo["responsavel_proxima_etapa"] = None
         if conferencia is not None:
-            resumo["situacao_form1_integral"] = "Aguardando conferência interna"
+            resumo["situacao_form1_integral"] = resumo["fluxo_conferencia"]["estado"]
             exercicio = apa_em_exercicio(sessao, resumo["unidade_id"])
             if exercicio is not None:
                 pessoa = sessao.get(Pessoa, exercicio["pessoa_id"])
@@ -1306,6 +1309,7 @@ def carregar_registro(sessao, conta_id, registro_id):
         )
     )
     conferencia_integral = sessao.get(ConferenciaInternaForm1Integral, registro.id)
+    conferente = conferente_da_apresentacao(sessao, registro, conferencia_integral)
     devolucao_integral = _devolucao_para_interface(sessao, registro.id)
     confirmacao_integral = _confirmacao_para_interface(sessao, registro.id)
     historicos_conferencia = sessao.scalars(
@@ -1391,8 +1395,7 @@ def carregar_registro(sessao, conta_id, registro_id):
                     f"{solicitante_conferencia.matricula} — {rotulo_interface(solicitante_conferencia.nome)}"
                 ),
                 "pode_consultar": bool(
-                    exercicio_apa is not None
-                    and exercicio_apa["pessoa_id"] == identidade["pessoa_id"]
+                    conferente == identidade["pessoa_id"]
                 ),
             }
         ),
@@ -1458,9 +1461,7 @@ def carregar_registro(sessao, conta_id, registro_id):
             ),
             conferencia_pendente=conferencia_integral is not None,
             pode_consultar_conferencia=bool(
-                conferencia_integral is not None
-                and exercicio_apa is not None
-                and exercicio_apa["pessoa_id"] == identidade["pessoa_id"]
+                conferencia_integral is not None and conferente == identidade["pessoa_id"]
             ),
             devolucao=devolucao_integral,
             confirmacao=confirmacao_integral,

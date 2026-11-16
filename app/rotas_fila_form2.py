@@ -255,6 +255,10 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
     from app.modelos import AvisoDpo
     comunicados = dict(sessao.execute(select(AvisoDpo.participacao_id, AvisoDpo.criado_em).where(
         AvisoDpo.tipo == "ciencia", AvisoDpo.participacao_id.in_([p.id for p in principais]))).all())
+    from app.continuidade_apa import conferente_da_apresentacao
+    from app.modelos import ConferenciaInternaForm1Integral
+    sem_conferente = [registros[c.registro_id].codigo_lgpd for c in sessao.scalars(
+        select(ConferenciaInternaForm1Integral)) if not conferente_da_apresentacao(sessao, registros[c.registro_id], c)] if dpo else []
     linhas = []
     for p in principais:
         consultas = sessao.scalars(select(ParticipacaoForm2).where(
@@ -366,7 +370,7 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
                  "conta_id": conta_id, "pessoa": pessoa, "participacoes": participacoes,
                  "registros": registros, "unidades": unidades, "linhas": linhas,
                  "impedimentos": impedimentos, "complementos": complementos, "gerenciaveis": gerenciaveis, "agentes": {p.id: [a for a in agentes if a.id != p.responsavel_id and autorizado(sessao, a, p)] for p in gerenciaveis},
-                 "responsaveis": responsaveis, "dpo": dpo, "aguardando_guarda": len({p.registro_id for p in principais if aguarda_temporalidade(p.conteudo)}), "cobertura": cobertura, "comando_id": str(uuid4())})
+                 "responsaveis": responsaveis, "dpo": dpo, "sem_conferente": sem_conferente, "aguardando_guarda": len({p.registro_id for p in principais if aguarda_temporalidade(p.conteudo)}), "cobertura": cobertura, "comando_id": str(uuid4())})
 
 
 @router.get("/form2/participacoes/{participacao_id}", name="participacao_form2")
