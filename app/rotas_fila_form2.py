@@ -494,6 +494,7 @@ def bloco_fila(request: Request, participacao_id: str, bloco: int, conta_id: str
         context={"atuacao": contexto_atuacao(sessao, pessoa, p), "p": p, "estados_regua": estados_regua_form2(p.conteudo or {}), "pessoa": pessoa, "conta_id": conta_id, "bloco": definicao,
         "cargo": CARGOS_FICTICIOS.get(pessoa.id), "numero": bloco, "confirmacao": confirmacao, "ocorrencias": ocorrencias, "origens_repetiveis": origens_repetiveis,
         "comando_id": str(uuid4()),
+        "finalidade_validada": conteudo.get(RASCUNHO, {}).get("2", {}).get("texto:F2-2.3"),
         "fatos_origem": origem["conteudo"],
         "registro": sessao.get(Registro, p.registro_id),
         "secretaria": sessao.get(Unidade, sessao.get(Registro, p.registro_id).unidade_principal_atual_id),

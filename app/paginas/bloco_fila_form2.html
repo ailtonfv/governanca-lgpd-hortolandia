@@ -23,7 +23,7 @@
 {% if numero in (1,2) %}
 {% set fatos = fatos_origem.get('respostas', {}) %}
 {% set unidade_origem = fatos.get('2.4.2') if fatos.get('2.4') == 'Não' else fatos.get('2.3') %}
-{% for q in bloco.itens %}<fieldset id="{{ q.id }}" {% if q.edicao == "habilitada" %}{{ gatilhos(q) }}{% endif %} {% if q.edicao == "habilitada" and not q.ativa %}disabled{% endif %}><legend>{{ q.id }} · {{ q.enunciado }}</legend>
+{% for q in bloco.itens %}<fieldset id="{{ q.id }}" {% if q.edicao == "habilitada" %}{{ gatilhos(q) }}{% endif %} {% if q.edicao == "habilitada" and not q.ativa %}disabled{% endif %}><legend>{{ q.id }} · {{ q.enunciado|replace("Seção 2","Bloco 2") }}</legend>
 {% if q.edicao == 'habilitada' %}{{ ajuda(q, q.ativa) }}{% endif %}
 {% if q.id == 'F2-1.2' %}<p>Secretaria do Registro: <strong>{{ secretaria.nome }}</strong>.</p>{% endif %}
 {% if q.id in ('F2-2.1', 'F2-2.9') %}<aside><strong>No FORM 1 · {{ rotulo_origem }}</strong>
@@ -62,11 +62,12 @@
 {% set op = 'opcao:' ~ q.id %}{% set txt = 'texto:' ~ q.id %}{% set com = 'comentario:' ~ q.id %}
 {% set bloqueada = numero == 1 or q.edicao in ('habilitada', 'consulta') %}
 {% if q.id in ('F2-9W.1','F2-11S.1','F2-12A.1') %}<h2>{{ {'F2-9W.1':'Ramificação 9W — Wi-Fi','F2-11S.1':'Ramificação 11S — Informações de saúde','F2-12A.1':'Ramificação 12A — Alta sensibilidade'}[q.id] }}</h2>{% endif %}
+{% if q.id == 'F2-3.2.2' %}<aside>{% if finalidade_validada %}<strong>No bloco 2 (sua resposta)</strong><p>{{ finalidade_validada }}</p>{% else %}Finalidade ainda não validada no bloco 2.{% endif %}</aside>{% endif %}
 {% if q.id == 'F2-3.5' %}
 <p id="balanceamento-inativo" {% if ativa(q.id, '') %}hidden{% endif %}>Teste de balanceamento: não se aplica (Legítimo interesse não indicado na 3.1)</p>
 <section id="teste-balanceamento" {% if not ativa(q.id, '') %}hidden{% endif %}><h2>Teste de balanceamento — só para Legítimo interesse</h2>
 {% endif %}
-<fieldset class="resposta-form2" id="{{ q.id }}"><legend>{{ q.id }} · {{ q.enunciado }}</legend>
+<fieldset class="resposta-form2" id="{{ q.id }}"><legend>{{ q.id }} · {{ q.enunciado|replace("Seção 2","Bloco 2") }}</legend>
 {% if q.id == 'F2-14.2' and complementacao %}<p><strong>Complementação do FORM 1 · origem 1.3.1</strong><br>{{ complementacao }}</p>{% endif %}
 {% if q.id == 'F2-13.9' %}<p>{{ revogacao|join(', ') if revogacao else 'F2-5.7 ainda sem resposta candidata.' }} Consulta ao rascunho, sem homologação D11.</p>{% endif %}
 {% if q.id in ('F2-14.8.1','F2-14.8.2') %}<p>A classificação de pendências impeditivas aguarda definição institucional.</p>{% endif %}
