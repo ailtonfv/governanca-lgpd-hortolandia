@@ -88,3 +88,7 @@ body:has(.salvamento-fixo-form1) > main { min-height: 0; flex: 1; }
 .dialogo-acao-fila::backdrop {background: rgb(12 59 90 / 55%);}
 
 .filas-form2 textarea:disabled, .filas-form2 input:disabled { background-color: #edf1f4; color: #53616b; border-color: #c7d1d9; }
+
+.filas-form2 .regua-compacta { flex-wrap: wrap; gap: .3rem; }
+.filas-form2 .regua-compacta a { padding: .35rem .55rem; }
+.regua-compacta [aria-current] { background-color: #075985; color: white; font-weight: bold; }
