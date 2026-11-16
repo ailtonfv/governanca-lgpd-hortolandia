@@ -513,8 +513,8 @@ def detalhe_registro(
             status_code=403,
         )
     from sqlalchemy import select
-    from app.modelos import ParticipacaoForm2
-    participacao_principal = sessao.scalar(select(ParticipacaoForm2.id).where(
+    from app.modelos import ParticipacaoForm2, Pessoa, Unidade
+    participacao_principal = sessao.scalar(select(ParticipacaoForm2).where(
         ParticipacaoForm2.registro_id == registro_id, ParticipacaoForm2.tipo == "principal",
         ParticipacaoForm2.estado != "concluida",
     ).limit(1))
@@ -529,6 +529,9 @@ def detalhe_registro(
             "erro": erro,
             "modo_legado": False,
             "esta_na_fila": participacao_principal,
+            "fila_unidade": sessao.get(Unidade, participacao_principal.unidade_id).nome if participacao_principal else None,
+            "fila_responsavel": sessao.get(Pessoa, participacao_principal.responsavel_id).nome
+                if participacao_principal and participacao_principal.responsavel_id else None,
             "comando_encaminhar": str(uuid.uuid4()),
             "navegacao_form2": projetar_navegacao_preparacao(sessao, conta_id=conta_id, registro_id=registro_id),
             "comando_i1": str(uuid.uuid4()),

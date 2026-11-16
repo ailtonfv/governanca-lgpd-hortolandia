@@ -44,11 +44,11 @@
     <h3 id="titulo-proxima-providencia">Próxima providência</h3>
     <p><strong>Seu papel neste Registro:</strong> {{ proxima.papel }}.</p>
     <p>{{ proxima.descricao }}</p>
-    {% if registro.form1_integral.confirmacao_interna and registro.form1_integral.pode_atribuir_arp %}
+    {% if registro.form1_integral.pode_atribuir_arp %}
       {% if esta_na_fila %}
-      <p>Este Registro já ingressou no FORM 2.</p>
+      <p>Fila do FORM 2: {{ fila_unidade }} · {{ "Responsável: " ~ fila_responsavel if fila_responsavel else "Aguardando responsável" }}.</p>
       <a class="botao-link" href="/form2/filas?conta_id={{ conta_id|urlencode }}">Consultar filas do FORM 2</a>
-      {% else %}
+      {% elif registro.form1_integral.confirmacao_interna %}
       <form method="post" action="/form2/filas/encaminhar">
         <input type="hidden" name="snapshot_id" value="{{ registro.form1_integral.confirmacao_interna.snapshot_id }}">
         <input type="hidden" name="conta_id" value="{{ conta_id }}">
