@@ -10,7 +10,10 @@
 <p class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/participacoes/{{ p.id }}/governanca?conta_id={{ conta_id|urlencode }}">Ver pendências e respostas</a></p>
 <p>Situação: {{ situacoes.get(p.estado, p.estado) }}</p>{% if p.responsavel_id == pessoa.id %}<p>{{ p.questao }}</p>{% endif %}
 {% if p.tipo == 'principal' and p.responsavel_id == pessoa.id %}{% include '_regua_fila_form2.html' %}
-<div class="acoes-fila-form2"><a class="botao-link" href="/form2/participacoes/{{ p.id }}/consolidacao?conta_id={{ conta_id|urlencode }}">Conferir consolidação</a></div>{% endif %}
+{% set proximo = namespace(numero=none) %}
+{% for n in range(1, 15) if proximo.numero is none and n|string not in estados_regua.salvos %}{% set proximo.numero = n %}{% endfor %}
+<div class="acoes-fila-form2">{% if proximo.numero and p.estado == 'em_atendimento' %}<a class="botao-link" href="/form2/participacoes/{{ p.id }}/blocos/{{ proximo.numero }}?conta_id={{ conta_id|urlencode }}">{{ 'Continuar no bloco ' ~ proximo.numero if estados_regua.salvos else 'Começar pelo bloco 1' }}</a>{% endif %}
+<a class="botao-link-secundario" href="/form2/participacoes/{{ p.id }}/consolidacao?conta_id={{ conta_id|urlencode }}">Conferir consolidação</a></div>{% endif %}
 {% if p.tipo == 'principal' and p.estado == 'em_atendimento' and p.responsavel_id == pessoa.id %}
 <details class="consultas-form2"><summary>Consultas ao DPO, ao Jurídico e às áreas temáticas</summary>
 <p>Use esta seção quando precisar de uma manifestação de outra área. O preenchimento do FORM 2 é feito nos blocos acima.</p>
