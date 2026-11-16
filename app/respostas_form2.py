@@ -44,6 +44,7 @@ def definicao_bloco(numero: int) -> dict:
         itens.append({
             **deepcopy(item),
             "enunciado": editorial["enunciado"],
+            "referencias_form1": editorial.get("subsidios_form1_rev13", []) + editorial.get("referencias_rev18", []),
             "orientacao": editorial.get("orientacao"),
             "modo": escolha.get("modo") if escolha else None,
             "alternativas": deepcopy(alternativas.get(item["id"], [])),

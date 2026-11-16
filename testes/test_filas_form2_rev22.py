@@ -256,3 +256,33 @@ def test_condicionais_inativas_e_pedidos_de_origem(sessao):
     resposta = enviar(1, "PEDIDO", {"resposta_F2-1.3": "NAO", "resposta_F2-1.3.1": "Pedido fictício"})
     assert resposta.status_code == 303
     assert sessao.scalar(select(ComplementoForm2)).solicitacao == "Pedido fictício"
+
+
+def test_bloco_dois_exibe_respostas_da_apresentacao(sessao):
+    from fastapi.testclient import TestClient
+    from app.main import app
+    from app.modelos import RascunhoForm1Integral
+
+    r = _preparar(sessao, "ORIGEM-FATOS")
+    rascunho = sessao.get(RascunhoForm1Integral, r["registro_id"])
+    from app.rascunho_form1_integral import salvar_bloco_2_form1_integral, salvar_bloco_12_form1_integral
+    dados = {"conta_id": "CONTA-G1", "registro_id": r["registro_id"]}
+    assert salvar_bloco_2_form1_integral(sessao, **dados, comando_id="FINALIDADE", versao_lida=1,
+        respostas={"2.11": "Organizar oficinas fictícias"})["permitido"]
+    assert salvar_bloco_12_form1_integral(sessao, **dados, comando_id="GUARDA", versao_lida=2,
+        respostas={"12.1": "Em definição"})["permitido"]
+    sessao.commit()
+    assert _solicitar(sessao, r, comando="FATOS-S", versao=3)["permitido"]
+    assert _confirmar(sessao, r, comando="FATOS-C")["permitido"]
+    p = sessao.scalar(select(ParticipacaoForm2).where(ParticipacaoForm2.registro_id == r["registro_id"]))
+    sessao.add(Designacao(pessoa_id="PESSOA-B", unidade_id=p.unidade_id, papel="aal_form2"))
+    sessao.flush()
+    executar(sessao, conta_id="CONTA-B1", comando_id="FATOS-A", participacao_id=p.id, acao="assumir", versao=1)
+    rascunho.conteudo = {**rascunho.conteudo, "respostas": {"2.11": "Alteração posterior"}}
+    sessao.commit()
+    pagina = TestClient(app).get(f"/form2/participacoes/{p.id}/blocos/2?conta_id=CONTA-B1")
+    for pergunta, fato in (("F2-2.1", "F1-2.11 — Organizar oficinas fictícias"),
+                           ("F2-2.9", "F1-12.1 — Em definição")):
+        quadro = pagina.text.split(f'id="{pergunta}"', 1)[1].split("</aside>", 1)[0]
+        assert f"No FORM 1 · {pagina.context['rotulo_origem']}" in quadro and fato in quadro
+    assert "Alteração posterior" not in pagina.text
