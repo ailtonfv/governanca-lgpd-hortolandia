@@ -36,7 +36,7 @@
 <details><summary>{{ acao }} — {{ registros[p.registro_id].codigo_lgpd }} · {{ p.tipo }}</summary>
 <form method="post" action="/form2/participacoes/{{ p.id }}/reatribuir">
 <input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="comando_id" value="{{ (comando_id ~ "-" ~ p.id)|chave_comando }}"><input type="hidden" name="versao" value="{{ p.versao }}">
-<label>Novo responsável <select name="responsavel_id">{% for a in agentes %}<option value="{{ a.id }}">{{ a.nome }}</option>{% endfor %}</select></label>
+<label>Novo responsável <select name="responsavel_id" required><option value="">Escolha…</option>{% for a in agentes[p.id] %}<option value="{{ a.id }}">{{ a.nome }}</option>{% endfor %}</select></label>
 <label>Motivo <textarea name="motivo" required maxlength="2000"></textarea></label>
 <div class="acoes-fila-form2"><button type="button" class="botao-primario" data-abrir-dialogo="atribuir-{{ p.id }}">{{ acao }}</button></div>
 <dialog class="dialogo-acao-fila" id="atribuir-{{ p.id }}" aria-labelledby="titulo-{{ p.id }}">

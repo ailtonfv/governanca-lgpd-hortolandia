@@ -288,6 +288,8 @@ def reatribuir(sessao, *, conta_id, comando_id, participacao_id, versao,
         ParticipacaoForm2.id == participacao_id).with_for_update().execution_options(populate_existing=True))
     if not p or p.unidade_id not in unidades(sessao, pessoa.id, "gestor_fila"):
         raise PermissionError("A reatribuição exige gestor autorizado da fila.")
+    if not responsavel_id:
+        raise ValueError("Escolha um responsável para esta participação.")
     alvo = sessao.get(Pessoa, responsavel_id)
     if not alvo or not alvo.ativa or not autorizado(sessao, alvo, p):
         raise ValueError("O novo responsável precisa de autorização vigente na unidade.")
