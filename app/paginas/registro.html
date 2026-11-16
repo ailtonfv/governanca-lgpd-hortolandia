@@ -327,7 +327,8 @@
           {% for item in registro.form1_integral.historico_conferencias %}
           <li>
             <strong>{{ item.rotulo_apresentacao }}</strong> · {{ item.situacao }}.
-            <p>Apresentada em {{ item.solicitada_em|data_local }}.</p>
+            {% if item.devolucao_anterior %}<p><strong>Reapresentação (após devolução de {{ (item.devolucao_anterior|data_local)[:5] }})</strong></p>{% endif %}
+          <p>Apresentada em {{ item.solicitada_em|data_local }}.</p>
             {% if item.devolvida_em %}<p>Devolvida em {{ item.devolvida_em|data_local }}.</p>{% endif %}
             {% if item.confirmada_em %}<p>Confirmada em {{ item.confirmada_em|data_local }}.</p>{% endif %}
             <details><summary>Dados técnicos</summary>Snapshot {{ item.numero_snapshot }}</details>

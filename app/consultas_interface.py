@@ -387,6 +387,10 @@ def projetar_fluxo_conferencia(sessao, registro_id, unidade_id):
             "Não há decisão de conferência pendente para esta apresentação. A versão confirmada permanece no histórico; eventual continuidade do preenchimento respeita as ações e permissões já disponíveis.",
             "Sem providência de conferência pendente",
         )
+    devolucao_anterior = sessao.scalar(select(HistoricoConferenciaForm1Integral.devolvida_em).where(
+        HistoricoConferenciaForm1Integral.registro_id == registro_id,
+        HistoricoConferenciaForm1Integral.numero_apresentacao < historico.numero_apresentacao
+    ).order_by(HistoricoConferenciaForm1Integral.numero_apresentacao.desc()).limit(1)) if historico and historico.numero_apresentacao > 1 else None
     referencia = pendente or historico
     atividades = [
         (rascunho.salvo_em if rascunho else None, "Rascunho salvo"),
@@ -397,6 +401,7 @@ def projetar_fluxo_conferencia(sessao, registro_id, unidade_id):
     ultima = max((a for a in atividades if a[0] is not None), default=None)
     return {
         "ultima_atividade": ultima,
+        "devolucao_anterior": devolucao_anterior,
         "atual": atual, "estado": estado, "proxima": proxima, "responsavel": responsavel,
         "apa": apa, "arp": arp,
         "rotulo_apresentacao": rotulo_apresentacao(historico) if historico else None,
@@ -1410,6 +1415,7 @@ def carregar_registro(sessao, conta_id, registro_id):
                     if item.situacao == "devolvida_para_ajustes"
                     else "Conferência interna confirmada"
                 ),
+                "devolucao_anterior": historicos_conferencia[indice-1].devolvida_em if indice else None,
                 "solicitada_em": item.solicitada_em,
                 "devolvida_em": item.devolvida_em,
                 "confirmada_em": item.confirmada_em,
@@ -1427,7 +1433,7 @@ def carregar_registro(sessao, conta_id, registro_id):
                     )
                 ),
             }
-            for item in historicos_conferencia
+            for indice, item in enumerate(historicos_conferencia)
         ],
         "pode_solicitar_conferencia": bool(
             pode_editar_integral and rascunho_integral is not None

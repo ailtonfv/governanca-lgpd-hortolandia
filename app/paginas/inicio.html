@@ -131,6 +131,7 @@
           {% endif %}
           <p><strong>Responsável pelo rascunho:</strong> {{ fluxo.arp }}</p>
           <p class="resumo-conferencia-cartao"><strong>Conferência interna:</strong> {{ fluxo.estado }}{% if fluxo.rotulo_apresentacao %} · {{ fluxo.rotulo_apresentacao }}{% endif %}.</p>
+          {% if fluxo.devolucao_anterior %}<p><strong>Reapresentação (após devolução de {{ (fluxo.devolucao_anterior|data_local)[:5] }})</strong></p>{% endif %}
           <details class="percurso-conferencia-cartao">
             <summary>Entender o percurso ARP → APA → ARP</summary>
             {% include '_fluxo_conferencia.html' %}
