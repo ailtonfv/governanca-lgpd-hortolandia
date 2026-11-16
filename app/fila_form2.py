@@ -197,7 +197,7 @@ def painel(sessao, conta_id):
     return pessoa, visiveis, principais, dpo
 
 
-def importar_confirmada(sessao, *, conta_id, comando_id, registro_id):
+def importar_confirmada(sessao, *, conta_id, comando_id, registro_id, snapshot_id=None):
     pessoa = pessoa_ativa(sessao, conta_id)
     registro = sessao.scalar(select(Registro).where(Registro.id == registro_id).with_for_update())
     if not registro or not pessoa_e_apa_em_exercicio(
@@ -209,10 +209,15 @@ def importar_confirmada(sessao, *, conta_id, comando_id, registro_id):
     ).order_by(HistoricoConferenciaForm1Integral.numero_apresentacao.desc()).limit(1))
     if not historico:
         raise ValueError("O FORM 1 precisa de conferência interna confirmada.")
+    parametros = {"conta_id": conta_id, "registro_id": registro_id}
+    if snapshot_id:
+        parametros["snapshot_id"] = snapshot_id
     comando, repeticao = abrir_comando(sessao, comando_id, "encaminhar_form2_fila",
-        {"conta_id": conta_id, "registro_id": registro_id}, "pessoa", pessoa.id, conta_id)
+        parametros, "pessoa", pessoa.id, conta_id)
     if repeticao is not None:
         return repeticao
+    if snapshot_id and historico.snapshot_id != snapshot_id:
+        raise ValueError("A apresentação confirmada mudou. Atualize a lista antes de encaminhar.")
     p = ingresso(sessao, registro, historico.snapshot_id, comando)
     return fechar_comando(comando, {"permitido": True, "participacao_id": p.id})
 

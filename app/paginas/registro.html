@@ -50,7 +50,7 @@
       <a class="botao-link" href="/form2/filas?conta_id={{ conta_id|urlencode }}">Consultar filas do FORM 2</a>
       {% else %}
       <form method="post" action="/form2/filas/encaminhar">
-        <input type="hidden" name="registro_id" value="{{ registro.id }}">
+        <input type="hidden" name="snapshot_id" value="{{ registro.form1_integral.confirmacao_interna.snapshot_id }}">
         <input type="hidden" name="conta_id" value="{{ conta_id }}">
         <input type="hidden" name="comando_id" value="{{ comando_encaminhar }}">
         <button class="botao-primario" type="submit">Encaminhar ao FORM 2</button>

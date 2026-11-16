@@ -335,10 +335,22 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
         aguardando = [p.entrada_em for p in cartao["participacoes"] if not p.responsavel_id and p.estado == "aguardando"]
         cartao["aguardando"] = min(aguardando) if aguardando else None
     ordenados = sorted(cartoes.values(), key=lambda c: (c["aguardando"] is None, c["aguardando"] or momento))
-    pode_encaminhar = any(pessoa_e_apa_em_exercicio(sessao, pessoa.id, u.id)
-        for u in unidades.values() if u.ativa)
+    unidades_apa = [u.id for u in unidades.values() if u.ativa and
+                    pessoa_e_apa_em_exercicio(sessao, pessoa.id, u.id)]
+    confirmadas = sessao.scalars(select(HistoricoConferenciaForm1Integral)
+        .join(Registro, Registro.id == HistoricoConferenciaForm1Integral.registro_id)
+        .where(Registro.unidade_principal_atual_id.in_(unidades_apa),
+               HistoricoConferenciaForm1Integral.situacao == "conferencia_interna_confirmada",
+               ~Registro.id.in_(select(ParticipacaoForm2.registro_id).where(
+                   ParticipacaoForm2.tipo == "principal")))
+        .order_by(Registro.codigo_lgpd, HistoricoConferenciaForm1Integral.numero_apresentacao.desc()))
+    encaminhaveis = {}
+    for item in confirmadas:
+        encaminhaveis.setdefault(item.registro_id, {
+            "snapshot": item.snapshot_id, "codigo": registros[item.registro_id].codigo_lgpd,
+            "rotulo": rotulo_apresentacao(item)})
     return paginas.TemplateResponse(request=request, name="filas_form2.html",
-        context={"referencias": referencias, "mensagem_atribuicao": mensagem, "atribuidores": atribuidores, "cartoes": ordenados, "entradas": entradas, "pode_encaminhar": pode_encaminhar,
+        context={"referencias": referencias, "mensagem_atribuicao": mensagem, "atribuidores": atribuidores, "cartoes": ordenados, "entradas": entradas, "pode_encaminhar": bool(unidades_apa), "encaminhaveis": encaminhaveis,
                  "conta_id": conta_id, "pessoa": pessoa, "participacoes": participacoes,
                  "registros": registros, "unidades": unidades, "linhas": linhas,
                  "impedimentos": impedimentos, "complementos": complementos, "gerenciaveis": gerenciaveis, "agentes": {p.id: [a for a in agentes if a.id != p.responsavel_id and autorizado(sessao, a, p)] for p in gerenciaveis},
@@ -413,8 +425,13 @@ async def agir(request: Request, participacao_id: str,
 async def encaminhar(request: Request, sessao: Session = Depends(sessao_fila)):
     dados = await request.form()
     try:
-        resultado = importar_confirmada(sessao, conta_id=dados.get("conta_id"),
-            comando_id=dados.get("comando_id"), registro_id=dados.get("registro_id"))
+        snapshot_id = dados.get("snapshot_id")
+        registro_id = dados.get("registro_id")
+        if snapshot_id:
+            registro_id = sessao.scalar(select(HistoricoConferenciaForm1Integral.registro_id).where(
+                HistoricoConferenciaForm1Integral.snapshot_id == snapshot_id))
+        resultado = importar_confirmada(sessao, conta_id=dados.get("conta_id"), snapshot_id=snapshot_id,
+            comando_id=dados.get("comando_id"), registro_id=registro_id)
         if not resultado["permitido"]:
             raise ValueError(resultado.get("motivo"))
         sessao.commit()

@@ -313,3 +313,30 @@ def test_bloco_dois_exibe_respostas_da_apresentacao(sessao):
     assert "F1-12.1.1) — 9" in quadro and "F1-12.1.2) — Dias" in quadro
     assert "Regra do sistema ou fornecedor" in quadro and "Fonte fictícia de teste" in quadro
     assert "Alteração posterior" not in pagina.text
+
+
+def test_lista_de_origens_confirmadas_do_apa(sessao, monkeypatch):
+    from fastapi.testclient import TestClient
+    from app.main import app
+
+    # Simula uma confirmação histórica anterior ao ingresso automático.
+    with monkeypatch.context() as legado:
+        legado.setattr("app.fila_form2.ingresso", lambda *args: None)
+        registro = origem(sessao)
+    cliente = TestClient(app)
+    fila = "/form2/filas"
+    html = cliente.get(fila, params={"conta_id": "CONTA-A1"}).text
+    assert registro["codigo_lgpd"] in html and "Apresentação 1 (rascunho 1)" in html
+    from app.modelos import HistoricoConferenciaForm1Integral
+    snapshot = sessao.scalar(select(HistoricoConferenciaForm1Integral.snapshot_id).where(
+        HistoricoConferenciaForm1Integral.registro_id == registro["registro_id"]))
+    dados = {"snapshot_id": snapshot, "comando_id": "LISTA-APA"}
+    negada = cliente.post(fila + "/encaminhar", data={**dados, "conta_id": "CONTA-G1"})
+    assert negada.status_code == 400
+    enviada = cliente.post(fila + "/encaminhar", data={**dados, "conta_id": "CONTA-A1"})
+    assert enviada.status_code == 200
+    assert "Nenhuma apresentação confirmada aguarda ingresso" in enviada.text
+    detalhe = cliente.get("/registros/" + registro["registro_id"], params={"conta_id": "CONTA-A1"})
+    assert "Fila do FORM 2:" in detalhe.text and "Aguardando responsável" in detalhe.text
+    painel = cliente.get("/painel", params={"conta_id": "CONTA-A1"})
+    assert "Ingressou na fila do FORM 2 em " in painel.text
