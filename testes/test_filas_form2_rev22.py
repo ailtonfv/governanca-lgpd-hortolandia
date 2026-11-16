@@ -77,7 +77,7 @@ def test_assuncao_explicada_confirmada_e_identificada_na_fila(sessao):
     url = f"/form2/participacoes/{p.id}"
     fila = "/form2/filas?conta_id=CONTA-B1"
     antes = cliente.get(fila)
-    assert "Atribuir responsável" in antes.text and "conta como primeira assunção" in antes.text
+    assert "Atribuir responsável" in antes.text and "Novas versões do FORM 1 dependerão" in antes.text
     detalhe = cliente.get(url, params={"conta_id": "CONTA-B1"})
     assert detalhe.status_code == 200
     referencia = rotulo_apresentacao(sessao.get(VersaoForm1Integral, p.snapshot_id))

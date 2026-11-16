@@ -282,7 +282,8 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
     gerenciaveis = sessao.scalars(select(ParticipacaoForm2).where(
         ParticipacaoForm2.unidade_id.in_(gestores),
         ParticipacaoForm2.estado != "concluida")).all() if gestores else []
-    from app.modelos import Comando
+    from app.modelos import Comando, VersaoForm1Integral
+    referencias = {p.id: rotulo_apresentacao(sessao.get(VersaoForm1Integral, p.snapshot_id)) for p in gerenciaveis}
     chave = request.query_params.get("atribuicao")
     comando = sessao.get(Comando, chave) if chave else None
     mensagem = None
@@ -303,7 +304,7 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
     pode_encaminhar = any(pessoa_e_apa_em_exercicio(sessao, pessoa.id, u.id)
         for u in unidades.values() if u.ativa)
     return paginas.TemplateResponse(request=request, name="filas_form2.html",
-        context={"mensagem_atribuicao": mensagem, "cartoes": list(cartoes.values()), "pode_encaminhar": pode_encaminhar,
+        context={"referencias": referencias, "mensagem_atribuicao": mensagem, "cartoes": list(cartoes.values()), "pode_encaminhar": pode_encaminhar,
                  "conta_id": conta_id, "pessoa": pessoa, "participacoes": participacoes,
                  "registros": registros, "unidades": unidades, "linhas": linhas,
                  "impedimentos": impedimentos, "complementos": complementos, "gerenciaveis": gerenciaveis, "agentes": {p.id: [a for a in agentes if autorizado(sessao, a, p)] for p in gerenciaveis},

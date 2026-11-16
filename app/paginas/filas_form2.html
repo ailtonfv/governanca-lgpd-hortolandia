@@ -42,8 +42,7 @@
 <div class="acoes-fila-form2"><button type="button" class="botao-primario" data-abrir-dialogo="atribuir-{{ p.id }}">{{ acao }}</button></div>
 <dialog class="dialogo-acao-fila" id="atribuir-{{ p.id }}" aria-labelledby="titulo-{{ p.id }}">
   <h2 id="titulo-{{ p.id }}">{{ acao }}?</h2>
-  <p>{{ registros[p.registro_id].codigo_lgpd }} · {{ p.tipo }} · <span data-nome-agente></span></p>
-  {% if p.assumida_em is none %}<p>Esta atribuição conta como primeira assunção.{% if p.tipo == 'principal' %} A partir daqui, novas versões do FORM 1 dependerão da decisão do responsável.{% endif %}</p>{% endif %}
+  <p><span data-nome-agente></span> passa a responder {% if p.tipo in ('principal', 'tematica') %}como AAL {% endif %}pelo {{ registros[p.registro_id].codigo_lgpd }}. A análise usará a {{ referencias[p.id] }}.{% if p.tipo == 'principal' %} Novas versões do FORM 1 dependerão da decisão desse responsável.{% endif %}</p>
   <div class="acoes-fila-form2"><button type="button" data-fechar-dialogo autofocus>Cancelar</button>
   <button type="submit" class="botao-primario">{{ acao }}</button></div>
 </dialog></form></details>{% endfor %}
