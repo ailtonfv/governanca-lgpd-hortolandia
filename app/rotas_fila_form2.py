@@ -305,6 +305,20 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
     agentes = sessao.scalars(select(Pessoa).where(Pessoa.ativa.is_(True))).all() if gestores else []
     responsaveis = dict(sessao.execute(select(Pessoa.id, Pessoa.nome).where(
         Pessoa.id.in_({p.responsavel_id for p in [*participacoes, *gerenciaveis] if p.responsavel_id}))).all())
+    from app.modelos import Evento
+    atribuidores = {}
+    minhas = {p.id: p for p in participacoes if p.responsavel_id == pessoa.id}
+    if minhas:
+        atos = sessao.execute(select(Evento, Pessoa.nome).join(Pessoa, Pessoa.id == Evento.ator_id)
+            .where(Evento.cadeia_tipo == "participacao_form2", Evento.cadeia_id.in_(minhas),
+                   Evento.tipo_evento == "form2_reatribuida").order_by(Evento.sequencia_cadeia.desc()))
+        for ato, nome in atos:
+            if ato.cadeia_id in atribuidores or ato.conteudo.get("responsavel_id") != pessoa.id:
+                continue
+            unidade = minhas[ato.cadeia_id].unidade_id
+            papel = "APA" if pessoa_e_apa_em_exercicio(sessao, ato.ator_id, unidade, ato.ocorrido_em) else "gestor da fila"
+            data = ato.ocorrido_em.astimezone(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y às %Hh%M")
+            atribuidores[ato.cadeia_id] = f"Atribuído por {nome} ({papel}) em {data}"
     cartoes = {}
     for p in participacoes:
         cartoes.setdefault(p.registro_id, dict(registro=registros[p.registro_id],
@@ -321,7 +335,7 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
     pode_encaminhar = any(pessoa_e_apa_em_exercicio(sessao, pessoa.id, u.id)
         for u in unidades.values() if u.ativa)
     return paginas.TemplateResponse(request=request, name="filas_form2.html",
-        context={"referencias": referencias, "mensagem_atribuicao": mensagem, "cartoes": ordenados, "entradas": entradas, "pode_encaminhar": pode_encaminhar,
+        context={"referencias": referencias, "mensagem_atribuicao": mensagem, "atribuidores": atribuidores, "cartoes": ordenados, "entradas": entradas, "pode_encaminhar": pode_encaminhar,
                  "conta_id": conta_id, "pessoa": pessoa, "participacoes": participacoes,
                  "registros": registros, "unidades": unidades, "linhas": linhas,
                  "impedimentos": impedimentos, "complementos": complementos, "gerenciaveis": gerenciaveis, "agentes": {p.id: [a for a in agentes if autorizado(sessao, a, p)] for p in gerenciaveis},

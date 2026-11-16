@@ -12,6 +12,7 @@
 <article data-registro="{{ c.registro.id }}"><h3>{{ c.registro.codigo_lgpd }}</h3>
 {% for p in c.participacoes %}
 <p>{{ entradas[p.id] }}</p>
+{% if p.id in atribuidores %}<p>{{ atribuidores[p.id] }}</p>{% endif %}
 <p>{{ unidades[p.unidade_id].nome }} · {{ p.tipo }} · Situação: {{ impedimentos.get(p.id, situacoes.get(p.estado, p.estado)) }}{% if p.responsavel_id %} · <strong>Responsável: {{ responsaveis[p.responsavel_id] }}</strong>{% endif %}</p>
 <div class="acoes-fila-form2"><a class="botao-link" href="/form2/participacoes/{{ p.id }}?conta_id={{ conta_id|urlencode }}">Abrir FORM 2{% if c.participacoes|length > 1 %} · {{ p.tipo }}{% endif %}</a></div>
 {% endfor %}
