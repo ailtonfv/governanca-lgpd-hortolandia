@@ -427,3 +427,5 @@ input:is([type="button"], [type="submit"], [type="reset"]):disabled,
 /* Durante um envio, preservar a indicação de processamento. */
 .formulario button[aria-disabled="true"],
 button[aria-busy="true"] { cursor: wait; }
+
+.estado-bloco[hidden] { display: none !important; }
