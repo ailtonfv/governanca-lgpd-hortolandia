@@ -24,14 +24,14 @@
 <div class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/participacoes/{{ complemento.p.id }}/governanca?conta_id={{ conta_id|urlencode }}">Ver pendências e respostas</a></div>
 {% endfor %}</article>
 {% else %}<p>Nenhum Registro nas filas autorizadas para esta conta.</p>{% endfor %}{% endif %}
-{% if pode_encaminhar %}
+{% if pode_encaminhar and encaminhaveis %}
 <details><summary>Encaminhar versão do FORM 1 já confirmada</summary>
-<p>O APA pode encaminhar uma origem com conferência interna confirmada para o ensaio demonstrativo.</p>
-{% if encaminhaveis %}<form method="post" action="/form2/filas/encaminhar">
+<p>O APA pode encaminhar uma origem com conferência interna confirmada à fila do FORM 2.</p>
+<form method="post" action="/form2/filas/encaminhar">
 <input type="hidden" name="conta_id" value="{{ conta_id }}">
 <input type="hidden" name="comando_id" value="{{ comando_id }}">
 <label>Apresentação confirmada<select name="snapshot_id" required><option value="">Escolha…</option>{% for v in encaminhaveis.values() %}<option value="{{ v.snapshot }}">{{ v.codigo }} · {{ v.rotulo }}</option>{% endfor %}</select></label>
-<button>Encaminhar para a fila</button></form>{% else %}<p>Nenhuma apresentação confirmada aguarda ingresso.</p>{% endif %}</details>
+<button>Encaminhar para a fila</button></form></details>
 {% endif %}
 {% if dpo %}<h2 id="painel-dpo">Acompanhamento do DPO</h2>
 <div class="tabela-filas"><table><thead><tr><th>Registro</th><th>Situação do Registro</th><th>Comunicado ao DPO em</th><th>Secretaria</th><th>Entrada</th><th>Tempo até ter responsável</th><th>Tempo aguardando DPO</th><th>Orientação consultiva</th></tr></thead>
