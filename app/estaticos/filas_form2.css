@@ -12,6 +12,7 @@
 .filas-form2 textarea, .filas-form2 select { max-width: 100%; }
 .filas-form2 nav { display: flex; gap: 10px; overflow-x: auto; margin-block: 20px; padding: 8px; }
 .filas-form2 nav a { flex-shrink: 0; padding: 12px 18px; border: 1px solid #d6e0e6; border-radius: 8px; background: white; }
+.filas-form2 fieldset.controle-condicional { border: 0; padding: 0; margin: 0; }
 .filas-form2 fieldset { margin-block: 12px; }
 .tabela-filas { max-width: 100%; overflow-x: auto; }
 @media (max-width: 600px) {

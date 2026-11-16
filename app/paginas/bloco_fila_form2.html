@@ -76,17 +76,17 @@
 {% if repetivel %}<div data-ocorrencia="{{ n }}"><strong>Conjunto <span>{{ n }}</span></strong>{% endif %}
 {% set op = op ~ ('#' ~ n if repetivel else '') %}{% set txt = txt ~ ('#' ~ n if repetivel else '') %}
 {% set sufixo = '#' ~ n if repetivel else '' %}
-<fieldset class="controle-condicional" {{ gatilhos(q) }} data-condicional{% if repetivel and q.condicoes|selectattr("origem","in",origens_repetiveis)|list %} data-dependencia-local{% endif %}{% if not ativa(q.id, sufixo) %} disabled{% endif %}><legend class="legenda-condicional">Resposta para {{ q.id }}</legend>
+<fieldset class="controle-condicional" {{ gatilhos(q) }} data-condicional{% if repetivel and q.condicoes|selectattr("origem","in",origens_repetiveis)|list %} data-dependencia-local{% endif %}{% if not ativa(q.id, sufixo) %} disabled{% endif %}>
 {{ ajuda(q, ativa(q.id, sufixo)) }}
 {% if q.alternativas %}
 {% if 'múltipla' in q.controle|lower %}
 <input type="hidden" name="{{ op }}" value="">
 {% for a in q.alternativas %}<label class="opcao-form2"><input type="checkbox" name="{{ op }}" value="{{ a.codigo }}"{% if a.codigo in valores.get(op,[]) %} checked{% endif %}> {{ a.rotulo }}</label>{% endfor %}
 {% else %}
-<label>Resposta<select name="{{ op }}"><option value="">Sem resposta</option>{% for a in q.alternativas %}<option value="{{ a.codigo }}"{% if a.codigo in valores.get(op,[]) %} selected{% endif %}>{{ a.rotulo }}</option>{% endfor %}</select></label>
+<label><select aria-label="{{ q.enunciado }}" name="{{ op }}"><option value="">Sem resposta</option>{% for a in q.alternativas %}<option value="{{ a.codigo }}"{% if a.codigo in valores.get(op,[]) %} selected{% endif %}>{{ a.rotulo }}</option>{% endfor %}</select></label>
 {% endif %}{% endif %}
 {% if not q.alternativas or 'texto' in q.controle|lower or q.alternativas|selectattr('complemento','in',['Texto condicionado (R13)'])|list %}
-<label>{{ 'Complemento' if q.alternativas else q.controle }}<textarea name="{{ txt }}" rows="2" maxlength="{{ limite_texto(q) }}">{{ valores.get(txt,'') }}</textarea></label>
+<label>{{ 'Complemento' if q.alternativas else '' }}<textarea aria-label="{{ q.enunciado }}" name="{{ txt }}" rows="2" maxlength="{{ limite_texto(q) }}">{{ valores.get(txt,'') }}</textarea></label>
 {% endif %}
 {% if q.id == 'F2-14.3.1' %}<label>Destino principal<select name="principal:{{ q.id }}{{ sufixo }}"><option value="">A definir</option>{% for a in q.alternativas %}<option value="{{ a.codigo }}"{% if valores.get('principal:' ~ q.id ~ sufixo) == a.codigo %} selected{% endif %}>{{ a.rotulo }}</option>{% endfor %}</select></label>{% endif %}
 </fieldset>
