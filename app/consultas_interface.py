@@ -255,7 +255,7 @@ def _projetar_proxima_providencia_form1_integral(
         )
         return {
             "tipo": "corrigir",
-            "rotulo": "Corrigir FORM 1 Integral",
+            "rotulo": "Corrigir FORM 1",
             "descricao": (
                 f"O APA devolveu a {devolucao['rotulo_apresentacao']} "
                 f"para ajustes. Justificativa: {devolucao['justificativa']}"
@@ -267,7 +267,7 @@ def _projetar_proxima_providencia_form1_integral(
     if pode_editar and rascunho is None:
         return {
             "tipo": "iniciar",
-            "rotulo": "Iniciar FORM 1 Integral",
+            "rotulo": "Preencher FORM 1",
             "descricao": (
                 "Você é o ARP atual e possui autorização vigente. "
                 "Inicie o rascunho para acessar a primeira pergunta."
@@ -297,7 +297,7 @@ def _projetar_proxima_providencia_form1_integral(
         )
         return {
             "tipo": "continuar",
-            "rotulo": "Continuar FORM 1 Integral",
+            "rotulo": "Preencher FORM 1",
             "descricao": descricao,
             "retomada": retomada,
             "papel": papel,

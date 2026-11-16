@@ -34,7 +34,7 @@ def test_sem_arp_mostra_designacao_pendente_sem_conceder_edicao():
     assert "Seu papel neste Registro:</strong> APA" in trecho
     assert "Quem preencherá o FORM 1?" in pagina.text
     assert "Alterar responsável pelo preenchimento" not in pagina.text
-    assert "Iniciar FORM 1" not in trecho
+    assert "Preencher FORM 1" not in trecho
     assert '<form class="formulario formulario-integral"' not in pagina.text
 
 
@@ -54,7 +54,7 @@ def test_apa_que_tambem_e_arp_ve_acao_antes_dos_quadros_e_redesignacao_recolhida
     # Assert
     trecho = _trecho_proxima_providencia(pagina.text)
     assert "Seu papel neste Registro:</strong> APA e ARP" in trecho
-    assert "Iniciar FORM 1" in trecho
+    assert "Preencher FORM 1" in trecho
     assert pagina.text.index('class="proxima-providencia"') < pagina.text.index(
         'class="informacoes-institucionais-form1 '
     )
@@ -88,12 +88,12 @@ def test_apa_consulta_e_arp_continua_o_mesmo_rascunho_sem_trocar_permissoes(sess
     trecho_apa = _trecho_proxima_providencia(pagina_apa.text)
     trecho_arp = _trecho_proxima_providencia(pagina_arp.text)
     assert "Seu papel neste Registro:</strong> APA" in trecho_apa
-    assert "Consultar FORM 1 Integral" in trecho_apa
-    assert "data-consultar-form1" in trecho_apa
+    assert "Consultar FORM 1" in trecho_apa
+    assert "/form1-rev22?conta_id=CONTA-A1" in trecho_apa
     assert "Você pode consultar o levantamento em modo somente leitura" in trecho_apa
     assert '<form class="formulario formulario-integral"' not in pagina_apa.text
     assert "Seu papel neste Registro:</strong> ARP" in trecho_arp
-    assert "Continuar FORM 1" in trecho_arp
+    assert "Preencher FORM 1" in trecho_arp
     assert '<form class="formulario formulario-integral"' in pagina_arp.text
 
 

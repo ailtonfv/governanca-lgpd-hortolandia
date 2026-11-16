@@ -32,7 +32,7 @@ def test_registro_sem_arp_prioriza_designacao_e_nao_expoe_questionario_legado():
     assert pagina.text.index("Designação do ARP") < pagina.text.index(
         "Informações do Registro — Somente leitura"
     )
-    assert "Iniciar FORM 1 Integral" not in pagina.text
+    assert "Preencher FORM 1" not in pagina.text
     assert 'class="formulario formulario-integral"' not in pagina.text
     assert "Questionário resumido de demonstração" not in pagina.text
     assert "data-instrumento-regressao" not in pagina.text
@@ -68,14 +68,14 @@ def test_designacao_confirmada_permite_ao_arp_iniciar_no_bloco_1():
     assert designacao.status_code == 200
     assert "Designação do ARP confirmada" in designacao.text
     assert "ARP vigente:</strong> matrícula MAT-FICT-0007 · Servidor Épsilon" in designacao.text
-    assert "Iniciar FORM 1 Integral" in pagina_arp.text
+    assert "Preencher FORM 1" in pagina_arp.text
     assert inicio.status_code == 303
-    assert inicio.headers["location"].endswith("#titulo-bloco-1")
+    assert inicio.headers["location"].endswith("/form1-rev22?conta_id=CONTA-G1")
     destino = cliente.get(inicio.headers["location"])
-    assert "FORM 1 — Levantamento Inicial do Tratamento de Dados Pessoais" in destino.text
-    assert "FORM 1 — Etapa 1 de 4 — Bloco 1 de 14" in destino.text
-    assert 'id="titulo-bloco-1"' in destino.text
-    assert "Salvar e permanecer neste bloco" in destino.text
+    assert registro["codigo_lgpd"] in destino.text
+    assert "FORM 1 · Bloco 1" in destino.text
+    assert "Preparar o FORM 1 para preenchimento" in destino.text
+    assert "Atualizar e continuar" in destino.text
     assert "data-instrumento-regressao" not in destino.text
 
 
@@ -114,19 +114,19 @@ def test_painel_do_arp_inicia_form1_integral_diretamente_no_bloco_1():
 
     # Assert
     assert painel.status_code == 200
-    assert ">Iniciar FORM 1 Integral</button>" in formulario.group(2)
+    assert ">Preencher FORM 1</button>" in formulario.group(2)
     assert (
         f'/registros/{registro["registro_id"]}?conta_id=CONTA-G1'
         '#titulo-form1-integral'
     ) not in painel.text
     assert inicio.status_code == 303
-    assert inicio.headers["location"].endswith("#titulo-bloco-1")
+    assert inicio.headers["location"].endswith("/form1-rev22?conta_id=CONTA-G1")
     assert "questionario-sintetico-legado" not in inicio.headers["location"]
     destino = cliente.get(inicio.headers["location"])
     assert destino.status_code == 200
-    assert "FORM 1 — Etapa 1 de 4 — Bloco 1 de 14" in destino.text
-    assert 'id="titulo-bloco-1"' in destino.text
-    assert "Iniciar FORM 1 Integral" not in destino.text
+    assert "FORM 1 · Bloco 1" in destino.text
+    assert "Preparar o FORM 1 para preenchimento" in destino.text
+    assert "Preencher FORM 1" not in destino.text
     assert "data-instrumento-regressao" not in destino.text
     assert "questionario-sintetico-legado" not in destino.text
 

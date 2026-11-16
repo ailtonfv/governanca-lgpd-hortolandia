@@ -43,7 +43,7 @@ def test_arp_autorizado_inicia_form1_e_chega_ao_primeiro_bloco(sessao):
     # Assert
     trecho = _trecho_proxima_providencia(pagina.text)
     assert "Próxima providência" in trecho
-    assert "Iniciar FORM 1" in trecho
+    assert "Preencher FORM 1" in trecho
     assert "Você é o ARP atual" in trecho
     assert 'disabled aria-disabled="true"' in pagina.text
     assert inicio.status_code == 303
@@ -68,7 +68,7 @@ def test_arp_com_rascunho_recebe_continuacao_para_pendencia_ativa(sessao):
     assert "Preencher FORM 1" in trecho
     assert "/form1-rev22?conta_id=CONTA-A1" in trecho
     assert "Etapas do FORM 1" in pagina.text
-    assert "Iniciar FORM 1" not in trecho
+    assert "/form1-integral/iniciar" not in trecho
 
 
 def test_apa_com_outro_arp_ve_responsavel_sem_acao_de_preenchimento(sessao):
@@ -97,10 +97,10 @@ def test_apa_com_outro_arp_ve_responsavel_sem_acao_de_preenchimento(sessao):
     trecho_apa = _trecho_proxima_providencia(pagina_apa.text)
     assert "matrícula MAT-FICT-0007 · Servidor Épsilon" in trecho_apa
     assert "Somente essa pessoa" in trecho_apa
-    assert "Iniciar FORM 1" not in trecho_apa
-    assert "Continuar FORM 1" not in trecho_apa
+    assert "Preencher FORM 1" not in trecho_apa
+    assert "Corrigir FORM 1" not in trecho_apa
     trecho_arp = _trecho_proxima_providencia(pagina_arp.text)
-    assert "Iniciar FORM 1" in trecho_arp
+    assert "Preencher FORM 1" in trecho_arp
 
 
 def test_registro_sem_arp_explica_por_que_nao_ha_acao_de_preenchimento(sessao):
@@ -116,8 +116,8 @@ def test_registro_sem_arp_explica_por_que_nao_ha_acao_de_preenchimento(sessao):
     trecho = _trecho_proxima_providencia(pagina.text)
     assert "O APA deverá assumir o preenchimento ou designar um Agente Responsável" in trecho
     assert "antes que o rascunho possa ser iniciado" in trecho
-    assert "Iniciar FORM 1" not in trecho
-    assert "Continuar FORM 1" not in trecho
+    assert "Preencher FORM 1" not in trecho
+    assert "Corrigir FORM 1" not in trecho
 
 
 

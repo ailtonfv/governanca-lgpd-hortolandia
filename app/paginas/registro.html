@@ -61,10 +61,10 @@
     <form method="post" action="{{ url_for('iniciar_form1_integral', registro_id=registro.id) }}">
       <input type="hidden" name="conta_id" value="{{ conta_id }}">
       <input type="hidden" name="comando_id" value="{{ comando_iniciar_integral }}">
-      <button class="botao-primario" type="submit">Iniciar FORM 1</button>
+      <button class="botao-primario" type="submit">Preencher FORM 1</button>
     </form>
     {% elif proxima.tipo in ['continuar', 'corrigir', 'consultar'] and registro.form1_integral.rascunho %}
-      <a class="botao-link botao-primario" href="/registros/{{ registro.id }}/form1-rev22?conta_id={{ conta_id|urlencode }}">{{ 'Preencher FORM 1' if registro.form1_integral.pode_editar else 'Consultar FORM 1' }}</a>
+      <a class="botao-link botao-primario" href="/registros/{{ registro.id }}/form1-rev22?conta_id={{ conta_id|urlencode }}">{{ ('Corrigir FORM 1' if registro.form1_integral.devolucao_interna else 'Preencher FORM 1') if registro.form1_integral.pode_editar else 'Consultar FORM 1' }}</a>
     {% elif proxima.tipo == 'conferir' %}
       <a class="botao-link botao-primario" href="{{ url_for('consultar_conferencia_interna', registro_id=registro.id) }}?conta_id={{ conta_id }}">{{ proxima.rotulo }}</a>
     {% endif %}

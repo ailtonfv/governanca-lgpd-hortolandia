@@ -38,7 +38,7 @@ def test_arp_sem_rascunho_recebe_acao_para_iniciar_form1(sessao):
     assert registro["codigo_lgpd"] in pagina.text
     assert "Situação do FORM 1:</strong> Não iniciado" in pagina.text
     assert "O rascunho do FORM 1 ainda não foi iniciado." in pagina.text
-    assert ">Iniciar FORM 1 Integral</button>" in pagina.text
+    assert ">Preencher FORM 1</button>" in pagina.text
     assert (
         f'action="http://testserver/registros/{registro["registro_id"]}/form1-integral/iniciar"'
     ) in pagina.text
@@ -76,9 +76,9 @@ def test_apa_nao_recebe_inicio_quando_outro_arp_foi_designado(sessao):
     assert pagina_apa.status_code == 200
     assert pagina_arp.status_code == 200
     assert registro["codigo_lgpd"] in pagina_apa.text
-    assert "Iniciar FORM 1" not in pagina_apa.text
+    assert "Preencher FORM 1" not in pagina_apa.text
     assert registro["codigo_lgpd"] in pagina_arp.text
-    assert ">Iniciar FORM 1 Integral</button>" in pagina_arp.text
+    assert ">Preencher FORM 1</button>" in pagina_arp.text
 
 
 def _rascunho_do_epsilon(sessao, prefixo):
@@ -129,13 +129,13 @@ def test_cartoes_atribuem_acoes_corretas_a_alfa_e_epsilon(sessao):
         assert registro_alfa["codigo_lgpd"] in pagina.text
         assert registro_epsilon["codigo_lgpd"] in pagina.text
 
-    assert ">Iniciar FORM 1 Integral</button>" in pagina_alfa.text
-    assert ">Continuar FORM 1 Integral</a>" not in pagina_alfa.text
+    assert ">Preencher FORM 1</button>" in pagina_alfa.text
+    assert ">Preencher FORM 1</a>" not in pagina_alfa.text
     assert "MAT-FICT-0007" in pagina_alfa.text
     assert "(ARP)" in pagina_alfa.text
 
-    assert ">Continuar FORM 1 Integral</a>" in pagina_epsilon.text
-    assert ">Iniciar FORM 1 Integral</button>" not in pagina_epsilon.text
+    assert ">Preencher FORM 1</a>" in pagina_epsilon.text
+    assert ">Preencher FORM 1</button>" not in pagina_epsilon.text
     assert "MAT-FICT-0001" in pagina_epsilon.text
     assert "(ARP)" in pagina_epsilon.text
 
@@ -154,7 +154,7 @@ def test_arp_com_rascunho_e_pendencias_recebe_proxima_providencia(sessao):
     assert "Atividade tributária fictícia" in pagina.text
     assert "Situação do FORM 1:</strong> Em preenchimento" in pagina.text
     assert "campo(s) obrigatório(s) ativo(s) incompleto(s)" in pagina.text
-    assert "Continuar FORM 1" in pagina.text
+    assert "Preencher FORM 1" in pagina.text
     assert (
         f'/registros/{registro["registro_id"]}?conta_id=CONTA-G1#titulo-bloco-'
         in pagina.text
@@ -174,7 +174,7 @@ def test_apa_e_agente_sem_permissao_nao_recebem_acao_do_arp(sessao):
     for pagina in (pagina_apa, pagina_sem_permissao):
         assert pagina.status_code == 200
         assert registro["codigo_lgpd"] in pagina.text
-        assert "Continuar FORM 1" not in pagina.text
+        assert "Preencher FORM 1" not in pagina.text
 
 
 def test_arp_sem_resposta_obrigatoria_pendente_e_encaminhado_a_pre_validacao(
@@ -217,4 +217,4 @@ def test_arp_sem_resposta_obrigatoria_pendente_e_encaminhado_a_pre_validacao(
         f'/registros/{registro["registro_id"]}?conta_id=CONTA-G1'
         "#titulo-pre-validacao-form1"
     ) in pagina.text
-    assert "Continuar FORM 1" in pagina.text
+    assert "Preencher FORM 1" in pagina.text

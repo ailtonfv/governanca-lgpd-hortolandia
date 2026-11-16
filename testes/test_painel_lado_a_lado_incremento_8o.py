@@ -102,7 +102,7 @@ def test_arp_com_quatro_rascunhos_recebe_quatro_providencias_identificadas(sessa
         'class="contador contador-providencias" '
         'aria-label="0 providência(s) de conferência">0</span>'
     ) in pagina.text
-    assert pagina.text.count(">Continuar FORM 1 Integral</a>") == 4
+    assert pagina.text.count(">Preencher FORM 1</a>") == 4
     for registro in registros:
         assert registro["codigo_lgpd"] in pagina.text
         assert (
@@ -129,7 +129,7 @@ def test_agente_com_mapeamento_sem_providencia_mantem_consulta(sessao):
     assert "Serviço consultável fictício" in pagina.text
     assert "Ver detalhes do Registro" in pagina.text
     assert "Nenhuma providência de conferência pendente para seu perfil neste momento." in pagina.text
-    assert "Continuar FORM 1" not in pagina.text
+    assert "Preencher FORM 1" not in pagina.text
     assert 'aria-label="0 providência(s) de conferência">0</span>' in pagina.text
 
 
@@ -144,7 +144,7 @@ def test_apa_com_outro_arp_visualiza_registro_sem_acao_de_preenchimento(sessao):
     assert pagina.status_code == 200
     assert registro["codigo_lgpd"] in pagina.text
     assert "Ver detalhes do Registro" in pagina.text
-    assert "Continuar FORM 1" not in pagina.text
+    assert "Preencher FORM 1" not in pagina.text
 
 
 def test_contador_considera_registro_unico_quando_ha_varios_alertas(sessao):
