@@ -25,6 +25,13 @@ def _indice_catalogo(catalogo):
     return {item["id"]: item for bloco in catalogo["blocos"] for item in bloco["itens"]}
 
 
+GUARDA_INSTITUCIONAL = "AGUARDA_DEFINICAO_INSTITUCIONAL"
+
+
+def aguarda_temporalidade(conteudo):
+    return (conteudo or {}).get("respostas_etapa1", {}).get("F2-2.9") == GUARDA_INSTITUCIONAL
+
+
 def definicao_bloco(numero: int) -> dict:
     contrato, catalogo = carregar_contrato(), carregar_catalogo()
     editoriais = _indice_catalogo(catalogo)
@@ -51,6 +58,11 @@ def definicao_bloco(numero: int) -> dict:
             "condicoes": deepcopy(condicoes.get(item["id"], [])),
             "fontes_publicas": referencias_anpd(item.get("referencias_anpd")),
         })
+    if numero == 2:
+        guarda = next(item for item in itens if item["id"] == "F2-2.9")
+        guarda["alternativas"].append({"id": guarda["id"], "codigo": GUARDA_INSTITUCIONAL,
+            "rotulo": "Aguarda definição institucional (grupo de trabalho de guarda documental)",
+            "complemento": "", "tratamento": ""})
     if numero == 1:
         for item in itens:
             if item["id"] in MODOS_IDENTIFICACAO:

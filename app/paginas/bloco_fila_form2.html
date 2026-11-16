@@ -4,6 +4,7 @@
 <h1>{{ registro.codigo_lgpd }} · FORM 2 · Bloco {{ numero }} — {{ titulos_blocos_form2().get(numero, bloco.titulo) }}</h1>
 <p><strong>Versão do FORM 1 em análise:</strong> {{ rotulo_origem }}</p>
 <p>{{ atuacao.servidor }} · {{ atuacao.funcao }} · <span class="sr-apenas">Unidade de atuação:</span> {{ atuacao.unidade }} · {{ "Você pode editar suas respostas" if atuacao.editavel else "Somente leitura" }}</p>
+{% if numero == 2 and aguarda_temporalidade(p.conteudo) %}<p class="estado-bloco">Guarda: aguarda definição institucional</p>{% endif %}
 {% if confirmacao %}<p id="confirmacao-salvamento" class="confirmacao-salvamento" role="status">{{ confirmacao }}</p>{% endif %}
 
 <div class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/participacoes/{{ p.id }}?conta_id={{ conta_id|urlencode }}">Voltar à participação</a></div>

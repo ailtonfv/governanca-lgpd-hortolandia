@@ -17,10 +17,11 @@ from app.modelos import (ParticipacaoForm2, Registro, Unidade, ComplementoForm2,
     AtribuicaoForm1Integral, HistoricoConferenciaForm1Integral, Pessoa)
 from app.fila_form2 import painel, pessoa_ativa, autorizado, executar, importar_confirmada, agora, unidades as unidades_autorizadas
 from app.continuidade_apa import pessoa_e_apa_em_exercicio
-from app.respostas_form2 import estados_regua_form2
+from app.respostas_form2 import estados_regua_form2, aguarda_temporalidade
 
 router = APIRouter()
 paginas = Jinja2Templates(directory=Path(__file__).parent / "paginas")
+paginas.env.globals["aguarda_temporalidade"] = aguarda_temporalidade
 paginas.env.globals["titulos_blocos_form2"] = titulos_blocos_form2
 paginas.env.filters["chave_comando"] = lambda valor: sha256(str(valor).encode("utf-8")).hexdigest()
 
@@ -362,7 +363,7 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
                  "conta_id": conta_id, "pessoa": pessoa, "participacoes": participacoes,
                  "registros": registros, "unidades": unidades, "linhas": linhas,
                  "impedimentos": impedimentos, "complementos": complementos, "gerenciaveis": gerenciaveis, "agentes": {p.id: [a for a in agentes if a.id != p.responsavel_id and autorizado(sessao, a, p)] for p in gerenciaveis},
-                 "responsaveis": responsaveis, "dpo": dpo, "cobertura": cobertura, "comando_id": str(uuid4())})
+                 "responsaveis": responsaveis, "dpo": dpo, "aguardando_guarda": len({p.registro_id for p in principais if aguarda_temporalidade(p.conteudo)}), "cobertura": cobertura, "comando_id": str(uuid4())})
 
 
 @router.get("/form2/participacoes/{participacao_id}", name="participacao_form2")
