@@ -1,11 +1,11 @@
 {% from '_identificador_pergunta.html' import codigo_pergunta %}
 {% extends "base.html" %}{% block conteudo %}
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/filas_form2.css') }}"><div class="filas-form2">
-<h1>FORM 2 · Bloco {{ numero }}</h1>
+<h1>{{ registro.codigo_lgpd }} · FORM 2 · Bloco {{ numero }} — {{ titulos_blocos_form2().get(numero, bloco.titulo) }}</h1>
 <p><strong>Versão do FORM 1 em análise:</strong> {{ rotulo_origem }}</p>
-{% include '_atuacao_form2.html' %}
+<p>{{ atuacao.servidor }} · {{ atuacao.funcao }} · <span class="sr-apenas">Unidade de atuação:</span> {{ atuacao.unidade }} · {{ "Você pode editar suas respostas" if atuacao.editavel else "Somente leitura" }}</p>
 {% if confirmacao %}<p id="confirmacao-salvamento" class="confirmacao-salvamento" role="status">{{ confirmacao }}</p>{% endif %}
-<p><strong>{{ registro.codigo_lgpd }}</strong> · {{ pessoa.nome }}</p>
+
 <div class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/participacoes/{{ p.id }}?conta_id={{ conta_id|urlencode }}">Voltar à participação</a></div>
 {% include '_regua_fila_form2.html' %}
 {% if numero in (1,14) %}<div class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/participacoes/{{ p.id }}/governanca?conta_id={{ conta_id|urlencode }}">Ver pendências e respostas</a></div>{% endif %}
