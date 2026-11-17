@@ -11,10 +11,10 @@
         {% if n in titulos %}<small class="titulo-bloco-form2">{{ titulos[n] }}</small>{% endif %}
 <small class="estado-bloco {{ 'salvo' if salvo else 'a-percorrer' }}">{{ estados_regua.get('situacao', {}).get(n|string, '— Ainda não preenchido') }}</small>
 {% if pendente %}<small class="estado-bloco com-pendencias">Com pendências</small>{% endif %}
-{% if n == 2 and aguarda_temporalidade(p.conteudo) %}{% if compacta %}<span role="img" aria-label="Guarda: aguarda definição institucional" title="Guarda: aguarda definição institucional">🗄</span>{% else %}<small class="selo-guarda">Guarda: aguarda definição institucional</small>{% endif %}{% endif %}
-{% if n in (3,4,5,10) %}{% if compacta %}<span role="img" aria-label="Aguarda homologação jurídica (D11)" title="Aguarda homologação jurídica (D11)">⚖</span>{% else %}<small class="selo-d11">Aguarda homologação jurídica (D11)</small>{% endif %}{% endif %}
+{% if n == 2 and aguarda_temporalidade(p.conteudo) %}{% if compacta %}<span class="etiqueta-grade" aria-label="Guarda: aguarda definição institucional" title="Guarda: aguarda definição institucional">[Guarda]</span>{% else %}<small class="selo-guarda">Guarda: aguarda definição institucional</small>{% endif %}{% endif %}
+{% if n in (3,4,5,10) %}{% if compacta %}<span class="etiqueta-grade" aria-label="Aguarda homologação jurídica (D11)" title="Aguarda homologação jurídica (D11)">[D11]</span>{% else %}<small class="selo-d11">Aguarda homologação jurídica (D11)</small>{% endif %}{% endif %}
 {% if numero|default(0) == n %}<small class="estado-bloco local-atual">Você está aqui</small>{% else %}<small class="estado-bloco visitado" data-visitado hidden>Visitado nesta sessão</small>{% endif %}
 {% include "_progresso_bloco_form2.html" %}</a></li>{% endfor %}</ol></nav>
-{% if compacta %}<p class="legenda-grade">⚖ Aguarda homologação jurídica (D11) · 🗄 Guarda: aguarda definição institucional. Respostas salvas não significam conclusão ou homologação.</p>{% endif %}
+{% if compacta %}<p class="legenda-grade">[D11] Aguarda homologação jurídica (D11) · [Guarda] Guarda: aguarda definição institucional. Respostas salvas não significam conclusão ou homologação.</p>{% endif %}
 </section>
 <script defer src="{{ url_for('estaticos', path='/regua_form2.js') }}"></script>

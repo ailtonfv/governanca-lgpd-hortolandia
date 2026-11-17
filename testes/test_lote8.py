@@ -99,3 +99,11 @@ def test_c4_consultas_sem_rotulo_tecnico(principal):
         assert tela.status_code == 200
         assert 'Consulta automática' not in tela.text
         assert 'resposta candidata' not in tela.text
+
+
+def test_p108_etiquetas_legiveis(principal):
+    pagina = TestClient(app).get(f'/form2/participacoes/{principal.id}/blocos/3?conta_id=CONTA-B1')
+    assert '[D11]' in pagina.text
+    assert '[Guarda]' in pagina.text
+    assert 'title="Aguarda homologação jurídica (D11)"' in pagina.text
+    assert '⚖' not in pagina.text and '🗄' not in pagina.text

@@ -173,3 +173,6 @@ body:has(.pagina-bloco-form2) .conteudo { padding-top: .5rem; }
   body:has(.pagina-bloco-form2) .brasao-institucional { width: 48px; height: 48px; }
   body:has(.pagina-bloco-form2) .central-cabecalho { font-size: .85rem; max-width: 12rem; }
 }
+
+.filas-form2 .grade-form2-compacta .etiqueta-grade { font-size: .65rem; line-height: 1.2; font-weight: 600; }
+.filas-form2 .regua-form2 .cartao-bloco:has(.progresso-bloco) { padding-bottom: .8rem; }
