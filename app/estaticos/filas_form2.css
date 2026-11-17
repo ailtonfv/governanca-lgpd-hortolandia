@@ -94,3 +94,82 @@ body:has(.salvamento-fixo-form1) > main { min-height: 0; flex: 1; }
 .regua-compacta [aria-current] { background-color: #075985; color: white; font-weight: bold; }
 
 .regua-navegacao-blocos .regua-com-titulos-form2 {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(8rem,100%),1fr));overflow:visible;}
+
+/* Grade do FORM 2: selos e estados ocupam linhas próprias no cartão. */
+.filas-form2 .regua-form2 .cartao-bloco {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .2rem;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+.filas-form2 .regua-form2 .titulo-bloco-form2 {
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: auto;
+}
+.filas-form2 .regua-form2 :is(.selo-d11, .selo-guarda) {
+  position: static;
+  font-size: .7rem;
+  line-height: 1.3;
+  white-space: normal;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.filas-form2 .regua-form2 .cartao-bloco[aria-current="page"] {
+  background: #0b3b55;
+  border-color: #0b3b55;
+  color: white;
+  outline: none;
+}
+.filas-form2 .regua-form2 .cartao-bloco[aria-current="page"] .estado-bloco {
+  color: white;
+}
+.filas-form2 .regua-form2 .cartao-bloco[aria-current="page"]:focus-visible {
+  outline: 3px solid #057aaa;
+  outline-offset: 3px;
+}
+.filas-form2 .grade-form2-compacta .regua-navegacao-blocos {
+  margin-block: .4rem;
+  padding: 0;
+}
+.filas-form2 .grade-form2-compacta .regua-form2 {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: .3rem;
+  margin: 0;
+}
+.filas-form2 .grade-form2-compacta .cartao-bloco {
+  min-height: 0;
+  padding: .25rem;
+  gap: .1rem;
+}
+.grade-form2-compacta .numero-bloco { font-size: .9rem; }
+.grade-form2-compacta .titulo-bloco-form2 { font-size: .72rem; line-height: 1.2; }
+.grade-form2-compacta .estado-bloco { font-size: .65rem; line-height: 1.2; }
+.grade-form2 .local-atual { font-weight: bold; }
+.grade-form2 .legenda-grade { margin: .3rem 0; font-size: .72rem; }
+.pagina-bloco-form2 > h1 { font-size: 1.5rem; margin: .5rem 0; }
+.pagina-bloco-form2 > p { margin: .4rem 0; }
+.pagina-bloco-form2 nav.acoes-fila-form2 { margin-block: .4rem; padding: 0; }
+.pagina-bloco-form2 nav.acoes-fila-form2 a { padding: .4rem .6rem; }
+.pagina-bloco-form2 details.apoio-bloco { padding: .5rem .75rem; margin: .5rem 0; }
+@media (max-width: 800px) {
+  .filas-form2 .grade-form2-compacta .regua-form2 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+  .filas-form2 .grade-form2-compacta .regua-form2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+body:has(.pagina-bloco-form2) .topo { padding-block: .5rem; }
+body:has(.pagina-bloco-form2) .conteudo { padding-top: .5rem; }
+.pagina-bloco-form2 .grade-form2-compacta .cartao-bloco { border-bottom-width: 1px; }
+.pagina-bloco-form2 > .aviso-dados { padding: .4rem .7rem; font-size: .85rem; }
+
+@media (min-width: 1100px) {
+  body:has(.pagina-bloco-form2) .topo { flex-wrap: nowrap; gap: .6rem; }
+  body:has(.pagina-bloco-form2) .topo .marca { font-size: 1.05rem; }
+  body:has(.pagina-bloco-form2) .topo .selo { max-width: 20rem; font-size: .75rem; }
+  body:has(.pagina-bloco-form2) .brasao-institucional { width: 48px; height: 48px; }
+  body:has(.pagina-bloco-form2) .central-cabecalho { font-size: .85rem; max-width: 12rem; }
+}

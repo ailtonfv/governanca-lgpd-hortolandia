@@ -1,6 +1,6 @@
-<section aria-label="Preenchimento do FORM 2">
-<h2>Blocos do FORM 2</h2>
-<p>Selecione um bloco para preencher ou revisar. Respostas salvas não significam conclusão ou homologação.</p>
+{% set compacta = grade_compacta|default(false) %}
+<section class="grade-form2{{ ' grade-form2-compacta' if compacta else '' }}" aria-label="Preenchimento do FORM 2">
+{% if not compacta %}<h2>Blocos do FORM 2</h2><p>Selecione um bloco para preencher ou revisar. Respostas salvas não significam conclusão ou homologação.</p>{% endif %}
 {% set titulos = titulos_blocos_form2() %}
 <nav data-preparacao="fila-{{ p.id }}" data-conta="{{ conta_id }}" class="regua-navegacao-blocos" aria-label="Navegação pelos 14 blocos do FORM 2">
 <ol class="mapa-blocos-form1 regua-form2 regua-com-titulos-form2">
@@ -11,9 +11,10 @@
         {% if n in titulos %}<small class="titulo-bloco-form2">{{ titulos[n] }}</small>{% endif %}
 <small class="estado-bloco {{ 'salvo' if salvo else 'a-percorrer' }}">{{ estados_regua.get('situacao', {}).get(n|string, '— Ainda não preenchido') }}</small>
 {% if pendente %}<small class="estado-bloco com-pendencias">Com pendências</small>{% endif %}
-{% if n == 2 and aguarda_temporalidade(p.conteudo) %}<small class="selo-guarda">Guarda: aguarda definição institucional</small>{% endif %}
-{% if n in (3,4,5,10) %}<small class="selo-d11" title="Este bloco depende de conferência jurídica ainda não concluída.">Aguarda homologação jurídica (D11)</small>{% endif %}
-<small class="estado-bloco visitado" data-visitado hidden>Visitado nesta sessão</small>
+{% if n == 2 and aguarda_temporalidade(p.conteudo) %}{% if compacta %}<span role="img" aria-label="Guarda: aguarda definição institucional" title="Guarda: aguarda definição institucional">🗄</span>{% else %}<small class="selo-guarda">Guarda: aguarda definição institucional</small>{% endif %}{% endif %}
+{% if n in (3,4,5,10) %}{% if compacta %}<span role="img" aria-label="Aguarda homologação jurídica (D11)" title="Aguarda homologação jurídica (D11)">⚖</span>{% else %}<small class="selo-d11">Aguarda homologação jurídica (D11)</small>{% endif %}{% endif %}
+{% if numero|default(0) == n %}<small class="estado-bloco local-atual">Você está aqui</small>{% else %}<small class="estado-bloco visitado" data-visitado hidden>Visitado nesta sessão</small>{% endif %}
 </a></li>{% endfor %}</ol></nav>
+{% if compacta %}<p class="legenda-grade">⚖ Aguarda homologação jurídica (D11) · 🗄 Guarda: aguarda definição institucional. Respostas salvas não significam conclusão ou homologação.</p>{% endif %}
 </section>
 <script defer src="{{ url_for('estaticos', path='/regua_form2.js') }}"></script>

@@ -1,27 +1,27 @@
 {% from '_identificador_pergunta.html' import codigo_pergunta %}
 {% extends "base.html" %}{% block conteudo %}
-<link rel="stylesheet" href="{{ url_for('estaticos', path='/filas_form2.css') }}"><div class="filas-form2">
+<link rel="stylesheet" href="{{ url_for('estaticos', path='/filas_form2.css') }}"><div class="filas-form2 pagina-bloco-form2">
 <h1>{{ registro.codigo_lgpd }} · FORM 2 · Bloco {{ numero }} — {{ titulos_blocos_form2().get(numero, bloco.titulo) }}</h1>
 <p><strong>Versão do FORM 1 em análise:</strong> {{ rotulo_origem }}</p>
 <p>{{ atuacao.servidor }} · {{ atuacao.funcao }} · <span class="sr-apenas">Unidade de atuação:</span> {{ atuacao.unidade }} · {{ "Você pode editar suas respostas" if atuacao.editavel else "Somente leitura" }}</p>
-{% if numero in (3,4,5,10) %}<p class="selo-d11">Aguarda homologação jurídica (D11)</p>{% endif %}
-{% if numero == 2 and aguarda_temporalidade(p.conteudo) %}<p class="selo-guarda">Guarda: aguarda definição institucional</p>{% endif %}
+{% if numero in (3,4,5,10) %}<span class="selo-d11">Aguarda homologação jurídica (D11)</span>{% endif %}
+{% if numero == 2 and aguarda_temporalidade(p.conteudo) %}<span class="selo-guarda">Guarda: aguarda definição institucional</span>{% endif %}
 {% if confirmacao %}<p id="confirmacao-salvamento" class="confirmacao-salvamento" role="status">{{ confirmacao }}</p>{% endif %}
 
-<div class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/participacoes/{{ p.id }}?conta_id={{ conta_id|urlencode }}">Voltar à participação</a></div>
-{% include '_regua_fila_form2.html' %}
-<nav aria-label="Percorrer blocos" class="acoes-fila-form2">
+
+{% with grade_compacta=true %}{% include '_regua_fila_form2.html' %}{% endwith %}
+<nav aria-label="Percorrer blocos" class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/participacoes/{{ p.id }}?conta_id={{ conta_id|urlencode }}">Voltar à participação</a>
 {% if numero > 1 %}<a href="{{ numero-1 }}?conta_id={{ conta_id|urlencode }}">Bloco anterior</a>{% endif %}
 {% if numero < 14 %}<a href="{{ numero+1 }}?conta_id={{ conta_id|urlencode }}">Próximo bloco</a>{% endif %}
 <a href="/form2/participacoes/{{ p.id }}/governanca?conta_id={{ conta_id|urlencode }}&amp;bloco_origem={{ numero }}">Pendências com a origem (FORM 1)</a></nav>
-{% if numero == 14 %}<article><h2>Conferência da consolidação</h2><p>Reúna as respostas salvas, as complementações e as manifestações das áreas. Salve o bloco antes de abrir a conferência.</p><div class="acoes-fila-form2"><a class="botao-link" href="/form2/participacoes/{{ p.id }}/consolidacao?conta_id={{ conta_id|urlencode }}">Conferir consolidação</a></div></article>{% endif %}
-<p>Demonstração com dados fictícios. As respostas candidatas, inclusive as jurídicas e o resultado da validação (bloco 14), são rascunhos não homologados. Salvar não conclui a validação institucional.</p>
+
+<details class="apoio-bloco"><summary>Orientações e consultas de apoio</summary>{% if numero == 14 %}<article><h2>Conferência da consolidação</h2><p>Reúna as respostas salvas, as complementações e as manifestações das áreas. Salve o bloco antes de abrir a conferência.</p><div class="acoes-fila-form2"><a class="botao-link" href="/form2/participacoes/{{ p.id }}/consolidacao?conta_id={{ conta_id|urlencode }}">Conferir consolidação</a></div></article>{% endif %}<p>Demonstração com dados fictícios. As respostas candidatas, inclusive as jurídicas e o resultado da validação (bloco 14), são rascunhos não homologados. Salvar não conclui a validação institucional.</p>
 <details class="origem-fila-form2"><summary>Consultar respostas do FORM 1</summary>
 <p>Respostas do FORM 1 em análise, somente para consulta.</p>
 <dl class="respostas-origem-form2">{% for q in perguntas_origem %}<div class="item-origem-form2"><dt>{{ codigo_pergunta(q.id, 1) }}{% if q.conjunto %} · conjunto {{ q.conjunto }}{% endif %} · {{ q.pergunta }}</dt><dd>{{ q.valor|join(', ') if q.valor is sequence and q.valor is not string and q.valor is not mapping else q.valor }}</dd></div>{% else %}<div><dt>Respostas</dt><dd>Nenhuma resposta registrada nesta versão.</dd></div>{% endfor %}</dl></details>
 {% set guias = bloco.itens|map(attribute="fontes_publicas")|sum(start=[])|unique(attribute="url")|list %}
 {% if guias %}<aside id="apoio-anpd"><h2>Apoio da ANPD</h2><ul>{% for guia in guias %}<li><a href="{{ guia.url }}" target="_blank" rel="noopener noreferrer">{{ guia.titulo }}</a></li>{% endfor %}</ul></aside>{% endif %}
-<p class="aviso-dados">Não informe nomes, CPF, protocolos de atendimento ou dados de casos concretos.</p>
+</details><p class="aviso-dados">Não informe nomes, CPF, protocolos de atendimento ou dados de casos concretos.</p>
 <form method="post" id="revisao-bloco"><input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="comando_id" value="{{ comando_id }}"><input type="hidden" name="versao" value="{{ p.versao }}">
 <fieldset {% if p.responsavel_id != pessoa.id or p.estado != 'em_atendimento' %}disabled{% endif %}>
 {% from '_condicoes_form2.html' import gatilhos, ajuda %}

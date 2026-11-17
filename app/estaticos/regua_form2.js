@@ -13,7 +13,8 @@
         visitado = sessionStorage.getItem(chave) === '1';
       } catch { /* A página atual continua identificada sem armazenamento local. */ }
       link.classList.toggle('bloco-visitado', Boolean(visitado));
-      link.querySelector('[data-visitado]').hidden = !visitado;
+      const marcador = link.querySelector('[data-visitado]');
+      if (marcador) marcador.hidden = !visitado;
     }
   }
   atualizar();
