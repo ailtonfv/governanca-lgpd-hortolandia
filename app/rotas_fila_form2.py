@@ -512,6 +512,7 @@ def bloco_fila(request: Request, participacao_id: str, bloco: int, conta_id: str
                sessao: Session = Depends(sessao_fila)):
     from app.respostas_form2 import projetar_bloco, definicao_revisao, limite_texto_revisao
     from app.confirmacoes_form2 import itens_a_confirmar
+    from app.fatos_abertura_form2 import projetar_fatos_abertura
     from app.form2_rev212 import RASCUNHO, ramos_origem, indice_valores, aplicavel, mapa_regras
     from app.contrato_form2_respostas import carregar_contrato
     from app.origem_form2 import ler_origem
@@ -525,6 +526,7 @@ def bloco_fila(request: Request, participacao_id: str, bloco: int, conta_id: str
     origem = ler_origem(sessao, p.registro_id, p.snapshot_id)
     conteudo = p.conteudo or {}
     definicao = projetar_bloco(conteudo, bloco) if bloco in (1, 2) else definicao_revisao(bloco)
+    projetar_fatos_abertura(definicao['itens'], origem)
     regras = mapa_regras(carregar_contrato())
     valores = indice_valores(conteudo)
     valores_bloco = conteudo.get(RASCUNHO, {}).get(str(bloco), {})

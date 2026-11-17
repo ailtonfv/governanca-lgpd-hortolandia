@@ -74,6 +74,9 @@
 <section id="teste-balanceamento" {% if not ativa(q.id, '') %}hidden{% endif %}><h2>Teste de balanceamento — só para Legítimo interesse</h2>
 {% endif %}
 <fieldset class="resposta-form2" id="{{ q.id }}"><legend>{{ q.id }} · {{ q.enunciado|replace("na Seção 2","no bloco 2")|replace("Seção 2","Bloco 2") }}</legend>
+{% if q.fatos_abertura is defined %}<aside class="fatos-abertura-form2"><strong>No FORM 1 · {{ rotulo_origem }}</strong>
+{% for fato in q.fatos_abertura %}<p>No FORM 1: {{ fato.valor }}{% if fato.complemento %} — {{ fato.complemento }}{% endif %} ({{ fato.referencia }}){% if fato.conjunto %} · conjunto {{ fato.conjunto }}{% endif %}</p>{% else %}<p>No FORM 1: sem resposta.</p>{% endfor %}
+<p class="ajuda">Compare as informações desta apresentação e registre sua resposta abaixo.</p></aside>{% endif %}
 {% if q.id == 'F2-14.2' and complementacao %}<p><strong>Complementação do FORM 1 · origem 1.3.1</strong><br>{{ complementacao }}</p>{% endif %}
 {% if q.id == 'F2-13.9' %}<p>{{ revogacao|join(', ') if revogacao else 'F2-5.7 ainda sem resposta salva.' }} Consulta ao rascunho, sem homologação D11.</p>{% endif %}
 {% if q.id in ('F2-14.8.1','F2-14.8.2') %}<p>A classificação de pendências impeditivas aguarda definição institucional.</p>{% endif %}
