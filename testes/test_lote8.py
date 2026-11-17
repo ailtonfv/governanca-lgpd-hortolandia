@@ -41,3 +41,12 @@ def test_c1_lista_nas_duas_perguntas_sem_premarcacao(sessao, principal):
     assert tela.text.count('6?conta_id=CONTA-B1#F2-6.1') == 2
     campo = tela.text.split('name="opcao:F2-14.8"')[1].split('</select>')[0]
     assert 'selected' not in campo
+
+
+def test_c4_consultas_sem_rotulo_tecnico(principal):
+    cliente = TestClient(app)
+    for numero in (13, 14):
+        tela = cliente.get(f"/form2/participacoes/{principal.id}/blocos/{numero}?conta_id=CONTA-B1")
+        assert tela.status_code == 200
+        assert 'Consulta automática' not in tela.text
+        assert 'resposta candidata' not in tela.text
