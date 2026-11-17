@@ -105,7 +105,9 @@ def estados_regua_form2(conteudo):
                         ativos.add(match[1])
         pendentes.difference_update(referenciados)
         pendentes.update(ativos)
-    return {"salvos": salvos, "pendentes": pendentes}
+    return {"salvos": salvos, "pendentes": pendentes,
+            "situacao": {str(n): ("◐ Em preenchimento" if str(n) in salvos else "— Ainda não preenchido")
+                         for n in range(1, 15)}}
 
 
 def definicao_revisao(numero):

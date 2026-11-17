@@ -9,7 +9,7 @@
 <li><a data-numero="{{ n }}" class="cartao-bloco{{ ' bloco-com-respostas' if salvo else '' }}{{ ' bloco-com-pendencias' if pendente else '' }}" href="/form2/participacoes/{{ p.id }}/blocos/{{ n }}?conta_id={{ conta_id|urlencode }}" aria-label="Ir ao Bloco {{ n }}{% if n in titulos %} — {{ titulos[n] }}{% endif %}"{% if numero|default(0) == n %} aria-current="page"{% endif %}>
 <strong class="numero-bloco">{{ n }}</strong>
         {% if n in titulos %}<small class="titulo-bloco-form2">{{ titulos[n] }}</small>{% endif %}
-<small class="estado-bloco {{ 'salvo' if salvo else 'a-percorrer' }}">{{ 'Respostas salvas' if salvo else 'Ainda não preenchido' }}</small>
+<small class="estado-bloco {{ 'salvo' if salvo else 'a-percorrer' }}">{{ estados_regua.situacao[n|string] }}</small>
 {% if pendente %}<small class="estado-bloco com-pendencias">Com pendências</small>{% endif %}
 {% if n in (3,4,5,10) %}<small class="estado-bloco" title="Este bloco depende de conferência jurídica ainda não concluída.">Aguarda homologação jurídica (D11)</small>{% endif %}
 <small class="estado-bloco visitado" data-visitado hidden>Visitado nesta sessão</small>
