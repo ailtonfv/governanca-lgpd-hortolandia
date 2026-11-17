@@ -38,3 +38,14 @@ def test_painel_exige_designacao_vigente(sessao):
     sessao.scalar(select(DesignacaoEncarregado)).fim = agora()
     sessao.commit()
     assert c.get("/form2/painel-dpo?conta_id=CONTA-E1").status_code == 403
+
+
+def test_exclusividade_no_dominio():
+    import pytest
+    from app.respostas_form2 import aplicar_revisao, aplicar_bloco
+    chave = "opcao:F2-3.1"
+    with pytest.raises(ValueError):
+        aplicar_revisao({},3,{chave:["ALT_09","A_CONFIRMAR"]},demonstrativo=True)
+    aplicar_revisao({},3,{chave:["ALT_09","ANALISE_JURIDICA"]},demonstrativo=True)
+    with pytest.raises(ValueError):
+        aplicar_bloco({},bloco=2,alteracoes={"F2-2.9.1":["ALT_01","A_CONFIRMAR"]},proxima_versao=1)

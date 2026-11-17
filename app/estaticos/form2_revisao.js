@@ -21,6 +21,8 @@
       const aviso = grupo.querySelector('[data-aviso-complemento]');
       if (aviso) aviso.hidden = !ativa;
     }
+    const alerta = document.getElementById('alerta-fundamento');
+    if (alerta) alerta.hidden = !form.querySelector('[name="opcao:F2-3.1"][value="ANALISE_JURIDICA"]:checked') || form.elements.namedItem('opcao:F2-3.4')?.value === 'SIM';
     const teste = document.getElementById('teste-balanceamento');
     if (teste) {
       const aplicavel = !document.getElementById('F2-3.5').querySelector('[data-gatilhos]').disabled;
