@@ -195,6 +195,8 @@ def painel_registros(
     acesso = carregar_central(sessao, conta_id)
     if acesso is None:
         return _erro_acesso_central(request, conta_indisponivel=True)
+    if unidades(sessao, acesso["identidade"]["pessoa_id"], PAPEIS["dpo"]) and not unidades(sessao, acesso["identidade"]["pessoa_id"], PAPEIS["principal"]):
+        return paginas.TemplateResponse(request=request, name="painel_agente_dpo.html", context={"conta_id":conta_id})
     secretarias = acesso["secretarias"]
     if secretaria_id is None:
         # Preferência de navegação por conta. O vínculo é verificado em todo acesso.

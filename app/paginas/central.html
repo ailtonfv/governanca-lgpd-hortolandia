@@ -56,14 +56,14 @@
       {% for registro in a_conferir %}<p><a class="botao-link" href="{{ url_for('consultar_conferencia_interna', registro_id=registro.id) }}?conta_id={{ conta_id|urlencode }}">Conferir {{ registro.codigo_lgpd }} ({{ unidades_conferencia[registro.unidade_principal_atual_id] }})</a></p>{% endfor %}
     </section>{% endif %}
     <div class="navegacao-governanca">
-      {% if secretarias %}
+      {% if secretarias and not exibir_painel_dpo %}
       <button class="botao-primario" type="submit" form="abrir-painel">Abrir Painel de Registros</button>
       {% endif %}
       {% if exibir_fila_form2 %}
       <a class="botao-link-secundario" href="{{ url_for('filas_form2') }}?conta_id={{ conta_id|urlencode }}">Abrir fila do FORM 2</a>
       {% endif %}
       {% if exibir_painel_dpo %}
-      <a class="botao-link-secundario" href="{{ url_for('painel_dpo') }}?conta_id={{ conta_id|urlencode }}">Abrir painel do DPO</a>
+      <a class="botao-link" href="{{ url_for('painel_dpo') }}?conta_id={{ conta_id|urlencode }}">Abrir painel do DPO</a>
       {% endif %}
     </div>
     <section class="identidade-demonstrativa">
