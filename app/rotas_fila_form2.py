@@ -149,6 +149,8 @@ def governanca(request: Request, participacao_id: str, conta_id: str):
         sessao.commit()
         return paginas.TemplateResponse(request=request, name="governanca_form2_v9.html", context={
             "p": p, "alvo": alvo, "registro": sessao.get(Registro, p.registro_id), "conta_id": conta_id,
+            "bloco_origem": next((n for n in range(1,15) if str(n)==request.query_params.get("bloco_origem")),None),
+            "estados_regua": estados_regua_form2(p.conteudo or {}),
             "e_aal": e_aal, "e_origem": e_origem, "e_participante": e_participante,
             "atuacao": contexto_atuacao(sessao, pessoa, alvo),
             "pendencias": pendencias, "g": g if e_aal else {}, "versoes": versoes,

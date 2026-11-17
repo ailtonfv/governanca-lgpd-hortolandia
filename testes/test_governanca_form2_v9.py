@@ -242,7 +242,7 @@ def test_HTTP_lista_retorno_e_negacao(sessao,principal):
     p=principal;pendencia(sessao,p)
     with TestClient(app) as c:
         url=f'/form2/participacoes/{p.id}/governanca'
-        pagina=c.get(url+'?conta_id=CONTA-B1')
+        pagina=c.get(url+'?conta_id=CONTA-B1&bloco_origem=1')
         assert pagina.status_code==200 and 'Acrescentar outra necessidade' in pagina.text
         for caminho in [url, f'/form2/participacoes/{p.id}', f'/form2/participacoes/{p.id}/blocos/1']:
             tela = c.get(caminho + '?conta_id=CONTA-B1')
@@ -387,14 +387,14 @@ def test_fila_cartao_unico_e_encaminhamento_so_APA(sessao, principal):
         beta = client.get('/form2/filas?conta_id=CONTA-B1')
         assert beta.status_code == 200
         assert beta.text.count('data-registro="' + principal.registro_id + '"') == 1
-        assert 'Abrir FORM 2' in beta.text
-        assert 'Ver pendências e respostas' in beta.text
+        assert 'Abrir participação' in beta.text
+        assert 'Pendências com a origem (FORM 1)' in beta.text
         assert 'Complementação do FORM 1: definir unidade responsável pela resposta.' in beta.text
         assert 'Encaminhar versão do FORM 1 já confirmada' not in beta.text
         alfa = client.get('/form2/filas?conta_id=CONTA-A1')
         assert alfa.status_code == 200
         assert alfa.text.count('data-registro="' + principal.registro_id + '"') == 1
-        assert 'Ver pendências e respostas' in alfa.text
+        assert 'Pendências com a origem (FORM 1)' in alfa.text
         assert not alfa.context['encaminhaveis']
         assert 'Encaminhar versão do FORM 1 já confirmada' not in alfa.text
 

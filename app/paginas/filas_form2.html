@@ -21,7 +21,7 @@
 {% for complemento in c.complementos %}
 {% if not c.participacoes %}<p>Situação da participação: {{ situacoes.get(complemento.p.estado, complemento.p.estado) }}.</p>{% endif %}
 {% if complemento.situacao %}<details><summary>Detalhes da origem</summary><p>Complementação do FORM 1: {{ complemento.situacao }}.</p></details>{% endif %}
-<div class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/participacoes/{{ complemento.p.id }}/governanca?conta_id={{ conta_id|urlencode }}">Ver pendências e respostas</a></div>
+<div class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/participacoes/{{ complemento.p.id }}/governanca?conta_id={{ conta_id|urlencode }}">Pendências com a origem (FORM 1)</a></div>
 {% endfor %}</article>
 {% else %}<p>Nenhum Registro nas filas autorizadas para esta conta.</p>{% endfor %}{% endif %}
 {% if pode_encaminhar and encaminhaveis %}

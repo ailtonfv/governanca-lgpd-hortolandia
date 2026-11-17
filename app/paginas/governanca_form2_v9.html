@@ -1,10 +1,11 @@
 {% extends 'base.html' %}
 {% block conteudo %}
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/filas_form2.css') }}">
-<div class="filas-form2"><h1>Pendências e retorno da origem</h1>
+<div class="filas-form2"><h1>Pendências com a origem (FORM 1)</h1>
 {% include '_atuacao_form2.html' %}
 <p><strong>{{ registro.codigo_lgpd }}</strong> · FORM 2</p>
 <div class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/filas?conta_id={{ conta_id|urlencode }}">Voltar às filas</a>
+{% if e_aal and bloco_origem %}<a class="botao-link" href="/form2/participacoes/{{ p.id }}/blocos/{{ bloco_origem }}?conta_id={{ conta_id|urlencode }}">Voltar ao bloco {{ bloco_origem }}</a>{% endif %}
 {% if e_aal %}<a class="botao-link-secundario" href="/form2/participacoes/{{ p.id }}?conta_id={{ conta_id|urlencode }}">Voltar ao FORM 2</a>{% endif %}</div>
 {% if e_aal and tem_retorno_institucional %}<p class="acoes-fila-form2"><a class="botao-link-secundario" href="/registros/{{ registro.id }}/unidade-retorno?conta_id={{ conta_id|urlencode }}">Conferir unidade de retorno de Ouvidoria/e-SIC</a></p>{% endif %}
 {% if e_origem and not e_aal %}
@@ -15,6 +16,7 @@
 {% else %}
 <p>Confira as respostas às solicitações da sua participação. Registre se atendem ao pedido ou se precisam de novo complemento. A escolha da versão usada na análise cabe ao AAL da participação principal.</p>
 {% endif %}
+{% if e_aal %}{% with numero=bloco_origem %}{% include '_regua_fila_form2.html' %}{% endwith %}{% endif %}
 {% macro cabecalho(chave, pendencia='') %}
 <input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="versao" value="{{ p.versao }}">
 <input type="hidden" name="comando_id" value="{{ (comando_id ~ "-" ~ chave)|chave_comando }}"><input type="hidden" name="pendencia_id" value="{{ pendencia }}">
@@ -59,8 +61,8 @@
 <details><summary>Histórico e referências da solicitação</summary><p>Referência para rastreabilidade: {{ d.id }}</p><ul>{% for h in d.historico %}<li>{{ h.em|default('Legado') }} · {{ h.ato }} · {{ h.motivo|default('') }}</li>{% endfor %}</ul></details>
 </article>{% else %}<p>Nenhuma pendência no seu escopo.</p>{% endfor %}
 {% if e_aal %}
-<details><summary>F2-1.3.1 · Acrescentar outra necessidade</summary><p>Uma necessidade por registro. Salve primeiro a divergência ou insuficiência no Bloco 1.</p><form method="post">{{ cabecalho('nova') }}
-<label>Complementação<textarea name="descricao" required maxlength="200"></textarea></label>{{ motivo() }}<button class="botao-link" name="acao" value="adicionar">Registrar outra necessidade</button></form></details>
+{% if bloco_origem == 1 %}<details><summary>F2-1.3.1 · Acrescentar outra necessidade</summary><p>Uma necessidade por registro. Salve primeiro a divergência ou insuficiência no Bloco 1.</p><form method="post">{{ cabecalho('nova') }}
+<label>Complementação<textarea name="descricao" required maxlength="200"></textarea></label>{{ motivo() }}<button class="botao-link" name="acao" value="adicionar">Registrar outra necessidade</button></form></details>{% else %}<a href="/form2/participacoes/{{ p.id }}/blocos/1?conta_id={{ conta_id|urlencode }}">Registrar no bloco 1</a>{% endif %}
 <article><h2>Nova versão do FORM 1</h2>
 <p>A resposta precisa ser confirmada pelo APA e conferida por quem a solicitou. Aceitar uma resposta não substitui automaticamente a versão usada na análise.</p>
 {% if versoes_aceitas %}<form method="post">{{ cabecalho('fonte') }}{{ fontes(versoes_aceitas) }}{{ motivo() }}<button class="botao-link" name="acao" value="fonte">Usar nova versão na análise</button><button class="botao-link" name="acao" value="manter_fonte">Continuar usando a versão atual</button></form>

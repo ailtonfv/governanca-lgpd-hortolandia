@@ -12,7 +12,7 @@
 <nav aria-label="Percorrer blocos" class="acoes-fila-form2">
 {% if numero > 1 %}<a href="{{ numero-1 }}?conta_id={{ conta_id|urlencode }}">Bloco anterior</a>{% endif %}
 {% if numero < 14 %}<a href="{{ numero+1 }}?conta_id={{ conta_id|urlencode }}">Próximo bloco</a>{% endif %}
-<a href="/form2/participacoes/{{ p.id }}/governanca?conta_id={{ conta_id|urlencode }}&amp;bloco_origem={{ numero }}">Ver pendências e respostas</a></nav>
+<a href="/form2/participacoes/{{ p.id }}/governanca?conta_id={{ conta_id|urlencode }}&amp;bloco_origem={{ numero }}">Pendências com a origem (FORM 1)</a></nav>
 {% if numero == 14 %}<article><h2>Conferência da consolidação</h2><p>Reúna as respostas salvas, as complementações e as manifestações das áreas. Salve o bloco antes de abrir a conferência.</p><div class="acoes-fila-form2"><a class="botao-link" href="/form2/participacoes/{{ p.id }}/consolidacao?conta_id={{ conta_id|urlencode }}">Conferir consolidação</a></div></article>{% endif %}
 <p>Demonstração com dados fictícios. As respostas candidatas, inclusive as jurídicas e o resultado da validação (bloco 14), são rascunhos não homologados. Salvar não conclui a validação institucional.</p>
 <details class="origem-fila-form2"><summary>Consultar respostas do FORM 1</summary>
