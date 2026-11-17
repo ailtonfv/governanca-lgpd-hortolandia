@@ -4,6 +4,33 @@ from app.form2_rev212 import condicoes_de_tela, mapa_regras
 from app.contrato_form2_respostas import carregar_contrato
 from app.respostas_form2 import definicao_revisao
 from app.fatos_abertura_form2 import projetar_fatos_abertura
+from app.respostas_form2 import aplicar_revisao, contagem_perguntas_ativas
+import pytest
+
+
+def test_d7_condicoes_e_contagem():
+    base = {RASCUNHO: {'10': {'opcao:F2-10.2': ['NAO'], 'opcao:F2-10.9': ['SIM'],
+                             'opcao:F2-10.9.6': ['NAO']}}}
+    antes = contagem_perguntas_ativas(base, [10])[10][1]
+    alterado, _ = aplicar_revisao(base, 10, {'opcao:F2-10.2': ['SIM'],
+        'opcao:F2-10.9.6': ['SIM']}, demonstrativo=True)
+    assert contagem_perguntas_ativas(alterado, [10])[10][1] >= antes + 6
+    for item in ('F2-10.3','F2-10.4','F2-10.9.7','F2-10.9.8','F2-10.9.9','F2-10.9.10'):
+        campo = ('texto:' if item.endswith('.7') else 'opcao:') + item
+        with pytest.raises(ValueError, match='depende de resposta anterior'):
+            aplicar_revisao(base, 10, {campo: ['Fictício' if campo.startswith('texto:') else 'SIM']}, demonstrativo=True)
+
+
+def test_d7_post_bloqueado_sem_gravar(sessao, principal):
+    cliente = TestClient(app)
+    for n, item in enumerate(('F2-10.3','F2-10.4','F2-10.9.7','F2-10.9.8','F2-10.9.9','F2-10.9.10')):
+        campo = ('texto:' if item.endswith('.7') else 'opcao:') + item
+        retorno = cliente.post(f'/form2/participacoes/{principal.id}/blocos/10', data={
+            'conta_id': 'CONTA-B1', 'comando_id': f'L8-D7-{n}', 'versao': principal.versao,
+            campo: 'Fictício' if campo.startswith('texto:') else 'SIM'})
+        assert retorno.status_code == 409
+    sessao.refresh(principal)
+    assert not principal.conteudo.get(RASCUNHO, {}).get('10')
 
 
 def test_d6_fatos_do_snapshot_sem_alterar_respostas():

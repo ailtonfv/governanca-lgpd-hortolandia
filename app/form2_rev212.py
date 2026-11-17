@@ -44,6 +44,12 @@ def novos_controles():
     }
 
 
+def condicoes_d7():
+    """DPO, 17/11/2026: divergência aprovada; incorporar na próxima revisão do Mestre."""
+    return {**{q: condicao('F2-10.2', 'SIM') for q in ('F2-10.3', 'F2-10.4')},
+            **{f'F2-10.9.{n}': condicao('F2-10.9.6', 'SIM') for n in range(7, 11)}}
+
+
 def montar_bloco(base):
     antigos = {q["id"]: q for q in base["itens"]}
     novos = novos_controles()
@@ -59,6 +65,8 @@ def montar_bloco(base):
         else:
             continue
         q.update(redacao)
+        if chave in condicoes_d7():
+            q['condicoes'] = condicoes_d7()[chave]
         q["repetivel"] = por_conjunto(chave)
         if chave in CONSULTAS:
             q.update(edicao="consulta", alternativas=[], controle="Consulta automática")
@@ -156,6 +164,7 @@ def mapa_regras(contrato):
         regras.setdefault(c["alvo"], []).append(c)
     for k, (_, _, condicoes) in novos_controles().items():
         regras[k] = condicoes
+    regras.update(condicoes_d7())
     return regras
 
 
