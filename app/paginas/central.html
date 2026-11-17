@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% from '_links_instrumentos.html' import identificacao_servidor %}
-{% block titulo %}Central de Acesso LGPD{% endblock %}
+{% block titulo %}Central de Acesso{% endblock %}
 {% macro cartao(area, titulo, objetivo, situacao, icone, numero='', acesso='') %}
 <li class="cartao-central area-{{ area }}">
   <svg class="icone-central" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="{{ icone }}"/></svg>
@@ -20,7 +20,7 @@
 {% block conteudo %}
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/instrumentos_registro.css') }}">
 <div class="central-acesso">
-  <h1>Central de Acesso LGPD</h1>
+  <h1>Central de Acesso</h1>
   <p>Escolha um instrumento para ver os Registros autorizados na sua Secretaria.</p>
   <section class="contexto-central" aria-labelledby="titulo-contexto">
     <h2 id="titulo-contexto">{{ "Atuação: Encarregado de Dados (DPO)" if exibir_painel_dpo else "Secretaria de atuação" }}</h2>
