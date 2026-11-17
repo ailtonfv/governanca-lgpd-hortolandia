@@ -149,6 +149,11 @@ def executar(sessao, *, conta_id, comando_id, participacao_id, acao, versao,
         elif acao == "consultar":
             if p.tipo != "principal" or tipo not in {"dpo", "juridico", "tematica"} or not texto.strip():
                 raise ValueError("A participação principal deve informar tipo, destino e questão.")
+            destino_fixo = {"dpo":"UNID-GOV", "juridico":"SEC-AJ"}.get(tipo)
+            if destino_fixo:
+                if unidade_id and unidade_id != destino_fixo:
+                    raise ValueError("O destino da consulta não corresponde ao tipo escolhido.")
+                unidade_id = destino_fixo
             destino = sessao.get(Unidade, unidade_id)
             if not destino or not destino.ativa:
                 raise ValueError("Unidade destinatária indisponível.")

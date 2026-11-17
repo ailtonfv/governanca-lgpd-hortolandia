@@ -36,12 +36,12 @@
   <button type="submit" class="botao-primario">Confirmar assunção</button></div>
 </dialog>
 {% elif p.estado == 'em_atendimento' and p.responsavel_id == pessoa.id %}
-<label>Manifestação ou questão <textarea name="texto" rows="10" maxlength="10000">{{ p.manifestacao }}</textarea></label>
-<button type="submit" class="botao-primario" name="acao" value="salvar">Salvar manifestação</button>
+<label>{{ "Sua questão" if p.tipo == "principal" else "Sua manifestação" }} <textarea name="texto" rows="10" maxlength="10000">{{ p.manifestacao }}</textarea></label>
+{% if p.tipo != "principal" %}<button type="submit" class="botao-primario" name="acao" value="salvar">Salvar manifestação</button>{% endif %}
 {% if p.tipo == 'principal' %}
 <label>Tipo de consulta <select name="tipo"><option value="dpo">DPO</option><option value="juridico">Jurídico</option><option value="tematica">Área temática</option></select></label>
-<label>Unidade destinatária <select name="unidade_id">{% for u in unidades %}<option value="{{ u.id }}">{{ u.nome }}</option>{% endfor %}</select></label>
-<button type="submit" class="botao-primario" name="acao" value="consultar" data-confirmar-ato="{{ pessoa.nome }} encaminhará a questão sobre {{ rotulo_origem }} à área selecionada.">Encaminhar questão</button>
+<p data-destino-fixo>Governança de proteção de dados</p><label data-area-tematica hidden>Unidade destinatária <select name="unidade_id" disabled>{% for u in unidades %}<option value="{{ u.id }}">{{ u.nome }}</option>{% endfor %}</select></label>
+<button type="submit" class="botao-primario" name="acao" value="consultar" data-confirmar-ato="{{ pessoa.nome }} encaminhará a questão sobre {{ rotulo_origem }} à área selecionada.">Encaminhar consulta</button>
 {% else %}<button type="submit" class="botao-primario" name="acao" value="concluir">Concluir manifestação</button>{% endif %}
 {% else %}<p>{{ p.manifestacao }}</p>{% endif %}
 </form>
@@ -55,4 +55,18 @@
 <label>Motivo<textarea name="texto" required maxlength="1000"></textarea></label><button class="botao-primario" data-confirmar-ato="{{ pessoa.nome }}, AAL, registrará como considerou a orientação sobre {{ rotulo_origem }}.">Registrar resposta</button></form>{% endif %}</article>
 {% endfor %}
 {% set consultas = consultas|rejectattr('conteudo.de_oficio')|list %}{% if consultas %}<h2>Manifestações solicitadas</h2>{% for consulta in consultas %}<article><h3>{{ consulta.tipo }} · {{ situacoes.get(consulta.estado, consulta.estado) }}</h3><p>{{ consulta.questao }}</p><p>{{ consulta.manifestacao }}</p><p>Responsável · {{ consulta.responsavel_id or 'Aguardando assunção' }} · {{ consulta.concluida_em or '' }}</p></article>{% endfor %}{% endif %}
-</div><script src="{{ url_for('estaticos', path='/confirmar_acao_fila.js') }}" defer></script>{% endblock %}
+</div><script>
+const tipoConsulta = document.querySelector('select[name="tipo"]');
+if (tipoConsulta) {
+  function mostrarDestino() {
+    const area = document.querySelector('[data-area-tematica]');
+    area.hidden = tipoConsulta.value !== 'tematica';
+    area.querySelector('select').disabled = area.hidden;
+    const fixo = document.querySelector('[data-destino-fixo]');
+    fixo.hidden = !area.hidden;
+    fixo.textContent = tipoConsulta.value === 'dpo' ? 'Governança de proteção de dados' : 'Assuntos Jurídicos';
+  }
+  tipoConsulta.addEventListener('change', mostrarDestino);
+  mostrarDestino();
+}
+</script><script src="{{ url_for('estaticos', path='/confirmar_acao_fila.js') }}" defer></script>{% endblock %}
