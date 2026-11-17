@@ -6,6 +6,11 @@ from app.respostas_form2 import definicao_revisao
 from app.fatos_abertura_form2 import projetar_fatos_abertura
 from app.respostas_form2 import aplicar_revisao, contagem_perguntas_ativas
 import pytest
+
+
+def test_c10_apoio_sem_guia_inadequado_no_bloco4():
+    assert all(f['chave'] != 'ANPD-LI' for q in definicao_revisao(4)['itens'] for f in q['fontes_publicas'])
+    assert any(f['chave'] == 'ANPD-LI' for q in definicao_revisao(3)['itens'] for f in q['fontes_publicas'])
 from app.campos_form2 import normalizar_cnpj
 from app.campos_form2 import validar_referencia_temporal, data_exata
 

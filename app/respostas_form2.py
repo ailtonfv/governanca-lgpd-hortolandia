@@ -66,6 +66,9 @@ def _definicao_bloco(numero, contrato, catalogo):
         guarda["alternativas"].append({"id": guarda["id"], "codigo": GUARDA_INSTITUCIONAL,
             "rotulo": "Aguarda definição institucional (grupo de trabalho de guarda documental)",
             "complemento": "", "tratamento": ""})
+    if numero == 4:
+        for item in itens:
+            item['fontes_publicas'] = [f for f in item['fontes_publicas'] if f['chave'] != 'ANPD-LI']
     if numero == 1:
         for item in itens:
             if item["id"] in MODOS_IDENTIFICACAO:
