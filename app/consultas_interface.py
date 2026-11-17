@@ -401,9 +401,18 @@ def projetar_fluxo_conferencia(sessao, registro_id, unidade_id):
         HistoricoConferenciaForm1Integral.registro_id == registro_id,
         HistoricoConferenciaForm1Integral.numero_apresentacao < historico.numero_apresentacao
     ).order_by(HistoricoConferenciaForm1Integral.numero_apresentacao.desc()).limit(1)) if historico and historico.numero_apresentacao > 1 else None
+    referencia = pendente or historico
+    papel_apresentante = sessao.scalar(select(Designacao.tipo_apa).where(
+        Designacao.unidade_id == unidade_id, Designacao.pessoa_id == referencia.solicitada_por_id,
+        Designacao.papel == "responsavel_registro", Designacao.ativa.is_(True)
+    ).limit(1)) if referencia else None
+    papel_conferente = {"titular": "APA suplente", "suplente": "APA titular"}.get(papel_apresentante, "APA")
     if pendente:
         conferente = conferente_da_apresentacao(sessao, sessao.get(Registro, registro_id), pendente)
-        responsavel = rotulo(conferente, "APA") if conferente else AGUARDANDO_CONFERENTE
+        responsavel = rotulo(conferente, papel_conferente) if conferente else AGUARDANDO_CONFERENTE
+        if papel_apresentante and conferente:
+            estado = f"Aguardando conferência do {papel_conferente}"
+            proxima = f"A conferência cabe ao {papel_conferente}, {sessao.get(Pessoa, conferente).nome} (G-17)."
         if not conferente:
             estado = proxima = AGUARDANDO_CONFERENTE
     referencia = pendente or historico
@@ -418,14 +427,16 @@ def projetar_fluxo_conferencia(sessao, registro_id, unidade_id):
         "ultima_atividade": ultima,
         "devolucao_anterior": devolucao_anterior,
         "atual": atual, "estado": estado, "proxima": proxima, "responsavel": responsavel,
-        "apa": apa, "arp": arp,
+        "apa": apa, "arp": arp, "papel_conferente": papel_conferente,
+        "papel_apresentante": papel_apresentante, "apresentante_id": referencia.solicitada_por_id if referencia else None,
+        "confirmador_id": historico.confirmada_por_id if historico else None,
         "rotulo_apresentacao": rotulo_apresentacao(historico) if historico else None,
         "versao": referencia.versao_rascunho if referencia else None,
         "versao_atual": rascunho.versao_rascunho if rascunho else None,
         "tem_historico": historico is not None,
         "decidida_por": (
-            rotulo(historico.confirmada_por_id, "APA") if atual == "confirmar"
-            else rotulo(historico.devolvida_por_id, "APA") if atual == "devolver" else None
+            rotulo(historico.confirmada_por_id, papel_conferente) if atual == "confirmar"
+            else rotulo(historico.devolvida_por_id, papel_conferente) if atual == "devolver" else None
         ),
         "decidida_em": (
             historico.confirmada_em if atual == "confirmar"
@@ -598,7 +609,7 @@ def carregar_central(sessao, conta_id):
         .where(Registro.unidade_principal_atual_id.in_(unidades_apa)).order_by(Registro.codigo_lgpd))
     a_conferir = [registro for registro, pendente in pendentes
                   if conferente_da_apresentacao(sessao, registro, pendente) == identidade["pessoa_id"]]
-    return {"identidade": identidade, "secretarias": secretarias, "a_conferir": a_conferir}
+    return {"identidade": identidade, "secretarias": secretarias, "a_conferir": a_conferir, "unidades_conferencia": {r.unidade_principal_atual_id: sessao.get(Unidade,r.unidade_principal_atual_id).nome for r in a_conferir}}
 
 
 def _ids_visiveis(sessao, identidade, secretaria_id=None):

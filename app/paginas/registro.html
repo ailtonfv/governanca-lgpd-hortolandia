@@ -38,12 +38,14 @@
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/instrumentos_registro.css') }}">
 <section data-modo-consulta="{{ 'false' if registro.form1_integral.pode_editar else 'true' }}" class="form1 form1-integral" aria-labelledby="titulo-form1-integral" data-registro-id="{{ registro.id }}">
   {% set usa_rev22 = registro.form1_integral.rascunho and "revisao_22" in registro.form1_integral.rascunho.conteudo %}
+  {% set percurso = registro.form1_integral.fluxo_conferencia %}
   {% set proxima = registro.form1_integral.proxima_providencia %}
   <section class="proxima-providencia" aria-labelledby="titulo-proxima-providencia">
     <p class="etiqueta">O que fazer agora</p>
     <h3 id="titulo-proxima-providencia">Próxima providência</h3>
-    <p><strong>Seu papel neste Registro:</strong> {{ proxima.papel }}.</p>
-    <p>{{ proxima.descricao }}</p>
+    <p><strong>Seu papel neste Registro:</strong> {{ percurso.papel_conferente ~ " — conferiu a " ~ percurso.rotulo_apresentacao if percurso.papel_apresentante and percurso.confirmador_id == identidade.pessoa_id else proxima.papel }}.</p>
+    <p>{% if percurso.papel_apresentante and percurso.atual == "conferir" and percurso.apresentante_id == identidade.pessoa_id %}Você apresentou esta versão. {{ percurso.proxima }} Aguarde a decisão.{% elif percurso.papel_apresentante and percurso.atual == "confirmar" %}{{ percurso.decidida_por }} confirmou a {{ percurso.rotulo_apresentacao }} em {{ percurso.decidida_em|data_local }}.{% else %}{{ proxima.descricao }}{% endif %}</p>
+    {% if ingresso_na_fila %}<p>Encaminhado à fila do FORM 2 ({{ fila_unidade }}) em {{ ingresso_na_fila|data_local }}.{% if dpo_comunicado %} DPO comunicado.{% endif %}</p>{% endif %}
     {% if registro.form1_integral.pode_atribuir_arp %}
       {% if esta_na_fila %}
       <p>Fila do FORM 2: {{ fila_unidade }} · {{ "Responsável: " ~ fila_responsavel if fila_responsavel else "Aguardando responsável" }}.</p>

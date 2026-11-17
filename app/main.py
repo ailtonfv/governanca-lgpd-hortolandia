@@ -513,7 +513,7 @@ def detalhe_registro(
             status_code=403,
         )
     from sqlalchemy import select
-    from app.modelos import ParticipacaoForm2, Pessoa, Unidade
+    from app.modelos import AvisoDpo, ParticipacaoForm2, Pessoa, Unidade
     participacao_principal = sessao.scalar(select(ParticipacaoForm2).where(
         ParticipacaoForm2.registro_id == registro_id, ParticipacaoForm2.tipo == "principal",
         ParticipacaoForm2.estado != "concluida",
@@ -527,6 +527,9 @@ def detalhe_registro(
             "conta_id": conta_id,
             "mensagem": mensagem,
             "erro": erro,
+            "ingresso_na_fila": participacao_principal.entrada_em if participacao_principal else None,
+            "dpo_comunicado": bool(participacao_principal and sessao.scalar(select(AvisoDpo.id).where(
+                AvisoDpo.participacao_id == participacao_principal.id, AvisoDpo.tipo == "ciencia").limit(1))),
             "modo_legado": False,
             "esta_na_fila": participacao_principal,
             "fila_unidade": sessao.get(Unidade, participacao_principal.unidade_id).nome if participacao_principal else None,

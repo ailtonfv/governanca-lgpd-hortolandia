@@ -7,7 +7,7 @@
 {% set data_apresentacao = conferencia.solicitada_em.strftime('%d/%m/%Y') %}
 <p><a class="voltar" href="{{ url_for('detalhe_registro', registro_id=registro.id) }}?conta_id={{ conta_id }}">← Voltar ao Registro</a></p>
 <section class="detalhe" aria-labelledby="titulo-conferencia">
-  <p class="etiqueta">Ato preparatório · somente leitura</p>
+  {% if not conferencia_pendente %}<p class="etiqueta">Conferência registrada</p>{% endif %}
   <h1 id="titulo-conferencia">{% if conferencia_pendente %}FORM 1 aguardando conferência interna{% else %}Conferência interna confirmada{% endif %}</h1>
   <p><strong>{{ registro.codigo_lgpd }}</strong> — {{ registro.titulo_objeto }}</p>
   <p class="aviso-leitura"><strong>Importante:</strong> esta consulta não é submissão, homologação, conclusão institucional nem envio à T.I. O rascunho pode conter pendências.</p>
@@ -97,7 +97,7 @@
 </section>
 <dialog id="dialogo-confirmar-conferencia" aria-labelledby="titulo-confirmar-decisao" aria-describedby="efeito-confirmar-decisao">
   <h2 id="titulo-confirmar-decisao">{{ acao_apa }}?</h2>
-  <p id="efeito-confirmar-decisao">Você registrará, como APA, a conferência das informações apresentadas por {{ autor_apresentacao }} em {{ data_apresentacao }}, no Registro {{ registro.codigo_lgpd }}. {{ efeito_apa }} Esta decisão registra a conferência interna e não constitui homologação ou aprovação jurídica.</p>
+  <p id="efeito-confirmar-decisao">Você registrará, como {{ fluxo.papel_conferente }}, a conferência das informações apresentadas por {{ autor_apresentacao }} em {{ data_apresentacao }}, no Registro {{ registro.codigo_lgpd }}. {{ efeito_apa }} Esta decisão registra a conferência interna e não constitui homologação ou aprovação jurídica.</p>
   <div class="acoes-decisao-conferencia">
     <button type="button" class="botao-secundario" data-cancelar-confirmacao autofocus>Cancelar e revisar as opções</button>
     <button type="button" class="botao-primario" data-efetivar-confirmacao>{{ acao_apa }}</button>

@@ -1,8 +1,8 @@
 <div class="fluxo-conferencia{% if fluxo_compacto %} fluxo-conferencia-compacto{% endif %}" role="group" aria-label="Percurso da conferência interna">
   <ol class="trajeto-conferencia">
     <li {% if fluxo.atual == 'preencher' %}aria-current="step"{% endif %}><strong>ARP preenche</strong>{% if fluxo.atual == 'preencher' %}<span>Etapa atual</span>{% endif %}</li>
-    <li><strong>ARP apresenta uma versão</strong><span>{% if fluxo.versao is not none %}{% if ocultar_numeros_versao|default(false) %}Apresentação registrada{% else %}{{ fluxo.rotulo_apresentacao }}{% endif %}{% else %}Ao apresentar, preserva a versão para consulta{% endif %}</span></li>
-    <li {% if fluxo.atual == 'conferir' %}aria-current="step"{% endif %}><strong>APA confere</strong>{% if fluxo.atual == 'conferir' %}<span>Etapa atual — decidir</span>{% endif %}</li>
+    <li><strong>{{ "APA " ~ fluxo.papel_apresentante ~ " apresentou" if fluxo.papel_apresentante else "ARP apresenta uma versão" }}</strong><span>{% if fluxo.versao is not none %}{% if ocultar_numeros_versao|default(false) %}Apresentação registrada{% else %}{{ fluxo.rotulo_apresentacao }}{% endif %}{% else %}Ao apresentar, preserva a versão para consulta{% endif %}</span></li>
+    <li {% if fluxo.atual == 'conferir' %}aria-current="step"{% endif %}><strong>{{ fluxo.papel_conferente }} confere</strong>{% if fluxo.atual == 'conferir' %}<span>{{ fluxo.estado if fluxo.papel_apresentante else "Etapa atual — decidir" }}</span>{% endif %}</li>
   </ol>
   <svg class="conexoes-decisao-conferencia" viewBox="0 0 600 32" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M500 0 V10 H300 V22 M150 32 V22 H450 V32" /></svg>
   <p class="sr-apenas">A decisão do APA pode seguir um dos caminhos:</p>
