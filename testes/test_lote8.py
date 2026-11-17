@@ -6,6 +6,15 @@ from app.respostas_form2 import definicao_revisao
 from app.fatos_abertura_form2 import projetar_fatos_abertura
 from app.respostas_form2 import aplicar_revisao, contagem_perguntas_ativas
 import pytest
+from app.campos_form2 import normalizar_cnpj
+
+
+def test_c6_cnpj_sintetico_e_recusas():
+    assert normalizar_cnpj('00000000000191') == '00.000.000/0001-91'
+    assert normalizar_cnpj('') == ''
+    for invalido in ('00000000000190', '11111111111111', 'texto fictício', '123'):
+        with pytest.raises(ValueError):
+            normalizar_cnpj(invalido)
 
 
 def test_d7_condicoes_e_contagem():
@@ -115,3 +124,18 @@ def test_c3_condicoes_de_fluxos_em_linguagem_comum():
     ajudas = ' '.join(q['ajuda_condicao'] for q in itens)
     assert 'fluxo de Ouvidoria' in ajudas and 'fluxo de e-SIC' in ajudas
     assert 'ramo OUV' not in ajudas and 'ramo ESIC' not in ajudas
+
+
+def test_c6_post_cnpj_invalido_nao_grava(sessao, principal):
+    cliente = TestClient(app)
+    url = f'/form2/participacoes/{principal.id}/blocos/10'
+    dados = {'conta_id':'CONTA-B1', 'comando_id':'L8-CNPJ-INVALIDO', 'versao':principal.versao,
+             'opcao:F2-10.2':'SIM', 'opcao:F2-10.2.2':'SIM', 'texto:F2-10.2.3':'00000000000190'}
+    assert cliente.post(url, data=dados).status_code == 409
+    sessao.refresh(principal)
+    assert not principal.conteudo.get(RASCUNHO, {}).get('10')
+    dados.update(comando_id='L8-CNPJ-VALIDO')
+    dados['texto:F2-10.2.3'] = '00000000000191'
+    assert cliente.post(url, data=dados).status_code == 200
+    sessao.refresh(principal)
+    assert principal.conteudo[RASCUNHO]['10']['texto:F2-10.2.3'] == '00.000.000/0001-91'

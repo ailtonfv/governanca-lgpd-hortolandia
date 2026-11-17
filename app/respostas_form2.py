@@ -226,7 +226,11 @@ def aplicar_revisao(conteudo, bloco, campos, ramos=(), *, demonstrativo=False):
             raise ValueError("Controle de revisão inválido.")
         if len(valores) != 1 or len(valores[0]) > limite:
             raise ValueError(f"Limite de {limite} caracteres por campo.")
-        revisao[nome] = valores[0]
+        valor = valores[0]
+        if tipo == 'texto' and item_id == 'F2-10.2.3':
+            from app.campos_form2 import normalizar_cnpj
+            valor = normalizar_cnpj(valor)
+        revisao[nome] = valor
     for nome, valor in revisao.items():
         if nome.startswith("principal:") and valor and valor not in revisao.get(nome.replace("principal:", "opcao:", 1), []):
             raise ValueError("O destino principal deve constar entre os destinos selecionados.")

@@ -107,7 +107,8 @@
 <label><select aria-label="{{ q.enunciado }}" name="{{ op }}"><option value="">Sem resposta</option>{% for a in q.alternativas %}<option value="{{ a.codigo }}"{% if a.codigo in valores.get(op,[]) %} selected{% endif %}>{{ a.rotulo }}</option>{% endfor %}</select></label>
 {% endif %}{% endif %}
 {% if not q.alternativas or 'texto' in q.controle|lower or q.alternativas|selectattr('complemento','in',['Texto condicionado (R13)'])|list %}
-<label>{{ 'Complemento' if q.alternativas else '' }}<textarea aria-label="{{ q.enunciado }}" name="{{ txt }}" rows="2" maxlength="{{ limite_texto(q) }}">{{ valores.get(txt,'') }}</textarea></label>
+{% if q.id == 'F2-10.2.3' %}<label>CNPJ<input data-cnpj inputmode="numeric" name="{{ txt }}" maxlength="18" placeholder="00.000.000/0000-00" value="{{ valores.get(txt,'') }}"></label>
+{% else %}<label>{{ 'Complemento' if q.alternativas else '' }}<textarea aria-label="{{ q.enunciado }}" name="{{ txt }}" rows="2" maxlength="{{ limite_texto(q) }}">{{ valores.get(txt,'') }}</textarea></label>{% endif %}
 {% endif %}
 {% if q.id == 'F2-14.3.1' %}<label>Destino principal<select name="principal:{{ q.id }}{{ sufixo }}"><option value="">A definir</option>{% for a in q.alternativas %}<option value="{{ a.codigo }}"{% if valores.get('principal:' ~ q.id ~ sufixo) == a.codigo %} selected{% endif %}>{{ a.rotulo }}</option>{% endfor %}</select></label>{% endif %}
 </fieldset>
@@ -120,4 +121,4 @@
 </fieldset>
 {% if q.id == "F2-3.10.1" %}</section>{% endif %}
 {% endfor %}
-{% endif %}<div class="acoes-fila-form2"><button type="button" id="descartar-alteracoes">Descartar alterações</button><button type="submit" class="botao-primario">Salvar bloco</button></div></fieldset></form></div><script defer src="{{ url_for('estaticos', path='/form2_revisao.js') }}"></script>{% endblock %}
+{% endif %}<div class="acoes-fila-form2"><button type="button" id="descartar-alteracoes">Descartar alterações</button><button type="submit" class="botao-primario">Salvar bloco</button></div></fieldset></form></div><script defer src="{{ url_for('estaticos', path='/form2_revisao.js') }}"></script><script defer src="{{ url_for('estaticos', path='/campos_form2.js') }}"></script>{% endblock %}
