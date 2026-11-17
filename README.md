@@ -4,6 +4,8 @@
 
 > ⚠️ **Somente dados fictícios.** Nenhum dado pessoal real, CPF, matrícula, senha ou token entra neste repositório, no código, nos testes ou nos logs.
 
+Em produção, o acesso será por autenticação real; `conta_id` é exclusivo da demonstração.
+
 ## Para quem está chegando — atualização de 14/11/2026
 
 ### Para que serve
@@ -22,13 +24,13 @@ A Prefeitura trata dados pessoais em muitos serviços, processos e atividades de
 
 ### Quem participa
 
-- **APA — Agente Público Autorizado:** abre o Registro da sua Secretaria, acompanha o ciclo, indica quem preenche e confere a versão apresentada.
+- **APA — Agente Público Autorizado:** abre o Registro da sua Secretaria, acompanha o ciclo, indica quem preenche e confere a versão apresentada por outra pessoa. Se o titular apresentou, o suplente habilitado confere; sem suplente, aguarda-se a definição de quem fará a conferência. Na unidade executora, indica e pode reatribuir o AAL, respeitando a habilitação e os impedimentos por pessoa.
 - **ARP — Agente Responsável pelo Preenchimento:** preenche o levantamento do FORM 1 e o apresenta para conferência. Pode ser o próprio APA.
 - **AAL — Agente de Análise de Legitimidade:** na unidade executora principal, assume o FORM 2, pede manifestações, avalia as respostas e consolida. Não pode ter apresentado nem confirmado a versão do FORM 1 em análise.
 - **Áreas consultadas:** outras Secretarias, o Jurídico e a TI respondem ao que lhes foi perguntado, cada uma em participação própria. A manifestação jurídica é do Jurídico.
-- **DPO — Encarregado de Dados:** recebe ciência do ingresso, orienta sobre proteção de dados e acompanha o conjunto. Não substitui a decisão da autoridade competente.
+- **DPO — Encarregado de Dados:** recebe ciência do ingresso, orienta sobre proteção de dados e acompanha o conjunto em painel exclusivo, mediante designação formal registrada. Responde às consultas e pode se manifestar de ofício, de modo consultivo. Não substitui a decisão da autoridade competente. A demonstração não possui suplente nem substituto do DPO; o responsável pelo cadastro da designação em produção ainda será definido.
 
-### Como o processo caminha
+### Como o Registro caminha
 
 Fluxo de referência: os encaminhamentos aos FORMs 3 e 4 e a conclusão institucional ainda não estão disponíveis na demonstração.
 
@@ -41,7 +43,7 @@ Fluxo de referência: os encaminhamentos aos FORMs 3 e 4 e a conclusão instituc
 6. O AAL consolida e encaminha: ao FORM 3, se há risco a avaliar; ao FORM 4, se a ação já é conhecida; ou à conclusão, se não há necessidade de avaliação adicional de riscos ou de ações.
 7. *Previsto:* no FORM 3, a gestão competente decide sobre o risco residual; se exigir ação, segue ao FORM 4, onde a ação é verificada e a gestão decide sobre prazo ou cancelamento.
 
-Em todo o percurso, **o Identificador LGPD não muda**. Nova versão, nova participação ou novo FORM não criam outro processo, e as versões anteriores permanecem no histórico.
+Em todo o percurso, **o Identificador LGPD não muda**. Nova versão, nova participação ou novo FORM não criam outro Registro, e as versões anteriores permanecem no histórico.
 
 ### O que ainda falta
 
@@ -1979,3 +1981,10 @@ Verificação: seis módulos, 69 testes, dos quais 68 passaram na rodada inicial
 **P13 e P17 — 14/11/2026.** Na primeira confirmação, o APA vê “Confirmar e encaminhar ao FORM 2”. Nas seguintes, vê “Confirmar nova versão do FORM 1”. O diálogo explica o efeito de cada ação. No LGPD-2026-00005, o histórico registrou às 13h08 (horário de Brasília) a atualização automática da referência do rascunho **7** (apresentação 2) para o **9** (apresentação 4). O Registro continua **aguardando responsável**, com o ingresso original das 11h21 e uma única ciência ao DPO. Repetir a operação preservou o registro único da atualização. Passaram os 49 testes selecionados de conferência do APA, fila e governança do FORM 2.
 
 **Limites.** Atualização documental: não foi executada bateria de testes nesta revisão do README. As observações remanescentes da vistoria — entre elas, caixas de confirmação do navegador em lugar do modelo institucional, numeração dupla de apresentação e rascunho, reapresentação sem destaque das mudanças, nomes de blocos cortados na régua, rolagem do link de histórico, data técnica em "Decisão registrada por" e "Reatribuir" exibido para participação nunca atribuída — estão na lista P1 a P24, fora do Git. Não há aceite institucional nem homologação D11.
+
+
+## Atualização documental de 17/11/2026
+
+O [SAD 10 REV17](docs/arquitetura/sad/SAD_10_DECISOES_DE_ARQUITETURA_REV17.md) registra as decisões DA-40 a DA-50, os requisitos de transferência à TI e a proposta AB-11, ainda em deliberação. A minimização do Registro macro remete às DA-17 e DA-19, sem duplicação.
+
+Referência documental: main `0d247db`, com os Lotes 1 a 7 integrados. O Lote 8 (`f8d6376`) está em branch separada, sujeito à conferência e ao merge; registrar sua regra aprovada não declara aceite em tela. Cartilha, palestra e lista de revisão do Mestre permanecem locais. A P17 já está descrita acima e seu teste de atualização antes da primeira assunção está aprovado; não havia marca pendente dessa implementação a retirar no README.
