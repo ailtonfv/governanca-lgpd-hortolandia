@@ -28,7 +28,7 @@ A Prefeitura trata dados pessoais em muitos serviços, processos e atividades de
 - **ARP — Agente Responsável pelo Preenchimento:** preenche o levantamento do FORM 1 e o apresenta para conferência. Pode ser o próprio APA.
 - **AAL — Agente de Análise de Legitimidade:** na unidade executora principal, assume o FORM 2, pede manifestações, avalia as respostas e consolida. Não pode ter apresentado nem confirmado a versão do FORM 1 em análise.
 - **Áreas consultadas:** outras Secretarias, o Jurídico e a TI respondem ao que lhes foi perguntado, cada uma em participação própria. A manifestação jurídica é do Jurídico.
-- **DPO — Encarregado de Dados:** recebe ciência do ingresso, orienta sobre proteção de dados e acompanha o conjunto em painel exclusivo, mediante designação formal registrada. Responde às consultas e pode se manifestar de ofício, de modo consultivo. Não substitui a decisão da autoridade competente. A demonstração não possui suplente nem substituto do DPO; o responsável pelo cadastro da designação em produção ainda será definido.
+- **DPO — Encarregado de Dados:** recebe ciência do ingresso, orienta sobre proteção de dados e acompanha o conjunto em painel exclusivo, mediante designação formal registrada. Responde às consultas e pode se manifestar de ofício, de modo consultivo. Não substitui a decisão da autoridade competente. Não há substituto nem suplente do DPO. A designação do Encarregado depende de ato formal publicado no Diário Oficial; a documentação não presume substituição; o responsável pelo cadastro da designação em produção ainda será definido.
 
 ### Como o Registro caminha
 
@@ -1985,6 +1985,9 @@ Verificação: seis módulos, 69 testes, dos quais 68 passaram na rodada inicial
 
 ## Atualização documental de 17/11/2026
 
-O [SAD 10 REV17](docs/arquitetura/sad/SAD_10_DECISOES_DE_ARQUITETURA_REV17.md) registra as decisões DA-40 a DA-50, os requisitos de transferência à TI e a proposta AB-11, ainda em deliberação. A minimização do Registro macro remete às DA-17 e DA-19, sem duplicação.
+O [SAD 10 REV17](docs/arquitetura/sad/SAD_10_DECISOES_DE_ARQUITETURA_REV17.md) registra as decisões DA-40 a DA-51, os requisitos de transferência à TI e as propostas AB-11 e AB-12, ainda em deliberação. A minimização do Registro macro remete às DA-17 e DA-19, sem duplicação.
 
-Referência documental: main `0d247db`, com os Lotes 1 a 7 integrados. O Lote 8 (`f8d6376`) está em branch separada, sujeito à conferência e ao merge; registrar sua regra aprovada não declara aceite em tela. Cartilha, palestra e lista de revisão do Mestre permanecem locais. A P17 já está descrita acima e seu teste de atualização antes da primeira assunção está aprovado; não havia marca pendente dessa implementação a retirar no README.
+Lote 8 aprovado na vistoria de 17/11/2026 e integrado ao `main` (`17338bf`). Cartilha, palestra e lista de revisão do Mestre permanecem locais. A P17 já está descrita acima e seu teste de atualização antes da primeira assunção está aprovado; não havia marca pendente dessa implementação a retirar no README.
+
+
+Ajustes documentais de 17/11/2026: AB-10 encerrada pela DA-46; não se presume substituição do DPO. DA-51 (P41) aprovada, com implementação no próximo lote: segregação do AAL e vedação de autoindicação pelo APA. AB-12: requisitos de habilitação do AAL em deliberação; a PoC não verifica esses requisitos. ADR 000 não alterado.

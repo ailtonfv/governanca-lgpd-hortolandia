@@ -1,59 +1,31 @@
-# Atualização documental — 17/11/2026
+# Ajustes documentais antes do merge — 17/11/2026
 
-Base: main `0d247db`. Branch documental: `docs-sad-2026-11-17`, sem merge. Nenhum arquivo da aplicação alterado; nenhum servidor ou banco acessado para escrita.
-
-## Registro das decisões
+Branch `docs-sad-2026-11-17`. Merge não autorizado nesta etapa. Lote 8 aprovado na vistoria de 17/11/2026 e integrado ao `main` (`17338bf`). Estas alterações são exclusivamente documentais; não alteram a aplicação, os bancos ou os servidores.
 
 | Registrado | Conferido | Falta conferir |
 |---|---|---|
-| SAD 10 REV17, seção 3, DA-40 — P36 | Indicação/reatribuição pelo APA da unidade, com habilitação e segregação preservadas | Aceite institucional para produção, quando aplicável |
-| Seção 3, DA-41 — P69 | Guarda institucional sem pendência para a origem; selo textual distinguido do ícone no main | Definição do grupo de trabalho; etiqueta textual do Lote 8 em tela |
-| Seção 3, DA-42 — P74 | Manifestação de ofício do DPO permanece consultiva | Nenhuma decisão nova atribuída ao DPO |
-| Seção 3, DA-43 — P79/P96 | Suplente habilitado confere; sem suplente, aguarda definição; dispensa descartada | Exceção com segundo ato pela mesma pessoa continua em deliberação |
-| Seção 3, DA-44 — P83 | Exclusividade de A confirmar e combinação permitida para análise jurídica registradas | Homologação jurídica não é presumida |
-| Seção 3, DA-45 — P86 | Contagem por perguntas ativas, centralizada e expressamente provisória | Decisão R17 |
-| Seção 3, DA-46 — P91 | Designação formal, painel exclusivo e ausência de suplente/substituto na demonstração | Responsável pelo cadastro em produção; continuidade institucional da AB-10 não resolvida |
-| Seção 3, DA-47 — P101 | Três escolhas de saída e descarte explícito | Nada novo nesta revisão documental |
-| Seção 3, DA-48 — C1 | Lista/quantidade nas duas perguntas; resposta do AAL sem pré-marcação; sem classificação automática de impeditivos | Vistoria/merge do Lote 8 e deliberação da classificação de impeditivos |
-| Seção 3, DA-49 — D6 | Sete perguntas de abertura consultam a apresentação em análise sem pré-marcar resposta | Vistoria/merge do Lote 8 |
-| Seção 3, DA-50 — D7 | Divergência aprovada registrada com data, decisor e identificadores das perguntas | Incorporar à próxima revisão do Mestre; vistoria/merge do Lote 8 |
-| Seção 3, reafirmação “Registro macro” | Remissão às DA-17 e DA-19; não criada ficha duplicada | Nada adicional |
-| Seção 4, AB-11 — D-FORM3-DPO | Proposta registrada como em deliberação; nenhum efeito atribuído ao código | Decisão de Ailton |
-| Seção 3.1, PROD-01 a PROD-03, ligada à DA-35 e à seção 37 do SAD 09 | Autenticação real; concorrência na auditoria; cadastro da designação do DPO | Verificação na transferência à TI; responsável pelo cadastro a definir. D5 não decidida |
+| SAD 10, README, Cartilha e palestra: aceite e integração do Lote 8 | Retiradas as indicações de implementação ainda em conferência ou aguardando merge do Lote 8. A branch documental permanece separada | Leitura final de Ailton |
+| SAD 10, Documentos afetados das novas decisões | ADR 000 identificado como referência consultada, não alterada | Nada a implementar no ADR nesta entrega |
+| SAD 10, DA-46 e AB-10 | Não há substituto nem suplente do DPO; designação por ato formal publicado no Diário Oficial; AB-10 encerrada por Ailton, DPO, em 17/11/2026, com remissão à DA-46 | Autoridade responsável pelo cadastro da designação em produção continua a definir |
+| SAD 10, remissão da DA-21 | Retirada a afirmação de que a continuidade depende de substituto; atualização datada e remetida à DA-46, preservando o restante da decisão histórica | Nenhuma alteração dos outros SADs nesta revisão |
+| SAD 10, DA-51 (P41) | Impedimento de quem apresentou ou confirmou a versão; vedação de o APA indicar a si mesmo como AAL; estado “Aguardando definição de quem fará a análise”; motivos de segregação e perfil registrados | Implementação no próximo lote de código, não realizada nesta entrega |
+| Cartilha 3.1 | Mantida a expressão “de quem apresentou ou confirmou a versão em análise”; perfil recomendado do AAL imediatamente após “O APA indica o AAL”; requisitos formais dependem de deliberação | Leitura editorial; futura implementação da DA-51 claramente separada |
+| Cartilha, corpo operacional | Sem commits, branches ou códigos P14/P16/P18; título “Situação da demonstração em 17/11/2026”; detalhes da integração somente no controle técnico de revisão | Conferência de Ailton |
+| Palestra v16.13 | Novo slide visível “Quatro papéis, quatro atos” após o antigo slide 29; 40 slides com paginação atualizada. Slide 5: 17338bf. Marco do slide 1: 17/11/2026, v16.13 | Ensaio oral e projeção no equipamento da palestra |
+| Palestra, notas | DPO sem substituto/suplente e designação formal; retirada a afirmação antiga de que a referência automática ainda não estava implementada | Conferência das notas pelo apresentador |
+| SAD 10, AB-12 | Requisitos de habilitação do AAL em deliberação; a PoC não verifica requisitos. Perfil recomendado não convertido em condição obrigatória | Deliberação institucional sobre formação jurídica, capacitação em LGPD e outros requisitos |
 
-A numeração sem lacunas de PROD-02 refere-se à cadeia de auditoria. Não altera a DA-39, item 3, que admite lacunas na numeração anual dos Registros. As decisões de outubro permanecem históricas. O SAD 10 foi lido antes das inclusões; SAD 01, SAD 04 e ADR 000 foram usados como referências vinculantes. Os outros SADs não foram modificados.
+## Escopo por SAD e publicação
 
-## Documentos orientativos
+Somente o SAD 10 foi alterado: DA-46, encerramento da AB-10, remissão da DA-21, nova DA-51, nova AB-12 e atualização do estado do Lote 8 nas decisões DA-41 e DA-48 a DA-50. DA-40 a DA-45, DA-47, AB-11 e requisitos de transferência permanecem, com as remissões documentais e o estado da entrega atualizados quando necessário. Os SADs 00 a 09 e o ADR 000 não foram alterados.
 
-| Registrado | Conferido | Falta conferir |
-|---|---|---|
-| Cartilha REV30.21, seção 3.1 | Papéis APA/suplente, indicação do AAL, DPO consultivo e painel exclusivo | Leitura editorial de Ailton |
-| Cartilha, seção 5.4 | P17; grade, perguntas ativas, selos, condicionais, saída sem salvar e consulta ao DPO | Recursos do Lote 8 identificados como em conferência |
-| Cartilha, seção 8.7 e glossário do ciclo do FORM 1 | Corrigida autoconferência antiga; Registro macro e cinco verbetes acrescentados | Leitura editorial |
-| Palestra v16.13, slide 6; slide 28 e notas 28–29 | Suplente; P17; “Quatro papéis, quatro atos” nas notas do slide 29, opção expressamente permitida nas instruções | Ensaio oral das notas |
-| Palestra, slide 35 e suas notas | Frase de abertura e sequência demonstrativa; itens do Lote 8 condicionados à conferência/integração | Ensaio do percurso |
-| Palestra, rodapés dos slides 9–11, 13–16, 27–30, 35–36 e 39 | Aviso de demonstração e autenticação real; mantidos 39 slides | Conferir projeção no equipamento da palestra |
-| README, abertura, papéis, percurso e seção de atualização de 17/11 | Terminologia, autenticação real e ligação ao SAD 10 REV17 | Merge documental depende de autorização |
-| Lista restrita PARA_REVISAO_DO_MESTRE.md | D7 e diferenças D13, com remissão ao relatório restrito completo do Lote 8 | Revisão do Mestre por Ailton; arquivo fora do GitHub |
+No GitHub entram somente README, SAD 10 textual e este relatório. Cartilha, palestra, cópias anteriores, fontes e materiais restritos permanecem locais. Não há merge no main. A decisão DA-51 e a AB-12 não provocaram alteração de código.
 
-A frase recebida sobre o AAL classificar impeditivos foi alinhada à decisão mais recente: a classificação permanece em deliberação; não foi apresentada como regra já definida. “A confirmar” não foi descrita como abertura automática universal de pendência: a orientação respeita a regra de cada item e a exceção da guarda institucional.
+## Verificação e limites
 
-O arquivo complementar de textos de 14/11 não foi localizado nesta rodada. A atualização equivalente da P17 foi feita com base na decisão expressa de Ailton, no código do main e na evidência de teste; não se declara comparação literal com aquele arquivo.
+Documentos conferidos por extração textual e renderização no Word/PowerPoint. Marcadores temáticos da Cartilha preservados. Revisões anteriores guardadas antes de substituir os arquivos locais. Testes da aplicação não repetidos: nenhuma aplicação foi alterada. A aprovação documental e a autorização para merge continuam com Ailton.
 
-## Verificações
+## Arquivos locais
 
-- P17: `test_confirmacao_atualiza_fila_sem_assuncao` aprovado na última bateria registrada em `testes-final.xml` do Lote 8. Domínio, teste e reconciliação correspondentes não diferem entre main e Lote 8. Não havia marca “implementação pendente” da P17 no README a remover; havia texto antigo na Cartilha, atualizado.
-- Documentação apenas: não foi repetida a bateria da aplicação nem usado banco de demonstração.
-- Renderização completa pelo Word e PowerPoint instalados: Cartilha com 102 páginas, SAD 10 com 38 páginas e palestra com 39 slides. Inspeção das páginas alteradas e panoramas de paginação; preservado o desenho dos documentos de origem.
-- O renderizador empacotado apresentou falha de codificação/limpeza no LibreOffice local. A conferência foi feita com os programas nativos; não se declarou sucesso daquele renderizador.
-- Sumário e campos de página atualizados. Os 243 marcadores estáveis da Cartilha foram preservados. O Word havia retirado 83 marcadores; foram restaurados nos títulos correspondentes com IDs únicos e reconhecidos novamente pelo Word.
-- Sem atualização de configuração da aplicação para outra revisão da Cartilha; a versão usada pelas referências históricas da PoC permanece preservada.
-- As revisões anteriores foram mantidas. Novas revisões foram preparadas para as mesmas pastas documentais.
-- Fontes jurídicas, históricos e capítulos fora deste pedido não passaram por nova auditoria normativa.
-
-## Publicação
-
-Publicar somente README e a edição textual integral do SAD 10 REV17, com este relatório. A edição textual contém as decisões e identificadores, sem enunciados do catálogo ou do Mestre. A autoria pública foi reduzida a “Ailton, DPO”, conforme a identificação solicitada.
-
-Cartilha, palestra, cópias de segurança, PDFs de conferência, lista restrita e fontes não entram no GitHub. Revisão de segredos sem achados nos documentos a enviar. Nenhum .env, cópia de banco, senha ou dado de atendimento real incluído. Não alterar main nem apagar branches.
+SAD 10 REV17 e Cartilha REV30.21 substituídos nos respectivos diretórios, com cópias anteriores preservadas. A palestra original estava aberta e bloqueada pelo PowerPoint: a entrega foi salva na mesma pasta como PALESTRA_LGPD_v16_13_CANDIDATA_2026-11-17_AJUSTADA.pptx, sem fechar nem sobrescrever a apresentação aberta. Use a versão AJUSTADA para conferir os 40 slides. Renderização: SAD 10 com 39 páginas; Cartilha com 102; palestra com 40 slides. Preservados os 243 marcadores temáticos.
 

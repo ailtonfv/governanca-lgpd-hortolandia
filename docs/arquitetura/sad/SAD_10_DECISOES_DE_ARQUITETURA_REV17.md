@@ -56,7 +56,7 @@ Controle de revisões
 
 **REV16 — 14/10/2026** — DA-39 (decisões do Encarregado de 14/10/2026 para o M1a: um contexto por Registro; advertência de família e transversalidade; numeração anual; verificação de sobreposição em dois momentos; pedido idempotente estrito; devolução com pendência, congelamento por hash e P5/P6 restritos; percurso com medidas com ação obrigatória sintética), provisória da PoC; origem: revisão da Etapa 2c. Nas DA-26 e DA-38, frase final em Consequências remetendo à DA-39.
 
-**REV17 — 17/11/2026** — Decisões DA-40 a DA-50 (P36, P69, P74, P79/P96, P83, P86, P91, P101, C1, D6 e D7); reafirmação do Registro macro por remissão às DA-17/DA-19; seção 3.1 de requisitos para transferência; proposta AB-11. Sem enunciados de catálogo ou do Mestre.
+**REV17 — 17/11/2026** — Decisões DA-40 a DA-51 (P36, P69, P74, P79/P96, P83, P86, P91, P101, C1, D6 e D7); reafirmação do Registro macro por remissão às DA-17/DA-19; seção 3.1 de requisitos para transferência; proposta AB-11. Sem enunciados de catálogo ou do Mestre. Ajustes de 17/11/2026: AB-10 encerrada por remissão à DA-46; AB-12 em deliberação; Lote 8 aprovado e integrado ao main (17338bf); ADR 000 não alterado.
 
 Prefeitura Municipal de Hortolândia
 
@@ -446,7 +446,7 @@ Decisões de tecnologia (G-01), físicas (SAD 09, seção 2) e as abertas nos de
 
 **Data** — 06/10/2026
 
-**Situação** — Vigente; substituto do Encarregado em aberto (AB-10)
+**Situação** — Vigente; remissão sobre substituição atualizada em 17/11/2026 pela DA-46 e pelo encerramento da AB-10.
 
 **Contexto** — Correspondências da ANPD (ofícios, requisições, fiscalizações) podem chegar a qualquer unidade, inclusive por protocolo no SEQUOIA. O Encarregado recebe as comunicações da autoridade nacional e adota providências (LGPD, art. 41, § 2º, II).
 
@@ -454,7 +454,7 @@ Decisões de tecnologia (G-01), físicas (SAD 09, seção 2) e as abertas nos de
 
 **Alternativas consideradas** — Resposta direta pela unidade que recebeu a correspondência, com ciência posterior ao Encarregado.
 
-**Consequências** — Novo requisito RF-DEX-07; guardrail G-32 ampliado; registro na PoC em M3 junto com RF-DEX. A continuidade das tratativas nas ausências do Encarregado depende da designação de substituto (AB-10).
+**Consequências** — Novo requisito RF-DEX-07; guardrail G-32 ampliado; registro na PoC em M3 junto com RF-DEX. Atualização de Ailton, DPO, em 17/11/2026: a documentação não presume substituição do Encarregado; aplicar a DA-46. AB-10 encerrada.
 
 **Documentos afetados** — ADR 000 REV06 (G-32); SAD 02 REV16 (RF-DEX-07); SAD 03 REV09 (6.8); SAD 09 REV10 (4A.5).
 
@@ -784,7 +784,7 @@ Decisões de tecnologia (G-01), físicas (SAD 09, seção 2) e as abertas nos de
 
 ### Atualização de novembro de 2026
 
-As decisões abaixo registram a deliberação de Ailton, DPO. Vigência da regra não significa aceite da interface nem implantação em produção. Os Lotes 1 a 7 integram o main 0d247db; o Lote 8 está na branch correcoes-lote8, f8d6376, sem merge. Os limites do G-28 permanecem.
+As decisões abaixo registram a deliberação de Ailton, DPO. Vigência da regra não significa aceite da interface nem implantação em produção. Lote 8 aprovado na vistoria de 17/11/2026 e integrado ao main (17338bf). Os limites do G-28 permanecem.
 
 ### DA-40 — APA como gestor da fila
 
@@ -804,7 +804,7 @@ As decisões abaixo registram a deliberação de Ailton, DPO. Vigência da regra
 
 **Consequências / efeito no sistema** — Atribuição e reatribuição exigem confirmação e registro de autoria, data e motivo, sem afastar habilitação, escopo de unidade nem segregação por pessoa. Complementa a DA-05 no FORM 2.
 
-**Documentos afetados** — Cartilha, README e documentação de operação. SAD 10, ADR 000; atualização aprovada em 17/11/2026.
+**Documentos afetados** — Cartilha, README e documentação de operação. SAD 10; atualização aprovada em 17/11/2026. ADR 000 consultado como referência, não alterado.
 
 ### DA-41 — Guarda documental em definição institucional
 
@@ -822,9 +822,9 @@ As decisões abaixo registram a deliberação de Ailton, DPO. Vigência da regra
 
 **Alternativas consideradas** — Não se registra deliberação de alternativa adicional. As opções descartadas e as que continuam pendentes constam expressamente da regra e de seus efeitos.
 
-**Consequências / efeito no sistema** — Indicar a situação da guarda na grade. A etiqueta textual [Guarda] pertence ao Lote 8, ainda fora do main nesta atualização; antes dela, há ícone com legenda. Nenhum prazo é inventado.
+**Consequências / efeito no sistema** — Indicar a situação da guarda na grade. A etiqueta textual [Guarda] está disponível. Lote 8 aprovado na vistoria de 17/11/2026 e integrado ao main (17338bf). Nenhum prazo é inventado.
 
-**Documentos afetados** — Cartilha, README e documentação de operação. SAD 10, ADR 000; atualização aprovada em 17/11/2026.
+**Documentos afetados** — Cartilha, README e documentação de operação. SAD 10; atualização aprovada em 17/11/2026. ADR 000 consultado como referência, não alterado.
 
 ### DA-42 — Manifestação consultiva de ofício do DPO
 
@@ -844,7 +844,7 @@ As decisões abaixo registram a deliberação de Ailton, DPO. Vigência da regra
 
 **Consequências / efeito no sistema** — Preservar autoria, data e hora; a manifestação não transfere competência decisória nem permite ao DPO preencher as respostas do AAL.
 
-**Documentos afetados** — Cartilha, README e documentação de operação. SAD 10, ADR 000; atualização aprovada em 17/11/2026.
+**Documentos afetados** — Cartilha, README e documentação de operação. SAD 10; atualização aprovada em 17/11/2026. ADR 000 consultado como referência, não alterado.
 
 ### DA-43 — Conferência por pessoa distinta do apresentante
 
@@ -864,7 +864,7 @@ As decisões abaixo registram a deliberação de Ailton, DPO. Vigência da regra
 
 **Consequências / efeito no sistema** — Recusar autoconferência. A dispensa da conferência foi descartada. A alternativa de segundo ato explícito pela mesma pessoa permanece em deliberação e não está autorizada.
 
-**Documentos afetados** — Cartilha, README e documentação de operação. SAD 10, ADR 000; atualização aprovada em 17/11/2026.
+**Documentos afetados** — Cartilha, README e documentação de operação. SAD 10; atualização aprovada em 17/11/2026. ADR 000 consultado como referência, não alterado.
 
 ### DA-44 — Combinações de respostas na análise jurídica
 
@@ -884,7 +884,7 @@ As decisões abaixo registram a deliberação de Ailton, DPO. Vigência da regra
 
 **Consequências / efeito no sistema** — O servidor recusa combinações inválidas e a F2-3.4 apresenta alerta. A regra não homologa hipóteses jurídicas.
 
-**Documentos afetados** — Cartilha, README e documentação de operação. SAD 10, ADR 000; atualização aprovada em 17/11/2026.
+**Documentos afetados** — Cartilha, README e documentação de operação. SAD 10; atualização aprovada em 17/11/2026. ADR 000 consultado como referência, não alterado.
 
 ### DA-45 — Contagem de perguntas ativas
 
@@ -904,7 +904,7 @@ As decisões abaixo registram a deliberação de Ailton, DPO. Vigência da regra
 
 **Consequências / efeito no sistema** — Exibir “Ainda não preenchido”, “Em preenchimento · N de M perguntas ativas” ou “Todas as perguntas ativas respondidas”. Contagem não autoriza conclusão nem homologação.
 
-**Documentos afetados** — Cartilha, README e documentação de operação. SAD 10, ADR 000; atualização aprovada em 17/11/2026.
+**Documentos afetados** — Cartilha, README e documentação de operação. SAD 10; atualização aprovada em 17/11/2026. ADR 000 consultado como referência, não alterado.
 
 ### DA-46 — Designação formal e painel do DPO
 
@@ -918,13 +918,13 @@ As decisões abaixo registram a deliberação de Ailton, DPO. Vigência da regra
 
 **Contexto / motivo** — Vincular o acesso à designação institucional, sem concedê-lo por rótulo genérico de perfil.
 
-**Decisão / regra** — O acesso ao painel do DPO depende de designação formal registrada (referência: LGPD, art. 41), com uma designação vigente. Não há substituto nem suplente do DPO no modelo aprovado para esta demonstração.
+**Decisão / regra** — Não há substituto nem suplente do DPO. A designação do Encarregado depende de ato formal publicado no Diário Oficial; a documentação não presume substituição. O acesso ao painel depende da designação formal registrada, com uma designação vigente.
 
 **Alternativas consideradas** — Não se registra deliberação de alternativa adicional. As opções descartadas e as que continuam pendentes constam expressamente da regra e de seus efeitos.
 
-**Consequências / efeito no sistema** — Painel exclusivo do DPO designado. Quem cadastrará a designação em produção ainda precisa ser definido. A decisão não inventa ato municipal nem soluciona a continuidade institucional tratada na AB-10.
+**Consequências / efeito no sistema** — Painel exclusivo do DPO designado. Quem cadastrará a designação em produção ainda precisa ser definido. A AB-10 fica encerrada por decisão de Ailton, DPO, em 17/11/2026, com remissão a esta DA-46. Não se presume substituição nem se cria ato municipal.
 
-**Documentos afetados** — Cartilha, README e documentação de operação. SAD 10, ADR 000; atualização aprovada em 17/11/2026.
+**Documentos afetados** — Cartilha, README e documentação de operação. SAD 10; atualização aprovada em 17/11/2026. ADR 000 consultado como referência, não alterado.
 
 ### DA-47 — Saída do bloco com alterações
 
@@ -944,7 +944,7 @@ As decisões abaixo registram a deliberação de Ailton, DPO. Vigência da regra
 
 **Consequências / efeito no sistema** — A escolha explícita controla o salvamento ou descarte; salvar não equivale a concluir o Instrumento.
 
-**Documentos afetados** — Cartilha, README e documentação de operação. SAD 10, ADR 000; atualização aprovada em 17/11/2026.
+**Documentos afetados** — Cartilha, README e documentação de operação. SAD 10; atualização aprovada em 17/11/2026. ADR 000 consultado como referência, não alterado.
 
 ### DA-48 — Lista automática de informações a confirmar
 
@@ -962,9 +962,9 @@ As decisões abaixo registram a deliberação de Ailton, DPO. Vigência da regra
 
 **Alternativas consideradas** — Não se registra deliberação de alternativa adicional. As opções descartadas e as que continuam pendentes constam expressamente da regra e de seus efeitos.
 
-**Consequências / efeito no sistema** — O sistema não classifica nenhum item como impeditivo e não libera conclusão institucional. Implementado no Lote 8; conferência humana e integração ao main pendentes nesta atualização.
+**Consequências / efeito no sistema** — O sistema não classifica nenhum item como impeditivo e não libera conclusão institucional. Lote 8 aprovado na vistoria de 17/11/2026 e integrado ao main (17338bf).
 
-**Documentos afetados** — Cartilha, README e documentação de operação. SAD 10, ADR 000; atualização aprovada em 17/11/2026.
+**Documentos afetados** — Cartilha, README e documentação de operação. SAD 10; atualização aprovada em 17/11/2026. ADR 000 consultado como referência, não alterado.
 
 ### DA-49 — Consulta da origem nas perguntas de abertura
 
@@ -982,9 +982,9 @@ As decisões abaixo registram a deliberação de Ailton, DPO. Vigência da regra
 
 **Alternativas consideradas** — Não se registra deliberação de alternativa adicional. As opções descartadas e as que continuam pendentes constam expressamente da regra e de seus efeitos.
 
-**Consequências / efeito no sistema** — Quando não houver resposta na origem, informar essa ausência. Implementado no Lote 8; conferência humana e integração ao main pendentes.
+**Consequências / efeito no sistema** — Quando não houver resposta na origem, informar essa ausência. Lote 8 aprovado na vistoria de 17/11/2026 e integrado ao main (17338bf).
 
-**Documentos afetados** — Cartilha, README e documentação de operação. SAD 10, ADR 000; atualização aprovada em 17/11/2026.
+**Documentos afetados** — Cartilha, README e documentação de operação. SAD 10; atualização aprovada em 17/11/2026. ADR 000 consultado como referência, não alterado.
 
 ### DA-50 — Condições do bloco 10
 
@@ -1002,9 +1002,29 @@ As decisões abaixo registram a deliberação de Ailton, DPO. Vigência da regra
 
 **Alternativas consideradas** — Não se registra deliberação de alternativa adicional. As opções descartadas e as que continuam pendentes constam expressamente da regra e de seus efeitos.
 
-**Consequências / efeito no sistema** — Bloquear perguntas inativas na tela e no servidor (409), excluindo-as da contagem de perguntas ativas. Implementado no Lote 8; conferência humana e integração ao main pendentes.
+**Consequências / efeito no sistema** — Bloquear perguntas inativas na tela e no servidor (409), excluindo-as da contagem de perguntas ativas. Lote 8 aprovado na vistoria de 17/11/2026 e integrado ao main (17338bf).
 
-**Documentos afetados** — Cartilha, README e documentação de operação. SAD 10, ADR 000; atualização aprovada em 17/11/2026.
+**Documentos afetados** — Cartilha, README e documentação de operação. SAD 10; atualização aprovada em 17/11/2026. ADR 000 consultado como referência, não alterado.
+
+### DA-51 — Segregação do AAL no mesmo Registro
+
+**ID** — DA-51 (P41)
+
+**Data** — 17/11/2026
+
+**Situação** — Decidida; implementação no próximo lote de código
+
+**Decisor** — Ailton, DPO
+
+**Contexto / motivo** — Segregação: quem atesta os fatos não valida a legitimidade; complementa a G-17. Perfil: o APA, em regra, delega o levantamento ao ARP; o AAL traz a leitura técnica e jurídica e, com o DPO, atua quando há problema.
+
+**Decisão / regra** — Quem apresentou ou confirmou a versão do FORM 1 não pode ser AAL do mesmo Registro. O APA não pode indicar a si mesmo como AAL. Sem outro servidor habilitado, o estado será “Aguardando definição de quem fará a análise”.
+
+**Alternativas consideradas** — Não autorizar autoindicação nem flexibilizar a segregação por falta de outro servidor habilitado.
+
+**Consequências / efeito no sistema** — Implementação no próximo lote de código. Esta revisão documental não altera permissões, listas, estados nem validações da aplicação. Não confundir a definição de quem fará a análise com a definição de quem fará a conferência do FORM 1.
+
+**Documentos afetados** — SAD 10 e Cartilha, seção 3.1. ADR 000 consultado como referência à G-17, não alterado. Código a ajustar no próximo lote.
 
 ### Registro macro — reafirmação de 15/11/2026
 
@@ -1024,7 +1044,7 @@ Limites de texto e de conjuntos repetíveis não recebem decisão nesta revisão
 
 ## 4 Decisões em aberto
 
-Os itens abaixo não estão decididos. Nenhum deles deve ser resolvido por interpretação nos SADs.
+Os itens em aberto não devem ser resolvidos por interpretação nos SADs. A AB-10 é mantida nesta lista apenas como registro encerrado, com remissão à DA-46.
 
 **ID** — Decisão pendente | Documentos afetados
 
@@ -1046,7 +1066,7 @@ Os itens abaixo não estão decididos. Nenhum deles deve ser resolvido por inter
 
 **AB-09** — Competência pela sucessão de Registros LGPD em reorganização. Default provisório proposto, por analogia com a prática do Protocolo no SEQUOIA: unidade extinta sem sucessora passa Registros, pendências e participações à unidade superior, com alerta "sucessão pendente", até decisão competente. Pendência ligada a prazo da ANPD não espera a sucessão: o Encarregado aciona de imediato a unidade superior ou sucessora. Proposta de 06/10/2026, a validar: o Registro LGPD acompanha a competência definida na Lei Municipal nº 4.148/2023 (Anexo II) e alterações; a vigência da mudança vem do ato; a transferência à unidade superior, com alerta "sucessão pendente", só se aplica quando o ato não indicar a sucessora. | SAD 03 (18); SAD 05 (12.4); SAD 06 (6.1)
 
-**AB-10** — Designação, em ato, de substituto do Encarregado, para a continuidade das tratativas com a ANPD em ausências (o Decreto nº 5.200/2023 designa o titular). | SAD 03 (6.8); SAD 10 (DA-21)
+**AB-10** — Encerrada por decisão de Ailton, DPO, em 17/11/2026. Não há substituto nem suplente do DPO. A designação do Encarregado depende de ato formal publicado no Diário Oficial; a documentação não presume substituição. | SAD 10 (DA-46); remissão da DA-21 atualizada. SAD 03 não alterado nesta revisão.
 
 ### AB-11 — D-FORM3-DPO
 
@@ -1055,6 +1075,14 @@ Data: 15/11/2026. Proponente e responsável pela deliberação: Ailton, DPO. Sit
 Proposta: DPO consultivo no FORM 3, com catálogo-base de riscos e manifestação obrigatória nos níveis Alto/Crítico; o DPO não pontua nem aceita risco.
 
 Motivo: esclarecer a participação consultiva na avaliação de riscos sem atribuir aceitação do risco ao DPO. Efeito pretendido: consulta e registro de manifestação, condicionados à aprovação. Alternativa: manter a proposta sem efeito no sistema até decisão. Documentos afetados: SADs 02, 03, 04 e 09, Cartilha e materiais do FORM 3.
+
+### AB-12 — Requisitos de habilitação do AAL
+
+Data: 17/11/2026. Registro solicitado por Ailton, DPO. Situação: em deliberação.
+
+Requisitos de habilitação do AAL (formação jurídica, capacitação em LGPD, outros): em deliberação; a PoC não verifica requisitos. O perfil recomendado é orientação, não requisito formal aprovado.
+
+Motivo: distinguir recomendação de perfil e critérios institucionais de habilitação. Efeito: nenhum requisito novo é implementado no sistema. Documentos afetados: SAD 10 e Cartilha, seção 3.1; demais SADs e ADR 000 não alterados.
 
 ## 5 Referências
 
