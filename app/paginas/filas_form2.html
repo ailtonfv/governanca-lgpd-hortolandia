@@ -16,7 +16,7 @@
 {% if p.id in atribuidores %}<p>{{ atribuidores[p.id] }}</p>{% endif %}
 <p>{{ unidades[p.unidade_id].nome }} · {{ p.tipo }} · Situação da participação: {{ impedimentos.get(p.id, situacoes.get(p.estado, p.estado)) }}{% if p.responsavel_id %} · <strong>Responsável: {{ responsaveis[p.responsavel_id] }}</strong>{% endif %}</p>
 {% if c.origem %}<details><summary>Situação do FORM 1 na origem</summary><p>{{ c.origem }}</p></details>{% endif %}
-<div class="acoes-fila-form2"><a class="botao-link" href="/form2/participacoes/{{ p.id }}?conta_id={{ conta_id|urlencode }}">Abrir participação{% if c.participacoes|length > 1 %} · {{ p.tipo }}{% endif %}</a></div>
+<div class="acoes-fila-form2"><a class="botao-link" href="/form2/participacoes/{{ p.id }}?conta_id={{ conta_id|urlencode }}">{{ c.registro.codigo_lgpd }} · {{ nomes_objetos[p.id] }} · Abrir participação{% if c.participacoes|length > 1 %} · {{ p.tipo }}{% endif %}</a></div>
 {% endfor %}
 {% for complemento in c.complementos %}
 {% if not c.participacoes %}<p>Situação da participação: {{ situacoes.get(complemento.p.estado, complemento.p.estado) }}.</p>{% endif %}

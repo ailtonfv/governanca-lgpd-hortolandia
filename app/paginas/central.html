@@ -10,7 +10,7 @@
     <p class="situacao-instrumento">{{ situacao }}</p>
     {% if numero == 2 %}
     {% if exibir_fila_form2 %}<a class="botao-link-secundario acesso-instrumento" href="{{ url_for('filas_form2') }}?conta_id={{ conta_id|urlencode }}">Abrir fila do FORM 2</a>{% elif not exibir_painel_dpo %}<a class="botao-link-secundario acesso-instrumento" href="{{ url_for('filas_form2') }}?conta_id={{ conta_id|urlencode }}">Consultar participações da unidade</a>{% endif %}
-    {% if em_andamento %}<h4>Suas participações em andamento</h4><ul>{% for id,codigo in em_andamento %}<li><a href="/form2/participacoes/{{ id }}?conta_id={{ conta_id|urlencode }}">{{ codigo }} · Abrir participação</a></li>{% endfor %}</ul>{% endif %}
+    {% if em_andamento %}<h4>Suas participações em andamento</h4><ul>{% for id,codigo,nome in em_andamento %}<li><a href="/form2/participacoes/{{ id }}?conta_id={{ conta_id|urlencode }}">{{ codigo }} · {{ nome }} · Abrir participação</a></li>{% endfor %}</ul>{% endif %}
     {% elif numero not in (3, 4) %}
     <button class="botao-link-secundario acesso-instrumento" {% if secretarias and numero in (1, 2) %}type="submit" form="abrir-painel" name="instrumento" value="form{{ numero }}"{% else %}type="button" disabled{% endif %}>{{ 'Acessar FORM ' ~ numero if numero else acesso }}</button>
     {% endif %}

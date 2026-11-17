@@ -60,3 +60,9 @@ def ler_origem(sessao, registro_id, snapshot_id):
         perguntas.extend(respostas_conjuntos(fonte))
     return {"snapshot": snapshot, "estrutura": estrutura, "perguntas": perguntas,
             "conteudo": deepcopy(fonte), "canais": deepcopy(pacote.get("retrato_canais", {}))}
+
+
+def nome_objeto_em_analise(sessao, registro_id, snapshot_id):
+    origem = ler_origem(sessao, registro_id, snapshot_id)
+    nome = origem["conteudo"].get("respostas", {}).get("1.3")
+    return nome.strip() if isinstance(nome, str) and nome.strip() else "Nome não informado no FORM 1 em análise"

@@ -177,13 +177,14 @@ def central(
     pessoa_id = acesso["identidade"]["pessoa_id"]
     from sqlalchemy import select
     from app.modelos import ParticipacaoForm2, Registro
-    em_andamento = sessao.execute(select(ParticipacaoForm2.id, Registro.codigo_lgpd)
+    from app.origem_form2 import nome_objeto_em_analise
+    em_andamento = sessao.execute(select(ParticipacaoForm2, Registro.codigo_lgpd)
         .join(Registro, Registro.id == ParticipacaoForm2.registro_id)
         .where(ParticipacaoForm2.responsavel_id == pessoa_id, ParticipacaoForm2.estado == "em_atendimento",
                ParticipacaoForm2.unidade_id.in_(unidades(sessao,pessoa_id,PAPEIS["principal"])),
                ParticipacaoForm2.tipo.in_(("principal","tematica")))).all()
     return paginas.TemplateResponse(request=request, name="central.html", context={
-        "em_andamento": em_andamento,
+        "em_andamento": [(p.id, codigo, nome_objeto_em_analise(sessao, p.registro_id, p.snapshot_id)) for p, codigo in em_andamento],
         **acesso, "conta_id": conta_id,
         "usuarios_demonstracao": usuarios_demonstracao(sessao, conta_id),
         "exibir_fila_form2": bool(unidades(sessao, pessoa_id, PAPEIS["principal"]) or unidades(sessao, pessoa_id, "gestor_fila")),

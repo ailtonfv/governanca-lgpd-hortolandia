@@ -382,6 +382,8 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
         cartoes.setdefault(c["registro"].id, dict(registro=c["registro"],
             participacoes=[], complementos=[]))["complementos"].append(c)
     momento = agora()
+    from app.origem_form2 import nome_objeto_em_analise
+    nomes_objetos = {p.id: nome_objeto_em_analise(sessao, p.registro_id, p.snapshot_id) for p in participacoes}
     entradas = {p.id: entrada_fila(p, momento) for p in [*participacoes, *gerenciaveis]}
     historicos_origem = sessao.scalars(select(HistoricoConferenciaForm1Integral).where(
         HistoricoConferenciaForm1Integral.registro_id.in_(cartoes)
@@ -410,7 +412,7 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
             "snapshot": item.snapshot_id, "codigo": registros[item.registro_id].codigo_lgpd,
             "rotulo": rotulo_apresentacao(item)})
     return paginas.TemplateResponse(request=request, name="filas_form2.html",
-        context={"referencias": referencias, "mensagem_atribuicao": mensagem, "atribuidores": atribuidores, "cartoes": ordenados, "entradas": entradas, "pode_encaminhar": bool(unidades_apa), "encaminhaveis": encaminhaveis,
+        context={"nomes_objetos": nomes_objetos, "referencias": referencias, "mensagem_atribuicao": mensagem, "atribuidores": atribuidores, "cartoes": ordenados, "entradas": entradas, "pode_encaminhar": bool(unidades_apa), "encaminhaveis": encaminhaveis,
                  "conta_id": conta_id, "pessoa": pessoa, "participacoes": participacoes,
                  "registros": registros, "unidades": unidades, "linhas": linhas,
                  "impedimentos": impedimentos, "complementos": complementos, "gerenciaveis": gerenciaveis, "agentes": {p.id: [a for a in agentes if a.id != p.responsavel_id and autorizado(sessao, a, p)] for p in gerenciaveis},
