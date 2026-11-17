@@ -2,6 +2,15 @@
 from hashlib import sha256
 from pathlib import Path
 import json
+import re
+
+
+def orientacoes_ao_usuario(instrucao):
+    """Extrai frases de orientação; controles, opções e condições seguem estruturados."""
+    frases = re.split(r'(?<=\.)\s+(?=[A-ZÁÉÍÓÚ])', instrucao or '')
+    prefixos = ('Se Sim,', 'Indique ', 'Informe ', 'Referência institucional (',
+                'Sem dados pessoais.', 'Unidade, cargo ou função (')
+    return [frase.strip() for frase in frases if frase.startswith(prefixos)]
 
 ARQUIVO = Path(__file__).with_name("catalogos") / "form2_rev21_2_privado.json"
 LACRE = "f3c25cdb4531d66dc9785100034405bbae3096465dc1202fe7ab1ed93a227d52"
@@ -65,6 +74,7 @@ def montar_bloco(base):
         else:
             continue
         q.update(redacao)
+        q['ajudas_usuario'] = orientacoes_ao_usuario(q.get('instrucao', ''))
         if chave in condicoes_d7():
             q['condicoes'] = condicoes_d7()[chave]
         q["repetivel"] = por_conjunto(chave)

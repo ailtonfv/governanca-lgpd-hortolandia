@@ -6,6 +6,16 @@ from app.respostas_form2 import definicao_revisao
 from app.fatos_abertura_form2 import projetar_fatos_abertura
 from app.respostas_form2 import aplicar_revisao, contagem_perguntas_ativas
 import pytest
+from app.form2_rev212 import orientacoes_ao_usuario
+
+
+def test_c12_ajuda_separada_da_especificacao():
+    texto = 'Controle candidato • Texto curto. Até 200 caracteres. Exibição • 1.1 = Sim. Indique a referência fictícia.'
+    assert orientacoes_ao_usuario(texto) == ['Indique a referência fictícia.']
+    for chave in ('F2-9.6.1', 'F2-9.6.2', 'F2-9.7.2'):
+        item = next(q for q in definicao_revisao(9)['itens'] if q['id'] == chave)
+        assert item['ajudas_usuario']
+        assert all('Controle candidato' not in ajuda and 'Exibição' not in ajuda for ajuda in item['ajudas_usuario'])
 
 
 def test_c10_apoio_sem_guia_inadequado_no_bloco4():

@@ -85,6 +85,7 @@
 {% if q.id == 'F2-3.9' %}<p>Se Sim, o legítimo interesse não pode ser usado.</p>{% endif %}
 {% if q.id == 'F2-3.5' %}<p class="aviso-alerta" id="aviso-dados-sensiveis" role="status" hidden>Legítimo interesse não ampara dados pessoais sensíveis. Revise a hipótese na 3.1 ou consulte o Jurídico.</p>{% endif %}
 {% if q.orientacao %}<p>{{ q.orientacao }}</p>{% endif %}
+{% for orientacao in q.ajudas_usuario %}<p class="ajuda">{{ orientacao }}</p>{% endfor %}
 
 {% if q.id in ('F2-14.2', 'F2-14.8') %}<section aria-label="Itens a confirmar"><h3>Itens a confirmar nos blocos 1 a 13</h3><p>{{ confirmacoes_por_bloco|map(attribute='itens')|map('length')|sum }} pergunta(s) ativa(s) com resposta ‘A confirmar’. A classificação de impeditivos depende de deliberação institucional.</p>
 {% for grupo in confirmacoes_por_bloco %}<h4>Bloco {{ grupo.bloco }}</h4><ul>{% for item in grupo.itens %}<li><a href="{{ grupo.bloco }}?conta_id={{ conta_id|urlencode }}#{{ item.ancora }}">{{ item.item }}</a> · A confirmar</li>{% endfor %}</ul>{% else %}<p>Nenhuma resposta ativa marcada como “A confirmar”.</p>{% endfor %}</section>{% endif %}
