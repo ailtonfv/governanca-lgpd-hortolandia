@@ -92,3 +92,5 @@ body:has(.salvamento-fixo-form1) > main { min-height: 0; flex: 1; }
 .filas-form2 .regua-compacta { flex-wrap: wrap; gap: .3rem; }
 .filas-form2 .regua-compacta a { padding: .35rem .55rem; }
 .regua-compacta [aria-current] { background-color: #075985; color: white; font-weight: bold; }
+
+.regua-navegacao-blocos .regua-com-titulos-form2 {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(8rem,100%),1fr));overflow:visible;}

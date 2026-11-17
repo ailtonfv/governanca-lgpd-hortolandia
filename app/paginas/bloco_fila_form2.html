@@ -8,13 +8,11 @@
 {% if confirmacao %}<p id="confirmacao-salvamento" class="confirmacao-salvamento" role="status">{{ confirmacao }}</p>{% endif %}
 
 <div class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/participacoes/{{ p.id }}?conta_id={{ conta_id|urlencode }}">Voltar à participação</a></div>
-<nav class="regua-compacta" aria-label="Blocos do FORM 2">
-{% set titulos = titulos_blocos_form2() %}
+{% include '_regua_fila_form2.html' %}
+<nav aria-label="Percorrer blocos" class="acoes-fila-form2">
 {% if numero > 1 %}<a href="{{ numero-1 }}?conta_id={{ conta_id|urlencode }}">Bloco anterior</a>{% endif %}
-{% for n in range(1,15) %}<a href="{{ n }}?conta_id={{ conta_id|urlencode }}" {% if n == numero %}aria-current="page"{% endif %} aria-label="Bloco {{ n }} — {{ titulos[n] }}{% if n in (3,4,5,10) %} · Aguarda homologação jurídica (D11){% endif %} · {{ 'Com pendências' if n|string in estados_regua.pendentes else 'Respostas salvas' if n|string in estados_regua.salvos else 'Ainda não preenchido' }}">{{ n }}{% if n|string in estados_regua.pendentes %} !{% elif n|string in estados_regua.salvos %} ✓{% endif %}</a>{% endfor %}
 {% if numero < 14 %}<a href="{{ numero+1 }}?conta_id={{ conta_id|urlencode }}">Próximo bloco</a>{% endif %}
-</nav>{% if numero in (3,4,5,10) %}<p class="estado-bloco">Aguarda homologação jurídica (D11)</p>{% endif %}
-{% if numero in (1,14) %}<div class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/participacoes/{{ p.id }}/governanca?conta_id={{ conta_id|urlencode }}">Ver pendências e respostas</a></div>{% endif %}
+<a href="/form2/participacoes/{{ p.id }}/governanca?conta_id={{ conta_id|urlencode }}&amp;bloco_origem={{ numero }}">Ver pendências e respostas</a></nav>
 {% if numero == 14 %}<article><h2>Conferência da consolidação</h2><p>Reúna as respostas salvas, as complementações e as manifestações das áreas. Salve o bloco antes de abrir a conferência.</p><div class="acoes-fila-form2"><a class="botao-link" href="/form2/participacoes/{{ p.id }}/consolidacao?conta_id={{ conta_id|urlencode }}">Conferir consolidação</a></div></article>{% endif %}
 <p>Demonstração com dados fictícios. As respostas candidatas, inclusive as jurídicas e o resultado da validação (bloco 14), são rascunhos não homologados. Salvar não conclui a validação institucional.</p>
 <details class="origem-fila-form2"><summary>Consultar respostas do FORM 1</summary>
