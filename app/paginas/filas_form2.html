@@ -7,7 +7,7 @@
 {% if mensagem_atribuicao %}<p class="mensagem mensagem-sucesso" role="status">{{ mensagem_atribuicao }}</p>{% endif %}
 <p>{{ pessoa.nome }} · Demonstração com dados fictícios.</p>
 <div class="acoes-fila-form2"><a class="botao-link-secundario" href="/central?conta_id={{ conta_id|urlencode }}">Voltar à Central de Acesso</a></div>
-{% if cartoes or (not gerenciaveis and not apenas_dpo) %}<h2>Participações da sua unidade</h2>
+{% if cartoes or (not gerenciaveis and not apenas_dpo) %}<h2>Participações da sua unidade</h2><p>Esta seção reúne as participações autorizadas para sua atuação e as solicitações de complementação à origem, inclusive seu histórico. A gestão dos responsáveis aparece mais abaixo, em quadro próprio.</p>
 {% for c in cartoes %}
 {% if loop.changed(c.aguardando is not none) %}<h3>{{ "Aguardando responsável" if c.aguardando else "Em acompanhamento" }}</h3>{% endif %}
 <article data-registro="{{ c.registro.id }}"><h3>{{ c.registro.codigo_lgpd }}</h3>

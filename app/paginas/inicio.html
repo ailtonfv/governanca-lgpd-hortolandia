@@ -110,7 +110,7 @@
           {% if acesso.resumo is mapping %}
           <p><strong>Origem:</strong> FORM 1, {{ acesso.resumo.rotulo_apresentacao }}{% if acesso.resumo.origem_em %}, registrada em {{ acesso.resumo.origem_em|data_local }}{% endif %}.</p>
           <p><strong>Preparação do FORM 2:</strong> rascunho {{ acesso.resumo.rascunho }}.
-            {% if acesso.resumo.salva is boolean %}{{ 'Último salvamento' if acesso.resumo.salva else 'Designação' }} em {{ acesso.resumo.salvo_em|data_local }} por {{ acesso.resumo.autor or 'autor indisponível' }} ({{ 'AAL' if acesso.resumo.salva else 'APA' }}).{% endif %}</p>
+            {% if acesso.resumo.salva is boolean %}{{ 'Último salvamento' if acesso.resumo.salva else 'Designação' }} em {{ acesso.resumo.salvo_em|data_local }} por {{ acesso.resumo.autor or 'autor indisponível' }} ({{ acesso.resumo.papel_autor }}).{% endif %}</p>
           {% endif %}
           {% if acesso.pode_editar %}<p>Função nesta atividade: você está designado como AAL. Abra a preparação para consultar a origem e registrar observações.</p>
           {% elif acesso.e_apa and acesso.preparacao_id %}<p>Função nesta atividade: você pode acompanhar esta preparação como APA. Abra o rascunho para consulta.</p>
@@ -194,7 +194,7 @@
           {% if instrumento == 'form2' %}
           <a class="botao-link-secundario" href="{{ url_registro }}#instrumentos-registro">Consultar detalhes e instrumentos do Registro</a>
           {% else %}
-          <a class="{{ 'botao-link' if not instrumento and not tarefas and not retomar else 'botao-link-secundario' }}" aria-label="Ver detalhes do Registro {{ registro.codigo_lgpd }}" aria-describedby="ajuda-detalhes-{{ registro.id }}" href="{{ url_registro }}">Ver detalhes do Registro</a>
+          <a class="{{ 'botao-link' if not instrumento and not tarefas and not retomar else 'botao-link-secundario' }}" aria-label="Ver detalhes do Registro {{ registro.codigo_lgpd }}" aria-describedby="ajuda-detalhes-{{ registro.id }}" href="{{ url_registro }}#inicio-registro">Ver detalhes do Registro</a>
           <p class="ajuda" id="ajuda-detalhes-{{ registro.id }}">Consulte a identificação, os responsáveis e a situação geral deste Registro.</p>
           <a class="botao-link-secundario" href="{{ url_registro }}#instrumentos-registro" aria-label="Consultar instrumentos do Registro {{ registro.codigo_lgpd }}" aria-describedby="ajuda-instrumentos-{{ registro.id }}">Instrumentos deste Registro</a>
           <p class="ajuda" id="ajuda-instrumentos-{{ registro.id }}">Veja os quatro FORMs e quais estão disponíveis para seu perfil.</p>

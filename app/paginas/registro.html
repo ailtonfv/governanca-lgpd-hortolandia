@@ -40,7 +40,7 @@
   {% set usa_rev22 = registro.form1_integral.rascunho and "revisao_22" in registro.form1_integral.rascunho.conteudo %}
   {% set percurso = registro.form1_integral.fluxo_conferencia %}
   {% set proxima = registro.form1_integral.proxima_providencia %}
-  <section class="proxima-providencia" aria-labelledby="titulo-proxima-providencia">
+  <section class="proxima-providencia" id="inicio-registro" aria-labelledby="titulo-proxima-providencia">
     <p class="etiqueta">O que fazer agora</p>
     <h3 id="titulo-proxima-providencia">Próxima providência</h3>
     <p><strong>Seu papel neste Registro:</strong> {{ percurso.papel_conferente ~ " — conferiu a " ~ percurso.rotulo_apresentacao if percurso.papel_apresentante and percurso.confirmador_id == identidade.pessoa_id else proxima.papel }}.</p>
@@ -1267,7 +1267,7 @@
       if (destinoInicial) destinoInicial.open = true;
     }
     if (window.location.hash === '#titulo-conferencia-interna-form1') destinoInicial = document.getElementById('titulo-conferencia-interna-form1');
-    if (['#instrumentos-registro', '#titulo-form1-integral'].includes(window.location.hash)) destinoInicial = document.getElementById(window.location.hash.slice(1));
+    if (['#inicio-registro', '#instrumentos-registro', '#titulo-form1-integral'].includes(window.location.hash)) destinoInicial = document.getElementById(window.location.hash.slice(1));
     var blocoGuardado = Number(sessaoForm1.getItem(chaveBloco));
     var blocoInicial = numeroBloco || (blocoGuardado >= 1 && blocoGuardado <= 14 && etapaDoNumeroDoBloco(blocoGuardado) === etapaInicial ? blocoGuardado : primeiroBlocoDaEtapa(etapaInicial));
     if (!destinoInicial && (etapaDaUrl || retomada && retomada.posicao)) destinoInicial = document.getElementById('titulo-bloco-' + blocoInicial);

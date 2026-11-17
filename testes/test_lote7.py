@@ -2,16 +2,15 @@ from app.respostas_form2 import estados_regua_form2
 from app.form2_rev212 import RASCUNHO
 
 def test_p102_progresso_proporcional():
-    estado = estados_regua_form2({RASCUNHO: {"2": {"opcao:F2-2.9": ["A_CONFIRMAR"]}}})
+    estado = estados_regua_form2({"respostas_etapa1": {"F2-2.9": "A_CONFIRMAR"}})
     assert estado["progresso"]["2"] == {"respondidas": 1, "ativas": 10, "percentual": 10.0}
     assert "1" not in estado["progresso"]
 
-def test_p102_progresso_completo(monkeypatch):
-    import app.respostas_form2 as dominio
-    monkeypatch.setattr(dominio, "contagem_perguntas_ativas", lambda *a, **k: {2: (10, 10)})
-    estado = dominio.estados_regua_form2({})
-    assert estado["progresso"]["2"]["percentual"] == 100
-    assert estado["situacao"]["2"] == "✓ Todas as perguntas ativas respondidas"
+def test_p102_progresso_completo():
+    estado = estados_regua_form2({"respostas_etapa1": {
+        "F2-1.2": "CONFIRMADA", "F2-1.2.1": "Descrição fictícia", "F2-1.3": "SIM"}})
+    assert estado["progresso"]["1"] == {"respondidas": 3, "ativas": 3, "percentual": 100}
+    assert estado["situacao"]["1"] == "✓ Todas as perguntas ativas respondidas"
 
 from fastapi.testclient import TestClient
 from app.main import app
@@ -37,3 +36,16 @@ def test_p101_salvar_para_continuar_preserva_validacao(sessao, principal):
     sessao.refresh(principal)
     assert principal.conteudo[RASCUNHO]["3"]["opcao:F2-3.1"] == ["ALT_09", "ANALISE_JURIDICA"]
     assert "/blocos/3?" in salvo.json()["destino"]
+
+def test_p103_p105_p106_telas(principal):
+    cliente = TestClient(app)
+    central = cliente.get("/central?conta_id=CONTA-B1")
+    assert 'class="central-cabecalho"' not in central.text
+    tela = cliente.get(f"/form2/participacoes/{principal.id}?conta_id=CONTA-B1")
+    assert 'class="central-cabecalho"' in tela.text
+    assert 'data-area-tematica hidden' in tela.text
+    assert 'data-destino-fixo data-dpo=' in tela.text
+    dpo = cliente.get(f"/form2/participacoes/{principal.id}/orientacao?conta_id=CONTA-E1")
+    assert dpo.status_code == 200
+    assert "ficará no histórico e não poderá ser alterada" in dpo.text
+    assert 'Cancelar e revisar as opções' in dpo.text
