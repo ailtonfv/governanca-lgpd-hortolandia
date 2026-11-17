@@ -158,3 +158,13 @@ def test_c7_envio_direto_data_e_texto():
         assert novo[RASCUNHO]['14']['texto:F2-14.4.3'] == valor
     with pytest.raises(ValueError, match='data válida'):
         aplicar_revisao(base, 14, {'texto:F2-14.4.3':['2026-02-30']}, demonstrativo=True)
+
+
+def test_c9_limites_unificados_preservam_excecao_explicita():
+    from app.respostas_form2 import limite_texto_revisao
+    assert limite_texto_revisao({'controle': 'Texto curto'}) == 200
+    assert limite_texto_revisao({'controle': 'Texto longo'}) == 1000
+    assert limite_texto_revisao({'controle': 'Texto curto', 'dominio': 'Até 500 caracteres'}) == 500
+    for numero, chave in [(11,'F2-11.4.1'), (13,'F2-13.12.1'), (14,'F2-14.3'), (14,'F2-14.4.3')]:
+        q = next(q for q in definicao_revisao(numero)['itens'] if q['id'] == chave)
+        assert limite_texto_revisao(q) == 200

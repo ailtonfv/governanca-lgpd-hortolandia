@@ -265,7 +265,9 @@ def aplicar_revisao(conteudo, bloco, campos, ramos=(), *, demonstrativo=False):
 
 def limite_texto_revisao(item):
     limite = re.search(r"até ([\d.]+) caracteres", item.get("dominio", ""), re.IGNORECASE)
-    return int(limite[1].replace(".", "")) if limite else 2000
+    if limite:
+        return int(limite[1].replace(".", ""))
+    return 1000 if 'longo' in item.get('controle', '').casefold() else 200
 
 
 def _habilitados(definicao):
