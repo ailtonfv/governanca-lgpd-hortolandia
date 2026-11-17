@@ -66,19 +66,20 @@
       <a class="botao-link-secundario" href="{{ url_for('painel_dpo') }}?conta_id={{ conta_id|urlencode }}">Abrir painel do DPO</a>
       {% endif %}
     </div>
-    <details class="identidade-demonstrativa">
-      <summary class="botao-link-secundario">Trocar usuário fictício — demonstração</summary>
+    <section class="identidade-demonstrativa">
+      <h3>Trocar servidor fictício</h3>
+      {% if request.query_params.get("troca") == "1" %}<p class="mensagem mensagem-sucesso" role="status">Agora você está como: {{ dict(usuarios_demonstracao).get(conta_id) }}</p>{% endif %}
       <form action="{{ url_for('central') }}" method="get">
         <label for="conta_id">Selecionar servidor por matrícula</label>
-        <select id="conta_id" name="conta_id">
+        <input type="hidden" name="troca" value="1"><select id="conta_id" name="conta_id">
           {% for id, nome in usuarios_demonstracao %}
           <option value="{{ id }}" {% if conta_id == id %}selected{% endif %}>{{ nome }}</option>
           {% endfor %}
-        </select>
+        </select> <button class="botao-primario" type="submit">Entrar como este servidor</button>
         <p class="ajuda">Este ambiente de demonstração não solicita senha. A troca de servidor fictício é exclusiva da demonstração. Depois de trocar, continue pelos botões desta página. Ao abrir a página, o sistema usa o servidor indicado por conta_id antes do sinal # no endereço. A parte depois de # só localiza uma seção. Confira o servidor em sessão ao retomar uma aba.</p>
-        <button class="botao-link-secundario" type="submit">Selecionar servidor e entrar</button>
+        
       </form>
-    </details>
+    </section>
   </section>
   <section aria-labelledby="titulo-instrumentos-central">
     <h2 id="titulo-instrumentos-central">Instrumentos de cada Registro</h2>
