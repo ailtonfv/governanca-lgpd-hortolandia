@@ -48,7 +48,7 @@
       {% if secretarias and (not exibir_painel_dpo or outro_vinculo) %}
       <div><dt>APA em exercício na Secretaria</dt>
         {% for secretaria in secretarias.values() %}
-        <dd id="apa-{{ loop.index }}">{% if secretarias|length > 1 %}<strong>{{ secretaria.nome }}</strong> · {% endif %}{{ secretaria.apa or 'Sem identificação vigente' }}{% if secretaria.apa and secretaria.modalidade_apa == 'titular' %} (titular){% elif secretaria.apa and secretaria.modalidade_apa == 'substituicao_temporaria' %} (em substituição temporária){% endif %}</dd>
+        <dd id="apa-{{ loop.index }}">{% if secretarias|length > 1 %}<strong>{{ secretaria.nome }}</strong> · {% endif %}{{ secretaria.apa or 'Sem identificação vigente' }}{% if secretaria.apa and secretaria.modalidade_apa == 'titular' %} (titular){% elif secretaria.apa and secretaria.modalidade_apa == 'substituicao_temporaria' %} (suplente em substituição temporária){% endif %}</dd>
         {% endfor %}
       </div>
       {% endif %}

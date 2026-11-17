@@ -193,15 +193,15 @@ def _projetar_painel_progresso_form1_integral(
 
 def _projetar_proxima_providencia_form1_integral(
     *, identidade, arp_atual, pode_editar, rascunho, pre_validacao,
-    e_apa_atual=False, conferencia_pendente=False,
+    e_apa_atual=False, conferencia_pendente=False, papel_apa="APA",
     pode_consultar_conferencia=False, devolucao=None, confirmacao=None,
 ):
     """Orienta a interface usando somente autorização e estado já projetados."""
 
     papel = (
-        "APA e ARP"
+        papel_apa + " e ARP"
         if e_apa_atual and pode_editar
-        else "APA"
+        else papel_apa
         if e_apa_atual
         else "ARP"
         if pode_editar
@@ -1465,6 +1465,7 @@ def carregar_registro(sessao, conta_id, registro_id):
             pode_editar=pode_editar_integral,
             rascunho=rascunho_integral,
             pre_validacao=pre_validacao_integral,
+            papel_apa=("APA titular" if exercicio_apa and exercicio_apa["modalidade"] == "titular" else "APA suplente"),
             e_apa_atual=bool(
                 exercicio_apa is not None
                 and exercicio_apa["pessoa_id"] == identidade["pessoa_id"]

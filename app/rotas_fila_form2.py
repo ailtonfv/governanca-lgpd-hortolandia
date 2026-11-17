@@ -371,7 +371,8 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
             if ato.cadeia_id in atribuidores or ato.conteudo.get("responsavel_id") != pessoa.id:
                 continue
             unidade = minhas[ato.cadeia_id].unidade_id
-            papel = "APA" if pessoa_e_apa_em_exercicio(sessao, ato.ator_id, unidade, ato.ocorrido_em) else "gestor da fila"
+            exercicio = pessoa_e_apa_em_exercicio(sessao, ato.ator_id, unidade, ato.ocorrido_em)
+            papel = ("APA titular" if exercicio["modalidade"] == "titular" else "APA suplente") if exercicio else "gestor da fila"
             data = ato.ocorrido_em.astimezone(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y às %Hh%M")
             atribuidores[ato.cadeia_id] = f"Atribuído por {nome}, {papel}, em {data}"
     cartoes = {}

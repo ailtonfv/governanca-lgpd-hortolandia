@@ -386,9 +386,11 @@ def projetar_navegacao_preparacao(sessao, *, conta_id, registro_id, momento=None
             VersaoForm1Integral.id == prep.snapshot_id, VersaoForm1Integral.registro_id == registro.id)).one()
         trabalho = projetar_trabalho_aal(sessao, [prep])
         autor = sessao.get(Pessoa, prep.salvo_por)
+        exercicio_autor = pessoa_e_apa_em_exercicio(sessao, prep.salvo_por, registro.unidade_principal_atual_id, prep.salvo_em) if autor else None
+        papel_autor = ("APA titular" if exercicio_autor["modalidade"] == "titular" else "APA suplente") if exercicio_autor else "APA"
         resumo = {"origem": versao.numero, "rotulo_apresentacao": rotulo_apresentacao(versao), "origem_em": versao.preparado_em, "salva": prep.id in trabalho,
                   "trabalhada": trabalho.get(prep.id, False), "rascunho": prep.versao_rascunho, "salvo_em": prep.salvo_em,
-                  "autor": f"{autor.matricula} — {autor.nome}" if autor else None}
+                  "autor": f"{autor.matricula} — {autor.nome}" if autor else None, "papel_autor": "AAL" if prep.id in trabalho else papel_autor}
     pode_iniciar = bool(not prep and e_apa and _ciclo_em_andamento(sessao, registro)
                         and sessao.scalar(select(VersaoForm1Integral.id).where(
                             VersaoForm1Integral.registro_id == registro.id).limit(1))

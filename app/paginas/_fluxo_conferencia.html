@@ -5,7 +5,7 @@
     <li {% if fluxo.atual == 'conferir' %}aria-current="step"{% endif %}><strong>{{ fluxo.papel_conferente }} confere</strong>{% if fluxo.atual == 'conferir' %}<span>{{ fluxo.estado if fluxo.papel_apresentante else "Etapa atual — decidir" }}</span>{% endif %}</li>
   </ol>
   <svg class="conexoes-decisao-conferencia" viewBox="0 0 600 32" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M500 0 V10 H300 V22 M150 32 V22 H450 V32" /></svg>
-  <p class="sr-apenas">A decisão do APA pode seguir um dos caminhos:</p>
+  <p class="sr-apenas">A decisão da conferência pode seguir um dos caminhos:</p>
   <ul class="ramificacoes-conferencia">
     <li {% if fluxo.atual == 'devolver' %}aria-current="step"{% endif %}><strong>Devolver para ajustes</strong><span>APA justifica → ARP corrige → ARP pode reapresentar nova versão.</span>{% if fluxo.atual == 'devolver' %}<strong>Situação atual</strong>{% endif %}</li>
     <li {% if fluxo.atual == 'confirmar' %}aria-current="step"{% endif %}><strong>Confirmar conferência interna</strong><span>APA confere aquela versão → histórico preservado → continuidade conforme o fluxo vigente.</span>{% if fluxo.atual == 'confirmar' %}<strong>Situação atual</strong>{% endif %}</li>
