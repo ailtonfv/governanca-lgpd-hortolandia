@@ -429,3 +429,5 @@ input:is([type="button"], [type="submit"], [type="reset"]):disabled,
 button[aria-busy="true"] { cursor: wait; }
 
 .estado-bloco[hidden] { display: none !important; }
+
+.central-cabecalho {color:white; margin-inline-start:auto; text-decoration:underline;}
