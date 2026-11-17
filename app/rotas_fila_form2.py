@@ -28,6 +28,20 @@ paginas.env.globals["titulos_blocos_form2"] = titulos_blocos_form2
 paginas.env.filters["chave_comando"] = lambda valor: sha256(str(valor).encode("utf-8")).hexdigest()
 
 
+def retorno_consultivo(request, sessao, conta_id, principal):
+    from app.modelos import Evento
+    chave = request.query_params.get("registrado")
+    if not chave:
+        return None
+    tipos = {"form2_consulta_encaminhada":"Consulta encaminhada",
+             "form2_orientacao_registrada":"Manifestação registrada",
+             "form2_orientacao_respondida":"Resposta registrada"}
+    ato = sessao.scalar(select(Evento).join(ParticipacaoForm2, Evento.cadeia_id == ParticipacaoForm2.id)
+        .where(Evento.comando_id == chave, Evento.conta_id == conta_id, Evento.tipo_evento.in_(tipos),
+               (ParticipacaoForm2.id == principal.id) | (ParticipacaoForm2.origem_id == principal.id)))
+    return f"{tipos[ato.tipo_evento]} em {data_local(ato.ocorrido_em)}." if ato else None
+
+
 def contexto_atuacao(sessao, pessoa, participacao):
     """Identificação visível; não concede permissões."""
     assumida = participacao.responsavel_id == pessoa.id and autorizado(sessao, pessoa, participacao)
@@ -423,7 +437,7 @@ def participacao(request: Request, participacao_id: str, conta_id: str,
         context={"atuacao": contexto_atuacao(sessao, pessoa, p), "conta_id": conta_id, "p": p, "estados_regua": estados_regua_form2(p.conteudo or {}), "pessoa": pessoa,
                  "rotulo_origem": rotulo_apresentacao(snapshot),
                  "confirmada_em": data_confirmacao.astimezone(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y às %Hh%M") if data_confirmacao else None,
-                 "assumida": assumida,
+                 "assumida": assumida, "retorno": retorno_consultivo(request,sessao,conta_id,p),
                  "registro": sessao.get(Registro, p.registro_id),
                  "unidades": sessao.scalars(select(Unidade).where(Unidade.ativa.is_(True))).all(),
                  "consultas": sessao.scalars(select(ParticipacaoForm2).where(ParticipacaoForm2.origem_id == p.id)).all(),
@@ -446,6 +460,9 @@ async def agir(request: Request, participacao_id: str,
     except (ValueError, PermissionError) as erro:
         sessao.rollback()
         raise HTTPException(409 if isinstance(erro, ValueError) else 403, str(erro))
+    if dados.get("acao") == "consultar":
+        return RedirectResponse(f"/form2/participacoes/{participacao_id}?" + urlencode(
+            {"conta_id":conta_id, "registrado":dados["comando_id"]}), status_code=303)
     if dados.get("acao") == "assumir":
         destino = request.url_for("participacao_form2", participacao_id=participacao_id)
         return RedirectResponse(str(destino)+"?"+urlencode({"conta_id": conta_id, "assumida": dados["comando_id"]}), status_code=303)
@@ -598,9 +615,16 @@ def consultar_orientacoes(request: Request, participacao_id: str, conta_id: str,
     consultas = sessao.scalars(select(ParticipacaoForm2).where(
         ParticipacaoForm2.origem_id == principal.id, ParticipacaoForm2.tipo == "dpo"
     ).order_by(ParticipacaoForm2.entrada_em.desc()))
+    from app.origem_form2 import ler_origem
+    from app.respostas_form2 import RASCUNHO
+    origem = ler_origem(sessao, principal.registro_id, principal.snapshot_id)
     return paginas.TemplateResponse(request=request, name="orientacao_dpo.html", context={
+        "pessoa": pessoa, "p": principal, "secretaria": sessao.get(Unidade,principal.unidade_id),
+        "aal": sessao.get(Pessoa,principal.responsavel_id) if principal.responsavel_id else None,
+        "revisoes": (principal.conteudo or {}).get(RASCUNHO, {}), "referencia": rotulo_apresentacao(origem["snapshot"]), "perguntas": origem["perguntas"],
+        "retorno": retorno_consultivo(request,sessao,conta_id,principal),
         "registro": sessao.get(Registro, principal.registro_id), "conta_id": conta_id,
-        "orientacoes": [c for c in consultas if (c.conteudo or {}).get("de_oficio")],
+        "orientacoes": list(consultas),
         "comando_id": str(uuid4()),
     })
 
@@ -619,4 +643,4 @@ async def registrar_orientacao(request: Request, participacao_id: str, sessao: S
     except (PermissionError, ValueError) as erro:
         sessao.rollback()
         raise HTTPException(403 if isinstance(erro, PermissionError) else 409, str(erro))
-    return RedirectResponse(destino + "?" + urlencode({"conta_id": conta}), status_code=303)
+    return RedirectResponse(destino + "?" + urlencode({"conta_id": conta, "registrado": dados.get("comando_id")}), status_code=303)
