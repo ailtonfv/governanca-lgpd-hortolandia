@@ -27,6 +27,11 @@ def pessoa_ativa(sessao, conta_id):
 
 def unidades(sessao, pessoa_id, papel):
     momento = agora()
+    if papel == PAPEIS["dpo"]:
+        from app.modelos import DesignacaoEncarregado as Dpo
+        if not sessao.scalar(select(Dpo.id).where(Dpo.pessoa_id == pessoa_id, Dpo.inicio <= momento,
+                or_(Dpo.fim.is_(None), Dpo.fim > momento))):
+            return set()
     return set(sessao.scalars(select(Designacao.unidade_id).join(
         Unidade, Unidade.id == Designacao.unidade_id).where(
         Designacao.pessoa_id == pessoa_id, Designacao.papel == papel,

@@ -246,6 +246,17 @@ def entrada_fila(p, momento):
     return f"Entrou na fila em {data} · " + (f"aguardou {espera}" if p.assumida_em else f"aguardando há {espera}")
 
 
+@router.get("/form2/painel-dpo", name="painel_dpo")
+def painel_dpo(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila)):
+    try:
+        pessoa = pessoa_ativa(sessao, conta_id)
+    except PermissionError as erro:
+        raise HTTPException(403, str(erro))
+    if not unidades_autorizadas(sessao, pessoa.id, "governanca_protecao_dados"):
+        raise HTTPException(403, "Este painel exige designação vigente como Encarregado.")
+    return filas(request, conta_id, sessao)
+
+
 @router.get("/form2/filas", name="filas_form2")
 def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila)):
     try:

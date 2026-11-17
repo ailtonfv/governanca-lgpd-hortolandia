@@ -1073,3 +1073,21 @@ class ComplementoForm2(Base):
     respondida_em = Column(DateTime(timezone=True))
     resolvida_em = Column(DateTime(timezone=True))
     __table_args__ = (CheckConstraint("estado IN ('aberta','respondida','resolvida')"),)
+
+
+class DesignacaoEncarregado(Base):
+    """Histórico institucional do DPO. Intervalos de vigência não podem se sobrepor."""
+    __tablename__ = "designacao_encarregado"
+    id = Column(Integer, primary_key=True)
+    pessoa_id = Column(ForeignKey("pessoa.id"), nullable=False)
+    ato_tipo = Column(String(80), nullable=False)
+    ato_numero = Column(String(80), nullable=False)
+    ato_data = Column(DateTime(timezone=True), nullable=False)
+    inicio = Column(DateTime(timezone=True), nullable=False)
+    fim = Column(DateTime(timezone=True))
+    email_institucional = Column(String(254), nullable=False)
+    from sqlalchemy.dialects.postgresql import ExcludeConstraint
+    __table_args__ = (
+        CheckConstraint("fim IS NULL OR fim > inicio"),
+        ExcludeConstraint((func.tstzrange(inicio, fim), "&&"), using="gist"),
+    )

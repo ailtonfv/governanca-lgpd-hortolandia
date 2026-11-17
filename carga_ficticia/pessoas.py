@@ -139,6 +139,7 @@ def semear(sessao):
             designacao.fundamento_administrativo = "designação fictícia inicial da PoC"
             designacao.autorizado_por_id = "PESSOA-E"
     sessao.flush()
+    semear_designacao_dpo(sessao)
     return novos
 
 
@@ -159,3 +160,12 @@ def semear_eta(sessao):
     if sessao.scalar(habilitacao) is None:
         sessao.add(Designacao(pessoa_id=pid, unidade_id="UNID-NORTE", papel="aal_form2", ativa=True))
     sessao.flush()
+
+
+def semear_designacao_dpo(sessao):
+    from app.modelos import DesignacaoEncarregado
+    if sessao.scalar(select(DesignacaoEncarregado.id).limit(1)) is None:
+        sessao.add(DesignacaoEncarregado(pessoa_id="PESSOA-E", ato_tipo="Portaria fictícia",
+            ato_numero="DEMO-DPO-01", ato_data=INICIO_DESIGNACOES_APA,
+            inicio=INICIO_DESIGNACOES_APA, email_institucional="dpo@example.invalid"))
+        sessao.flush()

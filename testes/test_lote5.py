@@ -24,3 +24,17 @@ def test_auditoria_dez_consultas_simultaneas():
         assert {e.conteudo["consulta"] for e in eventos} == set(range(10))
         assert sorted(e.sequencia_segmento for e in eventos) == list(range(1, 11))
         assert verificar_segmento(s, segmento)[0]
+
+
+def test_painel_exige_designacao_vigente(sessao):
+    from fastapi.testclient import TestClient
+    from app.main import app
+    from app.fila_form2 import agora
+    from app.modelos import DesignacaoEncarregado
+    c = TestClient(app)
+    for conta in ("CONTA-A1", "CONTA-B1"):
+        assert c.get("/form2/painel-dpo", params={"conta_id":conta}).status_code == 403
+    assert c.get("/form2/painel-dpo?conta_id=CONTA-E1").status_code == 200
+    sessao.scalar(select(DesignacaoEncarregado)).fim = agora()
+    sessao.commit()
+    assert c.get("/form2/painel-dpo?conta_id=CONTA-E1").status_code == 403

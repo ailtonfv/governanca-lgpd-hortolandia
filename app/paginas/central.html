@@ -63,7 +63,7 @@
       <a class="botao-link-secundario" href="{{ url_for('filas_form2') }}?conta_id={{ conta_id|urlencode }}">Abrir fila do FORM 2</a>
       {% endif %}
       {% if exibir_painel_dpo %}
-      <a class="botao-link-secundario" href="{{ url_for('filas_form2') }}?conta_id={{ conta_id|urlencode }}#painel-dpo">Abrir painel do DPO</a>
+      <a class="botao-link-secundario" href="{{ url_for('painel_dpo') }}?conta_id={{ conta_id|urlencode }}">Abrir painel do DPO</a>
       {% endif %}
     </div>
     <details class="identidade-demonstrativa">
