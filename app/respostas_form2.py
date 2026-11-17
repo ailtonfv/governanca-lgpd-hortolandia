@@ -160,15 +160,18 @@ def estados_regua_form2(conteudo, ramos=(), *, demonstrativo=True):
     marcas = marcas_salvas_form2(conteudo)
     situacao = {str(n): "— Ainda não preenchido" for n in range(1, 15)}
     com_respostas_ativas = set()
+    progresso = {}
     numeros = [int(bloco) for bloco in marcas["salvos"].intersection(situacao)]
     medidas = contagem_perguntas_ativas(conteudo, numeros, ramos, demonstrativo=demonstrativo)
     for numero, (respondidas, ativas) in medidas.items():
         bloco = str(numero)
         if respondidas:
+            progresso[bloco] = {"respondidas": respondidas, "ativas": ativas,
+                                "percentual": round(100 * respondidas / ativas, 2)}
             com_respostas_ativas.add(bloco)
             situacao[bloco] = ("✓ Todas as perguntas ativas respondidas" if respondidas == ativas
                                else f"◐ Em preenchimento · {respondidas} de {ativas} perguntas ativas")
-    return {**marcas, "com_respostas_ativas": com_respostas_ativas, "situacao": situacao}
+    return {**marcas, "com_respostas_ativas": com_respostas_ativas, "situacao": situacao, "progresso": progresso}
 
 
 def definicao_revisao(numero):

@@ -1,0 +1,2 @@
+{% set medida = estados_regua.get('progresso', {}).get(n|string) %}
+{% if medida %}<span class="progresso-bloco" role="progressbar" aria-label="{{ medida.respondidas }} de {{ medida.ativas }} perguntas ativas respondidas" aria-valuemin="0" aria-valuemax="{{ medida.ativas }}" aria-valuenow="{{ medida.respondidas }}"><span style="width: {{ medida.percentual }}%"></span></span>{% endif %}

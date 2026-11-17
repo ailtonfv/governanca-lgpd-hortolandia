@@ -14,7 +14,7 @@
 {% if n == 2 and aguarda_temporalidade(p.conteudo) %}{% if compacta %}<span role="img" aria-label="Guarda: aguarda definição institucional" title="Guarda: aguarda definição institucional">🗄</span>{% else %}<small class="selo-guarda">Guarda: aguarda definição institucional</small>{% endif %}{% endif %}
 {% if n in (3,4,5,10) %}{% if compacta %}<span role="img" aria-label="Aguarda homologação jurídica (D11)" title="Aguarda homologação jurídica (D11)">⚖</span>{% else %}<small class="selo-d11">Aguarda homologação jurídica (D11)</small>{% endif %}{% endif %}
 {% if numero|default(0) == n %}<small class="estado-bloco local-atual">Você está aqui</small>{% else %}<small class="estado-bloco visitado" data-visitado hidden>Visitado nesta sessão</small>{% endif %}
-</a></li>{% endfor %}</ol></nav>
+{% include "_progresso_bloco_form2.html" %}</a></li>{% endfor %}</ol></nav>
 {% if compacta %}<p class="legenda-grade">⚖ Aguarda homologação jurídica (D11) · 🗄 Guarda: aguarda definição institucional. Respostas salvas não significam conclusão ou homologação.</p>{% endif %}
 </section>
 <script defer src="{{ url_for('estaticos', path='/regua_form2.js') }}"></script>

@@ -18,7 +18,7 @@
         {% if pendente %}<small class="estado-bloco com-pendencias">Com pendências</small>{% endif %}
         <small class="estado-bloco visitado" data-visitado hidden>Visitado nesta sessão</small></span>
         {% else %}<small class="estado-bloco">Etapa {{ etapa }}</small>{% endif %}
-      {% if revisao %}</a>{% else %}</span>{% endif %}
+      {% if revisao %}{% include "_progresso_bloco_form2.html" %}</a>{% else %}</span>{% endif %}
     </li>
     {% endfor %}
   </ol>

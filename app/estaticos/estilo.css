@@ -435,3 +435,10 @@ button[aria-busy="true"] { cursor: wait; }
 .aviso-alerta, .aviso-dados { padding:.75rem 1rem; border-inline-start:4px solid #966200; background:#fff3ce; color:#382b11; }
 .selo-guarda,.selo-d11 {display:inline-block;padding:.25rem .5rem;border:1px solid #94752a;border-radius:.4rem;background:#fff7db;color:#443500;font-weight:600;}
 #titulo-conferencia-interna-form1:focus-visible {outline-offset:.35rem;}
+
+/* P102: proporção de perguntas ativas, compartilhada pelas grades do FORM 2. */
+.regua-form2 .cartao-bloco { position: relative; overflow: hidden; padding-bottom: .65rem; }
+.regua-form2 .cartao-bloco.bloco-com-respostas { border-bottom: 1px solid var(--borda, #d6e0e6); }
+.progresso-bloco { position: absolute; bottom: 0; left: 0; right: 0; height: .3rem; background: #e2e8f0; }
+.progresso-bloco > span { display: block; height: 100%; background: #075985; }
+.regua-form2 [aria-current="page"] .progresso-bloco > span { background: #7dd3fc; }
