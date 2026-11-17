@@ -1,5 +1,5 @@
 {% macro identificacao_servidor(pessoa) -%}
-{{ pessoa.nome.removesuffix(' (fictício)') }} — {{ pessoa.matricula }}
+{{ pessoa.nome }} — {{ pessoa.matricula }}
 {%- endmacro %}
 
 {% macro situacao_preparacao(trabalhada) -%}

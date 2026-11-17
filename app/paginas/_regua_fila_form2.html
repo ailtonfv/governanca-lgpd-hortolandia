@@ -11,7 +11,8 @@
         {% if n in titulos %}<small class="titulo-bloco-form2">{{ titulos[n] }}</small>{% endif %}
 <small class="estado-bloco {{ 'salvo' if salvo else 'a-percorrer' }}">{{ estados_regua.situacao[n|string] }}</small>
 {% if pendente %}<small class="estado-bloco com-pendencias">Com pendências</small>{% endif %}
-{% if n in (3,4,5,10) %}<small class="estado-bloco" title="Este bloco depende de conferência jurídica ainda não concluída.">Aguarda homologação jurídica (D11)</small>{% endif %}
+{% if n == 2 and aguarda_temporalidade(p.conteudo) %}<small class="selo-guarda">Guarda: aguarda definição institucional</small>{% endif %}
+{% if n in (3,4,5,10) %}<small class="selo-d11" title="Este bloco depende de conferência jurídica ainda não concluída.">Aguarda homologação jurídica (D11)</small>{% endif %}
 <small class="estado-bloco visitado" data-visitado hidden>Visitado nesta sessão</small>
 </a></li>{% endfor %}</ol></nav>
 </section>

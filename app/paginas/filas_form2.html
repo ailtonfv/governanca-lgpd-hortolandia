@@ -12,7 +12,7 @@
 {% if loop.changed(c.aguardando is not none) %}<h3>{{ "Aguardando responsável" if c.aguardando else "Em acompanhamento" }}</h3>{% endif %}
 <article data-registro="{{ c.registro.id }}"><h3>{{ c.registro.codigo_lgpd }}</h3>
 {% for p in c.participacoes %}
-{% if aguarda_temporalidade(p.conteudo) %}<p class="estado-bloco">Guarda: aguarda definição institucional</p>{% endif %}<p>{{ entradas[p.id] }}</p>
+{% if aguarda_temporalidade(p.conteudo) %}<p class="selo-guarda">Guarda: aguarda definição institucional</p>{% endif %}<p>{{ entradas[p.id] }}</p>
 {% if p.id in atribuidores %}<p>{{ atribuidores[p.id] }}</p>{% endif %}
 <p>{{ unidades[p.unidade_id].nome }} · {{ p.tipo }} · Situação da participação: {{ impedimentos.get(p.id, situacoes.get(p.estado, p.estado)) }}{% if p.responsavel_id %} · <strong>Responsável: {{ responsaveis[p.responsavel_id] }}</strong>{% endif %}</p>
 {% if c.origem %}<details><summary>Situação do FORM 1 na origem</summary><p>{{ c.origem }}</p></details>{% endif %}
@@ -44,7 +44,7 @@
 {% for p in gerenciaveis %}
 {% if loop.changed(p.responsavel_id is none) %}<h3>{{ 'Aguardando responsável' if p.responsavel_id is none else 'Com responsável' }}</h3>{% endif %}
 <article><h4>{{ registros[p.registro_id].codigo_lgpd }} · {{ unidades[p.unidade_id].nome }}</h4>
-<p>{{ situacoes.get(p.estado, p.estado) }}{% if p.responsavel_id %} · Responsável: {{ responsaveis[p.responsavel_id] }}{% endif %}</p>{% if aguarda_temporalidade(p.conteudo) %}<p class="estado-bloco">Guarda: aguarda definição institucional</p>{% endif %}<p>{{ entradas[p.id] }}</p>
+<p>{{ situacoes.get(p.estado, p.estado) }}{% if p.responsavel_id %} · Responsável: {{ responsaveis[p.responsavel_id] }}{% endif %}</p>{% if aguarda_temporalidade(p.conteudo) %}<p class="selo-guarda">Guarda: aguarda definição institucional</p>{% endif %}<p>{{ entradas[p.id] }}</p>
 {% set acao = 'Atribuir responsável' if p.assumida_em is none else 'Reatribuir' %}
 {% if not agentes[p.id] %}<p>{{ 'Não há outro AAL habilitado nesta fila' if p.tipo in ('principal','tematica') else 'Não há outro responsável habilitado nesta fila' }}.</p>{% else %}
 <details><summary>{{ acao }} — {{ registros[p.registro_id].codigo_lgpd }} · {{ p.tipo }}</summary>

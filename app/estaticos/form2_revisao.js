@@ -35,7 +35,9 @@
   form.addEventListener('input', atualizarCondicoes);
   form.addEventListener('change', atualizarCondicoes);
   atualizarCondicoes();
-  let alterado = false;
+  const estado = () => JSON.stringify(Array.from(new FormData(form).entries()));
+  const salvo = estado();
+  let enviando = false;
   document.getElementById('adicionar-ocorrencia')?.addEventListener('click', event => {
     const grupos = [...form.querySelectorAll('[data-ocorrencia]')];
     const ultimo = Math.max(...grupos.map(el => Number(el.dataset.ocorrencia)));
@@ -56,12 +58,12 @@
       grupo.after(novo);
     }
     atualizarCondicoes();
-    alterado = true;
+
     if (numero === 99) event.target.disabled = true;
   });
-  form.addEventListener('input', () => { alterado = true; });
-  form.addEventListener('submit', () => { alterado = false; });
+
+  form.addEventListener('submit', () => { enviando = true; });
   window.addEventListener('beforeunload', event => {
-    if (alterado) { event.preventDefault(); event.returnValue = ''; }
+    if (!enviando && estado() !== salvo) { event.preventDefault(); event.returnValue = ''; }
   });
 })();

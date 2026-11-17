@@ -4,7 +4,8 @@
 <h1>{{ registro.codigo_lgpd }} · FORM 2 · Bloco {{ numero }} — {{ titulos_blocos_form2().get(numero, bloco.titulo) }}</h1>
 <p><strong>Versão do FORM 1 em análise:</strong> {{ rotulo_origem }}</p>
 <p>{{ atuacao.servidor }} · {{ atuacao.funcao }} · <span class="sr-apenas">Unidade de atuação:</span> {{ atuacao.unidade }} · {{ "Você pode editar suas respostas" if atuacao.editavel else "Somente leitura" }}</p>
-{% if numero == 2 and aguarda_temporalidade(p.conteudo) %}<p class="estado-bloco">Guarda: aguarda definição institucional</p>{% endif %}
+{% if numero in (3,4,5,10) %}<p class="selo-d11">Aguarda homologação jurídica (D11)</p>{% endif %}
+{% if numero == 2 and aguarda_temporalidade(p.conteudo) %}<p class="selo-guarda">Guarda: aguarda definição institucional</p>{% endif %}
 {% if confirmacao %}<p id="confirmacao-salvamento" class="confirmacao-salvamento" role="status">{{ confirmacao }}</p>{% endif %}
 
 <div class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/participacoes/{{ p.id }}?conta_id={{ conta_id|urlencode }}">Voltar à participação</a></div>
@@ -20,14 +21,14 @@
 <dl class="respostas-origem-form2">{% for q in perguntas_origem %}<div class="item-origem-form2"><dt>{{ codigo_pergunta(q.id, 1) }}{% if q.conjunto %} · conjunto {{ q.conjunto }}{% endif %} · {{ q.pergunta }}</dt><dd>{{ q.valor|join(', ') if q.valor is sequence and q.valor is not string and q.valor is not mapping else q.valor }}</dd></div>{% else %}<div><dt>Respostas</dt><dd>Nenhuma resposta registrada nesta versão.</dd></div>{% endfor %}</dl></details>
 {% set guias = bloco.itens|map(attribute="fontes_publicas")|sum(start=[])|unique(attribute="url")|list %}
 {% if guias %}<aside id="apoio-anpd"><h2>Apoio da ANPD</h2><ul>{% for guia in guias %}<li><a href="{{ guia.url }}" target="_blank" rel="noopener noreferrer">{{ guia.titulo }}</a></li>{% endfor %}</ul></aside>{% endif %}
-<p>Não informe nomes, CPF, protocolos de atendimento ou dados de casos concretos.</p>
+<p class="aviso-dados">Não informe nomes, CPF, protocolos de atendimento ou dados de casos concretos.</p>
 <form method="post" id="revisao-bloco"><input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="comando_id" value="{{ comando_id }}"><input type="hidden" name="versao" value="{{ p.versao }}">
 <fieldset {% if p.responsavel_id != pessoa.id or p.estado != 'em_atendimento' %}disabled{% endif %}>
 {% from '_condicoes_form2.html' import gatilhos, ajuda %}
 {% if numero in (1,2) %}
 {% set fatos = fatos_origem.get('respostas', {}) %}
 {% set unidade_origem = fatos.get('2.4.2') if fatos.get('2.4') == 'Não' else fatos.get('2.3') %}
-{% for q in bloco.itens %}<fieldset id="{{ q.id }}" {% if q.edicao == "habilitada" %}{{ gatilhos(q) }}{% endif %} {% if q.edicao == "habilitada" and not q.ativa %}disabled{% endif %}><legend>{{ q.id }} · {{ q.enunciado|replace("Seção 2","Bloco 2") }}</legend>
+{% for q in bloco.itens %}<fieldset id="{{ q.id }}" {% if q.edicao == "habilitada" %}{{ gatilhos(q) }}{% endif %} {% if q.edicao == "habilitada" and not q.ativa %}disabled{% endif %}><legend>{{ q.id }} · {{ q.enunciado|replace("na Seção 2","no bloco 2")|replace("Seção 2","Bloco 2") }}</legend>
 {% if q.edicao == 'habilitada' %}{{ ajuda(q, q.ativa) }}{% endif %}
 {% if q.id == 'F2-1.2' %}<p>Secretaria do Registro: <strong>{{ secretaria.nome }}</strong>.</p>{% endif %}
 {% if q.id in ('F2-2.1', 'F2-2.9') %}<aside><strong>No FORM 1 · {{ rotulo_origem }}</strong>
@@ -72,14 +73,14 @@
 <p id="balanceamento-inativo" {% if ativa(q.id, '') %}hidden{% endif %}>Teste de balanceamento: não se aplica (Legítimo interesse não indicado na 3.1)</p>
 <section id="teste-balanceamento" {% if not ativa(q.id, '') %}hidden{% endif %}><h2>Teste de balanceamento — só para Legítimo interesse</h2>
 {% endif %}
-<fieldset class="resposta-form2" id="{{ q.id }}"><legend>{{ q.id }} · {{ q.enunciado|replace("Seção 2","Bloco 2") }}</legend>
+<fieldset class="resposta-form2" id="{{ q.id }}"><legend>{{ q.id }} · {{ q.enunciado|replace("na Seção 2","no bloco 2")|replace("Seção 2","Bloco 2") }}</legend>
 {% if q.id == 'F2-14.2' and complementacao %}<p><strong>Complementação do FORM 1 · origem 1.3.1</strong><br>{{ complementacao }}</p>{% endif %}
 {% if q.id == 'F2-13.9' %}<p>{{ revogacao|join(', ') if revogacao else 'F2-5.7 ainda sem resposta candidata.' }} Consulta ao rascunho, sem homologação D11.</p>{% endif %}
 {% if q.id in ('F2-14.8.1','F2-14.8.2') %}<p>A classificação de pendências impeditivas aguarda definição institucional.</p>{% endif %}
 {% if q.id == 'F2-6.4' %}<p>Faixas etárias no FORM 1 em análise (F1-4.1.1): {{ fatos_origem.get('respostas',{}).get('4.1.1',[])|join(', ') or 'Não informadas nesta versão. Ausência não significa inexistência de crianças ou adolescentes. Solicite complemento em F2-1.3.1 quando necessário.' }}</p>{% endif %}
-{% if q.id == 'F2-3.4' %}<p id="alerta-fundamento" role="status" hidden>Na 3.1 você indicou que a hipótese requer análise jurídica. Confirme se há dúvida sobre o fundamento.</p>{% endif %}
+{% if q.id == 'F2-3.4' %}<p class="aviso-alerta" id="alerta-fundamento" role="status" hidden>Na 3.1 você indicou que a hipótese requer análise jurídica. Confirme se há dúvida sobre o fundamento.</p>{% endif %}
 {% if q.id == 'F2-3.9' %}<p>Se Sim, o legítimo interesse não pode ser usado.</p>{% endif %}
-{% if q.id == 'F2-3.5' %}<p id="aviso-dados-sensiveis" role="status" hidden>Legítimo interesse não ampara dados pessoais sensíveis. Revise a hipótese na 3.1 ou consulte o Jurídico.</p>{% endif %}
+{% if q.id == 'F2-3.5' %}<p class="aviso-alerta" id="aviso-dados-sensiveis" role="status" hidden>Legítimo interesse não ampara dados pessoais sensíveis. Revise a hipótese na 3.1 ou consulte o Jurídico.</p>{% endif %}
 {% if q.orientacao %}<p>{{ q.orientacao }}</p>{% endif %}
 
 {% if q.id == 'F2-14.2' and pendencias %}<p>Itens a confirmar</p><ul>{% for chave in pendencias %}<li>{{ chave }}</li>{% endfor %}</ul>{% endif %}

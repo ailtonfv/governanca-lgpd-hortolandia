@@ -4,7 +4,7 @@
 {% block conteudo %}
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/filas_form2.css') }}">
 {% set autor_apresentacao = solicitante.nome if solicitante else 'responsável pelo preenchimento' %}
-{% set data_apresentacao = conferencia.solicitada_em.strftime('%d/%m/%Y') %}
+{% set data_apresentacao = conferencia.solicitada_em|data_local %}
 <p><a class="voltar" href="{{ url_for('detalhe_registro', registro_id=registro.id) }}?conta_id={{ conta_id }}">← Voltar ao Registro</a></p>
 <section class="detalhe" aria-labelledby="titulo-conferencia">
   {% if not conferencia_pendente %}<p class="etiqueta">Conferência registrada</p>{% endif %}
@@ -27,7 +27,7 @@
   <summary>Histórico e identificação da apresentação</summary>
   <dl>
     <div><dt>Apresentação</dt><dd>{{ snapshot|rotulo_apresentacao }}</dd></div>
-    <div><dt>Apresentada em</dt><dd>{{ conferencia.solicitada_em.strftime('%d/%m/%Y às %H:%M') }}</dd></div>
+    <div><dt>Apresentada em</dt><dd>{{ conferencia.solicitada_em|data_local }}</dd></div>
   </dl>
   <details><summary>Dados técnicos</summary><dl>
     <div><dt>Versão da estrutura consultada</dt><dd>{{ versao_estrutura }}</dd></div>

@@ -292,7 +292,7 @@
       {% endif %}
       {% elif registro.form1_integral.confirmacao_interna %}
       <p class="sucesso"><strong>Conferência interna confirmada.</strong> {{ registro.form1_integral.confirmacao_interna.rotulo_apresentacao }}.</p>
-      <p class="ajuda">Confirmação registrada por {{ registro.form1_integral.confirmacao_interna.confirmada_por }}.</p>
+
       <a class="botao-link" href="{{ url_for('consultar_conferencia_interna', registro_id=registro.id) }}?conta_id={{ conta_id }}">Consultar versão confirmada</a>
       {% elif registro.form1_integral.devolucao_interna %}
       <p class="aviso-leitura"><strong>Devolvido para ajustes pelo APA.</strong> {{ registro.form1_integral.devolucao_interna.rotulo_apresentacao }}.</p>
@@ -1135,7 +1135,7 @@
       sessaoForm1.setItem(chave, numero);
       window.history.replaceState(null, '', destinoInicial || '#form1-etapa-' + numero);
       var estado = raiz.querySelector('.estado-navegacao-form1');
-      if (estado) estado.textContent = 'Etapa ' + numero + ' exibida, Bloco ' + numeroBlocoAlvo + ' de 14. Use o mapa da jornada para consultar ou editar qualquer outro bloco.';
+      if (estado) estado.textContent = 'Etapa ' + numero + ' exibida, Bloco ' + numeroBlocoAlvo + ' de 14. Use o mapa da jornada para consultar{% if registro.form1_integral.pode_editar %} ou editar{% endif %} qualquer outro bloco.';
       sincronizarControlesForm1();
     }
 

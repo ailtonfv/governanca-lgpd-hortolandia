@@ -49,3 +49,113 @@ def test_exclusividade_no_dominio():
     aplicar_revisao({},3,{chave:["ALT_09","ANALISE_JURIDICA"]},demonstrativo=True)
     with pytest.raises(ValueError):
         aplicar_bloco({},bloco=2,alteracoes={"F2-2.9.1":["ALT_01","A_CONFIRMAR"]},proxima_versao=1)
+
+from fastapi.testclient import TestClient
+from app.main import app
+from app.modelos import ParticipacaoForm2
+from testes.test_governanca_form2_v9 import principal
+
+
+def test_grade_pendencias_e_retorno(principal):
+    cliente = TestClient(app)
+    url = f"/form2/participacoes/{principal.id}"
+    for n in (1, 7, 14):
+        bloco = cliente.get(f"{url}/blocos/{n}?conta_id=CONTA-B1")
+        assert bloco.status_code == 200
+        assert bloco.text.count('data-numero="') == 14
+        assert f'bloco_origem={n}' in bloco.text
+        assert "Central de Acesso (trocar servidor)" in bloco.text
+        pendencias = cliente.get(f"{url}/governanca?conta_id=CONTA-B1&bloco_origem={n}")
+        assert f"Voltar ao bloco {n}" in pendencias.text
+        assert ("Acrescentar outra necessidade" in pendencias.text) == (n == 1)
+
+
+def test_retorno_dpo_e_resposta_aal(sessao, principal):
+    cliente = TestClient(app)
+    url = f"/form2/participacoes/{principal.id}/orientacao"
+    estado = principal.estado
+    for conta in ("CONTA-A1", "CONTA-B1"):
+        assert cliente.post(url, data={"conta_id": conta, "comando_id": "L5-" + conta,
+                            "texto": "Orientação fictícia."}).status_code == 403
+        assert 'id="painel-dpo"' not in cliente.get(f"/form2/filas?conta_id={conta}#painel-dpo").text
+    recebida = cliente.post(url, data={"conta_id": "CONTA-E1", "comando_id": "L5-OF",
+                                       "texto": "Orientação fictícia."})
+    assert recebida.status_code == 200
+    assert "Manifestação registrada em " in recebida.text
+    assert "Aguardando resposta do AAL" in recebida.text
+    assert "data-confirmar-ato" in recebida.text
+    consulta = sessao.scalar(select(ParticipacaoForm2).where(ParticipacaoForm2.origem_id == principal.id,
+                                                             ParticipacaoForm2.tipo == "dpo"))
+    respondida = cliente.post(f"/form2/participacoes/{consulta.id}/orientacao",
+        data={"conta_id":"CONTA-B1", "comando_id":"L5-RESP", "texto":"Revisão registrada.", "decisao":"Acolhida"})
+    assert respondida.status_code == 200 and "Resposta registrada em " in respondida.text
+    historico = cliente.get(url + "?conta_id=CONTA-E1")
+    assert "Revisão registrada." in historico.text and "Servidor Beta" in historico.text
+    assert "Respondida em " in cliente.get("/form2/painel-dpo?conta_id=CONTA-E1").text
+    sessao.refresh(principal)
+    assert principal.estado == estado
+
+
+def test_central_e_consulta_principal(principal):
+    cliente = TestClient(app)
+    url = f"/form2/participacoes/{principal.id}"
+    troca = cliente.get("/central?conta_id=CONTA-B1&troca=1")
+    assert "Agora você está como" in troca.text
+    assert url in troca.text and "Suas participações em andamento" in troca.text
+    pagina = cliente.get(url + "?conta_id=CONTA-B1")
+    assert "Sua questão" in pagina.text
+    assert pagina.text.count(">Encaminhar consulta</button>") == 1
+    assert ">Salvar manifestação</button>" not in pagina.text
+    assert "Abrir Painel do DPO" in cliente.get("/painel?conta_id=CONTA-E1").text
+
+
+def test_conferencia_entre_titular_e_suplente(sessao):
+    from testes.test_form2_preparacao import base
+    from app.conferencia_interna_form1_integral import (
+        solicitar_conferencia_interna_form1_integral, confirmar_conferencia_interna_form1_integral,
+    )
+    rid, _ = base(sessao)
+    args = dict(registro_id=rid, versao_lida=1)
+    assert solicitar_conferencia_interna_form1_integral(sessao, **args, conta_id="CONTA-A1",
+            comando_id="L5-AP")["permitido"]
+    sessao.commit()
+    cliente = TestClient(app)
+    registro = f"/registros/{rid}"
+    espera = cliente.get(registro + "?conta_id=CONTA-A1")
+    assert "Você apresentou esta versão" in espera.text and "APA suplente" in espera.text
+    consulta = cliente.get(registro + "/form1-integral/conferencia-interna?conta_id=CONTA-F1")
+    assert "APA titular apresentou" in consulta.text and "como APA suplente" in consulta.text
+    assert confirmar_conferencia_interna_form1_integral(sessao, **args, conta_id="CONTA-F1",
+            comando_id="L5-CF")["permitido"]
+    sessao.commit()
+    recibo = cliente.get(registro + "?conta_id=CONTA-F1")
+    assert "APA suplente — conferiu a Apresentação" in recibo.text
+    assert "Encaminhado à fila do FORM 2" in recibo.text and "DPO comunicado" in recibo.text
+
+
+def test_bloco_parcial_e_avisos_de_guarda(principal):
+    from app.respostas_form2 import GUARDA_INSTITUCIONAL
+    c = TestClient(app)
+    url = f"/form2/participacoes/{principal.id}/blocos/2"
+    salvo = c.post(url, data={"conta_id":"CONTA-B1","comando_id":"L5-GUARDA","versao":principal.versao,
+                                "resposta_F2-2.9":GUARDA_INSTITUCIONAL})
+    assert salvo.status_code == 200
+    assert "Em preenchimento" in salvo.text and salvo.text.count("Guarda: aguarda definição institucional") >= 2
+    assert "Respostas completas" not in salvo.text
+    painel = c.get("/form2/painel-dpo?conta_id=CONTA-E1")
+    assert "Guarda: aguarda definição institucional" in painel.text
+
+
+def test_exclusividade_do_catalogo_completo():
+    import pytest
+    from app.respostas_form2 import definicao_revisao, aplicar_revisao
+    for n in range(3,15):
+        for q in definicao_revisao(n)["itens"]:
+            if "múltipla" not in q["controle"].lower():
+                continue
+            exclusiva = next((a for a in q["alternativas"] if a["rotulo"].strip().casefold() == "a confirmar"), None)
+            if exclusiva:
+                outra = next(a for a in q["alternativas"] if a != exclusiva)
+                with pytest.raises(ValueError):
+                    aplicar_revisao({}, n, {"opcao:" + q["id"]: [outra["codigo"], exclusiva["codigo"]]},
+                                    demonstrativo=True)

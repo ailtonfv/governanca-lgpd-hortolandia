@@ -102,11 +102,8 @@ def instrucao_para_interface(campo):
 
 
 def rotulo_interface(valor):
-    """Oculta o marcador repetitivo da massa sem alterar o dado persistido."""
-
-    if not isinstance(valor, str):
-        return valor
-    return valor.removesuffix(" (fictício)")
+    """Mantém o nome cadastrado, inclusive a identificação de dado fictício."""
+    return valor
 
 
 EVENTOS_SALVAMENTO_BLOCO_FORM1_INTEGRAL = {
@@ -372,7 +369,8 @@ def projetar_fluxo_conferencia(sessao, registro_id, unidade_id):
         return (f"{pessoa.matricula} — {rotulo_interface(pessoa.nome)} ({papel})"
                 if pessoa else f"{papel} não identificado no cadastro vigente")
 
-    apa = rotulo(exercicio["pessoa_id"] if exercicio else None, "APA")
+    papel_em_exercicio = "APA titular" if exercicio and exercicio["modalidade"] == "titular" else "APA suplente"
+    apa = rotulo(exercicio["pessoa_id"] if exercicio else None, papel_em_exercicio if exercicio else "APA")
     arp = rotulo(atribuicao.arp_atual_id if atribuicao else None, "ARP")
     situacao = pendente.situacao if pendente else historico.situacao if historico else None
     atual, estado, proxima, responsavel = (

@@ -21,17 +21,17 @@ REFERENCIAS_ANPD = {
     "ANPD-PP": {
         "titulo": "Guia Orientativo: Tratamento de Dados Pessoais pelo Poder Público",
         "versao": "2.0 (2023)",
-        "url": "https://www.gov.br/anpd/pt-br/centrais-de-conteudo/materiais-educativos-e-publicacoes/guia-poder-publico-anpd-versao-final.pdf",
+        "url": "https://www.gov.br/anpd/pt-br/centrais-de-conteudo/materiais-educativos-e-publicacoes/guia-poder-publico-anpd-versao-final.pdf/view",
     },
     "ANPD-LI": {
         "titulo": "Guia Orientativo: Hipóteses Legais de Tratamento — Legítimo Interesse",
         "versao": "1.0 (2024)",
-        "url": "https://www.gov.br/anpd/pt-br/centrais-de-conteudo/materiais-educativos-e-publicacoes/guia_legitimo_interesse.pdf",
+        "url": "https://www.gov.br/anpd/pt-br/centrais-de-conteudo/materiais-educativos-e-publicacoes/guia_legitimo_interesse.pdf/view",
     },
     "ANPD-AG": {
         "titulo": "Guia Orientativo para Definições dos Agentes de Tratamento e do Encarregado",
         "versao": "2.0 (2022)",
-        "url": "https://www.gov.br/anpd/pt-br/centrais-de-conteudo/materiais-educativos-e-publicacoes/anonimizado___guia_de_agente_de_tratamento_e_encarregado_da_anpd_novo.pdf",
+        "url": "https://www.gov.br/anpd/pt-br/centrais-de-conteudo/materiais-educativos-e-publicacoes/guia-orientativo-para-definicoes-dos-agentes-de-tratamento-de-dados-pessoais-e-do-encarregado",
     },
 }
 

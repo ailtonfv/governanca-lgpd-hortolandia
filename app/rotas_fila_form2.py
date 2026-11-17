@@ -37,7 +37,7 @@ def retorno_consultivo(request, sessao, conta_id, principal):
              "form2_orientacao_registrada":"Manifestação registrada",
              "form2_orientacao_respondida":"Resposta registrada"}
     ato = sessao.scalar(select(Evento).join(ParticipacaoForm2, Evento.cadeia_id == ParticipacaoForm2.id)
-        .where(Evento.comando_id == chave, Evento.conta_id == conta_id, Evento.tipo_evento.in_(tipos),
+        .where(Evento.comando_id == chave, Evento.ator_id == pessoa_ativa(sessao, conta_id).id, Evento.tipo_evento.in_(tuple(tipos)),
                (ParticipacaoForm2.id == principal.id) | (ParticipacaoForm2.origem_id == principal.id)))
     return f"{tipos[ato.tipo_evento]} em {data_local(ato.ocorrido_em)}." if ato else None
 
@@ -198,7 +198,11 @@ async def agir_governanca(request: Request, participacao_id: str):
                 "erro": str(erro), "participacao_id": participacao_id, "conta_id": conta,
                 "motivo": dados.get("motivo", ""), "descricao": dados.get("descricao", "")},
                 status_code=403 if isinstance(erro, PermissionError) else 409)
-    return RedirectResponse(f"/form2/participacoes/{participacao_id}/governanca?"+urlencode({"conta_id": conta}), status_code=303)
+    parametros = {"conta_id": conta}
+    origem = request.query_params.get("bloco_origem")
+    if origem in {str(n) for n in range(1, 15)}:
+        parametros["bloco_origem"] = origem
+    return RedirectResponse(f"/form2/participacoes/{participacao_id}/governanca?" + urlencode(parametros), status_code=303)
 
 
 def sessao_fila():
@@ -253,11 +257,11 @@ async def registrar_consolidacao_fila(request: Request, participacao_id: str,
 
 def duracao_fila(inicio, fim):
     horas = max(0, int((fim - inicio).total_seconds() // 3600))
-    return f"{horas // 24} d {horas % 24} h" if horas >= 24 else f"{horas} h"
+    return f"{horas // 24} d {horas % 24} h" if horas >= 24 else (f"{horas} h" if horas else "menos de 1 h")
 
 
 def entrada_fila(p, momento):
-    data = p.entrada_em.astimezone(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y")
+    data = data_local(p.entrada_em)
     espera = duracao_fila(p.entrada_em, p.assumida_em or momento)
     return f"Entrou na fila em {data} · " + (f"aguardou {espera}" if p.assumida_em else f"aguardando há {espera}")
 
@@ -610,7 +614,10 @@ async def reatribuir_participacao(request: Request, participacao_id: str,
 
 @router.get("/form2/participacoes/{participacao_id}/orientacao")
 def consultar_orientacoes(request: Request, participacao_id: str, conta_id: str, sessao: Session = Depends(sessao_fila)):
-    pessoa = pessoa_ativa(sessao, conta_id)
+    try:
+        pessoa = pessoa_ativa(sessao, conta_id)
+    except PermissionError as erro:
+        raise HTTPException(403, str(erro)) from erro
     if not unidades_autorizadas(sessao, pessoa.id, "governanca_protecao_dados"):
         raise HTTPException(403, "Esta consulta exige o perfil do DPO.")
     principal = sessao.get(ParticipacaoForm2, participacao_id)
