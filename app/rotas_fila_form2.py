@@ -362,19 +362,23 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
         Pessoa.id.in_({p.responsavel_id for p in [*participacoes, *gerenciaveis] if p.responsavel_id}))).all())
     from app.modelos import Evento
     atribuidores = {}
-    minhas = {p.id: p for p in participacoes if p.responsavel_id == pessoa.id}
+    minhas = {p.id: p for p in [*participacoes, *gerenciaveis] if p.responsavel_id}
     if minhas:
         atos = sessao.execute(select(Evento, Pessoa.nome).join(Pessoa, Pessoa.id == Evento.ator_id)
             .where(Evento.cadeia_tipo == "participacao_form2", Evento.cadeia_id.in_(minhas),
                    Evento.tipo_evento == "form2_reatribuida").order_by(Evento.sequencia_cadeia.desc()))
         for ato, nome in atos:
-            if ato.cadeia_id in atribuidores or ato.conteudo.get("responsavel_id") != pessoa.id:
+            if ato.cadeia_id in atribuidores or ato.conteudo.get("responsavel_id") != minhas[ato.cadeia_id].responsavel_id:
                 continue
             unidade = minhas[ato.cadeia_id].unidade_id
             exercicio = pessoa_e_apa_em_exercicio(sessao, ato.ator_id, unidade, ato.ocorrido_em)
             papel = ("APA titular" if exercicio["modalidade"] == "titular" else "APA suplente") if exercicio else "gestor da fila"
             data = ato.ocorrido_em.astimezone(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y às %Hh%M")
-            atribuidores[ato.cadeia_id] = f"Atribuído por {nome}, {papel}, em {data}"
+            anterior = sessao.scalar(select(Evento).where(Evento.cadeia_tipo == 'participacao_form2',
+                Evento.cadeia_id == ato.cadeia_id, Evento.sequencia_cadeia < ato.sequencia_cadeia)
+                .order_by(Evento.sequencia_cadeia.desc()).limit(1))
+            acao = 'Reatribuído' if anterior and anterior.conteudo.get('responsavel_id') else 'Atribuído'
+            atribuidores[ato.cadeia_id] = f"{acao} por {nome}, {papel}, em {data}"
     cartoes = {}
     for p in participacoes:
         cartoes.setdefault(p.registro_id, dict(registro=registros[p.registro_id],

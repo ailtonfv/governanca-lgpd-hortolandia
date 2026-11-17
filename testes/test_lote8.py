@@ -6,6 +6,23 @@ from app.respostas_form2 import definicao_revisao
 from app.fatos_abertura_form2 import projetar_fatos_abertura
 from app.respostas_form2 import aplicar_revisao, contagem_perguntas_ativas
 import pytest
+
+
+def test_n1_reatribuicao_visivel_na_fila_autorizada(sessao, principal):
+    from carga_ficticia.pessoas import semear_eta
+    from app.modelos import Designacao
+    from app.fila_form2 import reatribuir
+    semear_eta(sessao)
+    sessao.add(Designacao(pessoa_id='PESSOA-A', unidade_id=principal.unidade_id, papel='gestor_fila'))
+    sessao.commit()
+    reatribuir(sessao, conta_id='CONTA-A1', comando_id='L8-N1', participacao_id=principal.id,
+               versao=principal.versao, responsavel_id='PESSOA-I', motivo='Redistribuição fictícia')
+    sessao.commit()
+    for conta in ('CONTA-A1','CONTA-I1'):
+        pagina = TestClient(app).get('/form2/filas?conta_id=' + conta)
+        assert pagina.status_code == 200
+        assert 'Reatribuído por Servidor Alfa' in pagina.text
+        assert ' às ' in pagina.context['atribuidores'][principal.id]
 from app.form2_rev212 import orientacoes_ao_usuario
 
 
