@@ -7,6 +7,16 @@ from app.fatos_abertura_form2 import projetar_fatos_abertura
 from app.respostas_form2 import aplicar_revisao, contagem_perguntas_ativas
 import pytest
 from app.campos_form2 import normalizar_cnpj
+from app.campos_form2 import validar_referencia_temporal, data_exata
+
+
+def test_c7_data_e_referencia_temporal():
+    assert validar_referencia_temporal('2026-12-15') == '2026-12-15'
+    assert validar_referencia_temporal('Após deliberação fictícia') == 'Após deliberação fictícia'
+    assert data_exata('2026-12-15') and not data_exata('Após deliberação fictícia')
+    for valor in ('2026-02-30', 'x' * 201):
+        with pytest.raises(ValueError):
+            validar_referencia_temporal(valor)
 
 
 def test_c6_cnpj_sintetico_e_recusas():
@@ -139,3 +149,12 @@ def test_c6_post_cnpj_invalido_nao_grava(sessao, principal):
     assert cliente.post(url, data=dados).status_code == 200
     sessao.refresh(principal)
     assert principal.conteudo[RASCUNHO]['10']['texto:F2-10.2.3'] == '00.000.000/0001-91'
+
+
+def test_c7_envio_direto_data_e_texto():
+    base = {RASCUNHO: {'14': {'opcao:F2-14.4': ['SIM'], 'opcao:F2-14.4.2': ['SIM']}}}
+    for valor in ('2026-12-15', 'Após a deliberação fictícia'):
+        novo, _ = aplicar_revisao(base, 14, {'texto:F2-14.4.3':[valor]}, demonstrativo=True)
+        assert novo[RASCUNHO]['14']['texto:F2-14.4.3'] == valor
+    with pytest.raises(ValueError, match='data válida'):
+        aplicar_revisao(base, 14, {'texto:F2-14.4.3':['2026-02-30']}, demonstrativo=True)

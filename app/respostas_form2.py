@@ -230,6 +230,9 @@ def aplicar_revisao(conteudo, bloco, campos, ramos=(), *, demonstrativo=False):
         if tipo == 'texto' and item_id == 'F2-10.2.3':
             from app.campos_form2 import normalizar_cnpj
             valor = normalizar_cnpj(valor)
+        if tipo == 'texto' and item_id == 'F2-14.4.3':
+            from app.campos_form2 import validar_referencia_temporal
+            valor = validar_referencia_temporal(valor)
         revisao[nome] = valor
     for nome, valor in revisao.items():
         if nome.startswith("principal:") and valor and valor not in revisao.get(nome.replace("principal:", "opcao:", 1), []):

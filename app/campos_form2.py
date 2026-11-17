@@ -1,5 +1,24 @@
 """Validações dos campos especializados, aplicadas também a envios diretos."""
 import re
+from datetime import date
+
+
+def validar_referencia_temporal(valor):
+    if len(valor) > 200:
+        raise ValueError('Informe a referência temporal em até 200 caracteres.')
+    if re.match(r'^\d{4}-\d{2}-\d{2}$', valor):
+        try:
+            date.fromisoformat(valor)
+        except ValueError:
+            raise ValueError('Informe uma data válida.') from None
+    return valor
+
+
+def data_exata(valor):
+    try:
+        return bool(re.fullmatch(r'\d{4}-\d{2}-\d{2}', valor) and date.fromisoformat(valor))
+    except ValueError:
+        return False
 
 
 def normalizar_cnpj(valor):

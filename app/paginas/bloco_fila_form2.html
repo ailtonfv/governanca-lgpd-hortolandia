@@ -108,6 +108,9 @@
 {% endif %}{% endif %}
 {% if not q.alternativas or 'texto' in q.controle|lower or q.alternativas|selectattr('complemento','in',['Texto condicionado (R13)'])|list %}
 {% if q.id == 'F2-10.2.3' %}<label>CNPJ<input data-cnpj inputmode="numeric" name="{{ txt }}" maxlength="18" placeholder="00.000.000/0000-00" value="{{ valores.get(txt,'') }}"></label>
+{% elif q.id == 'F2-14.4.3' %}{% set valor_temporal = valores.get(txt,'') %}{% set modo_texto = valor_temporal and not data_exata(valor_temporal) %}
+<div data-referencia-temporal><label>Como informar o prazo<select data-modo-temporal><option value="date"{% if not modo_texto %} selected{% endif %}>Data conhecida</option><option value="text"{% if modo_texto %} selected{% endif %}>Referência em texto</option></select></label>
+<label>Prazo ou referência temporal<input data-valor-temporal name="{{ txt }}" type="{{ 'text' if modo_texto else 'date' }}" maxlength="200" value="{{ valor_temporal }}"></label></div>
 {% else %}<label>{{ 'Complemento' if q.alternativas else '' }}<textarea aria-label="{{ q.enunciado }}" name="{{ txt }}" rows="2" maxlength="{{ limite_texto(q) }}">{{ valores.get(txt,'') }}</textarea></label>{% endif %}
 {% endif %}
 {% if q.id == 'F2-14.3.1' %}<label>Destino principal<select name="principal:{{ q.id }}{{ sufixo }}"><option value="">A definir</option>{% for a in q.alternativas %}<option value="{{ a.codigo }}"{% if valores.get('principal:' ~ q.id ~ sufixo) == a.codigo %} selected{% endif %}>{{ a.rotulo }}</option>{% endfor %}</select></label>{% endif %}

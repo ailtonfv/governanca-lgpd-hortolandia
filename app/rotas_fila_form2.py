@@ -513,6 +513,7 @@ def bloco_fila(request: Request, participacao_id: str, bloco: int, conta_id: str
     from app.respostas_form2 import projetar_bloco, definicao_revisao, limite_texto_revisao
     from app.confirmacoes_form2 import itens_a_confirmar
     from app.fatos_abertura_form2 import projetar_fatos_abertura
+    from app.campos_form2 import data_exata
     from app.form2_rev212 import RASCUNHO, ramos_origem, indice_valores, aplicavel, mapa_regras
     from app.contrato_form2_respostas import carregar_contrato
     from app.origem_form2 import ler_origem
@@ -566,7 +567,7 @@ def bloco_fila(request: Request, participacao_id: str, bloco: int, conta_id: str
         "confirmacoes_por_bloco": itens_a_confirmar(conteudo, ramos),
         "valores": conteudo.get(RASCUNHO, {}).get(str(bloco), {}),
         "ativa": lambda item, sufixo: aplicavel(item, sufixo, valores, ramos, regras),
-        "limite_texto": limite_texto_revisao})
+        "data_exata": data_exata, "limite_texto": limite_texto_revisao})
 
 
 @router.post("/form2/participacoes/{participacao_id}/blocos/{bloco}")
