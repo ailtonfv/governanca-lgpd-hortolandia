@@ -40,7 +40,7 @@
 {% if p.tipo != "principal" %}<button type="submit" class="botao-primario" name="acao" value="salvar">Salvar manifestação</button>{% endif %}
 {% if p.tipo == 'principal' %}
 <label>Tipo de consulta <select name="tipo"><option value="dpo">DPO</option><option value="juridico">Jurídico</option><option value="tematica">Área temática</option></select></label>
-<p data-destino-fixo>Governança de proteção de dados</p><label data-area-tematica hidden>Unidade destinatária <select name="unidade_id" disabled>{% for u in unidades %}<option value="{{ u.id }}">{{ u.nome }}</option>{% endfor %}</select></label>
+<p data-destino-fixo data-dpo="{{ (unidades|selectattr('id', 'equalto', 'UNID-GOV')|first).nome }}" data-juridico="{{ (unidades|selectattr('id', 'equalto', 'SEC-AJ')|first).nome }}">Unidade destinatária: {{ (unidades|selectattr('id', 'equalto', 'UNID-GOV')|first).nome }}</p><label data-area-tematica hidden>Unidade destinatária <select name="unidade_id" disabled>{% for u in unidades %}<option value="{{ u.id }}">{{ u.nome }}</option>{% endfor %}</select></label>
 <button type="submit" class="botao-primario" name="acao" value="consultar" data-confirmar-ato="{{ pessoa.nome }} encaminhará a questão sobre {{ rotulo_origem }} à área selecionada.">Encaminhar consulta</button>
 {% else %}<button type="submit" class="botao-primario" name="acao" value="concluir">Concluir manifestação</button>{% endif %}
 {% else %}<p>{{ p.manifestacao }}</p>{% endif %}
@@ -64,7 +64,7 @@ if (tipoConsulta) {
     area.querySelector('select').disabled = area.hidden;
     const fixo = document.querySelector('[data-destino-fixo]');
     fixo.hidden = !area.hidden;
-    fixo.textContent = tipoConsulta.value === 'dpo' ? 'Governança de proteção de dados' : 'Assuntos Jurídicos';
+    fixo.textContent = 'Unidade destinatária: ' + (tipoConsulta.value === 'dpo' ? fixo.dataset.dpo : fixo.dataset.juridico);
   }
   tipoConsulta.addEventListener('change', mostrarDestino);
   mostrarDestino();

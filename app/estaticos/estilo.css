@@ -456,3 +456,8 @@ dialog :is(.acoes-fila-form2, .acoes-formulario, .acoes-dialogo) { display: flex
 dialog :is(.acoes-fila-form2, .acoes-formulario, .acoes-dialogo) button { width: auto; flex: 0 1 auto; }
 dialog :is([data-cancelar], [data-fechar-dialogo]) { font-size: .9rem; background: white; color: #075985; }
 @media (max-width: 600px) { dialog :is(.acoes-fila-form2, .acoes-formulario, .acoes-dialogo) button { width: 100%; } }
+
+/* Campos condicionais ocultos não podem ser reexibidos por regras de label. */
+[data-area-tematica][hidden], [data-destino-fixo][hidden] { display: none !important; }
+
+#saida-bloco-form2 [hidden] { display: none !important; }
