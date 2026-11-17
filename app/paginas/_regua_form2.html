@@ -15,7 +15,7 @@
         {% if n in titulos %}<small class="titulo-bloco-form2">{{ titulos[n] }}</small>{% endif %}
         {% if revisao %}<span id="estados-form2-{{ n }}">
         <small class="estado-bloco {{ 'salvo' if salvo else 'a-percorrer' }}">{{ estados_regua.get('situacao', {}).get(n|string, '— Ainda não preenchido') }}</small>
-        {% if pendente %}<small class="estado-bloco com-pendencias">Com pendências</small>{% endif %}
+        {% if pendente %}<small class="estado-bloco com-pendencias">{{ 'Com pendência para a origem (FORM 1)' if n == 1 else 'Com pendências' }}</small>{% endif %}
         <small class="estado-bloco visitado" data-visitado hidden>Visitado nesta sessão</small></span>
         {% else %}<small class="estado-bloco">Etapa {{ etapa }}</small>{% endif %}
       {% if revisao %}{% include "_progresso_bloco_form2.html" %}</a>{% else %}</span>{% endif %}
