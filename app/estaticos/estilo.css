@@ -442,3 +442,10 @@ button[aria-busy="true"] { cursor: wait; }
 .progresso-bloco { position: absolute; bottom: 0; left: 0; right: 0; height: .3rem; background: #e2e8f0; }
 .progresso-bloco > span { display: block; height: 100%; background: #075985; }
 .regua-form2 [aria-current="page"] .progresso-bloco > span { background: #7dd3fc; }
+
+.dialogo-bloco-form2 { width: min(42rem, calc(100% - 2rem)); box-sizing: border-box; border: 2px solid #075985; border-radius: .6rem; color: #17212b; padding: 1.25rem; }
+.dialogo-bloco-form2::backdrop { background: rgb(12 59 90 / 55%); }
+.acoes-dialogo { display: flex; justify-content: flex-end; gap: .75rem; flex-wrap: wrap; }
+.acoes-dialogo button { width: auto; }
+@media (max-width: 600px) { .acoes-dialogo button { width: 100%; } }
+#erro-salvar-bloco { padding: 1rem; border: 2px solid #b91c1c; background: #fef2f2; }

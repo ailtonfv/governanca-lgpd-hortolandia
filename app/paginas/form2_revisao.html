@@ -28,7 +28,7 @@
 {% if historico20 %}<details><summary>Consultar ensaio anterior · REV20</summary><dl>{% for campo, valor in historico20.items() %}{% if valor %}<dt>{{ campo }}</dt><dd>{{ valor|join(', ') if valor is not string else valor }}</dd>{% endif %}{% endfor %}</dl></details>{% endif %}
 {% if legado %}<details><summary>Consultar revisão anterior · REV18</summary><dl>{% for campo, valor in legado.items() %}{% if valor %}<dt>{{ campo }}</dt><dd>{{ valor|join(', ') if valor is not string else valor }}</dd>{% endif %}{% endfor %}</dl></details>{% endif %}
 {% if erro %}<p role="alert">{{ erro }}</p>{% endif %}
-<form method="post" class="form1" id="revisao-bloco">
+{% include "_saida_bloco_form2.html" %}<form method="post" class="form1" id="revisao-bloco">
 <input type="hidden" name="edicao" value="REV21.2"><input type="hidden" name="comando_id" value="{{ comando_id }}"><input type="hidden" name="versao_lida" value="{{ versao }}">
 {% for q in bloco.itens %}
 {% set op = 'opcao:' ~ q.id %}{% set txt = 'texto:' ~ q.id %}{% set com = 'comentario:' ~ q.id %}
@@ -72,7 +72,7 @@
 <label>Comentário sobre {{ q.id }}<textarea name="{{ com }}" rows="2" maxlength="2000">{{ valores.get(com,'') }}</textarea></label>
 </fieldset>
 {% endfor %}
-<button type="submit" class="botao-primario">Salvar rascunho do Bloco {{ numero }}</button>
+<button type="button" id="descartar-alteracoes">Descartar alterações</button><button type="submit" class="botao-primario">Salvar rascunho do Bloco {{ numero }}</button>
 </form></div>
 <script defer src="{{ url_for('estaticos', path='/form2_revisao.js') }}"></script>
 {% endblock %}

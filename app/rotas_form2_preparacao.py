@@ -4,7 +4,7 @@ from urllib.parse import urlencode
 import uuid
 
 from fastapi import APIRouter, Depends, Query, Request, HTTPException
-from fastapi.responses import RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from app.apresentacoes_form1 import rotulo_apresentacao
 from fastapi.templating import Jinja2Templates
 from app.catalogo_form2_rev18 import titulos_blocos_form2
@@ -149,8 +149,12 @@ async def revisao_form2(request: Request, registro_id: str, preparacao_id: str, 
             alteracoes=campos, revisao=True)
         sessao.commit()
         if resultado["permitido"]:
+            if request.headers.get("X-Salvar-Bloco") == "1":
+                return JSONResponse({"salvo": True, "destino": str(request.url)})
             return RedirectResponse(str(request.url), status_code=303)
         erro = resultado["motivo"]
+        if request.headers.get("X-Salvar-Bloco") == "1":
+            return JSONResponse({"detail": erro}, status_code=409)
         valores.update({k: v if k.startswith("opcao:") else v[0] for k, v in campos.items()})
     ocorrencias = sorted({int(k.split("#")[-1]) for k in valores if "#" in k and k.split("#")[-1].isascii()
                           and k.split("#")[-1].isdigit() and len(k.split("#")[-1]) <= 2})

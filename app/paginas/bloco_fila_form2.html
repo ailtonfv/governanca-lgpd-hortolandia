@@ -22,7 +22,7 @@
 {% set guias = bloco.itens|map(attribute="fontes_publicas")|sum(start=[])|unique(attribute="url")|list %}
 {% if guias %}<aside id="apoio-anpd"><h2>Apoio da ANPD</h2><ul>{% for guia in guias %}<li><a href="{{ guia.url }}" target="_blank" rel="noopener noreferrer">{{ guia.titulo }}</a></li>{% endfor %}</ul></aside>{% endif %}
 </details><p class="aviso-dados">Não informe nomes, CPF, protocolos de atendimento ou dados de casos concretos.</p>
-<form method="post" id="revisao-bloco"><input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="comando_id" value="{{ comando_id }}"><input type="hidden" name="versao" value="{{ p.versao }}">
+{% include "_saida_bloco_form2.html" %}<form method="post" id="revisao-bloco"><input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="comando_id" value="{{ comando_id }}"><input type="hidden" name="versao" value="{{ p.versao }}">
 <fieldset {% if p.responsavel_id != pessoa.id or p.estado != 'em_atendimento' %}disabled{% endif %}>
 {% from '_condicoes_form2.html' import gatilhos, ajuda %}
 {% if numero in (1,2) %}
@@ -116,4 +116,4 @@
 </fieldset>
 {% if q.id == "F2-3.10.1" %}</section>{% endif %}
 {% endfor %}
-{% endif %}<div class="acoes-fila-form2"><button type="submit" class="botao-primario">Salvar bloco</button></div></fieldset></form></div><script defer src="{{ url_for('estaticos', path='/form2_revisao.js') }}"></script>{% endblock %}
+{% endif %}<div class="acoes-fila-form2"><button type="button" id="descartar-alteracoes">Descartar alterações</button><button type="submit" class="botao-primario">Salvar bloco</button></div></fieldset></form></div><script defer src="{{ url_for('estaticos', path='/form2_revisao.js') }}"></script>{% endblock %}

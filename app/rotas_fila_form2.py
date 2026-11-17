@@ -5,7 +5,7 @@ from uuid import uuid4
 from zoneinfo import ZoneInfo
 from urllib.parse import urlencode
 from fastapi import APIRouter, Depends, Request, HTTPException
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from app.catalogo_form2_rev18 import titulos_blocos_form2
 from sqlalchemy import select, inspect
@@ -590,8 +590,10 @@ async def salvar_bloco_fila(request: Request, participacao_id: str, bloco: int,
     except (PermissionError, ValueError) as erro:
         sessao.rollback()
         raise HTTPException(409, str(erro))
-    return RedirectResponse(str(request.url_for("bloco_fila_form2",
-        participacao_id=participacao_id, bloco=bloco))+"?"+urlencode({"conta_id": conta_id, "salvo": dados.get("comando_id")})+"#confirmacao-salvamento", status_code=303)
+    destino = str(request.url_for("bloco_fila_form2", participacao_id=participacao_id, bloco=bloco)) + "?" + urlencode({"conta_id": conta_id, "salvo": dados.get("comando_id")}) + "#confirmacao-salvamento"
+    if request.headers.get("X-Salvar-Bloco") == "1":
+        return JSONResponse({"salvo": True, "destino": destino})
+    return RedirectResponse(destino, status_code=303)
 
 
 @router.post("/form2/participacoes/{participacao_id}/complemento")
