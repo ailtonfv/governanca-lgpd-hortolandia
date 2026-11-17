@@ -107,3 +107,11 @@ def test_p108_etiquetas_legiveis(principal):
     assert '[Guarda]' in pagina.text
     assert 'title="Aguarda homologação jurídica (D11)"' in pagina.text
     assert '⚖' not in pagina.text and '🗄' not in pagina.text
+
+
+def test_c3_condicoes_de_fluxos_em_linguagem_comum():
+    itens = definicao_revisao(11)['itens']
+    condicoes_de_tela(itens, mapa_regras(carregar_contrato()), {}, ())
+    ajudas = ' '.join(q['ajuda_condicao'] for q in itens)
+    assert 'fluxo de Ouvidoria' in ajudas and 'fluxo de e-SIC' in ajudas
+    assert 'ramo OUV' not in ajudas and 'ramo ESIC' not in ajudas

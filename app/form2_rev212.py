@@ -134,7 +134,7 @@ def condicoes_de_tela(itens, regras, valores, ramos):
                           rotulos.get((origem, codigo), "a opção indicada na pergunta de origem"))
             c["rotulo"] = rotulo
             if op == "RAMO_PREENCHIDO":
-                c["descricao"] = f"o ramo {codigo} estiver preenchido no FORM 1"
+                c["descricao"] = "o FORM 1 indicar fluxo de " + {"OUV": "Ouvidoria", "ESIC": "e-SIC"}.get(codigo, "atendimento correspondente")
             elif op == "POR_OCORRENCIA":
                 c["descricao"] = f"{origem} estiver preenchida neste conjunto"
             else:
