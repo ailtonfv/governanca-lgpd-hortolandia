@@ -293,7 +293,11 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
         consultas = sessao.scalars(select(ParticipacaoForm2).where(
             ParticipacaoForm2.origem_id == p.id, ParticipacaoForm2.tipo == "dpo",
             ParticipacaoForm2.estado != "concluida")).all()
-        linhas.append({"p": p, "registro": registros[p.registro_id],
+        orientacoes = [c.conteudo for c in sessao.scalars(select(ParticipacaoForm2).where(
+            ParticipacaoForm2.origem_id == p.id, ParticipacaoForm2.tipo == "dpo",
+            ParticipacaoForm2.estado == "concluida")) if (c.conteudo or {}).get("de_oficio")]
+        linhas.append({"p": p, "aguarda_resposta_aal": any(not c.get("resposta") for c in orientacoes),
+            "ultima_resposta": max((c["resposta"]["data"] for c in orientacoes if c.get("resposta")), default=None), "registro": registros[p.registro_id],
             "secretaria": unidades[registros[p.registro_id].unidade_principal_atual_id].nome,
             "fila": unidades[p.unidade_id].nome,
             "espera": duracao_fila(p.entrada_em, p.assumida_em or agora()),
