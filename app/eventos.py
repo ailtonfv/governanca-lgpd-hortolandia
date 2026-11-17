@@ -118,6 +118,10 @@ def registrar_auditoria(sessao, tipo_evento, ator_tipo, ator_id, conteudo, coman
     """Acrescenta um evento ao segmento de auditoria do mês (consulta, tentativa negada...)."""
     momento = agora_utc()
     segmento = segmento_do_mes(momento)
+    # Escritores do mesmo segmento aguardam o commit antes de ler posição e lacre.
+    from sqlalchemy import text
+    sessao.execute(text("SELECT pg_advisory_xact_lock(hashtextextended(:segmento, 0))"),
+                   {"segmento": segmento})
     ultimo = sessao.scalars(
         select(EventoAuditoria)
         .where(EventoAuditoria.segmento_id == segmento)
