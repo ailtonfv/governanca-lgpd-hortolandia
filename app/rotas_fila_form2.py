@@ -28,6 +28,13 @@ paginas.env.globals["titulos_blocos_form2"] = titulos_blocos_form2
 paginas.env.filters["chave_comando"] = lambda valor: sha256(str(valor).encode("utf-8")).hexdigest()
 
 
+def estados_da_participacao(sessao, participacao):
+    from app.form2_rev212 import ramos_origem
+    from app.origem_form2 import ler_origem
+    origem = ler_origem(sessao, participacao.registro_id, participacao.snapshot_id)
+    return estados_regua_form2(participacao.conteudo or {}, ramos_origem(origem))
+
+
 def retorno_consultivo(request, sessao, conta_id, principal):
     from app.modelos import Evento
     chave = request.query_params.get("registrado")
@@ -164,7 +171,7 @@ def governanca(request: Request, participacao_id: str, conta_id: str):
         return paginas.TemplateResponse(request=request, name="governanca_form2_v9.html", context={
             "p": p, "alvo": alvo, "registro": sessao.get(Registro, p.registro_id), "conta_id": conta_id,
             "bloco_origem": next((n for n in range(1,15) if str(n)==request.query_params.get("bloco_origem")),None),
-            "estados_regua": estados_regua_form2(p.conteudo or {}),
+            "estados_regua": estados_da_participacao(sessao, p) if e_aal else {},
             "e_aal": e_aal, "e_origem": e_origem, "e_participante": e_participante,
             "atuacao": contexto_atuacao(sessao, pessoa, alvo),
             "pendencias": pendencias, "g": g if e_aal else {}, "versoes": versoes,
@@ -226,7 +233,7 @@ def consolidacao_fila(request: Request, participacao_id: str, conta_id: str,
     sessao.commit()
     contexto.update(conta_id=conta_id, comando_id=str(uuid4()),
         registro=sessao.get(Registro, contexto["p"].registro_id),
-        estados_regua=estados_regua_form2(contexto["p"].conteudo or {}),
+        estados_regua=estados_da_participacao(sessao, contexto["p"]),
         unidades={u.id: u.nome for u in sessao.scalars(select(Unidade))},
         agentes={a.id: a.nome for a in sessao.scalars(select(Pessoa))})
     return paginas.TemplateResponse(request=request, name="consolidacao_fila_form2.html", context=contexto)
@@ -442,7 +449,7 @@ def participacao(request: Request, participacao_id: str, conta_id: str,
                 and comando.ator_id == pessoa.id and (comando.resultado or {}).get("participacao_id") == p.id
                 and comando.resultado.get("permitido"))
     return paginas.TemplateResponse(request=request, name="participacao_form2.html",
-        context={"atuacao": contexto_atuacao(sessao, pessoa, p), "conta_id": conta_id, "p": p, "estados_regua": estados_regua_form2(p.conteudo or {}), "pessoa": pessoa,
+        context={"atuacao": contexto_atuacao(sessao, pessoa, p), "conta_id": conta_id, "p": p, "estados_regua": estados_da_participacao(sessao, p), "pessoa": pessoa,
                  "rotulo_origem": rotulo_apresentacao(snapshot),
                  "confirmada_em": data_confirmacao.astimezone(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y às %Hh%M") if data_confirmacao else None,
                  "assumida": assumida, "retorno": retorno_consultivo(request,sessao,conta_id,p),
@@ -539,7 +546,7 @@ def bloco_fila(request: Request, participacao_id: str, bloco: int, conta_id: str
             if resultado_salvo.get("complemento_solicitado"):
                 confirmacao += " Complementação solicitada à origem."
     return paginas.TemplateResponse(request=request, name="bloco_fila_form2.html",
-        context={"atuacao": contexto_atuacao(sessao, pessoa, p), "p": p, "estados_regua": estados_regua_form2(p.conteudo or {}), "pessoa": pessoa, "conta_id": conta_id, "bloco": definicao,
+        context={"atuacao": contexto_atuacao(sessao, pessoa, p), "p": p, "estados_regua": estados_regua_form2(conteudo, ramos), "pessoa": pessoa, "conta_id": conta_id, "bloco": definicao,
         "cargo": CARGOS_FICTICIOS.get(pessoa.id), "numero": bloco, "confirmacao": confirmacao, "ocorrencias": ocorrencias, "origens_repetiveis": origens_repetiveis,
         "comando_id": str(uuid4()),
         "finalidade_validada": conteudo.get(RASCUNHO, {}).get("2", {}).get("texto:F2-2.3"),

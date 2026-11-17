@@ -140,7 +140,7 @@ def test_bloco_parcial_e_avisos_de_guarda(principal):
     salvo = c.post(url, data={"conta_id":"CONTA-B1","comando_id":"L5-GUARDA","versao":principal.versao,
                                 "resposta_F2-2.9":GUARDA_INSTITUCIONAL})
     assert salvo.status_code == 200
-    assert "Em preenchimento" in salvo.text and salvo.text.count("Guarda: aguarda definição institucional") >= 2
+    assert "Em preenchimento · 1 de 10 perguntas ativas" in salvo.text and salvo.text.count("Guarda: aguarda definição institucional") >= 2
     assert "Respostas completas" not in salvo.text
     painel = c.get("/form2/painel-dpo?conta_id=CONTA-E1")
     assert "Guarda: aguarda definição institucional" in painel.text
@@ -159,3 +159,41 @@ def test_exclusividade_do_catalogo_completo():
                 with pytest.raises(ValueError):
                     aplicar_revisao({}, n, {"opcao:" + q["id"]: [outra["codigo"], exclusiva["codigo"]]},
                                     demonstrativo=True)
+
+
+def test_p86_condicional_altera_total_sem_contar_historico_ou_comentario():
+    from app.form2_rev212 import RASCUNHO
+    from app.respostas_form2 import estados_regua_form2
+
+    respostas = {"F2-1.2": "CONFIRMADA", "F2-1.2.1": "Descrição fictícia", "F2-1.3": "SIM"}
+    conteudo = {"respostas_etapa1": respostas, RASCUNHO: {"1": {"comentario:F2-1.1": "Conferido"}}}
+    assert estados_regua_form2(conteudo)["situacao"]["1"] == "✓ Todas as perguntas ativas respondidas"
+    respostas["F2-1.3"] = "NAO"
+    assert estados_regua_form2(conteudo)["situacao"]["1"] == "◐ Em preenchimento · 3 de 4 perguntas ativas"
+    respostas["F2-1.3.1"] = "Solicitar complemento."
+    assert estados_regua_form2(conteudo)["situacao"]["1"] == "✓ Todas as perguntas ativas respondidas"
+    respostas.clear()
+    respostas["F2-1.3.1"] = "Resposta antiga ao ramo agora bloqueado"
+    assert estados_regua_form2(conteudo)["situacao"]["1"] == "— Ainda não preenchido"
+
+
+def test_p86_conjuntos_e_campos_da_mesma_pergunta():
+    from app.form2_rev212 import RASCUNHO
+    from app.respostas_form2 import contagem_perguntas_ativas
+
+    campos = {"opcao:F2-8.1": ["SIM"], "texto:F2-8.3#1": "Exemplo"}
+    conteudo = {RASCUNHO: {"8": campos}}
+    respondidas, total = contagem_perguntas_ativas(conteudo, [8])[8]
+    campos["comentario:F2-8.1"] = "Comentário"
+    assert contagem_perguntas_ativas(conteudo, [8])[8] == (respondidas, total)
+    campos["texto:F2-8.3#2"] = "Segundo exemplo"
+    novas, novo_total = contagem_perguntas_ativas(conteudo, [8])[8]
+    assert novas == respondidas + 1 and novo_total > total
+
+
+def test_p86_ramo_depende_da_apresentacao_em_analise():
+    from app.respostas_form2 import contagem_perguntas_ativas
+
+    sem_ramo = contagem_perguntas_ativas({}, [11])[11]
+    com_ouvidoria = contagem_perguntas_ativas({}, [11], {"OUV"})[11]
+    assert com_ouvidoria == (0, sem_ramo[1] + 4)

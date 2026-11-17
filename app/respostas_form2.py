@@ -33,7 +33,10 @@ def aguarda_temporalidade(conteudo):
 
 
 def definicao_bloco(numero: int) -> dict:
-    contrato, catalogo = carregar_contrato(), carregar_catalogo()
+    return _definicao_bloco(numero, carregar_contrato(), carregar_catalogo())
+
+
+def _definicao_bloco(numero, contrato, catalogo):
     editoriais = _indice_catalogo(catalogo)
     itens_contrato = [item for item in contrato["itens"] if item["bloco"] == numero]
     alternativas = {}
@@ -75,7 +78,52 @@ CADERNO_REV20 = "revisao_blocos_rev20"
 CONSULTAS_REV20 = {"F2-13.9", "F2-14.8.1", "F2-14.8.2"}
 
 
-def estados_regua_form2(conteudo):
+def _contar_perguntas_ativas(conteudo, bloco, valores, regras, ramos, demonstrativo):
+    """Medida de preenchimento por pergunta e conjunto, independente da futura R17."""
+    numero = bloco["numero"]
+    respostas = conteudo.get("respostas_etapa1", {})
+    campos = conteudo.get(RASCUNHO, {}).get(str(numero), {})
+    ocorrencias = sorted({1, *(int(chave.rsplit("#", 1)[1]) for chave in campos
+                               if re.search(r"#[1-9][0-9]?$", chave))})
+    sufixos = [f"#{n}" for n in (range(1, ocorrencias[-1] + 1) if demonstrativo else ocorrencias)]
+    respondidas = ativas = 0
+    for item in bloco["itens"]:
+        chave = item["id"]
+        if item.get("guardar_concluir") == "Automático em leitura" or item["edicao"] == "consulta":
+            continue
+        if item["edicao"] == "habilitada":
+            if _ativa(item, respostas):
+                ativas += 1
+                valor = respostas.get(chave)
+                respondidas += bool(valor.strip() if isinstance(valor, str) else valor)
+            continue
+        if numero == 1 or (not demonstrativo and (numero in (3, 4, 5, 10) or item["edicao"] == "bloqueada_d11")):
+            continue
+        for sufixo in sufixos if item["repetivel"] else ("",):
+            if aplicavel(chave, sufixo, valores, ramos, regras):
+                ativas += 1
+                prefixo = "opcao:" if item["alternativas"] else "texto:"
+                valor = campos.get(prefixo + chave + sufixo)
+                respondidas += bool(valor.strip() if isinstance(valor, str) else valor)
+    return respondidas, ativas
+
+
+def contagem_perguntas_ativas(conteudo, numeros, ramos=(), *, demonstrativo=True):
+    if not numeros:
+        return {}
+    contrato = carregar_contrato()
+    editorial = carregar_catalogo()
+    valores = indice_valores(conteudo)
+    regras = mapa_regras(contrato)
+    contagens = {}
+    for numero in numeros:
+        bloco = montar_bloco(_definicao_bloco(numero, contrato, editorial))
+        contagens[numero] = _contar_perguntas_ativas(conteudo, bloco, valores, regras, ramos, demonstrativo)
+    return contagens
+
+
+def marcas_salvas_form2(conteudo):
+    """Blocos com respostas gravadas e pendências registradas na versão consultada."""
     salvos = set()
     pendentes = set()
     for chave, valor in conteudo.get("respostas_etapa1", {}).items():
@@ -105,9 +153,22 @@ def estados_regua_form2(conteudo):
                         ativos.add(match[1])
         pendentes.difference_update(referenciados)
         pendentes.update(ativos)
-    return {"salvos": salvos, "pendentes": pendentes,
-            "situacao": {str(n): ("◐ Em preenchimento" if str(n) in salvos else "— Ainda não preenchido")
-                         for n in range(1, 15)}}
+    return {"salvos": salvos, "pendentes": pendentes}
+
+
+def estados_regua_form2(conteudo, ramos=(), *, demonstrativo=True):
+    marcas = marcas_salvas_form2(conteudo)
+    situacao = {str(n): "— Ainda não preenchido" for n in range(1, 15)}
+    com_respostas_ativas = set()
+    numeros = [int(bloco) for bloco in marcas["salvos"].intersection(situacao)]
+    medidas = contagem_perguntas_ativas(conteudo, numeros, ramos, demonstrativo=demonstrativo)
+    for numero, (respondidas, ativas) in medidas.items():
+        bloco = str(numero)
+        if respondidas:
+            com_respostas_ativas.add(bloco)
+            situacao[bloco] = ("✓ Todas as perguntas ativas respondidas" if respondidas == ativas
+                               else f"◐ Em preenchimento · {respondidas} de {ativas} perguntas ativas")
+    return {**marcas, "com_respostas_ativas": com_respostas_ativas, "situacao": situacao}
 
 
 def definicao_revisao(numero):

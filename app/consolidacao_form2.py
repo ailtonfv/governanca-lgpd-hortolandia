@@ -7,7 +7,7 @@ from app.modelos import ParticipacaoForm2, ComplementoForm2, Registro, Evento
 from app.fila_form2 import pessoa_ativa, autorizado, agora, evento
 from app.comandos import abrir_comando, fechar_comando
 from app.eventos import lacre
-from app.respostas_form2 import estados_regua_form2, definicao_revisao
+from app.respostas_form2 import marcas_salvas_form2, definicao_revisao
 from app.form2_rev212 import RASCUNHO, indice_valores, aplicavel, conjunto_da_chave, mapa_regras, ramos_origem
 from app.contrato_form2_respostas import carregar_contrato
 
@@ -78,7 +78,7 @@ def montar_resumo(fontes):
                 if not aplicavel(item, conjunto_da_chave(chave), valores,
                                  fontes.get("ramos_origem", []), fontes.get("regras", {})):
                     campos.pop(chave)
-    estados = estados_regua_form2(conteudo)
+    estados = marcas_salvas_form2(conteudo)
     confirmar = set()
     for item, valor in conteudo.get("respostas_etapa1", {}).items():
         if "A_CONFIRMAR" in (valor if isinstance(valor, list) else [valor]):

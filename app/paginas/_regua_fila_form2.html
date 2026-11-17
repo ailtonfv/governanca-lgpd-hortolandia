@@ -5,11 +5,11 @@
 <nav data-preparacao="fila-{{ p.id }}" data-conta="{{ conta_id }}" class="regua-navegacao-blocos" aria-label="Navegação pelos 14 blocos do FORM 2">
 <ol class="mapa-blocos-form1 regua-form2 regua-com-titulos-form2">
 {% for n in range(1,15) %}
-{% set salvo = n|string in estados_regua.salvos %}{% set pendente = n|string in estados_regua.pendentes %}
+{% set salvo = n|string in estados_regua.com_respostas_ativas|default([]) %}{% set pendente = n|string in estados_regua.pendentes %}
 <li><a data-numero="{{ n }}" class="cartao-bloco{{ ' bloco-com-respostas' if salvo else '' }}{{ ' bloco-com-pendencias' if pendente else '' }}" href="/form2/participacoes/{{ p.id }}/blocos/{{ n }}?conta_id={{ conta_id|urlencode }}" aria-label="Ir ao Bloco {{ n }}{% if n in titulos %} — {{ titulos[n] }}{% endif %}"{% if numero|default(0) == n %} aria-current="page"{% endif %}>
 <strong class="numero-bloco">{{ n }}</strong>
         {% if n in titulos %}<small class="titulo-bloco-form2">{{ titulos[n] }}</small>{% endif %}
-<small class="estado-bloco {{ 'salvo' if salvo else 'a-percorrer' }}">{{ estados_regua.situacao[n|string] }}</small>
+<small class="estado-bloco {{ 'salvo' if salvo else 'a-percorrer' }}">{{ estados_regua.get('situacao', {}).get(n|string, '— Ainda não preenchido') }}</small>
 {% if pendente %}<small class="estado-bloco com-pendencias">Com pendências</small>{% endif %}
 {% if n == 2 and aguarda_temporalidade(p.conteudo) %}<small class="selo-guarda">Guarda: aguarda definição institucional</small>{% endif %}
 {% if n in (3,4,5,10) %}<small class="selo-d11" title="Este bloco depende de conferência jurídica ainda não concluída.">Aguarda homologação jurídica (D11)</small>{% endif %}
