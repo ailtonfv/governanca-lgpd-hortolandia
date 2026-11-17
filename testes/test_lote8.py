@@ -1,5 +1,18 @@
 from app.confirmacoes_form2 import itens_a_confirmar
 from app.form2_rev212 import RASCUNHO
+from app.form2_rev212 import condicoes_de_tela, mapa_regras
+from app.contrato_form2_respostas import carregar_contrato
+from app.respostas_form2 import definicao_revisao
+
+
+def test_c2_condicoes_resolvem_opcoes_de_outros_blocos():
+    itens = definicao_revisao(5)['itens']
+    condicoes_de_tela(itens, mapa_regras(carregar_contrato()), {}, ())
+    for q in itens:
+        assert 'ALT_' not in q['ajuda_condicao']
+    for q in itens:
+        if q['id'] in ('F2-5.4', 'F2-5.7'):
+            assert 'Consentimento' in q['ajuda_condicao']
 
 
 def test_c1_lista_agrupada_exclui_inativas_comentarios_e_bloco14():

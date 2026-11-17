@@ -103,6 +103,10 @@ def aplicavel(q, conjunto, valores, ramos, regras):
 
 def condicoes_de_tela(itens, regras, valores, ramos):
     """Expõe os gatilhos locais e resolve na origem as condições externas ao bloco."""
+    from app.contrato_form2_respostas import carregar_contrato
+    rotulos = {(a['id'], a['codigo']): a['rotulo'] for a in carregar_contrato()['alternativas']}
+    for chave, (_, alternativas, _) in novos_controles().items():
+        rotulos.update({(chave, codigo): rotulo for codigo, rotulo in alternativas})
     locais = {q["id"]: q for q in itens}
     for q in itens:
         condicoes = []
@@ -118,7 +122,8 @@ def condicoes_de_tela(itens, regras, valores, ramos):
                 isoladas = {**regras, q["id"]: [regra]}
                 c["fixa"] = aplicavel(q["id"], "", valores, ramos, isoladas)
             alternativas = locais.get(origem, {}).get("alternativas", [])
-            rotulo = next((a["rotulo"] for a in alternativas if a["codigo"] == codigo), codigo)
+            rotulo = next((a["rotulo"] for a in alternativas if a["codigo"] == codigo),
+                          rotulos.get((origem, codigo), "a opção indicada na pergunta de origem"))
             c["rotulo"] = rotulo
             if op == "RAMO_PREENCHIDO":
                 c["descricao"] = f"o ramo {codigo} estiver preenchido no FORM 1"
@@ -137,7 +142,9 @@ def condicoes_de_tela(itens, regras, valores, ramos):
                 frases.append(c["descricao"])
         for origem, opcoes in grupos.items():
             valores_rotulados = conector.join(f"“{opcao}”" for opcao in opcoes)
-            frases.append(f"a resposta a {origem} for {valores_rotulados}")
+            inclusao = any(c['origem'] == origem and c['operador'] == 'CONTEM' for c in condicoes)
+            frases.append(f"a {origem} incluir {valores_rotulados}" if inclusao
+                          else f"a resposta a {origem} for {valores_rotulados}")
         q["ajuda_condicao"] = conector.join(frases)
         q["gatilhos"] = condicoes
         q["qualquer"] = any(r["combinar"] == "OU" for r in regras.get(q["id"], []))
