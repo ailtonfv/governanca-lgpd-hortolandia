@@ -449,3 +449,10 @@ button[aria-busy="true"] { cursor: wait; }
 .acoes-dialogo button { width: auto; }
 @media (max-width: 600px) { .acoes-dialogo button { width: 100%; } }
 #erro-salvar-bloco { padding: 1rem; border: 2px solid #b91c1c; background: #fef2f2; }
+
+#confirmar-ato { width: min(42rem, calc(100% - 2rem)); box-sizing: border-box; border: 2px solid #075985; border-radius: .6rem; color: #17212b; background: white; padding: 1.25rem; }
+#confirmar-ato::backdrop { background: rgb(12 59 90 / 55%); }
+dialog :is(.acoes-fila-form2, .acoes-formulario, .acoes-dialogo) { display: flex; flex-direction: row; justify-content: flex-end; align-items: center; gap: .75rem; flex-wrap: wrap; }
+dialog :is(.acoes-fila-form2, .acoes-formulario, .acoes-dialogo) button { width: auto; flex: 0 1 auto; }
+dialog :is([data-cancelar], [data-fechar-dialogo]) { font-size: .9rem; background: white; color: #075985; }
+@media (max-width: 600px) { dialog :is(.acoes-fila-form2, .acoes-formulario, .acoes-dialogo) button { width: 100%; } }
