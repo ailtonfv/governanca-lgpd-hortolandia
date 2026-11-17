@@ -18,12 +18,12 @@ def test_entrada_sem_listagem_identifica_apa_e_reserva_planejados():
     assert pagina.url.path == "/central"
     assert pagina.status_code == 200
     assert pagina.text.index("Secretaria de atuação") < pagina.text.index("Servidor em sessão") < pagina.text.index("APA em exercício")
-    assert 'MAT-FICT-0001 — Servidor Alfa (titular)' in pagina.text
+    assert 'MAT-FICT-0001 — Servidor Alfa (fictício) (titular)' in pagina.text
     assert 'name="secretaria_id" value="UNID-NORTE"' in pagina.text
     assert "Registros disponíveis" not in pagina.text and "Resumo do painel" not in pagina.text
     assert 'name="arp_id"' not in pagina.text and 'name="apa_id"' not in pagina.text
     assert '<label for="conta_id">Selecionar servidor por matrícula</label>' in pagina.text
-    assert 'type="submit">Selecionar servidor e entrar</button>' in pagina.text
+    assert 'type="submit">Entrar como este servidor</button>' in pagina.text
     assert 'A troca de servidor fictício é exclusiva da demonstração.' in pagina.text
     usuarios = dict(pagina.context["usuarios_demonstracao"])
     assert len(usuarios) == 8
@@ -31,8 +31,8 @@ def test_entrada_sem_listagem_identifica_apa_e_reserva_planejados():
     assert "ARP" in usuarios["CONTA-G1"] and "APA titular" in usuarios["CONTA-A1"]
     assert all(" — " in nome for nome in usuarios.values())
     alterada = cliente.get("/central?conta_id=CONTA-G1&administracao_ti_autorizada=true&apa_id=PESSOA-G")
-    assert 'Servidor Épsilon — MAT-FICT-0007</dd>' in alterada.text
-    assert 'MAT-FICT-0001 — Servidor Alfa (titular)' in alterada.text
+    assert 'Servidor Épsilon (fictício) — MAT-FICT-0007</dd>' in alterada.text
+    assert 'MAT-FICT-0001 — Servidor Alfa (fictício) (titular)' in alterada.text
     assert 'Administração Central — TI' in alterada.text
     assert '<a ' not in alterada.text.split('id="titulo-gestao"', 1)[1]
 
@@ -46,8 +46,8 @@ def test_atalhos_da_central_por_papel_vigente(sessao):
         resposta = cliente.get("/central", params={"conta_id": conta})
         assert resposta.status_code == 200
         quadro = resposta.text.split('<section class="contexto-central"', 1)[1].split("</section>", 1)[0]
-        assert (f'filas?conta_id={conta}">Abrir fila do FORM 2</a>' in quadro) == fila
-        assert (f'filas?conta_id={conta}#painel-dpo">Abrir painel do DPO</a>' in quadro) == painel
+        assert (f'filas?conta_id={conta}">Abrir fila do FORM 2</a>' in resposta.text) == fila
+        assert (f'painel-dpo?conta_id={conta}">Abrir painel do DPO</a>' in quadro) == painel
         assert "Filas institucionais do FORM 2 e painel do DPO" not in resposta.text
 
     sessao.add(Designacao(pessoa_id="PESSOA-A", unidade_id="UNID-NORTE", papel="gestor_fila", ativa=True))
@@ -59,7 +59,7 @@ def test_atalhos_da_central_por_papel_vigente(sessao):
     central = cliente.get("/central?conta_id=CONTA-E1")
     assert "Atuação: Encarregado de Dados (DPO)" in central.text
     assert "APA em exercício na Secretaria" not in central.text
-    painel_dpo = cliente.get("/form2/filas?conta_id=CONTA-E1")
+    painel_dpo = cliente.get("/form2/painel-dpo?conta_id=CONTA-E1")
     assert 'id="painel-dpo"' in painel_dpo.text and "Tempo até ter responsável" in painel_dpo.text
     cobertura = painel_dpo.context["cobertura"]
     assert len(cobertura) == 18 and all("Governança de proteção" not in u["nome"] for u in cobertura)
@@ -158,7 +158,7 @@ def test_escolha_explicita_filtra_form2_e_retorna_ao_contexto(sessao, conta, rot
         assert 'id="conta_id"' not in tela.text and "Selecionar servidor por matrícula" not in tela.text
         pagina = cliente.get(destino)
         assert pagina.status_code == 200
-        identidade = "Servidor Alfa — MAT-FICT-0001" if conta == "CONTA-A1" else "Servidor Épsilon — MAT-FICT-0007"
+        identidade = "Servidor Alfa (fictício) — MAT-FICT-0001" if conta == "CONTA-A1" else "Servidor Épsilon (fictício) — MAT-FICT-0007"
         assert f"Servidor em sessão:</strong> {identidade}" in pagina.text
         if filtro == "form2":
             assert "APA responsável:" in pagina.text and "Função nesta atividade:" in pagina.text
@@ -203,7 +203,7 @@ def test_central_indica_quem_exerce_substituicao_vigente(sessao):
                     fim_previsto_em=agora + timedelta(days=1), momento=agora)["permitido"]
     sessao.commit()
     pagina = TestClient(app).get("/central?conta_id=CONTA-G1")
-    assert "MAT-FICT-0006 — Servidor Delta (em substituição temporária)" in pagina.text
+    assert "MAT-FICT-0006 — Servidor Delta (fictício) (em substituição temporária)" in pagina.text
 
 
 def test_selecao_recorta_cartoes_contadores_e_comando_de_abertura(sessao):

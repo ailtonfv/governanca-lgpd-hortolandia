@@ -175,11 +175,20 @@ def central(
         return _erro_acesso_central(request)
     from app.consultas_interface import usuarios_demonstracao
     pessoa_id = acesso["identidade"]["pessoa_id"]
+    from sqlalchemy import select
+    from app.modelos import ParticipacaoForm2, Registro
+    em_andamento = sessao.execute(select(ParticipacaoForm2.id, Registro.codigo_lgpd)
+        .join(Registro, Registro.id == ParticipacaoForm2.registro_id)
+        .where(ParticipacaoForm2.responsavel_id == pessoa_id, ParticipacaoForm2.estado == "em_atendimento",
+               ParticipacaoForm2.unidade_id.in_(unidades(sessao,pessoa_id,PAPEIS["principal"])),
+               ParticipacaoForm2.tipo.in_(("principal","tematica")))).all()
     return paginas.TemplateResponse(request=request, name="central.html", context={
+        "em_andamento": em_andamento,
         **acesso, "conta_id": conta_id,
         "usuarios_demonstracao": usuarios_demonstracao(sessao, conta_id),
         "exibir_fila_form2": bool(unidades(sessao, pessoa_id, PAPEIS["principal"]) or unidades(sessao, pessoa_id, "gestor_fila")),
         "exibir_painel_dpo": bool(unidades(sessao, pessoa_id, PAPEIS["dpo"])),
+        "outro_vinculo": any(v["papel"] != PAPEIS["dpo"] for v in acesso["identidade"]["designacoes"]),
         "selecao": secretaria_id or request.cookies.get(f"secretaria_{conta_id}"),
     })
 
@@ -195,7 +204,7 @@ def painel_registros(
     acesso = carregar_central(sessao, conta_id)
     if acesso is None:
         return _erro_acesso_central(request, conta_indisponivel=True)
-    if unidades(sessao, acesso["identidade"]["pessoa_id"], PAPEIS["dpo"]) and not unidades(sessao, acesso["identidade"]["pessoa_id"], PAPEIS["principal"]):
+    if unidades(sessao, acesso["identidade"]["pessoa_id"], PAPEIS["dpo"]) and all(v["papel"] == PAPEIS["dpo"] for v in acesso["identidade"]["designacoes"]):
         return paginas.TemplateResponse(request=request, name="painel_agente_dpo.html", context={"conta_id":conta_id})
     secretarias = acesso["secretarias"]
     if secretaria_id is None:
