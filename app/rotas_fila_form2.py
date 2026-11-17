@@ -362,19 +362,23 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
         Pessoa.id.in_({p.responsavel_id for p in [*participacoes, *gerenciaveis] if p.responsavel_id}))).all())
     from app.modelos import Evento
     atribuidores = {}
-    minhas = {p.id: p for p in participacoes if p.responsavel_id == pessoa.id}
+    minhas = {p.id: p for p in [*participacoes, *gerenciaveis] if p.responsavel_id}
     if minhas:
         atos = sessao.execute(select(Evento, Pessoa.nome).join(Pessoa, Pessoa.id == Evento.ator_id)
             .where(Evento.cadeia_tipo == "participacao_form2", Evento.cadeia_id.in_(minhas),
                    Evento.tipo_evento == "form2_reatribuida").order_by(Evento.sequencia_cadeia.desc()))
         for ato, nome in atos:
-            if ato.cadeia_id in atribuidores or ato.conteudo.get("responsavel_id") != pessoa.id:
+            if ato.cadeia_id in atribuidores or ato.conteudo.get("responsavel_id") != minhas[ato.cadeia_id].responsavel_id:
                 continue
             unidade = minhas[ato.cadeia_id].unidade_id
             exercicio = pessoa_e_apa_em_exercicio(sessao, ato.ator_id, unidade, ato.ocorrido_em)
             papel = ("APA titular" if exercicio["modalidade"] == "titular" else "APA suplente") if exercicio else "gestor da fila"
             data = ato.ocorrido_em.astimezone(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y às %Hh%M")
-            atribuidores[ato.cadeia_id] = f"Atribuído por {nome}, {papel}, em {data}"
+            anterior = sessao.scalar(select(Evento).where(Evento.cadeia_tipo == 'participacao_form2',
+                Evento.cadeia_id == ato.cadeia_id, Evento.sequencia_cadeia < ato.sequencia_cadeia)
+                .order_by(Evento.sequencia_cadeia.desc()).limit(1))
+            acao = 'Reatribuído' if anterior and anterior.conteudo.get('responsavel_id') else 'Atribuído'
+            atribuidores[ato.cadeia_id] = f"{acao} por {nome}, {papel}, em {data}"
     cartoes = {}
     for p in participacoes:
         cartoes.setdefault(p.registro_id, dict(registro=registros[p.registro_id],
@@ -511,6 +515,9 @@ async def encaminhar(request: Request, sessao: Session = Depends(sessao_fila)):
 def bloco_fila(request: Request, participacao_id: str, bloco: int, conta_id: str,
                sessao: Session = Depends(sessao_fila)):
     from app.respostas_form2 import projetar_bloco, definicao_revisao, limite_texto_revisao
+    from app.confirmacoes_form2 import itens_a_confirmar
+    from app.fatos_abertura_form2 import projetar_fatos_abertura
+    from app.campos_form2 import data_exata
     from app.form2_rev212 import RASCUNHO, ramos_origem, indice_valores, aplicavel, mapa_regras
     from app.contrato_form2_respostas import carregar_contrato
     from app.origem_form2 import ler_origem
@@ -524,6 +531,7 @@ def bloco_fila(request: Request, participacao_id: str, bloco: int, conta_id: str
     origem = ler_origem(sessao, p.registro_id, p.snapshot_id)
     conteudo = p.conteudo or {}
     definicao = projetar_bloco(conteudo, bloco) if bloco in (1, 2) else definicao_revisao(bloco)
+    projetar_fatos_abertura(definicao['itens'], origem)
     regras = mapa_regras(carregar_contrato())
     valores = indice_valores(conteudo)
     valores_bloco = conteudo.get(RASCUNHO, {}).get(str(bloco), {})
@@ -560,9 +568,10 @@ def bloco_fila(request: Request, participacao_id: str, bloco: int, conta_id: str
         "perguntas_origem": [q for q in origem["perguntas"] if q["respondida"]],
         "revogacao": [a["rotulo"] for q in definicao_revisao(5)["itens"] if q["id"] == "F2-5.7" for a in q["alternativas"] if a["codigo"] in valores.get("opcao:F2-5.7", [])],
         "complementacao": conteudo.get("respostas_etapa1", {}).get("F2-1.3.1"),
+        "confirmacoes_por_bloco": itens_a_confirmar(conteudo, ramos),
         "valores": conteudo.get(RASCUNHO, {}).get(str(bloco), {}),
         "ativa": lambda item, sufixo: aplicavel(item, sufixo, valores, ramos, regras),
-        "limite_texto": limite_texto_revisao})
+        "data_exata": data_exata, "limite_texto": limite_texto_revisao})
 
 
 @router.post("/form2/participacoes/{participacao_id}/blocos/{bloco}")

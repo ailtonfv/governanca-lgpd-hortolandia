@@ -66,6 +66,9 @@ def _definicao_bloco(numero, contrato, catalogo):
         guarda["alternativas"].append({"id": guarda["id"], "codigo": GUARDA_INSTITUCIONAL,
             "rotulo": "Aguarda definição institucional (grupo de trabalho de guarda documental)",
             "complemento": "", "tratamento": ""})
+    if numero == 4:
+        for item in itens:
+            item['fontes_publicas'] = [f for f in item['fontes_publicas'] if f['chave'] != 'ANPD-LI']
     if numero == 1:
         for item in itens:
             if item["id"] in MODOS_IDENTIFICACAO:
@@ -226,7 +229,14 @@ def aplicar_revisao(conteudo, bloco, campos, ramos=(), *, demonstrativo=False):
             raise ValueError("Controle de revisão inválido.")
         if len(valores) != 1 or len(valores[0]) > limite:
             raise ValueError(f"Limite de {limite} caracteres por campo.")
-        revisao[nome] = valores[0]
+        valor = valores[0]
+        if tipo == 'texto' and item_id == 'F2-10.2.3':
+            from app.campos_form2 import normalizar_cnpj
+            valor = normalizar_cnpj(valor)
+        if tipo == 'texto' and item_id == 'F2-14.4.3':
+            from app.campos_form2 import validar_referencia_temporal
+            valor = validar_referencia_temporal(valor)
+        revisao[nome] = valor
     for nome, valor in revisao.items():
         if nome.startswith("principal:") and valor and valor not in revisao.get(nome.replace("principal:", "opcao:", 1), []):
             raise ValueError("O destino principal deve constar entre os destinos selecionados.")
@@ -258,7 +268,9 @@ def aplicar_revisao(conteudo, bloco, campos, ramos=(), *, demonstrativo=False):
 
 def limite_texto_revisao(item):
     limite = re.search(r"até ([\d.]+) caracteres", item.get("dominio", ""), re.IGNORECASE)
-    return int(limite[1].replace(".", "")) if limite else 2000
+    if limite:
+        return int(limite[1].replace(".", ""))
+    return 1000 if 'longo' in item.get('controle', '').casefold() else 200
 
 
 def _habilitados(definicao):

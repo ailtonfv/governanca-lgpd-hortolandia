@@ -2,6 +2,15 @@
 from hashlib import sha256
 from pathlib import Path
 import json
+import re
+
+
+def orientacoes_ao_usuario(instrucao):
+    """Extrai frases de orientação; controles, opções e condições seguem estruturados."""
+    frases = re.split(r'(?<=\.)\s+(?=[A-ZÁÉÍÓÚ])', instrucao or '')
+    prefixos = ('Se Sim,', 'Indique ', 'Informe ', 'Referência institucional (',
+                'Sem dados pessoais.', 'Unidade, cargo ou função (')
+    return [frase.strip() for frase in frases if frase.startswith(prefixos)]
 
 ARQUIVO = Path(__file__).with_name("catalogos") / "form2_rev21_2_privado.json"
 LACRE = "f3c25cdb4531d66dc9785100034405bbae3096465dc1202fe7ab1ed93a227d52"
@@ -44,6 +53,12 @@ def novos_controles():
     }
 
 
+def condicoes_d7():
+    """DPO, 17/11/2026: divergência aprovada; incorporar na próxima revisão do Mestre."""
+    return {**{q: condicao('F2-10.2', 'SIM') for q in ('F2-10.3', 'F2-10.4')},
+            **{f'F2-10.9.{n}': condicao('F2-10.9.6', 'SIM') for n in range(7, 11)}}
+
+
 def montar_bloco(base):
     antigos = {q["id"]: q for q in base["itens"]}
     novos = novos_controles()
@@ -59,6 +74,9 @@ def montar_bloco(base):
         else:
             continue
         q.update(redacao)
+        q['ajudas_usuario'] = orientacoes_ao_usuario(q.get('instrucao', ''))
+        if chave in condicoes_d7():
+            q['condicoes'] = condicoes_d7()[chave]
         q["repetivel"] = por_conjunto(chave)
         if chave in CONSULTAS:
             q.update(edicao="consulta", alternativas=[], controle="Consulta automática")
@@ -103,6 +121,10 @@ def aplicavel(q, conjunto, valores, ramos, regras):
 
 def condicoes_de_tela(itens, regras, valores, ramos):
     """Expõe os gatilhos locais e resolve na origem as condições externas ao bloco."""
+    from app.contrato_form2_respostas import carregar_contrato
+    rotulos = {(a['id'], a['codigo']): a['rotulo'] for a in carregar_contrato()['alternativas']}
+    for chave, (_, alternativas, _) in novos_controles().items():
+        rotulos.update({(chave, codigo): rotulo for codigo, rotulo in alternativas})
     locais = {q["id"]: q for q in itens}
     for q in itens:
         condicoes = []
@@ -118,10 +140,11 @@ def condicoes_de_tela(itens, regras, valores, ramos):
                 isoladas = {**regras, q["id"]: [regra]}
                 c["fixa"] = aplicavel(q["id"], "", valores, ramos, isoladas)
             alternativas = locais.get(origem, {}).get("alternativas", [])
-            rotulo = next((a["rotulo"] for a in alternativas if a["codigo"] == codigo), codigo)
+            rotulo = next((a["rotulo"] for a in alternativas if a["codigo"] == codigo),
+                          rotulos.get((origem, codigo), "a opção indicada na pergunta de origem"))
             c["rotulo"] = rotulo
             if op == "RAMO_PREENCHIDO":
-                c["descricao"] = f"o ramo {codigo} estiver preenchido no FORM 1"
+                c["descricao"] = "o FORM 1 indicar fluxo de " + {"OUV": "Ouvidoria", "ESIC": "e-SIC"}.get(codigo, "atendimento correspondente")
             elif op == "POR_OCORRENCIA":
                 c["descricao"] = f"{origem} estiver preenchida neste conjunto"
             else:
@@ -137,7 +160,9 @@ def condicoes_de_tela(itens, regras, valores, ramos):
                 frases.append(c["descricao"])
         for origem, opcoes in grupos.items():
             valores_rotulados = conector.join(f"“{opcao}”" for opcao in opcoes)
-            frases.append(f"a resposta a {origem} for {valores_rotulados}")
+            inclusao = any(c['origem'] == origem and c['operador'] == 'CONTEM' for c in condicoes)
+            frases.append(f"a {origem} incluir {valores_rotulados}" if inclusao
+                          else f"a resposta a {origem} for {valores_rotulados}")
         q["ajuda_condicao"] = conector.join(frases)
         q["gatilhos"] = condicoes
         q["qualquer"] = any(r["combinar"] == "OU" for r in regras.get(q["id"], []))
@@ -149,6 +174,7 @@ def mapa_regras(contrato):
         regras.setdefault(c["alvo"], []).append(c)
     for k, (_, _, condicoes) in novos_controles().items():
         regras[k] = condicoes
+    regras.update(condicoes_d7())
     return regras
 
 

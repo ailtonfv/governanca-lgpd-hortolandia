@@ -203,7 +203,7 @@ def test_central_indica_quem_exerce_substituicao_vigente(sessao):
                     fim_previsto_em=agora + timedelta(days=1), momento=agora)["permitido"]
     sessao.commit()
     pagina = TestClient(app).get("/central?conta_id=CONTA-G1")
-    assert "MAT-FICT-0006 — Servidor Delta (fictício) (em substituição temporária)" in pagina.text
+    assert "MAT-FICT-0006 — Servidor Delta (fictício) (suplente em substituição temporária)" in pagina.text
 
 
 def test_selecao_recorta_cartoes_contadores_e_comando_de_abertura(sessao):
