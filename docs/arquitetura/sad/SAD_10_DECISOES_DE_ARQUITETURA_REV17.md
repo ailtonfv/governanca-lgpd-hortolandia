@@ -1012,7 +1012,7 @@ As decisões abaixo registram a deliberação de Ailton, DPO. Vigência da regra
 
 **Data** — 17/11/2026
 
-**Situação** — Decidida; implementada na branch correcoes-lote9 em 18/11/2026, aguardando vistoria e merge
+**Situação** — Vigente; implementada no Lote 9, aprovada na vistoria de 18/11/2026 e integrada ao `main` (`a739fe4`).
 
 **Decisor** — Ailton, DPO
 
