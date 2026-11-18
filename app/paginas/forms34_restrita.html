@@ -1,0 +1,6 @@
+{% extends 'base.html' %}{% block conteudo %}
+<h1>Referência jurídica restrita</h1><p>Somente participantes autorizados por necessidade. Não inclua dados pessoais nem cópia integral de parecer. Consultas e alterações são auditadas.</p>
+<form method="post"><input type="hidden" name="versao" value="{{ estado.versao }}"><input type="hidden" name="comando_id" value="{{ comando_id }}">
+{% for k,nome in [('referencia','Referência institucional'),('questao','Questão sobre o tratamento'),('conclusao','Conclusão sintética'),('localizacao','Localização em repositório autorizado')] %}<label>{{ nome }}<textarea name="{{ k }}" maxlength="1000">{{ item.conteudo.get(k,'') if item else '' }}</textarea></label>{% endfor %}
+<div class="acoes-fila-form2"><a href="/forms34?conta_id={{ conta_id|urlencode }}">Voltar às participações</a><button class="botao-primario" data-confirmar-ato="Registrar uma nova versão da referência restrita, preservando a anterior.">Registrar referência</button></div></form>
+{% endblock %}

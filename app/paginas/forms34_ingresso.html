@@ -1,0 +1,11 @@
+{% extends 'base.html' %}{% block conteudo %}
+<h1>{{ registro.codigo_lgpd }} · Encaminhar para riscos ou providências</h1>
+<p>{{ pessoa.nome|identidade_demonstrativa }} · AAL responsável</p>
+<p>Salve primeiro F2-14.5 ou F2-14.6. Este ato preserva a versão {{ p.versao }} do FORM 2; alterações posteriores não a substituem.</p>
+<p>Proposta em deliberação [D11]. Não equivale a homologação ou operação em produção.</p>
+<form method="post"><input type="hidden" name="versao" value="{{ p.versao }}"><input type="hidden" name="comando_id" value="{{ comando_id }}">
+<label>Destino <select name="form" required><option value="">Escolha…</option><option value="3">FORM 3 — avaliação de riscos (F2-14.5)</option><option value="4">FORM 4 — providência direta (F2-14.6)</option></select></label>
+<label>Decisão fundamentada quando houver sinal de risco e somente ação direta <textarea name="justificativa" maxlength="1000"></textarea></label>
+<div class="acoes-fila-form2"><a href="/form2/participacoes/{{ p.id }}/blocos/14?conta_id={{ conta_id|urlencode }}">Voltar ao bloco 14</a>
+<button class="botao-primario" data-confirmar-ato="Registro {{ registro.codigo_lgpd }}: encaminhar a versão {{ p.versao }} do FORM 2 ao destino escolhido, preservando a origem. A autoria será registrada.">Confirmar encaminhamento</button></div></form>
+{% endblock %}

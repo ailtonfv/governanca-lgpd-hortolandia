@@ -1,0 +1,4 @@
+{% extends 'base.html' %}{% block conteudo %}
+<h1>Não foi possível registrar esta operação</h1><p role="alert" class="mensagem mensagem-erro">{{ erro }}</p>
+<div class="acoes-fila-form2"><a class="botao-link" href="{{ retorno }}?conta_id={{ conta_id|urlencode }}">Voltar e conferir</a></div>
+{% endblock %}

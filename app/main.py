@@ -77,6 +77,8 @@ from app.fila_form2 import PAPEIS, unidades
 app.include_router(rotas_fila_form2)
 from app.rotas_rev22_form1 import router as router_rev22_form1
 app.include_router(router_rev22_form1)
+from app.rotas_forms34 import router as router_forms34
+app.include_router(router_forms34)
 paginas = Jinja2Templates(directory=PASTA_APP / "paginas")
 from app.identidade_demonstrativa import configurar_identidade
 configurar_identidade(paginas)

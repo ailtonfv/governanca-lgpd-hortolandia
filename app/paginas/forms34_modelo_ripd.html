@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block conteudo %}
+<link rel="stylesheet" href="{{ url_for('estaticos',path='/forms34.css') }}">
+<div class="forms34">
+<p class="selo-d11" role="note">[D11] proposta em deliberação</p>
+<nav class="acoes-fila-form2"><a href="/forms34/{{ objeto_id }}/blocos/15?conta_id={{ conta_id|urlencode }}">Voltar ao bloco 15</a></nav>
+<article aria-label="Modelo Municipal de RIPD">
+{% for tipo,texto in trechos %}{% if tipo=='h1' %}<h1>{{ texto }}</h1>{% elif tipo=='h2' %}<h2>{{ texto }}</h2>{% else %}<p>{{ texto }}</p>{% endif %}{% endfor %}
+</article>
+</div>
+{% endblock %}

@@ -16,6 +16,7 @@
 {% if numero < 14 %}<a href="{{ numero+1 }}?conta_id={{ conta_id|urlencode }}">Próximo bloco</a>{% endif %}
 <a href="/form2/participacoes/{{ p.id }}/governanca?conta_id={{ conta_id|urlencode }}&amp;bloco_origem={{ numero }}">Pendências com a origem (FORM 1)</a></nav>
 
+{% if numero == 14 %}<div class="acoes-fila-form2"><a class="botao-link" href="/form2/participacoes/{{ p.id }}/encaminhar34?conta_id={{ conta_id|urlencode }}">Encaminhar pelos itens F2-14.5 / F2-14.6</a></div>{% endif %}
 <details class="apoio-bloco"><summary>Orientações e consultas de apoio</summary>{% if numero == 14 %}<article><h2>Conferência da consolidação</h2><p>Reúna as respostas salvas, as complementações e as manifestações das áreas. Salve o bloco antes de abrir a conferência.</p><div class="acoes-fila-form2"><a class="botao-link" href="/form2/participacoes/{{ p.id }}/consolidacao?conta_id={{ conta_id|urlencode }}">Conferir consolidação</a></div></article>{% endif %}<p>Demonstração com dados fictícios. As respostas candidatas, inclusive as jurídicas e o resultado da validação (bloco 14), são rascunhos não homologados. Salvar não conclui a validação institucional.</p>
 <details class="origem-fila-form2"><summary>Consultar respostas do FORM 1</summary>
 <p>Respostas do FORM 1 em análise, somente para consulta.</p>
