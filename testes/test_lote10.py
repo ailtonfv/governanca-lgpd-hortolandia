@@ -52,3 +52,16 @@ def test_d9_rotulo_nao_reescreve_valor_salvo():
     assert resposta == antes
     assert q['alternativas'][0]['codigo']=='ANALISE_LEGADA'
     assert q['alternativas'][0]['rotulo']=='Requer análise técnica'
+
+
+def test_d10_orienta_sem_identificar_pessoa(principal):
+    # Arrange / Act: renderização real da pergunta, sem escrever respostas.
+    q=next(q for q in definicao_revisao(10)['itens'] if q['id']=='F2-10.2.1')
+    tela=TestClient(app).get(f'/form2/participacoes/{principal.id}/blocos/10?conta_id=CONTA-B1')
+    # Assert: texto aprovado e ajuda visíveis, campo preservado.
+    assert tela.status_code == 200
+    trecho=tela.text.split('id="F2-10.2.1"',1)[1].split('</fieldset>',1)[0]
+    assert q['enunciado'] in trecho
+    assert q['enunciado'].endswith('(sem nome).')
+    assert 'Não informe nome de pessoa física.' in trecho
+    assert 'texto:F2-10.2.1' in trecho
