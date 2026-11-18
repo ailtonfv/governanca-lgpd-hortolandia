@@ -9,15 +9,35 @@ Leia este arquivo antes de alterar código ou documentação. Em seguida, leia s
 3. `docs/contexto/architecture.md` — stack, camadas e padrões.
 4. `docs/contexto/testing.md` — estratégia e execução dos testes.
 5. `docs/contexto/design-system.md` — identidade visual e acessibilidade, quando houver interface.
-6. `docs/contexto/glossary.md` — termos que precisem de definição.
+6. `docs/design-system/PADROES_DE_INTERACAO.md` — padrões acordados, componentes existentes, duplicações e evidências.
+7. `docs/arquitetura/sad/SAD_10_DECISOES_DE_ARQUITETURA_REV17.md` — decisões vigentes, propostas em deliberação e implementação pendente; conferir a revisão vigente antes de mudar regras.
+8. `docs/contexto/glossary.md` — termos que precisem de definição.
 
 ## Visão do produto e fase autorizada
 
 - O produto é o Sistema Municipal de Governança LGPD. Os quatro instrumentos integram o mesmo ciclo e o mesmo Registro LGPD: FORM 1 — levantamento factual do tratamento; FORM 2 — análise e validação jurídica e institucional; FORM 3 — avaliação de riscos e controles; FORM 4 — providências, responsáveis, prazos, evidências e acompanhamento. Não são sistemas independentes.
-- A PoC ampliada atualmente autorizada concentra-se no FORM 1 Integral, com meta de demonstração em meados de dezembro de 2026. O produto completo terá os quatro FORMs integrados, recursos de governança, relatórios e dashboards; o piloto fica fora do escopo. A visão do produto completo não autoriza automaticamente sua implementação nesta fase.
-- A implementação atual concentra-se no FORM 1 Integral REV13, com 128 campos e 14 blocos. O ciclo de apresentação pelo ARP, conferência pelo APA, devolução, reapresentação e confirmação interna está implementado.
-- A submissão institucional permanece bloqueada. Os FORMs 2, 3 e 4 pertencem à arquitetura futura e exigem autorização específica para implementação, assim como novos relatórios e dashboards.
-- Esta atualização de 02/11/2026 explicita a distinção entre a visão do produto completo e o escopo atual da PoC ampliada, concentrado no FORM 1 Integral. Limites de incrementos, contratos e permissões continuam vigentes; divergências com resumos e documentos anteriores devem ser registradas, sem alterar essas fontes automaticamente.
+- FORM 1 REV22 (145 itens) e FORM 2 (255 itens) estão implementados e em vistoria. O ciclo de apresentação pelo ARP, conferência pelo APA, devolução, reapresentação e confirmação interna está implementado. O aceite de um lote não representa homologação integral dos instrumentos.
+- FORMs 3 e 4 e dashboard estão autorizados para a demonstração de 15/12/2026. Regras de decisão ainda não deliberadas devem aparecer como “proposta em deliberação” (D11), sem adquirir efeito institucional por implementação.
+- Submissão institucional, piloto e produção continuam bloqueados. A autorização para demonstração não autoriza operação real, homologação jurídica nem definição de competência institucional.
+- O escopo de cada pedido e lote prevalece: um pedido só de documentação não autoriza iniciar telas dos FORMs 3 e 4 nem do dashboard. Preservar contratos, permissões e decisões pendentes; registrar divergências com resumos antigos, sem alterar outras fontes automaticamente.
+
+## Como trabalhar em cada lote
+
+- Criar uma branch por lote a partir do `main`, registrando o commit de base. Trabalhar em pasta separada.
+- Para lotes de código que precisam de servidor, usar porta e cópia do banco próprias, criadas a partir da cópia anterior. Não derrubar servidores em uso nem modificar os bancos das outras vistorias. Lotes exclusivamente documentais não precisam criar servidor ou copiar banco.
+- Fazer um commit por item. Executar testes somente no banco cujo nome termina em `_teste`, nunca nas cópias usadas para vistoria.
+- A cada entrega de código, executar a base fixa e os testes dos lotes anteriores; informar testes novos à parte, com falhas antigas identificadas. Para documentação apenas, verificar referências e diff e registrar por que não se repetiu a bateria da aplicação.
+- Entregar relatório em três colunas: implementado / verificado / falta conferir em tela. Distinguir evidência automatizada de aceite humano.
+- Fazer merge no `main` somente com autorização digitada por Ailton. Não usar `rebase` nem `push --force`; não apagar branches.
+- Antes de cada push, verificar todos os commits a publicar quanto a segredos, `.env`, cópias de banco e dados reais, além de materiais restritos. Publicar seletivamente e listar os arquivos enviados.
+
+## Regras transversais
+
+- Toda regra fica no domínio; o servidor deve recusar o que a tela esconde ou bloqueia. Esconder botão, validar apenas em JavaScript ou desabilitar campo não concede segurança.
+- `conta_id` é exclusivo da demonstração. Em produção, o acesso será por autenticação real; não tratar a simulação como autenticação institucional.
+- Nenhum enunciado de catálogo ou do Documento-Mestre entra em documentos publicados: usar somente identificadores. Capturas que reproduzam conteúdo restrito ficam fora dos commits e do GitHub, com referência ao local de entrega.
+- Decisões que mudam regras devem ser registradas no SAD 10, distinguindo deliberação, implementação, verificação e aceite. Não implementar decisões pendentes por inferência.
+- Toda tela nova segue `docs/design-system` (cores, tokens e padrões de interação) e reaproveita os componentes indicados; desvio só com aprovação de Ailton, registrado no relatório.
 
 ## Experiência do servidor e critérios de aceitação
 
@@ -60,13 +80,13 @@ Leia este arquivo antes de alterar código ou documentação. Em seguida, leia s
 
 ## Governança das referências FORM 1 × Cartilha LGPD
 
-A Cartilha LGPD é uma referência institucional versionada, integrada às ajudas contextuais do FORM 1 Integral REV13.
+A Cartilha LGPD é uma referência institucional versionada, integrada às ajudas contextuais do FORM 1 Integral. Preservar a edição associada a cada versão do formulário, inclusive as referências históricas da REV13.
 
 **Regras obrigatórias para qualquer agente que modificar a Cartilha, as ajudas contextuais ou seus vínculos:**
 
 1. Preservar identificadores temáticos estáveis, sem depender exclusivamente de números de página.
 2. Manter explícita a versão da Cartilha associada a cada referência.
-3. Ao incorporar nova revisão, verificar a correspondência entre as perguntas REV13, os assuntos e as seções efetivamente existentes.
+3. Ao incorporar nova revisão, verificar a correspondência entre as perguntas da versão do FORM 1 em uso, os assuntos e as seções efetivamente existentes, preservando as referências históricas.
 4. Executar testes automatizados dos vínculos navegáveis, verificando a disponibilidade e a correspondência dos destinos.
 5. Não substituir silenciosamente referências históricas nem eliminar versões anteriores sem decisão expressa e avaliação dos impactos.
 6. Quando uma seção for renomeada, dividida, reunida ou excluída, atualizar o mapa de correspondência e registrar a alteração.
@@ -81,10 +101,10 @@ A publicação externa da Cartilha exige autorização institucional específica
 
 ## Publicação e continuidade técnica da PoC
 
-O repositório público `ailtonfv/governanca-lgpd-hortolandia` deverá reunir progressivamente o código versionado dos quatro FORMs e do dashboard demonstrativo, os testes automatizados e a documentação técnica publicável. A meta é permitir a continuidade técnica pela Prefeitura em outra estação de desenvolvimento.
+O repositório `ailtonfv/governanca-lgpd-hortolandia` deverá reunir progressivamente o código versionado dos quatro FORMs e do dashboard demonstrativo, os testes automatizados e a documentação técnica publicável. A meta é permitir a continuidade técnica pela Prefeitura em outra estação de desenvolvimento. As restrições de publicação valem também quando o repositório é privado.
 
 - Publicar seletivamente o que estiver implementado e verificado, após revisão de segurança de todos os commits a enviar.
-- Manter fora do GitHub Documentos-Mestres protegidos, catálogos privados (inclusive o catálogo operacional de 250 perguntas do FORM 2), dados pessoais reais, segredos, credenciais e outros artefatos restritos.
+- Manter fora do GitHub Documentos-Mestres protegidos, catálogos privados do FORM 2, dados pessoais reais, segredos, credenciais e outros artefatos restritos.
 - Usar conteúdo sintético nos testes públicos. Instalações sem os catálogos privados devem indicar quais unidades estão indisponíveis e preservar o restante da navegação autorizada.
 - Distinguir implementação, testes, homologação humana e publicação. A implantação institucional em produção depende de decisão própria.
 - Preservar o vínculo dos quatro instrumentos ao mesmo Registro LGPD.
