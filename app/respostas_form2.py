@@ -4,6 +4,7 @@ Somente controles explicitamente habilitados no contrato privado podem receber
 escrita. O módulo não conclui análise, não cria parecer e não encaminha pendência.
 """
 
+from app.alternativas_exclusivas import combinacao_exclusiva
 from app.complementos_form2 import falta_complemento
 from copy import deepcopy
 import re
@@ -219,7 +220,7 @@ def aplicar_revisao(conteudo, bloco, campos, ramos=(), *, demonstrativo=False):
             permitidas = {a["codigo"] for a in q["alternativas"]}
             multipla = "múltipla" in q["controle"].lower()
             if (not set(opcoes) <= permitidas or len(set(opcoes)) != len(opcoes)
-                    or (not multipla and len(opcoes) > 1) or (len(opcoes) > 1 and any(a["codigo"] in opcoes and a["rotulo"].strip().casefold() == "a confirmar" for a in q["alternativas"]))):
+                    or (not multipla and len(opcoes) > 1) or combinacao_exclusiva(opcoes, q["alternativas"])):
                 raise ValueError(f"Confira a seleção de {chave}.")
             revisao[nome] = opcoes
             continue
@@ -311,8 +312,8 @@ def _validar_valor(item, valor):
     if item["modo"] == "multipla":
         if not isinstance(valor, list) or len(valor) != len(set(valor)) or any(v not in permitidos for v in valor):
             raise ValueError(f"Seleção múltipla inválida para {item['id']}.")
-        if len(valor) > 1 and any(a["codigo"] in valor and a["rotulo"].strip().casefold() == "a confirmar" for a in item["alternativas"]):
-            raise ValueError("A confirmar deve ser exclusiva das alternativas substantivas.")
+        if combinacao_exclusiva(valor, item["alternativas"]):
+            raise ValueError("A alternativa exclusiva não pode ser combinada com outras respostas.")
         return list(valor)
     raise ValueError(f"O controle de {item['id']} não está habilitado para escrita.")
 
