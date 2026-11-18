@@ -66,6 +66,13 @@ das cadeias `forms34_contexto`/`forms34_objeto`. Os eventos de outros instrument
 não recebem nova política neste lote. Não se pretende proteger contra um
 administrador que deliberadamente remova as proteções do banco.
 
+A proteção em `evento` é por linha, com predicado sobre `OLD.cadeia_tipo`:
+alterar o discriminador não permite escapar da proteção de uma linha 3/4.
+Não há trigger de INSERT nem proteção nova nas demais cadeias. Mantém-se a
+tabela comum para preservar o livro de eventos e seus contratos de auditoria;
+os testes comparam o comportamento SQL dos eventos F1/F2 antes e depois do
+trigger, inclusive suas restrições anteriores de integridade referencial.
+
 ## Projeções e autorização futura
 
 `fatos_existentes` exige lista explícita de Registros e não escreve. Retorna
@@ -91,8 +98,15 @@ diretamente para estas funções. Uma conta ativa é autoria válida, não compe
 
 ## Instalação e testes
 
-`migracoes/base_forms34.py::aplicar` é aditiva e idempotente, aceita somente banco
-terminado em `_teste`. Não foi ligada à inicialização do servidor. A preparação
+`migracoes/base_forms34.py::aplicar` é explícita e idempotente, aceita somente banco
+terminado em `_teste`, antes de abrir conexão. Cria as duas tabelas e instala
+função/triggers; inclui um trigger limitado na tabela `evento` existente.
+Portanto, não é uma migração exclusivamente de novas tabelas e índices.
+Não altera colunas nem remove estruturas/dados existentes. A função e os
+triggers próprios são substituídos idempotentemente pela migração.
+Não há callback em `Base.metadata` nem instalação por `create_all()` ou pela
+inicialização do servidor. Somente os testes deste lote invocam explicitamente
+a migração em sua preparação. A preparação
 local `abrir_8012.py` copia a base da 8009 para banco isolado `_teste` e não inicia
 servidor. A suíte recria somente essa cópia. 8009 e 8011 ficam preservadas.
 

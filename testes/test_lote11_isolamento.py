@@ -26,15 +26,25 @@ def test_sql_legado_sem_nova_restricao(sessao, cadeia, operacao):
         Evento.registro_id == r['registro_id'], Evento.cadeia_tipo == cadeia))
     assert ev is not None
     eid, cid = ev.id, ev.cadeia_id
-    # Act: SQL deliberadamente direto; rollback restaura inclusive o lacre.
-    transacao = sessao.begin_nested()
-    try:
-        sql = ('UPDATE evento SET tipo_evento=tipo_evento WHERE id=:id'
-               if operacao == 'UPDATE' else 'DELETE FROM evento WHERE id=:id')
-        assert sessao.execute(text(sql), {'id': eid}).rowcount == 1
-    finally:
-        transacao.rollback()
-    # Assert: não é permissão do domínio; só prova que o trigger não interfere.
+    # Act: comparar antes/depois, preservando recusas anteriores por FK.
+    # DROP TRIGGER também é revertido pelo savepoint, apenas neste _teste.
+    def resultado(com_trigger):
+        transacao = sessao.begin_nested()
+        try:
+            if not com_trigger:
+                sessao.execute(text('DROP TRIGGER proteger_evento_forms34 ON evento'))
+            sql = ('UPDATE evento SET tipo_evento=tipo_evento WHERE id=:id'
+                   if operacao == 'UPDATE' else 'DELETE FROM evento WHERE id=:id')
+            try:
+                return ('permitido', sessao.execute(text(sql), {'id': eid}).rowcount)
+            except IntegrityError as erro:
+                return ('recusado', erro.orig.sqlstate, erro.orig.diag.constraint_name)
+        finally:
+            transacao.rollback()
+    antes, depois = resultado(False), resultado(True)
+    # Assert: mesmas permissões E mesmas recusas, não um relaxamento da FK.
+    assert antes == depois
+    assert 'forms34_imutavel' not in depois
     sessao.expire_all()
     assert sessao.get(Evento, eid) is not None
     assert verificar_cadeia(sessao, cid)[0]
