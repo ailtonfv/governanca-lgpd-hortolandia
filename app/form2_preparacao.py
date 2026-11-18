@@ -292,7 +292,8 @@ def salvar_respostas_bloco(sessao, *, comando_id, conta_id, registro_id, prepara
         return _negar(sessao, conta_id, registro_id, "Integridade do rascunho não confere.", comando)
     try:
         if revisao:
-            novo_conteudo, resumo = aplicar_revisao(prep.conteudo, bloco, alteracoes, ramos_origem(origem))
+            from app.unidades_interface_form2 import secretarias_ativas
+            novo_conteudo, resumo = aplicar_revisao(prep.conteudo, bloco, alteracoes, ramos_origem(origem), unidades_permitidas={u.id for u in secretarias_ativas(sessao)})
         else:
             novo_conteudo, resumo = aplicar_bloco(
                 prep.conteudo, bloco=bloco, alteracoes=alteracoes,

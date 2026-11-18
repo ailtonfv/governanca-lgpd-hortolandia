@@ -1,3 +1,4 @@
+from app.unidades_interface_form2 import secretarias_ativas
 """Fronteira HTTP demonstrativa. Nenhuma rota de habilitação ou submissão."""
 from pathlib import Path
 from urllib.parse import urlencode
@@ -175,7 +176,7 @@ async def revisao_form2(request: Request, registro_id: str, preparacao_id: str, 
                 pendencias.append(chave)
     return paginas.TemplateResponse(request=request, name="form2_revisao.html", status_code=409 if erro else 200,
         headers={"Cache-Control": "private, no-store"},
-        context={"registro": dados["registro"], "prep": prep, "bloco": definicao, "valores": valores,
+        context={"secretarias_selecao": secretarias_ativas(sessao), "registro": dados["registro"], "prep": prep, "bloco": definicao, "valores": valores,
                  "estados_regua": estados_regua_form2(prep.conteudo, ramos, demonstrativo=False),
                  "versao": versao, "erro": erro, "comando_id": str(uuid.uuid4()), "conta_id": conta_id,
                  "ativa": ativa, "pendencias": pendencias,

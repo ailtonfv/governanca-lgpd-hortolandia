@@ -251,6 +251,7 @@ def salvar_bloco(sessao, *, conta_id, comando_id, participacao_id, versao,
                   bloco, campos, complementos=None):
     """Usa os contratos existentes dos blocos, inclusive os limites D11."""
     from app.respostas_form2 import aplicar_bloco, aplicar_revisao
+    from app.unidades_interface_form2 import secretarias_ativas
     from app.origem_form2 import ler_origem
     from app.form2_rev212 import ramos_origem
     pessoa = pessoa_ativa(sessao, conta_id)
@@ -277,9 +278,9 @@ def salvar_bloco(sessao, *, conta_id, comando_id, participacao_id, versao,
             complementos=complementos, proxima_versao=p.versao+1)
         candidatos = {k:v for k,v in campos.items() if ":" in k}
         if candidatos:
-            novo, _ = aplicar_revisao(novo, bloco, candidatos, ramos_origem(origem), demonstrativo=True)
+            novo, _ = aplicar_revisao(novo, bloco, candidatos, ramos_origem(origem), demonstrativo=True, unidades_permitidas={u.id for u in secretarias_ativas(sessao)})
     else:
-        novo, _ = aplicar_revisao(p.conteudo or {}, bloco, campos, ramos_origem(origem), demonstrativo=True)
+        novo, _ = aplicar_revisao(p.conteudo or {}, bloco, campos, ramos_origem(origem), demonstrativo=True, unidades_permitidas={u.id for u in secretarias_ativas(sessao)})
     complemento_solicitado = False
     texto_complemento = novo.get("respostas_etapa1", {}).get("F2-1.3.1")
     if texto_complemento and bloco == 1:

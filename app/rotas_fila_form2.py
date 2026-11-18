@@ -1,3 +1,4 @@
+from app.unidades_interface_form2 import secretarias_ativas
 """Interface de filas institucionais demonstrativas."""
 from pathlib import Path
 from hashlib import sha256
@@ -575,6 +576,7 @@ def bloco_fila(request: Request, participacao_id: str, bloco: int, conta_id: str
         "cargo": CARGOS_FICTICIOS.get(pessoa.id), "numero": bloco, "confirmacao": confirmacao, "ocorrencias": ocorrencias, "origens_repetiveis": origens_repetiveis,
         "comando_id": str(uuid4()),
         "finalidade_validada": conteudo.get(RASCUNHO, {}).get("2", {}).get("texto:F2-2.3"),
+        "secretarias_selecao": secretarias_ativas(sessao),
         "fatos_origem": origem["conteudo"],
         "registro": sessao.get(Registro, p.registro_id),
         "secretaria": sessao.get(Unidade, sessao.get(Registro, p.registro_id).unidade_principal_atual_id),
@@ -602,7 +604,7 @@ async def salvar_bloco_fila(request: Request, participacao_id: str, bloco: int,
                 item = chave.removeprefix("resposta_")
                 lista = [v for v in dados.getlist(chave) if v]
                 campos[item] = (lista or None) if item == "F2-2.9.1" else (lista[0] if lista else None)
-            elif bloco >= 2 and chave.startswith(("opcao:", "texto:", "comentario:", "principal:")):
+            elif bloco >= 2 and chave.startswith(("opcao:", "texto:", "comentario:", "principal:", "unidade:")):
                 campos[chave] = dados.getlist(chave)
         complemento = dados.get("complemento_outro", "").strip()
         resultado = salvar_bloco(sessao, conta_id=conta_id,

@@ -112,6 +112,8 @@ def _contar_perguntas_ativas(conteudo, bloco, valores, regras, ramos, demonstrat
                 ativas += 1
                 prefixo = "opcao:" if item["alternativas"] else "texto:"
                 valor = campos.get(prefixo + chave + sufixo)
+                if chave == "F2-14.3":
+                    valor = campos.get("unidade:" + chave + sufixo) or valor
                 respondidas += bool(valor.strip() if isinstance(valor, str) else valor) and not falta_complemento(item, valor if isinstance(valor, list) else [], campos.get("texto:" + chave + sufixo))
     return respondidas, ativas
 
@@ -186,7 +188,7 @@ def definicao_revisao(numero):
     return montar_bloco(definicao_bloco(numero))
 
 
-def aplicar_revisao(conteudo, bloco, campos, ramos=(), *, demonstrativo=False):
+def aplicar_revisao(conteudo, bloco, campos, ramos=(), *, demonstrativo=False, unidades_permitidas=()):
     """Guarda o ensaio e os comentários à parte das respostas homologadas."""
     definicao = definicao_revisao(bloco)
     if not definicao["itens"]:
@@ -213,6 +215,11 @@ def aplicar_revisao(conteudo, bloco, campos, ramos=(), *, demonstrativo=False):
             limite = 2000
         elif q["edicao"] in ("habilitada", "consulta") or bloco == 1 or (not demonstrativo and (bloco in (3, 4, 5, 10) or q["edicao"] == "bloqueada_d11")):
             raise ValueError("Este campo admite somente comentários na revisão.")
+        elif tipo == "unidade" and item_id == "F2-14.3":
+            if len(valores) != 1 or (valores[0] and valores[0] not in unidades_permitidas):
+                raise ValueError("Escolha uma Secretaria ativa da lista.")
+            revisao[nome] = valores[0]
+            continue
         elif tipo == "principal" and item_id == "F2-14.3.1":
             if len(valores) != 1:
                 raise ValueError("Selecione um único destino principal.")
