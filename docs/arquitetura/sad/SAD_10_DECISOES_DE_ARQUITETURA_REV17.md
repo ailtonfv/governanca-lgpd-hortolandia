@@ -1109,3 +1109,8 @@ Decisor: Ailton, DPO, instruções de 18/11/2026 às 07h43. Escopo demonstrativo
 - **D12:** fontes oficiais da ANPD propostas somente no relatório local; inclusão nas telas depende de aprovação de Ailton.
 
 U1/U2/U3 consolidam apresentação e identificação demonstrativa. Não alteram autoria persistida, efeitos dos atos ou permissões. Cartilha, palestra, catálogo privado e Documento-Mestre não foram modificados por este registro.
+
+
+## Complemento D9 — decisão de Ailton, DPO, 18/11/2026, 09h40
+
+Análise jurídica quando a pergunta exige interpretar norma ou fundamento; análise técnica quando exige conhecer o processo, os dados ou os sistemas. Classificação técnica: F2-2.5, F2-2.6, F2-2.8, F2-2.9, F2-2.9.3, F2-8.4, F2-8.5, F2-11S.8 e F2-14.5. Classificação jurídica: F2-4.5, F2-6.6, F2-7.4.2.1 e F2-11.7. Preservar códigos salvos; alterar somente rótulos e destinos oferecidos pelo atalho, mantendo o DPO. O atalho prepara a consulta; não a envia automaticamente.

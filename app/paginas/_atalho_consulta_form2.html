@@ -1,4 +1,4 @@
 {% if q.analise_especializada and q.analise_especializada.codigos %}
 <aside data-atalho-consulta data-item="{{ q.id }}" data-codigos='{{ q.analise_especializada.codigos|tojson }}' hidden><p>A consulta só será enviada se você confirmar o envio.</p>
-{% for tipo, rotulo in [('dpo','Consultar o DPO'),('juridico','Consultar o Jurídico'),('tematica','Consultar a área')] %}<a class="botao-link-secundario" href="/form2/participacoes/{{ p.id }}?conta_id={{ conta_id|urlencode }}&amp;consulta_item={{ q.id|urlencode }}&amp;consulta_tipo={{ tipo }}#consulta-form2">{{ rotulo }}</a> {% endfor %}</aside>
+{% for tipo, rotulo in q.analise_especializada.get('destinos', [('dpo','Consultar o DPO'),('juridico','Consultar o Jurídico'),('tematica','Consultar a área')]) %}<a class="botao-link-secundario" href="/form2/participacoes/{{ p.id }}?conta_id={{ conta_id|urlencode }}&amp;consulta_item={{ q.id|urlencode }}&amp;consulta_tipo={{ tipo }}#consulta-form2">{{ rotulo }}</a> {% endfor %}</aside>
 {% endif %}
