@@ -75,6 +75,12 @@ def montar_bloco(base):
             continue
         q.update(redacao)
         q['ajudas_usuario'] = orientacoes_ao_usuario(q.get('instrucao', ''))
+        if chave == 'F2-7.10.1':
+            rotulos = {'SIM':'Exclusivamente institucional', 'NAO':'Pode ter uso diverso', 'A_CONFIRMAR':'A confirmar'}
+            for alternativa in q['alternativas']:
+                alternativa['rotulo'] = rotulos[alternativa['codigo']]
+        if chave == 'F2-7.1.1':
+            q['ajudas_usuario'].append('Há dúvida = a situação existe e a análise é incerta; A confirmar = falta informação.')
         if chave in condicoes_d7():
             q['condicoes'] = condicoes_d7()[chave]
         q["repetivel"] = por_conjunto(chave)
