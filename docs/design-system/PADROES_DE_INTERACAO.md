@@ -6,25 +6,25 @@ Levantamento documental de 18/11/2026. Base: `main` `9471a44`; branch `padrao-de
 
 ## Evidências e limites
 
-As capturas E01–E13 estão na pasta local [entrega-padrao-tela-20261118](<C:/Users/ailto/Documents/Codex/entrega-padrao-tela-20261118>). Não entram no GitHub: reproduzem conteúdo restrito do catálogo. Quem obtiver apenas o repositório precisará solicitar o pacote local autorizado. Cada regra abaixo remete a uma captura do componente ou contexto correspondente; uma imagem não comprova autorização no servidor, persistência ou todas as variações de estado.
+As capturas E01–E13 estão na pasta local [entrega-padrao-tela-20261118](<entrega-padrao-tela-20261118>). Não entram no GitHub: reproduzem conteúdo restrito do catálogo. Os links das capturas usam o nome do pacote local `entrega-padrao-tela-20261118`, independente do usuário ou da unidade de disco. Para abri-los, use uma cópia local deste documento ao lado da pasta do pacote autorizado, fora do repositório. Quem obtiver apenas o repositório precisará solicitar esse pacote; as imagens não estarão disponíveis no GitHub. Cada regra abaixo remete a uma captura do componente ou contexto correspondente; uma imagem não comprova autorização no servidor, persistência ou todas as variações de estado.
 
 Foram obtidas páginas por GET da demonstração na porta 8008 e renderizadas localmente com os estilos e scripts da base, em 1366×768. Diálogos e seleção exclusiva foram acionados nessa reprodução local, sem enviar formulários ao servidor. E11 usa o componente real com dados sintéticos para ilustrar os três estados; E13 renderiza o trecho real da faixa de sucesso com mensagem sintética identificada; não é resultado de um novo ensaio de domínio. E10 mostra o conteúdo de uma resposta HTTP 403 real em uma moldura de evidência. Não houve mudança no banco nem interrupção de servidores. Os testes citados foram localizados no código, **não reexecutados neste lote documental**.
 
 | Captura | Conteúdo |
 |---|---|
-| [E01](<C:/Users/ailto/Documents/Codex/entrega-padrao-tela-20261118/E01-central.png>) | Central, identidade fictícia, papel, ações e aviso da demonstração |
-| [E02](<C:/Users/ailto/Documents/Codex/entrega-padrao-tela-20261118/E02-grade-form2.png>) | Cabeçalho, grade compacta do FORM 2, bloco atual, selos e navegação |
-| [E03](<C:/Users/ailto/Documents/Codex/entrega-padrao-tela-20261118/E03-exclusividade.png>) / [E03b](<C:/Users/ailto/Documents/Codex/entrega-padrao-tela-20261118/E03b-exclusiva-marcada.png>) | Grupo de múltipla seleção antes/depois da alternativa exclusiva |
-| [E04](<C:/Users/ailto/Documents/Codex/entrega-padrao-tela-20261118/E04-saida-sem-salvar.png>) | Diálogo de saída com alterações locais |
-| [E05](<C:/Users/ailto/Documents/Codex/entrega-padrao-tela-20261118/E05-condicional.png>) | Campo condicional inativo e explicação |
-| [E06](<C:/Users/ailto/Documents/Codex/entrega-padrao-tela-20261118/E06-origem.png>) | Referência à apresentação do FORM 1, resposta do AAL sem pré-marcação |
-| [E07](<C:/Users/ailto/Documents/Codex/entrega-padrao-tela-20261118/E07-ajuda.png>) | Ajuda ao usuário separada e comentário recolhido |
-| [E08](<C:/Users/ailto/Documents/Codex/entrega-padrao-tela-20261118/E08-grade-form1.png>) | Grade e ação de salvamento do FORM 1 |
-| [E09](<C:/Users/ailto/Documents/Codex/entrega-padrao-tela-20261118/E09-confirmacao.png>) | Confirmação de atribuição, aberta localmente; ato não executado |
-| [E10](<C:/Users/ailto/Documents/Codex/entrega-padrao-tela-20261118/E10-acesso-negado.png>) | Beta recusado no Painel do DPO, HTTP 403 |
-| [E11](<C:/Users/ailto/Documents/Codex/entrega-padrao-tela-20261118/E11-estados.png>) | Estados, progresso e etiquetas do componente, em exemplo sintético |
-| [E12](<C:/Users/ailto/Documents/Codex/entrega-padrao-tela-20261118/E12-retorno.png>) | Pendências com a origem, identidade e retorno ao bloco 3 |
-| [E13](<C:/Users/ailto/Documents/Codex/entrega-padrao-tela-20261118/E13-faixa-sucesso.png>) | Faixa de sucesso: markup real, mensagem sintética, sem ato persistido |
+| [E01](<entrega-padrao-tela-20261118/E01-central.png>) | Central, identidade fictícia, papel, ações e aviso da demonstração |
+| [E02](<entrega-padrao-tela-20261118/E02-grade-form2.png>) | Cabeçalho, grade compacta do FORM 2, bloco atual, selos e navegação |
+| [E03](<entrega-padrao-tela-20261118/E03-exclusividade.png>) / [E03b](<entrega-padrao-tela-20261118/E03b-exclusiva-marcada.png>) | Grupo de múltipla seleção antes/depois da alternativa exclusiva |
+| [E04](<entrega-padrao-tela-20261118/E04-saida-sem-salvar.png>) | Diálogo de saída com alterações locais |
+| [E05](<entrega-padrao-tela-20261118/E05-condicional.png>) | Campo condicional inativo e explicação |
+| [E06](<entrega-padrao-tela-20261118/E06-origem.png>) | Referência à apresentação do FORM 1, resposta do AAL sem pré-marcação |
+| [E07](<entrega-padrao-tela-20261118/E07-ajuda.png>) | Ajuda ao usuário separada e comentário recolhido |
+| [E08](<entrega-padrao-tela-20261118/E08-grade-form1.png>) | Grade e ação de salvamento do FORM 1 |
+| [E09](<entrega-padrao-tela-20261118/E09-confirmacao.png>) | Confirmação de atribuição, aberta localmente; ato não executado |
+| [E10](<entrega-padrao-tela-20261118/E10-acesso-negado.png>) | Beta recusado no Painel do DPO, HTTP 403 |
+| [E11](<entrega-padrao-tela-20261118/E11-estados.png>) | Estados, progresso e etiquetas do componente, em exemplo sintético |
+| [E12](<entrega-padrao-tela-20261118/E12-retorno.png>) | Pendências com a origem, identidade e retorno ao bloco 3 |
+| [E13](<entrega-padrao-tela-20261118/E13-faixa-sucesso.png>) | Faixa de sucesso: markup real, mensagem sintética, sem ato persistido |
 
 Os nomes de arquivos nas tabelas seguintes são relativos a `app/`. Quando só o nome de um template é informado, está em `app/paginas/`; scripts e estilos ficam em `app/estaticos/`.
 
