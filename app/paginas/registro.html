@@ -1,3 +1,4 @@
+{% from '_confirmacao_ato.html' import confirmacao %}
 {% from '_identificador_pergunta.html' import codigo_pergunta %}
 {% extends "base.html" %}
 {% from '_links_instrumentos.html' import identificacao_servidor, retorno_painel with context %}
@@ -306,10 +307,9 @@
         <input type="hidden" name="comando_id" value="{{ comando_solicitar_conferencia }}">
         <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
         <button class="botao-primario" type="button" data-abrir-dialogo="apresentar-registro">Solicitar nova conferência interna do APA</button>
-        <dialog id="apresentar-registro" aria-labelledby="titulo-apresentar"><h2 id="titulo-apresentar">Apresentar o FORM 1 para conferência?</h2>
+        {% call confirmacao(id="apresentar-registro", titulo="Apresentar o FORM 1 para conferência?", titulo_id="titulo-apresentar", principal="Apresentar ao APA", cancelar="Continuar revisando", tipo="submit", cancelar_attr="data-fechar-dialogo", registro=registro.codigo_lgpd) %}
         <p>O APA receberá as respostas salvas. A edição ficará suspensa até a decisão.</p>
-        <button type="button" data-fechar-dialogo autofocus>Continuar revisando</button>
-        <button class="botao-primario" type="submit">Apresentar ao APA</button></dialog>
+        {% endcall %}
       </form>
       {% else %}
       <p class="ajuda">Salve ao menos um ajuste no rascunho antes de solicitar nova conferência.</p>
@@ -322,10 +322,9 @@
         <input type="hidden" name="comando_id" value="{{ comando_solicitar_conferencia }}">
         <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
         <button class="botao-primario" type="button" data-abrir-dialogo="apresentar-registro">Solicitar conferência interna do APA</button>
-        <dialog id="apresentar-registro" aria-labelledby="titulo-apresentar"><h2 id="titulo-apresentar">Apresentar o FORM 1 para conferência?</h2>
+        {% call confirmacao(id="apresentar-registro", titulo="Apresentar o FORM 1 para conferência?", titulo_id="titulo-apresentar", principal="Apresentar ao APA", cancelar="Continuar revisando", tipo="submit", cancelar_attr="data-fechar-dialogo", registro=registro.codigo_lgpd) %}
         <p>O APA receberá as respostas salvas. A edição ficará suspensa até a decisão.</p>
-        <button type="button" data-fechar-dialogo autofocus>Continuar revisando</button>
-        <button class="botao-primario" type="submit">Apresentar ao APA</button></dialog>
+        {% endcall %}
       </form>
       {% else %}
       <p class="ajuda">Nenhuma ação de conferência interna está disponível para seu perfil neste momento.</p>

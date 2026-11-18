@@ -1,3 +1,4 @@
+{% from '_confirmacao_ato.html' import confirmacao %}
 {% extends "base.html" %}
 {% block conteudo %}
 {% set situacoes = {'aguardando': 'aguardando responsável', 'em_atendimento': 'em atendimento', 'concluida': 'concluída'} %}
@@ -29,12 +30,9 @@
 <p>{{ orientacao }}</p>
 <input type="hidden" name="acao" value="assumir">
 <button type="button" class="botao-primario" data-abrir-dialogo="confirmar-assuncao">Assumir participação</button>
-<dialog class="dialogo-acao-fila" id="confirmar-assuncao" aria-labelledby="titulo-assuncao">
-  <h2 id="titulo-assuncao">Assumir a participação?</h2>
+{% call confirmacao(id="confirmar-assuncao", titulo="Assumir a participação?", titulo_id="titulo-assuncao", principal="Confirmar assunção", cancelar="Cancelar", tipo="submit", cancelar_attr="data-fechar-dialogo", registro=registro.codigo_lgpd) %}
   <p>{{ orientacao }}</p><p><strong>Versão do FORM 1 em análise:</strong> {{ referencia }}.</p>
-  <div class="acoes-fila-form2"><button type="button" data-fechar-dialogo autofocus>Cancelar</button>
-  <button type="submit" class="botao-primario">Confirmar assunção</button></div>
-</dialog>
+  {% endcall %}
 {% elif p.estado == 'em_atendimento' and p.responsavel_id == pessoa.id %}
 <label>{{ "Sua questão" if p.tipo == "principal" else "Sua manifestação" }} <textarea name="texto" rows="10" maxlength="10000">{{ p.manifestacao }}</textarea></label>
 {% if p.tipo != "principal" %}<button type="submit" class="botao-primario" name="acao" value="salvar">Salvar manifestação</button>{% endif %}

@@ -1,3 +1,4 @@
+{% from '_confirmacao_ato.html' import confirmacao %}
 {% extends "base.html" %}
 {% block conteudo %}
 {% set situacoes = {'aguardando': 'aguardando responsável', 'em_atendimento': 'em atendimento', 'concluida': 'concluída'} %}
@@ -54,10 +55,7 @@
 <label>Novo responsável <select name="responsavel_id" required><option value="">Escolha…</option>{% for a in agentes[p.id] %}<option value="{{ a.id }}">{{ a.nome }}</option>{% endfor %}</select></label>
 <label>Motivo <textarea name="motivo" required maxlength="2000"></textarea></label>
 <div class="acoes-fila-form2"><button type="button" class="botao-primario" data-abrir-dialogo="atribuir-{{ p.id }}">{{ acao }}</button></div>
-<dialog class="dialogo-acao-fila" id="atribuir-{{ p.id }}" aria-labelledby="titulo-{{ p.id }}">
-  <h2 id="titulo-{{ p.id }}">{{ acao }}?</h2>
+{% call confirmacao(id="atribuir-" ~ p.id, titulo=acao ~ "?", titulo_id="titulo-" ~ p.id, principal=acao, cancelar="Cancelar e revisar as opções", tipo="submit", cancelar_attr="data-fechar-dialogo") %}
   <p><span data-nome-agente></span> passa a responder {% if p.tipo in ('principal', 'tematica') %}como AAL {% endif %}pelo {{ registros[p.registro_id].codigo_lgpd }}{% if p.responsavel_id %}, no lugar de {{ responsaveis[p.responsavel_id] }}{% endif %}. A análise usará a {{ referencias[p.id] }}.{% if p.tipo == 'principal' %} Novas versões do FORM 1 dependerão da decisão desse responsável.{% endif %}</p>
-  <div class="acoes-fila-form2"><button type="button" data-fechar-dialogo autofocus>Cancelar e revisar as opções</button>
-  <button type="submit" class="botao-primario">{{ acao }}</button></div>
-</dialog></form></details>{% endif %}</article>{% endfor %}
+  {% endcall %}</form></details>{% endif %}</article>{% endfor %}
 </div><script src="{{ url_for('estaticos', path='/confirmar_acao_fila.js') }}" defer></script>{% endblock %}
