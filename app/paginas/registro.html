@@ -1,3 +1,4 @@
+{% from '_faixa_ato.html' import faixa_ato %}
 {% from '_confirmacao_ato.html' import confirmacao %}
 {% from '_identificador_pergunta.html' import codigo_pergunta %}
 {% extends "base.html" %}
@@ -30,10 +31,7 @@
   {% endif %}
 </section>
 
-{% if mensagem %}
-<p id="mensagem-registro" class="mensagem mensagem-registro {% if erro %}mensagem-erro{% else %}mensagem-sucesso{% endif %}"
-   role="{{ 'alert' if erro else 'status' }}" aria-live="{{ 'assertive' if erro else 'polite' }}">{{ mensagem }}</p>
-{% endif %}
+{{ faixa_ato(mensagem, ato_registrado, id='mensagem-registro', erro=erro, classe='mensagem-registro') }}
 
 {% if not modo_legado %}
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/instrumentos_registro.css') }}">

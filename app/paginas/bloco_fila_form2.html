@@ -1,3 +1,4 @@
+{% from '_faixa_ato.html' import faixa_ato %}
 {% from '_identificador_pergunta.html' import codigo_pergunta %}
 {% extends "base.html" %}{% block conteudo %}
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/filas_form2.css') }}"><div class="filas-form2 pagina-bloco-form2">
@@ -6,7 +7,7 @@
 <p>{{ atuacao.servidor }} · {{ atuacao.funcao }} · <span class="sr-apenas">Unidade de atuação:</span> {{ atuacao.unidade }} · {{ "Você pode editar suas respostas" if atuacao.editavel else "Somente leitura" }}</p>
 {% if numero in (3,4,5,10) %}<span class="selo-d11">Aguarda homologação jurídica (D11)</span>{% endif %}
 {% if numero == 2 and aguarda_temporalidade(p.conteudo) %}<span class="selo-guarda">Guarda: aguarda definição institucional</span>{% endif %}
-{% if confirmacao %}<p id="confirmacao-salvamento" class="confirmacao-salvamento" role="status">{{ confirmacao }}</p>{% endif %}
+{{ faixa_ato(confirmacao, ato_registrado, id='confirmacao-salvamento', classe='confirmacao-salvamento') }}
 
 
 {% with grade_compacta=true %}{% include '_regua_fila_form2.html' %}{% endwith %}

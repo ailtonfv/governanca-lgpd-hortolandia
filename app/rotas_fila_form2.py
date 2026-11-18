@@ -21,6 +21,7 @@ from app.respostas_form2 import estados_regua_form2, aguarda_temporalidade
 
 router = APIRouter()
 paginas = Jinja2Templates(directory=Path(__file__).parent / "paginas")
+from app.atos_interface import ato_registrado
 from app.apresentacao_form2 import data_local
 paginas.env.filters["hora_local"] = data_local
 paginas.env.globals["aguarda_temporalidade"] = aguarda_temporalidade
@@ -417,7 +418,7 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
             "snapshot": item.snapshot_id, "codigo": registros[item.registro_id].codigo_lgpd,
             "rotulo": rotulo_apresentacao(item)})
     return paginas.TemplateResponse(request=request, name="filas_form2.html",
-        context={"nomes_objetos": nomes_objetos, "referencias": referencias, "mensagem_atribuicao": mensagem, "atribuidores": atribuidores, "cartoes": ordenados, "entradas": entradas, "pode_encaminhar": bool(unidades_apa), "encaminhaveis": encaminhaveis,
+        context={"ato_registrado": ato_registrado(sessao, chave, conta_id), "nomes_objetos": nomes_objetos, "referencias": referencias, "mensagem_atribuicao": mensagem, "atribuidores": atribuidores, "cartoes": ordenados, "entradas": entradas, "pode_encaminhar": bool(unidades_apa), "encaminhaveis": encaminhaveis,
                  "conta_id": conta_id, "pessoa": pessoa, "participacoes": participacoes,
                  "registros": registros, "unidades": unidades, "linhas": linhas,
                  "impedimentos": impedimentos, "complementos": complementos, "gerenciaveis": gerenciaveis, "agentes": {p.id: [a for a in agentes if a.id != p.responsavel_id and autorizado(sessao, a, p)] for p in gerenciaveis},
@@ -557,7 +558,7 @@ def bloco_fila(request: Request, participacao_id: str, bloco: int, conta_id: str
             if resultado_salvo.get("complemento_solicitado"):
                 confirmacao += " Complementação solicitada à origem."
     return paginas.TemplateResponse(request=request, name="bloco_fila_form2.html",
-        context={"atuacao": contexto_atuacao(sessao, pessoa, p), "p": p, "estados_regua": estados_regua_form2(conteudo, ramos), "pessoa": pessoa, "conta_id": conta_id, "bloco": definicao,
+        context={"ato_registrado": ato_registrado(sessao, request.query_params.get("salvo"), conta_id, participacao_id=p.id) if confirmacao else None, "atuacao": contexto_atuacao(sessao, pessoa, p), "p": p, "estados_regua": estados_regua_form2(conteudo, ramos), "pessoa": pessoa, "conta_id": conta_id, "bloco": definicao,
         "cargo": CARGOS_FICTICIOS.get(pessoa.id), "numero": bloco, "confirmacao": confirmacao, "ocorrencias": ocorrencias, "origens_repetiveis": origens_repetiveis,
         "comando_id": str(uuid4()),
         "finalidade_validada": conteudo.get(RASCUNHO, {}).get("2", {}).get("texto:F2-2.3"),
