@@ -53,6 +53,10 @@ Não criar essa divisão até existir um incremento próprio com comparação vi
 
 ## Componentes prioritários
 
+Antes de criar ou alterar uma tela, consultar [PADROES_DE_INTERACAO.md](../design-system/PADROES_DE_INTERACAO.md): cada regra indica pendência de origem, componente/função, evidência e limites de cobertura. Reaproveitar os componentes indicados; desvios exigem aprovação de Ailton e registro no relatório. A grade do FORM 2, o progresso e o cabeçalho já têm recursos compartilhados; grades do FORM 1, diálogos, mensagens e identidade ainda contêm implementações distintas. Não presumir unificação nem copiar regras de domínio para templates.
+
+Contagens de perguntas ativas não significam obrigatoriedade ou conformidade. Regras de acesso e condições são validadas no servidor. As capturas com enunciados de catálogo permanecem na entrega local, fora do GitHub. O [relatório](../design-system/RELATORIO_PADROES_DE_INTERACAO.md) distingue propostas de unificação e equivalentes para o dashboard.
+
 - cabeçalho institucional;
 - identificação do agente e da Secretaria;
 - indicador de etapa;
@@ -120,4 +124,5 @@ Para este sistema, as referências devem transmitir:
 - [`docs/design-system/README.md`](../design-system/README.md) — finalidade, situação e guardrails.
 - [`docs/design-system/CORES_E_TOKENS.md`](../design-system/CORES_E_TOKENS.md) — paleta aplicada e evolução semântica proposta.
 - [`docs/design-system/DECISOES_VISUAIS.md`](../design-system/DECISOES_VISUAIS.md) — histórico e decisões pendentes.
+- [`docs/design-system/PADROES_DE_INTERACAO.md`](../design-system/PADROES_DE_INTERACAO.md) — regras, implementação, duplicações e evidências.
 

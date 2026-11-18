@@ -1,0 +1,39 @@
+# Relatório — padrões de tela e revisão do AGENTS
+
+18/11/2026 · branch `padrao-de-tela` · base `main` `9471a44`. Documentação somente, sem merge, sem alteração da aplicação, sem início dos FORMs 3/4 ou dashboard. Referências e capturas estão em [Padrões de interação](PADROES_DE_INTERACAO.md).
+
+## Cobertura e propostas (não implementadas)
+
+| Regras já cobertas por componente/função compartilhado | Regras copiadas ou com variantes; proposta de unificação | Regra sem aplicação direta ao dashboard; equivalente |
+|---|---|---|
+| Cabeçalho: `_cabecalho_institucional.html` + `base.html`, link da Central condicionado ao destino. | Retornos do bloco, participação e pendências são locais aos templates. Proposta: componente de navegação com destinos explícitos, preservando contexto. | Grade de blocos de formulário não é necessária em visão de indicadores; usar navegação entre visões e filtros visíveis. Cabeçalho e identidade continuam aplicáveis. |
+| Grade principal FORM 2: `_regua_fila_form2.html`; contagem central em `respostas_form2`; progresso em `_progresso_bloco_form2.html`. | `_regua_form2.html`, `form1_rev22.html` e navegação de `registro.html` são variantes. Proposta: extrair apresentação comum, recebendo estados específicos de cada domínio. Não impor contagem FORM 2 ao FORM 1. | Não contar “perguntas ativas” do dashboard. Indicadores devem explicitar universo, filtros e data de referência; preenchimento não mede conformidade. |
+| Etiquetas/legenda D11 e Guarda na grade compartilhada; CSS organiza os elementos. | Outras réguas não têm o mesmo conjunto de selos. Proposta: subcomponente de selos sem alterar critérios institucionais. | Usar legendas e estado institucional junto dos indicadores pertinentes, sem marcar todo o dashboard como homologado. |
+| Exclusividade: `selecao_exclusiva.js` e validação em `respostas_form2`; condições: `form2_rev212` e `_condicoes_form2.html`. | `_identificacao_form2.html` e `_unidade_guarda_form2.html` mantêm explicações próprias. Proposta: renderizar ajuda a partir da mesma condição do domínio, preservando exceções aprovadas. | Sem perguntas, exclusividade de resposta não se aplica; filtros podem ter exclusividade própria somente se aprovada. Acesso e condições de qualquer ato continuam no servidor. |
+| Projeção D6: `fatos_abertura_form2.projetar_fatos_abertura`. | Quadros P53/P65 e D6 têm markup separado em `bloco_fila_form2.html`/`_unidade_guarda_form2.html`. Proposta: componente de referência com apresentação, campos e ausência de resposta. | Em indicadores, equivalente é fonte e referência dos dados, com acesso ao Registro permitido, sem resposta pré-preenchida. |
+| `form2_rev212.orientacoes_ao_usuario` separa ajuda técnica/funcional no FORM 2. | FORM 1 tem `consultas_interface.instrucao_para_interface`. Proposta: contrato comum para ajuda, com adaptadores por catálogo; não copiar enunciados restritos na documentação publicada. | Ajuda de indicador explica cálculo, universo e limites; não há enunciado de pergunta para repetir. |
+| Diálogo genérico em `base.html`/`ato_registrado.js`; controle compartilhado `confirmar_acao_fila.js`. | Markup específico em `filas_form2.html`, `participacao_form2.html`, `conferencia_form1_integral.html`, `form1_rev22.html`, `registro.html`. Proposta: macro única com Registro, efeito, atores, rótulos e alvo do formulário. | Em dashboard só de leitura não há confirmação de preenchimento. Se houver comando, manter confirmação e autorização como nas outras telas. |
+| FORM 2: `_saida_bloco_form2.html` + `form2_revisao.js`. Estilos de botões compartilhados em `estilo.css`. | FORM 1 protege saída em implementações próprias; botões de descarte aparecem em mais de um template. Proposta: contrato de formulário alterado e diálogo reutilizável, sem relaxar validação ao salvar. | Sem edição não há “Salvar e continuar”. Se filtros forem transitórios, não confundi-los com dados gravados; edição real requer proteção de alterações. |
+| `apresentacao_form2.data_local` fornece formato de data; validação de retorno em `rotas_fila_form2.retorno_consultivo`. | Faixas em `filas_form2.html`, `bloco_fila_form2.html` e `registro.html`; ator às vezes separado. Proposta: mensagem de ato com campos obrigatórios ato/autor/data e estado acessível. | Mensagens de carregamento/erro/atualização de dados; ato auditável, se existir, mantém autor e horário. |
+| Parte da identidade: `_links_instrumentos.html::identificacao_servidor`; contextos calculados no servidor. | `central.html`, páginas de participação e FORM 1 apresentam identidade de formas distintas. Sufixo fictício não é imposto em todas as saídas por uma função. Proposta: componente de contexto (pessoa, papel naquele Registro, unidade e caráter fictício). | Identidade, papel e escopo dos indicadores se aplicam integralmente. |
+| Controles de acesso no domínio e nas rotas; negação HTTP 403 do Painel do DPO observada com Beta. | Regras distribuídas por domínio não devem ser fundidas numa autorização genérica permissiva. Proposta: matriz de capacidades documentada e apresentação comum de indisponibilidade, preservando cada regra. | Filtrar dados no servidor; ocultar cartão não protege dados. `conta_id` permanece restrito à demonstração. |
+
+## Entrega e conferência
+
+| Implementado na documentação | Verificado neste trabalho | Falta conferir em tela |
+|---|---|---|
+| Padrões, origem por pendência/decisão, funções/templates e limitações; links no índice e resumo para agentes. | Leitura dos recursos citados; capturas locais inspecionadas; dimensões 1366×768 e ausência de rolagem horizontal nas páginas da coleta inicial. | Larguras menores, teclado/leitor de tela e todas as variantes de papel/estado; não é uma nova homologação de interface. |
+| Evidências locais restritas, sem imagens ou catálogo nos commits. | GETs de páginas demonstrativas; interação local sem POST. Estados completos e faixa de sucesso são exemplos sintéticos identificados, com template real. | Faixa de sucesso após um ato persistido e autor no conjunto de todas as telas. Não se executou ato só para obter a captura. |
+| AGENTS atualizado: escopo, lotes, domínio/servidor, identidade demonstrativa, SAD 10, restrições de publicação e ordem de leitura. | Diff e preservação das regras invioláveis e identificação F1-/F2-. Governança da Cartilha preservada, com referência à revisão em uso e manutenção das históricas. | Aprovação do diff por Ailton antes de qualquer merge. |
+
+Não se repetiu a base de testes da aplicação: nenhum arquivo da aplicação, teste ou configuração foi alterado. Os testes mencionados no catálogo de padrões são referências existentes, não resultados executados nesta entrega. Verificação documental: referências, arquivos de evidência, diff e escopo dos arquivos alterados.
+
+## Revisão do AGENTS para aprovação
+
+- Substitui o estado antigo por FORM 1 REV22/145 itens e FORM 2/255 itens em vistoria; autoriza o escopo demonstrativo dos FORMs 3/4 e dashboard, mantendo bloqueios institucionais e D11.
+- Acrescenta “Como trabalhar em cada lote”, com isolamento, banco `_teste`, commits por item, testes, relatório, aprovação digitada, histórico preservado e inspeção antes de push. Documentação pura verifica referências/diff sem criar banco/servidor desnecessário.
+- Acrescenta regras transversais e leitura do SAD 10 e dos padrões de interação.
+- Conserva integralmente as regras invioláveis e a seção de identificação F1-/F2-. Na governança da Cartilha, atualiza apenas a referência de versão, conservando as obrigações de histórico, vínculos e autorização de publicação.
+- Reforça que publicação seletiva e restrições também valem no repositório privado. Não altera Cartilha, palestra, SADs ou ADRs.
+
+O diff integral do AGENTS é entregue localmente como `DIFF_AGENTS.patch`, em `entrega-padrao-tela-20261118`. Branch preparada localmente; não há merge ou publicação neste pedido.
