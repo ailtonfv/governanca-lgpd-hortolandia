@@ -132,7 +132,7 @@ def test_d9_classificacao_e_duvida_preservada():
     for chave,esperado in [('F2-3.1','jurídica'),('F2-13.6','técnica')]:
         q={'id':chave,'alternativas':[{'codigo':'ANALISE','rotulo':'Requer análise'}]}
         assert classificar(q)['alternativas'][0]['rotulo'] == 'Requer análise ' + esperado
-    q={'id':'F2-2.5','alternativas':[{'codigo':'ANALISE','rotulo':'Requer análise jurídica/técnica'}]}
+    q={'id':'F2-TESTE-NAO-DELIBERADO','alternativas':[{'codigo':'ANALISE','rotulo':'Requer análise jurídica/técnica'}]}
     assert classificar(q)['analise_especializada']['classificacao'] == 'a_deliberar'
     assert q['alternativas'][0]['rotulo'] == 'Requer análise jurídica/técnica'
 

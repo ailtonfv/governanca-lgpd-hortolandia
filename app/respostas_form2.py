@@ -63,6 +63,11 @@ def _definicao_bloco(numero, contrato, catalogo):
             "condicoes": deepcopy(condicoes.get(item["id"], [])),
             "fontes_publicas": referencias_anpd(item.get("referencias_anpd")),
         })
+    # D12, 18/11/2026: apoio público por bloco, sem efeito na avaliação.
+    apoio = {6: 'ANPD-CA', 9: 'ANPD-TI', 13: 'ANPD-DT'}.get(numero)
+    if apoio and itens:
+        from app.contrato_form2_respostas import REFERENCIAS_ANPD
+        itens[0]['fontes_publicas'].append({'chave': apoio, **REFERENCIAS_ANPD[apoio]})
     if numero == 2:
         guarda = next(item for item in itens if item["id"] == "F2-2.9")
         guarda["alternativas"].append({"id": guarda["id"], "codigo": GUARDA_INSTITUCIONAL,

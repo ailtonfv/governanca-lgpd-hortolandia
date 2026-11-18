@@ -1109,3 +1109,20 @@ Decisor: Ailton, DPO, instruções de 18/11/2026 às 07h43. Escopo demonstrativo
 - **D12:** fontes oficiais da ANPD propostas somente no relatório local; inclusão nas telas depende de aprovação de Ailton.
 
 U1/U2/U3 consolidam apresentação e identificação demonstrativa. Não alteram autoria persistida, efeitos dos atos ou permissões. Cartilha, palestra, catálogo privado e Documento-Mestre não foram modificados por este registro.
+
+
+## Complemento D9 — decisão de Ailton, DPO, 18/11/2026, 09h40
+
+Análise jurídica quando a pergunta exige interpretar norma ou fundamento; análise técnica quando exige conhecer o processo, os dados ou os sistemas. Classificação técnica: F2-2.5, F2-2.6, F2-2.8, F2-2.9, F2-2.9.3, F2-8.4, F2-8.5, F2-11S.8 e F2-14.5. Classificação jurídica: F2-4.5, F2-6.6, F2-7.4.2.1 e F2-11.7. Preservar códigos salvos; alterar somente rótulos e destinos oferecidos pelo atalho, mantendo o DPO. O atalho prepara a consulta; não a envia automaticamente.
+
+
+## Complemento D10 — decisão de Ailton, DPO, 18/11/2026, 09h40
+
+Na F2-10.2.1, identificar a entidade ou a categoria de prestador, sem nome de pessoa física. Acrescentar ajuda de minimização junto à pergunta. Os demais 14 candidatos da varredura ficam preservados, pois o uso genérico de titular/pessoa não exige mudança. Não alterar campo, código ou resposta histórica.
+
+
+## Complemento D12 e ratificação D5 — decisão de Ailton, DPO, 18/11/2026, 09h40
+
+Aprovada a inclusão de referências oficiais no quadro de apoio da ANPD: Enunciado CD/ANPD nº 1/2023 no bloco 6; Resolução CD/ANPD nº 19/2024, regulamento e cláusulas-padrão, no bloco 9; página de direitos dos titulares no bloco 13. Apoio para consulta, sem automatizar avaliação nem substituir manifestação institucional. Esta decisão supera a pendência de aprovação da D12 registrada no Lote 9.
+
+Ratificada a D5 já registrada: 99 conjuntos e limites de texto curto de 200, longo de 1000 e comentário de 2000 caracteres são provisórios da PoC, não regras de produção. Exceções explícitas do catálogo continuam preservadas; limites definitivos dependem de deliberação institucional. Nenhum limite é alterado por este lote.

@@ -83,6 +83,9 @@ def montar_bloco(base):
             q['ajudas_usuario'].append('Há dúvida = a situação existe e a análise é incerta; A confirmar = falta informação.')
         if chave == 'F2-11.8.1':
             q['enunciado'] = 'Os pedidos são recebidos e registrados no e-SIC?'
+        if chave == 'F2-10.2.1':
+            q['enunciado'] = 'Identifique a entidade ou, se pessoa física, o tipo de prestador (sem nome).'
+            q['ajudas_usuario'].append('Não informe nome de pessoa física.')
         if chave == 'F2-10.8.1':
             q['ajudas_usuario'].append('Descreva categorias, não pessoas.')
         if chave in condicoes_d7():

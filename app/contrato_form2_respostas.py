@@ -18,6 +18,9 @@ MATRIZ_SHA256 = "9aa05457b637a7842908d469e17646383aa77dd45fb64f4b8b20a5981819457
 ARQUIVO = Path(__file__).with_name("catalogos") / "form2_controles_rev18_candidata_v2.json"
 
 REFERENCIAS_ANPD = {
+    'ANPD-CA': {"titulo": 'Enunciado CD/ANPD nº 1/2023 — Crianças e adolescentes', "url": 'https://www.gov.br/anpd/pt-br/assuntos/noticias/anpd-divulga-enunciado-sobre-o-tratamento-de-dados-pessoais-de-criancas-e-adolescentes/Enunciado1ANPD.pdf/@@display-file/file'},
+    'ANPD-TI': {"titulo": 'Resolução CD/ANPD nº 19/2024 — Transferência internacional: regulamento e cláusulas-padrão', "url": 'https://www.gov.br/anpd/pt-br/acesso-a-informacao/institucional/atos-normativos/regulamentacoes_anpd/resolucao-cd-anpd-no-19-de-23-de-agosto-de-2024'},
+    'ANPD-DT': {"titulo": 'Direitos dos Titulares — ANPD', "url": 'https://www.gov.br/anpd/pt-br/assuntos/titular-de-dados/direito-dos-titulares'},
     "ANPD-PP": {
         "titulo": "Guia Orientativo: Tratamento de Dados Pessoais pelo Poder Público",
         "versao": "2.0 (2023)",
