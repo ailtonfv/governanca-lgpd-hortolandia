@@ -81,6 +81,10 @@ def montar_bloco(base):
                 alternativa['rotulo'] = rotulos[alternativa['codigo']]
         if chave == 'F2-7.1.1':
             q['ajudas_usuario'].append('Há dúvida = a situação existe e a análise é incerta; A confirmar = falta informação.')
+        if chave == 'F2-11.8.1':
+            q['enunciado'] = 'Os pedidos são recebidos e registrados no e-SIC?'
+        if chave == 'F2-10.8.1':
+            q['ajudas_usuario'].append('Descreva categorias, não pessoas.')
         if chave in condicoes_d7():
             q['condicoes'] = condicoes_d7()[chave]
         q["repetivel"] = por_conjunto(chave)
