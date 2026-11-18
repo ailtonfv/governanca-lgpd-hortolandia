@@ -1993,8 +1993,15 @@ Lote 8 aprovado na vistoria de 17/11/2026 e integrado ao `main` (`17338bf`). Car
 Ajustes documentais de 17/11/2026: AB-10 encerrada pela DA-46; não se presume substituição do DPO. DA-51 (P41) aprovada, com implementação no próximo lote: segregação do AAL e vedação de autoindicação pelo APA. AB-12: requisitos de habilitação do AAL em deliberação; a PoC não verifica esses requisitos. ADR 000 não alterado.
 
 
-### Lote 9 — branch de conferência (18/11/2026)
+### Lote 9 — aprovado e integrado (18/11/2026)
 
 `correcoes-lote9`, baseada no `main` `b3ff0f8`, reúne componentes compartilhados de confirmação, faixa de ato e identidade fictícia, segregação DA-51 e ajustes de preenchimento e consolidação do FORM 2. Não representa aceite institucional nem autorização de produção. A grade do FORM 1 não foi redesenhada.
 
-A conferência usa a porta 8009 e uma nova cópia da cópia da 8008. O comando de abertura e os relatórios detalhados ficam no pacote local `entrega-lgpd-lote9`; catálogo, evidências com enunciados e credenciais não acompanham o repositório. A primeira abertura exige usuário do PostgreSQL autorizado a criar a cópia; a senha é solicitada localmente. Merge depende de autorização de Ailton após vistoria.
+A conferência usa a porta 8009 e uma nova cópia da cópia da 8008. O comando de abertura e os relatórios detalhados ficam no pacote local `entrega-lgpd-lote9`; catálogo, evidências com enunciados e credenciais não acompanham o repositório. A primeira abertura exige usuário do PostgreSQL autorizado a criar a cópia; a senha é solicitada localmente. Lote 9 aprovado por Ailton na vistoria de 18/11/2026 e integrado ao `main` (merge `a739fe4`, ajuste de teste `1d0ae9b`).
+
+
+### Lote 10 — branch de conferência (18/11/2026)
+
+`correcoes-lote10`, a partir de `1d0ae9b`, aplica a deliberação das 13 classificações de análise e seus atalhos, a orientação de minimização da F2-10.2.1 e fontes oficiais da ANPD nos blocos 6, 9 e 13. Códigos salvos e respostas históricas permanecem preservados. A consulta e a avaliação continuam dependendo de ato do AAL; nenhuma avaliação foi automatizada. D5 permanece como limite provisório da PoC, conforme SAD 10.
+
+Conferência na porta 8010, com nova cópia a partir da cópia da 8009. A abertura e o relatório ficam no pacote local `entrega-lgpd-lote10`; a primeira criação pede a credencial do PostgreSQL somente no terminal. A 8009 é preservada. Branch publicada para vistoria, sem merge nem autorização de produção.
