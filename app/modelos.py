@@ -10,6 +10,45 @@ class Base(DeclarativeBase):
     """Base comum de todas as tabelas da PoC."""
 
 
+class ReferenciaParticipacaoForms34(Base):
+    """Base técnica imutável. Não é fila, ingresso ou atribuição de competência."""
+    __tablename__ = "referencia_participacao_forms34"
+    id = Column(String(36), primary_key=True)
+    registro_id = Column(String(36), ForeignKey("registro.id"), nullable=False)
+    form = Column(Integer, nullable=False)
+    fonte_form = Column(Integer, nullable=False)
+    fonte_id = Column(String(50), nullable=False)
+    fonte_versao = Column(Integer, nullable=False)
+    fonte_lacre = Column(String(64), nullable=False)
+    fonte_canonica = Column(Text, nullable=False)
+    fonte_participacao_id = Column(String(36))
+    snapshot_form1_id = Column(String(36), ForeignKey("versao_form1_integral.id"), nullable=False)
+    criado_em = Column(DateTime(timezone=True), nullable=False)
+    __table_args__ = (
+        CheckConstraint("(form = 3 AND fonte_form IN (1,2)) OR "
+                        "(form = 4 AND fonte_form IN (2,3))", name="ck_forms34_origem"),
+        CheckConstraint("fonte_versao >= 1", name="ck_forms34_versao"),
+    )
+
+
+class IdentidadeForms34(Base):
+    """Reserva estável por Registro; retirada é evento, nunca exclusão física."""
+    __tablename__ = "identidade_forms34"
+    id = Column(String(36), primary_key=True)
+    registro_id = Column(String(36), ForeignKey("registro.id"), nullable=False)
+    participacao_id = Column(String(36), ForeignKey("referencia_participacao_forms34.id"), nullable=False)
+    tipo = Column(String(1), nullable=False)
+    numero = Column(Integer, nullable=False)
+    codigo = Column(String(40), nullable=False, unique=True)
+    chave_origem = Column(String(100), nullable=False)
+    criado_em = Column(DateTime(timezone=True), nullable=False)
+    __table_args__ = (
+        CheckConstraint("tipo IN ('R','A') AND numero >= 1", name="ck_forms34_identidade"),
+        UniqueConstraint("registro_id", "tipo", "numero", name="uq_forms34_numero"),
+        UniqueConstraint("registro_id", "tipo", "chave_origem", name="uq_forms34_origem"),
+    )
+
+
 class Comando(Base):
     """Um pedido do servidor (ex.: "validar o REG-0003"). DA-26, item 3.
 

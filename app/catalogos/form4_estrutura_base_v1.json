@@ -1,0 +1,329 @@
+{
+  "versao": "F4-REV22-V9-BASE-v1",
+  "sha256_privado": "e040ba1cca7caa32030d15bfd52bec47feedb0d319d5652f33cdbc6ab2fb4d2b",
+  "itens": [
+    {
+      "id": "F4-4.1",
+      "bloco": 1,
+      "tipo": "readonly",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F4-4.1.1",
+      "bloco": 1,
+      "tipo": "readonly",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F4-4.2",
+      "bloco": 1,
+      "tipo": "text_long",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F4-4.2.1",
+      "bloco": 1,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F4-4.3",
+      "bloco": 1,
+      "tipo": "text_long",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F4-4.4",
+      "bloco": 2,
+      "tipo": "multi",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F4-4.5",
+      "bloco": 2,
+      "tipo": "text_long",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F4-4.6",
+      "bloco": 3,
+      "tipo": "unit",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F4-4.7",
+      "bloco": 3,
+      "tipo": "text_long",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F4-4.8",
+      "bloco": 3,
+      "tipo": "multi",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F4-4.9",
+      "bloco": 4,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F4-4.9.1",
+      "bloco": 4,
+      "tipo": "text",
+      "condicao": {
+        "tipo": "declarativa_pendente",
+        "referencias": []
+      }
+    },
+    {
+      "id": "F4-4.10",
+      "bloco": 4,
+      "tipo": "date",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F4-4.10.1",
+      "bloco": 4,
+      "tipo": "date",
+      "condicao": {
+        "tipo": "declarativa_pendente",
+        "referencias": []
+      }
+    },
+    {
+      "id": "F4-4.10.2",
+      "bloco": 4,
+      "tipo": "text",
+      "condicao": {
+        "tipo": "declarativa_pendente",
+        "referencias": []
+      }
+    },
+    {
+      "id": "F4-4.10.3",
+      "bloco": 4,
+      "tipo": "date",
+      "condicao": {
+        "tipo": "declarativa_pendente",
+        "referencias": []
+      }
+    },
+    {
+      "id": "F4-4.11",
+      "bloco": 4,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F4-4.11.1",
+      "bloco": 4,
+      "tipo": "text_long",
+      "condicao": {
+        "tipo": "igual",
+        "origem": "F4-4.11",
+        "codigo_valor": "ALT_01"
+      }
+    },
+    {
+      "id": "F4-4.12",
+      "bloco": 4,
+      "tipo": "multi",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F4-4.13",
+      "bloco": 5,
+      "tipo": "multi",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F4-4.14",
+      "bloco": 5,
+      "tipo": "text_long",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F4-4.15",
+      "bloco": 6,
+      "tipo": "readonly",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F4-4.15.1",
+      "bloco": 6,
+      "tipo": "date",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F4-4.15.2",
+      "bloco": 6,
+      "tipo": "date",
+      "condicao": {
+        "tipo": "declarativa_pendente",
+        "referencias": []
+      }
+    },
+    {
+      "id": "F4-4.16",
+      "bloco": 6,
+      "tipo": "date",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F4-4.17",
+      "bloco": 6,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F4-4.17.1",
+      "bloco": 6,
+      "tipo": "text_long",
+      "condicao": {
+        "tipo": "igual",
+        "origem": "F4-4.17",
+        "codigo_valor": "ALT_01"
+      }
+    },
+    {
+      "id": "F4-4.18",
+      "bloco": 7,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F4-4.18.1",
+      "bloco": 7,
+      "tipo": "structured",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F4-4.19",
+      "bloco": 7,
+      "tipo": "text_long",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F4-4.20",
+      "bloco": 7,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F4-4.21",
+      "bloco": 7,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F4-4.22",
+      "bloco": 7,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F4-4.23",
+      "bloco": 8,
+      "tipo": "readonly",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F4-4.24",
+      "bloco": 8,
+      "tipo": "readonly",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F4-4.25",
+      "bloco": 8,
+      "tipo": "date",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F4-4.26",
+      "bloco": 9,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F4-4.26.1",
+      "bloco": 9,
+      "tipo": "text_long",
+      "condicao": {
+        "tipo": "igual",
+        "origem": "F4-4.26",
+        "codigo_valor": "ALT_01"
+      }
+    },
+    {
+      "id": "F4-4.27",
+      "bloco": 9,
+      "tipo": "date",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    }
+  ]
+}

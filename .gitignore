@@ -2,6 +2,9 @@
 
 # Senhas e configurações locais (o .env fica só no computador)
 .env
+.env.*
+!.env.exemplo
+!.env.example
 
 # Preferências do editor (cada pessoa tem as suas)
 .vscode/
@@ -28,12 +31,38 @@ treino/
 
 # cópias de segurança do banco (nunca no GitHub)
 *.dump
+*.dump.gz
+*.backup
+*.bak
+*.sql
+*.sql.gz
+*.sqlite
+*.sqlite3
+*.db
+# Scripts de migração revisados são código; dumps nunca devem ficar aqui.
+!migracoes/*.sql
 
 # Cola de comandos pessoal (fica só no computador)
 docs/operacao/COLA_COMANDOS.md
 
 # Cartilha interna: somente consulta local, nunca publicar documento ou derivados.
 documentos_locais/
+entrega-lgpd-*/
+catalogos_privados/
+pacote_restrito*/
+PACOTE_RESTRITO*/
+*_privado*.json
+*_privado*.csv
+*_privado*.xlsx
+*_PRIVADO*.json
+*_PRIVADO*.csv
+*_PRIVADO*.xlsx
+# Fontes e extrações do Documento-Mestre (qualquer diretório).
+*MESTRE*
+*mestre*
+*Mestre*
+CONTEUDO_FORM*.md
+DECISOES_FORMS_3_4_*.md
 
 # Catálogo editorial do FORM 2 disponibilizado apenas na instalação local autorizada.
 /app/catalogos/form2_revisao_rev20.json
@@ -43,6 +72,10 @@ documentos_locais/
 /app/catalogos/form2_rev21_2_privado.json
 
 /app/catalogos/form1_rev22_privado.json
+
+# FORMs 3/4: enunciados ficam no pacote restrito, nunca nos commits.
+/app/catalogos/form3_rev22_v9_privado.json
+/app/catalogos/form4_rev22_v9_privado.json
 
 # Derivados documentais privados: não publicar enunciados nem matrizes integrais.
 /docs/planejamento/FORM2_REV17_MATRIZ_CORRESPONDENCIA_CANDIDATA.md
