@@ -99,3 +99,18 @@ servidor. A suíte recria somente essa cópia. 8009 e 8011 ficam preservadas.
 Testar integridade das fontes, origem de outro Registro, congelamento, reenvio,
 não reuso, autoria, correção, proteção SQL, rollback e concorrência com conexões
 independentes; depois repetir a seleção de regressão dos lotes anteriores.
+
+### Verificação de 18/11/2026
+
+Executados exclusivamente na cópia isolada terminada em `_teste`: 42 testes
+novos aprovados e os mesmos 188 testes da entrega anterior, com 185 aprovados
+e somente as três falhas antigas. Total: 227 aprovados em 230, sem regressão
+nova. A base fixa permanece em 123/126; lotes 4–8 em 44/44, lote 9 em 13/13,
+regressão adicional em 1/1 e lote 10 em 4/4.
+
+Falhas antigas: `test_cartoes_explicam_disponibilidade_sem_oferecer_acesso_direto`,
+`test_catalogo_local_indisponivel_preserva_preparacao[True]` e
+`test_unidade_isola_origens_e_reutiliza_anotacao`.
+Evidências no pacote local `entrega-lgpd-lote11`: `testes-novos.xml` e
+`testes.xml`, com seus logs. Nenhum servidor ou banco de vistoria foi alterado.
+Não há conferência visual neste lote, pois nenhuma tela foi criada.
