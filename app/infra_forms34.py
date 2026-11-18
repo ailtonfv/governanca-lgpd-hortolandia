@@ -56,5 +56,3 @@ def historico(sessao, identidade_id):
     return sessao.scalars(select(Evento).where(
         Evento.cadeia_tipo == 'forms34_objeto', Evento.cadeia_id == identidade_id)
         .order_by(Evento.sequencia_cadeia)).all()
-
-

@@ -105,5 +105,3 @@ def fixar_referencia(sessao, *, comando_id, conta_id, participacao_id,
                  'base34_referencia_fixada', dict(dados, fonte_lacre=ref.fonte_lacre))
     return fechar_comando(comando, {'permitido': True, 'participacao_id': ref.id,
                                   'evento_id': ev.id, 'referencia_existente': False})
-
-

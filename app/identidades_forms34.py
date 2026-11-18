@@ -41,5 +41,3 @@ def reservar_identidade(sessao, *, comando_id, conta_id, participacao_id, tipo, 
                     referencia_id=ref.id, fonte_lacre=ref.fonte_lacre))
     return fechar_comando(comando, {'permitido': True, 'identidade_id': obj.id,
                                   'codigo': obj.codigo, 'evento_id': ev.id, 'existente': False})
-
-
