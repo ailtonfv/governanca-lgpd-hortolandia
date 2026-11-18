@@ -77,6 +77,7 @@
 <section id="teste-balanceamento" {% if not ativa(q.id, '') %}hidden{% endif %}><h2>Teste de balanceamento — só para Legítimo interesse</h2>
 {% endif %}
 <fieldset class="resposta-form2" id="{{ q.id }}"><legend>{{ q.id }} · {{ q.enunciado|replace("na Seção 2","no bloco 2")|replace("Seção 2","Bloco 2") }}</legend>
+{% if q.selo_d11 %}<span class="selo-d11" role="note">[D11] Aguarda homologação jurídica</span>{% endif %}
 {% include '_atalho_consulta_form2.html' %}
 {% if q.fatos_abertura is defined %}<aside class="fatos-abertura-form2"><strong>No FORM 1 · {{ rotulo_origem }}</strong>
 {% for fato in q.fatos_abertura %}<p>No FORM 1: {{ fato.valor }}{% if fato.complemento %} — {{ fato.complemento }}{% endif %} ({{ fato.referencia }}){% if fato.conjunto %} · conjunto {{ fato.conjunto }}{% endif %}</p>{% else %}<p>No FORM 1: sem resposta.</p>{% endfor %}

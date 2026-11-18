@@ -87,6 +87,7 @@ def montar_bloco(base):
             q['ajudas_usuario'].append('Descreva categorias, não pessoas.')
         if chave in condicoes_d7():
             q['condicoes'] = condicoes_d7()[chave]
+        q["selo_d11"] = chave in {"F2-7.5", "F2-7.11.4", "F2-8.6", "F2-9.7.2"}
         q["repetivel"] = por_conjunto(chave)
         if chave in CONSULTAS:
             q.update(edicao="consulta", alternativas=[], controle="Consulta automática")
