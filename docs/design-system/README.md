@@ -20,8 +20,10 @@ O sistema visual deve tornar estado, responsabilidade e próxima ação compreen
 |---|---|
 | [Cores e tokens](CORES_E_TOKENS.md) | Paleta vigente, significado, uso e evolução semântica proposta |
 | [Decisões visuais](DECISOES_VISUAIS.md) | Histórico das decisões, limites e pontos ainda pendentes |
+| [Padrões de interação](PADROES_DE_INTERACAO.md) | Regras acordadas nos FORMs 1 e 2, origem, implementação e capturas locais restritas |
+| [Relatório dos padrões](RELATORIO_PADROES_DE_INTERACAO.md) | Componentes compartilhados, duplicações, propostas de unificação e equivalentes no dashboard |
 
-Documentos de componentes e acessibilidade serão acrescentados quando houver um incremento visual autorizado e exemplos concretos suficientes. Até lá, as regras mínimas de acessibilidade permanecem no resumo de contexto.
+O levantamento dos padrões de interação documenta os componentes existentes em 18/11/2026 e suas diferenças. Não implementa a unificação proposta nem novas telas. As regras mínimas de acessibilidade permanecem também no resumo de contexto.
 
 ## Guardrails
 
