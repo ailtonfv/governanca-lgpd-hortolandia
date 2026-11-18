@@ -1119,3 +1119,10 @@ Análise jurídica quando a pergunta exige interpretar norma ou fundamento; aná
 ## Complemento D10 — decisão de Ailton, DPO, 18/11/2026, 09h40
 
 Na F2-10.2.1, identificar a entidade ou a categoria de prestador, sem nome de pessoa física. Acrescentar ajuda de minimização junto à pergunta. Os demais 14 candidatos da varredura ficam preservados, pois o uso genérico de titular/pessoa não exige mudança. Não alterar campo, código ou resposta histórica.
+
+
+## Complemento D12 e ratificação D5 — decisão de Ailton, DPO, 18/11/2026, 09h40
+
+Aprovada a inclusão de referências oficiais no quadro de apoio da ANPD: Enunciado CD/ANPD nº 1/2023 no bloco 6; Resolução CD/ANPD nº 19/2024, regulamento e cláusulas-padrão, no bloco 9; página de direitos dos titulares no bloco 13. Apoio para consulta, sem automatizar avaliação nem substituir manifestação institucional. Esta decisão supera a pendência de aprovação da D12 registrada no Lote 9.
+
+Ratificada a D5 já registrada: 99 conjuntos e limites de texto curto de 200, longo de 1000 e comentário de 2000 caracteres são provisórios da PoC, não regras de produção. Exceções explícitas do catálogo continuam preservadas; limites definitivos dependem de deliberação institucional. Nenhum limite é alterado por este lote.

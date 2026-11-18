@@ -65,3 +65,21 @@ def test_d10_orienta_sem_identificar_pessoa(principal):
     assert q['enunciado'].endswith('(sem nome).')
     assert 'Não informe nome de pessoa física.' in trecho
     assert 'texto:F2-10.2.1' in trecho
+
+
+def test_d12_apoio_somente_nos_tres_blocos(principal):
+    from app.contrato_form2_respostas import REFERENCIAS_ANPD
+    # Arrange: três fontes, sem substituir as demais referências já existentes.
+    destinos={6:'ANPD-CA', 9:'ANPD-TI', 13:'ANPD-DT'}
+    cliente=TestClient(app)
+    for numero in range(1,15):
+        # Act: percorrer todas as páginas, inclusive as que não devem receber links.
+        resp=cliente.get(f'/form2/participacoes/{principal.id}/blocos/{numero}?conta_id=CONTA-B1')
+        assert resp.status_code==200
+        for bloco,chave in destinos.items():
+            fonte=REFERENCIAS_ANPD[chave]
+            # Assert: link só no destino aprovado; quadro existente reaproveitado.
+            assert (fonte['url'] in resp.text) is (numero==bloco)
+            if numero==bloco:
+                assert 'id="apoio-anpd"' in resp.text
+                assert fonte['titulo'] in resp.text
