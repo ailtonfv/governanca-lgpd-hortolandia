@@ -61,7 +61,7 @@
 <label>Resposta<select name="{{ op }}"><option value="">Sem resposta</option>{% for a in q.alternativas %}<option value="{{ a.codigo }}"{% if a.codigo in valores.get(op,[]) %} selected{% endif %}>{{ a.rotulo }}</option>{% endfor %}</select></label>
 {% endif %}{% endif %}
 {% if not q.alternativas or 'texto' in q.controle|lower or q.alternativas|selectattr('complemento','in',['Texto condicionado (R13)'])|list %}
-<label>{{ 'Complemento' if q.alternativas else q.controle }}<textarea name="{{ txt }}" rows="2" maxlength="{{ limite_texto(q) }}">{{ valores.get(txt,'') }}</textarea></label>
+{% if q.id == 'F2-14.3' %}<label>Secretaria<select name="unidade:{{ q.id }}{{ sufixo }}"><option value="">Escolha…</option>{% for unidade in secretarias_selecao %}<option value="{{ unidade.id }}"{% if valores.get('unidade:' ~ q.id ~ sufixo) == unidade.id %} selected{% endif %}>{{ unidade.nome }}</option>{% endfor %}</select></label><label>Funções (lista institucional em definição)<input type="text" name="{{ txt }}" maxlength="200" value="{{ valores.get(txt, '') }}"></label>{% else %}<label>{{ 'Complemento' if q.alternativas else q.controle }}<textarea name="{{ txt }}" rows="2" maxlength="{{ limite_texto(q) }}">{{ valores.get(txt,'') }}</textarea></label>{% endif %}
 {% endif %}
 {% include '_complemento_necessario.html' %}
 {% if q.id == 'F2-14.3.1' %}<label>Destino principal<select name="principal:{{ q.id }}{{ sufixo }}"><option value="">A definir</option>{% for a in q.alternativas %}<option value="{{ a.codigo }}"{% if valores.get('principal:' ~ q.id ~ sufixo) == a.codigo %} selected{% endif %}>{{ a.rotulo }}</option>{% endfor %}</select></label>{% endif %}

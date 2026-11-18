@@ -145,7 +145,7 @@ def marcas_salvas_form2(conteudo):
         pendentes.add(sinal["item_id"].split(".")[0].removeprefix("F2-"))
     for bloco, campos in conteudo.get(RASCUNHO, {}).items():
         for chave, valor in campos.items():
-            if chave.startswith(("texto:", "opcao:")) and (valor.strip() if isinstance(valor, str) else valor):
+            if chave.startswith(("texto:", "opcao:", "unidade:")) and (valor.strip() if isinstance(valor, str) else valor):
                 salvos.add(bloco)
             if chave.startswith("opcao:") and "A_CONFIRMAR" in valor:
                 pendentes.add(bloco)

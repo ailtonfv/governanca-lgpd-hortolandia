@@ -1,4 +1,5 @@
 """Conferência demonstrativa versionada; não encerra nem homologa o FORM 2."""
+from app.unidades_interface_form2 import secretarias_ativas
 from app.complementos_form2 import complementos_pendentes
 from copy import deepcopy
 import json
@@ -44,6 +45,7 @@ def _fontes(sessao, p, bloquear=False):
     complementos = sessao.scalars(select(ComplementoForm2).where(
         ComplementoForm2.participacao_id == p.id).order_by(ComplementoForm2.id)).all()
     return {
+        "secretarias": {u.id: u.nome for u in secretarias_ativas(sessao)},
         "registro_id": p.registro_id, "snapshot_id": p.snapshot_id,
         "lacre_origem": origem["snapshot"].lacre,
         "ramos_origem": sorted(ramos_origem(origem)), "regras": mapa_regras(carregar_contrato()),
@@ -74,7 +76,7 @@ def montar_resumo(fontes):
     valores = indice_valores(conteudo)
     for campos in conteudo.get(RASCUNHO, {}).values():
         for chave in list(campos):
-            if chave.startswith(("opcao:", "texto:", "principal:")):
+            if chave.startswith(("opcao:", "texto:", "principal:", "unidade:")):
                 item = chave.partition(":")[2].partition("#")[0]
                 if not aplicavel(item, conjunto_da_chave(chave), valores,
                                  fontes.get("ramos_origem", []), fontes.get("regras", {})):
@@ -99,7 +101,7 @@ def montar_resumo(fontes):
             sufixo = "#" + conjunto
             principal = campos14.get("principal:F2-14.3.1" + sufixo, "")
             pendencias_declaradas.append({"conjunto": conjunto, "texto": texto,
-                "area": campos14.get("texto:F2-14.3" + sufixo, ""),
+                "area": " · ".join(filter(None, [fontes.get("secretarias", {}).get(campos14.get("unidade:F2-14.3" + sufixo), ""), campos14.get("texto:F2-14.3" + sufixo, "")])),
                 "destinos": escolhas("F2-14.3.1", sufixo),
                 "principal": rotulos.get("F2-14.3.1", {}).get(principal, principal)})
     pendencias_declaradas.sort(key=lambda p: int(p["conjunto"]))
