@@ -49,7 +49,7 @@
   {% endif %}
   <details class="apoio-juridico"><summary>Referências oficiais para os temas jurídicos</summary>
     <p>Material de apoio. As referências não preenchem respostas, não classificam automaticamente e não substituem manifestação do Jurídico.</p>
-    {% for grupo in apoio_juridico %}<h3>Bloco(s) {{ grupo.blocos }}</h3><ul>
+    {% for grupo in apoio_juridico %}<h3>Referência aos blocos: {{ grupo.blocos }}</h3><ul>
       {% for fonte in grupo.fontes %}<li><a href="{{ fonte.url }}" target="_blank" rel="noopener noreferrer">{{ fonte.titulo }}</a> — {{ fonte.versao }}</li>{% endfor %}
     </ul>{% endfor %}
   </details>

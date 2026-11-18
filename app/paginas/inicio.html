@@ -49,15 +49,15 @@
       </div>
       <div class="resumo-contadores-painel" aria-label="Resumo do painel">
         <div>
-          <span class="contador" aria-label="{{ registros|length }} Registro(s) disponível(is)">{{ registros|length }}</span>
+          <span class="contador" aria-label="{{ registros|length }} {{ 'Registro disponível' if registros|length == 1 else 'Registros disponíveis' }}">{{ registros|length }}</span>
           <span>Registros disponíveis</span>
         </div>
         <div>
-          <span class="contador contador-providencias" aria-label="{{ quantidade_providencias_conferencia }} providência(s) de conferência">{{ quantidade_providencias_conferencia }}</span>
+          <span class="contador contador-providencias" aria-label="{{ quantidade_providencias_conferencia }} {{ 'providência' if quantidade_providencias_conferencia == 1 else 'providências' }} de conferência">{{ quantidade_providencias_conferencia }}</span>
           <span>Providências de conferência</span>
         </div>
         <div>
-          <span id="contador-campos-pendentes" class="contador contador-campos" aria-label="{{ total_vazios.n }} bloco(s) sem respostas salvas">{{ total_vazios.n }}</span>
+          <span id="contador-campos-pendentes" class="contador contador-campos" aria-label="{{ total_vazios.n }} {{ 'bloco' if total_vazios.n == 1 else 'blocos' }} sem respostas salvas">{{ total_vazios.n }}</span>
           <span>Blocos sem respostas salvas</span>
         </div>
       </div>
