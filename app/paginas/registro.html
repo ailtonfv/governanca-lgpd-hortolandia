@@ -1,3 +1,5 @@
+{% from '_faixa_ato.html' import faixa_ato %}
+{% from '_confirmacao_ato.html' import confirmacao %}
 {% from '_identificador_pergunta.html' import codigo_pergunta %}
 {% extends "base.html" %}
 {% from '_links_instrumentos.html' import identificacao_servidor, retorno_painel with context %}
@@ -29,10 +31,7 @@
   {% endif %}
 </section>
 
-{% if mensagem %}
-<p id="mensagem-registro" class="mensagem mensagem-registro {% if erro %}mensagem-erro{% else %}mensagem-sucesso{% endif %}"
-   role="{{ 'alert' if erro else 'status' }}" aria-live="{{ 'assertive' if erro else 'polite' }}">{{ mensagem }}</p>
-{% endif %}
+{{ faixa_ato(mensagem, ato_registrado, id='mensagem-registro', erro=erro, classe='mensagem-registro') }}
 
 {% if not modo_legado %}
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/instrumentos_registro.css') }}">
@@ -99,7 +98,7 @@
           <select id="arp_pessoa_id" name="arp_pessoa_id" aria-describedby="nome-arp-selecionado" disabled>
             <option value="">Selecione somente para designar outro agente</option>
             {% for pessoa in registro.form1_integral.candidatos_arp %}
-            <option value="{{ pessoa.id }}">Matrícula {{ pessoa.matricula }} · {{ pessoa.nome }}</option>
+            <option value="{{ pessoa.id }}">Matrícula {{ pessoa.matricula }} · {{ pessoa.nome|identidade_demonstrativa }}</option>
             {% endfor %}
           </select>
         </div>
@@ -214,7 +213,7 @@
           </div>
           <p class="resumo-jornada-form1">
             <strong data-jornada-posicao>Etapa 1 de 4 · Bloco 1 de 14</strong><br>
-            <span><strong data-jornada-restantes>14</strong> bloco(s) ainda não visitado(s) nesta sessão.</span>
+            <span>Blocos ainda não visitados nesta sessão: <strong data-jornada-restantes>14</strong>.</span>
           </p>
           <p class="ajuda">Respostas salvas e visitas indicam atividade no rascunho; salvar um bloco vazio não representa conclusão. Esses indicadores não significam conferência, submissão ou conformidade.</p>
           <p class="legenda-estados-bloco">
@@ -227,7 +226,7 @@
 
         <article class="cartao-progresso-form1 pendencias-form1">
           <h4>Pendências a resolver</h4>
-          <p class="contador-pendencias-form1" role="status"><strong class="numero-pendencias-form1">{{ progresso.quantidade_incompletos }}</strong><span> campo(s) com pendências segundo a política atualmente configurada</span></p>
+          <p class="contador-pendencias-form1" role="status"><strong class="numero-pendencias-form1">{{ progresso.quantidade_incompletos }}</strong><span> {{ 'campo com pendência' if progresso.quantidade_incompletos == 1 else 'campos com pendências' }} segundo a política atualmente configurada</span></p>
           {% if progresso.quantidade_incompletos == 0 %}
           <p class="situacao-pendencias-form1 sem-pendencias"><strong>Nenhuma pendência obrigatória ativa no estado salvo.</strong></p>
           {% else %}
@@ -255,7 +254,7 @@
           </button>
           {% endif %}
           <div class="dependencias-governanca-form1">
-            <strong>{{ progresso.quantidade_governanca }}</strong> dependência(s) institucional(is) ou regra(s) de governança separada(s) das respostas faltantes.
+            Dependências institucionais ou regras de governança: <strong>{{ progresso.quantidade_governanca }}</strong>, contabilizadas separadamente das respostas faltantes.
           </div>
         </article>
       </div>
@@ -306,26 +305,24 @@
         <input type="hidden" name="comando_id" value="{{ comando_solicitar_conferencia }}">
         <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
         <button class="botao-primario" type="button" data-abrir-dialogo="apresentar-registro">Solicitar nova conferência interna do APA</button>
-        <dialog id="apresentar-registro" aria-labelledby="titulo-apresentar"><h2 id="titulo-apresentar">Apresentar o FORM 1 para conferência?</h2>
+        {% call confirmacao(id="apresentar-registro", titulo="Apresentar o FORM 1 para conferência?", titulo_id="titulo-apresentar", principal="Apresentar ao APA", cancelar="Continuar revisando", tipo="submit", cancelar_attr="data-fechar-dialogo", registro=registro.codigo_lgpd) %}
         <p>O APA receberá as respostas salvas. A edição ficará suspensa até a decisão.</p>
-        <button type="button" data-fechar-dialogo autofocus>Continuar revisando</button>
-        <button class="botao-primario" type="submit">Apresentar ao APA</button></dialog>
+        {% endcall %}
       </form>
       {% else %}
       <p class="ajuda">Salve ao menos um ajuste no rascunho antes de solicitar nova conferência.</p>
       {% endif %}
       {% elif registro.form1_integral.pode_solicitar_conferencia %}
       <p>O ARP pode apresentar ao APA a versão atual do rascunho, mesmo incompleta, para conferência interna.</p>
-      {% if not usa_rev22 and registro.form1_integral.pre_validacao %}<p><strong>{{ registro.form1_integral.pre_validacao.quantidades.incompletos }}</strong> campo(s) obrigatório(s) ativo(s) ainda incompleto(s).</p>{% endif %}
+      {% if not usa_rev22 and registro.form1_integral.pre_validacao %}<p><strong>{{ registro.form1_integral.pre_validacao.quantidades.incompletos }}</strong> {{ 'campo obrigatório ativo ainda incompleto' if registro.form1_integral.pre_validacao.quantidades.incompletos == 1 else 'campos obrigatórios ativos ainda incompletos' }}.</p>{% endif %}
       <form method="post" action="{{ url_for('solicitar_conferencia_interna', registro_id=registro.id) }}">
         <input type="hidden" name="conta_id" value="{{ conta_id }}">
         <input type="hidden" name="comando_id" value="{{ comando_solicitar_conferencia }}">
         <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
         <button class="botao-primario" type="button" data-abrir-dialogo="apresentar-registro">Solicitar conferência interna do APA</button>
-        <dialog id="apresentar-registro" aria-labelledby="titulo-apresentar"><h2 id="titulo-apresentar">Apresentar o FORM 1 para conferência?</h2>
+        {% call confirmacao(id="apresentar-registro", titulo="Apresentar o FORM 1 para conferência?", titulo_id="titulo-apresentar", principal="Apresentar ao APA", cancelar="Continuar revisando", tipo="submit", cancelar_attr="data-fechar-dialogo", registro=registro.codigo_lgpd) %}
         <p>O APA receberá as respostas salvas. A edição ficará suspensa até a decisão.</p>
-        <button type="button" data-fechar-dialogo autofocus>Continuar revisando</button>
-        <button class="botao-primario" type="submit">Apresentar ao APA</button></dialog>
+        {% endcall %}
       </form>
       {% else %}
       <p class="ajuda">Nenhuma ação de conferência interna está disponível para seu perfil neste momento.</p>
@@ -370,12 +367,12 @@
       <p class="etiqueta">Verificação consultiva · não submete o formulário</p>
       <h3 id="titulo-pre-validacao-form1" tabindex="-1">Pendências antes da futura submissão</h3>
       <p class="selo-somente-leitura">Somente leitura · controles de consulta disponíveis</p>
-      <p>A verificação encontrou <strong>{{ pre_validacao.quantidades.incompletos }}</strong> campo(s) obrigatório(s) ativo(s) ainda incompleto(s), <strong>{{ pre_validacao.quantidades.nao_aplicaveis }}</strong> campo(s) condicional(is) não aplicável(is) neste rascunho e <strong>{{ pre_validacao.quantidades.regras_pendentes }}</strong> regra(s) ou integração(ões) dependentes de governança.</p>
+      <p>A verificação encontrou <strong>{{ pre_validacao.quantidades.incompletos }}</strong> {{ 'campo obrigatório ativo ainda incompleto' if pre_validacao.quantidades.incompletos == 1 else 'campos obrigatórios ativos ainda incompletos' }}, <strong>{{ pre_validacao.quantidades.nao_aplicaveis }}</strong> {{ 'campo condicional não aplicável' if pre_validacao.quantidades.nao_aplicaveis == 1 else 'campos condicionais não aplicáveis' }} neste rascunho e <strong>{{ pre_validacao.quantidades.regras_pendentes }}</strong> {{ 'regra ou integração dependente' if pre_validacao.quantidades.regras_pendentes == 1 else 'regras ou integrações dependentes' }} de governança.</p>
       <p class="ajuda">O rascunho continua podendo ser salvo. Esta consulta não altera respostas, não cria versão submetida e não declara adequação à LGPD.</p>
       {% if pre_validacao.por_bloco %}
       {% for grupo in pre_validacao.por_bloco %}
       <details>
-        <summary><strong>Bloco {{ grupo.bloco }}</strong> — {{ grupo.itens | length }} pendência(s)</summary>
+        <summary><strong>Bloco {{ grupo.bloco }}</strong> — {{ grupo.itens | length }} {{ 'pendência' if grupo.itens|length == 1 else 'pendências' }}</summary>
         <ul>
           {% for item in grupo.itens %}
           <li>
@@ -400,7 +397,7 @@
       {% else %}<p>Nenhum campo obrigatório ativo está incompleto, mas as decisões de governança abaixo ainda impedem a submissão.</p>{% endif %}
       {% if pre_validacao.avisos %}
       <details class="avisos-facultativos-form1">
-        <summary><strong>{{ pre_validacao.quantidades.avisos }} aviso(s) informativo(s) — respostas facultativas a confirmar</strong></summary>
+        <summary><strong>{{ pre_validacao.quantidades.avisos }} {{ 'aviso informativo' if pre_validacao.quantidades.avisos == 1 else 'avisos informativos' }} — respostas facultativas a confirmar</strong></summary>
         <p>Estes avisos não entram no contador de obrigatórios incompletos e não impedem salvar ou solicitar conferência interna.</p>
         <ul>{% for item in pre_validacao.avisos %}<li>{% include '_destino_pergunta_form1.html' %}<span class="ajuda">{{ item.detalhe }}</span></li>{% endfor %}</ul>
       </details>

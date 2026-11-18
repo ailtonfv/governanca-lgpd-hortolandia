@@ -46,6 +46,21 @@ def autorizado(sessao, pessoa, participacao):
         and not impedido(sessao, pessoa.id, participacao))
 
 
+
+def candidatos_atribuicao(sessao, participacao, autor_id=None):
+    """DA-51: mesma seleção no domínio e na interface; não concede habilitação."""
+    candidatos = sessao.scalars(select(Pessoa).where(Pessoa.ativa.is_(True))).all()
+    return [a for a in candidatos if a.id != participacao.responsavel_id
+            and autorizado(sessao, a, participacao)
+            and not (participacao.tipo in ('principal', 'tematica') and a.id == autor_id
+                     and pessoa_e_apa_em_exercicio(sessao, autor_id, participacao.unidade_id))]
+
+
+def aguardando_definicao_analise(sessao, participacao):
+    return (participacao.tipo in ('principal', 'tematica') and not participacao.responsavel_id
+            and participacao.estado != 'concluida' and not candidatos_atribuicao(sessao, participacao))
+
+
 def ingresso(sessao, registro, snapshot_id, comando, momento=None):
     """Chamado na mesma transação da confirmação interna, para ensaio da fila."""
     momento = momento or agora()
@@ -236,6 +251,7 @@ def salvar_bloco(sessao, *, conta_id, comando_id, participacao_id, versao,
                   bloco, campos, complementos=None):
     """Usa os contratos existentes dos blocos, inclusive os limites D11."""
     from app.respostas_form2 import aplicar_bloco, aplicar_revisao
+    from app.unidades_interface_form2 import secretarias_ativas
     from app.origem_form2 import ler_origem
     from app.form2_rev212 import ramos_origem
     pessoa = pessoa_ativa(sessao, conta_id)
@@ -262,9 +278,9 @@ def salvar_bloco(sessao, *, conta_id, comando_id, participacao_id, versao,
             complementos=complementos, proxima_versao=p.versao+1)
         candidatos = {k:v for k,v in campos.items() if ":" in k}
         if candidatos:
-            novo, _ = aplicar_revisao(novo, bloco, candidatos, ramos_origem(origem), demonstrativo=True)
+            novo, _ = aplicar_revisao(novo, bloco, candidatos, ramos_origem(origem), demonstrativo=True, unidades_permitidas={u.id for u in secretarias_ativas(sessao)})
     else:
-        novo, _ = aplicar_revisao(p.conteudo or {}, bloco, campos, ramos_origem(origem), demonstrativo=True)
+        novo, _ = aplicar_revisao(p.conteudo or {}, bloco, campos, ramos_origem(origem), demonstrativo=True, unidades_permitidas={u.id for u in secretarias_ativas(sessao)})
     complemento_solicitado = False
     texto_complemento = novo.get("respostas_etapa1", {}).get("F2-1.3.1")
     if texto_complemento and bloco == 1:
@@ -305,6 +321,9 @@ def reatribuir(sessao, *, conta_id, comando_id, participacao_id, versao,
         raise PermissionError("A reatribuição exige gestor autorizado da fila.")
     if not responsavel_id:
         raise ValueError("Escolha um responsável para esta participação.")
+    if (p.tipo in ('principal', 'tematica') and responsavel_id == pessoa.id
+            and pessoa_e_apa_em_exercicio(sessao, pessoa.id, p.unidade_id)):
+        raise PermissionError("O APA não pode indicar a si mesmo como AAL deste Registro.")
     alvo = sessao.get(Pessoa, responsavel_id)
     if not alvo or not alvo.ativa or not autorizado(sessao, alvo, p):
         raise ValueError("O novo responsável precisa de autorização vigente na unidade.")

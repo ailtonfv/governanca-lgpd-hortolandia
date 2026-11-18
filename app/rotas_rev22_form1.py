@@ -18,6 +18,8 @@ from app.ajudas_cartilha_form1 import VERSAO_CARTILHA_AJUDAS_FORM1
 
 router=APIRouter()
 paginas=Jinja2Templates(directory=Path(__file__).parent/'paginas')
+from app.identidade_demonstrativa import configurar_identidade
+configurar_identidade(paginas)
 def sessao_rev22():
     with Session(motor) as s:yield s
 

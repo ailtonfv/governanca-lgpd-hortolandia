@@ -75,13 +75,28 @@ def montar_bloco(base):
             continue
         q.update(redacao)
         q['ajudas_usuario'] = orientacoes_ao_usuario(q.get('instrucao', ''))
+        if chave == 'F2-7.10.1':
+            rotulos = {'SIM':'Exclusivamente institucional', 'NAO':'Pode ter uso diverso', 'A_CONFIRMAR':'A confirmar'}
+            for alternativa in q['alternativas']:
+                alternativa['rotulo'] = rotulos[alternativa['codigo']]
+        if chave == 'F2-7.1.1':
+            q['ajudas_usuario'].append('Há dúvida = a situação existe e a análise é incerta; A confirmar = falta informação.')
+        if chave == 'F2-11.8.1':
+            q['enunciado'] = 'Os pedidos são recebidos e registrados no e-SIC?'
+        if chave == 'F2-10.8.1':
+            q['ajudas_usuario'].append('Descreva categorias, não pessoas.')
         if chave in condicoes_d7():
             q['condicoes'] = condicoes_d7()[chave]
+        q["selo_d11"] = chave in {"F2-7.5", "F2-7.11.4", "F2-8.6", "F2-9.7.2"}
         q["repetivel"] = por_conjunto(chave)
         if chave in CONSULTAS:
             q.update(edicao="consulta", alternativas=[], controle="Consulta automática")
         if chave in D11:
             q["edicao"] = "bloqueada_d11"
+        from app.complementos_form2 import codigos_com_complemento
+        q["complementos_necessarios"] = codigos_com_complemento(q)
+        from app.classificacao_analise_form2 import classificar
+        classificar(q)
         itens.append(q)
     return {**base, "itens": itens, "versao": "REV21.2"}
 

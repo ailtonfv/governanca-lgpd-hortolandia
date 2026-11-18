@@ -1,6 +1,6 @@
 {% from '_identificador_pergunta.html' import codigo_pergunta %}
 {% extends "base.html" %}
-{% block titulo %}Rascunho do FORM 2 · Bloco {{ bloco.numero }}{% endblock %}
+{% block titulo %}Rascunho do FORM 2 · Bloco {{ bloco.numero }}<script defer src="/estaticos/complementos_form2.js"></script>{% endblock %}
 {% block conteudo %}
 {% from '_condicoes_form2.html' import gatilhos, ajuda %}
 
@@ -33,8 +33,9 @@
 {% for q in bloco.itens %}
 {% set op = 'opcao:' ~ q.id %}{% set txt = 'texto:' ~ q.id %}{% set com = 'comentario:' ~ q.id %}
 {% set bloqueada = juridico or numero == 1 or q.edicao in ('habilitada', 'consulta', 'bloqueada_d11') %}
-{% if q.id in ('F2-9W.1','F2-11S.1','F2-12A.1') %}<h2>{{ {'F2-9W.1':'Ramificação 9W — Wi-Fi','F2-11S.1':'Ramificação 11S — Informações de saúde','F2-12A.1':'Ramificação 12A — Alta sensibilidade'}[q.id] }}</h2>{% endif %}
+{% if q.id in ('F2-9W.1','F2-11S.1','F2-12A.1') %}<h2>{{ {'F2-9W.1':'Wi-Fi oferecido pela Prefeitura','F2-11S.1':'Informações de saúde','F2-12A.1':'Informações de alta sensibilidade'}[q.id] }}</h2>{% endif %}
 <fieldset class="resposta-form2"><legend>{{ q.id }} — {{ q.enunciado }}</legend>
+{% if q.selo_d11 %}<span class="selo-d11" role="note">[D11] Aguarda homologação jurídica</span>{% endif %}
 {% if q.id == 'F2-14.2' and complementacao %}<p><strong>Complementação do FORM 1 · origem 1.3.1</strong><br>{{ complementacao }}</p>{% endif %}
 {% if q.id == 'F2-13.9' %}<p>{{ revogacao|join(', ') if revogacao else 'Sem resposta homologada em 5.7. A avaliação de consentimento aguarda D11.' }}</p>{% endif %}
 {% if q.id in ('F2-14.8.1','F2-14.8.2') %}<p>A classificação de pendências impeditivas aguarda definição institucional.</p>{% endif %}
@@ -59,9 +60,10 @@
 {% else %}
 <label>Resposta<select name="{{ op }}"><option value="">Sem resposta</option>{% for a in q.alternativas %}<option value="{{ a.codigo }}"{% if a.codigo in valores.get(op,[]) %} selected{% endif %}>{{ a.rotulo }}</option>{% endfor %}</select></label>
 {% endif %}{% endif %}
-{% if not q.alternativas or 'texto' in q.controle|lower or q.alternativas|selectattr('complemento','in',['Texto condicionado (R13)'])|list %}
-<label>{{ 'Complemento' if q.alternativas else q.controle }}<textarea name="{{ txt }}" rows="2" maxlength="{{ limite_texto(q) }}">{{ valores.get(txt,'') }}</textarea></label>
+{% if q.complementos_necessarios or not q.alternativas or 'texto' in q.controle|lower or q.alternativas|selectattr('complemento','in',['Texto condicionado (R13)'])|list %}
+{% if q.id == 'F2-14.3' %}<label>Secretaria<select name="unidade:{{ q.id }}{{ sufixo }}"><option value="">Escolha…</option>{% for unidade in secretarias_selecao %}<option value="{{ unidade.id }}"{% if valores.get('unidade:' ~ q.id ~ sufixo) == unidade.id %} selected{% endif %}>{{ unidade.nome }}</option>{% endfor %}</select></label><label>Funções (lista institucional em definição)<input type="text" name="{{ txt }}" maxlength="200" value="{{ valores.get(txt, '') }}"></label>{% else %}<label>{{ 'Complemento' if q.alternativas else q.controle }}<textarea name="{{ txt }}" rows="2" maxlength="{{ limite_texto(q) }}">{{ valores.get(txt,'') }}</textarea></label>{% endif %}
 {% endif %}
+{% include '_complemento_necessario.html' %}
 {% if q.id == 'F2-14.3.1' %}<label>Destino principal<select name="principal:{{ q.id }}{{ sufixo }}"><option value="">A definir</option>{% for a in q.alternativas %}<option value="{{ a.codigo }}"{% if valores.get('principal:' ~ q.id ~ sufixo) == a.codigo %} selected{% endif %}>{{ a.rotulo }}</option>{% endfor %}</select></label>{% endif %}
 </fieldset>
 {% if repetivel %}</div>{% endif %}
@@ -75,4 +77,4 @@
 <button type="button" id="descartar-alteracoes">Descartar alterações</button><button type="submit" class="botao-primario">Salvar rascunho do Bloco {{ numero }}</button>
 </form></div>
 <script defer src="{{ url_for('estaticos', path='/form2_revisao.js') }}"></script>
-{% endblock %}
+<script defer src="/estaticos/complementos_form2.js"></script>{% endblock %}

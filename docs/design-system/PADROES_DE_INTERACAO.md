@@ -91,3 +91,18 @@ Decisões ainda pendentes de implementação, inclusive o alcance da DA-51, deve
 Reaproveitar cabeçalho, identidade, textos, acesso pelo servidor, cores e mensagens. Um dashboard somente de leitura não tem grade de perguntas, “perguntas ativas” nem saída com alterações: os equivalentes são navegação por visões, filtros identificados, contagens com universo explícito e estado de carregamento/ausência de dados. Não transformar porcentagem de preenchimento em medida de conformidade. Se houver ato ou edição, aplicar confirmação, autoria, auditoria e proteção de alterações como nas demais telas.
 
 As propostas de unificação e os limites por grupo estão no [relatório](RELATORIO_PADROES_DE_INTERACAO.md). Nenhuma proposta desta seção autoriza desenvolvimento do dashboard neste pedido.
+
+
+## Componentes unificados no Lote 9 — 18/11/2026
+
+Esta atualização substitui as ressalvas de ausência de componente único em A1, A2 e T3 no escopo abaixo. A descrição inicial e E01–E13 continuam sendo evidência da base anterior, não capturas do Lote 9. A grade do FORM 1 ficou fora deste lote.
+
+| Regra | Componente único e uso | Verificação / limite |
+|---|---|---|
+| U1 — confirmação | `_confirmacao_ato.html::confirmacao`, usado em `filas_form2.html`, `participacao_form2.html`, `conferencia_form1_integral.html`, `form1_rev22.html` e `registro.html`. Parâmetros preservam IDs, alvo, texto principal/cancelamento e atributos dos scripts existentes; o corpo do ato fornece efeito e pessoas quando aplicável. | Comparação local antes/depois em `entrega-lgpd-lote9`. Diálogo de saída não salva e confirmação genérica de `base.html` têm contratos distintos e não foram incorporados por inferência. |
+| U2 — faixa do ato | `_faixa_ato.html::faixa_ato`; filas, salvamento de bloco e Registro. `atos_interface.ato_registrado` verifica comando permitido, conta, evento e Registro/participação. Data em `apresentacao_form2.data_local`. | Não usar autor/data vindos da URL. Mensagens sem evento verificável não inventam autoria ou horário. Erro mantém tratamento de alerta. |
+| U3 — identidade demonstrativa | `identidade_demonstrativa.identidade_demonstrativa`, filtro nos quatro ambientes Jinja; compatibilidade de nomes históricos da massa em `nomes_em_texto`. | Novas saídas de pessoa devem aplicar o filtro; mensagens compostas dos nomes fictícios existentes também são normalizadas. Não alterar Pessoa, eventos ou snapshots para acrescentar o sufixo. |
+
+Regras novas permanecem no domínio: `complementos_form2` (D1), `alternativas_exclusivas` (D3), `classificacao_analise_form2` (D9), candidatos/recusas em `fila_form2` (DA-51). Scripts apenas acompanham a regra para orientar a interação. O relatório local separa teste automatizado, reprodução visual e vistoria de Ailton.
+
+Os mesmos componentes U1/U2/U3 podem ser reutilizados no dashboard quando houver ato, mensagem ou identificação pessoal. A contagem de perguntas, condicionais e referência entre FORMs não se transfere automaticamente ao dashboard; seu equivalente são indicadores com fonte, período e condição de cálculo explícitos.

@@ -1,4 +1,6 @@
 """Conferência demonstrativa versionada; não encerra nem homologa o FORM 2."""
+from app.unidades_interface_form2 import secretarias_ativas
+from app.complementos_form2 import complementos_pendentes
 from copy import deepcopy
 import json
 import re
@@ -43,6 +45,7 @@ def _fontes(sessao, p, bloquear=False):
     complementos = sessao.scalars(select(ComplementoForm2).where(
         ComplementoForm2.participacao_id == p.id).order_by(ComplementoForm2.id)).all()
     return {
+        "secretarias": {u.id: u.nome for u in secretarias_ativas(sessao)},
         "registro_id": p.registro_id, "snapshot_id": p.snapshot_id,
         "lacre_origem": origem["snapshot"].lacre,
         "ramos_origem": sorted(ramos_origem(origem)), "regras": mapa_regras(carregar_contrato()),
@@ -73,7 +76,7 @@ def montar_resumo(fontes):
     valores = indice_valores(conteudo)
     for campos in conteudo.get(RASCUNHO, {}).values():
         for chave in list(campos):
-            if chave.startswith(("opcao:", "texto:", "principal:")):
+            if chave.startswith(("opcao:", "texto:", "principal:", "unidade:")):
                 item = chave.partition(":")[2].partition("#")[0]
                 if not aplicavel(item, conjunto_da_chave(chave), valores,
                                  fontes.get("ramos_origem", []), fontes.get("regras", {})):
@@ -98,11 +101,12 @@ def montar_resumo(fontes):
             sufixo = "#" + conjunto
             principal = campos14.get("principal:F2-14.3.1" + sufixo, "")
             pendencias_declaradas.append({"conjunto": conjunto, "texto": texto,
-                "area": campos14.get("texto:F2-14.3" + sufixo, ""),
+                "area": " · ".join(filter(None, [fontes.get("secretarias", {}).get(campos14.get("unidade:F2-14.3" + sufixo), ""), campos14.get("texto:F2-14.3" + sufixo, "")])),
                 "destinos": escolhas("F2-14.3.1", sufixo),
                 "principal": rotulos.get("F2-14.3.1", {}).get(principal, principal)})
     pendencias_declaradas.sort(key=lambda p: int(p["conjunto"]))
     return {
+        "complementos_pendentes": complementos_pendentes(conteudo, fontes.get("ramos_origem", [])),
         "governanca_v9": fontes.get("governanca_v9", {}),
         "reavaliacoes_pendentes": [i for i in fontes.get("governanca_v9", {}).get("impactos", {}).values()
             if i["estado"] in {"pendente", "complemento_necessario"}],
@@ -157,6 +161,8 @@ def registrar(sessao, *, conta_id, comando_id, participacao_id, versao, hash_fon
     fontes = _fontes(sessao, p, bloquear=True)
     if _hash(fontes) != hash_fontes:
         raise ValueError("Respostas ou manifestações mudaram. Atualize a conferência antes de registrar.")
+    if complementos_pendentes(fontes["conteudo"], fontes["ramos_origem"]):
+        raise ValueError("Preencha os complementos necessários antes de registrar a consolidação.")
     anterior = (p.conteudo or {}).get(CHAVE, {})
     retrato = {"numero": anterior.get("numero", 0) + 1, "em": agora().isoformat(),
         "ator_id": pessoa.id, "sintese": sintese.strip(), "hash_fontes": _hash(fontes),

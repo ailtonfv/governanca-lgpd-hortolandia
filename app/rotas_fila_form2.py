@@ -1,3 +1,4 @@
+from app.unidades_interface_form2 import secretarias_ativas
 """Interface de filas institucionais demonstrativas."""
 from pathlib import Path
 from hashlib import sha256
@@ -21,6 +22,9 @@ from app.respostas_form2 import estados_regua_form2, aguarda_temporalidade
 
 router = APIRouter()
 paginas = Jinja2Templates(directory=Path(__file__).parent / "paginas")
+from app.identidade_demonstrativa import configurar_identidade
+configurar_identidade(paginas)
+from app.atos_interface import ato_registrado
 from app.apresentacao_form2 import data_local
 paginas.env.filters["hora_local"] = data_local
 paginas.env.globals["aguarda_temporalidade"] = aguarda_temporalidade
@@ -322,8 +326,11 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
     from app.governanca_form2_v9 import estado as estado_v9, origem_autorizada
     from app.segregacao_form2_v9 import impedido
     complementos = []
+    from app.fila_form2 import candidatos_atribuicao, aguardando_definicao_analise
     impedimentos = {}
     for participacao in sessao.scalars(select(ParticipacaoForm2)):
+        if aguardando_definicao_analise(sessao, participacao):
+            impedimentos[participacao.id] = "Aguardando definição de quem fará a análise"
         if participacao.responsavel_id and impedido(sessao, participacao.responsavel_id, participacao):
             impedimentos[participacao.id] = "Designação pendente por impedimento"
         if participacao.tipo != "principal":
@@ -417,10 +424,10 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
             "snapshot": item.snapshot_id, "codigo": registros[item.registro_id].codigo_lgpd,
             "rotulo": rotulo_apresentacao(item)})
     return paginas.TemplateResponse(request=request, name="filas_form2.html",
-        context={"nomes_objetos": nomes_objetos, "referencias": referencias, "mensagem_atribuicao": mensagem, "atribuidores": atribuidores, "cartoes": ordenados, "entradas": entradas, "pode_encaminhar": bool(unidades_apa), "encaminhaveis": encaminhaveis,
+        context={"ato_registrado": ato_registrado(sessao, chave, conta_id), "nomes_objetos": nomes_objetos, "referencias": referencias, "mensagem_atribuicao": mensagem, "atribuidores": atribuidores, "cartoes": ordenados, "entradas": entradas, "pode_encaminhar": bool(unidades_apa), "encaminhaveis": encaminhaveis,
                  "conta_id": conta_id, "pessoa": pessoa, "participacoes": participacoes,
                  "registros": registros, "unidades": unidades, "linhas": linhas,
-                 "impedimentos": impedimentos, "complementos": complementos, "gerenciaveis": gerenciaveis, "agentes": {p.id: [a for a in agentes if a.id != p.responsavel_id and autorizado(sessao, a, p)] for p in gerenciaveis},
+                 "impedimentos": impedimentos, "complementos": complementos, "gerenciaveis": gerenciaveis, "agentes": {p.id: candidatos_atribuicao(sessao, p, pessoa.id) for p in gerenciaveis},
                  "responsaveis": responsaveis, "dpo": dpo, "sem_conferente": sem_conferente, "aguardando_guarda": len({p.registro_id for p in principais if aguarda_temporalidade(p.conteudo)}), "cobertura": cobertura, "comando_id": str(uuid4())})
 
 
@@ -455,8 +462,15 @@ def participacao(request: Request, participacao_id: str, conta_id: str,
     assumida = (comando and comando.tipo == "fila_form2_assumir" and comando.conta_id == conta_id
                 and comando.ator_id == pessoa.id and (comando.resultado or {}).get("participacao_id") == p.id
                 and comando.resultado.get("permitido"))
+    from app.form2_rev212 import catalogo
+    consulta_item = request.query_params.get("consulta_item", "")
+    consulta_tipo = request.query_params.get("consulta_tipo", "dpo")
+    if consulta_item and consulta_item not in catalogo():
+        raise HTTPException(400, "Referência de pergunta desconhecida.")
+    if consulta_tipo not in ("dpo", "juridico", "tematica"):
+        raise HTTPException(400, "Tipo de consulta desconhecido.")
     return paginas.TemplateResponse(request=request, name="participacao_form2.html",
-        context={"atuacao": contexto_atuacao(sessao, pessoa, p), "conta_id": conta_id, "p": p, "estados_regua": estados_da_participacao(sessao, p), "pessoa": pessoa,
+        context={"consulta_item": consulta_item, "consulta_tipo": consulta_tipo, "atuacao": contexto_atuacao(sessao, pessoa, p), "conta_id": conta_id, "p": p, "estados_regua": estados_da_participacao(sessao, p), "pessoa": pessoa,
                  "rotulo_origem": rotulo_apresentacao(snapshot),
                  "confirmada_em": data_confirmacao.astimezone(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y às %Hh%M") if data_confirmacao else None,
                  "assumida": assumida, "retorno": retorno_consultivo(request,sessao,conta_id,p),
@@ -515,6 +529,7 @@ async def encaminhar(request: Request, sessao: Session = Depends(sessao_fila)):
 def bloco_fila(request: Request, participacao_id: str, bloco: int, conta_id: str,
                sessao: Session = Depends(sessao_fila)):
     from app.respostas_form2 import projetar_bloco, definicao_revisao, limite_texto_revisao
+    from app.complementos_form2 import complementos_pendentes
     from app.confirmacoes_form2 import itens_a_confirmar
     from app.fatos_abertura_form2 import projetar_fatos_abertura
     from app.campos_form2 import data_exata
@@ -557,10 +572,11 @@ def bloco_fila(request: Request, participacao_id: str, bloco: int, conta_id: str
             if resultado_salvo.get("complemento_solicitado"):
                 confirmacao += " Complementação solicitada à origem."
     return paginas.TemplateResponse(request=request, name="bloco_fila_form2.html",
-        context={"atuacao": contexto_atuacao(sessao, pessoa, p), "p": p, "estados_regua": estados_regua_form2(conteudo, ramos), "pessoa": pessoa, "conta_id": conta_id, "bloco": definicao,
+        context={"ato_registrado": ato_registrado(sessao, request.query_params.get("salvo"), conta_id, participacao_id=p.id) if confirmacao else None, "atuacao": contexto_atuacao(sessao, pessoa, p), "p": p, "estados_regua": estados_regua_form2(conteudo, ramos), "pessoa": pessoa, "conta_id": conta_id, "bloco": definicao,
         "cargo": CARGOS_FICTICIOS.get(pessoa.id), "numero": bloco, "confirmacao": confirmacao, "ocorrencias": ocorrencias, "origens_repetiveis": origens_repetiveis,
         "comando_id": str(uuid4()),
         "finalidade_validada": conteudo.get(RASCUNHO, {}).get("2", {}).get("texto:F2-2.3"),
+        "secretarias_selecao": secretarias_ativas(sessao),
         "fatos_origem": origem["conteudo"],
         "registro": sessao.get(Registro, p.registro_id),
         "secretaria": sessao.get(Unidade, sessao.get(Registro, p.registro_id).unidade_principal_atual_id),
@@ -568,6 +584,7 @@ def bloco_fila(request: Request, participacao_id: str, bloco: int, conta_id: str
         "perguntas_origem": [q for q in origem["perguntas"] if q["respondida"]],
         "revogacao": [a["rotulo"] for q in definicao_revisao(5)["itens"] if q["id"] == "F2-5.7" for a in q["alternativas"] if a["codigo"] in valores.get("opcao:F2-5.7", [])],
         "complementacao": conteudo.get("respostas_etapa1", {}).get("F2-1.3.1"),
+        "complementos_pendentes": complementos_pendentes(conteudo, ramos),
         "confirmacoes_por_bloco": itens_a_confirmar(conteudo, ramos),
         "valores": conteudo.get(RASCUNHO, {}).get(str(bloco), {}),
         "ativa": lambda item, sufixo: aplicavel(item, sufixo, valores, ramos, regras),
@@ -587,7 +604,7 @@ async def salvar_bloco_fila(request: Request, participacao_id: str, bloco: int,
                 item = chave.removeprefix("resposta_")
                 lista = [v for v in dados.getlist(chave) if v]
                 campos[item] = (lista or None) if item == "F2-2.9.1" else (lista[0] if lista else None)
-            elif bloco >= 2 and chave.startswith(("opcao:", "texto:", "comentario:", "principal:")):
+            elif bloco >= 2 and chave.startswith(("opcao:", "texto:", "comentario:", "principal:", "unidade:")):
                 campos[chave] = dados.getlist(chave)
         complemento = dados.get("complemento_outro", "").strip()
         resultado = salvar_bloco(sessao, conta_id=conta_id,

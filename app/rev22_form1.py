@@ -1,4 +1,5 @@
 """Rascunho candidato versionado. Catálogo fornecido pela instalação privada."""
+from app.alternativas_exclusivas import exclusiva
 from copy import deepcopy
 from hashlib import sha256
 from pathlib import Path
@@ -83,8 +84,7 @@ def validar(q,v):
     if q['kind']=='multi':
         if not isinstance(v,list) or not all(isinstance(x,str) for x in v):raise ValueError('Seleção múltipla inválida.')
         if len(set(v))!=len(v) or not set(v)<=set(q['options']):raise ValueError('Alternativa desconhecida ou repetida.')
-        especiais={'A confirmar','Não se aplica','Nenhum outro canal','Nenhuma identificada','Nenhuma das situações acima','Faixa etária não registrada'}
-        if len(v)>1 and especiais.intersection(v):raise ValueError('Alternativa exclusiva combinada com outra.')
+        if len(v)>1 and any(exclusiva(x) for x in v):raise ValueError('Alternativa exclusiva combinada com outra.')
     elif not isinstance(v,str) or '\x00' in v or len(v)>2000:raise ValueError('Texto inválido ou maior que 2.000 caracteres.')
     elif q['kind']=='single' and v not in q['options']:raise ValueError('Alternativa desconhecida.')
     if q['id']=='12.1.1' and not v.isdigit():raise ValueError('Informe apenas o número do prazo.')

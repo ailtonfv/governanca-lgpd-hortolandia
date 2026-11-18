@@ -1,3 +1,4 @@
+{% from '_confirmacao_ato.html' import confirmacao %}
 {% extends "base.html" %}
 {% block conteudo %}
 {% set situacoes = {'aguardando': 'aguardando responsável', 'em_atendimento': 'em atendimento', 'concluida': 'concluída'} %}
@@ -16,7 +17,7 @@
 <div class="acoes-fila-form2">{% if proximo.numero and p.estado == 'em_atendimento' %}<a class="botao-link" href="/form2/participacoes/{{ p.id }}/blocos/{{ proximo.numero }}?conta_id={{ conta_id|urlencode }}">{{ 'Continuar no bloco ' ~ proximo.numero if estados_regua.salvos else 'Começar pelo bloco 1' }}</a>{% endif %}
 <a class="botao-link-secundario" href="/form2/participacoes/{{ p.id }}/consolidacao?conta_id={{ conta_id|urlencode }}">Conferir consolidação</a></div>{% endif %}
 {% if p.tipo == 'principal' and p.estado == 'em_atendimento' and p.responsavel_id == pessoa.id %}
-<details class="consultas-form2"><summary>Consultas ao DPO, ao Jurídico e às áreas temáticas</summary>
+<details class="consultas-form2" id="consulta-form2" {% if consulta_item %}open{% endif %}><summary>Consultas ao DPO, ao Jurídico e às áreas temáticas</summary>
 <p>Use esta seção quando precisar de uma manifestação de outra área. O preenchimento do FORM 2 é feito nos blocos acima.</p>
 {% endif %}
 <form method="post">
@@ -29,19 +30,16 @@
 <p>{{ orientacao }}</p>
 <input type="hidden" name="acao" value="assumir">
 <button type="button" class="botao-primario" data-abrir-dialogo="confirmar-assuncao">Assumir participação</button>
-<dialog class="dialogo-acao-fila" id="confirmar-assuncao" aria-labelledby="titulo-assuncao">
-  <h2 id="titulo-assuncao">Assumir a participação?</h2>
+{% call confirmacao(id="confirmar-assuncao", titulo="Assumir a participação?", titulo_id="titulo-assuncao", principal="Confirmar assunção", cancelar="Cancelar", tipo="submit", cancelar_attr="data-fechar-dialogo", registro=registro.codigo_lgpd) %}
   <p>{{ orientacao }}</p><p><strong>Versão do FORM 1 em análise:</strong> {{ referencia }}.</p>
-  <div class="acoes-fila-form2"><button type="button" data-fechar-dialogo autofocus>Cancelar</button>
-  <button type="submit" class="botao-primario">Confirmar assunção</button></div>
-</dialog>
+  {% endcall %}
 {% elif p.estado == 'em_atendimento' and p.responsavel_id == pessoa.id %}
-<label>{{ "Sua questão" if p.tipo == "principal" else "Sua manifestação" }} <textarea name="texto" rows="10" maxlength="10000">{{ p.manifestacao }}</textarea></label>
+<label>{{ "Sua questão" if p.tipo == "principal" else "Sua manifestação" }} <textarea name="texto" rows="10" maxlength="10000">{{ 'Consulta sobre ' ~ consulta_item ~ ': ' if consulta_item else p.manifestacao }}</textarea></label>
 {% if p.tipo != "principal" %}<button type="submit" class="botao-primario" name="acao" value="salvar">Salvar manifestação</button>{% endif %}
 {% if p.tipo == 'principal' %}
-<label>Tipo de consulta <select name="tipo"><option value="dpo">DPO</option><option value="juridico">Jurídico</option><option value="tematica">Área temática</option></select></label>
+<label>Tipo de consulta <select name="tipo"><option value="dpo" {% if consulta_tipo == "dpo" %}selected{% endif %}>DPO</option><option value="juridico" {% if consulta_tipo == "juridico" %}selected{% endif %}>Jurídico</option><option value="tematica" {% if consulta_tipo == "tematica" %}selected{% endif %}>Área temática</option></select></label>
 <p data-destino-fixo data-dpo="{{ (unidades|selectattr('id', 'equalto', 'UNID-GOV')|first).nome }}" data-juridico="{{ (unidades|selectattr('id', 'equalto', 'SEC-AJ')|first).nome }}">Unidade destinatária: {{ (unidades|selectattr('id', 'equalto', 'UNID-GOV')|first).nome }}</p><label data-area-tematica hidden>Unidade destinatária <select name="unidade_id" disabled>{% for u in unidades %}<option value="{{ u.id }}">{{ u.nome }}</option>{% endfor %}</select></label>
-<button type="submit" class="botao-primario" name="acao" value="consultar" data-confirmar-ato="{{ pessoa.nome }} encaminhará a questão sobre {{ rotulo_origem }} à área selecionada.">Encaminhar consulta</button>
+<button type="submit" class="botao-primario" name="acao" value="consultar" data-confirmar-ato="{{ pessoa.nome|identidade_demonstrativa }} encaminhará a questão sobre {{ rotulo_origem }} à área selecionada.">Encaminhar consulta</button>
 {% else %}<button type="submit" class="botao-primario" name="acao" value="concluir">Concluir manifestação</button>{% endif %}
 {% else %}<p>{{ p.manifestacao }}</p>{% endif %}
 </form>
@@ -52,7 +50,7 @@
 {% elif p.estado == 'em_atendimento' and p.responsavel_id == pessoa.id %}<strong>Nova orientação</strong><form method="post" action="/form2/participacoes/{{ consulta.id }}/orientacao">
 <input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="comando_id" value="{{ (comando_id ~ consulta.id ~ 'resposta')|chave_comando }}">
 <label>Decisão<select name="decisao" required><option value="">Escolha…</option><option>Acolhida</option><option>Acolhida em parte</option><option>Não acolhida</option></select></label>
-<label>Motivo<textarea name="texto" required maxlength="1000"></textarea></label><button class="botao-primario" data-confirmar-ato="{{ pessoa.nome }}, AAL, registrará como considerou a orientação sobre {{ rotulo_origem }}.">Registrar resposta</button></form>{% endif %}</article>
+<label>Motivo<textarea name="texto" required maxlength="1000"></textarea></label><button class="botao-primario" data-confirmar-ato="{{ pessoa.nome|identidade_demonstrativa }}, AAL, registrará como considerou a orientação sobre {{ rotulo_origem }}.">Registrar resposta</button></form>{% endif %}</article>
 {% endfor %}
 {% set consultas = consultas|rejectattr('conteudo.de_oficio')|list %}{% if consultas %}<h2>Manifestações solicitadas</h2>{% for consulta in consultas %}<article><h3>{{ consulta.tipo }} · {{ situacoes.get(consulta.estado, consulta.estado) }}</h3><p>{{ consulta.questao }}</p><p>{{ consulta.manifestacao }}</p><p>Responsável · {{ consulta.responsavel_id or 'Aguardando assunção' }} · {{ consulta.concluida_em or '' }}</p></article>{% endfor %}{% endif %}
 </div><script>

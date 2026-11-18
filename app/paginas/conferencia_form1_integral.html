@@ -1,3 +1,4 @@
+{% from '_confirmacao_ato.html' import confirmacao %}
 {% from '_identificador_pergunta.html' import codigo_pergunta %}
 {% extends "base.html" %}
 {% block titulo %}Conferência interna · {{ registro.codigo_lgpd }}{% endblock %}
@@ -12,7 +13,7 @@
   <p><strong>{{ registro.codigo_lgpd }}</strong> — {{ registro.titulo_objeto }}</p>
   <p class="aviso-leitura"><strong>Importante:</strong> esta consulta não é submissão, homologação, conclusão institucional nem envio à T.I. O rascunho pode conter pendências.</p>
   <dl>
-    <div><dt>Apresentado por</dt><dd>{% if solicitante %}{{ solicitante.matricula }} — {{ solicitante.nome }}{% else %}{{ conferencia.solicitada_por_id }}{% endif %}</dd></div>
+    <div><dt>Apresentado por</dt><dd>{% if solicitante %}{{ solicitante.matricula }} — {{ solicitante.nome|identidade_demonstrativa }}{% else %}{{ conferencia.solicitada_por_id }}{% endif %}</dd></div>
     <div><dt>Apresentado em</dt><dd>{{ data_apresentacao }}</dd></div>
   </dl>
 </section>
@@ -85,24 +86,16 @@
     <textarea id="justificativa-devolucao" name="justificativa" maxlength="2000" required aria-describedby="ajuda-justificativa-devolucao"></textarea>
     <p id="ajuda-justificativa-devolucao" class="ajuda">Explique objetivamente o que precisa ser revisto. Não inclua dados pessoais de casos concretos.</p>
     <button class="botao-secundario" type="button" data-abrir-dialogo="dialogo-form-devolver">Confirmar devolução para ajustes</button>
-<dialog class="dialogo-acao-fila" id="dialogo-form-devolver" aria-labelledby="titulo-form-devolver">
-  <h2 id="titulo-form-devolver">Devolver o FORM 1 para ajustes?</h2><p>O ARP receberá a justificativa informada e poderá corrigir o formulário.</p>
-  <button type="button" data-fechar-dialogo autofocus>Cancelar</button>
-  <button type="submit" class="botao-primario" form="form-devolver">Devolver para ajustes</button>
-</dialog>
+{% call confirmacao(id="dialogo-form-devolver", titulo="Devolver o FORM 1 para ajustes?", titulo_id="titulo-form-devolver", principal="Devolver para ajustes", cancelar="Cancelar", form="form-devolver", tipo="submit", cancelar_attr="data-fechar-dialogo", registro=registro.codigo_lgpd) %}<p>O ARP receberá a justificativa informada e poderá corrigir o formulário.</p>
+  {% endcall %}
 <script defer src="/estaticos/confirmar_acao_fila.js"></script>
   </form>
   </section>
   </div>
 </section>
-<dialog id="dialogo-confirmar-conferencia" aria-labelledby="titulo-confirmar-decisao" aria-describedby="efeito-confirmar-decisao">
-  <h2 id="titulo-confirmar-decisao">{{ acao_apa }}?</h2>
+{% call confirmacao(id="dialogo-confirmar-conferencia", titulo=acao_apa ~ "?", titulo_id="titulo-confirmar-decisao", principal=acao_apa, cancelar="Cancelar e revisar as opções", tipo="button", descricao_id="efeito-confirmar-decisao", cancelar_attr="data-cancelar-confirmacao", confirmar_attr="data-efetivar-confirmacao") %}
   <p id="efeito-confirmar-decisao">Você registrará, como {{ fluxo.papel_conferente }}, a conferência das informações apresentadas por {{ autor_apresentacao }} em {{ data_apresentacao }}, no Registro {{ registro.codigo_lgpd }}. {{ efeito_apa }} Esta decisão registra a conferência interna e não constitui homologação ou aprovação jurídica.</p>
-  <div class="acoes-decisao-conferencia">
-    <button type="button" class="botao-secundario" data-cancelar-confirmacao autofocus>Cancelar e revisar as opções</button>
-    <button type="button" class="botao-primario" data-efetivar-confirmacao>{{ acao_apa }}</button>
-  </div>
-</dialog>
+  {% endcall %}
 <script src="{{ url_for('estaticos', path='/decisao_conferencia.js') }}"></script>
 {% else %}
 <section class="form1" aria-labelledby="titulo-confirmacao-registrada">

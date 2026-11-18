@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 {% block conteudo %}
+{% if resumo.complementos_pendentes %}<aside class="aviso-alerta">Complementos necessários antes de registrar a consolidação:<ul>{% for item in resumo.complementos_pendentes %}<li>{{ item.item }}</li>{% endfor %}</ul></aside>{% endif %}
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/filas_form2.css') }}">
 <div class="filas-form2">
 <h1>Conferência da consolidação</h1>
-<p><strong>{{ registro.codigo_lgpd }}</strong> · FORM 2 · {{ pessoa.nome }}</p>
+<p><strong>{{ registro.codigo_lgpd }}</strong> · FORM 2 · {{ pessoa.nome|identidade_demonstrativa }}</p>
 {% include '_regua_fila_form2.html' %}
 <p>Esta conferência reúne o que está salvo. Pode ser registrada mesmo com pontos em aberto, para acompanhar a evolução. Não conclui o Registro nem homologa a análise.</p>
 {% if ultima %}<article aria-label="Última conferência">
@@ -21,7 +22,7 @@
 {% for id,d in resumo.governanca_v9.get('pendencias',{}).items() %}{% if d.estado != 'vinculada' %}<section><h4>{{ d.estado }}</h4><p>{{ d.texto }}</p><p>{% for o in d.origens %}{{ o.item }} · {% endfor %}</p><p>{{ d.area or 'Destinação pendente' }} · {{ d.prazo or 'Prazo não definido' }}</p></section>{% endif %}{% else %}<p>Nenhuma pendência registrada.</p>{% endfor %}
 <p>Sem classificação não significa ausência de impedimento. A classificação impeditiva depende de deliberação institucional.</p>
 <p><a href="/form2/participacoes/{{ p.id }}/governanca?conta_id={{ conta_id|urlencode }}">Tratar pendências e retorno da origem</a></p>
-<h3>Impacto da nova origem nas manifestações</h3><p>{{ resumo.reavaliacoes_pendentes|length }} avaliação(ões) ou complemento(s) pendente(s). Manifestações históricas não são renovadas automaticamente.</p>
+<h3>Impacto da nova origem nas manifestações</h3><p>Avaliações ou complementos pendentes: {{ resumo.reavaliacoes_pendentes|length }}. Manifestações históricas não são renovadas automaticamente.</p>
 <h3>Indicações para os FORMs 3 e 4</h3>
 {% for e in resumo.encaminhamentos %}<p><strong>FORM {{ e.form }}:</strong> {{ e.resposta|join(', ') or 'Ainda não informado' }}</p>{% if e.justificativa %}<p class="texto-preservado">{{ e.justificativa }}</p>{% endif %}{% endfor %}
 <p>São indicações salvas no rascunho. Esta tela não efetua o encaminhamento.</p>
@@ -49,6 +50,6 @@
 <details><summary>Histórico das conferências · {{ historico|length }}</summary>
 {% for h in historico %}<section class="manifestacao-consolidada"><h3>Conferência {{ h.numero }}</h3>
 <p>{{ h.em }} · {{ agentes.get(h.ator_id, h.ator_id) }}</p><p class="texto-preservado">{{ h.sintese }}</p>
-<p>{{ h.resumo.consultas_abertas|length }} manifestação(ões) aguardada(s) e {{ h.resumo.itens_a_confirmar|length }} item(ns) a confirmar naquele momento.</p>
+<p>{{ h.resumo.consultas_abertas|length }} {{ 'manifestação aguardada' if h.resumo.consultas_abertas|length == 1 else 'manifestações aguardadas' }} e {{ h.resumo.itens_a_confirmar|length }} {{ 'item' if h.resumo.itens_a_confirmar|length == 1 else 'itens' }} a confirmar naquele momento.</p>
 </section>{% else %}<p>Nenhuma conferência registrada.</p>{% endfor %}</details>
 </div><script defer src="{{ url_for('estaticos', path='/consolidacao_form2.js') }}"></script>{% endblock %}

@@ -1,0 +1,12 @@
+{# Textos/efeitos pertencem ao ato; esta macro cuida apenas da apresentação. #}
+{% macro confirmacao(id, titulo, titulo_id, principal, cancelar='Cancelar', form='', tipo='submit', classe='dialogo-acao-fila', descricao_id='', cancelar_attr='data-fechar-dialogo', confirmar_attr='', classe_acoes='acoes-fila-form2', registro='') -%}
+<dialog id="{{ id }}" class="{{ classe }}" aria-labelledby="{{ titulo_id }}"{% if descricao_id %} aria-describedby="{{ descricao_id }}"{% endif %}>
+  <h2 id="{{ titulo_id }}">{{ titulo }}</h2>
+  {% if registro %}<p><strong>Registro {{ registro }}</strong></p>{% endif %}
+  {{ caller() }}
+  <div class="{{ classe_acoes }} acoes-fila-form2">
+    <button type="button" class="botao-secundario" {{ cancelar_attr }} autofocus>{{ cancelar }}</button>
+    <button type="{{ tipo }}" class="botao-primario"{% if form %} form="{{ form }}"{% endif %}{% if confirmar_attr %} {{ confirmar_attr }}{% endif %}>{{ principal }}</button>
+  </div>
+</dialog>
+{%- endmacro %}

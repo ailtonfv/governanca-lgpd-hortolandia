@@ -8,6 +8,7 @@ from zoneinfo import ZoneInfo
 import uuid
 
 from fastapi import Depends, FastAPI, Form, Query, Request
+from app.atos_interface import ato_registrado
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from app.apresentacoes_form1 import rotulo_apresentacao
@@ -77,6 +78,8 @@ app.include_router(rotas_fila_form2)
 from app.rotas_rev22_form1 import router as router_rev22_form1
 app.include_router(router_rev22_form1)
 paginas = Jinja2Templates(directory=PASTA_APP / "paginas")
+from app.identidade_demonstrativa import configurar_identidade
+configurar_identidade(paginas)
 paginas.env.filters["rotulo_apresentacao"] = rotulo_apresentacao
 paginas.env.globals["consulta_cartilha_local"] = acesso_local_cartilha
 paginas.env.filters.update(data_local=data_local, rotulo_f2=rotulo_demonstrativo)
@@ -538,6 +541,7 @@ def detalhe_registro(
             "registro": registro,
             "conta_id": conta_id,
             "mensagem": mensagem,
+            "ato_registrado": ato_registrado(sessao, request.query_params.get("ato"), conta_id, registro_id=registro_id) if mensagem and not erro else None,
             "erro": erro,
             "ingresso_na_fila": participacao_principal.entrada_em if participacao_principal else None,
             "dpo_comunicado": bool(participacao_principal and sessao.scalar(select(AvisoDpo.id).where(
@@ -664,7 +668,7 @@ def questionario_sintetico_legado(
     )
 
 
-def _voltar_ao_registro(registro_id, conta_id, resultado, sucesso, *, ancora=None):
+def _voltar_ao_registro(registro_id, conta_id, resultado, sucesso, *, ancora=None, comando_id=None):
     mensagem = (
         sucesso
         if resultado["permitido"] or sucesso.startswith("Não foi possível salvar.")
@@ -675,6 +679,8 @@ def _voltar_ao_registro(registro_id, conta_id, resultado, sucesso, *, ancora=Non
         "mensagem": mensagem,
         "erro": "0" if resultado["permitido"] else "1",
     }
+    if comando_id and resultado["permitido"]:
+        parametros["ato"] = comando_id
     fragmento = f"#{ancora}" if ancora else ""
     return RedirectResponse(
         url=f"/registros/{registro_id}?{urlencode(parametros)}{fragmento}",
@@ -744,7 +750,8 @@ def atribuir_arp_integral(
     else:
         sucesso = f"Nenhuma alteração: matrícula {arp.matricula} · {rotulo_interface(arp.nome)} já é o ARP atual."
     return _voltar_ao_registro(
-        registro_id, conta_id, resultado, sucesso, ancora="titulo-form1-integral"
+        registro_id, conta_id, resultado, sucesso, ancora="titulo-form1-integral",
+        comando_id=comando_id,
     )
 
 
@@ -770,6 +777,7 @@ def iniciar_form1_integral(
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, "Rascunho do FORM 1 iniciado.",
         ancora="titulo-proxima-providencia",
+        comando_id=comando_id,
     )
 
 
@@ -809,6 +817,7 @@ def salvar_bloco_1_integral(
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, _mensagem_salvamento(resultado, "Bloco 1 atualizado."),
         ancora=_ancora_apos_salvar_bloco(1, acao_pos_salvar, resultado["permitido"]),
+        comando_id=comando_id,
     )
 
 
@@ -862,6 +871,7 @@ async def salvar_bloco_2_integral(
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, _mensagem_salvamento(resultado, "Bloco 2 atualizado."),
         ancora=_ancora_apos_salvar_bloco(2, acao_pos_salvar, resultado["permitido"]),
+        comando_id=str(formulario.get("comando_id", ""))[:64],
     )
 
 
@@ -885,6 +895,7 @@ async def salvar_bloco_4_integral(
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, _mensagem_salvamento(resultado, "Bloco 4 atualizado."),
         ancora=_ancora_apos_salvar_bloco(4, acao_pos_salvar, resultado["permitido"]),
+        comando_id=str(formulario.get("comando_id", ""))[:64],
     )
 
 
@@ -908,6 +919,7 @@ async def salvar_bloco_5_integral(
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, _mensagem_salvamento(resultado, "Bloco 5 atualizado."),
         ancora=_ancora_apos_salvar_bloco(5, acao_pos_salvar, resultado["permitido"]),
+        comando_id=str(formulario.get("comando_id", ""))[:64],
     )
 
 
@@ -931,6 +943,7 @@ async def salvar_bloco_6_integral(
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, _mensagem_salvamento(resultado, "Bloco 6 atualizado."),
         ancora=_ancora_apos_salvar_bloco(6, acao_pos_salvar, resultado["permitido"]),
+        comando_id=str(formulario.get("comando_id", ""))[:64],
     )
 
 
@@ -952,6 +965,7 @@ async def salvar_bloco_7_integral(
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, _mensagem_salvamento(resultado, "Bloco 7 atualizado."),
         ancora=_ancora_apos_salvar_bloco(7, acao_pos_salvar, resultado["permitido"]),
+        comando_id=str(formulario.get("comando_id", ""))[:64],
     )
 
 
@@ -973,6 +987,7 @@ async def salvar_bloco_8_integral(
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, _mensagem_salvamento(resultado, "Bloco 8 atualizado."),
         ancora=_ancora_apos_salvar_bloco(8, acao_pos_salvar, resultado["permitido"]),
+        comando_id=str(formulario.get("comando_id", ""))[:64],
     )
 
 
@@ -994,6 +1009,7 @@ async def salvar_bloco_9_integral(
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, _mensagem_salvamento(resultado, "Bloco 9 atualizado."),
         ancora=_ancora_apos_salvar_bloco(9, acao_pos_salvar, resultado["permitido"]),
+        comando_id=str(formulario.get("comando_id", ""))[:64],
     )
 
 
@@ -1015,6 +1031,7 @@ async def salvar_bloco_10_integral(
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, _mensagem_salvamento(resultado, "Bloco 10 atualizado."),
         ancora=_ancora_apos_salvar_bloco(10, acao_pos_salvar, resultado["permitido"]),
+        comando_id=str(formulario.get("comando_id", ""))[:64],
     )
 
 
@@ -1043,7 +1060,7 @@ async def adicionar_destinatario_10_2_1_integral(
     sessao.commit()
     return _voltar_ao_registro(registro_id, conta_id, resultado,
                                "Destinatário incluído no rascunho com segurança.",
-                               ancora="titulo-bloco-10")
+                               ancora="titulo-bloco-10", comando_id=str(formulario.get("comando_id", ""))[:64], )
 
 
 @app.post("/registros/{registro_id}/form1-integral/bloco-10/destinatarios/{destinatario_id}/atualizar")
@@ -1062,7 +1079,7 @@ async def atualizar_destinatario_10_2_1_integral(
     sessao.commit()
     return _voltar_ao_registro(registro_id, conta_id, resultado,
                                "Destinatário atualizado no rascunho com segurança.",
-                               ancora="titulo-bloco-10")
+                               ancora="titulo-bloco-10", comando_id=str(formulario.get("comando_id", ""))[:64], )
 
 
 @app.post("/registros/{registro_id}/form1-integral/bloco-10/destinatarios/{destinatario_id}/remover")
@@ -1081,7 +1098,7 @@ async def remover_destinatario_10_2_1_integral(
     sessao.commit()
     return _voltar_ao_registro(registro_id, conta_id, resultado,
                                "Destinatário removido da visão ativa; histórico preservado.",
-                               ancora="titulo-bloco-10")
+                               ancora="titulo-bloco-10", comando_id=str(formulario.get("comando_id", ""))[:64], )
 
 
 @app.post("/registros/{registro_id}/form1-integral/bloco-11/salvar")
@@ -1105,6 +1122,7 @@ async def salvar_bloco_11_integral(
         registro_id, conta_id, resultado,
         _mensagem_salvamento(resultado, "Bloco 11 atualizado."),
         ancora=_ancora_apos_salvar_bloco(11, acao_pos_salvar, resultado["permitido"]),
+        comando_id=str(formulario.get("comando_id", ""))[:64],
     )
 
 
@@ -1120,7 +1138,7 @@ def adotar_revisao_18(
     )
     sessao.commit()
     return _voltar_ao_registro(registro_id, conta_id, resultado, "REV18 adotada neste rascunho.",
-                               ancora="titulo-bloco-11")
+                               ancora="titulo-bloco-11", comando_id=comando_id, )
 
 
 @app.post("/registros/{registro_id}/form1-integral/bloco-12/adotar-extensao")
@@ -1138,6 +1156,7 @@ def adotar_guarda_bloco_12(
         registro_id, conta_id, resultado,
         "Extensão de guarda adotada. Responda por operação; o conteúdo anterior foi preservado.",
         ancora="titulo-bloco-12",
+        comando_id=comando_id,
     )
 
 
@@ -1167,6 +1186,7 @@ async def salvar_bloco_12_integral(
         registro_id, conta_id, resultado,
         _mensagem_salvamento(resultado, "Bloco 12 atualizado."),
         ancora=_ancora_apos_salvar_bloco(12, acao_pos_salvar, resultado["permitido"]),
+        comando_id=str(formulario.get("comando_id", ""))[:64],
     )
 
 
@@ -1185,6 +1205,7 @@ def adotar_medidas_bloco_13(
         registro_id, conta_id, resultado,
         "Extensão adotada. Responda separadamente 13.2 e 13.2.1; o histórico anterior foi preservado.",
         ancora="titulo-bloco-13",
+        comando_id=comando_id,
     )
 
 
@@ -1210,6 +1231,7 @@ async def salvar_bloco_13_integral(
         registro_id, conta_id, resultado,
         _mensagem_salvamento(resultado, "Bloco 13 atualizado."),
         ancora=_ancora_apos_salvar_bloco(13, acao_pos_salvar, resultado["permitido"]),
+        comando_id=str(formulario.get("comando_id", ""))[:64],
     )
 
 
@@ -1232,6 +1254,7 @@ async def salvar_bloco_14_integral(
         registro_id, conta_id, resultado,
         _mensagem_salvamento(resultado, "Bloco 14 atualizado."),
         ancora=_ancora_apos_salvar_bloco(14, acao_pos_salvar, resultado["permitido"]),
+        comando_id=str(formulario.get("comando_id", ""))[:64],
     )
 
 
@@ -1254,6 +1277,7 @@ def salvar_bloco_3_integral(
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, _mensagem_salvamento(resultado, "Bloco 3 atualizado."),
         ancora=_ancora_apos_salvar_bloco(3, acao_pos_salvar, resultado["permitido"]),
+        comando_id=comando_id,
     )
 
 
@@ -1278,6 +1302,7 @@ async def adicionar_participante_integral(
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, "Participante do Bloco 3 adicionado.",
         ancora="titulo-bloco-3",
+        comando_id=str(formulario.get("comando_id", ""))[:64],
     )
 
 
@@ -1299,6 +1324,7 @@ def remover_participante_integral(
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, "Participante do Bloco 3 removido.",
         ancora="titulo-bloco-3",
+        comando_id=comando_id,
     )
 
 
@@ -1323,6 +1349,7 @@ def solicitar_conferencia_interna(
     return _voltar_ao_registro(
         registro_id, conta_id, resultado, sucesso,
         ancora="titulo-conferencia-interna-form1",
+        comando_id=comando_id,
     )
 
 
@@ -1415,6 +1442,7 @@ def devolver_conferencia_interna(
         registro_id, conta_id, resultado,
         "FORM 1 devolvido ao ARP para ajustes. A versão apresentada foi preservada.",
         ancora="titulo-conferencia-interna-form1",
+        comando_id=comando_id,
     )
 
 
@@ -1437,6 +1465,7 @@ def confirmar_conferencia_interna(
         registro_id, conta_id, resultado,
         "Conferência interna confirmada. Este ato não submete nem homologa o FORM 1.",
         ancora="titulo-conferencia-interna-form1",
+        comando_id=comando_id,
     )
 
 

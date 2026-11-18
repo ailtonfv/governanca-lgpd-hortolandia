@@ -21,7 +21,7 @@ window.iniciarLocalizadorForm1 = function (raiz) {
     });
     lista.hidden = !encontrados;
     estado.textContent = !busca ? 'Digite para localizar uma pergunta.'
-      : encontrados ? encontrados + ' pergunta(s) encontrada(s). Selecione o destino abaixo.'
+      : encontrados ? encontrados + (encontrados === 1 ? ' pergunta encontrada.' : ' perguntas encontradas.') + ' Selecione o destino abaixo.'
       : 'Nenhuma pergunta encontrada. Revise o número ou parte do título.';
   });
 };

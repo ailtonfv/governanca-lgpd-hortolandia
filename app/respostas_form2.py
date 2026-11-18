@@ -4,6 +4,8 @@ Somente controles explicitamente habilitados no contrato privado podem receber
 escrita. O módulo não conclui análise, não cria parecer e não encaminha pendência.
 """
 
+from app.alternativas_exclusivas import combinacao_exclusiva
+from app.complementos_form2 import falta_complemento
 from copy import deepcopy
 import re
 import json
@@ -73,6 +75,9 @@ def _definicao_bloco(numero, contrato, catalogo):
         for item in itens:
             if item["id"] in MODOS_IDENTIFICACAO:
                 item.update(edicao="habilitada", modo=MODOS_IDENTIFICACAO[item["id"]])
+    from app.classificacao_analise_form2 import classificar
+    for q in itens:
+        classificar(q)
     titulo = next((b.get("titulo", "") for b in catalogo["blocos"] if b["numero"] == numero), "")
     return {"numero": numero, "titulo": titulo, "versao": contrato["versao"], "itens": itens}
 
@@ -107,7 +112,9 @@ def _contar_perguntas_ativas(conteudo, bloco, valores, regras, ramos, demonstrat
                 ativas += 1
                 prefixo = "opcao:" if item["alternativas"] else "texto:"
                 valor = campos.get(prefixo + chave + sufixo)
-                respondidas += bool(valor.strip() if isinstance(valor, str) else valor)
+                if chave == "F2-14.3":
+                    valor = campos.get("unidade:" + chave + sufixo) or valor
+                respondidas += bool(valor.strip() if isinstance(valor, str) else valor) and not falta_complemento(item, valor if isinstance(valor, list) else [], campos.get("texto:" + chave + sufixo))
     return respondidas, ativas
 
 
@@ -138,7 +145,7 @@ def marcas_salvas_form2(conteudo):
         pendentes.add(sinal["item_id"].split(".")[0].removeprefix("F2-"))
     for bloco, campos in conteudo.get(RASCUNHO, {}).items():
         for chave, valor in campos.items():
-            if chave.startswith(("texto:", "opcao:")) and (valor.strip() if isinstance(valor, str) else valor):
+            if chave.startswith(("texto:", "opcao:", "unidade:")) and (valor.strip() if isinstance(valor, str) else valor):
                 salvos.add(bloco)
             if chave.startswith("opcao:") and "A_CONFIRMAR" in valor:
                 pendentes.add(bloco)
@@ -173,7 +180,7 @@ def estados_regua_form2(conteudo, ramos=(), *, demonstrativo=True):
                                 "percentual": round(100 * respondidas / ativas, 2)}
             com_respostas_ativas.add(bloco)
             situacao[bloco] = ("✓ Todas as perguntas ativas respondidas" if respondidas == ativas
-                               else f"◐ Em preenchimento · {respondidas} de {ativas} perguntas ativas")
+                               else f"◐ Em preenchimento · {respondidas} de {ativas} {'pergunta ativa' if ativas == 1 else 'perguntas ativas'}")
     return {**marcas, "com_respostas_ativas": com_respostas_ativas, "situacao": situacao, "progresso": progresso}
 
 
@@ -181,7 +188,7 @@ def definicao_revisao(numero):
     return montar_bloco(definicao_bloco(numero))
 
 
-def aplicar_revisao(conteudo, bloco, campos, ramos=(), *, demonstrativo=False):
+def aplicar_revisao(conteudo, bloco, campos, ramos=(), *, demonstrativo=False, unidades_permitidas=()):
     """Guarda o ensaio e os comentários à parte das respostas homologadas."""
     definicao = definicao_revisao(bloco)
     if not definicao["itens"]:
@@ -208,6 +215,11 @@ def aplicar_revisao(conteudo, bloco, campos, ramos=(), *, demonstrativo=False):
             limite = 2000
         elif q["edicao"] in ("habilitada", "consulta") or bloco == 1 or (not demonstrativo and (bloco in (3, 4, 5, 10) or q["edicao"] == "bloqueada_d11")):
             raise ValueError("Este campo admite somente comentários na revisão.")
+        elif tipo == "unidade" and item_id == "F2-14.3":
+            if len(valores) != 1 or (valores[0] and valores[0] not in unidades_permitidas):
+                raise ValueError("Escolha uma Secretaria ativa da lista.")
+            revisao[nome] = valores[0]
+            continue
         elif tipo == "principal" and item_id == "F2-14.3.1":
             if len(valores) != 1:
                 raise ValueError("Selecione um único destino principal.")
@@ -218,11 +230,11 @@ def aplicar_revisao(conteudo, bloco, campos, ramos=(), *, demonstrativo=False):
             permitidas = {a["codigo"] for a in q["alternativas"]}
             multipla = "múltipla" in q["controle"].lower()
             if (not set(opcoes) <= permitidas or len(set(opcoes)) != len(opcoes)
-                    or (not multipla and len(opcoes) > 1) or (len(opcoes) > 1 and any(a["codigo"] in opcoes and a["rotulo"].strip().casefold() == "a confirmar" for a in q["alternativas"]))):
+                    or (not multipla and len(opcoes) > 1) or combinacao_exclusiva(opcoes, q["alternativas"])):
                 raise ValueError(f"Confira a seleção de {chave}.")
             revisao[nome] = opcoes
             continue
-        elif tipo == "texto" and (not q["alternativas"] or "texto" in q["controle"].lower()
+        elif tipo == "texto" and (q.get("complementos_necessarios") or not q["alternativas"] or "texto" in q["controle"].lower()
                                   or any(a["complemento"].startswith("Texto condicionado") for a in q["alternativas"])):
             limite = limite_texto_revisao(q)
         else:
@@ -310,8 +322,8 @@ def _validar_valor(item, valor):
     if item["modo"] == "multipla":
         if not isinstance(valor, list) or len(valor) != len(set(valor)) or any(v not in permitidos for v in valor):
             raise ValueError(f"Seleção múltipla inválida para {item['id']}.")
-        if len(valor) > 1 and any(a["codigo"] in valor and a["rotulo"].strip().casefold() == "a confirmar" for a in item["alternativas"]):
-            raise ValueError("A confirmar deve ser exclusiva das alternativas substantivas.")
+        if combinacao_exclusiva(valor, item["alternativas"]):
+            raise ValueError("A confirmar deve ser exclusiva." if "A_CONFIRMAR" in valor else "A alternativa exclusiva não pode ser combinada com outras respostas.")
         return list(valor)
     raise ValueError(f"O controle de {item['id']} não está habilitado para escrita.")
 

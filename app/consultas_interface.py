@@ -102,8 +102,9 @@ def instrucao_para_interface(campo):
 
 
 def rotulo_interface(valor):
-    """Mantém o nome cadastrado, inclusive a identificação de dado fictício."""
-    return valor
+    """Rotula a identidade na apresentação, sem modificar o cadastro."""
+    from app.identidade_demonstrativa import nomes_em_texto
+    return nomes_em_texto(valor)
 
 
 EVENTOS_SALVAMENTO_BLOCO_FORM1_INTEGRAL = {

@@ -1,3 +1,4 @@
+from app.unidades_interface_form2 import secretarias_ativas
 """Fronteira HTTP demonstrativa. Nenhuma rota de habilitação ou submissão."""
 from pathlib import Path
 from urllib.parse import urlencode
@@ -26,6 +27,8 @@ from app.contrato_form2_respostas import carregar_contrato
 from app.respostas_form2 import estados_regua_form2, CADERNO_REV20, MODOS_IDENTIFICACAO, definicao_revisao, definicao_bloco, limite_texto_revisao, projetar_bloco, _ativa
 router = APIRouter()
 paginas = Jinja2Templates(directory=Path(__file__).parent / "paginas")
+from app.identidade_demonstrativa import configurar_identidade
+configurar_identidade(paginas)
 paginas.env.filters["rotulo_apresentacao"] = rotulo_apresentacao
 paginas.env.globals["titulos_blocos_form2"] = titulos_blocos_form2
 paginas.env.policies["json.dumps_kwargs"] = {**paginas.env.policies["json.dumps_kwargs"], "ensure_ascii": False}
@@ -173,7 +176,7 @@ async def revisao_form2(request: Request, registro_id: str, preparacao_id: str, 
                 pendencias.append(chave)
     return paginas.TemplateResponse(request=request, name="form2_revisao.html", status_code=409 if erro else 200,
         headers={"Cache-Control": "private, no-store"},
-        context={"registro": dados["registro"], "prep": prep, "bloco": definicao, "valores": valores,
+        context={"secretarias_selecao": secretarias_ativas(sessao), "registro": dados["registro"], "prep": prep, "bloco": definicao, "valores": valores,
                  "estados_regua": estados_regua_form2(prep.conteudo, ramos, demonstrativo=False),
                  "versao": versao, "erro": erro, "comando_id": str(uuid.uuid4()), "conta_id": conta_id,
                  "ativa": ativa, "pendencias": pendencias,

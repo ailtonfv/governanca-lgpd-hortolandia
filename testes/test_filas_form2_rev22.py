@@ -204,7 +204,8 @@ def test_confirmacao_salvar_bloco_sem_consolidacao(sessao):
     response = client.post(url.replace('/blocos/1', '/blocos/2'), data={
         "conta_id":"CONTA-B1", "comando_id":"MSG-S2", "versao":"3"})
     assert response.status_code == 200
-    assert 'role="status">Bloco salvo.</p>' in response.text
+    assert 'role="status">Bloco salvo.' in response.text
+    assert 'Operação registrada em ' in response.text and 'Servidor Beta (fictício)' in response.text
     assert 'Complementação solicitada à origem.' not in response.text
     assert 'id="confirmacao-salvamento"' not in client.get(url+'?conta_id=CONTA-B1&salvo=MSG-S').text
 

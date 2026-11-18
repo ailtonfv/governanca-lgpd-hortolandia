@@ -15,7 +15,7 @@
     {% for unidade in unidades %}<option value="{{ unidade.id }}" {% if valores.unidade_id == unidade.id %}selected{% endif %}>{{ unidade.nome }}</option>{% endfor %}
   </select>
   {% endif %}
-  <p><strong>Agente identificado:</strong> {{ identidade.matricula }} — {{ identidade.nome }}</p>
+  <p><strong>Agente identificado:</strong> {{ identidade.matricula }} — {{ identidade.nome|identidade_demonstrativa }}</p>
   {% if unidades %}<p class="ajuda">A Secretaria responsável coordena o Registro. Outras Secretarias poderão participar do tratamento.</p>{% endif %}
 </section>
 

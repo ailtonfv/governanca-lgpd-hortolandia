@@ -1,7 +1,8 @@
+{% from '_confirmacao_ato.html' import confirmacao %}
 {% extends 'base.html' %}{% block conteudo %}
 <link rel="stylesheet" href="{{ url_for('estaticos',path='/filas_form2.css') }}?v=20261112-aviso-apa">
 <div class="filas-form2 form1-rev22"><div class="conteudo-bloco-form1"><h1>FORM 1 · Bloco {{ bloco }}</h1>
-<p><strong>{{ registro.codigo_lgpd }}</strong> · {{ identidade.nome }}</p>
+<p><strong>{{ registro.codigo_lgpd }}</strong> · {{ identidade.nome|identidade_demonstrativa }}</p>
 <div class="acoes-fila-form2"><a class="botao-link-secundario" href="/painel?conta_id={{ conta_id|urlencode }}">Voltar ao Painel</a></div>
 {% if bloco == 2 %}<p><a href="/registros/{{ registro.id }}/unidade-retorno?conta_id={{ conta_id|urlencode }}">Unidade de retorno de Ouvidoria/e-SIC · definição pelo APA</a></p>{% endif %}
 {% if (not adotada or bloco == 1) and orientacao_levantamento %}
@@ -45,11 +46,8 @@
 <button type="submit" form="respostas-bloco" class="botao-link">Salvar bloco</button>
 <button id="apresentacao-apa" type="button" data-abrir-dialogo="dialogo-form-apresentar-apa" form="form-apresentar-apa" class="botao-link" {% if not salvamento_confirmado %}hidden{% endif %}>Apresentar ao APA para conferência</button>
 </div>
-<dialog class="dialogo-acao-fila" id="dialogo-form-apresentar-apa" aria-labelledby="titulo-form-apresentar-apa">
-  <h2 id="titulo-form-apresentar-apa">Apresentar o FORM 1 ao APA?</h2><p>Blocos sem respostas salvas: {{ 14 - respondidos|length }} de 14. O APA receberá esta apresentação para conferência.</p>
-  <button type="button" data-fechar-dialogo autofocus>Cancelar</button>
-  <button type="submit" class="botao-primario" form="form-apresentar-apa">Apresentar ao APA</button>
-</dialog>
+{% call confirmacao(id="dialogo-form-apresentar-apa", titulo="Apresentar o FORM 1 ao APA?", titulo_id="titulo-form-apresentar-apa", principal="Apresentar ao APA", cancelar="Cancelar", form="form-apresentar-apa", tipo="submit", cancelar_attr="data-fechar-dialogo", registro=registro.codigo_lgpd) %}<p>Blocos sem respostas salvas: {{ 14 - respondidos|length }} de 14. O APA receberá esta apresentação para conferência.</p>
+  {% endcall %}
 <script defer src="/estaticos/confirmar_acao_fila.js"></script>
 {% endif %}</div>
 <script>

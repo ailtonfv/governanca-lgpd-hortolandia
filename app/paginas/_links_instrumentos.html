@@ -1,5 +1,5 @@
 {% macro identificacao_servidor(pessoa) -%}
-{{ pessoa.nome }} — {{ pessoa.matricula }}
+{{ pessoa.nome|identidade_demonstrativa }} — {{ pessoa.matricula }}
 {%- endmacro %}
 
 {% macro situacao_preparacao(trabalhada) -%}

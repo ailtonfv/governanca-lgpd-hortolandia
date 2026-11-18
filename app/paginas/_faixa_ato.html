@@ -1,0 +1,3 @@
+{% macro faixa_ato(mensagem, ato=none, id='', erro=false, classe='') -%}
+{% if mensagem %}<p{% if id %} id="{{ id }}"{% endif %} class="mensagem {{ 'mensagem-erro' if erro else 'mensagem-sucesso' }}{% if classe %} {{ classe }}{% endif %}" aria-live="{{ 'assertive' if erro else 'polite' }}" role="{{ 'alert' if erro else 'status' }}">{{ mensagem }}{% if ato and not erro %}<br><span>Operação registrada em {{ ato.quando }} por {{ ato.autor }}.</span>{% endif %}</p>{% endif %}
+{%- endmacro %}

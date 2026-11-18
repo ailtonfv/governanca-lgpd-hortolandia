@@ -33,4 +33,7 @@ def problema_exclusividade_multisselecao(
     if "Não se aplica" in alternativas and "Não se aplica" in valores and len(valores) != 1:
         return f"{campo_id}: Não se aplica não pode coexistir com outra alternativa"
 
+    from app.alternativas_exclusivas import exclusiva
+    if len(valores) > 1 and any(v in alternativas and exclusiva(v) for v in valores):
+        return f"{campo_id}: alternativa exclusiva não pode coexistir com outra alternativa"
     return None
