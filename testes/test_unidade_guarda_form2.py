@@ -126,5 +126,8 @@ def test_edicao_local_renderiza_enunciados_validados(sessao):
     assert len(perguntas) == 4 and all(q["enunciado"] in pagina.text for q in perguntas)
     for questao in perguntas:
         for alternativa in questao["escolha_documental"]["alternativas"]:
-            assert alternativa in pagina.text
+            # D9, 18/11/2026: rótulo deliberado; demais opções continuam integrais.
+            esperado = ("Requer análise técnica" if questao["id"] in {"F2-2.9", "F2-2.9.3"}
+                        and alternativa.startswith("Requer análise") else alternativa)
+            assert esperado in pagina.text
     assert "Lei nº 8.159/1991" in pagina.text
