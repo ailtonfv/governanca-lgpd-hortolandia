@@ -49,6 +49,18 @@ class IdentidadeForms34(Base):
     )
 
 
+class ReferenciaRestritaForms34(Base):
+    """Revisões restritas, separadas do histórico geral e da aprendizagem."""
+    __tablename__ = 'referencia_restrita_forms34'
+    id = Column(String(36), primary_key=True)
+    identidade_id = Column(String(36), ForeignKey('identidade_forms34.id'), nullable=False)
+    versao = Column(Integer, nullable=False)
+    conteudo = Column(JSON, nullable=False)
+    autor_id = Column(String(50), ForeignKey('pessoa.id'), nullable=False)
+    criado_em = Column(DateTime(timezone=True), nullable=False)
+    __table_args__ = (UniqueConstraint('identidade_id', 'versao'),)
+
+
 class Comando(Base):
     """Um pedido do servidor (ex.: "validar o REG-0003"). DA-26, item 3.
 

@@ -11,6 +11,17 @@ from app.modelos import ReferenciaParticipacaoForms34, IdentidadeForms34
 def aplicar(motor):
     if not motor.url.database or not motor.url.database.endswith('_teste'):
         raise RuntimeError("Lote 11: executar somente na cópia terminada em _teste.")
+    _instalar(motor)
+
+
+def aplicar_copia_8013(motor):
+    """Exceção nominal autorizada por Ailton para a vistoria do Lote 12."""
+    if motor.url.database != "lgpd_lote12_3be0186939a7":
+        raise RuntimeError("Migração da 8013 recusada: nome diferente da cópia autorizada.")
+    _instalar(motor)
+
+
+def _instalar(motor):
     with motor.begin() as conexao:
         if conexao.dialect.name != 'postgresql':
             raise RuntimeError("A base 3/4 exige PostgreSQL para integridade e concorrência.")
