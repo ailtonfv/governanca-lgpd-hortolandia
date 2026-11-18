@@ -1012,7 +1012,7 @@ As decisões abaixo registram a deliberação de Ailton, DPO. Vigência da regra
 
 **Data** — 17/11/2026
 
-**Situação** — Decidida; implementação no próximo lote de código
+**Situação** — Decidida; implementada na branch correcoes-lote9 em 18/11/2026, aguardando vistoria e merge
 
 **Decisor** — Ailton, DPO
 
@@ -1022,9 +1022,9 @@ As decisões abaixo registram a deliberação de Ailton, DPO. Vigência da regra
 
 **Alternativas consideradas** — Não autorizar autoindicação nem flexibilizar a segregação por falta de outro servidor habilitado.
 
-**Consequências / efeito no sistema** — Implementação no próximo lote de código. Esta revisão documental não altera permissões, listas, estados nem validações da aplicação. Não confundir a definição de quem fará a análise com a definição de quem fará a conferência do FORM 1.
+**Consequências / efeito no sistema** — Implementação do Lote 9 no domínio e na seleção de candidatos, com recusa no servidor e estado informativo nas filas e no painel do DPO. Preservada a segregação por pessoa canônica já vigente. Não confundir a definição de quem fará a análise com a definição de quem fará a conferência do FORM 1.
 
-**Documentos afetados** — SAD 10 e Cartilha, seção 3.1. ADR 000 consultado como referência à G-17, não alterado. Código a ajustar no próximo lote.
+**Documentos afetados** — SAD 10 e Cartilha, seção 3.1. ADR 000 consultado como referência à G-17, não alterado. Código na branch correcoes-lote9; aceite humano pendente.
 
 ### Registro macro — reafirmação de 15/11/2026
 
@@ -1093,3 +1093,19 @@ SAD 01 REV06; SAD 02 REV17; SAD 03 REV11; SAD 04 REV12; SAD 05 REV11; SAD 06 REV
 Lei nº 13.709/2018 (LGPD); Resoluções CD/ANPD nº 15/2024 e nº 18/2024.
 
 Decretos Municipais nº 4.818/2021 (revogado), nº 4.822/2021, nº 4.914/2021, nº 5.200/2023 e nº 5.357/2024; Lei Municipal nº 4.148/2023.
+
+
+## Registro de execução das decisões do Lote 9 — 18/11/2026
+
+Decisor: Ailton, DPO, instruções de 18/11/2026 às 07h43. Escopo demonstrativo, branch `correcoes-lote9`; sem aprovação de produção e sem merge até autorização própria. O documento restrito de origem permanece na entrega local.
+
+- **DA-51:** regra implementada, preservando a separação entre análise do FORM 2 e conferência do FORM 1 (P79). Nenhuma exceção por falta de agente foi criada.
+- **D1:** os 18 complementos aprovados admitem salvamento parcial. Enquanto faltarem, exibem orientação, não contam como pergunta respondida e impedem registrar a consolidação demonstrativa. Isso não classifica respostas “A confirmar” como impeditivas. Conclusão institucional permanece bloqueada.
+- **D3:** alternativas mutuamente exclusivas são verificadas no domínio dos dois FORMs e na interação. Identificadores e respostas históricas permanecem intactos.
+- **D9/D2:** distinguir análise jurídica e técnica onde a classificação é clara. Casos mistos são relacionados no relatório local para decisão. Atalhos apenas preparam consulta; o AAL decide e confirma seu envio.
+- **D8/D10/D11:** alterações de apresentação aprovadas, sem renumerar campos nem estender selo jurídico à grade inteira por inferência.
+- **C8:** seleção de Secretaria da lista existente e função em texto curto; não foi inventado cadastro institucional de funções.
+- **D5 — limites provisórios:** 99 conjuntos e limites de texto curto de 200, longo de 1000 e comentário de 2000 caracteres são limites provisórios da PoC, não regras de produção. Exceções explícitas do catálogo continuam preservadas. Este registro não altera código nem aprova limites definitivos.
+- **D12:** fontes oficiais da ANPD propostas somente no relatório local; inclusão nas telas depende de aprovação de Ailton.
+
+U1/U2/U3 consolidam apresentação e identificação demonstrativa. Não alteram autoria persistida, efeitos dos atos ou permissões. Cartilha, palestra, catálogo privado e Documento-Mestre não foram modificados por este registro.
