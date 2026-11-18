@@ -1,6 +1,6 @@
 {% from '_identificador_pergunta.html' import codigo_pergunta %}
 {% extends "base.html" %}
-{% block titulo %}Rascunho do FORM 2 · Bloco {{ bloco.numero }}{% endblock %}
+{% block titulo %}Rascunho do FORM 2 · Bloco {{ bloco.numero }}<script defer src="/estaticos/complementos_form2.js"></script>{% endblock %}
 {% block conteudo %}
 {% from '_condicoes_form2.html' import gatilhos, ajuda %}
 
@@ -62,6 +62,7 @@
 {% if not q.alternativas or 'texto' in q.controle|lower or q.alternativas|selectattr('complemento','in',['Texto condicionado (R13)'])|list %}
 <label>{{ 'Complemento' if q.alternativas else q.controle }}<textarea name="{{ txt }}" rows="2" maxlength="{{ limite_texto(q) }}">{{ valores.get(txt,'') }}</textarea></label>
 {% endif %}
+{% include '_complemento_necessario.html' %}
 {% if q.id == 'F2-14.3.1' %}<label>Destino principal<select name="principal:{{ q.id }}{{ sufixo }}"><option value="">A definir</option>{% for a in q.alternativas %}<option value="{{ a.codigo }}"{% if valores.get('principal:' ~ q.id ~ sufixo) == a.codigo %} selected{% endif %}>{{ a.rotulo }}</option>{% endfor %}</select></label>{% endif %}
 </fieldset>
 {% if repetivel %}</div>{% endif %}
@@ -75,4 +76,4 @@
 <button type="button" id="descartar-alteracoes">Descartar alterações</button><button type="submit" class="botao-primario">Salvar rascunho do Bloco {{ numero }}</button>
 </form></div>
 <script defer src="{{ url_for('estaticos', path='/form2_revisao.js') }}"></script>
-{% endblock %}
+<script defer src="/estaticos/complementos_form2.js"></script>{% endblock %}

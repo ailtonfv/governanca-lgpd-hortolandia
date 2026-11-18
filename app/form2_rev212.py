@@ -82,6 +82,8 @@ def montar_bloco(base):
             q.update(edicao="consulta", alternativas=[], controle="Consulta automática")
         if chave in D11:
             q["edicao"] = "bloqueada_d11"
+        from app.complementos_form2 import codigos_com_complemento
+        q["complementos_necessarios"] = codigos_com_complemento(q)
         itens.append(q)
     return {**base, "itens": itens, "versao": "REV21.2"}
 

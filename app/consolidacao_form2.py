@@ -1,4 +1,5 @@
 """Conferência demonstrativa versionada; não encerra nem homologa o FORM 2."""
+from app.complementos_form2 import complementos_pendentes
 from copy import deepcopy
 import json
 import re
@@ -103,6 +104,7 @@ def montar_resumo(fontes):
                 "principal": rotulos.get("F2-14.3.1", {}).get(principal, principal)})
     pendencias_declaradas.sort(key=lambda p: int(p["conjunto"]))
     return {
+        "complementos_pendentes": complementos_pendentes(conteudo, fontes.get("ramos_origem", [])),
         "governanca_v9": fontes.get("governanca_v9", {}),
         "reavaliacoes_pendentes": [i for i in fontes.get("governanca_v9", {}).get("impactos", {}).values()
             if i["estado"] in {"pendente", "complemento_necessario"}],
@@ -157,6 +159,8 @@ def registrar(sessao, *, conta_id, comando_id, participacao_id, versao, hash_fon
     fontes = _fontes(sessao, p, bloquear=True)
     if _hash(fontes) != hash_fontes:
         raise ValueError("Respostas ou manifestações mudaram. Atualize a conferência antes de registrar.")
+    if complementos_pendentes(fontes["conteudo"], fontes["ramos_origem"]):
+        raise ValueError("Preencha os complementos necessários antes de registrar a consolidação.")
     anterior = (p.conteudo or {}).get(CHAVE, {})
     retrato = {"numero": anterior.get("numero", 0) + 1, "em": agora().isoformat(),
         "ator_id": pessoa.id, "sintese": sintese.strip(), "hash_fontes": _hash(fontes),

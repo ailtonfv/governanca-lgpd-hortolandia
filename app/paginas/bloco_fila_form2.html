@@ -23,6 +23,7 @@
 {% set guias = bloco.itens|map(attribute="fontes_publicas")|sum(start=[])|unique(attribute="url")|list %}
 {% if guias %}<aside id="apoio-anpd"><h2>Apoio da ANPD</h2><ul>{% for guia in guias %}<li><a href="{{ guia.url }}" target="_blank" rel="noopener noreferrer">{{ guia.titulo }}</a></li>{% endfor %}</ul></aside>{% endif %}
 </details><p class="aviso-dados">Não informe nomes, CPF, protocolos de atendimento ou dados de casos concretos.</p>
+{% if numero == 14 and complementos_pendentes %}<aside class="aviso-alerta"><p>Há complementos necessários antes de registrar a consolidação.</p><ul>{% for item in complementos_pendentes %}<li><a href="{{ item.bloco }}?conta_id={{ conta_id|urlencode }}#{{ item.ancora }}">{{ item.item }}</a></li>{% endfor %}</ul></aside>{% endif %}
 {% include "_saida_bloco_form2.html" %}<form method="post" id="revisao-bloco"><input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="comando_id" value="{{ comando_id }}"><input type="hidden" name="versao" value="{{ p.versao }}">
 <fieldset {% if p.responsavel_id != pessoa.id or p.estado != 'em_atendimento' %}disabled{% endif %}>
 {% from '_condicoes_form2.html' import gatilhos, ajuda %}
@@ -115,6 +116,7 @@
 <label>Prazo ou referência temporal<input data-valor-temporal name="{{ txt }}" type="{{ 'text' if modo_texto else 'date' }}" maxlength="200" value="{{ valor_temporal }}"></label></div>
 {% else %}<label>{{ 'Complemento' if q.alternativas else '' }}<textarea aria-label="{{ q.enunciado }}" name="{{ txt }}" rows="2" maxlength="{{ limite_texto(q) }}">{{ valores.get(txt,'') }}</textarea></label>{% endif %}
 {% endif %}
+{% include '_complemento_necessario.html' %}
 {% if q.id == 'F2-14.3.1' %}<label>Destino principal<select name="principal:{{ q.id }}{{ sufixo }}"><option value="">A definir</option>{% for a in q.alternativas %}<option value="{{ a.codigo }}"{% if valores.get('principal:' ~ q.id ~ sufixo) == a.codigo %} selected{% endif %}>{{ a.rotulo }}</option>{% endfor %}</select></label>{% endif %}
 </fieldset>
 {% if repetivel %}</div>{% endif %}
@@ -126,4 +128,4 @@
 </fieldset>
 {% if q.id == "F2-3.10.1" %}</section>{% endif %}
 {% endfor %}
-{% endif %}<div class="acoes-fila-form2"><button type="button" id="descartar-alteracoes">Descartar alterações</button><button type="submit" class="botao-primario">Salvar bloco</button></div></fieldset></form></div><script defer src="{{ url_for('estaticos', path='/form2_revisao.js') }}"></script><script defer src="{{ url_for('estaticos', path='/campos_form2.js') }}"></script>{% endblock %}
+{% endif %}<div class="acoes-fila-form2"><button type="button" id="descartar-alteracoes">Descartar alterações</button><button type="submit" class="botao-primario">Salvar bloco</button></div></fieldset></form></div><script defer src="{{ url_for('estaticos', path='/form2_revisao.js') }}"></script><script defer src="{{ url_for('estaticos', path='/campos_form2.js') }}"></script><script defer src="/estaticos/complementos_form2.js"></script>{% endblock %}

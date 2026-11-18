@@ -521,6 +521,7 @@ async def encaminhar(request: Request, sessao: Session = Depends(sessao_fila)):
 def bloco_fila(request: Request, participacao_id: str, bloco: int, conta_id: str,
                sessao: Session = Depends(sessao_fila)):
     from app.respostas_form2 import projetar_bloco, definicao_revisao, limite_texto_revisao
+    from app.complementos_form2 import complementos_pendentes
     from app.confirmacoes_form2 import itens_a_confirmar
     from app.fatos_abertura_form2 import projetar_fatos_abertura
     from app.campos_form2 import data_exata
@@ -574,6 +575,7 @@ def bloco_fila(request: Request, participacao_id: str, bloco: int, conta_id: str
         "perguntas_origem": [q for q in origem["perguntas"] if q["respondida"]],
         "revogacao": [a["rotulo"] for q in definicao_revisao(5)["itens"] if q["id"] == "F2-5.7" for a in q["alternativas"] if a["codigo"] in valores.get("opcao:F2-5.7", [])],
         "complementacao": conteudo.get("respostas_etapa1", {}).get("F2-1.3.1"),
+        "complementos_pendentes": complementos_pendentes(conteudo, ramos),
         "confirmacoes_por_bloco": itens_a_confirmar(conteudo, ramos),
         "valores": conteudo.get(RASCUNHO, {}).get(str(bloco), {}),
         "ativa": lambda item, sufixo: aplicavel(item, sufixo, valores, ramos, regras),

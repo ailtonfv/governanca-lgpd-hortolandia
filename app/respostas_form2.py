@@ -4,6 +4,7 @@ Somente controles explicitamente habilitados no contrato privado podem receber
 escrita. O módulo não conclui análise, não cria parecer e não encaminha pendência.
 """
 
+from app.complementos_form2 import falta_complemento
 from copy import deepcopy
 import re
 import json
@@ -107,7 +108,7 @@ def _contar_perguntas_ativas(conteudo, bloco, valores, regras, ramos, demonstrat
                 ativas += 1
                 prefixo = "opcao:" if item["alternativas"] else "texto:"
                 valor = campos.get(prefixo + chave + sufixo)
-                respondidas += bool(valor.strip() if isinstance(valor, str) else valor)
+                respondidas += bool(valor.strip() if isinstance(valor, str) else valor) and not falta_complemento(item, valor if isinstance(valor, list) else [], campos.get("texto:" + chave + sufixo))
     return respondidas, ativas
 
 

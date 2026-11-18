@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block conteudo %}
+{% if resumo.complementos_pendentes %}<aside class="aviso-alerta">Complementos necessários antes de registrar a consolidação:<ul>{% for item in resumo.complementos_pendentes %}<li>{{ item.item }}</li>{% endfor %}</ul></aside>{% endif %}
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/filas_form2.css') }}">
 <div class="filas-form2">
 <h1>Conferência da consolidação</h1>
