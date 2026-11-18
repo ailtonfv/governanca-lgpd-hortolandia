@@ -10,10 +10,6 @@ class Base(DeclarativeBase):
     """Base comum de todas as tabelas da PoC."""
 
 
-from app.integridade_forms34 import registrar_protecao
-registrar_protecao(Base.metadata)
-
-
 class ReferenciaParticipacaoForms34(Base):
     """Base técnica imutável. Não é fila, ingresso ou atribuição de competência."""
     __tablename__ = "referencia_participacao_forms34"

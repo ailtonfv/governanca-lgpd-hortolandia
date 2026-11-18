@@ -20,6 +20,12 @@ from app import catalogo_forms34 as catalogo
 from testes.test_filas_form2_rev22 import origem
 
 
+@pytest.fixture(scope='module', autouse=True)
+def protecoes_por_migracao_explicita(esquema):
+    from migracoes.base_forms34 import aplicar
+    aplicar(motor)
+
+
 @pytest.fixture
 def fonte(sessao):
     # Arrange: origem válida criada exclusivamente pelos fluxos já existentes.

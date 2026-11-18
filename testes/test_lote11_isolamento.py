@@ -1,12 +1,10 @@
 """Isolamento da migração 3/4; alterações destrutivas só na cópia _teste."""
-from uuid import uuid4
-
 import pytest
 from sqlalchemy import select, text
 from sqlalchemy.exc import IntegrityError
 
 from app.banco import motor
-from app.modelos import Evento, ParticipacaoForm2
+from app.modelos import Base, Evento, ParticipacaoForm2
 from app.eventos import verificar_cadeia
 from migracoes.base_forms34 import aplicar
 from testes.test_filas_form2_rev22 import origem
@@ -40,6 +38,41 @@ def test_sql_legado_sem_nova_restricao(sessao, cadeia, operacao):
     sessao.expire_all()
     assert sessao.get(Evento, eid) is not None
     assert verificar_cadeia(sessao, cid)[0]
+
+
+def test_create_all_nao_instala_protecoes():
+    # Arrange: remover apenas triggers do lote, dentro da cópia _teste.
+    assert motor.url.database.endswith('_teste')
+    with motor.begin() as c:
+        for tabela, trigger in [('evento', 'proteger_evento_forms34'),
+                                ('identidade_forms34', 'proteger_forms34'),
+                                ('referencia_participacao_forms34', 'proteger_forms34')]:
+            c.execute(text(f'DROP TRIGGER IF EXISTS {trigger} ON {tabela}'))
+    try:
+        # Act: create_all sobre banco com tabelas existentes também não instala.
+        Base.metadata.create_all(motor)
+        # Assert: só a migração explícita reinstala os três triggers.
+        with motor.connect() as c:
+            assert c.scalar(text("SELECT count(*) FROM pg_trigger WHERE tgname IN "
+                "('proteger_evento_forms34','proteger_forms34')")) == 0
+        aplicar(motor)
+        with motor.connect() as c:
+            assert c.scalar(text("SELECT count(*) FROM pg_trigger WHERE tgname IN "
+                "('proteger_evento_forms34','proteger_forms34')")) == 3
+    finally:
+        aplicar(motor)
+
+
+@pytest.mark.parametrize('banco', [None, 'demonstracao', 'lgpd_lote9_ficticio',
+                                  'lgpd_lote11_ficticio', 'teste_nao_sufixo'])
+def test_migracao_recusa_banco_sem_sufixo_antes_de_conectar(banco):
+    from types import SimpleNamespace
+    # begin() falha se a guarda tentar abrir conexão no banco proibido.
+    def conexao_proibida():
+        raise AssertionError('Não pode conectar')
+    falso = SimpleNamespace(url=SimpleNamespace(database=banco), begin=conexao_proibida)
+    with pytest.raises(RuntimeError, match='_teste'):
+        aplicar(falso)
 
 
 @pytest.mark.parametrize('form', [3, 4])
