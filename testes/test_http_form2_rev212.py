@@ -11,6 +11,7 @@ from app.respostas_form2 import aplicar_revisao
 
 
 def test_percurso_rascunho_http(monkeypatch):
+    monkeypatch.setattr(rotas, "secretarias_ativas", lambda sessao: [])
     prep = SimpleNamespace(id="FICTICIO-P", versao_rascunho=1, conteudo={
         "revisao_blocos_rev20": {"13": {"texto:F2-13.12": "Local fictício da REV20"}}
     })

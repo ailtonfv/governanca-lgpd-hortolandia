@@ -31,7 +31,6 @@
 {% set fatos = fatos_origem.get('respostas', {}) %}
 {% set unidade_origem = fatos.get('2.4.2') if fatos.get('2.4') == 'Não' else fatos.get('2.3') %}
 {% for q in bloco.itens %}<fieldset id="{{ q.id }}" {% if q.edicao == "habilitada" %}{{ gatilhos(q) }}{% endif %} {% if q.edicao == "habilitada" and not q.ativa %}disabled{% endif %}><legend>{{ q.id }} · {{ q.enunciado|replace("na Seção 2","no bloco 2")|replace("Seção 2","Bloco 2") }}</legend>
-{% include '_atalho_consulta_form2.html' %}
 {% if q.edicao == 'habilitada' %}{{ ajuda(q, q.ativa) }}{% endif %}
 {% if q.id == 'F2-1.2' %}<p>Secretaria do Registro: <strong>{{ secretaria.nome }}</strong>.</p>{% endif %}
 {% if q.id in ('F2-2.1', 'F2-2.9') %}<aside><strong>No FORM 1 · {{ rotulo_origem }}</strong>
@@ -43,6 +42,7 @@
 {% for chave, rotulo in [('12.1.1','Prazo praticado'), ('12.1.2','Unidade do prazo'), ('12.1.3','Referência utilizada')] %}
 {% for item in perguntas_origem if item.id == chave %}<p>{{ rotulo }} (F1-{{ chave }}){% if item.conjunto %} · conjunto {{ item.conjunto }}{% endif %} — {{ item.valor|join(', ') if item.valor is sequence and item.valor is not string and item.valor is not mapping else item.valor }}{% set complemento = item.complemento if item.conjunto else fatos_origem.get("complementos", {}).get(chave) %}{% if complemento %} · {{ complemento }}{% endif %}</p>
 {% else %}<p>{{ rotulo }} (F1-{{ chave }}) — Sem informação nesta apresentação.</p>{% endfor %}{% endfor %}{% endif %}{% endif %}</aside>{% endif %}
+{% include '_atalho_consulta_form2.html' %}
 {% if q.id == 'F2-1.2.1' %}<p>Unidade informada na {{ rotulo_origem }} do FORM 1: {{ unidade_origem or 'Sem informação' }}.</p>{% endif %}
 {% if q.id == 'F2-1.3.1' %}<p data-aviso-complemento {% if not q.ativa %}hidden{% endif %}>Ao salvar, esta resposta abre um pedido de complementação ao FORM 1.</p>{% endif %}
 {% if q.edicao == 'habilitada' %}
@@ -112,7 +112,7 @@
 {% else %}
 <label><select aria-label="{{ q.enunciado }}" name="{{ op }}"><option value="">Sem resposta</option>{% for a in q.alternativas %}<option value="{{ a.codigo }}"{% if a.codigo in valores.get(op,[]) %} selected{% endif %}>{{ a.rotulo }}</option>{% endfor %}</select></label>
 {% endif %}{% endif %}
-{% if not q.alternativas or 'texto' in q.controle|lower or q.alternativas|selectattr('complemento','in',['Texto condicionado (R13)'])|list %}
+{% if q.complementos_necessarios or not q.alternativas or 'texto' in q.controle|lower or q.alternativas|selectattr('complemento','in',['Texto condicionado (R13)'])|list %}
 {% if q.id == 'F2-14.3' %}<label>Secretaria<select name="unidade:{{ q.id }}{{ sufixo }}"><option value="">Escolha…</option>{% for unidade in secretarias_selecao %}<option value="{{ unidade.id }}" {% if valores.get('unidade:' ~ q.id ~ sufixo) == unidade.id %}selected{% endif %}>{{ unidade.nome }}</option>{% endfor %}</select></label><label>Funções (texto livre)<input name="{{ txt }}" maxlength="200" value="{{ valores.get(txt,'') }}"></label>
 {% elif q.id == 'F2-10.2.3' %}<label>CNPJ<input data-cnpj inputmode="numeric" name="{{ txt }}" maxlength="18" placeholder="00.000.000/0000-00" value="{{ valores.get(txt,'') }}"></label>
 {% elif q.id == 'F2-14.4.3' %}{% set valor_temporal = valores.get(txt,'') %}{% set modo_texto = valor_temporal and not data_exata(valor_temporal) %}

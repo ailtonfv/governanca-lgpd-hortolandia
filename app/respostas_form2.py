@@ -234,7 +234,7 @@ def aplicar_revisao(conteudo, bloco, campos, ramos=(), *, demonstrativo=False, u
                 raise ValueError(f"Confira a seleção de {chave}.")
             revisao[nome] = opcoes
             continue
-        elif tipo == "texto" and (not q["alternativas"] or "texto" in q["controle"].lower()
+        elif tipo == "texto" and (q.get("complementos_necessarios") or not q["alternativas"] or "texto" in q["controle"].lower()
                                   or any(a["complemento"].startswith("Texto condicionado") for a in q["alternativas"])):
             limite = limite_texto_revisao(q)
         else:
@@ -323,7 +323,7 @@ def _validar_valor(item, valor):
         if not isinstance(valor, list) or len(valor) != len(set(valor)) or any(v not in permitidos for v in valor):
             raise ValueError(f"Seleção múltipla inválida para {item['id']}.")
         if combinacao_exclusiva(valor, item["alternativas"]):
-            raise ValueError("A alternativa exclusiva não pode ser combinada com outras respostas.")
+            raise ValueError("A confirmar deve ser exclusiva." if "A_CONFIRMAR" in valor else "A alternativa exclusiva não pode ser combinada com outras respostas.")
         return list(valor)
     raise ValueError(f"O controle de {item['id']} não está habilitado para escrita.")
 

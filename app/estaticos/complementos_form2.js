@@ -2,7 +2,7 @@
 function atualizarComplementos() {
  document.querySelectorAll('[data-complemento-necessario]').forEach(aviso => {
   const campos = [...document.getElementsByName(aviso.dataset.opcao)];
-  const selecionadas = campos.filter(e => !e.disabled && (e.tagName === 'SELECT' || e.checked)).map(e => e.value);
+  const selecionadas = campos.filter(e => !e.matches(':disabled') && (e.tagName === 'SELECT' || e.checked)).map(e => e.value);
   const texto = document.getElementsByName(aviso.dataset.texto)[0];
   aviso.hidden = !selecionadas.some(v => JSON.parse(aviso.dataset.codigos).includes(v)) || !!texto?.value.trim();
  });
