@@ -126,13 +126,13 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
         try:itens=[dict(q,ativa=ativa(q,e['respostas'],e),recolhida=recolhida(q,e['respostas'],e))
                    for q in perguntas(ref.form) if q['bloco']==bloco]
         except (FileNotFoundError,ValueError) as exc:return erro(request,conta_id,exc,503)
-        origem=s.get(ParticipacaoForm2,e.get('origem_form2_id'))
+        origem=s.get(ParticipacaoForm2,e['origem_form2_id']) if e.get('origem_form2_id') else None
         atos=disponiveis(ref.form,bloco,papeis)
         for a in atos:a['comando_id']=str(uuid4())
         registro=s.get(Registro,obj.registro_id)
         valores = {'F3-3.1':registro.codigo_lgpd,'F4-4.1':registro.codigo_lgpd,
                    'F4-4.1.1':obj.codigo,'F3-3.2':s.get(Unidade,uid).nome,
-                   'F3-3.3':e.get('situacao_form2','Não informado'),
+                   'F3-3.3':{'em_atendimento':'Em atendimento','aguardando':'Aguardando responsável','concluida':'Concluída'}.get(e.get('situacao_form2'),'Situação preservada na origem'),
                    'F4-4.15':e['situacao'],'F4-4.10':e.get('prazo') or 'Prazo não definido',
                    'F4-4.23':e.get('faixa_origem','Não avaliado'),
                    'F4-4.24':'Aceitação pendente de autoridade competente',
