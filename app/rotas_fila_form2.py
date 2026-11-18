@@ -461,8 +461,15 @@ def participacao(request: Request, participacao_id: str, conta_id: str,
     assumida = (comando and comando.tipo == "fila_form2_assumir" and comando.conta_id == conta_id
                 and comando.ator_id == pessoa.id and (comando.resultado or {}).get("participacao_id") == p.id
                 and comando.resultado.get("permitido"))
+    from app.form2_rev212 import catalogo
+    consulta_item = request.query_params.get("consulta_item", "")
+    consulta_tipo = request.query_params.get("consulta_tipo", "dpo")
+    if consulta_item and consulta_item not in catalogo():
+        raise HTTPException(400, "Referência de pergunta desconhecida.")
+    if consulta_tipo not in ("dpo", "juridico", "tematica"):
+        raise HTTPException(400, "Tipo de consulta desconhecido.")
     return paginas.TemplateResponse(request=request, name="participacao_form2.html",
-        context={"atuacao": contexto_atuacao(sessao, pessoa, p), "conta_id": conta_id, "p": p, "estados_regua": estados_da_participacao(sessao, p), "pessoa": pessoa,
+        context={"consulta_item": consulta_item, "consulta_tipo": consulta_tipo, "atuacao": contexto_atuacao(sessao, pessoa, p), "conta_id": conta_id, "p": p, "estados_regua": estados_da_participacao(sessao, p), "pessoa": pessoa,
                  "rotulo_origem": rotulo_apresentacao(snapshot),
                  "confirmada_em": data_confirmacao.astimezone(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y às %Hh%M") if data_confirmacao else None,
                  "assumida": assumida, "retorno": retorno_consultivo(request,sessao,conta_id,p),

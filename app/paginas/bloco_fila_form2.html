@@ -31,6 +31,7 @@
 {% set fatos = fatos_origem.get('respostas', {}) %}
 {% set unidade_origem = fatos.get('2.4.2') if fatos.get('2.4') == 'Não' else fatos.get('2.3') %}
 {% for q in bloco.itens %}<fieldset id="{{ q.id }}" {% if q.edicao == "habilitada" %}{{ gatilhos(q) }}{% endif %} {% if q.edicao == "habilitada" and not q.ativa %}disabled{% endif %}><legend>{{ q.id }} · {{ q.enunciado|replace("na Seção 2","no bloco 2")|replace("Seção 2","Bloco 2") }}</legend>
+{% include '_atalho_consulta_form2.html' %}
 {% if q.edicao == 'habilitada' %}{{ ajuda(q, q.ativa) }}{% endif %}
 {% if q.id == 'F2-1.2' %}<p>Secretaria do Registro: <strong>{{ secretaria.nome }}</strong>.</p>{% endif %}
 {% if q.id in ('F2-2.1', 'F2-2.9') %}<aside><strong>No FORM 1 · {{ rotulo_origem }}</strong>
@@ -76,6 +77,7 @@
 <section id="teste-balanceamento" {% if not ativa(q.id, '') %}hidden{% endif %}><h2>Teste de balanceamento — só para Legítimo interesse</h2>
 {% endif %}
 <fieldset class="resposta-form2" id="{{ q.id }}"><legend>{{ q.id }} · {{ q.enunciado|replace("na Seção 2","no bloco 2")|replace("Seção 2","Bloco 2") }}</legend>
+{% include '_atalho_consulta_form2.html' %}
 {% if q.fatos_abertura is defined %}<aside class="fatos-abertura-form2"><strong>No FORM 1 · {{ rotulo_origem }}</strong>
 {% for fato in q.fatos_abertura %}<p>No FORM 1: {{ fato.valor }}{% if fato.complemento %} — {{ fato.complemento }}{% endif %} ({{ fato.referencia }}){% if fato.conjunto %} · conjunto {{ fato.conjunto }}{% endif %}</p>{% else %}<p>No FORM 1: sem resposta.</p>{% endfor %}
 <p class="ajuda">Compare as informações desta apresentação e registre sua resposta abaixo.</p></aside>{% endif %}
@@ -128,4 +130,4 @@
 </fieldset>
 {% if q.id == "F2-3.10.1" %}</section>{% endif %}
 {% endfor %}
-{% endif %}<div class="acoes-fila-form2"><button type="button" id="descartar-alteracoes">Descartar alterações</button><button type="submit" class="botao-primario">Salvar bloco</button></div></fieldset></form></div><script defer src="{{ url_for('estaticos', path='/form2_revisao.js') }}"></script><script defer src="{{ url_for('estaticos', path='/campos_form2.js') }}"></script><script defer src="/estaticos/complementos_form2.js"></script>{% endblock %}
+{% endif %}<div class="acoes-fila-form2"><button type="button" id="descartar-alteracoes">Descartar alterações</button><button type="submit" class="botao-primario">Salvar bloco</button></div></fieldset></form></div><script defer src="{{ url_for('estaticos', path='/form2_revisao.js') }}"></script><script defer src="{{ url_for('estaticos', path='/campos_form2.js') }}"></script><script defer src="/estaticos/complementos_form2.js"></script><script defer src="/estaticos/atalhos_consulta_form2.js"></script>{% endblock %}
