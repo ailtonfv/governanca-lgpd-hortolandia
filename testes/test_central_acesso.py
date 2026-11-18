@@ -222,7 +222,7 @@ def test_selecao_recorta_cartoes_contadores_e_comando_de_abertura(sessao):
         painel = cliente.get("/painel", params={"conta_id": "CONTA-A1", "secretaria_id": unidade})
         assert painel.status_code == 200
         assert presente["codigo_lgpd"] in painel.text and ausente["codigo_lgpd"] not in painel.text
-        assert 'aria-label="1 Registro(s) disponível(is)"' in painel.text
+        assert 'aria-label="1 Registro disponível"' in painel.text
         assert ("Criar novo Registro LGPD" in painel.text) is pode_abrir
         assert 'name="secretaria_id"' not in painel.text and "Selecionar servidor por matrícula" not in painel.text
         retorno = cliente.get("/?conta_id=CONTA-A1")
