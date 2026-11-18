@@ -47,7 +47,7 @@
 {% if loop.changed(p.responsavel_id is none) %}<h3>{{ 'Aguardando responsável' if p.responsavel_id is none else 'Com responsável' }}</h3>{% endif %}
 <article><h4>{{ registros[p.registro_id].codigo_lgpd }} · {{ unidades[p.unidade_id].nome }}</h4>
 {% if p.id in atribuidores %}<p>{{ atribuidores[p.id] }}</p>{% endif %}
-<p>{{ situacoes.get(p.estado, p.estado) }}{% if p.responsavel_id %} · Responsável: {{ responsaveis[p.responsavel_id] }}{% endif %}</p>{% if aguarda_temporalidade(p.conteudo) %}<p class="selo-guarda">Guarda: aguarda definição institucional</p>{% endif %}<p>{{ entradas[p.id] }}</p>
+<p>{{ impedimentos.get(p.id, situacoes.get(p.estado, p.estado)) }}{% if p.responsavel_id %} · Responsável: {{ responsaveis[p.responsavel_id] }}{% endif %}</p>{% if aguarda_temporalidade(p.conteudo) %}<p class="selo-guarda">Guarda: aguarda definição institucional</p>{% endif %}<p>{{ entradas[p.id] }}</p>
 {% set acao = 'Atribuir responsável' if p.assumida_em is none else 'Reatribuir' %}
 {% if not agentes[p.id] %}<p>{{ 'Não há outro AAL habilitado nesta fila' if p.tipo in ('principal','tematica') else 'Não há outro responsável habilitado nesta fila' }}.</p>{% else %}
 <details><summary>{{ acao }} — {{ registros[p.registro_id].codigo_lgpd }} · {{ p.tipo }}</summary>

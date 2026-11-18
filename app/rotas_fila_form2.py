@@ -325,8 +325,11 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
     from app.governanca_form2_v9 import estado as estado_v9, origem_autorizada
     from app.segregacao_form2_v9 import impedido
     complementos = []
+    from app.fila_form2 import candidatos_atribuicao, aguardando_definicao_analise
     impedimentos = {}
     for participacao in sessao.scalars(select(ParticipacaoForm2)):
+        if aguardando_definicao_analise(sessao, participacao):
+            impedimentos[participacao.id] = "Aguardando definição de quem fará a análise"
         if participacao.responsavel_id and impedido(sessao, participacao.responsavel_id, participacao):
             impedimentos[participacao.id] = "Designação pendente por impedimento"
         if participacao.tipo != "principal":
@@ -423,7 +426,7 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
         context={"ato_registrado": ato_registrado(sessao, chave, conta_id), "nomes_objetos": nomes_objetos, "referencias": referencias, "mensagem_atribuicao": mensagem, "atribuidores": atribuidores, "cartoes": ordenados, "entradas": entradas, "pode_encaminhar": bool(unidades_apa), "encaminhaveis": encaminhaveis,
                  "conta_id": conta_id, "pessoa": pessoa, "participacoes": participacoes,
                  "registros": registros, "unidades": unidades, "linhas": linhas,
-                 "impedimentos": impedimentos, "complementos": complementos, "gerenciaveis": gerenciaveis, "agentes": {p.id: [a for a in agentes if a.id != p.responsavel_id and autorizado(sessao, a, p)] for p in gerenciaveis},
+                 "impedimentos": impedimentos, "complementos": complementos, "gerenciaveis": gerenciaveis, "agentes": {p.id: candidatos_atribuicao(sessao, p, pessoa.id) for p in gerenciaveis},
                  "responsaveis": responsaveis, "dpo": dpo, "sem_conferente": sem_conferente, "aguardando_guarda": len({p.registro_id for p in principais if aguarda_temporalidade(p.conteudo)}), "cobertura": cobertura, "comando_id": str(uuid4())})
 
 
