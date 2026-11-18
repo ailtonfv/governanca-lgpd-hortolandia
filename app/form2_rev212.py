@@ -84,6 +84,8 @@ def montar_bloco(base):
             q["edicao"] = "bloqueada_d11"
         from app.complementos_form2 import codigos_com_complemento
         q["complementos_necessarios"] = codigos_com_complemento(q)
+        from app.classificacao_analise_form2 import classificar
+        classificar(q)
         itens.append(q)
     return {**base, "itens": itens, "versao": "REV21.2"}
 

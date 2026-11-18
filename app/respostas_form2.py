@@ -75,6 +75,9 @@ def _definicao_bloco(numero, contrato, catalogo):
         for item in itens:
             if item["id"] in MODOS_IDENTIFICACAO:
                 item.update(edicao="habilitada", modo=MODOS_IDENTIFICACAO[item["id"]])
+    from app.classificacao_analise_form2 import classificar
+    for q in itens:
+        classificar(q)
     titulo = next((b.get("titulo", "") for b in catalogo["blocos"] if b["numero"] == numero), "")
     return {"numero": numero, "titulo": titulo, "versao": contrato["versao"], "itens": itens}
 
