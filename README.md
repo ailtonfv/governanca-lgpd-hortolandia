@@ -2005,3 +2005,20 @@ A conferência usa a porta 8009 e uma nova cópia da cópia da 8008. O comando d
 `correcoes-lote10`, a partir de `1d0ae9b`, aplica a deliberação das 13 classificações de análise e seus atalhos, a orientação de minimização da F2-10.2.1 e fontes oficiais da ANPD nos blocos 6, 9 e 13. Códigos salvos e respostas históricas permanecem preservados. A consulta e a avaliação continuam dependendo de ato do AAL; nenhuma avaliação foi automatizada. D5 permanece como limite provisório da PoC, conforme SAD 10.
 
 Conferência na porta 8010, com nova cópia a partir da cópia da 8009. A abertura e o relatório ficam no pacote local `entrega-lgpd-lote10`; a primeira criação pede a credencial do PostgreSQL somente no terminal. A 8009 é preservada. Branch publicada para vistoria, sem merge nem autorização de produção.
+
+
+## Lote 12 — FORMs 3 e 4 demonstrativos
+
+A branch `lote-12-forms34-telas` acrescenta ingresso explícito pelo AAL, origem congelada,
+avaliação conjunta Secretaria/DPO, triagem de RIPD e providências com aprovação,
+execução, verificação independente e aprendizagem. Competências e metodologia
+permanecem propostas em deliberação (D11); não autorizam produção.
+
+O modelo municipal publicável está em `docs/modelos/MODELO_MUNICIPAL_RIPD_PROPOSTA.md`.
+O bloco 15 do FORM 3 oferece consulta por página interna, com controle de acesso e selo D11.
+Os catálogos editoriais dos FORMs 3 e 4 continuam no pacote privado local, fora do Git.
+A migração é explícita: testes somente em banco `_teste`; a única exceção demonstrativa
+é a cópia nominalmente autorizada `lgpd_lote12_3be0186939a7`. Abrir páginas ou iniciar o
+servidor não instala proteções nem altera o esquema.
+
+O relatório local do lote distingue testes automatizados de vistoria humana.
