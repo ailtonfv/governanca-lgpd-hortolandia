@@ -44,6 +44,10 @@ documentos_locais/
 
 /app/catalogos/form1_rev22_privado.json
 
+# FORMs 3/4: enunciados ficam no pacote restrito, nunca nos commits.
+/app/catalogos/form3_rev22_v9_privado.json
+/app/catalogos/form4_rev22_v9_privado.json
+
 # Derivados documentais privados: não publicar enunciados nem matrizes integrais.
 /docs/planejamento/FORM2_REV17_MATRIZ_CORRESPONDENCIA_CANDIDATA.md
 /docs/planejamento/GOV_FORMS_REV18_02/

@@ -1,0 +1,658 @@
+{
+  "versao": "F3-REV22-V9-BASE-v1",
+  "sha256_privado": "338d0a9ae832a357d2d10f3f2e4562f9ee63c254fca0108702bc56b0b77ae435",
+  "itens": [
+    {
+      "id": "F3-3.1",
+      "bloco": 1,
+      "tipo": "readonly",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.2",
+      "bloco": 1,
+      "tipo": "readonly",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.3",
+      "bloco": 1,
+      "tipo": "readonly",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.3.1",
+      "bloco": 1,
+      "tipo": "text_long",
+      "condicao": {
+        "tipo": "declarativa_pendente",
+        "referencias": []
+      }
+    },
+    {
+      "id": "F3-3.4",
+      "bloco": 1,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.4.1",
+      "bloco": 1,
+      "tipo": "text_long",
+      "condicao": {
+        "tipo": "igual",
+        "origem": "F3-3.4",
+        "codigo_valor": "ALT_01"
+      }
+    },
+    {
+      "id": "F3-3.5",
+      "bloco": 2,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.6",
+      "bloco": 2,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.7",
+      "bloco": 2,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.8",
+      "bloco": 2,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.9",
+      "bloco": 2,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.10",
+      "bloco": 3,
+      "tipo": "multi",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.11",
+      "bloco": 3,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.11.1",
+      "bloco": 3,
+      "tipo": "text_long",
+      "condicao": {
+        "tipo": "igual",
+        "origem": "F3-3.11",
+        "codigo_valor": "ALT_01"
+      }
+    },
+    {
+      "id": "F3-3.12",
+      "bloco": 4,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.13",
+      "bloco": 4,
+      "tipo": "text_long",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.14",
+      "bloco": 5,
+      "tipo": "multi",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.15",
+      "bloco": 5,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.16",
+      "bloco": 6,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.17",
+      "bloco": 6,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.18",
+      "bloco": 6,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.19",
+      "bloco": 6,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.19.1",
+      "bloco": 6,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.20",
+      "bloco": 6,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.21",
+      "bloco": 7,
+      "tipo": "readonly",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.22",
+      "bloco": 7,
+      "tipo": "readonly",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.23",
+      "bloco": 7,
+      "tipo": "readonly",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.24",
+      "bloco": 7,
+      "tipo": "readonly",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.25",
+      "bloco": 8,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.25.1",
+      "bloco": 8,
+      "tipo": "readonly",
+      "condicao": {
+        "tipo": "igual",
+        "origem": "F3-3.25",
+        "codigo_valor": "ALT_01"
+      }
+    },
+    {
+      "id": "F3-3.26",
+      "bloco": 8,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.27",
+      "bloco": 8,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.28",
+      "bloco": 8,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.29",
+      "bloco": 8,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.30",
+      "bloco": 8,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.31",
+      "bloco": 9,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.32",
+      "bloco": 9,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.33",
+      "bloco": 9,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.34",
+      "bloco": 9,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.35",
+      "bloco": 10,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.36",
+      "bloco": 10,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.37",
+      "bloco": 10,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.38",
+      "bloco": 10,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.39",
+      "bloco": 11,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.40",
+      "bloco": 11,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "igual",
+        "origem": "F3-3.39",
+        "codigo_valor": "ALT_01"
+      }
+    },
+    {
+      "id": "F3-3.41",
+      "bloco": 11,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.42",
+      "bloco": 11,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.43",
+      "bloco": 12,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.43.1",
+      "bloco": 12,
+      "tipo": "structured",
+      "condicao": {
+        "tipo": "igual",
+        "origem": "F3-3.43",
+        "codigo_valor": "ALT_01"
+      }
+    },
+    {
+      "id": "F3-3.43.2",
+      "bloco": 12,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "igual",
+        "origem": "F3-3.43",
+        "codigo_valor": "ALT_01"
+      }
+    },
+    {
+      "id": "F3-3.43.3",
+      "bloco": 12,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "igual",
+        "origem": "F3-3.43",
+        "codigo_valor": "ALT_01"
+      }
+    },
+    {
+      "id": "F3-3.43.4",
+      "bloco": 12,
+      "tipo": "structured",
+      "condicao": {
+        "tipo": "igual",
+        "origem": "F3-3.43",
+        "codigo_valor": "ALT_01"
+      }
+    },
+    {
+      "id": "F3-3.44",
+      "bloco": 12,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.45",
+      "bloco": 12,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.46",
+      "bloco": 12,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.47",
+      "bloco": 13,
+      "tipo": "multi",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.48",
+      "bloco": 13,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.49",
+      "bloco": 14,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.50",
+      "bloco": 14,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.51",
+      "bloco": 14,
+      "tipo": "computed",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.52",
+      "bloco": 14,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.52.1",
+      "bloco": 14,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.52.2",
+      "bloco": 14,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.52.3",
+      "bloco": 14,
+      "tipo": "computed",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.52.4",
+      "bloco": 14,
+      "tipo": "structured",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.52.5",
+      "bloco": 14,
+      "tipo": "date",
+      "condicao": {
+        "tipo": "declarativa_pendente",
+        "referencias": [
+          "F3-3.52",
+          "F3-3.52.3",
+          "F3-3.53",
+          "F3-3.54",
+          "F3-3.55"
+        ]
+      }
+    },
+    {
+      "id": "F3-3.52.6",
+      "bloco": 14,
+      "tipo": "date",
+      "condicao": {
+        "tipo": "declarativa_pendente",
+        "referencias": [
+          "F3-3.52",
+          "F3-3.52.3",
+          "F3-3.53",
+          "F3-3.54",
+          "F3-3.55"
+        ]
+      }
+    },
+    {
+      "id": "F3-3.53",
+      "bloco": 15,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.54",
+      "bloco": 15,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.55",
+      "bloco": 15,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.56",
+      "bloco": 15,
+      "tipo": "text_long",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.57",
+      "bloco": 15,
+      "tipo": "unit",
+      "condicao": {
+        "tipo": "declarativa_pendente",
+        "referencias": [
+          "F3-3.55"
+        ]
+      }
+    },
+    {
+      "id": "F3-3.58",
+      "bloco": 16,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.58.1",
+      "bloco": 16,
+      "tipo": "text_long",
+      "condicao": {
+        "tipo": "igual",
+        "origem": "F3-3.58",
+        "codigo_valor": "ALT_01"
+      }
+    },
+    {
+      "id": "F3-3.59",
+      "bloco": 16,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.60",
+      "bloco": 16,
+      "tipo": "single",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    },
+    {
+      "id": "F3-3.61",
+      "bloco": 16,
+      "tipo": "multi",
+      "condicao": {
+        "tipo": "sempre"
+      }
+    }
+  ]
+}
