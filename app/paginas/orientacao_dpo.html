@@ -2,7 +2,7 @@
 {% block conteudo %}
 <h1>{{ registro.codigo_lgpd }} · Consultas ao DPO, ao Jurídico e às áreas temáticas</h1>
 {% if retorno %}<p class="mensagem mensagem-sucesso" role="status">{{ retorno }}</p>{% endif %}
-<p>Servidor em sessão: {{ pessoa.nome }} · DPO</p><p>{{ registro.titulo_objeto }} · {{ secretaria.nome }} · {{ p.estado|replace("_"," ") }} · {{ referencia }} · AAL: {{ aal.nome if aal else "aguardando responsável" }}</p>
+<p>Servidor em sessão: {{ pessoa.nome|identidade_demonstrativa }} · DPO</p><p>{{ registro.titulo_objeto }} · {{ secretaria.nome }} · {{ p.estado|replace("_"," ") }} · {{ referencia }} · AAL: {{ aal.nome if aal else "aguardando responsável" }}</p>
 <p>A manifestação é consultiva: não altera respostas nem a situação do Registro. O AAL registrará o que fez com ela.</p>
 <a href="#origem">Consultar FORM 1</a> · <a href="#respostas">Consultar respostas do FORM 2</a>
 <a href="/form2/painel-dpo?conta_id={{ conta_id|urlencode }}">Voltar ao painel do DPO</a>
@@ -11,7 +11,7 @@
 <form method="post"><input type="hidden" name="conta_id" value="{{ conta_id }}">
 <input type="hidden" name="comando_id" value="{{ comando_id }}">
 <label>Orientação<textarea name="texto" required maxlength="10000"></textarea></label>
-<button class="botao-primario" data-confirmar-ato="{{ pessoa.nome }}, DPO, registrará uma orientação consultiva sobre o {{ registro.codigo_lgpd }} · {{ referencia }}. A manifestação ficará no histórico e não poderá ser alterada. O AAL receberá a orientação para análise." type="submit">Registrar manifestação</button></form></section>
+<button class="botao-primario" data-confirmar-ato="{{ pessoa.nome|identidade_demonstrativa }}, DPO, registrará uma orientação consultiva sobre o {{ registro.codigo_lgpd }} · {{ referencia }}. A manifestação ficará no histórico e não poderá ser alterada. O AAL receberá a orientação para análise." type="submit">Registrar manifestação</button></form></section>
 <h2>Manifestações registradas</h2>{% for c in orientacoes %}<article><h3>{{ c.conteudo.autor or "Consulta encaminhada ao DPO" }} · {{ c.entrada_em|hora_local }}</h3>{% if c.questao and not c.conteudo.de_oficio %}<p>{{ c.questao }}</p>{% endif %}<p>{{ c.manifestacao }}</p>
 {% if c.conteudo.resposta %}<p>{{ c.conteudo.resposta.autor }}, AAL · {{ c.conteudo.resposta.data|hora_local }} · {{ c.conteudo.resposta.decisao }}</p><p>{{ c.conteudo.resposta.motivo }}</p>{% elif c.conteudo.de_oficio %}<p>Aguardando resposta do AAL</p>{% else %}<p>{{ c.estado|replace("_"," ") }}</p>{% endif %}</article>{% endfor %}
 <section id="origem"><h2>FORM 1 · {{ referencia }}</h2>{% for q in perguntas if q.respondida %}<p><strong>{{ q.id }} · {{ q.pergunta }}</strong><br>{{ q.valor|join(", ") if q.valor is sequence and q.valor is not string else q.valor }}</p>{% endfor %}</section>

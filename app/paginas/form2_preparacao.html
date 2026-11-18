@@ -72,7 +72,7 @@
       <input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="comando_id" value="{{ comando_id }}">
       <input type="hidden" name="snapshot_id" value="{{ origem.snapshot.id }}">
       <label for="preparador">AAL — Agente de Análise de Legitimidade habilitado para este Registro</label>
-      <select name="preparador_id" id="preparador" required><option value="">Selecione o AAL</option>{% for agente in candidatos %}<option value="{{ agente.id }}">{{ agente.matricula }} — {{ agente.nome }}</option>{% endfor %}</select>
+      <select name="preparador_id" id="preparador" required><option value="">Selecione o AAL</option>{% for agente in candidatos %}<option value="{{ agente.id }}">{{ agente.matricula }} — {{ agente.nome|identidade_demonstrativa }}</option>{% endfor %}</select>
       <button type="submit" class="botao-primario">Designar AAL e iniciar preparação</button>
     </form>
     {% else %}<p>Nenhum AAL com habilitação vigente disponível para designação neste Registro.</p>{% endif %}

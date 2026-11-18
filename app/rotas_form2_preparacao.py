@@ -26,6 +26,8 @@ from app.contrato_form2_respostas import carregar_contrato
 from app.respostas_form2 import estados_regua_form2, CADERNO_REV20, MODOS_IDENTIFICACAO, definicao_revisao, definicao_bloco, limite_texto_revisao, projetar_bloco, _ativa
 router = APIRouter()
 paginas = Jinja2Templates(directory=Path(__file__).parent / "paginas")
+from app.identidade_demonstrativa import configurar_identidade
+configurar_identidade(paginas)
 paginas.env.filters["rotulo_apresentacao"] = rotulo_apresentacao
 paginas.env.globals["titulos_blocos_form2"] = titulos_blocos_form2
 paginas.env.policies["json.dumps_kwargs"] = {**paginas.env.policies["json.dumps_kwargs"], "ensure_ascii": False}

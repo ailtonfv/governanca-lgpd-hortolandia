@@ -91,7 +91,7 @@
     </details>
     {% endif %}
     {% if registros_exibidos %}
-    <p class="sr-apenas">Registros LGPD que {{ identidade.nome }} pode consultar</p>
+    <p class="sr-apenas">Registros LGPD que {{ identidade.nome|identidade_demonstrativa }} pode consultar</p>
     <div class="lista-mapeamentos-painel">
       {% for registro in registros_exibidos %}
       {% set url_registro = url_for('detalhe_registro', registro_id=registro.id).include_query_params(conta_id=conta_id) %}

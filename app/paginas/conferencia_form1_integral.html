@@ -13,7 +13,7 @@
   <p><strong>{{ registro.codigo_lgpd }}</strong> — {{ registro.titulo_objeto }}</p>
   <p class="aviso-leitura"><strong>Importante:</strong> esta consulta não é submissão, homologação, conclusão institucional nem envio à T.I. O rascunho pode conter pendências.</p>
   <dl>
-    <div><dt>Apresentado por</dt><dd>{% if solicitante %}{{ solicitante.matricula }} — {{ solicitante.nome }}{% else %}{{ conferencia.solicitada_por_id }}{% endif %}</dd></div>
+    <div><dt>Apresentado por</dt><dd>{% if solicitante %}{{ solicitante.matricula }} — {{ solicitante.nome|identidade_demonstrativa }}{% else %}{{ conferencia.solicitada_por_id }}{% endif %}</dd></div>
     <div><dt>Apresentado em</dt><dd>{{ data_apresentacao }}</dd></div>
   </dl>
 </section>

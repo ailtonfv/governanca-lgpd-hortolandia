@@ -3,7 +3,7 @@
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/filas_form2.css') }}">
 <div class="filas-form2">
 <h1>Conferência da consolidação</h1>
-<p><strong>{{ registro.codigo_lgpd }}</strong> · FORM 2 · {{ pessoa.nome }}</p>
+<p><strong>{{ registro.codigo_lgpd }}</strong> · FORM 2 · {{ pessoa.nome|identidade_demonstrativa }}</p>
 {% include '_regua_fila_form2.html' %}
 <p>Esta conferência reúne o que está salvo. Pode ser registrada mesmo com pontos em aberto, para acompanhar a evolução. Não conclui o Registro nem homologa a análise.</p>
 {% if ultima %}<article aria-label="Última conferência">

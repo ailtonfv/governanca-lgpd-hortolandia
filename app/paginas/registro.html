@@ -98,7 +98,7 @@
           <select id="arp_pessoa_id" name="arp_pessoa_id" aria-describedby="nome-arp-selecionado" disabled>
             <option value="">Selecione somente para designar outro agente</option>
             {% for pessoa in registro.form1_integral.candidatos_arp %}
-            <option value="{{ pessoa.id }}">Matrícula {{ pessoa.matricula }} · {{ pessoa.nome }}</option>
+            <option value="{{ pessoa.id }}">Matrícula {{ pessoa.matricula }} · {{ pessoa.nome|identidade_demonstrativa }}</option>
             {% endfor %}
           </select>
         </div>

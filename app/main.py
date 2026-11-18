@@ -78,6 +78,8 @@ app.include_router(rotas_fila_form2)
 from app.rotas_rev22_form1 import router as router_rev22_form1
 app.include_router(router_rev22_form1)
 paginas = Jinja2Templates(directory=PASTA_APP / "paginas")
+from app.identidade_demonstrativa import configurar_identidade
+configurar_identidade(paginas)
 paginas.env.filters["rotulo_apresentacao"] = rotulo_apresentacao
 paginas.env.globals["consulta_cartilha_local"] = acesso_local_cartilha
 paginas.env.filters.update(data_local=data_local, rotulo_f2=rotulo_demonstrativo)

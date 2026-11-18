@@ -39,7 +39,7 @@
 {% if p.tipo == 'principal' %}
 <label>Tipo de consulta <select name="tipo"><option value="dpo">DPO</option><option value="juridico">Jurídico</option><option value="tematica">Área temática</option></select></label>
 <p data-destino-fixo data-dpo="{{ (unidades|selectattr('id', 'equalto', 'UNID-GOV')|first).nome }}" data-juridico="{{ (unidades|selectattr('id', 'equalto', 'SEC-AJ')|first).nome }}">Unidade destinatária: {{ (unidades|selectattr('id', 'equalto', 'UNID-GOV')|first).nome }}</p><label data-area-tematica hidden>Unidade destinatária <select name="unidade_id" disabled>{% for u in unidades %}<option value="{{ u.id }}">{{ u.nome }}</option>{% endfor %}</select></label>
-<button type="submit" class="botao-primario" name="acao" value="consultar" data-confirmar-ato="{{ pessoa.nome }} encaminhará a questão sobre {{ rotulo_origem }} à área selecionada.">Encaminhar consulta</button>
+<button type="submit" class="botao-primario" name="acao" value="consultar" data-confirmar-ato="{{ pessoa.nome|identidade_demonstrativa }} encaminhará a questão sobre {{ rotulo_origem }} à área selecionada.">Encaminhar consulta</button>
 {% else %}<button type="submit" class="botao-primario" name="acao" value="concluir">Concluir manifestação</button>{% endif %}
 {% else %}<p>{{ p.manifestacao }}</p>{% endif %}
 </form>
@@ -50,7 +50,7 @@
 {% elif p.estado == 'em_atendimento' and p.responsavel_id == pessoa.id %}<strong>Nova orientação</strong><form method="post" action="/form2/participacoes/{{ consulta.id }}/orientacao">
 <input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="comando_id" value="{{ (comando_id ~ consulta.id ~ 'resposta')|chave_comando }}">
 <label>Decisão<select name="decisao" required><option value="">Escolha…</option><option>Acolhida</option><option>Acolhida em parte</option><option>Não acolhida</option></select></label>
-<label>Motivo<textarea name="texto" required maxlength="1000"></textarea></label><button class="botao-primario" data-confirmar-ato="{{ pessoa.nome }}, AAL, registrará como considerou a orientação sobre {{ rotulo_origem }}.">Registrar resposta</button></form>{% endif %}</article>
+<label>Motivo<textarea name="texto" required maxlength="1000"></textarea></label><button class="botao-primario" data-confirmar-ato="{{ pessoa.nome|identidade_demonstrativa }}, AAL, registrará como considerou a orientação sobre {{ rotulo_origem }}.">Registrar resposta</button></form>{% endif %}</article>
 {% endfor %}
 {% set consultas = consultas|rejectattr('conteudo.de_oficio')|list %}{% if consultas %}<h2>Manifestações solicitadas</h2>{% for consulta in consultas %}<article><h3>{{ consulta.tipo }} · {{ situacoes.get(consulta.estado, consulta.estado) }}</h3><p>{{ consulta.questao }}</p><p>{{ consulta.manifestacao }}</p><p>Responsável · {{ consulta.responsavel_id or 'Aguardando assunção' }} · {{ consulta.concluida_em or '' }}</p></article>{% endfor %}{% endif %}
 </div><script>

@@ -21,6 +21,8 @@ from app.respostas_form2 import estados_regua_form2, aguarda_temporalidade
 
 router = APIRouter()
 paginas = Jinja2Templates(directory=Path(__file__).parent / "paginas")
+from app.identidade_demonstrativa import configurar_identidade
+configurar_identidade(paginas)
 from app.atos_interface import ato_registrado
 from app.apresentacao_form2 import data_local
 paginas.env.filters["hora_local"] = data_local
