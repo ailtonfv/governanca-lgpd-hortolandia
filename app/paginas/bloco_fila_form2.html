@@ -92,7 +92,7 @@
 {% if q.orientacao %}<p>{{ q.orientacao }}</p>{% endif %}
 {% for orientacao in q.ajudas_usuario %}<p class="ajuda">{{ orientacao }}</p>{% endfor %}
 
-{% if q.id in ('F2-14.2', 'F2-14.8') %}<section aria-label="Itens a confirmar"><h3>Itens a confirmar nos blocos 1 a 13</h3><p>{{ confirmacoes_por_bloco|map(attribute='itens')|map('length')|sum }} pergunta(s) ativa(s) com resposta ‘A confirmar’. A classificação de impeditivos depende de deliberação institucional.</p>
+{% if q.id in ('F2-14.2', 'F2-14.8') %}<section aria-label="Itens a confirmar"><h3>Itens a confirmar nos blocos 1 a 13</h3><p>{% set quantidade = confirmacoes_por_bloco|map(attribute='itens')|map('length')|sum %}{{ quantidade }} {{ 'pergunta ativa' if quantidade == 1 else 'perguntas ativas' }} com resposta ‘A confirmar’. A classificação de impeditivos depende de deliberação institucional.</p>
 {% for grupo in confirmacoes_por_bloco %}<h4>Bloco {{ grupo.bloco }}</h4><ul>{% for item in grupo.itens %}<li><a href="{{ grupo.bloco }}?conta_id={{ conta_id|urlencode }}#{{ item.ancora }}">{{ item.item }}</a> · A confirmar</li>{% endfor %}</ul>{% else %}<p>Nenhuma resposta ativa marcada como “A confirmar”.</p>{% endfor %}</section>{% endif %}
 {% if bloqueada %}
 {% if q.edicao != "consulta" %}<p>{{ q.controle }}</p>{% endif %}

@@ -180,7 +180,7 @@ def estados_regua_form2(conteudo, ramos=(), *, demonstrativo=True):
                                 "percentual": round(100 * respondidas / ativas, 2)}
             com_respostas_ativas.add(bloco)
             situacao[bloco] = ("✓ Todas as perguntas ativas respondidas" if respondidas == ativas
-                               else f"◐ Em preenchimento · {respondidas} de {ativas} perguntas ativas")
+                               else f"◐ Em preenchimento · {respondidas} de {ativas} {'pergunta ativa' if ativas == 1 else 'perguntas ativas'}")
     return {**marcas, "com_respostas_ativas": com_respostas_ativas, "situacao": situacao, "progresso": progresso}
 
 

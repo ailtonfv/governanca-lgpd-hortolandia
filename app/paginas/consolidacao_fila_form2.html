@@ -50,6 +50,6 @@
 <details><summary>Histórico das conferências · {{ historico|length }}</summary>
 {% for h in historico %}<section class="manifestacao-consolidada"><h3>Conferência {{ h.numero }}</h3>
 <p>{{ h.em }} · {{ agentes.get(h.ator_id, h.ator_id) }}</p><p class="texto-preservado">{{ h.sintese }}</p>
-<p>{{ h.resumo.consultas_abertas|length }} manifestação(ões) aguardada(s) e {{ h.resumo.itens_a_confirmar|length }} item(ns) a confirmar naquele momento.</p>
+<p>{{ h.resumo.consultas_abertas|length }} {{ 'manifestação aguardada' if h.resumo.consultas_abertas|length == 1 else 'manifestações aguardadas' }} e {{ h.resumo.itens_a_confirmar|length }} {{ 'item' if h.resumo.itens_a_confirmar|length == 1 else 'itens' }} a confirmar naquele momento.</p>
 </section>{% else %}<p>Nenhuma conferência registrada.</p>{% endfor %}</details>
 </div><script defer src="{{ url_for('estaticos', path='/consolidacao_form2.js') }}"></script>{% endblock %}

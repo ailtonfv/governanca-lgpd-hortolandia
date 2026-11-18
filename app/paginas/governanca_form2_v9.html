@@ -29,7 +29,7 @@
 {% for d in pendencias %}<article><h2>Solicitação {{ loop.index }} · {{ {'aberta': 'aguardando resposta' if d.unidade_id else 'aguardando definição do destinatário', 'respondida': 'resposta recebida para conferência', 'resolvida': 'resposta aceita', 'retirada': 'retirada com justificativa'}.get(d.estado, d.estado) }}</h2>
 <p>{{ d.texto }}</p><p>Origem do pedido: {% for o in d.origens %}{{ o.item.split("#")[0] }}{% if not loop.last %} · {% endif %}{% endfor %}</p>
 <p>Unidade responsável pela resposta: {{ d.area or 'a definir' }}.</p>
-<p>{{ d.prazo_rotulo }} · {{ d.dias_em_aberto }} dia(s) desde a abertura.</p>
+<p>{{ d.prazo_rotulo }} · {{ d.dias_em_aberto }} {{ 'dia' if d.dias_em_aberto == 1 else 'dias' }} desde a abertura.</p>
 {% if e_aal and not d.unidade_id and d.estado == 'aberta' %}<p><strong>Próximo passo:</strong> defina a unidade responsável pela resposta e, se houver, o prazo acordado.</p>{% endif %}
 <details><summary>Acompanhamento de atrasos</summary><p>A regra de encaminhamento à instância superior ainda não foi configurada. A definição cabe à gestão responsável; o sistema não encaminha atrasos automaticamente.</p></details>
 {% if d.atrasada %}<p role="status"><strong>Prazo vencido.</strong> Encaminhamento superior depende da política institucional; não há aprovação automática.</p>{% endif %}
