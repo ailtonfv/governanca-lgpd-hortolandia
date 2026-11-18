@@ -128,7 +128,7 @@ def ingressar(sessao, *, conta_id, comando_id, participacao_id, versao, form, ju
     if existente:
         raise ValueError('Esta versão já foi encaminhada; consulte o objeto existente.')
     obj = _criar(sessao, cmd, conta_id, p.registro_id, form, 2, fonte.id, chave,
-        dict(form=form, respostas={}, sinais=sinais, origem_form2_id=p.id, situacao_form2=p.estado,
+        dict(form=form, respostas={}, sinais=sinais, sinais_origem=sinais, origem_form2_id=p.id, situacao_form2=p.estado,
              decisao_nao_encaminhar=justificativa, situacao='Em preenchimento',
              avaliacao=None, confirmacoes={}, triagem=None, triagem_confirmacoes={},
              prorrogacoes=0, prazo=None, executor_id=None, decisoes_pendentes={},
@@ -231,7 +231,7 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         from app.questionario_forms34 import salvar
         e['respostas'] = salvar(e['form'], e.get('respostas', {}), dados, e)
         if f3:
-            e['sinais'] = sorted(set(e.get('sinais', [])) | ({'F3-3.10'} if e['respostas'].get('F3-3.10') else set()) |
+            e['sinais'] = sorted(set(e.get('sinais_origem', [])) | ({'F3-3.10'} if e['respostas'].get('F3-3.10') else set()) |
                 ({'F3-3.54'} if e['respostas'].get('F3-3.54') in ('Sim','Requer análise','A confirmar') else set()))
     elif acao == 'abrir_detalhes':
         exigir(papeis, 'secretaria', 'dpo')
