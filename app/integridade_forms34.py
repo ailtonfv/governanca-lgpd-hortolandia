@@ -19,6 +19,9 @@ def instalar_protecao(conexao):
             BEFORE UPDATE OR DELETE ON {tabela}
             FOR EACH ROW EXECUTE FUNCTION proteger_base_forms34()
         """))
+    # O predicado usa OLD: nem a troca do discriminador permite escapar da
+    # proteção. Eventos dos FORMs 1/2 não executam esta função. Não há trigger
+    # de INSERT, de tabela inteira ou política nova para outras cadeias.
     conexao.execute(text("""
         CREATE OR REPLACE TRIGGER proteger_evento_forms34
         BEFORE UPDATE OR DELETE ON evento
