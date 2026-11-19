@@ -107,7 +107,7 @@ body:has(.salvamento-fixo-form1) > main { min-height: 0; flex: 1; }
 .filas-form2 .regua-form2 .titulo-bloco-form2 {
   overflow-wrap: normal;
   word-break: normal;
-  hyphens: auto;
+  hyphens: none;
 }
 .filas-form2 .regua-form2 :is(.selo-d11, .selo-guarda) {
   position: static;

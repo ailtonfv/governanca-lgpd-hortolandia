@@ -472,3 +472,5 @@ dialog :is([data-cancelar], [data-fechar-dialogo]) { font-size: .9rem; backgroun
 :is(.acoes-fila-form2,.acoes-formulario) > :is(a,button){max-width:100%;white-space:normal;}
 
 .mapa-blocos-form1 :is([aria-current="page"],[aria-current="step"]) .progresso-bloco > span{background:#fff;}
+
+.mapa-blocos-form1 :is(.cartao-bloco,button,.titulo-bloco-form2),.grade34 a{hyphens:none;}
