@@ -8,6 +8,7 @@
 {% if salvos[3] and salvos[4] %}<p>Os dois destinos estão indicados. Cada encaminhamento é registrado separadamente; depois do primeiro, volte ao bloco 14 para encaminhar ao outro.</p>{% endif %}
 <form method="post" novalidate data-ato34 data-ingresso34 data-versao="{{ p.versao }}" data-registro="{{ registro.codigo_lgpd }}" data-risco-direto="{{ 'sim' if risco_direto else 'nao' }}">
 <input type="hidden" name="versao" value="{{ p.versao }}"><input type="hidden" name="comando_id" value="{{ comando_id }}">
+{% if salvos[3] or salvos[4] %}<p>Você indicou no bloco 14: {{ 'avaliar os riscos e providência direta' if salvos[3] and salvos[4] else 'avaliar os riscos' if salvos[3] else 'providência direta' }}.</p>{% endif %}
 <label for="destino34">Destino <span class="indicador-obrigatoriedade indicador-obrigatoriedade-obrigatorio"><span class="marcador-obrigatorio">*</span> Obrigatório</span></label>
 <select id="destino34" name="form" required aria-describedby="erro-destino34" data-erro-obrigatorio="Escolha para onde encaminhar: Riscos (FORM 3) ou Providência (FORM 4)." {% if erros.get('form') %}aria-invalid="true"{% endif %}><option value="">Escolha…</option>{% for n,nome in [(3,'Avaliar os riscos (FORM 3)'),(4,'Providência direta, sem avaliação de risco (FORM 4)')] %}<option value="{{ n }}" title="{{ 'F2-14.5' if n==3 else 'F2-14.6' }}" {% if dados.get('form')==n|string %}selected{% endif %}>{{ nome }}</option>{% endfor %}</select>
 <p class="erro-campo" id="erro-destino34" {% if not erros.get('form') %}hidden{% endif %}>{{ erros.get('form','') }}</p>
