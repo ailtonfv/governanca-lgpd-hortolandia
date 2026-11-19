@@ -1,4 +1,5 @@
 """Interface demonstrativa; sem migração no startup ou no GET."""
+from app.obrigatoriedade_forms import conferencia_para_tela, conferencia34, FormularioIncompleto
 from pathlib import Path
 from uuid import uuid4
 from urllib.parse import urlencode
@@ -36,7 +37,7 @@ def url_objeto(obj,conta,bloco=1,**extra):
 
 def erro(request,conta,e,status=409,retorno='/forms34'):
     return paginas.TemplateResponse(request=request,name='forms34_erro.html',status_code=status,
-        context={'conta_id':conta,'erro':str(e),'retorno':retorno})
+        context={'conta_id':conta,'erro':str(e),'retorno':retorno,'conferencia_r17':getattr(e,'conferencia',None),'base_r17':getattr(e,'base','')})
 
 
 @router.get('/forms34')
@@ -79,6 +80,8 @@ async def ingresso(request:Request,pid:str,conta_id:str):
                 if not r.get('permitido'):raise ValueError(r.get('motivo'))
                 s.commit()
                 return RedirectResponse(url_objeto(r['identidade_id'],conta_id,registrado=d.get('comando_id')),303)
+            except FormularioIncompleto as exc:
+                s.rollback();erros_ingresso={'r17':str(exc)};status_ingresso=409
             except ErrosCampos as exc:
                 s.rollback();erros_ingresso=exc.erros;status_ingresso=409
             except (ValueError,PermissionError) as e:
@@ -88,6 +91,7 @@ async def ingresso(request:Request,pid:str,conta_id:str):
         respostas=indice_valores(p.conteudo or {})
         selecionados={n:any(v in ('Sim','SIM') for v in respostas.get('opcao:F2-14.'+str(n+2),[])) for n in (3,4)}
         return paginas.TemplateResponse(request=request,name='forms34_ingresso.html',status_code=status_ingresso,context={
+            'conferencia_r17':conferencia_para_tela(s,p), 'base_r17':f'/form2/participacoes/{p.id}/blocos',
             'salvos':selecionados,'risco_direto':bool(dominio.sinais_form2(p.conteudo or {})) and not selecionados[3],
             'erros':erros_ingresso,'dados':dados_ingresso,
             'p':p,'registro':s.get(Registro,p.registro_id),'pessoa':pessoa,'conta_id':conta_id,'comando_id':str(uuid4())})
@@ -112,7 +116,7 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
         try:obj,ref,e,pessoa,papeis,uid=dominio.consultar(s,conta_id,objeto_id)
         except (PermissionError,ValueError) as exc:return erro(request,conta_id,exc,403)
         if not 1<=bloco<=(16 if ref.form==3 else 9):raise HTTPException(404,'Bloco inexistente.')
-        erros_campos={}; valores_enviados={}; acao_erro=None; status=200
+        erros_campos={}; valores_enviados={}; acao_erro=None; status=200; falhas_r17=False
         if request.method=='POST':
             d=await request.form();acao=d.get('acao','salvar_bloco')
             try:
@@ -132,6 +136,8 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
                 if not r.get('permitido'):raise ValueError(r.get('motivo'))
                 s.commit()
                 return RedirectResponse(url_objeto(r['identidade_id'],conta_id,bloco if r['identidade_id']==obj.id else 1,registrado=d.get('comando_id')),303)
+            except FormularioIncompleto as exc:
+                s.rollback(); falhas_r17=True; valores_enviados=dict(d); acao_erro=acao; status=409
             except ErrosCampos as exc:
                 s.rollback(); erros_campos=exc.erros; valores_enviados=dict(d); acao_erro=acao; status=409
             except (ValueError,PermissionError,KeyError) as exc:
@@ -182,6 +188,7 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
         ato=ato_registrado(s,request.query_params.get('registrado'),conta_id,registro_id=registro.id,participacao_id=obj.id)
         from app.restrito_forms34 import pode_ler
         return paginas.TemplateResponse(request=request,name='forms34_bloco.html',status_code=status,context={
+            'falhas_r17':falhas_r17,'conferencia_r17':conferencia34(ref.form,e),'base_r17':f'/forms34/{obj.id}/blocos',
             'erros_campos':erros_campos,'acao_erro':acao_erro,'revisar':revisar,
             'ato_proposta':proposta,'ato_principal':principal,'outros_atos':restantes[1:],
             'valores_formulario':valores_enviados if acao_erro else valores_proposta(e),

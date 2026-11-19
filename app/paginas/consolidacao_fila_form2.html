@@ -3,7 +3,7 @@
 {% if resumo.complementos_pendentes %}<aside class="aviso-alerta">Complementos necessários antes de registrar a consolidação:<ul>{% for item in resumo.complementos_pendentes %}<li>{{ item.item }}</li>{% endfor %}</ul></aside>{% endif %}
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/filas_form2.css') }}">
 <div class="filas-form2">
-<h1>Conferência da consolidação</h1>
+<h1>Conferência da consolidação</h1>{% from '_conferencia_r17.html' import resumo as resumo_r17 %}{% if conferencia_r17 %}{{ resumo_r17(conferencia_r17,base_r17,conta_id,true) }}{% endif %}
 <p><strong>{{ registro.codigo_lgpd }}</strong> · FORM 2 · {{ pessoa.nome|identidade_demonstrativa }}</p>
 {% include '_regua_fila_form2.html' %}
 <p>Esta conferência reúne o que está salvo. Pode ser registrada mesmo com pontos em aberto, para acompanhar a evolução. Não conclui o Registro nem homologa a análise.</p>

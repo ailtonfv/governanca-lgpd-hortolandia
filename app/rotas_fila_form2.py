@@ -1,3 +1,4 @@
+from app.obrigatoriedade_forms import conferencia_para_tela
 from app.unidades_interface_form2 import secretarias_ativas
 """Interface de filas institucionais demonstrativas."""
 from pathlib import Path
@@ -235,7 +236,7 @@ def consolidacao_fila(request: Request, participacao_id: str, conta_id: str,
     registrar_auditoria(sessao, "consulta_consolidacao_form2", "pessoa", contexto["pessoa"].id,
         {"participacao_id": participacao_id, "finalidade": "conferência pelo AAL responsável"})
     sessao.commit()
-    contexto.update(conta_id=conta_id, comando_id=str(uuid4()),
+    contexto.update(conferencia_r17=conferencia_para_tela(sessao,contexto["p"]),base_r17=f"/form2/participacoes/{participacao_id}/blocos",conta_id=conta_id, comando_id=str(uuid4()),
         registro=sessao.get(Registro, contexto["p"].registro_id),
         estados_regua=estados_da_participacao(sessao, contexto["p"]),
         unidades={u.id: u.nome for u in sessao.scalars(select(Unidade))},
@@ -259,7 +260,7 @@ async def registrar_consolidacao_fila(request: Request, participacao_id: str,
     except (PermissionError, ValueError) as erro:
         sessao.rollback()
         return paginas.TemplateResponse(request=request, name="erro_consolidacao_form2.html",
-            context={"conta_id": conta_id, "participacao_id": participacao_id, "erro": str(erro),
+            context={"conferencia_r17":getattr(erro,"conferencia",None),"base_r17":getattr(erro,"base",""),"conta_id": conta_id, "participacao_id": participacao_id, "erro": str(erro),
                      "sintese": dados.get("sintese", "")},
             status_code=403 if isinstance(erro, PermissionError) else 409)
     return RedirectResponse(str(request.url_for("consolidacao_fila_form2",
@@ -470,7 +471,7 @@ def participacao(request: Request, participacao_id: str, conta_id: str,
     if consulta_tipo not in ("dpo", "juridico", "tematica"):
         raise HTTPException(400, "Tipo de consulta desconhecido.")
     return paginas.TemplateResponse(request=request, name="participacao_form2.html",
-        context={"consulta_item": consulta_item, "consulta_tipo": consulta_tipo, "atuacao": contexto_atuacao(sessao, pessoa, p), "conta_id": conta_id, "p": p, "estados_regua": estados_da_participacao(sessao, p), "pessoa": pessoa,
+        context={"conferencia_r17":conferencia_para_tela(sessao,p) if p.tipo=="principal" else None,"base_r17":f"/form2/participacoes/{p.id}/blocos","consulta_item": consulta_item, "consulta_tipo": consulta_tipo, "atuacao": contexto_atuacao(sessao, pessoa, p), "conta_id": conta_id, "p": p, "estados_regua": estados_da_participacao(sessao, p), "pessoa": pessoa,
                  "rotulo_origem": rotulo_apresentacao(snapshot),
                  "confirmada_em": data_confirmacao.astimezone(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y às %Hh%M") if data_confirmacao else None,
                  "assumida": assumida, "retorno": retorno_consultivo(request,sessao,conta_id,p),
@@ -572,7 +573,7 @@ def bloco_fila(request: Request, participacao_id: str, bloco: int, conta_id: str
             if resultado_salvo.get("complemento_solicitado"):
                 confirmacao += " Complementação solicitada à origem."
     return paginas.TemplateResponse(request=request, name="bloco_fila_form2.html",
-        context={"ato_registrado": ato_registrado(sessao, request.query_params.get("salvo"), conta_id, participacao_id=p.id) if confirmacao else None, "atuacao": contexto_atuacao(sessao, pessoa, p), "p": p, "estados_regua": estados_regua_form2(conteudo, ramos), "pessoa": pessoa, "conta_id": conta_id, "bloco": definicao,
+        context={"conferencia_r17":conferencia_para_tela(sessao,p) if p.tipo=="principal" else None,"base_r17":f"/form2/participacoes/{p.id}/blocos","ato_registrado": ato_registrado(sessao, request.query_params.get("salvo"), conta_id, participacao_id=p.id) if confirmacao else None, "atuacao": contexto_atuacao(sessao, pessoa, p), "p": p, "estados_regua": estados_regua_form2(conteudo, ramos), "pessoa": pessoa, "conta_id": conta_id, "bloco": definicao,
         "cargo": CARGOS_FICTICIOS.get(pessoa.id), "numero": bloco, "confirmacao": confirmacao, "ocorrencias": ocorrencias, "origens_repetiveis": origens_repetiveis,
         "comando_id": str(uuid4()),
         "finalidade_validada": conteudo.get(RASCUNHO, {}).get("2", {}).get("texto:F2-2.3"),

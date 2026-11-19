@@ -1,3 +1,4 @@
+{% from '_marca_r17.html' import marca %}
 {% from '_identificador_pergunta.html' import codigo_pergunta %}
 <section class="form1" id="unidade-guarda" tabindex="-1" aria-labelledby="titulo-guarda">
   <p class="etiqueta">FORM 2 · Etapa 1 · Bloco 2</p>
@@ -50,7 +51,7 @@
       <input type="hidden" name="versao_lida" value="{{ preparacao.versao_rascunho }}">
       {% for questao in guarda.questoes %}
       <fieldset class="resposta-form2" data-resposta-form2="{{ questao.id }}"{% if not questao.ativa %} disabled{% endif %}>
-        <legend>{{ questao.id }} — {{ questao.enunciado }}</legend>
+        <legend>{{ questao.id }} — {{ questao.enunciado }} {{ marca(questao,2,questao.ativa|default(true)) }}</legend>
         {% for regra in questao.condicoes if regra.operador != 'SEMPRE' %}<p data-ajuda-condicao {% if questao.ativa %}hidden{% endif %}>Disponível quando {{ regra.origem }} estiver respondida com “Sim”.</p>{% endfor %}
         {% if questao.modo == 'unica' %}
         <label for="resposta-{{ questao.id }}">Resposta</label>

@@ -1,5 +1,6 @@
 {% extends 'base.html' %}{% block conteudo %}
 <h1>{{ registro.codigo_lgpd }} · Encaminhar para riscos ou providências</h1>
+{% from '_conferencia_r17.html' import resumo as resumo_r17 %}{% if conferencia_r17 %}{{ resumo_r17(conferencia_r17,base_r17,conta_id,true) }}{% endif %}
 <p>{{ pessoa.nome|identidade_demonstrativa }} · AAL responsável</p>
 <p>Este encaminhamento usa o FORM 2 como está agora (versão {{ p.versao }}). Se o FORM 2 for alterado depois, a avaliação continua ligada à versão {{ p.versao }} e a mudança fica sinalizada para revisão.</p>
 {% if not salvos[3] and not salvos[4] %}<p class="aviso-alerta">Responda e salve no bloco 14 se segue para Riscos (FORM 3) ou Ações (FORM 4).</p>{% endif %}

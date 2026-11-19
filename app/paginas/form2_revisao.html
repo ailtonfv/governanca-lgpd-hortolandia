@@ -1,3 +1,4 @@
+{% from '_marca_r17.html' import marca %}
 {% from '_identificador_pergunta.html' import codigo_pergunta %}
 {% extends "base.html" %}
 {% block titulo %}Rascunho do FORM 2 · Bloco {{ bloco.numero }}<script defer src="/estaticos/complementos_form2.js"></script>{% endblock %}
@@ -34,7 +35,7 @@
 {% set op = 'opcao:' ~ q.id %}{% set txt = 'texto:' ~ q.id %}{% set com = 'comentario:' ~ q.id %}
 {% set bloqueada = juridico or numero == 1 or q.edicao in ('habilitada', 'consulta', 'bloqueada_d11') %}
 {% if q.id in ('F2-9W.1','F2-11S.1','F2-12A.1') %}<h2>{{ {'F2-9W.1':'Wi-Fi oferecido pela Prefeitura','F2-11S.1':'Informações de saúde','F2-12A.1':'Informações de alta sensibilidade'}[q.id] }}</h2>{% endif %}
-<fieldset class="resposta-form2"><legend>{{ q.id }} — {{ q.enunciado }}</legend>
+<fieldset class="resposta-form2"><legend>{{ q.id }} — {{ q.enunciado }} {{ marca(q,2,ativa(q.id,'')) }}</legend>
 {% if q.selo_d11 %}<span class="selo-d11" role="note" title="[D11] Aguarda homologação jurídica">Em deliberação</span>{% endif %}
 {% if q.id == 'F2-14.2' and complementacao %}<p><strong>Complementação do FORM 1 · origem 1.3.1</strong><br>{{ complementacao }}</p>{% endif %}
 {% if q.id == 'F2-13.9' %}<p>{{ revogacao|join(', ') if revogacao else 'Sem resposta homologada em 5.7. A avaliação de consentimento aguarda deliberação.' }}</p>{% endif %}
@@ -52,7 +53,7 @@
 {% set op = op ~ ('#' ~ n if repetivel else '') %}{% set txt = txt ~ ('#' ~ n if repetivel else '') %}
 {% set sufixo = '#' ~ n if repetivel else '' %}
 <fieldset class="controle-condicional" {{ gatilhos(q) }} data-condicional{% if repetivel and q.condicoes|selectattr("origem","in",origens_repetiveis)|list %} data-dependencia-local{% endif %}{% if not ativa(q.id, sufixo) %} disabled{% endif %}><legend class="legenda-condicional">Resposta para {{ q.id }}</legend>
-{{ ajuda(q, ativa(q.id, sufixo)) }}
+{{ ajuda(q, ativa(q.id, sufixo)) }}{% if repetivel %}{{ marca(q,2,ativa(q.id,sufixo)) }}{% endif %}
 {% if q.alternativas %}
 {% if 'múltipla' in q.controle|lower %}
 <input type="hidden" name="{{ op }}" value="">

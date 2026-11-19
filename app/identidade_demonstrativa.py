@@ -19,5 +19,7 @@ def nomes_em_texto(valor):
 
 
 def configurar_identidade(paginas):
+    from app.obrigatoriedade_forms import metadado_pergunta
+    paginas.env.globals['metadado_r17'] = metadado_pergunta
     paginas.env.filters['identidade_demonstrativa'] = identidade_demonstrativa
     paginas.env.finalize = nomes_em_texto

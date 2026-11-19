@@ -4,6 +4,11 @@
  function conditions(){document.querySelectorAll('[data-depende]').forEach(f=>{
    const origin=form.elements.namedItem(f.dataset.depende);if(!origin)return;
    f.disabled=origin.value!=='Sim';f.classList.toggle('bloqueada34',f.disabled);
+ });
+ document.querySelectorAll('[data-prioridade-origem]').forEach(f=>{
+   const origem=f.dataset.prioridadeOrigem, campo=form.elements.namedItem('F4-4.9');
+   f.disabled=!origem || !campo || !campo.value || campo.value===origem;
+   f.classList.toggle('bloqueada34',f.disabled);
  });}
  form.addEventListener('change',()=>{dirty=true;conditions();});form.addEventListener('input',()=>dirty=true);
  form.addEventListener('reset',()=>{dirty=false;setTimeout(conditions,0);});form.addEventListener('submit',()=>dirty=false);

@@ -3,7 +3,7 @@
 {% block conteudo %}
 {% set situacoes = {'aguardando': 'aguardando responsável', 'em_atendimento': 'em atendimento', 'concluida': 'concluída'} %}
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/filas_form2.css') }}"><div class="filas-form2">
-<h1>{{ registro.codigo_lgpd }} · Participação {{ p.tipo }}</h1>
+<h1>{{ registro.codigo_lgpd }} · Participação {{ p.tipo }}</h1>{% from '_conferencia_r17.html' import resumo as resumo_r17 %}{% if conferencia_r17 %}{{ resumo_r17(conferencia_r17,base_r17,conta_id,false) }}{% endif %}
 {% if retorno %}<p class="mensagem mensagem-sucesso" role="status">{{ retorno }}</p>{% endif %}{% if assumida %}<p class="mensagem mensagem-sucesso" role="status">Você assumiu a participação {{ p.tipo }} do {{ registro.codigo_lgpd }}. A análise usa a {{ rotulo_origem }}.</p>{% endif %}
 <p><strong>Versão do FORM 1 em análise:</strong> {{ rotulo_origem }}</p>
 {% include '_atuacao_form2.html' %}

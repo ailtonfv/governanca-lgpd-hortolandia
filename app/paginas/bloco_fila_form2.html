@@ -1,8 +1,9 @@
+{% from '_marca_r17.html' import marca %}
 {% from '_faixa_ato.html' import faixa_ato %}
 {% from '_identificador_pergunta.html' import codigo_pergunta %}
 {% extends "base.html" %}{% block conteudo %}
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/filas_form2.css') }}"><div class="filas-form2 pagina-bloco-form2">
-<h1>{{ registro.codigo_lgpd }} · FORM 2 · Bloco {{ numero }} — {{ titulos_blocos_form2().get(numero, bloco.titulo) }}</h1>
+<h1>{{ registro.codigo_lgpd }} · FORM 2 · Bloco {{ numero }} — {{ titulos_blocos_form2().get(numero, bloco.titulo) }}</h1>{% from '_conferencia_r17.html' import resumo as resumo_r17 %}{% if conferencia_r17 %}{{ resumo_r17(conferencia_r17,base_r17,conta_id,false) }}{% endif %}
 <p><strong>Versão do FORM 1 em análise:</strong> {{ rotulo_origem }}</p>
 <p>{{ atuacao.servidor }} · {{ atuacao.funcao }} · <span class="sr-apenas">Unidade de atuação:</span> {{ atuacao.unidade }} · {{ "Você pode editar suas respostas" if atuacao.editavel else "Somente leitura" }}</p>
 {% if numero in (3,4,5,10) %}<span class="selo-d11" title="Aguarda homologação jurídica (D11)">Em deliberação</span>{% endif %}
@@ -31,7 +32,7 @@
 {% if numero in (1,2) %}
 {% set fatos = fatos_origem.get('respostas', {}) %}
 {% set unidade_origem = fatos.get('2.4.2') if fatos.get('2.4') == 'Não' else fatos.get('2.3') %}
-{% for q in bloco.itens %}<fieldset id="{{ q.id }}" {% if q.edicao == "habilitada" %}{{ gatilhos(q) }}{% endif %} {% if q.edicao == "habilitada" and not q.ativa %}disabled{% endif %}><legend>{{ q.id }} · {{ q.enunciado|replace("na Seção 2","no bloco 2")|replace("Seção 2","Bloco 2") }}</legend>
+{% for q in bloco.itens %}<fieldset id="{{ q.id }}" {% if q.edicao == "habilitada" %}{{ gatilhos(q) }}{% endif %} {% if q.edicao == "habilitada" and not q.ativa %}disabled{% endif %}><legend>{{ q.id }} · {{ q.enunciado|replace("na Seção 2","no bloco 2")|replace("Seção 2","Bloco 2") }} {{ marca(q,2,q.ativa if q.edicao=="habilitada" else ativa(q.id,'')) }}</legend>
 {% if q.edicao == 'habilitada' %}{{ ajuda(q, q.ativa) }}{% endif %}
 {% if q.id == 'F2-1.2' %}<p>Secretaria do Registro: <strong>{{ secretaria.nome }}</strong>.</p>{% endif %}
 {% if q.id in ('F2-2.1', 'F2-2.9') %}<aside><strong>No FORM 1 · {{ rotulo_origem }}</strong>
@@ -77,7 +78,7 @@
 <p id="balanceamento-inativo" {% if ativa(q.id, '') %}hidden{% endif %}>Teste de balanceamento: não se aplica (Legítimo interesse não indicado na 3.1)</p>
 <section id="teste-balanceamento" {% if not ativa(q.id, '') %}hidden{% endif %}><h2>Teste de balanceamento — só para Legítimo interesse</h2>
 {% endif %}
-<fieldset class="resposta-form2" id="{{ q.id }}"><legend>{{ q.id }} · {{ q.enunciado|replace("na Seção 2","no bloco 2")|replace("Seção 2","Bloco 2") }}</legend>
+<fieldset class="resposta-form2" id="{{ q.id }}"><legend>{{ q.id }} · {{ q.enunciado|replace("na Seção 2","no bloco 2")|replace("Seção 2","Bloco 2") }} {{ marca(q,2,q.ativa if q.edicao=="habilitada" else ativa(q.id,'')) }}</legend>
 {% if q.selo_d11 %}<span class="selo-d11" role="note" title="[D11] Aguarda homologação jurídica">Em deliberação</span>{% endif %}
 {% include '_atalho_consulta_form2.html' %}
 {% if q.fatos_abertura is defined %}<aside class="fatos-abertura-form2"><strong>No FORM 1 · {{ rotulo_origem }}</strong>
@@ -105,7 +106,7 @@
 {% set op = op ~ ('#' ~ n if repetivel else '') %}{% set txt = txt ~ ('#' ~ n if repetivel else '') %}
 {% set sufixo = '#' ~ n if repetivel else '' %}
 <fieldset class="controle-condicional" {{ gatilhos(q) }} data-condicional{% if repetivel and q.condicoes|selectattr("origem","in",origens_repetiveis)|list %} data-dependencia-local{% endif %}{% if not ativa(q.id, sufixo) %} disabled{% endif %}>
-{{ ajuda(q, ativa(q.id, sufixo)) }}
+{{ ajuda(q, ativa(q.id, sufixo)) }}{% if repetivel %}{{ marca(q,2,ativa(q.id,sufixo)) }}{% endif %}
 {% if q.alternativas %}
 {% if 'múltipla' in q.controle|lower %}
 <input type="hidden" name="{{ op }}" value="">

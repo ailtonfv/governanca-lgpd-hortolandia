@@ -1,0 +1,7 @@
+{% macro resumo(r, base, conta, faltas=false) -%}
+<section class="conferencia-r17" aria-label="Conferência de preenchimento">
+{% if r.indisponivel|default(false) %}<p role="alert">A conferência de preenchimento está indisponível porque o catálogo não pôde ser carregado. O encaminhamento permanece bloqueado.</p>{% else %}<p><strong>{{ r.quantidade_a_confirmar }} respostas marcadas 'A confirmar'</strong>. São pendências visíveis e não impedem a conclusão.</p>
+{% if r.a_confirmar %}<details><summary>Consultar respostas a confirmar</summary><ul>{% for q in r.a_confirmar %}<li><a href="{{ base }}/{{ q.bloco }}?conta_id={{ conta|urlencode }}#{{ q.ancora }}">Bloco {{ q.bloco }} — {{ q.item }}</a>{% if not q.ativa %} · resposta anterior, pergunta atualmente inativa{% endif %}</li>{% endfor %}</ul></details>{% endif %}
+{% if faltas and r.grupos %}<div role="alert"><p>Responda às perguntas obrigatórias antes de concluir ou encaminhar. O que foi salvo continua preservado.</p><ul>{% for g in r.grupos %}<li><a href="{{ base }}/{{ g.bloco }}?conta_id={{ conta|urlencode }}">Bloco {{ g.bloco }} — {{ g.quantidade }} {{ 'pergunta sem resposta' if g.quantidade==1 else 'perguntas sem resposta' }}</a></li>{% endfor %}</ul></div>{% endif %}
+{% endif %}</section>
+{%- endmacro %}

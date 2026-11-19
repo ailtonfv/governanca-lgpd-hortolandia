@@ -2,6 +2,7 @@
 {% block conteudo %}
 <link rel="stylesheet" href="{{ url_for('estaticos',path='/filas_form2.css') }}"><link rel="stylesheet" href="{{ url_for('estaticos',path='/forms34.css') }}">
 <div class="forms34 filas-form2"><h1>{{ registro.codigo_lgpd }} · FORM {{ ref.form }} · Bloco {{ bloco }}</h1>
+{% from '_conferencia_r17.html' import resumo as resumo_r17 %}{% if conferencia_r17 %}{{ resumo_r17(conferencia_r17,base_r17,conta_id,falhas_r17|default(false)) }}{% endif %}
 <p><strong>{{ pessoa.nome|identidade_demonstrativa }}</strong> · {{ papeis_visiveis|join(' / ') }} · {{ obj.codigo }}</p>
 <p>Origem: FORM {{ ref.fonte_form }}, versão {{ ref.fonte_versao }} preservada.</p>
 <p><span class="selo-d11" title="D11">Em deliberação</span> Proposta em deliberação. Não equivale a homologação.</p>
