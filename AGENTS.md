@@ -33,7 +33,7 @@ Leia este arquivo antes de alterar código ou documentação. Em seguida, leia s
 
 ## Regras transversais
 
-- Todo campo de pergunta ou de ato usa a marcação de obrigatoriedade do padrão de interação; não criar outra. Classificações de perguntas ainda pendentes aguardam aprovação.
+- Todo campo de pergunta ou de ato usa a marcação de obrigatoriedade do padrão de interação; não criar outra. Classificações de perguntas ainda pendentes aguardam aprovação. Obrigatoriedade é cobrada na conclusão e no encaminhamento, nunca no salvamento.
 
 - Toda regra fica no domínio; o servidor deve recusar o que a tela esconde ou bloqueia. Esconder botão, validar apenas em JavaScript ou desabilitar campo não concede segurança.
 - `conta_id` é exclusivo da demonstração. Em produção, o acesso será por autenticação real; não tratar a simulação como autenticação institucional.

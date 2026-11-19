@@ -1126,3 +1126,10 @@ Na F2-10.2.1, identificar a entidade ou a categoria de prestador, sem nome de pe
 Aprovada a inclusão de referências oficiais no quadro de apoio da ANPD: Enunciado CD/ANPD nº 1/2023 no bloco 6; Resolução CD/ANPD nº 19/2024, regulamento e cláusulas-padrão, no bloco 9; página de direitos dos titulares no bloco 13. Apoio para consulta, sem automatizar avaliação nem substituir manifestação institucional. Esta decisão supera a pendência de aprovação da D12 registrada no Lote 9.
 
 Ratificada a D5 já registrada: 99 conjuntos e limites de texto curto de 200, longo de 1000 e comentário de 2000 caracteres são provisórios da PoC, não regras de produção. Exceções explícitas do catálogo continuam preservadas; limites definitivos dependem de deliberação institucional. Nenhum limite é alterado por este lote.
+
+
+## R17 — decisão de Ailton, DPO, 19/11/2026 (Lote 12-B)
+
+Perguntas principais ativas são obrigatórias nos atos de conclusão/encaminhamento. Condicionais só são exigidas quando ativas; informativas e calculadas são somente leitura. A ausência de preenchimento não bloqueia salvamento parcial. Respostas a confirmar são aceitas e sinalizadas, com quantidade registrada no ato, sem classificação automática de impedimento. Atos anteriores não são invalidados ou refeitos.
+
+Encaminhamento do FORM 2 exige questionário pronto para encaminhar. Mantêm-se dois encaminhamentos separados. Adiar a identidade de risco até sua descrição fica para depois de 15/12, fora deste lote. Exceções por identificador estão configuradas como proposta em `app/r17_excecoes.json`; aprovação da lista precede eventual merge. Não se libera conclusão institucional, nem se altera a matriz do FORM 1. Sem migração e sem atualização da cópia em vistoria.

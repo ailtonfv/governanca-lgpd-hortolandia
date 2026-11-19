@@ -116,6 +116,22 @@ Referência existente: `app/pre_validacao_form1_integral.py`, função `metadado
 
 O bloco atual mantém azul-escuro e recebe borda grossa. Selos visíveis usam “Em deliberação” e “Guarda em definição”; códigos internos ficam apenas nas dicas e documentação. A deliberação é explicada por “Proposta em deliberação. Não equivale a homologação.”
 
-Alternativa Outro solicita imediatamente “Qual?”, com até 200 caracteres; o domínio recusa o complemento vazio. Isso não torna obrigatórias as demais perguntas. As ações do rodapé ficam lado a lado: salvar o bloco identificado em destaque e descartar como secundária.
+Alternativa Outro solicita imediatamente “Qual?”, com até 200 caracteres. Nos FORMs 2, 3 e 4, a R17 permite salvar o complemento vazio e o exige no ato final; o comportamento do FORM 1 permanece preservado. As ações do rodapé ficam lado a lado: salvar o bloco identificado em destaque e descartar como secundária.
 
 Códigos de instrumentos e perguntas servem como apoio entre parênteses nos comandos. A ação deve explicar seu destino em linguagem comum. Identificadores nas perguntas e no histórico continuam preservados.
+
+
+## R17 — quatro regras aprovadas em 19/11/2026
+
+Convenção comum aos quatro FORMs: salvar parcialmente; exigir pergunta principal ativa no ato final; exigir condicional somente quando ativa; manter respostas a confirmar como pendências visíveis, sem tratá-las como impeditivas. A aplicação deste lote alcança os FORMs 2, 3 e 4. O FORM 1 conserva sua matriz, fluxo e comportamento; não se libera submissão institucional.
+
+- `* Obrigatório`, em vermelho, nas principais ativas. `** Obrigatório em alguns casos`, em âmbar, passa a `* Obrigatório neste caso` ao ativar. Informativas, calculadas e projeções de atos: `****`, somente leitura. Texto por extenso acompanha a cor.
+- Obrigatoriedade é cobrada na conclusão e no encaminhamento, nunca no salvamento. Salvamento continua recusando respostas inválidas, alterações em campos inativos e operações sem permissão; não recusa mera ausência de preenchimento.
+- “A confirmar” satisfaz preenchimento, permanece na lista superior e sua quantidade/identificadores ficam no evento do ato final. Não se classifica como impeditiva. Resposta histórica inativa continua sinalizada, sem reativação automática.
+- Recusa de ato final mostra faltas agrupadas por bloco, com links. Não apaga respostas. Apenas atos futuros são conferidos; não se recalcula a validade de ingresso ou conclusão anterior.
+
+Implementação única de conferência: `app/obrigatoriedade_forms.py`. Marcação reutiliza `metadado_visual_obrigatoriedade` do FORM 1, agora aceitando classe explícita para outros instrumentos; chamadas do FORM 1 continuam usando sua matriz. Macros `_marca_r17.html` e `_conferencia_r17.html`; interação `obrigatoriedade.js`, sem impor `required` aos formulários de salvamento parcial.
+
+Exceções propostas: `app/r17_excecoes.json`, somente identificadores e motivos técnicos, carregadas como proposta. Ailton aprova a lista antes do merge. Relatório editorial e resumo dos enunciados ficam na entrega local restrita.
+
+A conferência demonstrativa do FORM 2 e seus encaminhamentos passam pela R17; conclusão institucional continua bloqueada pelas regras existentes. Consultas de unidades especialistas não são a conclusão do questionário principal. FORM 3 confere ao concluir a avaliação; o envio de medida protetiva ao FORM 4 permanece disponível e registra a contagem, sem antecipar a conclusão do FORM 3; FORM 4 confere antes de registrar encerramento automático. Salvar bloco não aciona encerramento automático.
