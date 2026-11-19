@@ -87,7 +87,7 @@ def test_guarda_no_bloco_fila_e_painel(sessao,principal):
     resposta=c.post(f"/form2/participacoes/{p.id}/blocos/2", data={
         "conta_id":"CONTA-B1","comando_id":"L4-GUARDA","versao":p.versao,
         "resposta_F2-2.9":GUARDA_INSTITUCIONAL})
-    selo="Guarda: aguarda definição institucional"
+    selo="Guarda em definição"
     assert resposta.status_code==200 and selo in resposta.text
     assert selo in c.get("/form2/filas?conta_id=CONTA-B1").text
     painel=c.get("/form2/filas?conta_id=CONTA-E1")
