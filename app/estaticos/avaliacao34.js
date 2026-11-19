@@ -9,7 +9,7 @@
    for(const [tipo,pn,iname,mark] of [['inerente','p','i','I'],['residual','pr','ir','R']]){
     const p=box.querySelector(`[name="${pn}"]`)?.value??initial[tipo]?.probabilidade;
     const i=box.querySelector(`[name="${iname}"]`)?.value??initial[tipo]?.impacto;
-    const s=score(p,i);scores[tipo]=s;box.querySelector(`[data-nota="${tipo}"]`).textContent=tipo[0].toUpperCase()+tipo.slice(1)+': '+(s.nota===null?'Ainda não avaliado':`${p} × ${i} = ${s.nota} — ${s.faixa}`);
+    const s=score(p,i);scores[tipo]=s;box.querySelector(`[data-nota=${tipo}]`).dataset.faixa=s.faixa;box.querySelector(`[data-nota="${tipo}"]`).textContent=tipo[0].toUpperCase()+tipo.slice(1)+': '+(s.nota===null?'Ainda não avaliado':`${p} × ${i} = ${s.nota} — ${s.faixa}`);
     if(s.nota!==null){const cell=box.querySelector(`[data-p="${p}"][data-i="${i}"] [data-marca]`);if(cell)cell.textContent+=(cell.textContent?' / ':'')+mark;}
    }
    const a=scores.inerente,b=scores.residual;

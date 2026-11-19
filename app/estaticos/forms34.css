@@ -8,3 +8,10 @@
 .forms34 .matriz34{position:sticky;top:1rem}.forms34 .indicador-obrigatoriedade-obrigatorio{color:#b42318}.forms34 .indicador-obrigatoriedade-condicional{color:#854d0e}.forms34 .indicador-obrigatoriedade-facultativo{color:#475569}
 
 .matriz-corpo34{display:grid;grid-template-columns:1.4rem minmax(0,1fr);gap:.4rem;align-items:center}.eixo-vertical34{writing-mode:vertical-rl;transform:rotate(180deg);text-align:center;font-weight:700}.eixo-horizontal34{text-align:center;font-weight:700;margin:.4rem 0}
+
+.faixa-pequeno,[data-faixa="Pequeno"]{--faixa-forte:var(--risco-pequeno);--faixa-texto:#102116}
+.faixa-moderado,[data-faixa="Moderado"]{--faixa-forte:var(--risco-moderado);--faixa-texto:var(--risco-moderado-texto)}
+.faixa-alto,[data-faixa="Alto"]{--faixa-forte:var(--risco-alto);--faixa-texto:#211300}
+.faixa-crítico,[data-faixa="Crítico"]{--faixa-forte:var(--risco-critico);--faixa-texto:white}
+.matriz34 td:has([data-marca]:not(:empty)),[data-nota][data-faixa]:not([data-faixa="Ainda não avaliado"]){background:var(--faixa-forte);color:var(--faixa-texto);border-radius:.3rem}
+[data-nota][data-faixa]{padding:.4rem .6rem}.matriz34 .nome-faixa34{display:block;font-size:.65rem}.matriz34 td{padding:.3rem}.matriz34 td [data-marca]{background:transparent;color:inherit}

@@ -464,3 +464,5 @@ dialog :is([data-cancelar], [data-fechar-dialogo]) { font-size: .9rem; backgroun
 
 .tabela-proposta-impacto {max-width:100%;overflow-x:auto;}
 .tabela-proposta-impacto table {min-width:55rem;}
+
+:root{--risco-pequeno:#2e9e44;--risco-moderado:#e2a90f;--risco-moderado-texto:#2b1d00;--risco-alto:#e3651d;--risco-critico:#b3261e;}
