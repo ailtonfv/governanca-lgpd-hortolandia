@@ -126,7 +126,7 @@ def montar_resumo(fontes):
         "complementos": fontes["complementos"],
         "conclusao_institucional_habilitada": False,
         "limites": ["Homologação jurídica D11 pendente.",
-            "Obrigatoriedade para concluir e classificação de pendências impeditivas dependem de deliberação institucional.",
+            "Perguntas obrigatórias são conferidas nos atos finais. A classificação de pendências impeditivas continua em deliberação institucional.",
             "Encaminhamentos aos FORMs 3 e 4 ainda não são executados por esta conferência."],
     }
 
@@ -161,13 +161,13 @@ def registrar(sessao, *, conta_id, comando_id, participacao_id, versao, hash_fon
     fontes = _fontes(sessao, p, bloquear=True)
     if _hash(fontes) != hash_fontes:
         raise ValueError("Respostas ou manifestações mudaram. Atualize a conferência antes de registrar.")
-    if complementos_pendentes(fontes["conteudo"], fontes["ramos_origem"]):
-        raise ValueError("Preencha os complementos necessários antes de registrar a consolidação.")
+    from app.obrigatoriedade_forms import conferencia2, exigir
+    r17 = exigir(conferencia2(fontes['conteudo'],fontes['ramos_origem']), f'/form2/participacoes/{p.id}/blocos')
     anterior = (p.conteudo or {}).get(CHAVE, {})
     retrato = {"numero": anterior.get("numero", 0) + 1, "em": agora().isoformat(),
         "ator_id": pessoa.id, "sintese": sintese.strip(), "hash_fontes": _hash(fontes),
         "fontes": fontes, "resumo": montar_resumo(fontes),
-        "natureza": "conferencia_demonstrativa_sem_homologacao"}
+        "conferencia_r17": r17, "natureza": "conferencia_demonstrativa_sem_homologacao"}
     novo = deepcopy(p.conteudo or {})
     novo[CHAVE] = retrato
     p.conteudo = novo

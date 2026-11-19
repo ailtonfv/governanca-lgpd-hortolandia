@@ -285,7 +285,8 @@ def aplicar_revisao(conteudo, bloco, campos, ramos=(), *, demonstrativo=False, u
         if not nome.startswith('opcao:'):continue
         chave=nome.partition(':')[2];q=itens[chave.partition('#')[0]]
         rotulos={a['codigo']:a['rotulo'] for a in q['alternativas']}
-        validar_outro([rotulos.get(v,v) for v in revisao.get(nome,[])],revisao.get('texto:'+chave,''),chave)
+        if revisao.get('texto:'+chave,'').strip():
+            validar_outro([rotulos.get(v,v) for v in revisao.get(nome,[])],revisao.get('texto:'+chave,''),chave)
     return novo, {"edicao": "REV21.2", "bloco": bloco, "campos_revisados": len(campos)}
 
 
@@ -385,11 +386,7 @@ def aplicar_bloco(conteudo, *, bloco, alteracoes, complementos=None, reativar=No
         informados = complementos.get(item_id, {})
         if any(codigo not in selecionados for codigo in informados):
             raise ValueError("Complemento informado para alternativa não selecionada.")
-        exigidos = {a["codigo"] for a in item["alternativas"]
-                    if a["complemento"].startswith("Texto condicionado") and a["codigo"] in selecionados}
-        existentes = complementos_ativos.get(item_id, {})
-        if any(not str(informados.get(codigo, existentes.get(codigo, ""))).strip() for codigo in exigidos):
-            raise ValueError("A alternativa selecionada exige complemento.")
+        # R17: complemento ausente é preservado para completar antes do ato final.
 
     for item_id, item in habilitados.items():
         if item_id not in normalizadas:

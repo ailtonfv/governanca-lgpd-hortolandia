@@ -5,7 +5,7 @@ from app.catalogo_forms34 import carregar_catalogo, estrutura
 
 DETALHES4 = {'F4-' + i for i in ('4.9.1','4.10.1','4.10.2','4.10.3','4.11','4.11.1',
     '4.12','4.15.2','4.17','4.17.1','4.23','4.24','4.26','4.26.1','4.27')}
-ATOS3 = {'F3-' + i for i in ('3.49','3.50','3.51','3.52.1','3.52.2','3.52.3','3.52.4',
+ATOS3 = {'F3-' + i for i in ('3.49','3.50','3.51','3.52','3.52.1','3.52.2','3.52.3','3.52.4',
     '3.52.5','3.52.6','3.55','3.56','3.57','3.43.1','3.43.4')}
 ATOS4 = {'F4-' + i for i in ('4.2.1','4.6','4.7','4.10','4.10.1','4.10.2','4.10.3',
     '4.15','4.15.1','4.15.2','4.16','4.18','4.18.1','4.19','4.20','4.21','4.22',
@@ -52,6 +52,8 @@ def perguntas(form):
 
 
 def ativa(item, respostas, estado):
+    if item['id'] == 'F4-4.9.1':
+        return bool(estado.get('prioridade_origem') and respostas.get('F4-4.9')) and respostas['F4-4.9'] != estado['prioridade_origem']
     dep = DEPENDENCIAS.get(item['id'])
     if dep:
         return respostas.get(dep) == 'Sim'
@@ -87,10 +89,6 @@ def salvar(form, anteriores, dados, estado):
         raise ValueError('Bloco ou pergunta inválida.')
     novo = deepcopy(anteriores)
     novo.update(campos)
-    if (form == 4 and estado.get('prioridade_origem') and 'F4-4.9' in campos
-            and campos['F4-4.9'] != anteriores.get('F4-4.9')
-            and not str(campos.get('F4-4.9.1','')).strip()):
-        raise ValueError('Mudança de prioridade exige justificativa em F4-4.9.1.')
     for chave, valor in campos.items():
         i = itens[chave]
         if i['tipo'] in ('readonly', 'computed', 'ato'):
@@ -113,7 +111,8 @@ def salvar(form, anteriores, dados, estado):
     from app.opcao_outro import validar_outro
     complementos={**estado.get('complementos',{}),**dados.get('complementos',{})}
     for chave,valor in campos.items():
-        if ativa(itens[chave],novo,estado):validar_outro(valor,complementos.get(chave,''),chave)
+        if ativa(itens[chave],novo,estado) and str(complementos.get(chave,'')).strip():
+            validar_outro(valor,complementos.get(chave,''),chave)
     return novo
 
 

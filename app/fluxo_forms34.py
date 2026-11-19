@@ -3,6 +3,7 @@
 Estado derivado exclusivamente de eventos; transação e bloqueio por Registro.
 Nenhum ato é concedido por um campo enviado pelo navegador.
 """
+from app.obrigatoriedade_forms import conferencia_participacao, conferencia34, retrato, exigir as exigir_r17
 from copy import deepcopy
 from datetime import date
 from uuid import uuid4, uuid5, NAMESPACE_URL
@@ -124,6 +125,8 @@ def ingressar(sessao, *, conta_id, comando_id, participacao_id, versao, form, ju
             from app.validacao_atos34 import ErrosCampos
             raise ErrosCampos({'justificativa':'Informe a justificativa para encaminhar diretamente apesar do sinal de risco.'})
         _texto({'justificativa': justificativa}, 'justificativa')
+    r17 = exigir_r17(conferencia_participacao(sessao,p), f'/form2/participacoes/{p.id}/blocos')
+    p.conteudo = {**(p.conteudo or {}), 'conferencia_r17':r17}
     # Um novo evento fonte contém a versão exata, antes de criar o contexto 3/4.
     evento_form2(sessao, cmd, p, 'form2_encaminhamento34')
     fonte = sessao.scalar(select(Evento).where(Evento.comando_id == cmd.id,
@@ -369,6 +372,7 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
             raise ValueError('A triagem exige confirmação conjunta.')
         if not e.get('aceitacao'):
             raise ValueError('Pendente de autoridade competente.')
+        e['conferencia_r17'] = exigir_r17(conferencia34(3,e), f'/forms34/{obj.id}/blocos')
         e['situacao'] = 'Avaliação concluída'
     elif acao == 'encaminhar_acao':
         exigir(papeis, 'aal')
@@ -376,6 +380,8 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         if e.get('acoes'):
             return fechar_comando(cmd, {'permitido': True, 'identidade_id': e['acoes'][-1],
                                         'existente': True})
+        # R17 exige prontidão no encaminhamento do FORM 2; não bloqueia medidas protetivas do FORM 3.
+        e['conferencia_r17'] = retrato(conferencia34(3,e))
         fonte = historico(sessao, obj.id)[-1]
         chave = f'f3:{obj.id}:v{fonte.sequencia_cadeia}'
         a = _criar(sessao, cmd, conta_id, obj.registro_id, 4, 3, fonte.id, chave,
@@ -495,7 +501,8 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
     else:
         raise ValueError('Ato não disponível.')
     ev = _gravar_estado(sessao, cmd, obj, acao, e)
-    if not f3 and e.get('verificada') and _sem_pendencia(e) and not e.get('encerrada'):
+    if not f3 and acao not in ('salvar_bloco','abrir_detalhes') and e.get('verificada') and _sem_pendencia(e) and not e.get('encerrada'):
+        e['conferencia_r17'] = exigir_r17(conferencia34(4,e), f'/forms34/{obj.id}/blocos')
         e['encerrada'] = True
         e['situacao'] = 'Concluída com verificação'
         ev = _gravar_estado(sessao, cmd, obj, 'encerramento_automatico', e)
