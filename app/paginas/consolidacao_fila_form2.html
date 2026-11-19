@@ -19,7 +19,7 @@
 <h3>Itens a confirmar</h3>
 {% if resumo.itens_a_confirmar %}<ul>{% for item in resumo.links_a_confirmar %}<li><a href="/form2/participacoes/{{ p.id }}/blocos/{{ item.bloco }}?conta_id={{ conta_id|urlencode }}#{{ item.ancora }}">{{ item.item }}</a></li>{% endfor %}</ul>{% else %}<p>Nenhuma alternativa “A confirmar” registrada nas respostas ativas.</p>{% endif %}
 <h3>F2-14.2 · Relação unificada de pendências</h3>
-{% for id,d in resumo.governanca_v9.get('pendencias',{}).items() %}{% if d.estado != 'vinculada' %}<section><h4>{{ d.estado }}</h4><p>{{ d.texto }}</p><p>{% for o in d.origens %}{{ o.item }} · {% endfor %}</p><p>{{ d.area or 'Destinação pendente' }} · {{ d.prazo or 'Prazo não definido' }}</p></section>{% endif %}{% else %}<p>Nenhuma pendência registrada.</p>{% endfor %}
+{% for id,d in resumo.governanca_v9.get('pendencias',{}).items() %}{% if d.estado != 'vinculada' %}<section><h4>{{ d.estado }}</h4><p>{{ d.texto }}</p><p>{% for o in d.origens %}{{ o.item }} · {% endfor %}</p><p>{{ d.area or 'Destinação pendente' }} · {{ d.prazo|data_br if d.prazo else 'Prazo não definido' }}</p></section>{% endif %}{% else %}<p>Nenhuma pendência registrada.</p>{% endfor %}
 <p>Sem classificação não significa ausência de impedimento. A classificação impeditiva depende de deliberação institucional.</p>
 <p><a href="/form2/participacoes/{{ p.id }}/governanca?conta_id={{ conta_id|urlencode }}">Tratar pendências e retorno da origem</a></p>
 <h3>Impacto da nova origem nas manifestações</h3><p>Avaliações ou complementos pendentes: {{ resumo.reavaliacoes_pendentes|length }}. Manifestações históricas não são renovadas automaticamente.</p>
