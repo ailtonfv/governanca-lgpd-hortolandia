@@ -15,3 +15,5 @@
 .faixa-crítico,[data-faixa="Crítico"]{--faixa-forte:var(--risco-critico);--faixa-texto:white}
 .matriz34 td:has([data-marca]:not(:empty)),[data-nota][data-faixa]:not([data-faixa="Ainda não avaliado"]){background:var(--faixa-forte);color:var(--faixa-texto);border-radius:.3rem}
 [data-nota][data-faixa]{padding:.4rem .6rem}.matriz34 .nome-faixa34{display:block;font-size:.65rem}.matriz34 td{padding:.3rem}.matriz34 td [data-marca]{background:transparent;color:inherit}
+
+.risco-resumo34 dt{text-transform:none;font-size:1rem;}
