@@ -281,7 +281,7 @@ def aplicar_revisao(conteudo, bloco, campos, ramos=(), *, demonstrativo=False, u
                 arquivo = novo.setdefault("respostas_inativas_rev212", {}).setdefault(str(bloco), {})
                 arquivo[nome] = valor
     from app.opcao_outro import validar_outro
-    for nome in campos:
+    for nome in revisao:
         if not nome.startswith('opcao:'):continue
         chave=nome.partition(':')[2];q=itens[chave.partition('#')[0]]
         rotulos={a['codigo']:a['rotulo'] for a in q['alternativas']}

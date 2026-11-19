@@ -87,7 +87,31 @@ def test_preview_mesmas_25_notas_do_dominio():
     node=shutil.which('node')
     if not node:pytest.skip('Node não instalado para verificar JavaScript')
     code="const {score}=require('./app/estaticos/avaliacao34.js');console.log(JSON.stringify(Array.from({length:25},(_,n)=>score(Math.floor(n/5)+1,n%5+1))));"
-    saida=json.loads(subprocess.check_output([node,'-e',code],text=True))
+    saida=json.loads(subprocess.check_output([node,'-e',code],text=True,encoding='utf8'))
     for n,s in enumerate(saida):
         d=pontuar(n//5+1,n%5+1)
         assert (s['nota'],s['faixa'])==(d['nota'],d['faixa'])
+
+
+def test_form2_nao_apaga_qual_mantendo_outro():
+    from app.respostas_form2 import aplicar_revisao
+    from app.form2_rev212 import RASCUNHO
+    base={RASCUNHO:{'10':{'opcao:F2-10.1':['ALT_02'],'texto:F2-10.1':'Complemento fictício'}}}
+    with pytest.raises(ValueError,match='Qual'):
+        aplicar_revisao(base,10,{'texto:F2-10.1':['']},demonstrativo=True)
+    assert base[RASCUNHO]['10']['texto:F2-10.1']=='Complemento fictício'
+
+
+def test_form1_nao_apaga_qual_mantendo_outro(sessao):
+    from testes.test_conferencia_interna_form1_integral_8ac import _preparar
+    from app.rev22_form1 import adotar,salvar,definicoes
+    from app.modelos import RascunhoForm1Integral
+    from app.opcao_outro import eh_outro
+    rid=_preparar(sessao,'OUTRO-AJUSTE')['registro_id'];draft=sessao.get(RascunhoForm1Integral,rid)
+    adotar(sessao,conta_id='CONTA-G1',comando_id=str(uuid4()),registro_id=rid,versao_lida=draft.versao_rascunho,confirmar=True)
+    q=definicoes()['2.1'];valor=next(v for v in q['options'] if eh_outro(v))
+    result=salvar(sessao,conta_id='CONTA-G1',comando_id=str(uuid4()),registro_id=rid,versao_lida=draft.versao_rascunho,bloco=2,respostas={'2.1':valor},complementos={'2.1':'Canal fictício'})
+    assert result['permitido']
+    with pytest.raises(ValueError,match='Qual'):
+        salvar(sessao,conta_id='CONTA-G1',comando_id=str(uuid4()),registro_id=rid,versao_lida=draft.versao_rascunho,bloco=2,respostas={},complementos={'2.1':''})
+    assert draft.conteudo['complementos']['2.1']=='Canal fictício'
