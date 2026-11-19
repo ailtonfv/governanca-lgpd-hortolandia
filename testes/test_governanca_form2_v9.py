@@ -392,7 +392,10 @@ def test_fila_cartao_unico_e_encaminhamento_so_APA(sessao, principal):
         assert beta.text.count('data-registro="' + principal.registro_id + '"') == 1
         assert 'Abrir participação' in beta.text
         assert 'Pendências com a origem (FORM 1)' in beta.text
-        assert 'Complementação do FORM 1: definir unidade responsável pela resposta.' in beta.text
+        from app.apresentacoes_form1 import rotulo_apresentacao
+        from app.modelos import VersaoForm1Integral
+        referencia = rotulo_apresentacao(sessao.get(VersaoForm1Integral, principal.snapshot_id))
+        assert f'Complementação do FORM 1: Solicitação sobre {referencia} — definir unidade responsável pela resposta.' in beta.text
         assert 'Encaminhar versão do FORM 1 já confirmada' not in beta.text
         alfa = client.get('/form2/filas?conta_id=CONTA-A1')
         assert alfa.status_code == 200
