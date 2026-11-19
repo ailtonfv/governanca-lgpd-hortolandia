@@ -11,7 +11,7 @@
 {% from '_ato_forms34.html' import formulario %}{% from '_quadro_avaliacao34.html' import quadro %}{% from '_cartao_bloco.html' import cartao %}
 {% if erros_campos %}<p role="alert" class="mensagem mensagem-erro">Confira os campos indicados. Seus dados continuam na tela.</p>{% endif %}
 {% if ref.form==3 and bloco==14 %}
-<p class="definicao-impacto">Impacto: a consequência plausível para o titular (a pessoa dona dos dados) se o evento acontecer. Mede só o dano à pessoa; custo para a Prefeitura e benefícios do tratamento não entram na nota. <a href="/forms34/{{ obj.id }}/proposta-impacto?conta_id={{ conta_id|urlencode }}" target="_blank" rel="noopener">Como avaliar</a></p>
+<p class="definicao-impacto">Impacto: a consequência plausível para o titular (a pessoa dona dos dados) se o evento acontecer. Mede só o dano à pessoa; custo para a Prefeitura e benefícios do tratamento não entram na nota. {% if descricao_nota34 is defined %}<a href="/forms34/{{ obj.id }}/proposta-impacto?conta_id={{ conta_id|urlencode }}" target="_blank" rel="noopener">Como avaliar</a>{% endif %}</p>
 <section class="risco-resumo34"><h2>Risco {{ obj.codigo.split('-')[-1] }}</h2><dl><dt>Evento</dt><dd>{{ estado.evento or 'Ainda não identificado' }}</dd><dt>Causa</dt><dd>{{ estado.causa or 'Ainda não informada' }}</dd><dt>Consequência para o titular</dt><dd>{{ estado.consequencia or 'Ainda não informada' }}</dd></dl></section>
 {% if ato_proposta %}{{ formulario(ato_proposta,estado,registro,obj,matriz,valores_formulario,erros_campos,true) }}{% else %}{{ quadro({}, {}, {},matriz,estado.avaliacao) }}{% endif %}
 <p class="situacao-avaliacao34" role="status">{{ situacao_avaliacao }}</p>
