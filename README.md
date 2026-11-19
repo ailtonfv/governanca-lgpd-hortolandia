@@ -2037,3 +2037,8 @@ reutilizam as permissões das páginas de destino, sem executar atos.
 Os FORMs 3 e 4 mostram os atos registrados e seus conteúdos, autor e horário; a grade distingue perguntas respondidas de confirmação do ato. A triagem já registrada permanece visível e não reaparece como formulário vazio. O histórico permite filtrar apenas atos ou incluir salvamentos. A exibição deriva dos eventos existentes, sem refazê-los.
 
 Na reavaliação, a nota conjunta vigente e os atos dependentes permanecem até a nova confirmação conjunta. A proposta e eventual divergência são mostradas separadamente; o histórico anterior é preservado.
+
+
+### Ajustes demonstrativos 12-E — 19/11/2026
+
+Planos e decisões têm leitura antes da confirmação e histórico visível. O cargo responsável pelo plano não substitui a autoria pessoal da execução; a verificação permanece independente. O RIPD fica no processo da Secretaria e o sistema registra somente sua referência. Novas decisões críticas são registradas pelo Gabinete com documento formal, preservando os atos anteriores. Sem migração ou liberação para produção. A carga da nova conta na cópia em vistoria exige autorização específica de gravação.

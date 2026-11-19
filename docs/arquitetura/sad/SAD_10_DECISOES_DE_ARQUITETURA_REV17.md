@@ -1139,3 +1139,16 @@ Encaminhamento do FORM 2 exige questionário pronto para encaminhar. Mantêm-se 
 A avaliação conjunta confirmada continua vigente durante uma reavaliação. A nova proposta é guardada separadamente, com autoria e data, aguardando confirmação da outra parte. Matriz, faixa e atos dependentes continuam usando a avaliação vigente. Com a confirmação conjunta, a nova avaliação substitui a anterior; sem consenso, a vigente permanece e a divergência é submetida ao Comitê. Os eventos anteriores não são reescritos. Não há migração.
 
 Preservadas as competências e condições de aceitação. O tratamento já existente dos atos dependentes (nova aceitação, manifestações e triagem após substituição da avaliação) é aplicado somente na efetiva confirmação da nova nota, não durante a proposta. A aceitação anterior permanece documentada no histórico. Não foi criada regra especial para mudanças de faixa.
+
+
+## Complemento 12-E — evidências e autoria (Ailton, DPO, 19/11/2026)
+
+O sistema orienta e registra a governança; não administra os serviços das Secretarias. As evidências permanecem em arquivo auditável da Secretaria. O sistema registra sua referência, responsável e vínculo ao ato, sem anexar o material.
+
+O RIPD municipal e a triagem são diretrizes. O documento é elaborado pela Secretaria e juntado ao processo; Secretaria ou DPO informam a referência em ato próprio, com autoria e data. O sistema não declara o documento concluído nem infere recomendações a partir do texto de manifestações.
+
+O responsável pelo plano é identificado por cargo, função ou unidade. Qualquer AAL/ARP habilitado da unidade executora pode registrar a execução, com autoria preservada. A verificação continua com membro do Comitê de outra Secretaria, independente do executor, DPO e Relator.
+
+As decisões críticas continuam de competência do Prefeito, mas são registradas pelo Gabinete com referência obrigatória ao documento formal. A conta do Prefeito não pratica novos atos. Atos anteriores permanecem intactos. Implementação demonstrativa sem migração; cadastro do Gabinete preparado na carga fictícia, condicionado à autorização de gravação na cópia da vistoria.
+
+Relatórios ao controlador, dossiês e comunicação de incidentes ficam fora deste lote, para depois de 15/12. Não se altera competência por inferência nem se habilita produção.
