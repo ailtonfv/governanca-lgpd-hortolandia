@@ -1,0 +1,8 @@
+{
+  "situacao": "proposta",
+  "decisao": "R17-2026-11-19",
+  "excecoes": {
+    "F2-14.9": "observacoes_finais",
+    "F4-4.27": "data_de_revisao_quando_aplicavel_sem_gatilho_definido"
+  }
+}
