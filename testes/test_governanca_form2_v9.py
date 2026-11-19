@@ -153,6 +153,9 @@ def test_E04_consolidacao_expoe_reavaliacoes_sem_concluir(sessao,principal):
     from app.consolidacao_form2 import consultar, registrar
     p=principal; ident=pendencia(sessao,p); consultar_dpo(sessao,p);s2=segunda(sessao,p)
     ato(sessao,p,'responder',ident,conta='CONTA-G1',snapshot_id=s2)
+    from testes.apoio_r17 import completo2
+    p.conteudo = completo2(p.conteudo)
+    sessao.commit()
     tela=consultar(sessao,conta_id='CONTA-B1',participacao_id=p.id)
     assert len(tela['resumo']['reavaliacoes_pendentes'])==2
     assert not tela['resumo']['conclusao_institucional_habilitada']

@@ -1,4 +1,5 @@
 """Somente registros fictícios; nenhuma redação do catálogo privado."""
+from testes.apoio_r17 import completo2
 from copy import deepcopy
 from concurrent.futures import ThreadPoolExecutor
 from sqlalchemy import select, func
@@ -18,6 +19,7 @@ def preparar(sessao):
     sessao.flush()
     executar(sessao, conta_id="CONTA-B1", comando_id="ASSUMIR-CONS", participacao_id=p.id,
              acao="assumir", versao=p.versao)
+    p.conteudo = completo2(p.conteudo)
     sessao.commit()
     return p
 

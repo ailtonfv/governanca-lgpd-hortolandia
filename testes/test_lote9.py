@@ -108,7 +108,8 @@ def test_d1_salva_sem_complemento_mas_nao_consolida(sessao, principal):
     resposta = TestClient(app).post(f'/form2/participacoes/{principal.id}/consolidacao', data={
         'conta_id':'CONTA-B1','comando_id':'L9-D1-CONSOLIDA','versao':principal.versao,
         'hash_fontes':resumo['hash_fontes'],'sintese':'Síntese fictícia'})
-    assert resposta.status_code == 409 and 'complementos necessários' in resposta.text
+    assert resposta.status_code == 409 and 'perguntas obrigatórias' in resposta.text
+    assert f'/form2/participacoes/{principal.id}/blocos/9?' in resposta.text
     assert sessao.scalar(select(func.count()).select_from(Evento)) == antes
     assert not resumo['resumo']['conclusao_institucional_habilitada']
 

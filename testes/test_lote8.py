@@ -138,7 +138,12 @@ def test_c1_lista_nas_duas_perguntas_sem_premarcacao(sessao, principal):
     tela = TestClient(app).get(f"/form2/participacoes/{principal.id}/blocos/14?conta_id=CONTA-B1")
     assert tela.status_code == 200
     assert tela.text.count('2 perguntas ativas') == 2
-    assert tela.text.count('6?conta_id=CONTA-B1#F2-6.1') == 2
+    import re
+    quadros = re.findall(r'<section aria-label="Itens a confirmar">(.*?)</section>', tela.text, re.S)
+    assert len(quadros) == 2
+    assert all('6?conta_id=CONTA-B1#F2-6.1' in quadro for quadro in quadros)
+    topo = re.search(r'<section class="conferencia-r17".*?</section>', tela.text, re.S).group()
+    assert '6?conta_id=CONTA-B1#F2-6.1' in topo
     campo = tela.text.split('name="opcao:F2-14.8"')[1].split('</select>')[0]
     assert 'selected' not in campo
 

@@ -122,10 +122,12 @@ def test_recusa_combinacao_invalida_e_bloco_juridico(sessao):
 
 
 def test_outro_exige_complemento_e_nao_aceita_complemento_solto():
-    with pytest.raises(ValueError, match="exige complemento"):
-        aplicar_bloco({}, bloco=2,
+    parcial, _ = aplicar_bloco({}, bloco=2,
                       alteracoes={"F2-2.9": "SIM", "F2-2.9.1": ["ALT_05"]},
                       proxima_versao=2)
+    from app.obrigatoriedade_forms import conferencia2
+    assert parcial["respostas_etapa1"]["F2-2.9.1"] == ["ALT_05"]
+    assert "F2-2.9.1" in [q["item"] for q in conferencia2(parcial)["faltantes"]]
     with pytest.raises(ValueError, match="não selecionada"):
         aplicar_bloco({}, bloco=2,
                       alteracoes={"F2-2.9": "SIM", "F2-2.9.1": ["ALT_01"]},

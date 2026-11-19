@@ -1,4 +1,5 @@
 """Regras demonstrativas; massa sintética e atos reais do domínio."""
+from testes.apoio_r17 import completo2, preencher34
 from copy import deepcopy
 from datetime import date, timedelta
 from uuid import uuid4
@@ -36,7 +37,7 @@ def entrada(sessao, fonte):
     # Massa sintética autoriza secretário na unidade do teste, sem mudar a carga demonstrativa.
     sessao.add(Designacao(pessoa_id='PESSOA-DEMO34-SECULT', unidade_id=p.unidade_id,
                          papel='demo34_secretario'))
-    p.conteudo = {'rascunho_form2_rev21_2': {'14': {'opcao:F2-14.5':['SIM'], 'opcao:F2-14.6':['SIM']}}}
+    p.conteudo = completo2({'rascunho_form2_rev21_2': {'14': {'opcao:F2-14.5':['SIM'], 'opcao:F2-14.6':['SIM']}}})
     sessao.commit()
     return p
 
@@ -113,7 +114,7 @@ def test_ingresso_so_aal(sessao,entrada,conta):
 
 
 def test_sinal_exige_fundamentacao_acao_direta(sessao,entrada):
-    entrada.conteudo={'rascunho_form2_rev21_2':{'4':{'opcao:F2-4.1':['SIM']},'14':{'opcao:F2-14.6':['SIM']}}}
+    entrada.conteudo=completo2({'rascunho_form2_rev21_2':{'4':{'opcao:F2-4.1':['SIM']},'14':{'opcao:F2-14.5':['NAO'],'opcao:F2-14.6':['SIM']}}})
     sessao.commit()
     with pytest.raises(ValueError,match='justificativa'):entrar(sessao,entrada,4)
     obj=entrar(sessao,entrada,4,justificativa='Correção imediata fictícia, avaliação posterior fundamentada.')
@@ -140,6 +141,7 @@ def test_prefeito_fora_critico_e_dpo_aceitando_recusados(sessao,entrada):
 
 def preparar_acao(s,p):
     obj=entrar(s,p,4)
+    preencher34(s,obj)
     ato(s,obj,'planejar',plano='Plano fictício',executor_id='PESSOA-B',prazo=(date.today()-timedelta(days=2)).isoformat())
     ato(s,obj,'aprovar_plano',conta=SECRETARIO,justificativa='Fictícia')
     return obj
@@ -214,6 +216,7 @@ def test_critico_triagem_conjunta_e_autoridade(sessao,entrada):
     with pytest.raises(ValueError,match='triagem'):ato(sessao,obj,'concluir_avaliacao')
     ato(sessao,obj,'confirmar_triagem',conta='CONTA-E1')
     ato(sessao,obj,'confirmar_gatilho_juridico',restringe_direitos=True)
+    preencher34(sessao,obj)
     ato(sessao,obj,'concluir_avaliacao')
     assert estado(sessao,obj)['situacao']=='Avaliação concluída'
     assert estado(sessao,obj)['juridico']=='manifestação jurídica esperada'
@@ -359,6 +362,7 @@ def test_http_limpar_selecao_multipla(sessao,entrada):
 
 def test_nao_cria_risco_dentro_form4(sessao,entrada):
     obj=entrar(sessao,entrada,4)
+    preencher34(sessao,obj)
     antes=estado(sessao,obj)
     with pytest.raises(ValueError,match='FORM 3'):
         ato(sessao,obj,'adicionar_risco',motivo='Fictício')
@@ -375,6 +379,7 @@ def test_percurso_critico_dez_passos_sem_secretario_de_outra_unidade(sessao,entr
     ato(sessao,risco,'manifestar_comite',conta=RELATOR,finalidade='residual',
         ata='ATA-FICT-12',texto='Deliberação fictícia',favoravel=True)
     ato(sessao,risco,'aceitar_residual',conta=PREFEITO,justificativa='Aceitação fictícia')
+    preencher34(sessao,risco)
     ato(sessao,risco,'concluir_avaliacao')
     # Act: pass from the frozen risk version to an action and complete the cycle.
     acao=ato(sessao,risco,'encaminhar_acao',justificativa='Providência fictícia')['identidade_id']
@@ -383,6 +388,7 @@ def test_percurso_critico_dez_passos_sem_secretario_de_outra_unidade(sessao,entr
         prazo=(date.today()+timedelta(days=10)).isoformat())
     ato(sessao,acao,'aprovar_plano',conta=PREFEITO,justificativa='Aprovação fictícia')
     ato(sessao,acao,'executar_medida',evidencia='Evidência fictícia')
+    preencher34(sessao,acao)
     ato(sessao,acao,'verificar',conta=VERIFICADOR,aprovada=True,evidencia='Conferência fictícia')
     ato(sessao,acao,'aprender',diretriz='Diretriz fictícia',escopo='Escopo fictício')
     ato(sessao,acao,'conferir_aprendizagem',conta='CONTA-E1',sem_dados_pessoais=True)

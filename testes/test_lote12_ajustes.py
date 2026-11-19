@@ -65,14 +65,16 @@ def test_destino_invalido_tem_erro_proprio(sessao,entrada):
     assert r.status_code==409
     assert 'Escolha para onde encaminhar' in r.text and 'aria-invalid="true"' in r.text
 
-def test_outro_nao_salva_sem_qual(sessao,entrada):
+def test_outro_salva_parcial_e_exige_qual_ao_concluir(sessao,entrada):
     from app.questionario_forms34 import perguntas
     obj=entrar(sessao,entrada);q=next(q for q in perguntas(3) if q['id']=='F3-3.14')
     opcao=next(v for v in q['opcoes'] if v.startswith('Outro'))
     value=[opcao] if q['tipo']=='multi' else opcao
     antes=estado(sessao,obj)
-    with pytest.raises(ValueError,match='Qual'):ato(sessao,obj,'salvar_bloco',bloco=q['bloco'],campos={q['id']:value})
-    assert estado(sessao,obj)==antes
+    ato(sessao,obj,'salvar_bloco',bloco=q['bloco'],campos={q['id']:value})
+    from app.obrigatoriedade_forms import conferencia34
+    assert q['id'] in [i['item'] for i in conferencia34(3,estado(sessao,obj))['faltantes']]
+    assert estado(sessao,obj)['respostas'][q['id']]==value
     ato(sessao,obj,'salvar_bloco',bloco=q['bloco'],campos={q['id']:value},complementos={q['id']:'Complemento fictício'})
     assert estado(sessao,obj)['complementos'][q['id']]=='Complemento fictício'
 
@@ -93,12 +95,14 @@ def test_preview_mesmas_25_notas_do_dominio():
         assert (s['nota'],s['faixa'])==(d['nota'],d['faixa'])
 
 
-def test_form2_nao_apaga_qual_mantendo_outro():
+def test_form2_complemento_vazio_pendente_para_conclusao():
     from app.respostas_form2 import aplicar_revisao
     from app.form2_rev212 import RASCUNHO
     base={RASCUNHO:{'10':{'opcao:F2-10.1':['ALT_02'],'texto:F2-10.1':'Complemento fictício'}}}
-    with pytest.raises(ValueError,match='Qual'):
-        aplicar_revisao(base,10,{'texto:F2-10.1':['']},demonstrativo=True)
+    novo,_=aplicar_revisao(base,10,{'texto:F2-10.1':['']},demonstrativo=True)
+    from app.obrigatoriedade_forms import conferencia2
+    assert novo[RASCUNHO]['10']['texto:F2-10.1']==''
+    assert 'F2-10.1' in [i['item'] for i in conferencia2(novo)['faltantes']]
     assert base[RASCUNHO]['10']['texto:F2-10.1']=='Complemento fictício'
 
 
