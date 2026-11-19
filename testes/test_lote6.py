@@ -17,7 +17,7 @@ def test_p98_cartao_atual_e_grade_compacta(principal):
         assert pagina.text.count("Você está aqui") == 1
         assert "grade-form2-compacta" in pagina.text
         assert len(re.findall('data-numero="', pagina.text)) == 14
-        assert 'class="etiqueta-grade" aria-label="Aguarda homologação jurídica (D11)"' in pagina.text
+        assert 'class="etiqueta-grade" aria-label="Proposta em deliberação. Não equivale a homologação."' in pagina.text
     participacao = cliente.get(raiz + "?conta_id=CONTA-B1")
     assert "grade-form2-compacta" not in participacao.text
 

@@ -154,9 +154,10 @@ def test_c4_consultas_sem_rotulo_tecnico(principal):
 
 def test_p108_etiquetas_legiveis(principal):
     pagina = TestClient(app).get(f'/form2/participacoes/{principal.id}/blocos/3?conta_id=CONTA-B1')
-    assert '[D11]' in pagina.text
-    assert '[Guarda]' in pagina.text
-    assert 'title="Aguarda homologação jurídica (D11)"' in pagina.text
+    assert 'Em deliberação' in pagina.text
+    assert 'Proposta em deliberação. Não equivale a homologação.' in pagina.text
+    assert 'Guarda em definição' in pagina.text
+    assert 'title="[D11] Aguarda homologação jurídica (D11)"' in pagina.text
     assert '⚖' not in pagina.text and '🗄' not in pagina.text
 
 
