@@ -15,7 +15,7 @@ ATOS = {
     campo('pr','Probabilidade residual (1 a 5)','number'),campo('ir','Impacto residual (1 a 5)','number'),
     campo('controle','Controle existente','textarea'),campo('implementado','Controle implementado','bool'),E,J]),
  'confirmar_avaliacao':(3,14,S,'Confirmar avaliação proposta',[]),
- 'sem_consenso':(3,14,S,'Registrar divergência e encaminhar ao Comitê',[
+ 'sem_consenso':(3,14,S,'Sem consenso: encaminhar ao Comitê',[
     campo('campo','Proposta','select',(('avaliacao','Avaliação'),('triagem','Triagem de RIPD'))),
     campo('posicao','Sua posição (até 300 caracteres)','textarea')]),
  'manifestar_comite':(0,0,('relator',),'Registrar deliberação do Comitê',[
@@ -57,27 +57,56 @@ ATOS = {
  'autorizar_aprendizagem':(4,9,('secretaria',),'Autorizar versão para consulta',[]),
 }
 
+ATOS['revisar_avaliacao']=(*ATOS['propor_avaliacao'][:3],'Registrar revisão da proposta',ATOS['propor_avaliacao'][4])
 
-def disponiveis(form, bloco, papeis):
-    return [dict(acao=k,titulo=v[3],campos=v[4]) for k,v in ATOS.items()
+def disponiveis(form, bloco, papeis, estado=None, pessoa_id=None, revisar=False):
+    candidatos=[dict(acao=k,titulo=v[3],campos=[dict(c) for c in v[4]]) for k,v in ATOS.items()
             if v[0] in (0,form) and (v[1] in (0,bloco) or k=='sem_consenso' and bloco==15)
             and set(v[2]).intersection(papeis)]
+
+    if estado is None:return candidatos
+    from app.validacao_atos34 import obrigatorios
+    lado='dpo' if 'dpo' in papeis else 'secretaria'
+    saida=[]
+    for a in candidatos:
+        k=a['acao'];campo='triagem' if bloco==15 else 'avaliacao'
+        confirmacoes=estado.get(campo+'_confirmacoes',{})
+        confirmou=any(v['pessoa_id']==pessoa_id for v in confirmacoes.values())
+        if k=='propor_avaliacao' and estado.get('avaliacao'):continue
+        if k=='revisar_avaliacao' and (not estado.get('avaliacao') or not revisar or estado.get('avaliacao_sem_consenso')):continue
+        if k in ('confirmar_avaliacao','confirmar_triagem','sem_consenso'):
+            if not estado.get(campo) or confirmou or estado.get(campo+'_sem_consenso'):continue
+        if k=='aceitar_residual' and (set(estado.get('avaliacao_confirmacoes',{}))!={'secretaria','dpo'} or estado.get('aceitacao')):continue
+        if k=='aceitar_residual':
+            critico=estado['avaliacao']['residual']['faixa']=='Crítico'
+            if critico and 'prefeito' not in papeis or not critico and 'secretario' not in papeis:continue
+        if k=='manifestar_dpo' and estado.get('manifestacao_dpo'):continue
+        obrig=obrigatorios(k,{})
+        for c in a['campos']:
+            c['obrigatorio']=c['nome'] in obrig or c['tipo']=='bool'
+            c['condicional']=(c['nome']=='unidade_id' and k=='propor_triagem') or (c['nome']=='evidencia' and k in ('propor_avaliacao','revisar_avaliacao'))
+        saida.append(a)
+    prioridade={'propor_avaliacao':0,'revisar_avaliacao':0,'confirmar_avaliacao':1,'confirmar_triagem':1,'aceitar_residual':2}
+    saida.sort(key=lambda a:prioridade.get(a['acao'],5))
+    return saida
 
 
 def interpretar(acao, formulario):
     if acao not in ATOS:
         raise ValueError('Ato desconhecido.')
+    from app.validacao_atos34 import validar,ErrosCampos
+    validar(acao,formulario)
     dados={}
     for c in ATOS[acao][4]:
         valor=formulario.get(c['nome'],'')
         if c['tipo']=='bool':
             if valor not in ('sim','nao'):
-                raise ValueError('Selecione Sim ou Não explicitamente.')
+                raise ErrosCampos({c['nome']:'Escolha Sim ou Não para este campo obrigatório.'})
             valor=valor=='sim'
         elif c['tipo']=='number':
             valor=int(valor) if valor else None
         dados[c['nome']]=valor
-    if acao=='propor_avaliacao':
+    if acao in ('propor_avaliacao','revisar_avaliacao'):
         dados['controles']=[dict(descricao=dados.pop('controle'),implementado=dados.pop('implementado'),
                                   evidencia=dados.pop('evidencia'))]
     return dados

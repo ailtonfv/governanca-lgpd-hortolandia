@@ -106,7 +106,10 @@ def ingressar(sessao, *, conta_id, comando_id, participacao_id, versao, form, ju
     cmd, repeticao = _abrir(sessao, comando_id, conta_id, 'f34_ingressar', dados)
     if repeticao is not None:
         return repeticao
-    if type(form) is not int or form not in (3, 4) or p.versao != versao:
+    if type(form) is not int or form not in (3,4):
+        from app.validacao_atos34 import ErrosCampos
+        raise ErrosCampos({'form':'Escolha para onde encaminhar: Riscos (FORM 3) ou Providência (FORM 4).'})
+    if p.versao != versao:
         raise ValueError('Instrumento ou versão inválida. Atualize a página.')
     from app.form2_rev212 import indice_valores
     respostas = indice_valores(p.conteudo or {})
@@ -117,6 +120,9 @@ def ingressar(sessao, *, conta_id, comando_id, participacao_id, versao, form, ju
     from app.gatilhos_juridicos34 import motivos
     gatilhos = motivos(p.conteudo or {})
     if form == 4 and sinais and not any(v in ('Sim', 'SIM') for v in respostas.get('opcao:F2-14.5', [])):
+        if not isinstance(justificativa,str) or not justificativa.strip():
+            from app.validacao_atos34 import ErrosCampos
+            raise ErrosCampos({'justificativa':'Informe a justificativa para encaminhar diretamente apesar do sinal de risco.'})
         _texto({'justificativa': justificativa}, 'justificativa')
     # Um novo evento fonte contém a versão exata, antes de criar o contexto 3/4.
     evento_form2(sessao, cmd, p, 'form2_encaminhamento34')
@@ -158,6 +164,8 @@ def _confirmar(e, campo, pessoa_id, papeis, agora):
         raise ValueError('Sem consenso: aguarda deliberação registrada pelo Relator.')
     if any(c['pessoa_id'] == pessoa_id for l, c in confirmacoes.items() if l != lado):
         raise PermissionError('As confirmações exigem pessoas distintas.')
+    if any(c['pessoa_id']==pessoa_id for c in confirmacoes.values()):
+        raise PermissionError('Quem propôs ou já confirmou não confirma novamente; aguarde o outro lado.')
     confirmacoes[lado] = dict(pessoa_id=pessoa_id, em=agora)
 
 
@@ -196,11 +204,13 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         raise ValueError('O Registro mudou. Atualize antes de confirmar.')
     if not isinstance(dados, dict):
         raise ValueError('Dados inválidos.')
+    from app.validacao_atos34 import validar
+    validar(acao,dados)
     agora = agora_utc().isoformat()
     f3 = e['form'] == 3
     if 'dpo' in papeis and acao in ('aceitar_residual','aprovar_plano','decidir_prorrogacao','cancelar','executar_medida','verificar'):
         raise PermissionError('O DPO não exerce estes atos de autoridade, execução ou verificação.')
-    if acao in ('propor_avaliacao', 'confirmar_avaliacao', 'propor_triagem', 'confirmar_triagem',
+    if acao in ('propor_avaliacao', 'revisar_avaliacao', 'confirmar_avaliacao', 'propor_triagem', 'confirmar_triagem',
                 'sem_consenso', 'aceitar_residual', 'concluir_avaliacao', 'encaminhar_acao') and not f3:
         raise ValueError('Ato exclusivo do FORM 3.')
     if acao in ('planejar', 'aprovar_plano', 'executar_medida', 'verificar', 'pedir_prorrogacao',
@@ -230,6 +240,9 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         exigir(papeis, 'secretaria', 'dpo')
         from app.questionario_forms34 import salvar
         e['respostas'] = salvar(e['form'], e.get('respostas', {}), dados, e)
+        complementos=dados.get('complementos',{})
+        if not isinstance(complementos,dict) or set(complementos)-set(dados.get('campos',{})) or any(not isinstance(v,str) or len(v)>200 for v in complementos.values()):raise ValueError('Complemento inválido.')
+        e.setdefault('complementos',{}).update(complementos)
         if f3:
             e['sinais'] = sorted(set(e.get('sinais_origem', [])) | ({'F3-3.10'} if e['respostas'].get('F3-3.10') else set()) |
                 ({'F3-3.54'} if e['respostas'].get('F3-3.54') in ('Sim','Requer análise','A confirmar') else set()))
@@ -239,7 +252,11 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         if type(bloco) is not int or not 1 <= bloco <= (16 if f3 else 9):
             raise ValueError('Bloco inválido.')
         e.setdefault('aberturas', {})[str(bloco)] = _texto(dados, 'motivo', 300)
-    elif acao == 'propor_avaliacao':
+    elif acao in ('propor_avaliacao','revisar_avaliacao'):
+        if acao=='propor_avaliacao' and e.get('avaliacao'):
+            raise ValueError('Para corrigir a avaliação registrada, use Revisar proposta.')
+        if acao=='revisar_avaliacao' and not e.get('avaliacao'):
+            raise ValueError('Ainda não há proposta para revisar.')
         if e.get('avaliacao_sem_consenso'):
             raise ValueError('Sem consenso: aguarda deliberação do Comitê antes de reapresentar.')
         lado = _lado(papeis)
@@ -247,6 +264,7 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         e['causa'] = _texto(dados, 'causa')
         e['consequencia'] = _texto(dados, 'consequencia')
         e['avaliacao'] = propor_avaliacao(dados)
+        e['avaliacao_proponente'] = dict(lado=lado,pessoa_id=pessoa.id,em=agora)
         e['avaliacao_confirmacoes'] = {lado: dict(pessoa_id=pessoa.id, em=agora)}
         e['avaliacao_sem_consenso'] = False
         for k in ('aceitacao', 'manifestacao_dpo', 'manifestacao_comite', 'triagem'):
@@ -262,6 +280,8 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         if campo not in ('avaliacao', 'triagem') or not e.get(campo):
             raise ValueError('Indique a proposta em discussão.')
         lado = _lado(papeis)
+        if any(c['pessoa_id']==pessoa.id for c in e.get(campo+'_confirmacoes',{}).values()):
+            raise PermissionError('Quem propôs deve revisar a proposta; o outro lado registra a ausência de consenso.')
         e.setdefault(campo + '_posicoes', {})[lado] = _texto(dados, 'posicao', 300)
         e[campo + '_sem_consenso'] = True
         e[campo + '_confirmacoes'] = {}
@@ -498,6 +518,8 @@ def registrar_referencia_restrita(sessao, *, conta_id, comando_id, identidade_id
         return repeticao
     if versao != e.pop('versao'):
         raise ValueError('A referência mudou; atualize a página.')
+    from app.validacao_atos34 import validar
+    validar('registrar_referencia',dados)
     rid = acrescentar(sessao, obj.id, cmd.ator_id, dados)
     e['referencia_restrita_id'] = rid  # só existência/estado, nunca conteúdo no livro geral
     e['juridico'] = 'referência registrada'
