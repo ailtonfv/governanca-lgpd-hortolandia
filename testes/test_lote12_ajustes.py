@@ -41,7 +41,7 @@ def test_tela_separa_proponente_confirmante_matriz_e_detalhes(sessao,entrada):
     assert not html.select('input[value="propor_avaliacao"]')
     assert len(html.select('[data-p][data-i]'))==25
     assert 'Ver detalhes da avaliação' in html.get_text()
-    assert 'Revisar proposta' in html.get_text()
+    assert 'Reavaliar o risco' in html.get_text()
     assert 'D11' not in html.get_text()
     assert len(html.select('[aria-current="page"]'))==1
     outro=BeautifulSoup(client.get(f'/forms34/{obj}/blocos/14?conta_id=CONTA-E1').text,'html.parser')

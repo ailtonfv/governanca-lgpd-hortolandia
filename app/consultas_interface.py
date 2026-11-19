@@ -561,7 +561,7 @@ def usuarios_demonstracao(sessao, conta_atual):
 
     rotulos = {"responsavel_registro": "APA", "preenchedor": "ARP",
                "aal_form2": "AAL", "gestor_fila": "gestor da fila",
-               "juridico_form2": "Jurídico", "governanca_protecao_dados": "DPO", "curador": "Curador"}
+               "juridico_form2": "Jurídico", "governanca_protecao_dados": "DPO", "curador": "Curador", "demo34_gabinete":"Gabinete do Prefeito", "demo34_secretario":"Secretário(a)", "demo34_verificador":"Verificador do Comitê", "demo34_relator":"Relator do Comitê"}
     momento = agora()
     papeis = {}
     for d in sessao.scalars(select(Designacao).join(Unidade).where(
@@ -578,6 +578,7 @@ def usuarios_demonstracao(sessao, conta_atual):
     for conta, pessoa in sessao.execute(select(Conta, Pessoa).join(Pessoa).where(
             Conta.ativa.is_(True), Pessoa.ativa.is_(True), Pessoa.matricula.like("MAT-FICT-%")
             ).order_by(Pessoa.matricula, Conta.id)):
+        if pessoa.id=='PESSOA-DEMO34-PREF':continue
         if pessoa.id not in usuarios or conta.id == conta_atual:
             funcoes = ", ".join(sorted(papeis.get(pessoa.id, ()))) or "sem papel institucional vigente"
             usuarios[pessoa.id] = (conta.id, f"{pessoa.matricula} · {pessoa.nome} — {funcoes}")

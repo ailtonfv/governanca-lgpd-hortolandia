@@ -32,7 +32,7 @@ def matriz():
 def titulo_bloco(texto):
     import re
     titulo=texto[:1].upper()+texto[1:].lower()
-    return re.sub(r'\b(ripd|lgpd|dpo|anpd|form|ppps)\b',lambda m:m[0].upper(),titulo,flags=re.I)
+    return re.sub(r'\b(ripd|lgpd|dpo|anpd|form|ppps)\b',lambda m:'PPPs' if m[0].lower()=='ppps' else m[0].upper(),titulo,flags=re.I)
 
 def grade_visual(grade,obj,conta,bloco,estado=None):
     from urllib.parse import urlencode

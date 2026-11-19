@@ -115,7 +115,8 @@ def test_a_confirmar_inativa_continua_visivel():
 def test_get_exibe_marcas_sem_html_required_para_salvar(sessao,entrada):
     obj=entrar(sessao,entrada)
     r=TestClient(app).get(f'/forms34/{obj}/blocos/2?conta_id=CONTA-B1')
-    assert r.status_code==200 and 'data-r17' in r.text and "respostas marcadas 'A confirmar'" in r.text
+    assert r.status_code==200 and 'data-r17' in r.text
+    assert "0 respostas marcadas 'A confirmar'" not in r.text
     form=r.text.split('id="perguntas34"',1)[1].split('</form>',1)[0]
     assert ' required' not in form
 

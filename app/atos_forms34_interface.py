@@ -25,12 +25,13 @@ ATOS = {
     campo('ata','Referência à ata'),campo('texto','Deliberação do colegiado','textarea'),
     campo('favoravel','Manifestação favorável','bool')]),
  'manifestar_dpo':(0,0,('dpo',),'Registrar manifestação do DPO',[campo('texto','Manifestação','textarea')]),
+ 'informar_ripd':(3,15,S,'Informar referência do RIPD',[campo('referencia','Processo ou arquivo onde o RIPD está juntado (sem dados pessoais)')]),
  'propor_triagem':(3,15,S,'Registrar proposta de triagem',[
     campo('resultado','Resultado','select',(('elaborar','Elaborar RIPD'),('revisar','Revisar RIPD'),
         ('nao_indicado','Não indicado neste momento'),('analise_adicional','Precisa de análise adicional antes de decidir'),('determinado_anpd','Determinação da ANPD'))),
     J,campo('unidade_id','Unidade que instruirá (quando houver RIPD)','unidade')]),
  'confirmar_triagem':(3,15,S,'Confirmar triagem proposta',[]),
- 'aceitar_residual':(3,14,('secretario','prefeito'),'Registrar aceitação do residual',[J]),
+ 'aceitar_residual':(3,14,('secretario','gabinete'),'Registrar aceitação do residual',[J]),
  'concluir_avaliacao':(3,16,S,'Concluir avaliação conjunta',[]),
  'encaminhar_acao':(3,16,('aal',),'Encaminhar providência ao FORM 4',[J]),
  'confirmar_gatilho_juridico':(3,16,('aal',),'Confirmar necessidade de manifestação',[
@@ -40,9 +41,9 @@ ATOS = {
  'autorizar_referencia':(3,16,('aal',),'Autorizar consulta restrita pela autoridade do caso',[
     campo('pessoa_id','Autoridade participante','autoridade'),campo('necessidade','Necessidade de acesso','textarea')]),
  'planejar':(4,3,('secretaria',),'Registrar plano e responsável',[
-    campo('plano','Plano de ação','textarea'),campo('executor_id','Executor da unidade','executor'),campo('prazo','Prazo','date')]),
- 'aprovar_plano':(4,3,('secretario','prefeito'),'Aprovar plano',[J]),
- 'executar_medida':(4,6,('secretaria',),'Registrar execução da medida',[E]),
+    campo('plano','Plano de ação','textarea'),campo('cargo','Cargo, função ou unidade responsável','select'),campo('prazo','Prazo','date')]),
+ 'aprovar_plano':(4,3,('secretario','gabinete'),'Aprovar plano',[J]),
+ 'executar_medida':(4,6,('executor_unidade',),'Registrar execução da medida',[E]),
  'verificar':(4,7,('verificador',),'Registrar verificação independente',[
     campo('aprovada','Verificação aprovada','bool'),E]),
  'pedir_prorrogacao':(4,4,('secretaria',),'Solicitar prorrogação',[campo('prazo','Nova data proposta','date'),J]),
@@ -57,7 +58,7 @@ ATOS = {
  'autorizar_aprendizagem':(4,9,('secretaria',),'Autorizar versão para consulta',[]),
 }
 
-ATOS['revisar_avaliacao']=(*ATOS['propor_avaliacao'][:3],'Registrar revisão da proposta',ATOS['propor_avaliacao'][4])
+ATOS['revisar_avaliacao']=(*ATOS['propor_avaliacao'][:3],'Reavaliar o risco',ATOS['propor_avaliacao'][4])
 
 def disponiveis(form, bloco, papeis, estado=None, pessoa_id=None, revisar=False):
     candidatos=[dict(acao=k,titulo=v[3],campos=[dict(c) for c in v[4]]) for k,v in ATOS.items()
@@ -83,9 +84,31 @@ def disponiveis(form, bloco, papeis, estado=None, pessoa_id=None, revisar=False)
         if k=='aceitar_residual' and (set(estado.get('avaliacao_confirmacoes',{}))!={'secretaria','dpo'} or estado.get('aceitacao')):continue
         if k=='aceitar_residual':
             critico=estado['avaliacao']['residual']['faixa']=='Crítico'
-            if critico and 'prefeito' not in papeis or not critico and 'secretario' not in papeis:continue
+            if critico and 'gabinete' not in papeis or not critico and 'secretario' not in papeis:continue
+        if k=='aprovar_plano':
+            critico=estado.get('faixa_origem')=='Crítico'
+            if not estado.get('plano') or (critico and 'gabinete' not in papeis) or (not critico and 'secretario' not in papeis):continue
         if k=='manifestar_dpo' and estado.get('manifestacao_dpo'):continue
+        if form==4:
+            salvos={'planejar':'plano','aprovar_plano':'plano_aprovado','executar_medida':'execucao',
+                    'verificar':'verificacao','aprender':'aprendizagem','conferir_aprendizagem':'aprendizagem_conferida','autorizar_aprendizagem':'aprendizagem_autorizada'}
+            if k=='planejar' and estado.get('plano_aprovado'):continue
+            if (estado.get('encerrada') or estado.get('cancelada')) and k not in ('aprender','conferir_aprendizagem','autorizar_aprendizagem'):continue
+            if k in salvos and estado.get(salvos[k]) and not revisar:continue
+        if k=='informar_ripd' and estado.get('referencia_ripd') and not revisar:continue
+        if k=='manifestar_comite':
+            from app.regras_atos34 import finalidades,FINALIDADES
+            opcoes=[(v,FINALIDADES[v]) for v in finalidades(estado)]
+            if not opcoes:continue
+            a['campos'][0]['opcoes']=opcoes
+        if k=='planejar':
+            from app.regras_atos34 import CARGOS
+            a['campos'][1]['opcoes']=[(v,v) for v in CARGOS]
+        if k in ('aceitar_residual','aprovar_plano') and 'gabinete' in papeis:
+            a['titulo']='Decisão do Prefeito — registrada pelo Gabinete'
+            a['campos'].append(dict(nome='documento',rotulo='Documento formal da decisão (despacho, ofício ou processo nº)',tipo='text',opcoes=()))
         obrig=obrigatorios(k,{})
+        if k in ('aceitar_residual','aprovar_plano') and 'gabinete' in papeis:obrig.add('documento')
         for c in a['campos']:
             c['obrigatorio']=c['nome'] in obrig or c['tipo']=='bool'
             c['condicional']=(c['nome']=='unidade_id' and k=='propor_triagem') or (c['nome']=='evidencia' and k in ('propor_avaliacao','revisar_avaliacao'))
@@ -113,4 +136,5 @@ def interpretar(acao, formulario):
     if acao in ('propor_avaliacao','revisar_avaliacao'):
         dados['controles']=[dict(descricao=dados.pop('controle'),implementado=dados.pop('implementado'),
                                   evidencia=dados.pop('evidencia'))]
+    if acao in ('aceitar_residual','aprovar_plano') and formulario.get('documento'):dados['documento']=formulario['documento']
     return dados

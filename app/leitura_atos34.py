@@ -6,7 +6,7 @@ RESULTADOS = {'elaborar':'Elaborar RIPD', 'revisar':'Revisar RIPD',
     'analise_adicional':'Precisa de análise adicional antes de decidir',
     'determinado_anpd':'Determinação da ANPD'}
 NOMES = {
-    'propor_avaliacao':'Proposta de avaliação registrada', 'revisar_avaliacao':'Nova proposta de avaliação registrada',
+    'informar_ripd':'Referência do RIPD informada', 'propor_avaliacao':'Proposta de avaliação registrada', 'revisar_avaliacao':'Nova proposta de avaliação registrada',
     'confirmar_avaliacao':'Nota conjunta confirmada', 'propor_triagem':'Proposta de triagem registrada',
     'confirmar_triagem':'Triagem confirmada', 'manifestar_dpo':'Manifestação do DPO registrada',
     'manifestar_comite':'Deliberação do Comitê registrada', 'aceitar_residual':'Aceitação do residual registrada',
@@ -74,32 +74,37 @@ def conteudo_ato(acao,e,autores,unidades):
     chaves={'manifestar_dpo':'manifestacao_dpo','manifestar_comite':'manifestacao_comite',
             'aceitar_residual':'aceitacao','aprovar_plano':'plano_aprovado','executar_medida':'execucao',
             'verificar':'verificacao','cancelar':'cancelada','aprender':'aprendizagem',
-            'conferir_aprendizagem':'aprendizagem_conferida','autorizar_aprendizagem':'aprendizagem_autorizada'}
+            'informar_ripd':'referencia_ripd','conferir_aprendizagem':'aprendizagem_conferida','autorizar_aprendizagem':'aprendizagem_autorizada'}
     if acao in ('propor_avaliacao','revisar_avaliacao','confirmar_avaliacao','propor_triagem','confirmar_triagem'):
         p=proposta(e,'triagem' if 'triagem' in acao else 'avaliacao',autores,unidades)
         return p['linhas'] if p else []
     if acao=='sem_consenso':
-        return [(('DPO' if lado=='dpo' else 'Secretaria')+' — '+campo, texto)
+        return [(('DPO' if lado=='dpo' else 'Secretaria')+' — '+('Avaliação' if campo=='avaliacao' else 'Triagem'), texto)
                 for campo in ('avaliacao','triagem') for lado,texto in e.get(campo+'_posicoes',{}).items()]
     valor=e.get(chaves.get(acao,''),{})
     if acao=='manifestar_comite' and e.get('reavaliacao',{}).get('manifestacao_comite'):valor=e['reavaliacao']['manifestacao_comite']
-    if acao=='planejar':valor={k:e.get(k) for k in ('plano','executor_id','prazo')}
+    if acao=='planejar':valor={k:e.get(k) for k in ('plano','executor_id','cargo_responsavel','unidade_responsavel_id','prazo')}
     if acao.startswith('pedir_'):valor=e.get('decisoes_pendentes',{}).get(acao.removeprefix('pedir_'),{})
     nomes={'texto':'Texto','justificativa':'Justificativa','ata':'Referência à ata','finalidade':'Finalidade',
            'favoravel':'Favorável','evidencia':'Evidência','aprovada':'Aprovada','plano':'Plano',
-           'executor_id':'Executor','prazo':'Prazo','diretriz':'Diretriz','escopo':'Escopo'}
-    return [(rotulo,autores.get(v,v) if k=='executor_id' else 'Sim' if v is True else 'Não' if v is False else v)
+           'executor_id':'Executor registrado no ato anterior','cargo_responsavel':'Cargo responsável','unidade_responsavel_id':'Unidade responsável','referencia':'Referência do RIPD','documento':'Documento formal da decisão','prazo':'Prazo','diretriz':'Diretriz','escopo':'Escopo'}
+    from app.regras_atos34 import FINALIDADES
+    from app.apresentacao_atos34 import data_br
+    return [(rotulo,autores.get(v,v) if k=='executor_id' else unidades.get(v,v) if k=='unidade_responsavel_id' else FINALIDADES.get(v,v) if k=='finalidade' else data_br(v) if k=='prazo' else 'Sim' if v is True else 'Não' if v is False else v)
             for k,rotulo in nomes.items() if (v:=valor.get(k)) is not None]
 
 def historico_visual(eventos, autores, unidades, mapa_blocos):
     saida=[];anterior={}
     for ev in reversed(eventos):
         acao=ev.tipo_evento.removeprefix('f34_'); e=ev.conteudo.get('estado',{})
-        nome=NOMES.get(acao,'Evento de acompanhamento registrado')
+        nome=NOMES.get(acao, 'Registro de '+acao.replace('_',' '))
         if acao=='salvar_bloco':
             respostas=e.get('respostas',{});ant=anterior.get('respostas',{})
             blocos=sorted({mapa_blocos[k] for k in respostas if respostas[k]!=ant.get(k) and k in mapa_blocos})
             nome=('Bloco '+str(blocos[0])+' salvo') if len(blocos)==1 else ('Blocos '+', '.join(map(str,blocos))+' salvos') if blocos else 'Bloco salvo sem alteração de respostas'
+        if acao in ('aceitar_residual','aprovar_plano'):
+            d=e.get('aceitacao' if acao=='aceitar_residual' else 'plano_aprovado',{})
+            if d.get('registrador')=='Gabinete':nome=f"Decisão do Prefeito, registrada pelo Gabinete em {horario(d['em'])}, conforme {d['documento']}"
         if e:anterior=e
         saida.append(dict(id=ev.id,comando_id=ev.comando_id,nome=nome,acao=acao,
                           ato=acao not in ('salvar_bloco','abrir_detalhes'),
