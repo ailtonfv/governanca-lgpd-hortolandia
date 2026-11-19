@@ -6,6 +6,7 @@
 {% for item in objetos %}<article><h2>{{ item.registro.codigo_lgpd }} · {{ 'Risco' if item.estado.form==3 else 'Ação' }} {{ item.obj.codigo.split('-')[-1] }} — {{ item.estado.situacao }} (FORM {{ item.estado.form }})</h2>
 <div class="acoes-fila-form2"><a class="botao-link" href="/forms34/{{ item.obj.id }}/blocos/1?conta_id={{ conta_id|urlencode }}">{{ 'Avaliar risco' if item.estado.form==3 else 'Acompanhar ação' }}</a></div></article>
 {% else %}<p>Nenhum risco ou ação ingressado no seu escopo. O AAL encaminha explicitamente pelo bloco 14 do FORM 2.</p>{% endfor %}
-<div class="acoes-fila-form2"><a href="/form2/filas?conta_id={{ conta_id|urlencode }}">Abrir fila do FORM 2</a></div>
+
 {% for item in referencias %}<article><h2>{{ item.registro }} · {{ item.codigo }}</h2><a href="/forms34/{{ item.id }}/referencia-restrita?conta_id={{ conta_id|urlencode }}">Consultar solicitação jurídica restrita</a></article>{% endfor %}
+<p class="acoes-fila-form2"><a href="/form2/filas?conta_id={{ conta_id|urlencode }}">Encaminhar um novo caso: ir às análises do FORM 2</a></p>
 {% endblock %}
