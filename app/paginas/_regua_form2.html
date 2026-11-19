@@ -9,7 +9,7 @@
     {% set salvo = n|string in estados_regua.com_respostas_ativas|default([]) %}
     {% set pendente = n|string in estados_regua.pendentes|default([]) %}
     <li data-etapa="{{ etapa }}">
-      {% if revisao %}<a data-numero="{{ n }}" class="cartao-bloco{{ ' bloco-com-respostas' if salvo else '' }}{{ ' bloco-com-pendencias' if pendente else '' }}" href="{{ url_for('revisao_form2', registro_id=registro.id, preparacao_id=prep_id, bloco=n).include_query_params(conta_id=conta_id, **parametros) }}" aria-describedby="estados-form2-{{ n }}" aria-label="Ir ao Bloco {{ n }}{% if n in titulos %} — {{ titulos[n] }}{% endif %}, etapa {{ etapa }}{{ ', revisão jurídica D11' if juridico else '' }}"{% if bloco_atual|default(0) == n %} aria-current="page"{% endif %}>
+      {% if revisao %}<a data-numero="{{ n }}" class="cartao-bloco{{ ' bloco-com-respostas' if salvo else '' }}{{ ' bloco-com-pendencias' if pendente else '' }}" href="{{ url_for('revisao_form2', registro_id=registro.id, preparacao_id=prep_id, bloco=n).include_query_params(conta_id=conta_id, **parametros) }}" aria-describedby="estados-form2-{{ n }}" aria-label="Ir ao Bloco {{ n }}{% if n in titulos %} — {{ titulos[n] }}{% endif %}, etapa {{ etapa }}{{ ', revisão jurídica em deliberação' if juridico else '' }}"{% if bloco_atual|default(0) == n %} aria-current="page"{% endif %}>
       {% else %}<span class="bloco-indisponivel">{% endif %}
         <strong class="numero-bloco">{{ n }}</strong>
         {% if n in titulos %}<small class="titulo-bloco-form2">{{ titulos[n] }}</small>{% endif %}
