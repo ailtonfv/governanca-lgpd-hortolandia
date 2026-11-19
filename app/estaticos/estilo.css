@@ -441,7 +441,7 @@ button[aria-busy="true"] { cursor: wait; }
 .regua-form2 .cartao-bloco.bloco-com-respostas { border-bottom: 1px solid var(--borda, #d6e0e6); }
 .progresso-bloco { position: absolute; bottom: 0; left: 0; right: 0; height: .6rem; background: #e2e8f0; }
 .progresso-bloco > span { display: block; height: 100%; background: #075985; }
-.regua-form2 [aria-current="page"] .progresso-bloco > span { background: #7dd3fc; }
+.regua-form2 [aria-current="page"] .progresso-bloco > span { background: #fff; }
 
 .dialogo-bloco-form2 { width: min(42rem, calc(100% - 2rem)); box-sizing: border-box; border: 2px solid #075985; border-radius: .6rem; color: #17212b; padding: 1.25rem; }
 .dialogo-bloco-form2::backdrop { background: rgb(12 59 90 / 55%); }
@@ -470,3 +470,5 @@ dialog :is([data-cancelar], [data-fechar-dialogo]) { font-size: .9rem; backgroun
 :root{--espaco-entre-acoes:.75rem;--espaco-grupo-acoes:1rem;}
 :is(.acoes-fila-form2,.acoes-formulario,.acoes-dialogo,.acoes-saida-form1){display:flex;justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:var(--espaco-entre-acoes);margin-block:var(--espaco-grupo-acoes)}
 :is(.acoes-fila-form2,.acoes-formulario) > :is(a,button){max-width:100%;white-space:normal;}
+
+.mapa-blocos-form1 :is([aria-current="page"],[aria-current="step"]) .progresso-bloco > span{background:#fff;}
