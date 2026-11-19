@@ -17,7 +17,7 @@ def pode_ler(sessao, conta_id, identidade_id, estado):
     if 'dpo' in papeis:
         return True
     escopos = estado.get('escopos_restritos', [])
-    return pessoa.id in escopos and (bool(papeis.intersection(('aal','secretario','prefeito')))
+    return pessoa.id in escopos and (bool(papeis.intersection(('aal','secretario','gabinete')))
         or bool(unidades(sessao, pessoa.id, 'juridico_form2')))
 
 

@@ -14,7 +14,7 @@ from app.fila_form2 import executar as ato_fila
 from testes.test_lote11 import fonte
 
 SECRETARIO = 'CONTA-DEMO34-SECULT'
-PREFEITO = 'CONTA-DEMO34-PREF'
+PREFEITO = 'CONTA-DEMO34-GAB'  # Registra a decisão formal do Prefeito.
 RELATOR = 'CONTA-DEMO34-RELAT'
 VERIFICADOR = 'CONTA-DEMO34-VERIF'
 
@@ -142,7 +142,7 @@ def test_prefeito_fora_critico_e_dpo_aceitando_recusados(sessao,entrada):
 def preparar_acao(s,p):
     obj=entrar(s,p,4)
     preencher34(s,obj)
-    ato(s,obj,'planejar',plano='Plano fictício',executor_id='PESSOA-B',prazo=(date.today()-timedelta(days=2)).isoformat())
+    ato(s,obj,'planejar',plano='Plano fictício',cargo='Chefia da unidade',prazo=(date.today()-timedelta(days=2)).isoformat())
     ato(s,obj,'aprovar_plano',conta=SECRETARIO,justificativa='Fictícia')
     return obj
 
@@ -206,11 +206,11 @@ def test_migracao_excecao_exata(nome):
 def test_critico_triagem_conjunta_e_autoridade(sessao,entrada):
     obj=entrar(sessao,entrada);avaliar(sessao,obj,5)
     with pytest.raises(PermissionError):ato(sessao,obj,'aceitar_residual',conta=SECRETARIO,justificativa='Fictícia')
-    with pytest.raises(ValueError,match='DPO'):ato(sessao,obj,'aceitar_residual',conta=PREFEITO,justificativa='Fictícia')
+    with pytest.raises(ValueError,match='DPO'):ato(sessao,obj,'aceitar_residual',conta=PREFEITO,documento='OFICIO-FICTICIO-12E',justificativa='Fictícia')
     ato(sessao,obj,'manifestar_dpo',conta='CONTA-E1',texto='Manifestação fictícia')
-    with pytest.raises(ValueError,match='Comitê'):ato(sessao,obj,'aceitar_residual',conta=PREFEITO,justificativa='Fictícia')
+    with pytest.raises(ValueError,match='Comitê'):ato(sessao,obj,'aceitar_residual',conta=PREFEITO,documento='OFICIO-FICTICIO-12E',justificativa='Fictícia')
     ato(sessao,obj,'manifestar_comite',conta=RELATOR,finalidade='residual',ata='Ata fictícia',texto='Deliberação fictícia',favoravel=True)
-    ato(sessao,obj,'aceitar_residual',conta=PREFEITO,justificativa='Fictícia')
+    ato(sessao,obj,'aceitar_residual',conta=PREFEITO,documento='OFICIO-FICTICIO-12E',justificativa='Fictícia')
     with pytest.raises(ValueError,match='triagem'):ato(sessao,obj,'concluir_avaliacao')
     ato(sessao,obj,'propor_triagem',resultado='elaborar',justificativa='Fictícia',unidade_id='UNID-NORTE')
     with pytest.raises(ValueError,match='triagem'):ato(sessao,obj,'concluir_avaliacao')
@@ -378,15 +378,15 @@ def test_percurso_critico_dez_passos_sem_secretario_de_outra_unidade(sessao,entr
     ato(sessao,risco,'confirmar_triagem',conta='CONTA-E1')
     ato(sessao,risco,'manifestar_comite',conta=RELATOR,finalidade='residual',
         ata='ATA-FICT-12',texto='Deliberação fictícia',favoravel=True)
-    ato(sessao,risco,'aceitar_residual',conta=PREFEITO,justificativa='Aceitação fictícia')
+    ato(sessao,risco,'aceitar_residual',conta=PREFEITO,documento='OFICIO-FICTICIO-12E',justificativa='Aceitação fictícia')
     preencher34(sessao,risco)
     ato(sessao,risco,'concluir_avaliacao')
     # Act: pass from the frozen risk version to an action and complete the cycle.
     acao=ato(sessao,risco,'encaminhar_acao',justificativa='Providência fictícia')['identidade_id']
     assert acao!=risco
-    ato(sessao,acao,'planejar',plano='Plano fictício verificável',executor_id='PESSOA-B',
+    ato(sessao,acao,'planejar',plano='Plano fictício verificável',cargo='Chefia da unidade',
         prazo=(date.today()+timedelta(days=10)).isoformat())
-    ato(sessao,acao,'aprovar_plano',conta=PREFEITO,justificativa='Aprovação fictícia')
+    ato(sessao,acao,'aprovar_plano',conta=PREFEITO,documento='OFICIO-FICTICIO-12E',justificativa='Aprovação fictícia')
     ato(sessao,acao,'executar_medida',evidencia='Evidência fictícia')
     preencher34(sessao,acao)
     ato(sessao,acao,'verificar',conta=VERIFICADOR,aprovada=True,evidencia='Conferência fictícia')

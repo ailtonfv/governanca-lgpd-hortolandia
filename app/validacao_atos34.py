@@ -5,6 +5,7 @@ class ErrosCampos(ValueError):
         super().__init__(' '.join(erros.values()))
 
 OBRIGATORIOS={
+ 'informar_ripd':('referencia',),
  'adicionar_risco':('motivo',),
  'propor_avaliacao':('evento','causa','consequencia','justificativa'),
  'revisar_avaliacao':('evento','causa','consequencia','justificativa'),
@@ -16,7 +17,7 @@ OBRIGATORIOS={
  'confirmar_gatilho_juridico':('restringe_direitos',),
  'enviar_juridico':('destinatario_id','motivo'),
  'autorizar_referencia':('pessoa_id','necessidade'),
- 'planejar':('plano','executor_id','prazo'), 'aprovar_plano':('justificativa',),
+ 'planejar':('plano','cargo','prazo'), 'aprovar_plano':('justificativa',),
  'executar_medida':('evidencia',), 'verificar':('aprovada','evidencia'),
  'pedir_prorrogacao':('prazo','justificativa'),
  'decidir_prorrogacao':('aprovar','justificativa'),

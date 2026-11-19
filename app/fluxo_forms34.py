@@ -61,7 +61,7 @@ def consultar(sessao, conta_id, identidade_id):
         raise ValueError('Objeto inexistente.')
     ref = sessao.get(Referencia, obj.participacao_id)
     pessoa, papeis, uid = contexto(sessao, conta_id, ref)
-    exigir(papeis, 'secretaria', 'dpo', 'secretario', 'prefeito', 'verificador', 'relator')
+    exigir(papeis, 'secretaria', 'dpo', 'secretario', 'gabinete', 'verificador', 'relator', 'executor_unidade')
     return obj, ref, estado(sessao, obj.id), pessoa, papeis, uid
 
 
@@ -214,7 +214,7 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
     if 'dpo' in papeis and acao in ('aceitar_residual','aprovar_plano','decidir_prorrogacao','cancelar','executar_medida','verificar'):
         raise PermissionError('O DPO não exerce estes atos de autoridade, execução ou verificação.')
     if acao in ('propor_avaliacao', 'revisar_avaliacao', 'confirmar_avaliacao', 'propor_triagem', 'confirmar_triagem',
-                'sem_consenso', 'aceitar_residual', 'concluir_avaliacao', 'encaminhar_acao') and not f3:
+                'sem_consenso', 'aceitar_residual', 'concluir_avaliacao', 'encaminhar_acao', 'informar_ripd') and not f3:
         raise ValueError('Ato exclusivo do FORM 3.')
     if acao in ('planejar', 'aprovar_plano', 'executar_medida', 'verificar', 'pedir_prorrogacao',
                 'decidir_prorrogacao', 'pedir_cancelamento', 'cancelar', 'aprender',
@@ -307,7 +307,8 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         if papeis.intersection(('verificador', 'dpo')):
             raise PermissionError('Relator distinto do verificador e do DPO.')
         finalidade = dados.get('finalidade')
-        if finalidade not in ('avaliacao', 'triagem', 'residual', 'prorrogacao', 'cancelamento'):
+        from app.regras_atos34 import finalidades
+        if finalidade not in finalidades(e):
             raise ValueError('Finalidade da manifestação inválida.')
         m = dict(ata=_texto(dados, 'ata', 200), texto=_texto(dados, 'texto'),
                  favoravel=dados.get('favoravel') is True, finalidade=finalidade,
@@ -347,7 +348,7 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         if not alvo_conta:
             raise ValueError('Participante indisponível.')
         _, alvo_papeis, _ = contexto(sessao, alvo_conta.id, ref)
-        exigir(alvo_papeis, 'secretario', 'prefeito')
+        exigir(alvo_papeis, 'secretario', 'gabinete')
         _texto(dados, 'necessidade', 300)
         e['escopos_restritos'] = sorted(set(e.get('escopos_restritos', [])) | {alvo_conta.pessoa_id})
     elif acao == 'propor_triagem':
@@ -368,17 +369,22 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
             e['triagem']['unidade_id'] = unidade.id
         e['triagem_sem_consenso'] = False
         e['triagem_confirmacoes'] = {lado: dict(pessoa_id=pessoa.id, em=agora)}
+    elif acao == 'informar_ripd':
+        exigir(papeis,'secretaria','dpo')
+        e['referencia_ripd']=dict(referencia=_texto(dados,'referencia',200),pessoa_id=pessoa.id,
+                                  em=agora,papel='DPO' if 'dpo' in papeis else 'Secretaria')
     elif acao == 'aceitar_residual':
         if not _consenso(e, 'avaliacao'):
             raise ValueError('A nota ainda não tem as duas confirmações.')
         faixa = _faixa(e)
         if faixa == 'Não avaliado':
             raise ValueError('Risco não avaliado não pode ser aceito.')
-        exigir(papeis, 'prefeito' if faixa == 'Crítico' else 'secretario')
-        if 'prefeito' in papeis and faixa != 'Crítico':
+        exigir(papeis, 'gabinete' if faixa == 'Crítico' else 'secretario')
+        if 'gabinete' in papeis and faixa != 'Crítico':
             raise PermissionError('Prefeito atua somente no risco Crítico.')
         _pareceres(e, faixa)
         e['aceitacao'] = dict(pessoa_id=pessoa.id, em=agora, justificativa=_texto(dados, 'justificativa'))
+        if faixa=='Crítico':e['aceitacao'].update(decisor='Prefeito',registrador='Gabinete',documento=_texto(dados,'documento',200))
         if faixa in ('Alto', 'Crítico'):
             e['ciencia_comite'] = dict(em=agora, motivo='aceitação residual')
     elif acao == 'concluir_avaliacao':
@@ -413,34 +419,32 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         exigir(papeis, 'secretaria')
         if e.get('plano_aprovado'):
             raise ValueError('Plano aprovado: alterações de prazo exigem pedido próprio.')
-        executor = sessao.get(Pessoa, dados.get('executor_id'))
-        from app.fila_form2 import unidades
-        if (not executor or not executor.ativa or
-                unidades(sessao, executor.id, 'governanca_protecao_dados') or
-                uid not in unidades(sessao, executor.id, 'preenchedor') | unidades(sessao, executor.id, 'aal_form2')):
-            raise PermissionError('Executor deve participar da unidade; o DPO não executa.')
-        e.update(plano=_texto(dados, 'plano'), executor_id=executor.id,
+        from app.regras_atos34 import CARGOS
+        cargo=dados.get('cargo')
+        if cargo not in CARGOS:raise ValueError('Escolha o cargo, função ou unidade responsável.')
+        e.pop('executor_id',None)  # autoria anterior permanece nos eventos, não no novo cargo
+        e.update(plano=_texto(dados,'plano'),cargo_responsavel=cargo,unidade_responsavel_id=uid,
                  prazo=date.fromisoformat(dados['prazo']).isoformat())
     elif acao == 'aprovar_plano':
         faixa = _faixa(e)
-        exigir(papeis, 'prefeito' if faixa == 'Crítico' else 'secretario')
-        if 'prefeito' in papeis and faixa != 'Crítico':
+        exigir(papeis, 'gabinete' if faixa == 'Crítico' else 'secretario')
+        if 'gabinete' in papeis and faixa != 'Crítico':
             raise PermissionError('Prefeito não aprova plano fora do risco Crítico.')
-        if not e.get('plano') or not e.get('executor_id') or not e.get('prazo'):
+        if not e.get('plano') or not (e.get('cargo_responsavel') or e.get('executor_id')) or not e.get('prazo'):
             raise ValueError('Informe plano, executor e prazo antes da aprovação.')
         e['plano_aprovado'] = dict(pessoa_id=pessoa.id, em=agora, justificativa=_texto(dados, 'justificativa'))
+        if faixa=='Crítico':e['plano_aprovado'].update(decisor='Prefeito',registrador='Gabinete',documento=_texto(dados,'documento',200))
         e['situacao'] = 'Plano aprovado'
     elif acao == 'executar_medida':
-        exigir(papeis, 'secretaria')
-        if 'dpo' in papeis or pessoa.id != e.get('executor_id'):
-            raise PermissionError('Somente o executor indicado, nunca o DPO, registra execução.')
+        exigir(papeis, 'executor_unidade')
+        if 'dpo' in papeis:raise PermissionError('O DPO não registra execução.')
         if not e.get('plano_aprovado'):
             raise ValueError('A medida requer plano autorizado; a espera do DPO no FORM 3 não o bloqueia.')
         e['execucao'] = dict(evidencia=_texto(dados, 'evidencia'), pessoa_id=pessoa.id, em=agora)
         e['situacao'] = 'Execução informada, aguardando verificação'
     elif acao == 'verificar':
         exigir(papeis, 'verificador')
-        if papeis.intersection(('dpo', 'relator')) or pessoa.id == e.get('executor_id'):
+        if papeis.intersection(('dpo', 'relator')) or pessoa.id == e.get('execucao',{}).get('pessoa_id') or 'executor_unidade' in papeis:
             raise PermissionError('Verificador deve ser pessoa independente, nunca executor, DPO ou Relator.')
         if not e.get('execucao'):
             raise ValueError('Aguarda evidência da execução.')

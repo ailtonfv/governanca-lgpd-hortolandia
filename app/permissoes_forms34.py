@@ -3,7 +3,7 @@ from sqlalchemy import select
 from app.fila_form2 import pessoa_ativa, unidades, autorizado
 from app.modelos import ParticipacaoForm2, AtribuicaoForm1Integral, Registro
 
-PAPEIS_DEMO = {'secretario': 'demo34_secretario', 'prefeito': 'demo34_prefeito',
+PAPEIS_DEMO = {'secretario': 'demo34_secretario', 'gabinete': 'demo34_gabinete',
                'verificador': 'demo34_verificador', 'relator': 'demo34_relator'}
 
 
@@ -22,10 +22,12 @@ def contexto(sessao, conta_id, referencia):
     atribuicao = sessao.get(AtribuicaoForm1Integral, registro.id)
     if atribuicao and atribuicao.arp_atual_id == pessoa.id and uid in unidades(sessao, pessoa.id, 'preenchedor'):
         papeis.add('secretaria')
+    if referencia.form==4 and uid in (unidades(sessao,pessoa.id,'aal_form2') | unidades(sessao,pessoa.id,'preenchedor')) and 'dpo' not in papeis:
+        papeis.add('executor_unidade')
     for papel, codigo in PAPEIS_DEMO.items():
         lotacoes = unidades(sessao, pessoa.id, codigo)
         if ((papel == 'secretario' and uid in lotacoes) or
-                (papel == 'prefeito' and lotacoes) or
+                (papel == 'gabinete' and lotacoes) or
                 (papel in ('verificador', 'relator') and lotacoes - {uid})):
             papeis.add(papel)
     return pessoa, papeis, uid
