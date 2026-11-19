@@ -17,3 +17,6 @@
 [data-nota][data-faixa]{padding:.4rem .6rem}.matriz34 .nome-faixa34{display:block;font-size:.65rem}.matriz34 td{padding:.3rem}.matriz34 td [data-marca]{background:transparent;color:inherit}
 
 .risco-resumo34 dt{text-transform:none;font-size:1rem;}
+
+.encaminhamento34 .acoes-encaminhamento34{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:var(--espaco-entre-acoes,.75rem);margin-block:var(--espaco-grupo-acoes,1rem)}
+.encaminhamento34 .indicacao-destino34{padding:.75rem 1rem;background:#edf5fa;border-left:4px solid #075985;color:#17212b}

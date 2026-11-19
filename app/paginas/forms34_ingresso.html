@@ -1,4 +1,6 @@
 {% extends 'base.html' %}{% block conteudo %}
+<link rel="stylesheet" href="{{ url_for('estaticos',path='/forms34.css') }}?v=20261119-12c-encaminhamento">
+<div class="forms34 encaminhamento34">
 <h1>{{ registro.codigo_lgpd }} · Encaminhar para riscos ou providências</h1>
 {% from '_conferencia_r17.html' import resumo as resumo_r17 %}{% if conferencia_r17 %}{{ resumo_r17(conferencia_r17,base_r17,conta_id,true) }}{% endif %}
 <p>{{ pessoa.nome|identidade_demonstrativa }} · AAL responsável</p>
@@ -8,10 +10,11 @@
 {% if salvos[3] and salvos[4] %}<p>Os dois destinos estão indicados. Cada encaminhamento é registrado separadamente; depois do primeiro, volte ao bloco 14 para encaminhar ao outro.</p>{% endif %}
 <form method="post" novalidate data-ato34 data-ingresso34 data-versao="{{ p.versao }}" data-registro="{{ registro.codigo_lgpd }}" data-risco-direto="{{ 'sim' if risco_direto else 'nao' }}">
 <input type="hidden" name="versao" value="{{ p.versao }}"><input type="hidden" name="comando_id" value="{{ comando_id }}">
-{% if salvos[3] or salvos[4] %}<p>Você indicou no bloco 14: {{ 'avaliar os riscos e providência direta' if salvos[3] and salvos[4] else 'avaliar os riscos' if salvos[3] else 'providência direta' }}.</p>{% endif %}
+<p class="indicacao-destino34" role="note">Você indicou no bloco 14: {{ 'avaliar os riscos e providência direta' if salvos[3] and salvos[4] else 'avaliar os riscos' if salvos[3] else 'providência direta' if salvos[4] else 'nenhum destino salvo' }}.</p>
 <label for="destino34">Destino <span class="indicador-obrigatoriedade indicador-obrigatoriedade-obrigatorio"><span class="marcador-obrigatorio">*</span> Obrigatório</span></label>
 <select id="destino34" name="form" required aria-describedby="erro-destino34" data-erro-obrigatorio="Escolha para onde encaminhar: Riscos (FORM 3) ou Providência (FORM 4)." {% if erros.get('form') %}aria-invalid="true"{% endif %}><option value="">Escolha…</option>{% for n,nome in [(3,'Avaliar os riscos (FORM 3)'),(4,'Providência direta, sem avaliação de risco (FORM 4)')] %}<option value="{{ n }}" title="{{ 'F2-14.5' if n==3 else 'F2-14.6' }}" {% if dados.get('form')==n|string %}selected{% endif %}>{{ nome }}</option>{% endfor %}</select>
 <p class="erro-campo" id="erro-destino34" {% if not erros.get('form') %}hidden{% endif %}>{{ erros.get('form','') }}</p>
 <div data-justificativa-direta {% if not (risco_direto and dados.get('form')=='4') %}hidden{% endif %}><label for="justificativa34">Decisão fundamentada para seguir somente com a providência <span class="indicador-obrigatoriedade indicador-obrigatoriedade-obrigatorio">* Obrigatório</span></label><textarea id="justificativa34" name="justificativa" maxlength="1000" aria-describedby="erro-justificativa34" {% if erros.get('justificativa') %}aria-invalid="true"{% endif %}>{{ dados.get('justificativa','') }}</textarea><p id="erro-justificativa34" class="erro-campo" {% if not erros.get('justificativa') %}hidden{% endif %}>{{ erros.get('justificativa','') }}</p></div>
-<div class="acoes-fila-form2"><a href="/form2/participacoes/{{ p.id }}/blocos/14?conta_id={{ conta_id|urlencode }}">Voltar ao bloco 14</a><button class="botao-primario" data-confirmar-ato="Confira o destino antes de encaminhar.">Confirmar encaminhamento</button></div></form>
+<div class="acoes-fila-form2 acoes-encaminhamento34"><a href="/form2/participacoes/{{ p.id }}/blocos/14?conta_id={{ conta_id|urlencode }}">Voltar ao bloco 14</a><button class="botao-primario" data-confirmar-ato="Confira o destino antes de encaminhar.">Confirmar encaminhamento</button></div></form>
+</div>
 <script src="/estaticos/avaliacao34.js" defer></script>{% endblock %}
