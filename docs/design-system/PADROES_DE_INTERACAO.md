@@ -135,3 +135,7 @@ Implementação única de conferência: `app/obrigatoriedade_forms.py`. Marcaç�
 Exceções propostas: `app/r17_excecoes.json`, somente identificadores e motivos técnicos, carregadas como proposta. Ailton aprova a lista antes do merge. Relatório editorial e resumo dos enunciados ficam na entrega local restrita.
 
 A conferência demonstrativa do FORM 2 e seus encaminhamentos passam pela R17; conclusão institucional continua bloqueada pelas regras existentes. Consultas de unidades especialistas não são a conclusão do questionário principal. FORM 3 confere ao concluir a avaliação; o envio de medida protetiva ao FORM 4 permanece disponível e registra a contagem, sem antecipar a conclusão do FORM 3; FORM 4 confere antes de registrar encerramento automático. Salvar bloco não aciona encerramento automático.
+
+## Lote 12-C — espaçamento e navegação (19/11/2026)
+
+Grupos de ações têm 1rem de separação vertical e .75rem entre controles, com alinhamento central e quebra de linha. Navegação usa links de aparência uniforme; o encaminhamento principal permanece em destaque. Tokens `--espaco-grupo-acoes` e `--espaco-entre-acoes`, em `estilo.css`. Grades não hifenizam automaticamente seus títulos; no cartão atual, o progresso é branco. Faixas de risco usam as cores aprovadas para o dashboard, sempre com nome escrito. A proposta de impacto é apenas consulta em deliberação: nenhuma escala, fórmula, competência ou regra de encaminhamento muda neste lote.

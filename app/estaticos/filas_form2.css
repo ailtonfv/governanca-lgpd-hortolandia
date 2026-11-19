@@ -151,7 +151,7 @@ body:has(.salvamento-fixo-form1) > main { min-height: 0; flex: 1; }
 .grade-form2 .legenda-grade { margin: .3rem 0; font-size: .72rem; }
 .pagina-bloco-form2 > h1 { font-size: 1.5rem; margin: .5rem 0; }
 .pagina-bloco-form2 > p { margin: .4rem 0; }
-.pagina-bloco-form2 nav.acoes-fila-form2 { margin-block: .4rem; padding: 0; }
+.pagina-bloco-form2 nav.acoes-fila-form2 { margin-block: var(--espaco-grupo-acoes); padding: 0; }
 .pagina-bloco-form2 nav.acoes-fila-form2 a { padding: .4rem .6rem; }
 .pagina-bloco-form2 details.apoio-bloco { padding: .5rem .75rem; margin: .5rem 0; }
 @media (max-width: 800px) {
