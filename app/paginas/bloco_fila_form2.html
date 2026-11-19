@@ -12,7 +12,7 @@
 
 
 {% with grade_compacta=true %}{% include '_regua_fila_form2.html' %}{% endwith %}
-<nav aria-label="Percorrer blocos" class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/participacoes/{{ p.id }}?conta_id={{ conta_id|urlencode }}">Voltar à participação no FORM 2</a>
+<nav aria-label="Percorrer blocos" class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/participacoes/{{ p.id }}?conta_id={{ conta_id|urlencode }}">Voltar ao resumo do FORM 2</a>
 {% if numero > 1 %}<a href="{{ numero-1 }}?conta_id={{ conta_id|urlencode }}">Bloco anterior</a>{% endif %}
 {% if numero < 14 %}<a href="{{ numero+1 }}?conta_id={{ conta_id|urlencode }}">Próximo bloco</a>{% endif %}
 <a href="/form2/participacoes/{{ p.id }}/governanca?conta_id={{ conta_id|urlencode }}&amp;bloco_origem={{ numero }}">Pendências com a origem (FORM 1)</a></nav>
