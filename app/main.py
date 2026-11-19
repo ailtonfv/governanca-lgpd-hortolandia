@@ -7,7 +7,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 import uuid
 
-from fastapi import Depends, FastAPI, Form, Query, Request
+from fastapi import HTTPException, Depends, FastAPI, Form, Query, Request
 from app.atos_interface import ato_registrado
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -180,16 +180,9 @@ def central(
         return _erro_acesso_central(request)
     from app.consultas_interface import usuarios_demonstracao
     pessoa_id = acesso["identidade"]["pessoa_id"]
-    from sqlalchemy import select
-    from app.modelos import ParticipacaoForm2, Registro
-    from app.origem_form2 import nome_objeto_em_analise
-    em_andamento = sessao.execute(select(ParticipacaoForm2, Registro.codigo_lgpd)
-        .join(Registro, Registro.id == ParticipacaoForm2.registro_id)
-        .where(ParticipacaoForm2.responsavel_id == pessoa_id, ParticipacaoForm2.estado == "em_atendimento",
-               ParticipacaoForm2.unidade_id.in_(unidades(sessao,pessoa_id,PAPEIS["principal"])),
-               ParticipacaoForm2.tipo.in_(("principal","tematica")))).all()
+    from app.central_instrumentos import cartoes_em_andamento
     return paginas.TemplateResponse(request=request, name="central.html", context={
-        "em_andamento": [(p.id, codigo, nome_objeto_em_analise(sessao, p.registro_id, p.snapshot_id)) for p, codigo in em_andamento],
+        "cartoes_forms": cartoes_em_andamento(sessao, conta_id),
         **acesso, "conta_id": conta_id,
         "usuarios_demonstracao": usuarios_demonstracao(sessao, conta_id),
         "exibir_fila_form2": bool(unidades(sessao, pessoa_id, PAPEIS["principal"]) or unidades(sessao, pessoa_id, "gestor_fila")),
@@ -197,6 +190,17 @@ def central(
         "outro_vinculo": any(v["papel"] != PAPEIS["dpo"] for v in acesso["identidade"]["designacoes"]),
         "selecao": secretaria_id or request.cookies.get(f"secretaria_{conta_id}"),
     })
+
+
+@app.get("/central/itens/{form}", response_class=HTMLResponse)
+def itens_central(request: Request, form: int, conta_id: str = Query(default="CONTA-A1", max_length=50), sessao: Session = Depends(obter_sessao)):
+    if form not in (1, 2, 3, 4):
+        raise HTTPException(404, "FORM inexistente.")
+    if carregar_central(sessao, conta_id) is None:
+        return _erro_acesso_central(request, conta_indisponivel=True)
+    from app.central_instrumentos import itens_em_andamento
+    return paginas.TemplateResponse(request=request, name="central_itens.html", context={
+        "conta_id": conta_id, "form": form, "itens": itens_em_andamento(sessao, conta_id)[form]})
 
 
 @app.get("/painel", response_class=HTMLResponse)

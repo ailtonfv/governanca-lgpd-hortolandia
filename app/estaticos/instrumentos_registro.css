@@ -72,3 +72,13 @@
 @media (max-width: 650px) {
   .proxima-providencia .botao-primario { width: 100%; box-sizing: border-box; text-align: center; }
 }
+
+/* Mesma hierarquia e área de ação nos quatro instrumentos. */
+.cartao-central .itens-central{margin-top:.8rem;min-width:0}
+.cartao-central .itens-central h4{font-size:.95rem;margin:0 0 .4rem}
+.cartao-central .itens-central ul{list-style:none;padding:0;margin:0}
+.cartao-central .itens-central li{margin:.35rem 0;min-width:0}
+.cartao-central .itens-central li a{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.85rem}
+.cartao-central .itens-central li a:focus{white-space:normal;overflow:visible}
+.cartao-central .mais-itens-central{display:inline-block;margin-top:.35rem}
+.cartao-central .acesso-instrumento{margin-top:auto}

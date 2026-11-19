@@ -7,20 +7,25 @@
   <div>
     <h3>{% if numero %}<span class="numero-form">FORM {{ numero }}<span class="sr-apenas"> — </span></span>{% endif %}{{ titulo }}</h3>
     <p>{{ objetivo }}</p>
-    <p class="situacao-instrumento">{{ situacao }}</p>
-    {% if numero == 2 %}
-    {% if exibir_fila_form2 %}<a class="botao-link-secundario acesso-instrumento" href="{{ url_for('filas_form2') }}?conta_id={{ conta_id|urlencode }}">Abrir fila do FORM 2</a>{% elif not exibir_painel_dpo %}<a class="botao-link-secundario acesso-instrumento" href="{{ url_for('filas_form2') }}?conta_id={{ conta_id|urlencode }}">Consultar participações da unidade</a>{% endif %}
-    {% if em_andamento %}<h4>Suas participações em andamento</h4><ul>{% for id,codigo,nome in em_andamento %}<li><a href="/form2/participacoes/{{ id }}?conta_id={{ conta_id|urlencode }}">{{ codigo }} · {{ nome }} · Abrir participação</a></li>{% endfor %}</ul>{% endif %}
-    {% elif numero in (3, 4) %}
-    <a class="botao-link-secundario acesso-instrumento" href="/forms34?conta_id={{ conta_id|urlencode }}">Acessar FORM {{ numero }}</a>
+    {% if numero in (1, 2, 3, 4) %}
+    {% set resumo = cartoes_forms[numero] %}
+    <section class="itens-central" aria-labelledby="itens-form{{ numero }}">
+      <h4 id="itens-form{{ numero }}">Seus itens em andamento</h4>
+      {% if resumo.itens %}<ul>{% for item in resumo.itens %}<li><a href="{{ item.href }}" title="{{ item.texto }}">{{ item.texto }}</a></li>{% endfor %}</ul>
+      {% else %}<p>Nenhum item em andamento para você.</p>{% endif %}
+      {% if resumo.mais %}<a class="mais-itens-central" href="{{ resumo.lista }}">e mais {{ resumo.mais }}</a>{% endif %}
+    </section>
+    <p class="situacao-instrumento">Disponível na demonstração, conforme as permissões do seu perfil. Não equivale a homologação institucional.</p>
+    <a class="botao-link-secundario acesso-instrumento" href="{{ resumo.acesso }}">Acessar FORM {{ numero }}</a>
     {% else %}
-    <button class="botao-link-secundario acesso-instrumento" {% if secretarias and numero in (1, 2) %}type="submit" form="abrir-painel" name="instrumento" value="form{{ numero }}"{% else %}type="button" disabled{% endif %}>{{ 'Acessar FORM ' ~ numero if numero else acesso }}</button>
+    <p class="situacao-instrumento">{{ situacao }}</p>
+    <button class="botao-link-secundario acesso-instrumento" type="button" disabled>{{ acesso }}</button>
     {% endif %}
   </div>
 </li>
 {% endmacro %}
 {% block conteudo %}
-<link rel="stylesheet" href="{{ url_for('estaticos', path='/instrumentos_registro.css') }}">
+<link rel="stylesheet" href="{{ url_for('estaticos', path='/instrumentos_registro.css') }}?v=20261119-cartoes">
 <div class="central-acesso">
   <h1>Central de Acesso</h1>
   <p>Escolha um instrumento para ver os Registros autorizados na sua Secretaria.</p>

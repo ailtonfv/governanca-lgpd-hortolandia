@@ -5,7 +5,7 @@ from uuid import uuid4
 from urllib.parse import urlencode
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter, Request, HTTPException, Query
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from app.banco import motor
@@ -42,7 +42,7 @@ def erro(request,conta,e,status=409,retorno='/forms34'):
 
 
 @router.get('/forms34')
-def lista(request:Request,conta_id:str):
+def lista(request:Request,conta_id:str,form:int|None=Query(default=None,ge=3,le=4)):
     with Session(motor) as s:
         pessoa=pessoa_ativa(s,conta_id)
         visiveis=[]
@@ -51,7 +51,8 @@ def lista(request:Request,conta_id:str):
         for obj in s.scalars(select(IdentidadeForms34).order_by(IdentidadeForms34.codigo)):
             try:
                 _,ref,e,_,papeis,_=dominio.consultar(s,conta_id,obj.id)
-                visiveis.append(dict(obj=obj,estado=e,registro=s.get(Registro,obj.registro_id)))
+                if form is None or ref.form == form:
+                    visiveis.append(dict(obj=obj,estado=e,registro=s.get(Registro,obj.registro_id)))
             except (ValueError,PermissionError):
                 try:
                     if pode_ler(s,conta_id,obj.id,dominio.estado(s,obj.id)):
@@ -61,7 +62,7 @@ def lista(request:Request,conta_id:str):
         contas=s.execute(select(Conta,Pessoa).join(Pessoa,Conta.pessoa_id==Pessoa.id)
             .where(Conta.ativa.is_(True),Pessoa.ativa.is_(True))).all()
         return paginas.TemplateResponse(request=request,name='forms34_lista.html',context={
-            'conta_id':conta_id,'pessoa':pessoa,'objetos':visiveis,'referencias':referencias,'contas':contas})
+            'filtro_form':form,'conta_id':conta_id,'pessoa':pessoa,'objetos':visiveis,'referencias':referencias,'contas':contas})
 
 
 @router.api_route('/form2/participacoes/{pid}/encaminhar34',methods=['GET','POST'])

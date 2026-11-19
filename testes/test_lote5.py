@@ -101,7 +101,7 @@ def test_central_e_consulta_principal(principal):
     url = f"/form2/participacoes/{principal.id}"
     troca = cliente.get("/central?conta_id=CONTA-B1&troca=1")
     assert "Agora você está como" in troca.text
-    assert url in troca.text and "Suas participações em andamento" in troca.text
+    assert url in troca.text and "Seus itens em andamento" in troca.text
     pagina = cliente.get(url + "?conta_id=CONTA-B1")
     assert "Sua questão" in pagina.text
     assert pagina.text.count(">Encaminhar consulta</button>") == 1

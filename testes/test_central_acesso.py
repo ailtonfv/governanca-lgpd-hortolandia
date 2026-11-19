@@ -46,7 +46,8 @@ def test_atalhos_da_central_por_papel_vigente(sessao):
         resposta = cliente.get("/central", params={"conta_id": conta})
         assert resposta.status_code == 200
         quadro = resposta.text.split('<section class="contexto-central"', 1)[1].split("</section>", 1)[0]
-        assert (f'filas?conta_id={conta}">Abrir fila do FORM 2</a>' in resposta.text) == fila
+        assert f'/form2/filas?conta_id={conta}">Acessar FORM 2</a>' in resposta.text
+        assert 'Abrir fila do FORM 2</a>' not in resposta.text
         assert (f'painel-dpo?conta_id={conta}">Abrir painel do DPO</a>' in quadro) == painel
         assert "Filas institucionais do FORM 2 e painel do DPO" not in resposta.text
 
@@ -74,36 +75,19 @@ def test_atalhos_da_central_por_papel_vigente(sessao):
 
 
 def test_cartoes_explicam_disponibilidade_sem_oferecer_acesso_direto():
+    # Convenção aprovada em 19/11: acesso à lista, sem executar atos.
     pagina = TestClient(app).get("/central").text
     cartoes = re.findall(r'<li class="cartao-central [^"]+">(.*?)</li>', pagina, re.S)
-    esperados = [
-        ("FORM 1", "Levantamento do tratamento", "Como esse processo", "Disponível conforme autorização do Registro"),
-        ("FORM 2", "Validação jurídica e institucional", "Por que e em que condições", "Análise jurídica completa ainda não implementada"),
-        ("FORM 3", "Avaliação de riscos e controles", "Que riscos o tratamento", "Planejado"),
-        ("FORM 4", "Plano de ação, monitoramento e aprendizagem institucional", "O que precisa ser feito", "Planejado"),
-        ("Dashboard LGPD", "Indicadores consolidados", "Planejado"),
-        ("Administração Central — TI", "18 Secretarias", "Planejada", "habilitação específica"),
-    ]
-    assert len(cartoes) == len(esperados)
-    for numero, (cartao, textos) in enumerate(zip(cartoes, esperados), 1):
-        assert all(texto in cartao for texto in textos)
-        assert 'aria-hidden="true" focusable="false"' in cartao
-        if numero != 2:
-            assert '<a ' not in cartao
-        if numero == 2:
-            assert '>Acessar FORM 2</a>' in cartao
-            assert '/form2/filas?conta_id=' in cartao
-            assert 'form="abrir-painel"' not in cartao
-        elif numero == 1:
-            assert f'>Acessar FORM {numero}</button>' in cartao
-            assert f'form="abrir-painel" name="instrumento" value="form{numero}"' in cartao
-        elif numero in (3, 4):
-            assert f'type="button" disabled>Acessar FORM {numero}</button>' in cartao
-            assert 'form="abrir-painel"' not in cartao
-        else:
-            rotulo = 'Acessar Dashboard' if numero == 5 else 'Acessar Administração Central'
-            assert f'type="button" disabled>{rotulo}</button>' in cartao
-            assert 'form="abrir-painel"' not in cartao
+    assert len(cartoes) == 6
+    for numero, cartao in enumerate(cartoes[:4], 1):
+        assert f'FORM {numero}' in cartao
+        assert 'Seus itens em andamento' in cartao
+        assert 'Nenhum item em andamento para você.' in cartao
+        assert 'Disponível na demonstração, conforme as permissões do seu perfil.' in cartao
+        assert f'>Acessar FORM {numero}</a>' in cartao
+        assert cartao.count('acesso-instrumento') == 1
+    assert 'disabled>Acessar Dashboard</button>' in cartoes[4]
+    assert 'disabled>Acessar Administração Central</button>' in cartoes[5]
 
 
 @pytest.mark.parametrize("conta,rotulo", [

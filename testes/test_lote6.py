@@ -37,7 +37,9 @@ def test_p97_p99_p100_central_e_nome_da_origem(sessao, principal):
     assert "Ao voltar a uma aba antiga, confira o servidor em sessão." in central.text
     assert "antes do sinal #" not in central.text
     esperado = f"{registro.codigo_lgpd} · {nome} · Abrir participação"
-    assert esperado in central.text
+    tipo = {"servico": "Serviço", "processo": "Processo", "atividade": "Atividade"}[registro.tipo_objeto]
+    assert f"{registro.codigo_lgpd} · {nome} ({tipo})" in central.text
+    assert esperado not in central.text
     fila = cliente.get("/form2/filas?conta_id=CONTA-B1")
     assert esperado in fila.text
 

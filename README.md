@@ -2026,3 +2026,8 @@ O relatório local do lote distingue testes automatizados de vistoria humana.
 A Central de Acesso oferece os botões dos FORMs 3 e 4 para a página compartilhada
 Riscos e providências, preservando o servidor em sessão. A lista e os atos continuam
 limitados pelas permissões do domínio; abrir a lista não cria risco nem ação.
+
+Na Central, os quatro instrumentos compartilham a lista de até três itens autorizados,
+com indicação do excedente e acesso à lista completa. Os botões ficam no rodapé
+dos cartões; os FORMs 3 e 4 abrem riscos e ações, respectivamente. As consultas
+reutilizam as permissões das páginas de destino, sem executar atos.
