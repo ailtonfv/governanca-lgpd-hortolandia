@@ -17,7 +17,7 @@ from app.fila_form2 import pessoa_ativa, autorizado, unidades
 from app.questionario_forms34 import perguntas, grade, ativa, recolhida
 from app.atos_forms34_interface import disponiveis, interpretar
 from app.validacao_atos34 import ErrosCampos
-from app.apresentacao_forms34 import matriz, grade_visual, situacao_avaliacao, valores_proposta, PROBABILIDADE, IMPACTO
+from app.apresentacao_forms34 import descricao_nota34, matriz, grade_visual, situacao_avaliacao, valores_proposta, PROBABILIDADE, IMPACTO
 from app.identidade_demonstrativa import configurar_identidade
 from app.atos_interface import ato_registrado
 from app.eventos import registrar_auditoria
@@ -28,6 +28,7 @@ MODELO_RIPD=Path(__file__).resolve().parents[1]/'docs/modelos/MODELO_MUNICIPAL_R
 router=APIRouter()
 paginas=Jinja2Templates(directory=Path(__file__).parent/'paginas')
 configurar_identidade(paginas)
+paginas.env.globals['descricao_nota34'] = descricao_nota34
 paginas.env.filters['hora_local']=data_local
 
 

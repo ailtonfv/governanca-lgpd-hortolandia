@@ -40,3 +40,12 @@ def grade_visual(grade,obj,conta,bloco):
         texto=g['texto'],respondidas=g['n'],ativas=g['m'],percentual=g['percentual'],
         href=f'/forms34/{obj}/blocos/{g["numero"]}?'+urlencode({'conta_id':conta}),
         atual=g['numero']==bloco) for g in grade]
+
+
+def descricao_nota34(valor, eixo):
+    """Mesmo vocabulário das listas, sem recalcular a pontuação histórica."""
+    textos = PROBABILIDADE if eixo == 'probabilidade' else IMPACTO
+    if valor is None or valor == '':
+        return 'Ainda não avaliado'
+    numero = int(valor)
+    return f'{numero} — {textos[numero-1]}' if 1 <= numero <= 5 else str(valor)
