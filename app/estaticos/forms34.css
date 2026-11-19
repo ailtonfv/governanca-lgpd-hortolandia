@@ -20,3 +20,18 @@
 
 .encaminhamento34 .acoes-encaminhamento34{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:var(--espaco-entre-acoes,.75rem);margin-block:var(--espaco-grupo-acoes,1rem)}
 .encaminhamento34 .indicacao-destino34{padding:.75rem 1rem;background:#edf5fa;border-left:4px solid #075985;color:#17212b}
+/* Vistoria 12-D: texto e atos legíveis, sem alterar o estado salvo. */
+.leitura-ato34{border:1px solid #d6e0e6;border-left:4px solid #075985;padding:1rem;margin:1rem 0;background:#f4f7f9}
+.leitura-ato34 dt{font-weight:700;margin-top:.5rem}.leitura-ato34 dd{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.forms34 textarea{overflow-y:hidden;min-height:4rem;box-sizing:border-box}
+.forms34 .indicador-sistema{color:#52616b;background:#eef1f3}
+.forms34 .cartao-bloco .progresso-bloco{height:4px;margin:.5rem .4rem .3rem;width:calc(100% - .8rem);position:relative;left:auto;right:auto;bottom:auto}
+.forms34 .cartao-bloco[aria-current=page] .progresso-bloco{background:rgba(255,255,255,.25)}
+.forms34 .cartao-bloco[aria-current=page] .progresso-bloco>span{background:#fff}
+.item-risco34{padding:1rem;border:1px solid #d6e0e6;border-radius:8px;margin:1rem 0}
+.item-risco34 header{display:flex;flex-wrap:wrap;gap:1rem;align-items:center;justify-content:flex-start}
+.item-risco34 h2{font-size:1.15rem;margin:0}.troca-compacta34{margin:1rem 0}.troca-compacta34 form{max-width:42rem}
+
+.forms34 .leitura-ato34 dl,.forms34 #historico34 dl{display:block}
+.forms34 .leitura-ato34 dt,.forms34 #historico34 dt{text-transform:none}
+.forms34 #historico34 dd{margin:0 0 .6rem;white-space:pre-wrap}

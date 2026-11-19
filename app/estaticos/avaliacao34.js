@@ -38,3 +38,29 @@
   if(first){e.preventDefault();e.stopImmediatePropagation();first.focus();}
  },true);
 })();
+/* Leitura antes do ato: a caixa resume os campos visíveis, sem decidir pelo servidor. */
+(() => {
+ if(typeof document==='undefined')return;
+ document.querySelectorAll('[data-ato34]').forEach(form=>{
+  const button=form.querySelector('[data-confirmar-ato]');if(!button)return;
+  const acao=form.elements.acao?.value;
+  if(['confirmar_avaliacao','confirmar_triagem'].includes(acao)||form.querySelector('[data-quadro-avaliacao]'))return;
+  const base=button.dataset.confirmarAto;
+  function resumo(){
+   const partes=[];
+   form.querySelectorAll('select,textarea,input:not([type=hidden])').forEach(c=>{
+    if(c.disabled||!c.value)return;
+    const label=form.querySelector(`label[for="${c.id}"]`);
+    const nome=(label?.textContent||c.name).replace(/\*.*$/,'').trim();
+    partes.push(nome+': '+(c.tagName==='SELECT'?c.selectedOptions[0]?.textContent:c.value));
+   });
+   button.dataset.confirmarAto=base+(partes.length?' '+partes.join(' · '):'');
+   const aviso=form.querySelector('[data-aviso-triagem]');
+   if(aviso)aviso.hidden=!(form.elements.resultado?.value==='nao_indicado'&&['Alto','Crítico'].includes(form.dataset.faixa));
+  }form.addEventListener('input',resumo);form.addEventListener('change',resumo);resumo();
+ });
+ function ajustar(el){if(!el.getClientRects().length)return;el.style.height='auto';el.style.height=el.scrollHeight+'px';}
+ document.querySelectorAll('.forms34 textarea').forEach(el=>{ajustar(el);el.addEventListener('input',()=>ajustar(el));});
+ document.addEventListener('toggle',()=>document.querySelectorAll('.forms34 textarea').forEach(ajustar),true);
+ window.addEventListener('resize',()=>document.querySelectorAll('.forms34 textarea').forEach(ajustar));
+})();

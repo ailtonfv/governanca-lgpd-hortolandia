@@ -22,6 +22,8 @@ from app.identidade_demonstrativa import configurar_identidade
 from app.atos_interface import ato_registrado
 from app.eventos import registrar_auditoria
 from app.apresentacao_form2 import data_local
+from app.leitura_atos34 import proposta as quadro_proposta, historico_visual, NOMES, RESULTADOS, situacao_atual
+from app.apresentacao_forms34 import titulo_bloco
 
 MODELO_RIPD=Path(__file__).resolve().parents[1]/'docs/modelos/MODELO_MUNICIPAL_RIPD_PROPOSTA.md'
 
@@ -52,7 +54,7 @@ def lista(request:Request,conta_id:str,form:int|None=Query(default=None,ge=3,le=
             try:
                 _,ref,e,_,papeis,_=dominio.consultar(s,conta_id,obj.id)
                 if form is None or ref.form == form:
-                    visiveis.append(dict(obj=obj,estado=e,registro=s.get(Registro,obj.registro_id)))
+                    visiveis.append(dict(obj=obj,estado=e,situacao=situacao_atual(e),registro=s.get(Registro,obj.registro_id)))
             except (ValueError,PermissionError):
                 try:
                     if pode_ler(s,conta_id,obj.id,dominio.estado(s,obj.id)):
@@ -154,15 +156,33 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
         revisar=request.query_params.get('revisar')=='1' or acao_erro=='revisar_avaliacao'
         atos=disponiveis(ref.form,bloco,papeis,e,pessoa.id,revisar)
         listas=escolhas(s,ref,papeis,uid)
+        eventos=s.scalars(select(Evento).where(Evento.cadeia_id==obj.id).order_by(Evento.id.desc())).all()
+        autores={p.id:p.nome for p in s.scalars(select(Pessoa))}
+        unidades_nomes={u.id:u.nome for u in s.scalars(select(Unidade))}
+        proposta_av=quadro_proposta(e,'avaliacao',autores,unidades_nomes,eventos)
+        proposta_reavaliacao=quadro_proposta(e['reavaliacao'],'avaliacao',autores,unidades_nomes) if e.get('reavaliacao') else None
+        proposta_tr=quadro_proposta(e,'triagem',autores,unidades_nomes,eventos)
+        hist=historico_visual(eventos,autores,unidades_nomes,{q['id']:q['bloco'] for q in perguntas(ref.form)})
+        for item in hist:
+            item['bloco']=__import__('app.atos_forms34_interface',fromlist=['ATOS']).ATOS.get(item['acao'],(0,0))[1]
+        codigo_risco=obj.codigo.split('-')[-1]
+
         for a in atos:
+            a['reavaliacao']=a['acao']=='revisar_avaliacao' and set(e.get('avaliacao_confirmacoes',{}))=={'secretaria','dpo'}
             a['comando_id']=str(uuid4())
-            a['resumo']=f"Registro {s.get(Registro,obj.registro_id).codigo_lgpd}: {a['titulo']}. A autoria será registrada."
+            a['resumo']=f"{'Risco' if ref.form==3 else 'Ação'} {codigo_risco} ({s.get(Registro,obj.registro_id).codigo_lgpd}): {a['titulo']}. A autoria será registrada."
             for c in a['campos']:
                 c['uid']=a['acao']+'-'+c['nome']
                 c['lista']=(list(enumerate(PROBABILIDADE if c['nome'] in ('p','pr') else IMPACTO,1)) if c['tipo']=='number' else [('sim','Sim'),('nao','Não')] if c['tipo']=='bool' else listas.get(c['tipo'],c.get('opcoes',())))
                 if c['tipo']=='number':c['lista']=[(k,f'{k} — {v}') for k,v in c['lista']]
             if a['acao']=='confirmar_avaliacao' and e.get('avaliacao'):
-                av=e['avaliacao'];a['resumo']=f"Risco {obj.codigo.split('-')[-1]}: inerente {av['inerente']['nota']} ({av['inerente']['faixa']}), residual {av['residual']['nota']} ({av['residual']['faixa']}). Confirmar esta proposta?"
+                av=e.get('reavaliacao',e)['avaliacao'];a['resumo']=f"Risco {obj.codigo.split('-')[-1]}: inerente {av['inerente']['nota']} ({av['inerente']['faixa']}), residual {av['residual']['nota']} ({av['residual']['faixa']}). Confirmar esta proposta?"
+            if a['acao']=='confirmar_avaliacao':
+                a['resumo']+=' Com a sua confirmação, a nota passa a valer como nota conjunta.'
+                faixa=e.get('reavaliacao',e).get('avaliacao',{}).get('residual',{}).get('faixa')
+                if faixa=='Crítico':a['resumo']+=' O risco Crítico segue para triagem de RIPD, manifestação do Comitê e aceitação pelo Prefeito.'
+            if a['acao']=='confirmar_triagem' and proposta_tr:
+                a['resumo']=f"Risco {codigo_risco}: confirmar a triagem proposta por {proposta_tr['lado']} — "+RESULTADOS.get(e['triagem']['resultado'],'')
             a['escala']={c['nome']:c for c in a['campos'] if c['nome'] in ('p','i','pr','ir')}
         proposta=next((a for a in atos if a['acao'] in ('propor_avaliacao','revisar_avaliacao')),None)
         restantes=[a for a in atos if a is not proposta]
@@ -176,6 +196,10 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
                    'F4-4.23':e.get('faixa_origem','Não avaliado'),
                    'F4-4.24':'Aceitação pendente de autoridade competente',
                    'F3-3.52.5':'Aceitação registrada' if e.get('aceitacao') else 'Pendente de autoridade competente'}
+        if e.get('triagem'):
+            valores.update({'F3-3.55':RESULTADOS.get(e['triagem'].get('resultado'),'Ainda não avaliado'),
+                            'F3-3.56':e['triagem'].get('justificativa',''),
+                            'F3-3.57':unidades_nomes.get(e['triagem'].get('unidade_id'),'Não indicada para este resultado')})
         if e.get('avaliacao'):
             valores.update({'F3-3.52':e['respostas'].get('F3-3.52') or 'Ainda não avaliado','F3-3.52.4':'; '.join((c.get('descricao','')+' — '+c.get('evidencia','')).strip(' —') for c in e['avaliacao'].get('controles',[])) or 'Ainda não avaliado'})
             if e.get('aceitacao'):
@@ -183,19 +207,28 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
             for ident, tipo, chave in [('F3-3.49','inerente','probabilidade'),('F3-3.50','inerente','impacto'),
                     ('F3-3.51','inerente','nota'),('F3-3.52.1','residual','probabilidade'),
                     ('F3-3.52.2','residual','impacto'),('F3-3.52.3','residual','nota')]:
-                valores[ident] = e['avaliacao'][tipo][chave] if e['avaliacao'][tipo][chave] is not None else 'Não avaliado'
+                valores[ident] = descricao_nota34(e['avaliacao'][tipo][chave],chave) if chave in ('probabilidade','impacto') else e['avaliacao'][tipo][chave] if e['avaliacao'][tipo][chave] is not None else 'Não avaliado'
         if ref.form==3 and bloco==14:
             for q in itens:q['tipo']='ato'
         from app.atos_forms34_interface import ATOS
         ato=ato_registrado(s,request.query_params.get('registrado'),conta_id,registro_id=registro.id,participacao_id=obj.id)
+        if ato:
+            evento_sucesso=next((h for h in hist if h['comando_id']==request.query_params.get('registrado')),None)
+            ato['nome']=evento_sucesso['nome'] if evento_sucesso else 'Ato registrado'
+        situacao_topo=(proposta_tr or proposta_av or {}).get('status',e['situacao']) if ref.form==3 and not e.get('concluida') else e['situacao']
         from app.restrito_forms34 import pode_ler
         return paginas.TemplateResponse(request=request,name='forms34_bloco.html',status_code=status,context={
             'falhas_r17':falhas_r17,'conferencia_r17':conferencia34(ref.form,e),'base_r17':f'/forms34/{obj.id}/blocos',
             'erros_campos':erros_campos,'acao_erro':acao_erro,'revisar':revisar,
             'ato_proposta':proposta,'ato_principal':principal,'outros_atos':restantes[1:],
-            'valores_formulario':valores_enviados if acao_erro else valores_proposta(e),
+            'valores_formulario':valores_enviados if acao_erro else valores_proposta(e.get('reavaliacao',e)),
             'matriz':matriz(),'situacao_avaliacao':situacao_avaliacao(e),
-            'grade_visual':grade_visual(grade_atual,obj.id,conta_id,bloco),
+            'grade_visual':grade_visual(grade_atual,obj.id,conta_id,bloco,e),
+            'titulo_bloco':titulo_bloco(next(g['titulo'] for g in grade_atual if g['numero']==bloco)),
+            'proposta_reavaliacao':proposta_reavaliacao,'proposta_av':proposta_av,'proposta_tr':proposta_tr,'situacao_topo':situacao_topo,
+            'historico_visual':hist,'so_atos':request.query_params.get('historico')=='atos' if request.query_params.get('filtrar') else request.query_params.get('historico','atos')!='todos',
+            'manifestacoes':[h for h in hist if h['acao'] in ('manifestar_dpo','manifestar_comite','aceitar_residual','aprovar_plano','verificar','cancelar')],
+            'valores_triagem':e.get('triagem') or {},
             'obj':obj,'ref':ref,'estado':e,'pessoa':pessoa,'papeis':papeis,'registro':registro,
             'conta_id':conta_id,'bloco':bloco,'itens':itens,'grade':grade(ref.form,e['respostas'],e),
             'atos':atos,'escolhas':escolhas(s,ref,papeis,uid),'comando_id':str(uuid4()),'ato':ato,

@@ -1,12 +1,12 @@
 {% macro formulario(a,estado,registro,obj,matriz,valores,erros,principal=false) -%}
 {% from '_campos_ato34.html' import campo %}{% from '_quadro_avaliacao34.html' import quadro %}
 <section class="ato34" id="ato-{{ a.acao }}"><h2>{{ a.titulo }}</h2>
-<form method="post" novalidate data-ato34 data-risco="{{ obj.codigo.split('-')[-1] }}">
+<form method="post" novalidate data-ato34 data-risco="{{ obj.codigo.split('-')[-1] }}" data-registro="{{ registro.codigo_lgpd }}" data-faixa="{{ estado.avaliacao.residual.faixa if estado.avaliacao else '' }}">
 <input type="hidden" name="acao" value="{{ a.acao }}"><input type="hidden" name="versao" value="{{ estado.versao }}"><input type="hidden" name="comando_id" value="{{ a.comando_id }}">
 {% if a.acao in ['propor_avaliacao','revisar_avaliacao'] %}
 {% for c in a.campos if c.nome in ['evento','causa','consequencia'] %}{{ campo(c,valores.get(c.nome,''),erros.get(c.nome,'')) }}{% endfor %}
-{{ quadro(a.escala,valores,erros,matriz,estado.avaliacao) }}
+{% if a.reavaliacao %}<p>A nota conjunta atual continua valendo até que uma nova avaliação seja confirmada pelas duas partes.</p>{% for nome in ['p','i','pr','ir'] %}{{ campo(a.escala[nome],valores.get(nome,''),erros.get(nome,'')) }}{% endfor %}{% else %}{{ quadro(a.escala,valores,erros,matriz,estado.avaliacao) }}{% endif %}
 {% for c in a.campos if c.nome not in ['evento','causa','consequencia','p','i','pr','ir'] %}{{ campo(c,valores.get(c.nome,''),erros.get(c.nome,'')) }}{% endfor %}
 {% else %}{% for c in a.campos %}{{ campo(c,valores.get(c.nome,''),erros.get(c.nome,'')) }}{% endfor %}{% endif %}
-<div class="acoes-fila-form2"><button class="{{ 'botao-primario' if principal else 'botao-link-secundario' }}" data-confirmar-ato="{{ a.resumo }}">{{ a.titulo }}</button></div></form></section>
+{% if a.acao=='propor_triagem' %}<p class="aviso-alerta" data-aviso-triagem hidden>A regra municipal indica RIPD para esta faixa. Justifique por que não agora.</p>{% endif %}<div class="acoes-fila-form2"><button class="{{ 'botao-primario' if principal else 'botao-link-secundario' }}" data-confirmar-ato="{{ a.resumo }}">{{ a.titulo }}</button></div></form></section>
 {%- endmacro %}

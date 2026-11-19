@@ -29,6 +29,12 @@ def opcoes(controle, todos):
     return [v.strip() for v in texto.split(' / ')]
 
 
+def texto_pergunta(texto):
+    texto=re.sub(r'\bpassagem do processo\b','etapa do fluxo',texto,flags=re.I)
+    texto=re.sub(r'\bdeste processo\b','deste Registro',texto,flags=re.I)
+    return re.sub(r'\bdo processo\b','do Registro',texto,flags=re.I)
+
+
 def perguntas(form):
     d = carregar_catalogo(form)
     controles = {c['id']: c for c in d['controles']['itens']}
@@ -44,7 +50,7 @@ def perguntas(form):
             if ato:
                 tipo = 'ato'
             saida.append(dict(id=item['id'], bloco=bloco['numero'], titulo=bloco['titulo'],
-                enunciado=item['enunciado'], tipo=tipo, opcoes=alternativas,
+                enunciado=texto_pergunta(item['enunciado']), tipo=tipo, opcoes=alternativas,
                 detalhe=item['id'] in DETALHES4, depende=DEPENDENCIAS.get(item['id']),
                 ajuda='Confirme os fatos da origem; esta resposta não é preenchida automaticamente.'
                       if c['controle'] == 'readonly' and alternativas else ''))
@@ -129,5 +135,5 @@ def grade(form, respostas, estado):
                  'Todas as perguntas ativas respondidas' if preenchidos == total else
                  f'Em preenchimento · {preenchidos} de {total} perguntas ativas')
         resultado.append(dict(numero=n, titulo=grupo[0]['titulo'], n=preenchidos, m=total,
-                              texto=texto, percentual=round(100*preenchidos/total) if total else 0))
+                              texto=texto, a_confirmar=sum('A confirmar' in (respostas.get(i['id']) if isinstance(respostas.get(i['id']),list) else [respostas.get(i['id'])]) for i in ativos), percentual=round(100*preenchidos/total) if total else 0))
     return resultado

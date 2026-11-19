@@ -1,3 +1,3 @@
 {% macro marca(q, form, ativa=true) -%}
-{% if metadado_r17 is defined %}{% set m=metadado_r17(q,form) %}<span data-r17 data-condicional-r17="{{ '1' if m.condicional else '0' }}" class="indicador-obrigatoriedade indicador-obrigatoriedade-{{ m.tom_ativo if ativa else m.tom }}">{{ m.marcador_ativo if ativa else m.marcador }} {{ m.rotulo_ativo if ativa else m.rotulo }}</span>{% endif %}
+{% if form in [3,4] and q.tipo in ['readonly','computed','ato'] %}<span class="indicador-obrigatoriedade indicador-sistema">**** Preenchido pelo sistema</span>{% elif metadado_r17 is defined %}{% set m=metadado_r17(q,form) %}<span data-r17 data-condicional-r17="{{ '1' if m.condicional else '0' }}" class="indicador-obrigatoriedade indicador-obrigatoriedade-{{ m.tom_ativo if ativa else m.tom }}">{{ m.marcador_ativo if ativa else m.marcador }} {{ m.rotulo_ativo if ativa else m.rotulo }}</span>{% endif %}
 {%- endmacro %}

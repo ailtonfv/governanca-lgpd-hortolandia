@@ -27,7 +27,7 @@ ATOS = {
  'manifestar_dpo':(0,0,('dpo',),'Registrar manifestação do DPO',[campo('texto','Manifestação','textarea')]),
  'propor_triagem':(3,15,S,'Registrar proposta de triagem',[
     campo('resultado','Resultado','select',(('elaborar','Elaborar RIPD'),('revisar','Revisar RIPD'),
-        ('nao_indicado','Não indicado neste momento'),('analise_adicional','Análise adicional'),('determinado_anpd','Determinação da ANPD'))),
+        ('nao_indicado','Não indicado neste momento'),('analise_adicional','Precisa de análise adicional antes de decidir'),('determinado_anpd','Determinação da ANPD'))),
     J,campo('unidade_id','Unidade que instruirá (quando houver RIPD)','unidade')]),
  'confirmar_triagem':(3,15,S,'Confirmar triagem proposta',[]),
  'aceitar_residual':(3,14,('secretario','prefeito'),'Registrar aceitação do residual',[J]),
@@ -70,12 +70,16 @@ def disponiveis(form, bloco, papeis, estado=None, pessoa_id=None, revisar=False)
     saida=[]
     for a in candidatos:
         k=a['acao'];campo='triagem' if bloco==15 else 'avaliacao'
-        confirmacoes=estado.get(campo+'_confirmacoes',{})
+        proposta_atual=estado.get('reavaliacao',estado) if campo=='avaliacao' else estado
+        confirmacoes=proposta_atual.get(campo+'_confirmacoes',{})
         confirmou=any(v['pessoa_id']==pessoa_id for v in confirmacoes.values())
+        if k=='propor_triagem' and estado.get('triagem'):
+            if not revisar or not confirmou or len(confirmacoes)==2 or estado.get('triagem_sem_consenso'):continue
+            a['titulo']='Revisar proposta de triagem'
         if k=='propor_avaliacao' and estado.get('avaliacao'):continue
-        if k=='revisar_avaliacao' and (not estado.get('avaliacao') or not revisar or estado.get('avaliacao_sem_consenso')):continue
+        if k=='revisar_avaliacao' and (not estado.get('avaliacao') or not revisar or proposta_atual.get('avaliacao_sem_consenso')):continue
         if k in ('confirmar_avaliacao','confirmar_triagem','sem_consenso'):
-            if not estado.get(campo) or confirmou or estado.get(campo+'_sem_consenso'):continue
+            if not proposta_atual.get(campo) or confirmou or proposta_atual.get(campo+'_sem_consenso'):continue
         if k=='aceitar_residual' and (set(estado.get('avaliacao_confirmacoes',{}))!={'secretaria','dpo'} or estado.get('aceitacao')):continue
         if k=='aceitar_residual':
             critico=estado['avaliacao']['residual']['faixa']=='Crítico'

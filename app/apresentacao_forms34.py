@@ -11,7 +11,7 @@ EXIGENCIAS={'Pequeno':'Pequeno: acompanhar controles; aceitação pela autoridad
 def situacao_avaliacao(e):
     if e.get('avaliacao_sem_consenso'):return 'Sem consenso — encaminhado ao Comitê'
     c=e.get('avaliacao_confirmacoes',{})
-    if set(c)=={'secretaria','dpo'}:return 'Nota conjunta confirmada pela Secretaria e pelo DPO'
+    if set(c)=={'secretaria','dpo'}:return 'Nota conjunta confirmada pela Secretaria e pelo DPO em '+str(data_local(max(v.get('em','') for v in c.values())))
     if not e.get('avaliacao'):return 'Ainda não avaliado — registre a proposta para o outro lado conferir.'
     proponente=e.get('avaliacao_proponente') or next((dict(v,lado=k) for k,v in c.items()),{})
     if not proponente:return 'Deliberação registrada — revisar e confirmar a proposta em conjunto.'
@@ -32,14 +32,22 @@ def matriz():
 def titulo_bloco(texto):
     import re
     titulo=texto[:1].upper()+texto[1:].lower()
-    return re.sub(r'\b(ripd|lgpd|dpo|anpd|form)\b',lambda m:m[0].upper(),titulo,flags=re.I)
+    return re.sub(r'\b(ripd|lgpd|dpo|anpd|form|ppps)\b',lambda m:m[0].upper(),titulo,flags=re.I)
 
-def grade_visual(grade,obj,conta,bloco):
+def grade_visual(grade,obj,conta,bloco,estado=None):
     from urllib.parse import urlencode
-    return [dict(numero=g['numero'],titulo=titulo_bloco(g['titulo']),
-        texto=g['texto'],respondidas=g['n'],ativas=g['m'],percentual=g['percentual'],
-        href=f'/forms34/{obj}/blocos/{g["numero"]}?'+urlencode({'conta_id':conta}),
-        atual=g['numero']==bloco) for g in grade]
+    from app.leitura_atos34 import situacao_bloco
+    saida=[]
+    for g in grade:
+        ato=situacao_bloco(estado.get('form'),g['numero'],estado) if estado else ''
+        texto=g['texto'] if g['m'] else ''
+        if g['n'] and g['n']==g['m']:
+            texto='✓ Todas respondidas · '+str(g['a_confirmar'])+' a confirmar' if g.get('a_confirmar') else '✓ Todas as perguntas ativas respondidas'
+        saida.append(dict(numero=g['numero'],titulo=titulo_bloco(g['titulo']),
+            texto=texto,situacao_ato=ato,respondidas=g['n'],ativas=g['m'],percentual=g['percentual'],
+            href=f'/forms34/{obj}/blocos/{g["numero"]}?'+urlencode({'conta_id':conta}),atual=g['numero']==bloco))
+    return saida
+
 
 
 def descricao_nota34(valor, eixo):

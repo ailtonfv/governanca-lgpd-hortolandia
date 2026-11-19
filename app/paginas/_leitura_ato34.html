@@ -1,0 +1,5 @@
+{% macro leitura(p) -%}
+{% if p %}<section class="leitura-ato34"><h2>{{ p.titulo }}</h2>
+<p>{{ p.status }}</p><p>{{ p.autor|identidade_demonstrativa }} · {{ p.quando }}</p>
+<dl>{% for nome,valor in p.linhas %}<dt>{{ nome }}</dt><dd>{{ valor }}</dd>{% endfor %}</dl></section>{% endif %}
+{%- endmacro %}
