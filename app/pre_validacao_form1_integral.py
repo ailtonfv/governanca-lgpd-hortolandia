@@ -101,10 +101,11 @@ def carregar_matriz_obrigatoriedade() -> dict[str, RegraObrigatoriedade]:
     return regras
 
 
-def metadado_visual_obrigatoriedade(campo_id: str, conteudo=None) -> dict:
+def metadado_visual_obrigatoriedade(campo_id: str, conteudo=None, *, classe=None) -> dict:
     """Projeta a matriz canônica em rótulos visuais, sem criar regra funcional."""
 
-    regra = matriz_efetiva(conteudo)[campo_id]
+    # Classe explícita permite reutilizar a convenção, sem alterar a matriz do FORM 1.
+    classe = classe if classe is not None else matriz_efetiva(conteudo)[campo_id].classe
     apresentacoes = {
         CLASSE_ESSENCIAL: ("*", "Obrigatório", "obrigatorio", False),
         CLASSE_SOMENTE_LEITURA: (
@@ -123,13 +124,13 @@ def metadado_visual_obrigatoriedade(campo_id: str, conteudo=None) -> dict:
             "****", "Facultativo (classificação provisória)", "facultativo", False
         ),
     }
-    if regra.classe not in apresentacoes:
+    if classe not in apresentacoes:
         raise ValueError(
-            f"classe de obrigatoriedade sem apresentação definida: {regra.classe}"
+            f"classe de obrigatoriedade sem apresentação definida: {classe}"
         )
-    marcador, rotulo, tom, condicional = apresentacoes[regra.classe]
+    marcador, rotulo, tom, condicional = apresentacoes[classe]
     return {
-        "classe": regra.classe,
+        "classe": classe,
         "marcador": marcador,
         "rotulo": rotulo,
         "tom": tom,
