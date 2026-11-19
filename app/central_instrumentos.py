@@ -6,6 +6,7 @@ from app.fila_form2 import pessoa_ativa, autorizado
 from app.modelos import ParticipacaoForm2, Registro, IdentidadeForms34
 from app.origem_form2 import nome_objeto_em_analise
 from app.fluxo_forms34 import consultar
+from app.leitura_atos34 import situacao_atual
 
 
 def itens_em_andamento(sessao, conta_id):
@@ -38,7 +39,7 @@ def itens_em_andamento(sessao, conta_id):
             continue
         r = sessao.get(Registro, obj.registro_id)
         especie = 'Risco' if ref.form == 3 else 'Ação'
-        itens[ref.form].append(dict(texto=f"{r.codigo_lgpd} · {especie} {obj.codigo.split('-')[-1]} — {estado['situacao']}",
+        itens[ref.form].append(dict(texto=f"{r.codigo_lgpd} · {especie} {obj.codigo.split('-')[-1]} — {situacao_atual(estado)}",
                                   href=f'/forms34/{obj.id}/blocos/1?{query}'))
     return itens
 

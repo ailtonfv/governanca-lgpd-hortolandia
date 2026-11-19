@@ -82,3 +82,9 @@
 .cartao-central .itens-central li a:focus{white-space:normal;overflow:visible}
 .cartao-central .mais-itens-central{display:inline-block;margin-top:.35rem}
 .cartao-central .acesso-instrumento{margin-top:auto}
+.cartao-central .itens-central li a{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.4;overflow-wrap:anywhere}
+
+.cartao-central .nome-item-central{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;overflow:hidden}
+.cartao-central .nome-item-central.duas-linhas{-webkit-line-clamp:2}
+.cartao-central .situacao-item-central{display:block;font-size:.85rem;white-space:normal;overflow:visible}
+.cartao-central .itens-central a:focus .nome-item-central{-webkit-line-clamp:unset}

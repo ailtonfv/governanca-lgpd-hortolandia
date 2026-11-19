@@ -139,3 +139,12 @@ A conferência demonstrativa do FORM 2 e seus encaminhamentos passam pela R17; c
 ## Lote 12-C — espaçamento e navegação (19/11/2026)
 
 Grupos de ações têm 1rem de separação vertical e .75rem entre controles, com alinhamento central e quebra de linha. Navegação usa links de aparência uniforme; o encaminhamento principal permanece em destaque. Tokens `--espaco-grupo-acoes` e `--espaco-entre-acoes`, em `estilo.css`. Grades não hifenizam automaticamente seus títulos; no cartão atual, o progresso é branco. Faixas de risco usam as cores aprovadas para o dashboard, sempre com nome escrito. A proposta de impacto é apenas consulta em deliberação: nenhuma escala, fórmula, competência ou regra de encaminhamento muda neste lote.
+
+## Leitura dos atos — vistoria 12-D (19/11/2026)
+
+- Propostas conjuntas exibem conteúdo, autor e horário antes da confirmação; depois do ato, permanece a leitura, sem formulário vazio. Recurso: `leitura_atos34.py` e `_leitura_ato34.html`.
+- Situação de ato e contagem de respostas são informações distintas na grade. Uma grade respondida não equivale a ato confirmado.
+- Manifestações e decisões permanecem legíveis na página e no histórico. O filtro inicial inclui apenas atos; o servidor permite consultar também os salvamentos. Nunca expor o estado bruto nem o conteúdo jurídico restrito nessa leitura.
+- Cartões da Central reservam uma linha própria para a situação; nomes longos podem ser abreviados visualmente, com nome completo acessível. Texto de situação não usa reticências.
+- Campos de texto crescem com o conteúdo; rótulos e valores de propostas ficam em sequência vertical.
+- Evidências locais (fora do Git): `entrega-lgpd-lote12/lote12d-20261119`.
