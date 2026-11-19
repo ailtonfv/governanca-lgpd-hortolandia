@@ -1,3 +1,4 @@
+from app.apresentacao_situacoes_form2 import situacao_origem, situacoes_complementacao
 from app.obrigatoriedade_forms import conferencia_para_tela
 from app.unidades_interface_form2 import secretarias_ativas
 """Interface de filas institucionais demonstrativas."""
@@ -342,11 +343,7 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
         if (e_origem or e_aal) and estado_v9(sessao, participacao)["pendencias"]:
             pendencias = [d for d in estado_v9(sessao, participacao)["pendencias"].values()
                 if any(o["item"].startswith("F2-1.3.1") for o in d["origens"])]
-            estados = {d["estado"] for d in pendencias}
-            situacao = ("definir unidade responsável pela resposta" if any(d["estado"] == "aberta" and not d.get("unidade_id") for d in pendencias) else
-                "aguardando resposta" if "aberta" in estados else
-                "resposta recebida, aguardando conferência" if "respondida" in estados else
-                "consulte o histórico")
+            situacao = situacoes_complementacao(sessao, pendencias)
             complementos.append(dict(p=participacao, registro=registro,
                 situacao=situacao if pendencias else None))
     for l in linhas:
@@ -401,11 +398,8 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
     historicos_origem = sessao.scalars(select(HistoricoConferenciaForm1Integral).where(
         HistoricoConferenciaForm1Integral.registro_id.in_(cartoes)
     ).order_by(HistoricoConferenciaForm1Integral.numero_apresentacao.desc()))
-    situacoes_origem = {"devolvida_para_ajustes": "Devolvido para ajustes",
-                        "conferencia_interna_confirmada": "Conferência interna confirmada",
-                        "aguardando_conferencia_interna_apa": "Aguardando conferência do APA"}
     for historico in historicos_origem:
-        cartoes[historico.registro_id].setdefault("origem", situacoes_origem.get(historico.situacao))
+        cartoes[historico.registro_id].setdefault("origem", situacao_origem(historico))
     for cartao in cartoes.values():
         aguardando = [p.entrada_em for p in cartao["participacoes"] if not p.responsavel_id and p.estado == "aguardando"]
         cartao["aguardando"] = min(aguardando) if aguardando else None
