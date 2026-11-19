@@ -2022,3 +2022,7 @@ A migração é explícita: testes somente em banco `_teste`; a única exceção
 servidor não instala proteções nem altera o esquema.
 
 O relatório local do lote distingue testes automatizados de vistoria humana.
+
+A Central de Acesso oferece os botões dos FORMs 3 e 4 para a página compartilhada
+Riscos e providências, preservando o servidor em sessão. A lista e os atos continuam
+limitados pelas permissões do domínio; abrir a lista não cria risco nem ação.
