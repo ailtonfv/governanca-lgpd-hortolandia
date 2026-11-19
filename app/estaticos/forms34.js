@@ -23,8 +23,20 @@
        notice.setAttribute('role','alert');notice.textContent='O salvamento foi recusado. Confira o bloco antes de sair.';form.prepend(notice);}
    }finally{button.disabled=false;}
  };
- window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
+ document.addEventListener('ato-confirmado',()=>dirty=false);
  // Alternativa exclusiva, sem substituir a validação do servidor.
  form.addEventListener('change',e=>{const t=e.target;if(t.type!=='checkbox'||!t.checked)return;
   form.querySelectorAll('input[type=checkbox]').forEach(x=>{if(x!==t&&x.name===t.name&&(t.value==='A confirmar'||x.value==='A confirmar'))x.checked=false;});});
 })();
+
+(() => {const check=document.querySelector('[data-filtro-historico]');if(!check)return;
+function filtrar(){document.querySelectorAll('[data-historico-ato]').forEach(el=>el.hidden=check.checked&&el.dataset.historicoAto==='nao');}
+check.addEventListener('change',filtrar);filtrar();})();
+
+(() => {const form=document.querySelector('#ato-manifestar_comite form');if(!form)return;
+const finalidade=form.elements.finalidade,label=form.querySelector('label[for="ato-manifestar_comite-favoravel"]');
+const textos={residual:'O Comitê é favorável ao tratamento proposto para o risco residual (RIPD e controles)?',
+avaliacao:form.dataset.perguntaAvaliacao,triagem:form.dataset.perguntaTriagem,
+prorrogacao:'O Comitê é favorável à prorrogação?',cancelamento:'O Comitê é favorável ao cancelamento?'};
+function ajustar(){if(label)label.firstChild.textContent=(textos[finalidade.value]||'Selecione a finalidade para indicar sua manifestação')+' ';}
+finalidade.addEventListener('change',ajustar);ajustar();})();

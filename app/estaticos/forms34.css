@@ -35,3 +35,5 @@
 .forms34 .leitura-ato34 dl,.forms34 #historico34 dl{display:block}
 .forms34 .leitura-ato34 dt,.forms34 #historico34 dt{text-transform:none}
 .forms34 #historico34 dd{margin:0 0 .6rem;white-space:pre-wrap}
+
+#confirmar-ato [data-descricao]{white-space:pre-line;}

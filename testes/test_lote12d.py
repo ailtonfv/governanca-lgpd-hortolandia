@@ -44,10 +44,10 @@ def test_revisao_triagem_preenchida_e_filtro_salvamentos(sessao,entrada):
     html=pagina(c,obj,extra='&revisar=1').text
     assert 'name="acao" value="propor_triagem"' in html
     assert '>Análise fictícia adicional</textarea>' in html
-    assert 'Bloco 1 salvo' not in pagina(c,obj).text
+    assert 'data-historico-ato="nao" hidden><strong>Bloco 1 salvo' in pagina(c,obj).text
     assert 'Bloco 1 salvo' in pagina(c,obj,extra='&historico=todos').text
     assert 'Bloco 1 salvo' in pagina(c,obj,extra='&filtrar=1').text
-    assert 'Bloco 1 salvo' not in pagina(c,obj,extra='&filtrar=1&historico=atos').text
+    assert 'data-historico-ato="nao" hidden><strong>Bloco 1 salvo' in pagina(c,obj,extra='&filtrar=1&historico=atos').text
 
 def test_grade_separa_perguntas_e_atos():
     e={'form':3,'avaliacao':{},'avaliacao_confirmacoes':{'secretaria':{},'dpo':{}},'triagem':None}

@@ -15,6 +15,7 @@
   caixa.querySelector('[data-confirmar]').onclick = () => {
     caixa.close();
     autorizado = true;
+    document.dispatchEvent(new Event('ato-confirmado'));
     try { botao.form.requestSubmit(botao); } finally { autorizado = false; }
   };
 })();

@@ -52,9 +52,9 @@
     if(c.disabled||!c.value)return;
     const label=form.querySelector(`label[for="${c.id}"]`);
     const nome=(label?.textContent||c.name).replace(/\*.*$/,'').trim();
-    partes.push(nome+': '+(c.tagName==='SELECT'?c.selectedOptions[0]?.textContent:c.value));
+    partes.push(nome+': '+(c.tagName==='SELECT'?c.selectedOptions[0]?.textContent:c.type==='date'?c.value.split('-').reverse().join('/'):c.value));
    });
-   button.dataset.confirmarAto=base+(partes.length?' '+partes.join(' · '):'');
+   button.dataset.confirmarAto=base+(partes.length?'\n'+partes.join('\n'):'');
    const aviso=form.querySelector('[data-aviso-triagem]');
    if(aviso)aviso.hidden=!(form.elements.resultado?.value==='nao_indicado'&&['Alto','Crítico'].includes(form.dataset.faixa));
   }form.addEventListener('input',resumo);form.addEventListener('change',resumo);resumo();
