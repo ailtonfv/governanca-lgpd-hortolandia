@@ -98,6 +98,8 @@ def montar_bloco(base):
             q["edicao"] = "bloqueada_d11"
         from app.complementos_form2 import codigos_com_complemento
         q["complementos_necessarios"] = codigos_com_complemento(q)
+        from app.opcao_outro import eh_outro
+        q["opcoes_outro"]=[a["codigo"] for a in q["alternativas"] if eh_outro(a["rotulo"])]
         from app.classificacao_analise_form2 import classificar
         classificar(q)
         itens.append(q)

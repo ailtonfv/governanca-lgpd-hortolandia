@@ -239,7 +239,7 @@ def aplicar_revisao(conteudo, bloco, campos, ramos=(), *, demonstrativo=False, u
                 raise ValueError(f"Confira a seleção de {chave}.")
             revisao[nome] = opcoes
             continue
-        elif tipo == "texto" and (q.get("complementos_necessarios") or not q["alternativas"] or "texto" in q["controle"].lower()
+        elif tipo == "texto" and (q.get("opcoes_outro") or q.get("complementos_necessarios") or not q["alternativas"] or "texto" in q["controle"].lower()
                                   or any(a["complemento"].startswith("Texto condicionado") for a in q["alternativas"])):
             limite = limite_texto_revisao(q)
         else:
@@ -280,6 +280,12 @@ def aplicar_revisao(conteudo, bloco, campos, ramos=(), *, demonstrativo=False, u
             if valor:
                 arquivo = novo.setdefault("respostas_inativas_rev212", {}).setdefault(str(bloco), {})
                 arquivo[nome] = valor
+    from app.opcao_outro import validar_outro
+    for nome in campos:
+        if not nome.startswith('opcao:'):continue
+        chave=nome.partition(':')[2];q=itens[chave.partition('#')[0]]
+        rotulos={a['codigo']:a['rotulo'] for a in q['alternativas']}
+        validar_outro([rotulos.get(v,v) for v in revisao.get(nome,[])],revisao.get('texto:'+chave,''),chave)
     return novo, {"edicao": "REV21.2", "bloco": bloco, "campos_revisados": len(campos)}
 
 

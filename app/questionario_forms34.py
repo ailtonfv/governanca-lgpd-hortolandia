@@ -110,6 +110,10 @@ def salvar(form, anteriores, dados, estado):
                 raise ValueError('A confirmar deve ficar sozinha.')
         elif not isinstance(valor, str) or len(valor) > (1000 if i['tipo'] == 'text_long' else 200):
             raise ValueError('Texto fora do limite permitido.')
+    from app.opcao_outro import validar_outro
+    complementos={**estado.get('complementos',{}),**dados.get('complementos',{})}
+    for chave,valor in campos.items():
+        if ativa(itens[chave],novo,estado):validar_outro(valor,complementos.get(chave,''),chave)
     return novo
 
 

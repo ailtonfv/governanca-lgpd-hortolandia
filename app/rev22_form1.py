@@ -183,6 +183,8 @@ def salvar(sessao, *, comando_id,conta_id,registro_id,versao_lida,bloco,resposta
         if key not in fields or not isinstance(value,str) or len(value)>1000 or '\x00' in value:raise ValueError('Complemento inválido.')
         if value.strip():extras[key]=value.strip()
         else:extras.pop(key,None)
+    from app.opcao_outro import validar_outro
+    for key,value in validated.items():validar_outro(value,extras.get(key,''),'F1-'+key)
     # Respostas que saem de aplicabilidade ficam no histórico, sem reativação implícita.
     archive=novo.setdefault('inativas_rev22',[])
     groups=[(valores,novo.get('complementos',{}),None)]
