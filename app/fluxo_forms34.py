@@ -260,35 +260,48 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
             raise ValueError('Para corrigir a avaliação registrada, use Revisar proposta.')
         if acao=='revisar_avaliacao' and not e.get('avaliacao'):
             raise ValueError('Ainda não há proposta para revisar.')
-        if e.get('avaliacao_sem_consenso'):
+        vigente = _consenso(e, 'avaliacao')
+        alvo = e.get('reavaliacao', {}) if vigente else e
+        if alvo.get('avaliacao_sem_consenso'):
             raise ValueError('Sem consenso: aguarda deliberação do Comitê antes de reapresentar.')
         lado = _lado(papeis)
-        e['evento'] = _texto(dados, 'evento')
-        e['causa'] = _texto(dados, 'causa')
-        e['consequencia'] = _texto(dados, 'consequencia')
-        e['avaliacao'] = propor_avaliacao(dados)
-        e['avaliacao_proponente'] = dict(lado=lado,pessoa_id=pessoa.id,em=agora)
-        e['avaliacao_confirmacoes'] = {lado: dict(pessoa_id=pessoa.id, em=agora)}
-        e['avaliacao_sem_consenso'] = False
-        for k in ('aceitacao', 'manifestacao_dpo', 'manifestacao_comite', 'triagem'):
-            e.pop(k, None)
-        e['triagem_confirmacoes'] = {}
-        e['situacao'] = 'Aguardando DPO' if lado == 'secretaria' else 'Aguardando Secretaria'
+        nova = dict(evento=_texto(dados, 'evento'), causa=_texto(dados, 'causa'),
+            consequencia=_texto(dados, 'consequencia'), avaliacao=propor_avaliacao(dados),
+            avaliacao_proponente=dict(lado=lado,pessoa_id=pessoa.id,em=agora),
+            avaliacao_confirmacoes={lado:dict(pessoa_id=pessoa.id,em=agora)}, avaliacao_sem_consenso=False)
+        if vigente:
+            # Proposta separada: nenhum consumidor da avaliação vigente muda antes do consenso.
+            e['reavaliacao'] = nova
+        else:
+            e.update(nova)
+            for k in ('aceitacao', 'manifestacao_dpo', 'manifestacao_comite', 'triagem'):
+                e.pop(k, None)
+            e['triagem_confirmacoes'] = {}
+            e['situacao'] = 'Aguardando DPO' if lado == 'secretaria' else 'Aguardando Secretaria'
     elif acao in ('confirmar_avaliacao', 'confirmar_triagem'):
         campo = acao.removeprefix('confirmar_')
-        _confirmar(e, campo, pessoa.id, papeis, agora)
+        alvo = e.get('reavaliacao', e) if campo=='avaliacao' else e
+        _confirmar(alvo, campo, pessoa.id, papeis, agora)
+        if alvo is not e and _consenso(alvo, 'avaliacao'):
+            e.update(e.pop('reavaliacao'))
+            # Mesmo tratamento dos atos dependentes já existente na substituição da nota.
+            for k in ('aceitacao', 'manifestacao_dpo', 'manifestacao_comite', 'triagem'):
+                e.pop(k, None)
+            e['triagem_confirmacoes'] = {}
         e['situacao'] = 'Avaliação conjunta registrada' if _consenso(e, campo) else 'Aguardando confirmação'
     elif acao == 'sem_consenso':
         campo = dados.get('campo')
-        if campo not in ('avaliacao', 'triagem') or not e.get(campo):
+        if campo not in ('avaliacao', 'triagem'):
             raise ValueError('Indique a proposta em discussão.')
+        alvo = e.get('reavaliacao', e) if campo=='avaliacao' else e
+        if not alvo.get(campo):raise ValueError('Indique a proposta em discussão.')
         lado = _lado(papeis)
-        if any(c['pessoa_id']==pessoa.id for c in e.get(campo+'_confirmacoes',{}).values()):
+        if any(c['pessoa_id']==pessoa.id for c in alvo.get(campo+'_confirmacoes',{}).values()):
             raise PermissionError('Quem propôs deve revisar a proposta; o outro lado registra a ausência de consenso.')
-        e.setdefault(campo + '_posicoes', {})[lado] = _texto(dados, 'posicao', 300)
-        e[campo + '_sem_consenso'] = True
-        e[campo + '_confirmacoes'] = {}
-        e['situacao'] = 'Sem consenso — encaminhado ao Comitê'
+        alvo.setdefault(campo + '_posicoes', {})[lado] = _texto(dados, 'posicao', 300)
+        alvo[campo + '_sem_consenso'] = True
+        alvo[campo + '_confirmacoes'] = {}
+        if alvo is e:e['situacao'] = 'Sem consenso — encaminhado ao Comitê'
     elif acao == 'manifestar_comite':
         exigir(papeis, 'relator')
         if papeis.intersection(('verificador', 'dpo')):
@@ -299,7 +312,11 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         m = dict(ata=_texto(dados, 'ata', 200), texto=_texto(dados, 'texto'),
                  favoravel=dados.get('favoravel') is True, finalidade=finalidade,
                  pessoa_id=pessoa.id, em=agora)
-        e['manifestacao_comite'] = m
+        if finalidade=='avaliacao' and e.get('reavaliacao',{}).get('avaliacao_sem_consenso'):
+            e['reavaliacao']['manifestacao_comite'] = m
+            e['reavaliacao']['avaliacao_sem_consenso'] = False
+        else:
+            e['manifestacao_comite'] = m
         if finalidade in ('avaliacao', 'triagem') and e.get(finalidade + '_sem_consenso'):
             e[finalidade + '_sem_consenso'] = False
             e['situacao'] = 'Deliberação registrada — reapresentar proposta conjunta'

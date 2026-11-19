@@ -1133,3 +1133,9 @@ Ratificada a D5 já registrada: 99 conjuntos e limites de texto curto de 200, lo
 Perguntas principais ativas são obrigatórias nos atos de conclusão/encaminhamento. Condicionais só são exigidas quando ativas; informativas e calculadas são somente leitura. A ausência de preenchimento não bloqueia salvamento parcial. Respostas a confirmar são aceitas e sinalizadas, com quantidade registrada no ato, sem classificação automática de impedimento. Atos anteriores não são invalidados ou refeitos.
 
 Encaminhamento do FORM 2 exige questionário pronto para encaminhar. Mantêm-se dois encaminhamentos separados. Adiar a identidade de risco até sua descrição fica para depois de 15/12, fora deste lote. Exceções por identificador estão configuradas como proposta em `app/r17_excecoes.json`; aprovação da lista precede eventual merge. Não se libera conclusão institucional, nem se altera a matriz do FORM 1. Sem migração e sem atualização da cópia em vistoria.
+
+## Complemento do Lote 12-D — reavaliação (Ailton, DPO, 19/11/2026)
+
+A avaliação conjunta confirmada continua vigente durante uma reavaliação. A nova proposta é guardada separadamente, com autoria e data, aguardando confirmação da outra parte. Matriz, faixa e atos dependentes continuam usando a avaliação vigente. Com a confirmação conjunta, a nova avaliação substitui a anterior; sem consenso, a vigente permanece e a divergência é submetida ao Comitê. Os eventos anteriores não são reescritos. Não há migração.
+
+Preservadas as competências e condições de aceitação. O tratamento já existente dos atos dependentes (nova aceitação, manifestações e triagem após substituição da avaliação) é aplicado somente na efetiva confirmação da nova nota, não durante a proposta. A aceitação anterior permanece documentada no histórico. Não foi criada regra especial para mudanças de faixa.

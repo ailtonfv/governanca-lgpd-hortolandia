@@ -2031,3 +2031,9 @@ Na Central, os quatro instrumentos compartilham a lista de até três itens auto
 com indicação do excedente e acesso à lista completa. Os botões ficam no rodapé
 dos cartões; os FORMs 3 e 4 abrem riscos e ações, respectivamente. As consultas
 reutilizam as permissões das páginas de destino, sem executar atos.
+
+### Vistoria 12-D — leitura dos atos (19/11/2026)
+
+Os FORMs 3 e 4 mostram os atos registrados e seus conteúdos, autor e horário; a grade distingue perguntas respondidas de confirmação do ato. A triagem já registrada permanece visível e não reaparece como formulário vazio. O histórico permite filtrar apenas atos ou incluir salvamentos. A exibição deriva dos eventos existentes, sem refazê-los.
+
+Na reavaliação, a nota conjunta vigente e os atos dependentes permanecem até a nova confirmação conjunta. A proposta e eventual divergência são mostradas separadamente; o histórico anterior é preservado.
