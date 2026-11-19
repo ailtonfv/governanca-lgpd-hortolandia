@@ -1,0 +1,11 @@
+{% macro campo(c,valor='',erro='') -%}
+<div class="campo-ato34"{% if c.condicional %} data-obrigatorio-{{ 'triagem' if c.nome=='unidade_id' else 'evidencia' }}{% endif %}>
+<label for="ato-{{ c.uid }}">{{ c.rotulo }}
+<span class="indicador-obrigatoriedade indicador-obrigatoriedade-{{ 'condicional' if c.condicional else 'obrigatorio' if c.obrigatorio else 'facultativo' }}" data-marcador>
+<span class="{{ 'marcador-obrigatorio' if c.obrigatorio else '' }}">{{ '**' if c.condicional else '*' if c.obrigatorio else '****' }}</span> {{ 'Obrigatório em alguns casos' if c.condicional else 'Obrigatório' if c.obrigatorio else 'Facultativo / informativo' }}</span></label>
+{% set attrs %}id="ato-{{ c.uid }}" name="{{ c.nome }}" aria-describedby="erro-{{ c.uid }}" {% if c.obrigatorio %}required data-obrigatorio{% endif %}{% if erro %} aria-invalid="true"{% endif %}{% endset %}
+{% if c.tipo=='textarea' %}<textarea {{ attrs|safe }} maxlength="1000">{{ valor or '' }}</textarea>
+{% elif c.tipo in ['bool','select','unidade','executor','juridico','autoridade','number'] %}<select {{ attrs|safe }}><option value="">{{ 'Ainda não avaliado' if c.tipo=='number' else 'Escolha…' }}</option>{% for chave,nome in c.lista %}<option value="{{ chave }}" {% if chave|string==valor|string %}selected{% endif %}>{{ nome }}</option>{% endfor %}</select>
+{% else %}<input {{ attrs|safe }} type="{{ c.tipo }}" value="{{ valor or '' }}" maxlength="200">{% endif %}
+<p class="erro-campo" id="erro-{{ c.uid }}" {% if not erro %}hidden{% endif %}>{{ erro }}</p></div>
+{%- endmacro %}

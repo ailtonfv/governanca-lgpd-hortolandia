@@ -1,11 +1,15 @@
 {% extends 'base.html' %}{% block conteudo %}
 <h1>{{ registro.codigo_lgpd }} · Encaminhar para riscos ou providências</h1>
 <p>{{ pessoa.nome|identidade_demonstrativa }} · AAL responsável</p>
-<p>Salve primeiro F2-14.5 ou F2-14.6. Este ato preserva a versão {{ p.versao }} do FORM 2; alterações posteriores não a substituem.</p>
-<p>Proposta em deliberação [D11]. Não equivale a homologação ou operação em produção.</p>
-<form method="post"><input type="hidden" name="versao" value="{{ p.versao }}"><input type="hidden" name="comando_id" value="{{ comando_id }}">
-<label>Destino <select name="form" required><option value="">Escolha…</option><option value="3">FORM 3 — avaliação de riscos (F2-14.5)</option><option value="4">FORM 4 — providência direta (F2-14.6)</option></select></label>
-<label>Decisão fundamentada quando houver sinal de risco e somente ação direta <textarea name="justificativa" maxlength="1000"></textarea></label>
-<div class="acoes-fila-form2"><a href="/form2/participacoes/{{ p.id }}/blocos/14?conta_id={{ conta_id|urlencode }}">Voltar ao bloco 14</a>
-<button class="botao-primario" data-confirmar-ato="Registro {{ registro.codigo_lgpd }}: encaminhar a versão {{ p.versao }} do FORM 2 ao destino escolhido, preservando a origem. A autoria será registrada.">Confirmar encaminhamento</button></div></form>
-{% endblock %}
+<p>Este encaminhamento usa o FORM 2 como está agora (versão {{ p.versao }}). Se o FORM 2 for alterado depois, a avaliação continua ligada à versão {{ p.versao }} e a mudança fica sinalizada para revisão.</p>
+{% if not salvos[3] and not salvos[4] %}<p class="aviso-alerta">Responda e salve no bloco 14 se segue para Riscos (FORM 3) ou Ações (FORM 4).</p>{% endif %}
+<p><span class="selo-d11" title="D11">Em deliberação</span> Proposta em deliberação. Não equivale a homologação.</p>
+{% if salvos[3] and salvos[4] %}<p>Os dois destinos estão indicados. Cada encaminhamento é registrado separadamente; depois do primeiro, volte ao bloco 14 para encaminhar ao outro.</p>{% endif %}
+<form method="post" novalidate data-ato34 data-ingresso34 data-versao="{{ p.versao }}" data-registro="{{ registro.codigo_lgpd }}" data-risco-direto="{{ 'sim' if risco_direto else 'nao' }}">
+<input type="hidden" name="versao" value="{{ p.versao }}"><input type="hidden" name="comando_id" value="{{ comando_id }}">
+<label for="destino34">Destino <span class="indicador-obrigatoriedade indicador-obrigatoriedade-obrigatorio"><span class="marcador-obrigatorio">*</span> Obrigatório</span></label>
+<select id="destino34" name="form" required aria-describedby="erro-destino34" data-erro-obrigatorio="Escolha para onde encaminhar: Riscos (FORM 3) ou Providência (FORM 4)." {% if erros.get('form') %}aria-invalid="true"{% endif %}><option value="">Escolha…</option>{% for n,nome in [(3,'FORM 3 — avaliação de riscos (F2-14.5)'),(4,'FORM 4 — providência direta (F2-14.6)')] %}<option value="{{ n }}" {% if dados.get('form')==n|string %}selected{% endif %}>{{ nome }}</option>{% endfor %}</select>
+<p class="erro-campo" id="erro-destino34" {% if not erros.get('form') %}hidden{% endif %}>{{ erros.get('form','') }}</p>
+<div data-justificativa-direta {% if not (risco_direto and dados.get('form')=='4') %}hidden{% endif %}><label for="justificativa34">Decisão fundamentada para seguir somente com a providência <span class="indicador-obrigatoriedade indicador-obrigatoriedade-obrigatorio">* Obrigatório</span></label><textarea id="justificativa34" name="justificativa" maxlength="1000" aria-describedby="erro-justificativa34" {% if erros.get('justificativa') %}aria-invalid="true"{% endif %}>{{ dados.get('justificativa','') }}</textarea><p id="erro-justificativa34" class="erro-campo" {% if not erros.get('justificativa') %}hidden{% endif %}>{{ erros.get('justificativa','') }}</p></div>
+<div class="acoes-fila-form2"><a href="/form2/participacoes/{{ p.id }}/blocos/14?conta_id={{ conta_id|urlencode }}">Voltar ao bloco 14</a><button class="botao-primario" data-confirmar-ato="Confira o destino antes de encaminhar.">Confirmar encaminhamento</button></div></form>
+<script src="/estaticos/avaliacao34.js" defer></script>{% endblock %}

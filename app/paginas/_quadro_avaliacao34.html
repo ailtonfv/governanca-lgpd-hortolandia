@@ -1,0 +1,10 @@
+{% macro quadro(campos, valores, erros, matriz, avaliacao=none) -%}
+{% from '_campos_ato34.html' import campo %}
+<div class="avaliacao-layout34" data-quadro-avaliacao data-inicial='{{ (avaliacao or {})|tojson }}'>
+<div><div class="avaliacao-campos34">
+{% if campos %}{% for nome,titulo in [('p','Probabilidade — Inerente'),('i','Impacto sobre o titular — Inerente'),('pr','Probabilidade — Residual'),('ir','Impacto sobre o titular — Residual')] %}{% set c=campos[nome] %}{{ campo(c,valores.get(nome,''),erros.get(nome,'')) }}{% endfor %}
+{% else %}{% for tipo in ['inerente','residual'] %}<section><h3>{{ tipo|capitalize }}</h3><p>Probabilidade: {{ avaliacao[tipo].probabilidade if avaliacao and avaliacao[tipo].probabilidade is not none else 'Ainda não avaliado' }}</p><p>Impacto: {{ avaliacao[tipo].impacto if avaliacao and avaliacao[tipo].impacto is not none else 'Ainda não avaliado' }}</p></section>{% endfor %}{% endif %}
+</div><div class="resultado-avaliacao34" aria-live="polite"><p data-nota="inerente">Inerente: ainda não avaliado</p><p data-nota="residual">Residual: ainda não avaliado</p><p data-efeito>Controles: ainda não avaliado</p><p data-exigencia></p><small>Prévia do cálculo. O servidor confere e registra a nota ao salvar a proposta.</small></div></div>
+<div class="matriz34"><table><caption>Matriz de risco — probabilidade × impacto sobre o titular</caption><thead><tr><th scope="col">P / I</th>{% for i in range(1,6) %}<th scope="col">{{ i }}</th>{% endfor %}</tr></thead><tbody>{% for linha in matriz %}<tr><th scope="row">{{ linha[0].p }}</th>{% for c in linha %}<td class="faixa-{{ c.faixa|lower }}" data-p="{{ c.p }}" data-i="{{ c.i }}" title="Probabilidade {{ c.p }}, impacto {{ c.i }}: {{ c.nota }} — {{ c.faixa }}">{{ c.nota }}<span data-marca></span></td>{% endfor %}</tr>{% endfor %}</tbody></table><p class="legenda-matriz34">I = Inerente · R = Residual. Pequeno: 1–3; Moderado: 4–6; Alto: 8–12; Crítico: 15–25.</p></div>
+</div>
+{%- endmacro %}

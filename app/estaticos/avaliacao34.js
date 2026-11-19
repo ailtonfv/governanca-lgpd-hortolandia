@@ -1,0 +1,40 @@
+/* Preview uses the same approved thresholds; the domain validates saved values. */
+(() => {
+ function score(p,i){p=Number(p);i=Number(i);if(!p||!i)return {nota:null,faixa:'Ainda não avaliado'};const nota=p*i;return {nota,faixa:nota<=3?'Pequeno':nota<=6?'Moderado':nota<=12?'Alto':'Crítico'};}
+ if(typeof module!=='undefined')module.exports={score};
+ if(typeof document==='undefined')return;
+ document.querySelectorAll('[data-quadro-avaliacao]').forEach(box=>{
+  const initial=JSON.parse(box.dataset.inicial||'{}'),form=box.closest('form');
+  function update(){const scores={};box.querySelectorAll('[data-marca]').forEach(x=>x.textContent='');
+   for(const [tipo,pn,iname,mark] of [['inerente','p','i','I'],['residual','pr','ir','R']]){
+    const p=box.querySelector(`[name="${pn}"]`)?.value??initial[tipo]?.probabilidade;
+    const i=box.querySelector(`[name="${iname}"]`)?.value??initial[tipo]?.impacto;
+    const s=score(p,i);scores[tipo]=s;box.querySelector(`[data-nota="${tipo}"]`).textContent=tipo[0].toUpperCase()+tipo.slice(1)+': '+(s.nota===null?'Ainda não avaliado':`${p} × ${i} = ${s.nota} — ${s.faixa}`);
+    if(s.nota!==null){const cell=box.querySelector(`[data-p="${p}"][data-i="${i}"] [data-marca]`);if(cell)cell.textContent+=(cell.textContent?' / ':'')+mark;}
+   }
+   const a=scores.inerente,b=scores.residual;
+   const evidencia=form?.querySelector('[data-obrigatorio-evidencia]');if(evidencia){const active=a.nota!==null&&b.nota!==null&&b.nota<a.nota;evidencia.querySelector('textarea').required=active;const badge=evidencia.querySelector('[data-marcador]');badge.textContent=active?'* Obrigatório':'** Obrigatório em alguns casos';badge.className='indicador-obrigatoriedade indicador-obrigatoriedade-'+(active?'obrigatorio':'condicional');}
+   box.querySelector('[data-efeito]').textContent=a.nota===null||b.nota===null?'Efeito dos controles: ainda não avaliado':b.nota<a.nota?`De ${a.nota} (${a.faixa}) para ${b.nota} (${b.faixa}). Exige controle implementado e evidência.`:b.nota===a.nota?'Sem redução da nota após os controles.':'A nota residual é superior à inerente; confira e justifique.';
+   const notes={Pequeno:'Aceitação pela autoridade da Secretaria.',Moderado:'Aceitação pela autoridade da Secretaria.',Alto:'Manifestação do DPO, ciência do Comitê e aceitação pela autoridade da Secretaria.',Crítico:'Crítico: controles imediatos, triagem de RIPD, manifestação do DPO e do Comitê, aceitação pelo Prefeito.'};
+   box.querySelector('[data-exigencia]').textContent=notes[b.faixa]||'';
+   box.querySelectorAll('select').forEach(input=>{let help=input.parentElement.querySelector('[data-significado]');if(!help){help=document.createElement('small');help.dataset.significado='';input.after(help);}help.textContent=input.value?input.selectedOptions[0].textContent:'';});
+   const btn=form?.querySelector('[data-confirmar-ato]');if(btn)btn.dataset.confirmarAto=`Risco ${form.dataset.risco}: inerente ${a.nota??'não avaliado'} (${a.faixa}), residual ${b.nota??'não avaliado'} (${b.faixa}). Registrar esta proposta?`;
+  }box.addEventListener('change',update);update();
+ });
+ document.querySelectorAll('[data-ingresso34]').forEach(form=>{
+  function update(){const selected=form.elements.form.value,active=selected==='4'&&form.dataset.riscoDireto==='sim';form.querySelector('[data-justificativa-direta]').hidden=!active;form.elements.justificativa.required=active;
+   form.querySelector('[data-confirmar-ato]').dataset.confirmarAto=`Registro ${form.dataset.registro}: encaminhar a versão ${form.dataset.versao} do FORM 2 para ${selected==='3'?'Riscos (FORM 3)':'Providência (FORM 4)'}. A origem será preservada e a autoria registrada.`;
+  }form.addEventListener('change',update);update();
+ });
+ document.querySelectorAll('[data-ato34]').forEach(form=>{
+  function conditions(){const wrap=form.querySelector('[data-obrigatorio-triagem]');if(!wrap)return;
+   const active=['elaborar','revisar','determinado_anpd'].includes(form.elements.resultado?.value);
+   const input=wrap.querySelector('select');input.required=active;wrap.querySelector('[data-marcador]').textContent=active?'* Obrigatório':'** Obrigatório em alguns casos';wrap.querySelector('[data-marcador]').className='indicador-obrigatoriedade indicador-obrigatoriedade-'+(active?'obrigatorio':'condicional');
+  }form.addEventListener('change',conditions);conditions();
+ });
+ document.addEventListener('submit',e=>{
+  const form=e.target;if(!form.matches('[data-ato34]'))return;let first=null;
+  form.querySelectorAll('[required]').forEach(input=>{if(input.disabled)return;const bad=!input.value.trim();input.toggleAttribute('aria-invalid',bad);if(bad)input.setAttribute('aria-invalid','true');const msg=document.getElementById(input.getAttribute('aria-describedby'));if(msg){msg.hidden=!bad;msg.textContent=bad?(input.dataset.erroObrigatorio||'Preencha este campo obrigatório.'):'';}if(bad&&!first)first=input;});
+  if(first){e.preventDefault();e.stopImmediatePropagation();first.focus();}
+ },true);
+})();

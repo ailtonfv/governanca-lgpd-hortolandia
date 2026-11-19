@@ -15,6 +15,8 @@ from app.permissoes_forms34 import contexto
 from app.fila_form2 import pessoa_ativa, autorizado, unidades
 from app.questionario_forms34 import perguntas, grade, ativa, recolhida
 from app.atos_forms34_interface import disponiveis, interpretar
+from app.validacao_atos34 import ErrosCampos
+from app.apresentacao_forms34 import matriz, grade_visual, situacao_avaliacao, valores_proposta, PROBABILIDADE, IMPACTO
 from app.identidade_demonstrativa import configurar_identidade
 from app.atos_interface import ato_registrado
 from app.eventos import registrar_auditoria
@@ -67,18 +69,27 @@ async def ingresso(request:Request,pid:str,conta_id:str):
         p=s.get(ParticipacaoForm2,pid)
         if not p or p.responsavel_id!=pessoa.id or p.tipo!='principal' or not autorizado(s,pessoa,p):
             return erro(request,conta_id,'Somente o AAL responsável encaminha.',403)
+        erros_ingresso={}; dados_ingresso={}; status_ingresso=200
         if request.method=='POST':
-            d=await request.form()
+            d=await request.form(); dados_ingresso=dict(d)
             try:
+                if d.get('form') not in ('3','4'):raise ErrosCampos({'form':'Escolha para onde encaminhar: Riscos (FORM 3) ou Providência (FORM 4).'})
                 r=dominio.ingressar(s,conta_id=conta_id,comando_id=d.get('comando_id'),participacao_id=pid,
                     versao=int(d.get('versao','0')),form=int(d.get('form','0')),justificativa=d.get('justificativa',''))
                 if not r.get('permitido'):raise ValueError(r.get('motivo'))
                 s.commit()
                 return RedirectResponse(url_objeto(r['identidade_id'],conta_id,registrado=d.get('comando_id')),303)
+            except ErrosCampos as exc:
+                s.rollback();erros_ingresso=exc.erros;status_ingresso=409
             except (ValueError,PermissionError) as e:
                 s.rollback();return erro(request,conta_id,e,403 if isinstance(e,PermissionError) else 409,
                     f'/form2/participacoes/{pid}/encaminhar34')
-        return paginas.TemplateResponse(request=request,name='forms34_ingresso.html',context={
+        from app.form2_rev212 import indice_valores
+        respostas=indice_valores(p.conteudo or {})
+        selecionados={n:any(v in ('Sim','SIM') for v in respostas.get('opcao:F2-14.'+str(n+2),[])) for n in (3,4)}
+        return paginas.TemplateResponse(request=request,name='forms34_ingresso.html',status_code=status_ingresso,context={
+            'salvos':selecionados,'risco_direto':bool(dominio.sinais_form2(p.conteudo or {})) and not selecionados[3],
+            'erros':erros_ingresso,'dados':dados_ingresso,
             'p':p,'registro':s.get(Registro,p.registro_id),'pessoa':pessoa,'conta_id':conta_id,'comando_id':str(uuid4())})
 
 
@@ -101,6 +112,7 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
         try:obj,ref,e,pessoa,papeis,uid=dominio.consultar(s,conta_id,objeto_id)
         except (PermissionError,ValueError) as exc:return erro(request,conta_id,exc,403)
         if not 1<=bloco<=(16 if ref.form==3 else 9):raise HTTPException(404,'Bloco inexistente.')
+        erros_campos={}; valores_enviados={}; acao_erro=None; status=200
         if request.method=='POST':
             d=await request.form();acao=d.get('acao','salvar_bloco')
             try:
@@ -112,7 +124,7 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
                     # Também recusar campos editoriais forjados de outro bloco/fora do catálogo.
                     for k in d:
                         if k.startswith(('F3-','F4-')) and k not in campos:campos[k]=d[k]
-                    dados=dict(bloco=bloco,campos=campos)
+                    dados=dict(bloco=bloco,campos=campos,complementos={k.partition(':')[2]:d[k] for k in d if k.startswith('complemento:')})
                 elif acao=='abrir_detalhes':dados=dict(bloco=bloco,motivo=d.get('motivo',''))
                 else:dados=interpretar(acao,d)
                 r=dominio.executar(s,conta_id=conta_id,comando_id=d.get('comando_id'),identidade_id=obj.id,
@@ -120,15 +132,34 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
                 if not r.get('permitido'):raise ValueError(r.get('motivo'))
                 s.commit()
                 return RedirectResponse(url_objeto(r['identidade_id'],conta_id,bloco if r['identidade_id']==obj.id else 1,registrado=d.get('comando_id')),303)
+            except ErrosCampos as exc:
+                s.rollback(); erros_campos=exc.erros; valores_enviados=dict(d); acao_erro=acao; status=409
             except (ValueError,PermissionError,KeyError) as exc:
                 s.rollback();return erro(request,conta_id,exc,403 if isinstance(exc,PermissionError) else 409,
                                            f'/forms34/{obj.id}/blocos/{bloco}')
         try:itens=[dict(q,ativa=ativa(q,e['respostas'],e),recolhida=recolhida(q,e['respostas'],e))
                    for q in perguntas(ref.form) if q['bloco']==bloco]
         except (FileNotFoundError,ValueError) as exc:return erro(request,conta_id,exc,503)
+        from app.opcao_outro import eh_outro
+        for q in itens:q['opcoes_outro']=[v for v in q['opcoes'] if eh_outro(v)]
         origem=s.get(ParticipacaoForm2,e['origem_form2_id']) if e.get('origem_form2_id') else None
-        atos=disponiveis(ref.form,bloco,papeis)
-        for a in atos:a['comando_id']=str(uuid4())
+        revisar=request.query_params.get('revisar')=='1' or acao_erro=='revisar_avaliacao'
+        atos=disponiveis(ref.form,bloco,papeis,e,pessoa.id,revisar)
+        listas=escolhas(s,ref,papeis,uid)
+        for a in atos:
+            a['comando_id']=str(uuid4())
+            a['resumo']=f"Registro {s.get(Registro,obj.registro_id).codigo_lgpd}: {a['titulo']}. A autoria será registrada."
+            for c in a['campos']:
+                c['uid']=a['acao']+'-'+c['nome']
+                c['lista']=(list(enumerate(PROBABILIDADE if c['nome'] in ('p','pr') else IMPACTO,1)) if c['tipo']=='number' else [('sim','Sim'),('nao','Não')] if c['tipo']=='bool' else listas.get(c['tipo'],c.get('opcoes',())))
+                if c['tipo']=='number':c['lista']=[(k,f'{k} — {v}') for k,v in c['lista']]
+            if a['acao']=='confirmar_avaliacao' and e.get('avaliacao'):
+                av=e['avaliacao'];a['resumo']=f"Risco {obj.codigo.split('-')[-1]}: inerente {av['inerente']['nota']} ({av['inerente']['faixa']}), residual {av['residual']['nota']} ({av['residual']['faixa']}). Confirmar esta proposta?"
+            a['escala']={c['nome']:c for c in a['campos'] if c['nome'] in ('p','i','pr','ir')}
+        proposta=next((a for a in atos if a['acao'] in ('propor_avaliacao','revisar_avaliacao')),None)
+        restantes=[a for a in atos if a is not proposta]
+        principal=restantes[0] if restantes else None
+        grade_atual=grade(ref.form,e['respostas'],e)
         registro=s.get(Registro,obj.registro_id)
         valores = {'F3-3.1':registro.codigo_lgpd,'F4-4.1':registro.codigo_lgpd,
                    'F4-4.1.1':obj.codigo,'F3-3.2':s.get(Unidade,uid).nome,
@@ -138,14 +169,24 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
                    'F4-4.24':'Aceitação pendente de autoridade competente',
                    'F3-3.52.5':'Aceitação registrada' if e.get('aceitacao') else 'Pendente de autoridade competente'}
         if e.get('avaliacao'):
+            valores.update({'F3-3.52':e['respostas'].get('F3-3.52') or 'Ainda não avaliado','F3-3.52.4':'; '.join((c.get('descricao','')+' — '+c.get('evidencia','')).strip(' —') for c in e['avaliacao'].get('controles',[])) or 'Ainda não avaliado'})
+            if e.get('aceitacao'):
+                dec=e['aceitacao'];autor=s.get(Pessoa,dec['pessoa_id']);valores['F3-3.52.6']=f"{dec['justificativa']} · {autor.nome} · {data_local(dec['em'])}"
             for ident, tipo, chave in [('F3-3.49','inerente','probabilidade'),('F3-3.50','inerente','impacto'),
                     ('F3-3.51','inerente','nota'),('F3-3.52.1','residual','probabilidade'),
                     ('F3-3.52.2','residual','impacto'),('F3-3.52.3','residual','nota')]:
                 valores[ident] = e['avaliacao'][tipo][chave] if e['avaliacao'][tipo][chave] is not None else 'Não avaliado'
+        if ref.form==3 and bloco==14:
+            for q in itens:q['tipo']='ato'
         from app.atos_forms34_interface import ATOS
         ato=ato_registrado(s,request.query_params.get('registrado'),conta_id,registro_id=registro.id,participacao_id=obj.id)
         from app.restrito_forms34 import pode_ler
-        return paginas.TemplateResponse(request=request,name='forms34_bloco.html',context={
+        return paginas.TemplateResponse(request=request,name='forms34_bloco.html',status_code=status,context={
+            'erros_campos':erros_campos,'acao_erro':acao_erro,'revisar':revisar,
+            'ato_proposta':proposta,'ato_principal':principal,'outros_atos':restantes[1:],
+            'valores_formulario':valores_enviados if acao_erro else valores_proposta(e),
+            'matriz':matriz(),'situacao_avaliacao':situacao_avaliacao(e),
+            'grade_visual':grade_visual(grade_atual,obj.id,conta_id,bloco),
             'obj':obj,'ref':ref,'estado':e,'pessoa':pessoa,'papeis':papeis,'registro':registro,
             'conta_id':conta_id,'bloco':bloco,'itens':itens,'grade':grade(ref.form,e['respostas'],e),
             'atos':atos,'escolhas':escolhas(s,ref,papeis,uid),'comando_id':str(uuid4()),'ato':ato,
@@ -182,6 +223,7 @@ async def restrita(request:Request,objeto_id:str,conta_id:str):
             s.commit()  # consulta auditada, inclusive a negativa no caminho abaixo
         except (PermissionError,ValueError) as exc:
             s.commit();return erro(request,conta_id,exc,403)
+        erros_restritos={};status_restrita=200
         if request.method=='POST':
             d=await request.form()
             try:
@@ -191,9 +233,14 @@ async def restrita(request:Request,objeto_id:str,conta_id:str):
                 if not r.get('permitido'):raise ValueError(r.get('motivo'))
                 s.commit()
                 return RedirectResponse(f'/forms34/{objeto_id}/referencia-restrita?'+urlencode({'conta_id':conta_id}),303)
+            except ErrosCampos as exc:
+                s.rollback();erros_restritos=exc.erros;status_restrita=409
+                from types import SimpleNamespace
+                item=SimpleNamespace(conteudo=dict(d))
             except (ValueError,PermissionError) as exc:
                 s.rollback();return erro(request,conta_id,exc)
-        return paginas.TemplateResponse(request=request,name='forms34_restrita.html',context={
+        return paginas.TemplateResponse(request=request,name='forms34_restrita.html',status_code=status_restrita,context={
+            'erros':erros_restritos,
             'conta_id':conta_id,'objeto_id':objeto_id,'item':item,'estado':dominio.estado(s,objeto_id),'comando_id':str(uuid4())})
 
 
