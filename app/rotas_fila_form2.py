@@ -391,6 +391,12 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
     for c in complementos:
         cartoes.setdefault(c["registro"].id, dict(registro=c["registro"],
             participacoes=[], complementos=[]))["complementos"].append(c)
+    from app.modelos import ContextoAtuacao
+    contextos = {c.id:c.nome for c in sessao.scalars(select(ContextoAtuacao))}
+    tipos = {'processo':'Processo','servico':'Serviço','atividade':'Atividade'}
+    identificacoes = {rid:tipos.get(r.tipo_objeto,r.tipo_objeto)+' · '+contextos.get(r.contexto_atuacao_id,r.contexto_atuacao_id) for rid,r in registros.items()}
+    for cartao in cartoes.values():
+        cartao['identificacao'] = identificacoes[cartao['registro'].id]
     momento = agora()
     from app.origem_form2 import nome_objeto_em_analise
     nomes_objetos = {p.id: nome_objeto_em_analise(sessao, p.registro_id, p.snapshot_id) for p in participacoes}
@@ -419,7 +425,7 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
             "snapshot": item.snapshot_id, "codigo": registros[item.registro_id].codigo_lgpd,
             "rotulo": rotulo_apresentacao(item)})
     return paginas.TemplateResponse(request=request, name="filas_form2.html",
-        context={"ato_registrado": ato_registrado(sessao, chave, conta_id), "nomes_objetos": nomes_objetos, "referencias": referencias, "mensagem_atribuicao": mensagem, "atribuidores": atribuidores, "cartoes": ordenados, "entradas": entradas, "pode_encaminhar": bool(unidades_apa), "encaminhaveis": encaminhaveis,
+        context={"ato_registrado": ato_registrado(sessao, chave, conta_id), "nomes_objetos": nomes_objetos, "referencias": referencias, "mensagem_atribuicao": mensagem, "atribuidores": atribuidores, "cartoes": ordenados, "identificacoes":identificacoes, "entradas": entradas, "pode_encaminhar": bool(unidades_apa), "encaminhaveis": encaminhaveis,
                  "conta_id": conta_id, "pessoa": pessoa, "participacoes": participacoes,
                  "registros": registros, "unidades": unidades, "linhas": linhas,
                  "impedimentos": impedimentos, "complementos": complementos, "gerenciaveis": gerenciaveis, "agentes": {p.id: candidatos_atribuicao(sessao, p, pessoa.id) for p in gerenciaveis},

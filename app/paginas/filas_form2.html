@@ -12,7 +12,7 @@
 {% if cartoes or (not gerenciaveis and not apenas_dpo) %}<h2>Participações da sua unidade</h2><p>Esta seção reúne as participações autorizadas para sua atuação e as solicitações de complementação à origem, inclusive seu histórico. A gestão dos responsáveis aparece mais abaixo, em quadro próprio.</p>
 {% for c in cartoes %}
 {% if loop.changed(c.aguardando is not none) %}<h3>{{ "Aguardando responsável" if c.aguardando else "Em acompanhamento" }}</h3>{% endif %}
-<article data-registro="{{ c.registro.id }}"><h3>{{ c.registro.codigo_lgpd }}</h3>
+<article data-registro="{{ c.registro.id }}"><h3>{{ c.registro.codigo_lgpd }}</h3>{% if c.identificacao %}<p>{{ c.identificacao }}</p>{% endif %}
 {% for p in c.participacoes %}
 {% if aguarda_temporalidade(p.conteudo) %}<p class="selo-guarda">Guarda em definição</p>{% endif %}<p>{{ entradas[p.id] }}</p>
 {% if p.id in atribuidores %}<p>{{ atribuidores[p.id] }}</p>{% endif %}
@@ -45,7 +45,7 @@
 {% if gerenciaveis %}<h2>Gestão da fila</h2>{% endif %}
 {% for p in gerenciaveis %}
 {% if loop.changed(p.responsavel_id is none) %}<h3>{{ 'Aguardando responsável' if p.responsavel_id is none else 'Com responsável' }}</h3>{% endif %}
-<article><h4>{{ registros[p.registro_id].codigo_lgpd }} · {{ unidades[p.unidade_id].nome }}</h4>
+<article><h4>{{ registros[p.registro_id].codigo_lgpd }} · {{ unidades[p.unidade_id].nome }}</h4>{% if identificacoes is defined %}<p>{{ identificacoes[p.registro_id] }}</p>{% endif %}
 {% if p.id in atribuidores %}<p>{{ atribuidores[p.id] }}</p>{% endif %}
 <p>{{ impedimentos.get(p.id, situacoes.get(p.estado, p.estado)) }}{% if p.responsavel_id %} · Responsável: {{ responsaveis[p.responsavel_id] }}{% endif %}</p>{% if aguarda_temporalidade(p.conteudo) %}<p class="selo-guarda">Guarda em definição</p>{% endif %}<p>{{ entradas[p.id] }}</p>
 {% set acao = 'Atribuir responsável' if p.assumida_em is none else 'Reatribuir' %}
