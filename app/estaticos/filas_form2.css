@@ -19,7 +19,7 @@
   .filas-form2 form button { width: 100%; }
 }
 
-.filas-form2 .acoes-fila-form2 { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 12px; }
+.filas-form2 .acoes-fila-form2 { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: var(--espaco-entre-acoes); }
 .filas-form2 .acoes-fila-form2 a { margin: 0; text-align: center; }
 @media (max-width: 600px) {
   .filas-form2 .acoes-fila-form2 a { width: 100%; box-sizing: border-box; }
