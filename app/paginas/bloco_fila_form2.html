@@ -7,7 +7,7 @@
 <p><strong>Versão do FORM 1 em análise:</strong> {{ rotulo_origem }}</p>
 <p>{{ atuacao.servidor }} · {{ atuacao.funcao }} · <span class="sr-apenas">Unidade de atuação:</span> {{ atuacao.unidade }} · {{ "Você pode editar suas respostas" if atuacao.editavel else "Somente leitura" }}</p>
 {% if numero in (3,4,5,10) %}<span class="selo-d11" title="Aguarda homologação jurídica (D11)">Em deliberação</span>{% endif %}
-{% if numero == 2 and aguarda_temporalidade(p.conteudo) %}<span class="selo-guarda">Guarda: aguarda definição institucional</span>{% endif %}
+{% if numero == 2 and aguarda_temporalidade(p.conteudo) %}<span class="selo-guarda">Guarda em definição</span>{% endif %}
 {{ faixa_ato(confirmacao, ato_registrado, id='confirmacao-salvamento', classe='confirmacao-salvamento') }}
 
 

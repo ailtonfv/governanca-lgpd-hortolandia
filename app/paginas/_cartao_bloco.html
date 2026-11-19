@@ -3,7 +3,7 @@
 <strong class="numero-bloco">{{ n }}</strong><small class="titulo-bloco-form2">{{ titulo }}</small>
 <small class="estado-bloco {{ 'salvo' if salvo else 'a-percorrer' }}">{{ texto }}</small>
 {% if pendente %}<small class="estado-bloco com-pendencias">Com pendência para a origem (FORM 1)</small>{% endif %}
-{% if guarda %}<span class="etiqueta-grade" title="[Guarda] Guarda: aguarda definição institucional">Guarda em definição</span>{% endif %}
+{% if guarda %}<span class="etiqueta-grade" title="[Guarda] Guarda em definição">Guarda em definição</span>{% endif %}
 {% if d11 %}<span class="etiqueta-grade" aria-label="Proposta em deliberação. Não equivale a homologação." title="[D11] Aguarda homologação jurídica (D11)">Em deliberação</span>{% endif %}
 {% if atual %}<small class="estado-bloco local-atual">Você está aqui</small>{% else %}<small class="estado-bloco visitado" data-visitado hidden>Visitado nesta sessão</small>{% endif %}
 {% if medida %}<span class="progresso-bloco" role="progressbar" aria-label="{{ medida.respondidas }} de {{ medida.ativas }} {{ 'pergunta ativa respondida' if medida.ativas==1 else 'perguntas ativas respondidas' }}" aria-valuemin="0" aria-valuemax="{{ medida.ativas }}" aria-valuenow="{{ medida.respondidas }}"><span style="width: {{ medida.percentual }}%"></span></span>{% endif %}

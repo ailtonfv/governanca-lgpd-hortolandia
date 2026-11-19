@@ -14,7 +14,7 @@
 {% if loop.changed(c.aguardando is not none) %}<h3>{{ "Aguardando responsável" if c.aguardando else "Em acompanhamento" }}</h3>{% endif %}
 <article data-registro="{{ c.registro.id }}"><h3>{{ c.registro.codigo_lgpd }}</h3>
 {% for p in c.participacoes %}
-{% if aguarda_temporalidade(p.conteudo) %}<p class="selo-guarda">Guarda: aguarda definição institucional</p>{% endif %}<p>{{ entradas[p.id] }}</p>
+{% if aguarda_temporalidade(p.conteudo) %}<p class="selo-guarda">Guarda em definição</p>{% endif %}<p>{{ entradas[p.id] }}</p>
 {% if p.id in atribuidores %}<p>{{ atribuidores[p.id] }}</p>{% endif %}
 <p>{{ unidades[p.unidade_id].nome }} · {{ p.tipo }} · Situação da participação: {{ impedimentos.get(p.id, situacoes.get(p.estado, p.estado)) }}{% if p.responsavel_id %} · <strong>Responsável: {{ responsaveis[p.responsavel_id] }}</strong>{% endif %}</p>
 {% if c.origem %}<details><summary>Situação do FORM 1 na origem</summary><p>{{ c.origem }}</p></details>{% endif %}
@@ -37,7 +37,7 @@
 {% endif %}
 {% if dpo %}<h2 id="painel-dpo">Acompanhamento do DPO</h2><p>Entrada registra o início da participação. Comunicação registra a criação do aviso de ingresso.</p>
 <div class="tabela-filas"><table><thead><tr><th>Registro</th><th>Situação do Registro</th><th>Comunicado ao DPO em</th><th>Secretaria</th><th>Entrada na fila</th><th>Tempo até ter responsável</th><th>Tempo aguardando DPO<br><small>Desde a consulta em aberto mais antiga</small></th><th>Orientação consultiva</th></tr></thead>
-<tbody>{% for l in linhas %}<tr><td>{{ l.registro.codigo_lgpd }}{% if aguarda_temporalidade(l.p.conteudo) %}<span class="selo-guarda">Guarda: aguarda definição institucional</span>{% endif %}</td><td>{{ situacoes.get(l.situacao,l.situacao) }}{% if l.consulta_pendente %} · Aguardando manifestação{% endif %}</td><td>{{ l.comunicado_em|hora_local if l.comunicado_em else "Sem comunicação registrada" }}</td><td>{{ l.secretaria }}</td><td>{{ l.p.entrada_em|hora_local }}</td><td>{{ l.espera }}</td><td>{{ l.dpo }}</td><td>{% if l.aguarda_resposta_aal %}<p>Aguardando resposta do AAL</p>{% endif %}{% if l.ultima_resposta %}<p>Respondida em {{ l.ultima_resposta|hora_local }}</p>{% endif %}<a class="botao-link" href="/form2/participacoes/{{ l.p.id }}/orientacao?conta_id={{ conta_id|urlencode }}#manifestacao">Manifestar-se</a></td></tr>{% endfor %}</tbody></table></div>
+<tbody>{% for l in linhas %}<tr><td>{{ l.registro.codigo_lgpd }}{% if aguarda_temporalidade(l.p.conteudo) %}<span class="selo-guarda">Guarda em definição</span>{% endif %}</td><td>{{ situacoes.get(l.situacao,l.situacao) }}{% if l.consulta_pendente %} · Aguardando manifestação{% endif %}</td><td>{{ l.comunicado_em|hora_local if l.comunicado_em else "Sem comunicação registrada" }}</td><td>{{ l.secretaria }}</td><td>{{ l.p.entrada_em|hora_local }}</td><td>{{ l.espera }}</td><td>{{ l.dpo }}</td><td>{% if l.aguarda_resposta_aal %}<p>Aguardando resposta do AAL</p>{% endif %}{% if l.ultima_resposta %}<p>Respondida em {{ l.ultima_resposta|hora_local }}</p>{% endif %}<a class="botao-link" href="/form2/participacoes/{{ l.p.id }}/orientacao?conta_id={{ conta_id|urlencode }}#manifestacao">Manifestar-se</a></td></tr>{% endfor %}</tbody></table></div>
 {% if sem_conferente %}<h3>Aguardando definição de quem fará a conferência</h3><ul>{% for codigo in sem_conferente %}<li>{{ codigo }}</li>{% endfor %}</ul>{% endif %}
 <p>Registros aguardando definição de temporalidade: {{ aguardando_guarda }}</p><h2>Ingresso por unidade ativa</h2><ul>{% for u in cobertura if u.total %}<li>{{ u.nome }} · {{ u.total }} {{ 'ingresso' if u.total == 1 else 'ingressos' }}</li>{% endfor %}</ul>
 {% set zeradas = cobertura|rejectattr('total')|list %}{% if zeradas %}<details><summary>Outras {{ zeradas|length }} unidades sem ingresso</summary><ul>{% for u in zeradas %}<li>{{ u.nome }}</li>{% endfor %}</ul></details>{% endif %}{% endif %}
@@ -47,7 +47,7 @@
 {% if loop.changed(p.responsavel_id is none) %}<h3>{{ 'Aguardando responsável' if p.responsavel_id is none else 'Com responsável' }}</h3>{% endif %}
 <article><h4>{{ registros[p.registro_id].codigo_lgpd }} · {{ unidades[p.unidade_id].nome }}</h4>
 {% if p.id in atribuidores %}<p>{{ atribuidores[p.id] }}</p>{% endif %}
-<p>{{ impedimentos.get(p.id, situacoes.get(p.estado, p.estado)) }}{% if p.responsavel_id %} · Responsável: {{ responsaveis[p.responsavel_id] }}{% endif %}</p>{% if aguarda_temporalidade(p.conteudo) %}<p class="selo-guarda">Guarda: aguarda definição institucional</p>{% endif %}<p>{{ entradas[p.id] }}</p>
+<p>{{ impedimentos.get(p.id, situacoes.get(p.estado, p.estado)) }}{% if p.responsavel_id %} · Responsável: {{ responsaveis[p.responsavel_id] }}{% endif %}</p>{% if aguarda_temporalidade(p.conteudo) %}<p class="selo-guarda">Guarda em definição</p>{% endif %}<p>{{ entradas[p.id] }}</p>
 {% set acao = 'Atribuir responsável' if p.assumida_em is none else 'Reatribuir' %}
 {% if not agentes[p.id] %}<p>{{ 'Não há outro AAL habilitado nesta fila' if p.tipo in ('principal','tematica') else 'Não há outro responsável habilitado nesta fila' }}.</p>{% else %}
 <details><summary>{{ acao }} — {{ registros[p.registro_id].codigo_lgpd }} · {{ p.tipo }}</summary>
