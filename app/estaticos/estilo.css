@@ -461,3 +461,6 @@ dialog :is([data-cancelar], [data-fechar-dialogo]) { font-size: .9rem; backgroun
 [data-area-tematica][hidden], [data-destino-fixo][hidden] { display: none !important; }
 
 #saida-bloco-form2 [hidden] { display: none !important; }
+
+.tabela-proposta-impacto {max-width:100%;overflow-x:auto;}
+.tabela-proposta-impacto table {min-width:55rem;}

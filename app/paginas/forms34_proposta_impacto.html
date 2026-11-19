@@ -1,0 +1,7 @@
+{% extends 'base.html' %}{% block conteudo %}
+<p class="selo-d11" role="note">Em deliberação</p>
+<p>Consulta orientativa. O cálculo por dimensões não está implementado; depende das deliberações da seção 5.</p>
+<nav class="acoes-fila-form2"><a href="/forms34/{{ objeto_id }}/blocos/14?conta_id={{ conta_id|urlencode }}">Voltar ao bloco 14</a></nav>
+<article aria-label="Proposta da tabela de impacto">
+{% for b in blocos_documento %}{% if b.tipo=='tabela' %}<div class="tabela-proposta-impacto"><table><thead><tr>{% for c in b.linhas[0] %}<th scope="col">{{ c }}</th>{% endfor %}</tr></thead><tbody>{% for linha in b.linhas[1:] %}<tr>{% for c in linha %}{% if loop.first %}<th scope="row">{{ c }}</th>{% else %}<td>{{ c }}</td>{% endif %}{% endfor %}</tr>{% endfor %}</tbody></table></div>{% elif b.tipo=='h1' %}<h1>{{ b.texto }}</h1>{% elif b.tipo=='h2' %}<h2>{{ b.texto }}</h2>{% else %}<p>{{ b.texto }}</p>{% endif %}{% endfor %}
+</article>{% endblock %}

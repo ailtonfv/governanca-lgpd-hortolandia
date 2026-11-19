@@ -262,3 +262,15 @@ def aprendizagem(request:Request,objeto_id:str,conta_id:str):
         # Whitelist: nenhuma origem, anexo, referência jurídica ou histórico é enviado.
         return paginas.TemplateResponse(request=request,name='forms34_aprendizagem.html',context={
             'conta_id':conta_id,'aprendizagem':e['aprendizagem']})
+
+
+@router.get('/forms34/{objeto_id}/proposta-impacto')
+def proposta_impacto(request:Request,objeto_id:str,conta_id:str):
+    from app.documentos_interface import blocos_documento
+    with Session(motor) as s:
+        try:dominio.consultar(s,conta_id,objeto_id)
+        except (PermissionError,ValueError) as exc:return erro(request,conta_id,exc,403)
+    arquivo=Path(__file__).resolve().parent.parent/'docs/planejamento/PROPOSTA_TABELA_IMPACTO_FORM3.md'
+    if not arquivo.is_file():return erro(request,conta_id,'Proposta de impacto ainda não instalada.',503)
+    return paginas.TemplateResponse(request=request,name='forms34_proposta_impacto.html',context={
+        'conta_id':conta_id,'objeto_id':objeto_id,'blocos_documento':blocos_documento(arquivo.read_text(encoding='utf8'))})
