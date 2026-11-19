@@ -106,3 +106,16 @@ Esta atualização substitui as ressalvas de ausência de componente único em A
 Regras novas permanecem no domínio: `complementos_form2` (D1), `alternativas_exclusivas` (D3), `classificacao_analise_form2` (D9), candidatos/recusas em `fila_form2` (DA-51). Scripts apenas acompanham a regra para orientar a interação. O relatório local separa teste automatizado, reprodução visual e vistoria de Ailton.
 
 Os mesmos componentes U1/U2/U3 podem ser reutilizados no dashboard quando houver ato, mensagem ou identificação pessoal. A contagem de perguntas, condicionais e referência entre FORMs não se transfere automaticamente ao dashboard; seu equivalente são indicadores com fonte, período e condição de cálculo explícitos.
+
+
+## Complemento aprovado — 19/11/2026
+
+Reutilizar a convenção do FORM 1: `* Obrigatório` em vermelho; `** Obrigatório em alguns casos` em âmbar, passando a `*` quando a condição estiver ativa; `**** Facultativo/informativo` em cinza. Exibir também o texto por extenso. Campo inválido recebe `aria-invalid="true"`, moldura vermelha e mensagem associada. Não deduzir obrigatoriedade de perguntas: a classificação depende da R17 e da aprovação de Ailton.
+
+Referência existente: `app/pre_validacao_form1_integral.py`, função `metadado_visual_obrigatoriedade`; classes `marcador-obrigatorio` e `indicador-obrigatoriedade-*`. Os atos dos FORMs 3/4 usam `app/validacao_atos34.py` para suas exigências já existentes e a macro `_campos_ato34.html` para a apresentação.
+
+O bloco atual mantém azul-escuro e recebe borda grossa. Selos visíveis usam “Em deliberação” e “Guarda em definição”; códigos internos ficam apenas nas dicas e documentação. A deliberação é explicada por “Proposta em deliberação. Não equivale a homologação.”
+
+Alternativa Outro solicita imediatamente “Qual?”, com até 200 caracteres; o domínio recusa o complemento vazio. Isso não torna obrigatórias as demais perguntas. As ações do rodapé ficam lado a lado: salvar o bloco identificado em destaque e descartar como secundária.
+
+Códigos de instrumentos e perguntas servem como apoio entre parênteses nos comandos. A ação deve explicar seu destino em linguagem comum. Identificadores nas perguntas e no histórico continuam preservados.

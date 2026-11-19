@@ -33,6 +33,8 @@ Leia este arquivo antes de alterar código ou documentação. Em seguida, leia s
 
 ## Regras transversais
 
+- Todo campo de pergunta ou de ato usa a marcação de obrigatoriedade do padrão de interação; não criar outra. Classificações de perguntas ainda pendentes aguardam aprovação.
+
 - Toda regra fica no domínio; o servidor deve recusar o que a tela esconde ou bloqueia. Esconder botão, validar apenas em JavaScript ou desabilitar campo não concede segurança.
 - `conta_id` é exclusivo da demonstração. Em produção, o acesso será por autenticação real; não tratar a simulação como autenticação institucional.
 - Nenhum enunciado de catálogo ou do Documento-Mestre entra em documentos publicados: usar somente identificadores. Capturas que reproduzam conteúdo restrito ficam fora dos commits e do GitHub, com referência ao local de entrega.
