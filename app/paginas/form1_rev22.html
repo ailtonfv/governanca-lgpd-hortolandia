@@ -18,7 +18,7 @@
 {% else %}
 {% if conferencia %}<div class="aviso-conferencia-apa" role="status"><strong>{{ "Aguardando definição de quem fará a conferência" if falta_conferente else "Aguardando conferência do APA" }}</strong><p>{% if falta_conferente %}A apresentação aguarda um APA habilitado para a conferência.{% elif e_apa %}Confira a apresentação e decida se deve confirmá-la ou devolver para ajustes.{% else %}O formulário foi apresentado. O próximo passo cabe ao APA: conferir as informações e confirmar ou devolver para ajustes. Enquanto aguarda, você pode consultar as respostas, mas não alterá-las.{% endif %}</p></div>{% if e_apa %}<div class="acoes-fila-form2"><a class="botao-link-secundario" href="/registros/{{ registro.id }}/form1-integral/conferencia-interna?conta_id={{ conta_id|urlencode }}">Consultar conferência interna</a></div>{% endif %}{% endif %}
 {% set nomes_blocos = ['Identificação', 'Entrada e execução', 'Participantes', 'Titulares', 'Categorias de dados', 'Origem dos dados', 'Operações', 'Sistemas e canais', 'Acesso', 'Destinatários', 'Armazenamento', 'Guarda', 'Exposição', 'Pendências'] %}
-<p>Selecione um dos 14 blocos para consultar suas respostas.</p><nav data-preparacao="f1-rev22-{{ registro.id }}" data-conta="{{ conta_id }}" class="regua-navegacao-blocos" aria-label="Blocos do FORM 1"><ol class="mapa-blocos-form1 regua-form2 regua-com-titulos-form2">{% for b in range(1,15) %}<li><a data-numero="{{ b }}" class="cartao-bloco{{ ' bloco-com-respostas' if b in respondidos else '' }}" href="?conta_id={{ conta_id|urlencode }}&bloco={{ b }}" {% if bloco==b %}aria-current="page"{% endif %}><strong class="numero-bloco">{{ b }}</strong><small class="titulo-bloco-form2">{{ nomes_blocos[b-1] }}</small><small class="estado-bloco">{{ 'Respostas salvas' if b in respondidos else 'Ainda não preenchido' }}</small><small class="estado-bloco visitado" data-visitado hidden>Visitado nesta sessão</small></a></li>{% endfor %}</ol></nav><script defer src="{{ url_for('estaticos',path='/regua_form2.js') }}"></script>
+<p>Selecione um dos 14 blocos para consultar suas respostas.</p><nav data-preparacao="f1-rev22-{{ registro.id }}" data-conta="{{ conta_id }}" class="regua-navegacao-blocos" aria-label="Blocos do FORM 1"><ol class="mapa-blocos-form1 regua-form2 regua-com-titulos-form2">{% for b in range(1,15) %}<li><a data-numero="{{ b }}" class="cartao-bloco{{ ' bloco-com-respostas' if b in respondidos else '' }}" href="?conta_id={{ conta_id|urlencode }}&bloco={{ b }}" {% if bloco==b %}aria-current="page"{% endif %}><strong class="numero-bloco">{{ b }}</strong><small class="titulo-bloco-form2">{{ nomes_blocos[b-1] }}</small><small class="estado-bloco">{{ 'Respostas salvas' if b in respondidos else 'Ainda não preenchido' }}</small><small class="estado-bloco {{ 'local-atual' if bloco==b else 'visitado' }}" {% if bloco!=b %}data-visitado hidden{% endif %}>{{ 'Você está aqui' if bloco==b else 'Visitado nesta sessão' }}</small></a></li>{% endfor %}</ol></nav><script defer src="{{ url_for('estaticos',path='/regua_form2.js') }}"></script>
 <p>{% if pode %}Salve antes de mudar de bloco.{% endif %} {% if encaminhado %}Antes de um AAL assumir o FORM 2, cada nova confirmação do APA atualiza a versão usada na fila. Depois da primeira assunção, o AAL decide qual versão usar.{% endif %}</p>
 {% if bloco==1 %}<details><summary>Identificação do preenchimento</summary>{% for q in metadados %}<p><strong>F1-{{ q.id }} — {{ q.question }}</strong></p><p>{{ identidade.nome if q.id=='0.1' else 'Cadastro funcional autorizado indisponível nesta demonstração.' }}</p>{% endfor %}</details>{% endif %}
 {% if bloco in (3,10) %}<p>Cada conjunto reúne as respostas sobre {{ 'um participante' if bloco == 3 else 'um destinatário' }}. Conjuntos: {% for c in range(1,quantidade_conjuntos+2) %}<a href="?conta_id={{ conta_id|urlencode }}&bloco={{ bloco }}&conjunto={{ c }}">{{ c if c<=quantidade_conjuntos else 'Novo conjunto' }}</a> {% endfor %}</p>{% endif %}
@@ -31,7 +31,7 @@
 {% if q.kind=='multi' %}<input type="hidden" name="r:{{ q.id }}" value="">{% for a in q.options %}<label><input type="checkbox" name="r:{{ q.id }}" value="{{ a }}" {% if a in (q.valor or []) %}checked{% endif %}>{{ a }}</label>{% endfor %}
 {% elif q.kind in ('single','unit') %}<select aria-label="F1-{{ q.id }} — {{ q.question }}" name="r:{{ q.id }}"><option value="">Sem resposta</option>{% if q.kind=='unit' %}{% for u in unidades %}<option value="{{ u.id }}" {% if q.valor==u.id %}selected{% endif %}>{{ u.nome }}</option>{% endfor %}{% else %}{% for a in q.options %}<option {% if q.valor==a %}selected{% endif %}>{{ a }}</option>{% endfor %}{% endif %}</select>
 {% else %}<textarea name="r:{{ q.id }}" aria-label="F1-{{ q.id }} — {{ q.question }}" maxlength="2000">{{ q.valor or '' }}</textarea>{% endif %}
-{% if q.options %}<label>Complemento, quando solicitado pela alternativa<input type="text" name="c:{{ q.id }}" value="{{ q.complemento }}" maxlength="1000"></label>{% endif %}
+{% if q.options %}<label data-outro-form1 data-outro-origem="r:{{ q.id }}">Complemento, quando solicitado pela alternativa<input type="text" name="c:{{ q.id }}" value="{{ q.complemento }}" maxlength="1000"></label>{% endif %}
 <details><summary>Orientação do item</summary><p style="white-space:pre-line">{{ q.help }}</p></details></fieldset>{% endfor %}
 </fieldset></form>
 {% endfor %}
@@ -43,7 +43,8 @@
 {% if adotada and pode %}
 <div class="salvamento-fixo-form1" role="region" aria-label="Salvar respostas do bloco">
 {% if bloco in (3,10) %}<button type="submit" form="respostas-conjunto" class="botao-link-secundario">Salvar conjunto {{ conjunto }}</button>{% endif %}
-<button type="submit" form="respostas-bloco" class="botao-link">Salvar bloco</button>
+<button type="reset" form="respostas-bloco" class="botao-link-secundario">Descartar alterações</button>
+<button type="submit" form="respostas-bloco" class="botao-primario">Salvar bloco {{ bloco }}</button>
 <button id="apresentacao-apa" type="button" data-abrir-dialogo="dialogo-form-apresentar-apa" form="form-apresentar-apa" class="botao-link" {% if not salvamento_confirmado %}hidden{% endif %}>Apresentar ao APA para conferência</button>
 </div>
 {% call confirmacao(id="dialogo-form-apresentar-apa", titulo="Apresentar o FORM 1 ao APA?", titulo_id="titulo-form-apresentar-apa", principal="Apresentar ao APA", cancelar="Cancelar", form="form-apresentar-apa", tipo="submit", cancelar_attr="data-fechar-dialogo", registro=registro.codigo_lgpd) %}<p>Blocos sem respostas salvas: {{ 14 - respondidos|length }} de 14. O APA receberá esta apresentação para conferência.</p>
@@ -58,9 +59,10 @@
     form.addEventListener('input', marcarAlteracao);
     form.addEventListener('change', marcarAlteracao);
     form.addEventListener('submit', () => { alterado = false; });
+    form.addEventListener('reset', () => { alterado = false; });
   });
   window.addEventListener('beforeunload', event => {
     if (alterado) { event.preventDefault(); event.returnValue = ''; }
   });
 })();
-</script>{% endblock %}
+</script><script src="/estaticos/outro.js" defer></script>{% endblock %}

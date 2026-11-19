@@ -19,7 +19,7 @@
 {% include '_regua_form2.html' %}
 <h1>Bloco {{ numero }} — {{ bloco.titulo }}</h1>
 <p>{{ bloco.itens|length }} itens. Salve o rascunho para atualizar as perguntas aplicáveis.</p>
-{% if juridico %}<p>Alternativas em avaliação pelo Jurídico (D11). Você pode comentar cada item.</p>
+{% if juridico %}<p>Alternativas em avaliação pelo Jurídico. Você pode comentar cada item.</p>
 {% else %}<p>O rascunho pode ser retomado pela régua dos blocos.</p>{% endif %}
 {% if numero in (1,2) %}<a href="{{ preparacao_url }}#{{ 'identificacao' if numero == 1 else 'unidade-guarda' }}">Abrir preenchimento já habilitado</a>{% endif %}
 </section>
@@ -35,9 +35,9 @@
 {% set bloqueada = juridico or numero == 1 or q.edicao in ('habilitada', 'consulta', 'bloqueada_d11') %}
 {% if q.id in ('F2-9W.1','F2-11S.1','F2-12A.1') %}<h2>{{ {'F2-9W.1':'Wi-Fi oferecido pela Prefeitura','F2-11S.1':'Informações de saúde','F2-12A.1':'Informações de alta sensibilidade'}[q.id] }}</h2>{% endif %}
 <fieldset class="resposta-form2"><legend>{{ q.id }} — {{ q.enunciado }}</legend>
-{% if q.selo_d11 %}<span class="selo-d11" role="note">[D11] Aguarda homologação jurídica</span>{% endif %}
+{% if q.selo_d11 %}<span class="selo-d11" role="note" title="[D11] Aguarda homologação jurídica">Em deliberação</span>{% endif %}
 {% if q.id == 'F2-14.2' and complementacao %}<p><strong>Complementação do FORM 1 · origem 1.3.1</strong><br>{{ complementacao }}</p>{% endif %}
-{% if q.id == 'F2-13.9' %}<p>{{ revogacao|join(', ') if revogacao else 'Sem resposta homologada em 5.7. A avaliação de consentimento aguarda D11.' }}</p>{% endif %}
+{% if q.id == 'F2-13.9' %}<p>{{ revogacao|join(', ') if revogacao else 'Sem resposta homologada em 5.7. A avaliação de consentimento aguarda deliberação.' }}</p>{% endif %}
 {% if q.id in ('F2-14.8.1','F2-14.8.2') %}<p>A classificação de pendências impeditivas aguarda definição institucional.</p>{% endif %}
 {% if q.orientacao %}<p>{{ q.orientacao }}</p>{% endif %}
 <p class="ajuda">{{ q.instrucao }}</p>
