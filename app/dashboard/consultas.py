@@ -26,7 +26,13 @@ def momento(v):
 
 
 def data_br(v):
-    return momento(v).astimezone(LOCAL).strftime('%d/%m/%Y, %H:%M') if v else 'Não disponível'
+    if not v:
+        return 'Não disponível'
+    if isinstance(v, date) and not isinstance(v, datetime):
+        return v.strftime('%d/%m/%Y')
+    if isinstance(v, str) and len(v) == 10:
+        return date.fromisoformat(v).strftime('%d/%m/%Y')
+    return momento(v).astimezone(LOCAL).strftime('%d/%m/%Y às %Hh%M')
 
 
 def numero_br(v):

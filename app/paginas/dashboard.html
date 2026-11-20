@@ -72,6 +72,6 @@
 <div data-dash-tabela class="dash-tabela"><table><caption>Secretarias e categorias declaradas</caption><thead><tr><th>Secretaria</th><th>Categoria</th><th>Registros</th></tr></thead><tbody>{% for c in circulacao %}<tr><td>{{ c.secretaria }}</td><td>{{ c.categoria }}</td><td>{{ numero(c) }}</td></tr>{% endfor %}</tbody></table></div>
 {% endif %}
 {% endif %}
-<footer class="dash-rodape">Situação em {{ agora|data_dashboard|replace(', ',' às ') }} · dados fictícios de demonstração</footer>
+<footer class="dash-rodape">Situação em {{ agora|data_dashboard }} · dados fictícios de demonstração</footer>
 </div><script defer src="{{ url_for('estaticos',path='/dashboard.js') }}"></script>
 {% endblock %}
