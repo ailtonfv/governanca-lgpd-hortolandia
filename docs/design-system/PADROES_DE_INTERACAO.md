@@ -154,3 +154,12 @@ Grupos de ações têm 1rem de separação vertical e .75rem entre controles, co
 - Cartões da Central reservam uma linha própria para a situação; nomes longos podem ser abreviados visualmente, com nome completo acessível. Texto de situação não usa reticências.
 - Campos de texto crescem com o conteúdo; rótulos e valores de propostas ficam em sequência vertical.
 - Evidências locais (fora do Git): `entrega-lgpd-lote12/lote12d-20261119`.
+# Complemento: dashboard demonstrativo — 20/11/2026
+
+As sete telas compartilham `app/paginas/dashboard.html`: macros `numero`, `sobre`, `cartao` e `tabela`; cabeçalho institucional existente; filtros e navegação preservando o escopo. `app/estaticos/dashboard.css` usa as cores aprovadas, nomes das faixas e atraso em destaque escuro, sem confundi-lo com risco. A matriz reaproveita a classificação de `app/avaliacao_risco34.py`; nenhuma faixa é decidida pelo template.
+
+Números abrem listas calculadas pela mesma função de consulta. Gráfico e tabela são alternativas acessíveis; sem JavaScript ambos permanecem visíveis. A seleção de modo só muda a apresentação, sem requisição de escrita. Tabelas largas têm rolagem local. Os filtros ficam no quadro comum expansível; o escopo ativo permanece escrito. A troca de servidor fica fora deles.
+
+Não se aplicam ao dashboard marcas de obrigatoriedade, salvamento, confirmação de atos ou bloqueio por pergunta: ele é somente leitura. O equivalente é a explicação da fonte e da regra, a distinção entre ausência de dado e zero verificado, e a recusa de acesso fora do escopo pelo servidor. A abertura de ato encaminha à tela do FORM, que conserva suas próprias permissões.
+
+Evidências visuais locais: pacote `entrega-lgpd-lote13/visual`. Vistoria humana e teste dos cinco segundos na Abertura continuam pendentes. Não há alteração das regras nem da aparência dos FORMs por este complemento.

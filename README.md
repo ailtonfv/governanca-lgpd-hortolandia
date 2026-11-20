@@ -8,6 +8,12 @@ Em produção, o acesso será por autenticação real; `conta_id` é exclusivo d
 
 **Atualização demonstrativa — 20/11/2026, Lote 12-F:** o AAL pode concluir a etapa de análise do FORM 2 sem homologação jurídica e mantendo separados os encaminhamentos. FORMs 3 e 4 possuem fluxo demonstrativo: avaliação conjunta, decisão, plano, execução, verificação independente e aprendizagem. Conclusões e planos aprovados ficam protegidos; revisões preservam o histórico. R17 é cobrada por etapa, nunca no salvamento parcial. Competências continuam em deliberação; não se autoriza produção. A entrega na branch não altera automaticamente o servidor de vistoria nem representa merge no `main`.
 
+## Dashboard demonstrativo — Lote 13, 20/11/2026
+
+Sete páginas de consulta em `/dashboard`: Abertura, Risco, Correção, Operação, Cobertura, Aprendizados e Circulação. Cada indicador abre a lista que o compõe. As consultas preservam as permissões do perfil, as notas conjuntas vigentes e os históricos, sem gravar no banco. Não expõem manifestações, referências de evidências ou nomes de pessoas; aprendizagens aparecem somente na versão autorizada.
+
+Implementação em branch própria, baseada no Lote 12-F; aguarda vistoria e autorização de merge. A especificação vigente está em [DASHBOARD_ESPEC_FINAL_2026-11-20.md](docs/planejamento/DASHBOARD_ESPEC_FINAL_2026-11-20.md). Não inclui incidentes, percentuais de cobertura nem inferência de contratos. A massa dos casos 1 e 3 aguarda os textos fictícios aprovados; não foi carregada por suposição.
+
 ## Para quem está chegando — atualização de 14/11/2026
 
 ### Para que serve
