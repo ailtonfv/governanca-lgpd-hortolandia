@@ -159,7 +159,9 @@ def risco(d):
                  ripd='Informada' if e.get('referencia_ripd') else 'Não informada')
         linhas.append(l)
         if n.get('metodologia')==inerente.get('metodologia')==METODOLOGIA and inerente.get('nota') is not None:
-            efeito.append({**l,'situacao':f"{inerente['nota']} {inerente['faixa']} → {n['nota']} {n['faixa']}" + (' · nenhuma redução' if n['nota']>=inerente['nota'] else '')})
+            titulo = ' '.join(str(e.get('evento') or 'Título ainda não informado').split())
+            efeito.append({**l, 'item':f"Risco {i['obj'].numero}: {titulo} ({i['obj'].codigo.split('-')[-1]})",
+                'situacao':f"{inerente['nota']} {inerente['faixa']} → {n['nota']} {n['faixa']}" + (' · nenhuma redução' if n['nota']>=inerente['nota'] else '')})
         if set(e.get('triagem_confirmacoes',{}))=={'secretaria','dpo'} and e.get('triagem',{}).get('resultado') in ('elaborar','revisar','determinado_anpd'):
             ripd.append(l)
     quadros=[quadro('riscos','Riscos com nota conjunta',linhas,'riscos','Eventos de avaliação conjunta','Somente notas confirmadas pelas duas partes.','Secretaria e DPO'),

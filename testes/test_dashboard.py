@@ -15,6 +15,27 @@ from testes.test_lote12 import entrada, fonte, protecoes, entrar, avaliar, ato, 
 AGORA=datetime(2026,11,20,12,tzinfo=timezone.utc)
 
 
+def test_efeito_com_titulo_sem_residual_repetido(sessao,dados,monkeypatch):
+    import re
+    from html import unescape
+    from app.dashboard import rotas
+    risco=next(i for i in dados['objetos'] if i['obj'].tipo=='R')
+    risco['estado']['evento']='Exposição fictícia'
+    for lado in ('inerente','residual'):
+        risco['estado']['avaliacao'][lado].update(nota=25,faixa='Crítico',probabilidade=5,impacto=5)
+    monkeypatch.setattr(rotas,'carregar',lambda *_:deepcopy(dados))
+    client=TestClient(app)
+    for sufixo in ('','&lista=efeito'):
+        resposta=client.get('/dashboard/risco?conta_id=CONTA-B1'+sufixo)
+        assert resposta.status_code==200
+        linhas=re.findall(r'<ul class="dash-efeitos">(.*?)</ul>',resposta.text,re.S)
+        assert linhas
+        for linha in linhas:
+            texto=unescape(re.sub('<[^>]+>','',linha)).strip()
+            assert texto=='Risco 1: Exposição fictícia (R01) · 25 Crítico → 25 Crítico · nenhuma redução'
+            assert 'Residual' not in texto
+
+
 @pytest.fixture
 def dados(sessao,entrada):
     obj=entrar(sessao,entrada)
@@ -122,8 +143,11 @@ def test_telas_get_sem_gravacao_ou_texto_restrito(sessao,dados,tela):
     assert not escritas
     depois=[sessao.scalar(select(func.count()).select_from(m)) for m in (Evento,EventoAuditoria,Registro)]
     assert antes==depois
-    for proibido in ('Servidor Beta','Evento fictício','Justificativa fictícia','Providência fictícia do dashboard','PESSOA-B'):
+    for proibido in ('Servidor Beta','Justificativa fictícia','Providência fictícia do dashboard','PESSOA-B'):
         assert proibido not in r.text
+    # Título do risco autorizado por Ailton no efeito dos controles (20/11).
+    if tela=='/risco':assert 'Evento fictício' in r.text
+    else:assert 'Evento fictício' not in r.text
     assert 'Somente leitura' in r.text
 
 
