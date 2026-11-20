@@ -180,7 +180,8 @@ def _faixa(e):
 def _pareceres(e, faixa):
     if faixa in ('Alto', 'Crítico') and not e.get('manifestacao_dpo'):
         raise ValueError('Aguarda manifestação prévia do DPO.')
-    if faixa == 'Crítico' and e.get('manifestacao_comite',{}).get('finalidade') != 'residual':
+    residual = e.get('deliberacoes_rodada', {}).get('residual') or e.get('manifestacao_comite', {})
+    if faixa == 'Crítico' and residual.get('finalidade') != 'residual':
         raise ValueError('Aguarda manifestação do Comitê registrada pelo Relator.')
 
 
@@ -330,6 +331,8 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         m = dict(ata=_texto(dados, 'ata', 200), texto=_texto(dados, 'texto'),
                  favoravel=dados.get('favoravel') is True, finalidade=finalidade,
                  pessoa_id=pessoa.id, em=agora)
+        alvo_deliberacao = e.get('reavaliacao', e) if finalidade == 'avaliacao' else e
+        alvo_deliberacao.setdefault('deliberacoes_rodada', {})[finalidade] = m
         if finalidade=='avaliacao' and e.get('reavaliacao',{}).get('avaliacao_sem_consenso'):
             e['reavaliacao']['manifestacao_comite'] = m
             e['reavaliacao']['avaliacao_sem_consenso'] = False
