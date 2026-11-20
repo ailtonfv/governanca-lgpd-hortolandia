@@ -199,7 +199,8 @@ def executar(sessao, *, conta_id, comando_id, participacao_id, versao, acao,
         return repeticao
     if p.versao != versao:
         raise ValueError("O Registro mudou. Atualize a página antes de agir.")
-    if p.estado != "em_atendimento" or sessao.get(Registro, p.registro_id).estado_atual != "em_andamento":
+    reabrindo = acao == 'fonte' and p.estado == 'concluida' and bool((p.conteudo or {}).get('conclusao_analise'))
+    if (p.estado != "em_atendimento" and not reabrindo) or sessao.get(Registro, p.registro_id).estado_atual != "em_andamento":
         raise ValueError("A operação exige atendimento em andamento.")
     g = estado(sessao, p)
     pend = g["pendencias"].get(pendencia_id)
@@ -290,15 +291,24 @@ def executar(sessao, *, conta_id, comando_id, participacao_id, versao, acao,
         sid = dados.get("snapshot_id")
         ultima = sessao.scalar(select(VersaoForm1Integral).where(VersaoForm1Integral.registro_id == p.registro_id)
             .order_by(VersaoForm1Integral.numero.desc()).limit(1))
-        if not ultima or ultima.id != sid or g["retornos"].get(sid, {}).get("estado") != "retornada":
+        estados_origem = {'retornada', 'confirmada_disponivel'} if reabrindo else {'retornada'}
+        if not ultima or ultima.id != sid or sid == p.snapshot_id or g["retornos"].get(sid, {}).get("estado") not in estados_origem:
             raise ValueError("Use a versão mais recente do FORM 1, confirmada e devolvida pela origem.")
-        if not any(d.get("snapshot_resposta_id") == sid and d["estado"] == "resolvida" for d in g["pendencias"].values()):
+        if not reabrindo and not any(d.get("snapshot_resposta_id") == sid and d["estado"] == "resolvida" for d in g["pendencias"].values()):
             raise ValueError("Confira e aceite a resposta antes de usar a nova versão na análise.")
         h = sessao.scalar(select(HistoricoConferenciaForm1Integral).where(HistoricoConferenciaForm1Integral.snapshot_id == sid))
+        if not h or h.situacao != 'conferencia_interna_confirmada':
+            raise ValueError('A nova versão deve estar confirmada pelo APA.')
         if pessoa.id in {h.solicitada_por_id, h.confirmada_por_id}:
             raise PermissionError("Quem apresentou ou confirmou esta versão do FORM 1 não pode validá-la. Solicite outro responsável.")
         g["fontes"].append(dict(anterior=p.snapshot_id, nova=sid, motivo=motivo, em=instante(), ator=pessoa.id))
         p.snapshot_id = sid
+        if reabrindo:
+            conteudo = deepcopy(p.conteudo)
+            conteudo.setdefault('conclusoes_anteriores', []).append(conteudo.pop('conclusao_analise'))
+            p.conteudo = conteudo
+            p.estado = 'em_atendimento'
+            p.concluida_em = None
         marcar_impactos(sessao, p, g, sid)
     elif acao == "manter_fonte":
         sid = dados.get("snapshot_id")

@@ -1,5 +1,5 @@
 from app.apresentacao_situacoes_form2 import situacao_origem, situacoes_complementacao
-from app.obrigatoriedade_forms import conferencia_para_tela
+from app.obrigatoriedade_forms import conferencia_para_tela, FormularioIncompleto
 from app.unidades_interface_form2 import secretarias_ativas
 """Interface de filas institucionais demonstrativas."""
 from pathlib import Path
@@ -161,6 +161,8 @@ def governanca(request: Request, participacao_id: str, conta_id: str):
         versoes_aceitas = [v for v in novas_versoes if any(
             d.get("snapshot_resposta_id") == v.id and d["estado"] == "resolvida"
             for d in pendencias)]
+        if p.estado == 'concluida' and (p.conteudo or {}).get('conclusao_analise'):
+            versoes_aceitas = novas_versoes
         from app.unidade_retorno_institucional import consultar as consultar_retorno
         retorno_institucional = consultar_retorno(sessao, p.registro_id)
         comparacao = []
@@ -472,6 +474,7 @@ def participacao(request: Request, participacao_id: str, conta_id: str,
         raise HTTPException(400, "Tipo de consulta desconhecido.")
     return paginas.TemplateResponse(request=request, name="participacao_form2.html",
         context={"conferencia_r17":conferencia_para_tela(sessao,p) if p.tipo=="principal" else None,"base_r17":f"/form2/participacoes/{p.id}/blocos","consulta_item": consulta_item, "consulta_tipo": consulta_tipo, "atuacao": contexto_atuacao(sessao, pessoa, p), "conta_id": conta_id, "p": p, "estados_regua": estados_da_participacao(sessao, p), "pessoa": pessoa,
+                 "autor_conclusao": sessao.get(Pessoa, (p.conteudo or {}).get('conclusao_analise', {}).get('pessoa_id')) if (p.conteudo or {}).get('conclusao_analise') else None,
                  "rotulo_origem": rotulo_apresentacao(snapshot),
                  "confirmada_em": data_confirmacao.astimezone(ZoneInfo("America/Sao_Paulo")).strftime("%d/%m/%Y às %Hh%M") if data_confirmacao else None,
                  "assumida": assumida, "retorno": retorno_consultivo(request,sessao,conta_id,p),
@@ -496,6 +499,10 @@ async def agir(request: Request, participacao_id: str,
         sessao.commit()
     except (ValueError, PermissionError) as erro:
         sessao.rollback()
+        if isinstance(erro, FormularioIncompleto):
+            return paginas.TemplateResponse(request=request, name='forms34_erro.html', status_code=409,
+                context={'conta_id':conta_id,'erro':str(erro), 'retorno':f'/form2/participacoes/{participacao_id}',
+                         'conferencia_r17':erro.conferencia, 'base_r17':erro.base})
         raise HTTPException(409 if isinstance(erro, ValueError) else 403, str(erro))
     if dados.get("acao") == "consultar":
         return RedirectResponse(f"/form2/participacoes/{participacao_id}?" + urlencode(

@@ -69,8 +69,9 @@ def ingresso(sessao, registro, snapshot_id, comando, momento=None):
     if existente:
         return existente
     anteriores = sessao.scalars(select(ParticipacaoForm2).where(
-        ParticipacaoForm2.registro_id == registro.id, ParticipacaoForm2.tipo == "principal",
-        ParticipacaoForm2.estado != "concluida").with_for_update()).all()
+        ParticipacaoForm2.registro_id == registro.id, ParticipacaoForm2.tipo == "principal").with_for_update()).all()
+    # A conclusão da análise não termina o Registro nem cria outra participação.
+    anteriores = [p for p in anteriores if p.estado != 'concluida' or (p.conteudo or {}).get('conclusao_analise')]
     if len(anteriores) > 1:
         raise ValueError("Há participações principais históricas concorrentes. Reconcilie-as antes de encaminhar nova origem.")
     if anteriores:
@@ -188,7 +189,14 @@ def executar(sessao, *, conta_id, comando_id, participacao_id, acao, versao,
             return fechar_comando(comando, {"permitido": True, "participacao_id": filho.id})
         elif acao == "concluir":
             if p.tipo == "principal":
-                raise ValueError("Conclusão consolidada aguarda as regras de pendência e D11.")
+                from app.obrigatoriedade_forms import conferencia_participacao, exigir
+                conferida = exigir(conferencia_participacao(sessao, p), f'/form2/participacoes/{p.id}/blocos')
+                if not texto.strip():
+                    raise ValueError("Registre o resultado da análise antes de concluir.")
+                p.conteudo = {**(p.conteudo or {}), 'conclusao_analise': {
+                    'pessoa_id': pessoa.id, 'em': agora().isoformat(), 'snapshot_id': p.snapshot_id,
+                    'versao': p.versao, 'resultado': texto.strip(), 'conferencia_r17': conferida,
+                    'aviso': 'Conclusão da etapa de análise; não equivale a homologação jurídica.'}}
             if not texto.strip():
                 raise ValueError("Registre a manifestação antes de concluir.")
             p.manifestacao = texto.strip()

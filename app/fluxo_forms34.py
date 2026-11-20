@@ -101,7 +101,7 @@ def ingressar(sessao, *, conta_id, comando_id, participacao_id, versao, form, ju
     _registro(sessao, p.registro_id)
     sessao.refresh(p, with_for_update=True)
     if (p.tipo != 'principal' or p.responsavel_id != pessoa.id or
-            p.estado != 'em_atendimento' or not autorizado(sessao, pessoa, p)):
+            not (p.estado == 'em_atendimento' or p.estado == 'concluida' and (p.conteudo or {}).get('conclusao_analise')) or not autorizado(sessao, pessoa, p)):
         raise PermissionError('Somente o AAL responsável encaminha pelos itens F2-14.5/14.6.')
     dados = dict(participacao_id=p.id, versao=versao, form=form, justificativa=justificativa)
     cmd, repeticao = _abrir(sessao, comando_id, conta_id, 'f34_ingressar', dados)
