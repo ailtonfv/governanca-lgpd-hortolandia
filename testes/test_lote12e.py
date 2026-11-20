@@ -96,7 +96,9 @@ def test_encaminhamento_em_destaque_e_origem_congelada(sessao,entrada):
     assert tela.index('id="ato-encaminhar_acao"')<tela.index('Outras ações disponíveis')
     assert 'Encaminhe as providências e depois conclua a avaliação.' in tela
     acao=ato(sessao,obj,'encaminhar_acao',justificativa='Fictícia')['identidade_id']
-    assert 'Risco R01 — Crítico (25)' in html(acao,1)
+    origem = html(acao,1)
+    assert 'Risco 1: Evento fictício (R01) — Crítico (25)' in origem
+    assert f'/forms34/{obj}/blocos/16?conta_id=CONTA-B1' in origem
 
 def test_avisos_historico_datas_e_sem_native():
     r=Path(__file__).resolve().parents[1]
