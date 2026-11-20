@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block titulo %}Dashboard LGPD · {{ titulo }}{% endblock %}
 {% macro numero(ind) -%}
-{% if ind.disponivel %}<a class="dash-numero" href="{{ url(lista=ind.chave) }}">{{ ind.numero }}</a> <span>{{ {'Registros':'Registro','riscos':'risco','ações':'ação','participações':'participação','Secretarias':'Secretaria','aprendizados':'aprendizado'}.get(ind.unidade,ind.unidade) if ind.numero==1 else ind.unidade }}</span>{% elif ind.chave in ['form1','form2'] and filtros.faixa %}<strong>— não se aplica</strong>{% else %}<strong>Não disponível</strong>{% endif %}
+{% if ind.disponivel %}<a class="dash-numero" href="{{ url(lista=ind.chave) }}">{{ ind.numero|numero_dashboard }}</a> <span>{{ {'Registros':'Registro','riscos':'risco','ações':'ação','participações':'participação','Secretarias':'Secretaria','aprendizados':'aprendizado'}.get(ind.unidade,ind.unidade) if ind.numero==1 else ind.unidade }}</span>{% elif ind.chave in ['form1','form2'] and filtros.faixa %}<strong>— não se aplica</strong>{% else %}<strong>Não disponível</strong>{% endif %}
 {%- endmacro %}
 {% macro sobre(ind) -%}
 <details class="dash-sobre"><summary>ⓘ Sobre este número</summary><p>{{ ind.fonte or 'Fatos registrados nos FORMs' }}. {{ ind.regra }}</p>
@@ -11,7 +11,7 @@
 {% macro cartao(ind,destino=none) -%}<article class="dash-card"><h2>{% if destino %}<a href="{{ url(destino) }}">{{ ind.titulo }}</a>{% else %}{{ ind.titulo }}{% endif %}</h2><p>{{ numero(ind) }}</p>{{ sobre(ind) }}</article>{%- endmacro %}
 {% macro tabela(linhas) -%}
 <div class="dash-tabela"><table><caption>Lista que compõe o indicador</caption><thead><tr><th>Registro</th><th>Item / etapa</th><th>Secretaria</th><th>Tipo</th><th>Situação</th><th>Desde</th><th>Espera</th><th>Prazo</th></tr></thead><tbody>
-{% for l in linhas %}<tr><td>{{ l.registro }}</td><td>{{ l.item }}{% if l.etapa %} · {{ l.etapa }}{% endif %}{% if l.ato and perfil in ['Gabinete','DPO'] %}<br><a href="{{ l.ato }}?conta_id={{ conta_id|urlencode }}">Abrir o ato no FORM 3</a>{% endif %}</td><td>{{ l.secretaria }}</td><td>{{ 'serviço' if l.tipo=='servico' else l.tipo }}</td><td>{{ l.situacao }}{% if l.residual %} · Residual {{ l.residual.nota }} — {{ l.residual.faixa }}{% endif %}{% if l.atrasada %} · ◷ Atrasada{% endif %}</td><td>{{ l.desde|data_dashboard if l.desde else '—' }}</td><td>{{ (l.dias|string)+' dias' if l.dias is defined and l.dias is not none else '—' }}</td><td>{{ l.prazo|data_dashboard if l.prazo else '—' }}{% if l.dias_restantes is defined and l.dias_restantes is not none and not l.atrasada %}<br>{{ l.dias_restantes }} dias restantes{% endif %}</td></tr>
+{% for l in linhas %}<tr><td>{{ l.registro }}</td><td>{{ l.item }}{% if l.etapa %} · {{ l.etapa }}{% endif %}{% if l.ato and perfil in ['Gabinete','DPO'] %}<br><a href="{{ l.ato }}?conta_id={{ conta_id|urlencode }}">Abrir o ato no FORM 3</a>{% endif %}</td><td>{{ l.secretaria }}</td><td>{{ 'serviço' if l.tipo=='servico' else l.tipo }}</td><td>{{ l.situacao }}{% if l.residual %} · Residual {{ l.residual.nota }} — {{ l.residual.faixa }}{% endif %}{% if l.atrasada %} · ◷ Atrasada{% endif %}</td><td>{{ l.desde|data_dashboard if l.desde else '—' }}</td><td>{{ (l.dias|numero_dashboard)+' dias' if l.dias is defined and l.dias is not none else '—' }}</td><td>{{ l.prazo|data_dashboard if l.prazo else '—' }}{% if l.dias_restantes is defined and l.dias_restantes is not none and not l.atrasada %}<br>{{ l.dias_restantes|numero_dashboard }} dias restantes{% endif %}</td></tr>
 {% else %}<tr><td colspan="8">0 — nenhum item nesta lista.</td></tr>{% endfor %}</tbody></table></div>
 {%- endmacro %}
 {% block conteudo %}
@@ -57,7 +57,7 @@
 <p>Cancelamentos registrados por decisão do Secretário; motivos ficam fora da projeção.</p>{{ cartao(q.incidentes) }}
 {% elif tela=='operacao' %}
 <p>Um Registro pode estar em mais de uma fila; a soma das barras não é o total. Espera não é atraso.</p>
-<div data-dash-grafico>{% for f in filas %}<article class="dash-barra"><h2>{{ f.titulo }}</h2><meter min="0" max="{{ [q.esperando.numero,1]|max }}" value="{{ f.numero }}">{{ f.numero }}</meter><p>{{ numero(f) }} · espera mediana {{ f.mediana if f.mediana is not none else '—' }} dias · maior espera {{ f.maior if f.maior is not none else '—' }} dias</p>{{ sobre(f) }}</article>{% endfor %}</div>
+<div data-dash-grafico>{% for f in filas %}<article class="dash-barra"><h2>{{ f.titulo }}</h2><meter min="0" max="{{ [q.esperando.numero,1]|max }}" value="{{ f.numero }}">{{ f.numero }}</meter><p>{{ numero(f) }} · espera mediana {{ f.mediana|numero_dashboard }} dias · maior espera {{ f.maior|numero_dashboard }} dias</p>{{ sobre(f) }}</article>{% endfor %}</div>
 <div data-dash-tabela>{% for f in filas %}<h2>{{ f.titulo }}</h2>{{ tabela(f.detalhes) }}{% endfor %}</div><h2>Prazos em curso</h2>{{ tabela(correcao|selectattr('prazo')|rejectattr('encerrada')|list) }}<p>Incidentes: Não disponível.</p>
 {% elif tela=='cobertura' %}
 <p>{{ numero(q.secretarias) }} com pelo menos um Registro, de <a href="{{ url(lista='cobertura') }}">{{ q.secretarias.total_ativas }} ativas</a>. Mostramos quantidades. O percentual depende de um inventário de referência ainda não aprovado.</p>

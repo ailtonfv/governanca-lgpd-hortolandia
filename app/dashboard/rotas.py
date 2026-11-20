@@ -13,6 +13,7 @@ from app.dashboard import consultas as c
 router=APIRouter()
 paginas=Jinja2Templates(directory=Path(__file__).parents[1]/'paginas')
 paginas.env.filters['data_dashboard']=c.data_br
+paginas.env.filters['numero_dashboard']=c.numero_br
 TELAS={'abertura':'Visão geral da governança LGPD','risco':'Quais riscos existem e quanto os controles os reduzem?',
        'correcao':'As providências estão sendo cumpridas?','operacao':'Onde os Registros estão esperando?',
        'cobertura':'Quais Secretarias já mapearam seus serviços, processos e atividades?',

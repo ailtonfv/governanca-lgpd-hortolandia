@@ -29,6 +29,11 @@ def data_br(v):
     return momento(v).astimezone(LOCAL).strftime('%d/%m/%Y, %H:%M') if v else 'Não disponível'
 
 
+def numero_br(v):
+    """Somente apresentação; cálculos, URLs e coordenadas mantêm números nativos."""
+    return str(v).replace('.', ',') if v is not None else '—'
+
+
 def conjunta(e):
     return set(e.get('avaliacao_confirmacoes',{})) == {'secretaria','dpo'} and bool(e.get('avaliacao'))
 
