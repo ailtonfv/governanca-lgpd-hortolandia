@@ -1152,3 +1152,15 @@ O responsável pelo plano é identificado por cargo, função ou unidade. Qualqu
 As decisões críticas continuam de competência do Prefeito, mas são registradas pelo Gabinete com referência obrigatória ao documento formal. A conta do Prefeito não pratica novos atos. Atos anteriores permanecem intactos. Implementação demonstrativa sem migração; cadastro do Gabinete preparado na carga fictícia, condicionado à autorização de gravação na cópia da vistoria.
 
 Relatórios ao controlador, dossiês e comunicação de incidentes ficam fora deste lote, para depois de 15/12. Não se altera competência por inferência nem se habilita produção.
+
+## Complemento 12-F — conclusão, proteção e responsabilidades (Ailton, DPO, 20/11/2026)
+
+A conclusão da análise principal do FORM 2 registra o resultado do trabalho do AAL responsável, a versão examinada, autoria, data e pendências. Não homologa juridicamente o tratamento, não encerra o Registro e não executa os encaminhamentos separados aos FORMs 3 e 4. A R17 é conferida no ato; respostas a confirmar permanecem visíveis. O conteúdo concluído fica protegido no servidor. Uma nova versão confirmada da origem não cria outra participação nem substitui automaticamente a referência: sua adoção explícita reabre a análise, preservando a conclusão anterior.
+
+No FORM 3, confirmar conjuntamente a nota e concluir a avaliação do risco são atos distintos. A conclusão exige nota conjunta, decisão do residual, R17 e tratamento das providências indicadas; não exige que uma ação encaminhada esteja concluída. Não exige criar uma ação quando não indicada. Conteúdo concluído ou encaminhado é preservado; a reavaliação abre nova rodada sem alterar a origem congelada de ações existentes. A referência posterior do RIPD é um complemento com autoria, sem reabrir a conclusão. A finalidade já deliberada pelo Comitê não pode ser repetida na mesma rodada; uma nova avaliação confirmada abre nova rodada de decisões dependentes.
+
+O plano aprovado do FORM 4 fica protegido, inclusive no servidor. Mudança substancial por substituição de plano não foi autorizada para improvisação; permanece indisponível. Prorrogação mantém ato próprio. A R17 do plano é cobrada na aprovação; a da execução, no registro pela Secretaria. F4-4.18, F4-4.20, F4-4.21 e F4-4.22 são respondidas no ato do verificador independente. F4-4.18.1 deriva da autoria da verificação; F4-4.19 mostra a referência informada na execução, sem inferir aceitação. Não existe novo ato de designação. Os atos históricos não são refeitos nem invalidados.
+
+A aprendizagem exige verificação aprovada, contexto impessoal, diretriz e aplicação/limites. Registra automaticamente a ação e a verificação de referência. A sequência é Secretaria, conferência do DPO e autorização da Secretaria. Alterar o aprendizado inicia nova versão, que exige nova conferência e autorização. Contexto ausente no legado é apresentado como não informado.
+
+Implementação demonstrativa sem migração. Competências permanecem como proposta em deliberação. Publicação da branch não autoriza merge ou ativação: a vistoria permanece no último commit autorizado até nova autorização expressa.

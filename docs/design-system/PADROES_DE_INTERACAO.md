@@ -1,5 +1,11 @@
 # Padrões de interação
 
+## Complemento operacional de 20/11/2026 — Lote 12-F
+
+Uma conclusão informa seu resultado e seus limites; não representa homologação nem encerramento do Registro. Conteúdo concluído ou aprovado é somente leitura, com recusa no domínio. Revisões são atos explícitos e preservam a versão anterior. R17 é conferida na etapa de quem responde: plano na aprovação, execução pela Secretaria, verificação pelo verificador independente. A aprendizagem segue registro, conferência e autorização, com botões oferecidos apenas na etapa correspondente.
+
+Central, listas e cabeçalhos dos FORMs 3/4 compartilham `app/acompanhamento_forms34.py`: título antes do identificador, último ato relevante com data, pendência por papel e destino de entrada. Distinguir pendência de acompanhamento. Histórico completo inclui salvamentos; reserva de identificador é evento técnico, excluído da seleção de atos. O filtro possui alternativa sem JavaScript. Estes acréscimos não substituem o aceite em tela.
+
 Levantamento documental de 18/11/2026. Base: `main` `9471a44`; branch `padrao-de-tela`. Este documento registra os padrões acordados e sua implementação encontrada; não altera telas nem autoriza regras em deliberação. Consulte também [cores e tokens](CORES_E_TOKENS.md), [AGENTS](../../AGENTS.md) e [SAD 10](../arquitetura/sad/SAD_10_DECISOES_DE_ARQUITETURA_REV17.md).
 
 **Regra acordada não significa cobertura uniforme.** As ressalvas abaixo fazem parte do levantamento. Não aplicar a contagem de perguntas ativas do FORM 2 ao FORM 1 por inferência; obrigatoriedade por pergunta continua em deliberação (R17). Identificadores F1-/F2- são preservados; enunciados do catálogo não são reproduzidos neste documento.

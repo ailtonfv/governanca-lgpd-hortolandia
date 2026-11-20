@@ -6,6 +6,8 @@
 
 Em produção, o acesso será por autenticação real; `conta_id` é exclusivo da demonstração.
 
+**Atualização demonstrativa — 20/11/2026, Lote 12-F:** o AAL pode concluir a etapa de análise do FORM 2 sem homologação jurídica e mantendo separados os encaminhamentos. FORMs 3 e 4 possuem fluxo demonstrativo: avaliação conjunta, decisão, plano, execução, verificação independente e aprendizagem. Conclusões e planos aprovados ficam protegidos; revisões preservam o histórico. R17 é cobrada por etapa, nunca no salvamento parcial. Competências continuam em deliberação; não se autoriza produção. A entrega na branch não altera automaticamente o servidor de vistoria nem representa merge no `main`.
+
 ## Para quem está chegando — atualização de 14/11/2026
 
 ### Para que serve
