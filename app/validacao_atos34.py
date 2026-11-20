@@ -18,11 +18,11 @@ OBRIGATORIOS={
  'enviar_juridico':('destinatario_id','motivo'),
  'autorizar_referencia':('pessoa_id','necessidade'),
  'planejar':('plano','cargo','prazo'), 'aprovar_plano':('justificativa',),
- 'executar_medida':('evidencia',), 'verificar':('aprovada','evidencia'),
+ 'executar_medida':('resumo','evidencia'), 'verificar':('aprovada','evidencia'),
  'pedir_prorrogacao':('prazo','justificativa'),
  'decidir_prorrogacao':('aprovar','justificativa'),
  'pedir_cancelamento':('justificativa',), 'cancelar':('justificativa',),
- 'aprender':('diretriz','escopo'), 'conferir_aprendizagem':('sem_dados_pessoais',),
+ 'aprender':('contexto','diretriz','escopo'), 'conferir_aprendizagem':('sem_dados_pessoais',),
  'abrir_detalhes':('motivo',), 'registrar_referencia':('referencia',)
 }
 

@@ -32,7 +32,7 @@ ATOS = {
     J,campo('unidade_id','Unidade que instruirá (quando houver RIPD)','unidade')]),
  'confirmar_triagem':(3,15,S,'Confirmar triagem proposta',[]),
  'aceitar_residual':(3,14,('secretario','gabinete'),'Registrar aceitação do residual',[J]),
- 'concluir_avaliacao':(3,16,S,'Concluir avaliação conjunta',[]),
+ 'concluir_avaliacao':(3,16,S,'Concluir a avaliação do risco',[]),
  'encaminhar_acao':(3,16,('aal',),'Encaminhar providência ao FORM 4',[J]),
  'confirmar_gatilho_juridico':(3,16,('aal',),'Confirmar necessidade de manifestação',[
     campo('restringe_direitos','O tratamento apoia decisão que restringe direitos?','bool')]),
@@ -43,7 +43,7 @@ ATOS = {
  'planejar':(4,3,('secretaria',),'Registrar plano e responsável',[
     campo('plano','Plano de ação','textarea'),campo('cargo','Cargo, função ou unidade responsável','select'),campo('prazo','Prazo','date')]),
  'aprovar_plano':(4,3,('secretario','gabinete'),'Aprovar plano',[J]),
- 'executar_medida':(4,6,('executor_unidade',),'Registrar execução da medida',[E]),
+ 'executar_medida':(4,6,('executor_unidade',),'Registrar execução',[campo('resumo','Resumo do que foi feito','textarea'), E]),
  'verificar':(4,7,('verificador',),'Registrar verificação independente',[
     campo('aprovada','Verificação aprovada','bool'),E]),
  'pedir_prorrogacao':(4,4,('secretaria',),'Solicitar prorrogação',[campo('prazo','Nova data proposta','date'),J]),
@@ -52,7 +52,7 @@ ATOS = {
  'pedir_cancelamento':(4,6,('secretaria',),'Solicitar cancelamento',[J]),
  'cancelar':(4,6,('secretario',),'Aprovar cancelamento',[J]),
  'aprender':(4,9,('secretaria',),'Registrar aprendizagem',[
-    campo('diretriz','Diretriz de procedimento','textarea'),campo('escopo','Escopo de aplicação','textarea')]),
+    campo('contexto','Contexto (relato impessoal)','textarea'),campo('diretriz','Diretriz de procedimento','textarea'),campo('escopo','Aplicação e limites','textarea')]),
  'conferir_aprendizagem':(4,9,('dpo',),'Conferir aprendizagem',[
     campo('sem_dados_pessoais','Conferi a ausência de dados pessoais','bool')]),
  'autorizar_aprendizagem':(4,9,('secretaria',),'Autorizar versão para consulta',[]),
@@ -71,6 +71,13 @@ def disponiveis(form, bloco, papeis, estado=None, pessoa_id=None, revisar=False)
     saida=[]
     for a in candidatos:
         k=a['acao'];campo='triagem' if bloco==15 else 'avaliacao'
+        if form == 3 and estado.get('conclusao') and k not in ('revisar_avaliacao', 'informar_ripd'):continue
+        if k == 'propor_triagem' and set(estado.get('avaliacao_confirmacoes', {})) != {'secretaria','dpo'}:continue
+        if k == 'concluir_avaliacao' and (not estado.get('aceitacao') or estado.get('reavaliacao')):continue
+        if k == 'encaminhar_acao' and estado.get('acoes'):
+            a['titulo'] = 'Encaminhar outra providência'
+            a['recolhido'] = True
+            a['campos'].append(campo_outra())
         proposta_atual=estado.get('reavaliacao',estado) if campo=='avaliacao' else estado
         confirmacoes=proposta_atual.get(campo+'_confirmacoes',{})
         confirmou=any(v['pessoa_id']==pessoa_id for v in confirmacoes.values())
@@ -80,6 +87,7 @@ def disponiveis(form, bloco, papeis, estado=None, pessoa_id=None, revisar=False)
         if k=='propor_avaliacao' and estado.get('avaliacao'):continue
         if k=='revisar_avaliacao' and (not estado.get('avaliacao') or not revisar or proposta_atual.get('avaliacao_sem_consenso')):continue
         if k in ('confirmar_avaliacao','confirmar_triagem','sem_consenso'):
+            if set(confirmacoes) == {'secretaria','dpo'}:continue
             if not proposta_atual.get(campo) or confirmou or proposta_atual.get(campo+'_sem_consenso'):continue
         if k=='aceitar_residual' and (set(estado.get('avaliacao_confirmacoes',{}))!={'secretaria','dpo'} or estado.get('aceitacao')):continue
         if k=='aceitar_residual':
@@ -90,6 +98,11 @@ def disponiveis(form, bloco, papeis, estado=None, pessoa_id=None, revisar=False)
             if not estado.get('plano') or (critico and 'gabinete' not in papeis) or (not critico and 'secretario' not in papeis):continue
         if k=='manifestar_dpo' and estado.get('manifestacao_dpo'):continue
         if form==4:
+            if k == 'executar_medida' and not estado.get('plano_aprovado'):continue
+            if k == 'verificar' and not estado.get('execucao'):continue
+            if k in ('aprender','conferir_aprendizagem','autorizar_aprendizagem') and (not estado.get('verificada') or estado.get('cancelada')):continue
+            if k == 'conferir_aprendizagem' and not estado.get('aprendizagem'):continue
+            if k == 'autorizar_aprendizagem' and not estado.get('aprendizagem_conferida'):continue
             salvos={'planejar':'plano','aprovar_plano':'plano_aprovado','executar_medida':'execucao',
                     'verificar':'verificacao','aprender':'aprendizagem','conferir_aprendizagem':'aprendizagem_conferida','autorizar_aprendizagem':'aprendizagem_autorizada'}
             if k=='planejar' and estado.get('plano_aprovado'):continue
@@ -104,10 +117,19 @@ def disponiveis(form, bloco, papeis, estado=None, pessoa_id=None, revisar=False)
         if k=='planejar':
             from app.regras_atos34 import CARGOS
             a['campos'][1]['opcoes']=[(v,v) for v in CARGOS]
+        if k == 'verificar':
+            from app.etapas_forms34 import VERIFICACAO
+            from app.questionario_forms34 import perguntas
+            for q in perguntas(4):
+                if q['id'] in VERIFICACAO:
+                    a['campos'].append(dict(nome=q['id'], rotulo=q['id']+' · '+q['enunciado'], tipo='select', opcoes=[(v,v) for v in q['opcoes']]))
         if k in ('aceitar_residual','aprovar_plano') and 'gabinete' in papeis:
             a['titulo']='Decisão do Prefeito — registrada pelo Gabinete'
             a['campos'].append(dict(nome='documento',rotulo='Documento formal da decisão (despacho, ofício ou processo nº)',tipo='text',opcoes=()))
         obrig=obrigatorios(k,{})
+        if k == 'verificar':
+            from app.etapas_forms34 import VERIFICACAO
+            obrig.update(VERIFICACAO)
         if k in ('aceitar_residual','aprovar_plano') and 'gabinete' in papeis:obrig.add('documento')
         for c in a['campos']:
             c['obrigatorio']=c['nome'] in obrig or c['tipo']=='bool'
@@ -137,4 +159,12 @@ def interpretar(acao, formulario):
         dados['controles']=[dict(descricao=dados.pop('controle'),implementado=dados.pop('implementado'),
                                   evidencia=dados.pop('evidencia'))]
     if acao in ('aceitar_residual','aprovar_plano') and formulario.get('documento'):dados['documento']=formulario['documento']
+    if acao == 'verificar':
+        from app.etapas_forms34 import VERIFICACAO
+        dados.update({k: formulario.get(k, '') for k in VERIFICACAO})
+    if acao == 'encaminhar_acao':dados['outra'] = formulario.get('outra') == 'sim'
     return dados
+
+
+def campo_outra():
+    return campo('outra', 'Deseja criar outra providência, além das já encaminhadas?', 'bool')

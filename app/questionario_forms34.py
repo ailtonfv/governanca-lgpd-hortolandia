@@ -49,7 +49,7 @@ def perguntas(form):
             ato = item['id'] in (ATOS3 if form == 3 else ATOS4)
             if ato:
                 tipo = 'ato'
-            saida.append(dict(id=item['id'], bloco=bloco['numero'], titulo=bloco['titulo'],
+            saida.append(dict(id=item['id'], bloco=bloco['numero'], titulo='Gatilhos de revisão e aprendizagem' if form==4 and bloco['numero']==9 else bloco['titulo'],
                 enunciado=texto_pergunta(item['enunciado']), tipo=tipo, opcoes=alternativas,
                 detalhe=item['id'] in DETALHES4, depende=DEPENDENCIAS.get(item['id']),
                 ajuda='Confirme os fatos da origem; esta resposta não é preenchida automaticamente.'
