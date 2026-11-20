@@ -32,15 +32,16 @@ def itens_em_andamento(sessao, conta_id):
                             href=f'/form2/participacoes/{p.id}?{query}'))
     for obj in sessao.scalars(select(IdentidadeForms34).order_by(IdentidadeForms34.codigo)):
         try:
-            _, ref, estado, _, _, _ = consultar(sessao, conta_id, obj.id)
+            _, ref, estado, _, papeis, _ = consultar(sessao, conta_id, obj.id)
         except (PermissionError, ValueError):
             continue
-        if estado['situacao'] in ('Avaliação concluída', 'Concluída com verificação', 'Cancelada com aprovação'):
-            continue
         r = sessao.get(Registro, obj.registro_id)
-        especie = 'Risco' if ref.form == 3 else 'Ação'
-        itens[ref.form].append(dict(texto=f"{r.codigo_lgpd} · {especie} {obj.codigo.split('-')[-1]} — {situacao_atual(estado)}",
-                                  href=f'/forms34/{obj.id}/blocos/1?{query}'))
+        from app.acompanhamento_forms34 import resumo
+        acompanhamento = resumo(sessao,obj,estado,papeis,pessoa.id)
+        itens[ref.form].append(dict(texto=f"{r.codigo_lgpd} · {acompanhamento['titulo']} — {acompanhamento['situacao']}",
+                                  pendente=acompanhamento['pendente'],
+                                  href=f"/forms34/{obj.id}/blocos/{acompanhamento['bloco']}?{query}"))
+    for n in (3,4):itens[n].sort(key=lambda item:not item['pendente'])
     return itens
 
 

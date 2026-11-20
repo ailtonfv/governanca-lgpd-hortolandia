@@ -10,8 +10,8 @@
     {% if numero in (1, 2, 3, 4) %}
     {% set resumo = cartoes_forms[numero] %}
     <section class="itens-central" aria-labelledby="itens-form{{ numero }}">
-      <h4 id="itens-form{{ numero }}">Seus itens em andamento</h4>
-      {% if resumo.itens %}<ul>{% for item in resumo.itens %}<li><a href="{{ item.href }}" title="{{ item.texto }}">{% if numero!=2 and ' — ' in item.texto %}<span class="nome-item-central">{{ item.texto.rsplit(' — ',1)[0] }}</span><span class="situacao-item-central">{{ item.texto.rsplit(' — ',1)[1] }}</span>{% else %}<span class="nome-item-central duas-linhas">{{ item.texto }}</span>{% endif %}</a></li>{% endfor %}</ul>
+      <h4 id="itens-form{{ numero }}">Seus itens em andamento</h4>{% if numero in (3,4) and gabinete and not resumo.itens|selectattr("pendente")|list %}<p>Nenhuma decisão aguardando o Gabinete</p>{% endif %}
+      {% if resumo.itens %}<ul>{% for item in resumo.itens %}<li>{% if numero in (3,4) %}<strong>{{ "Pendente para você" if item.pendente else "Em acompanhamento" }}</strong>{% endif %}<a href="{{ item.href }}" title="{{ item.texto }}">{% if numero!=2 and ' — ' in item.texto %}<span class="nome-item-central">{{ item.texto.rsplit(' — ',1)[0] }}</span><span class="situacao-item-central">{{ item.texto.rsplit(' — ',1)[1] }}</span>{% else %}<span class="nome-item-central duas-linhas">{{ item.texto }}</span>{% endif %}</a></li>{% endfor %}</ul>
       {% else %}<p>Nenhum item em andamento para você.</p>{% endif %}
       {% if resumo.mais %}<a class="mais-itens-central" href="{{ resumo.lista }}">e mais {{ resumo.mais }}</a>{% endif %}
     </section>
@@ -52,7 +52,7 @@
     {% endif %}
     <dl class="agentes-central">
       <div><dt>Servidor em sessão</dt><dd>{{ identificacao_servidor(identidade) }}</dd></div>
-      {% if secretarias and (not exibir_painel_dpo or outro_vinculo) %}
+      {% if not gabinete and secretarias and (not exibir_painel_dpo or outro_vinculo) %}
       <div><dt>APA em exercício na Secretaria</dt>
         {% for secretaria in secretarias.values() %}
         <dd id="apa-{{ loop.index }}">{% if secretarias|length > 1 %}<strong>{{ secretaria.nome }}</strong> · {% endif %}{{ secretaria.apa or 'Sem identificação vigente' }}{% if secretaria.apa and secretaria.modalidade_apa == 'titular' %} (titular){% elif secretaria.apa and secretaria.modalidade_apa == 'substituicao_temporaria' %} (suplente em substituição temporária){% endif %}</dd>
@@ -64,7 +64,7 @@
       {% for registro in a_conferir %}<p><a class="botao-link" href="{{ url_for('consultar_conferencia_interna', registro_id=registro.id) }}?conta_id={{ conta_id|urlencode }}">Conferir {{ registro.codigo_lgpd }} ({{ unidades_conferencia[registro.unidade_principal_atual_id] }})</a></p>{% endfor %}
     </section>{% endif %}
     <div class="navegacao-governanca">
-      {% if secretarias and (not exibir_painel_dpo or outro_vinculo) %}
+      {% if not gabinete and secretarias and (not exibir_painel_dpo or outro_vinculo) %}
       <button class="botao-primario" type="submit" form="abrir-painel">Abrir Painel de Registros</button>
       {% endif %}
 
@@ -90,9 +90,9 @@
   <section aria-labelledby="titulo-instrumentos-central">
     <h2 id="titulo-instrumentos-central">Instrumentos de cada Registro</h2>
     <ul class="lista-instrumentos-registro">
-      {{ cartao('levantamento', 'Levantamento do tratamento', 'Como esse processo, atividade ou serviço funciona hoje?', 'Disponível conforme autorização do Registro.', 'M6 3h9l4 4v14H6z M14 3v5h5 M9 12h7 M9 16h7', 1) }}
+      {% if not gabinete %}{{ cartao('levantamento', 'Levantamento do tratamento', 'Como esse processo, atividade ou serviço funciona hoje?', 'Disponível conforme autorização do Registro.', 'M6 3h9l4 4v14H6z M14 3v5h5 M9 12h7 M9 16h7', 1) }}
       {{ cartao('legitimidade', 'Validação jurídica e institucional', 'Por que e em que condições esse tratamento pode ocorrer?', 'Validação pelo AAL, com consulta ao Jurídico e ao DPO. Resultado não homologado nesta demonstração.', 'M12 3v16 M7 21h10 M4 7l16-2 M5 7l-3 7h6z M19 5l-3 7h6z', 2) }}
-      {{ cartao('riscos', 'Avaliação de riscos e controles', 'Que riscos o tratamento apresenta e quais controles existem?', 'Disponível na demonstração. Consulte os riscos e as providências autorizados para seu perfil. Proposta em deliberação.', 'M12 2l8 3v6c0 5-3 8-8 11-5-3-8-6-8-11V5z M12 7v5 M12 16h.01', 3) }}
+      {% endif %}{{ cartao('riscos', 'Avaliação de riscos e controles', 'Que riscos o tratamento apresenta e quais controles existem?', 'Disponível na demonstração. Consulte os riscos e as providências autorizados para seu perfil. Proposta em deliberação.', 'M12 2l8 3v6c0 5-3 8-8 11-5-3-8-6-8-11V5z M12 7v5 M12 16h.01', 3) }}
       {{ cartao('providencias', 'Plano de ação, monitoramento e aprendizagem institucional', 'O que precisa ser feito, por quem, até quando e como comprovar?', 'Disponível na demonstração. Consulte os riscos e as providências autorizados para seu perfil. Proposta em deliberação.', 'M4 6l1.5 1.5L8 4 M11 6h9 M4 12l1.5 1.5L8 10 M11 12h9 M4 18l1.5 1.5L8 16 M11 18h9', 4) }}
     </ul>
   </section>

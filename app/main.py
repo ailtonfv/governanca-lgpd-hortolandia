@@ -183,6 +183,7 @@ def central(
     from app.central_instrumentos import cartoes_em_andamento
     return paginas.TemplateResponse(request=request, name="central.html", context={
         "cartoes_forms": cartoes_em_andamento(sessao, conta_id),
+        "gabinete": bool(unidades(sessao, pessoa_id, 'demo34_gabinete')),
         **acesso, "conta_id": conta_id,
         "usuarios_demonstracao": usuarios_demonstracao(sessao, conta_id),
         "exibir_fila_form2": bool(unidades(sessao, pessoa_id, PAPEIS["principal"]) or unidades(sessao, pessoa_id, "gestor_fila")),
