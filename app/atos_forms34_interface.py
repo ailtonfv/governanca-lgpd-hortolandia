@@ -54,7 +54,8 @@ ATOS = {
  'aprender':(4,9,('secretaria',),'Registrar aprendizagem',[
     campo('contexto','Contexto (relato impessoal)','textarea'),campo('diretriz','Diretriz de procedimento','textarea'),campo('escopo','Aplicação e limites','textarea')]),
  'conferir_aprendizagem':(4,9,('dpo',),'Conferir aprendizagem',[
-    campo('sem_dados_pessoais','Conferi a ausência de dados pessoais','bool')]),
+    campo('sem_dados_pessoais','Conferi a ausência de dados pessoais','bool'),
+    campo('observacao','Observação do DPO (obrigatória ao responder Não)','textarea')]),
  'autorizar_aprendizagem':(4,9,('secretaria',),'Autorizar versão para consulta',[]),
 }
 
@@ -102,12 +103,13 @@ def disponiveis(form, bloco, papeis, estado=None, pessoa_id=None, revisar=False)
             if k == 'verificar' and not estado.get('execucao'):continue
             if k in ('aprender','conferir_aprendizagem','autorizar_aprendizagem') and (not estado.get('verificada') or estado.get('cancelada')):continue
             if k == 'conferir_aprendizagem' and not estado.get('aprendizagem'):continue
+            if k == 'conferir_aprendizagem' and estado.get('aprendizagem_devolvida'):continue
             if k == 'autorizar_aprendizagem' and not estado.get('aprendizagem_conferida'):continue
             salvos={'planejar':'plano','aprovar_plano':'plano_aprovado','executar_medida':'execucao',
                     'verificar':'verificacao','aprender':'aprendizagem','conferir_aprendizagem':'aprendizagem_conferida','autorizar_aprendizagem':'aprendizagem_autorizada'}
             if k=='planejar' and estado.get('plano_aprovado'):continue
             if (estado.get('encerrada') or estado.get('cancelada')) and k not in ('aprender','conferir_aprendizagem','autorizar_aprendizagem'):continue
-            if k in salvos and estado.get(salvos[k]) and not revisar:continue
+            if k in salvos and estado.get(salvos[k]) and not revisar and not (k == 'aprender' and estado.get('aprendizagem_devolvida')):continue
         if k=='informar_ripd' and estado.get('referencia_ripd') and not revisar:continue
         if k=='manifestar_comite':
             from app.regras_atos34 import finalidades,FINALIDADES
@@ -133,7 +135,7 @@ def disponiveis(form, bloco, papeis, estado=None, pessoa_id=None, revisar=False)
         if k in ('aceitar_residual','aprovar_plano') and 'gabinete' in papeis:obrig.add('documento')
         for c in a['campos']:
             c['obrigatorio']=c['nome'] in obrig or c['tipo']=='bool'
-            c['condicional']=(c['nome']=='unidade_id' and k=='propor_triagem') or (c['nome']=='evidencia' and k in ('propor_avaliacao','revisar_avaliacao'))
+            c['condicional']=(c['nome']=='unidade_id' and k=='propor_triagem') or (c['nome']=='evidencia' and k in ('propor_avaliacao','revisar_avaliacao')) or (c['nome']=='observacao' and k=='conferir_aprendizagem')
         saida.append(a)
     prioridade={'propor_avaliacao':0,'revisar_avaliacao':0,'confirmar_avaliacao':1,'confirmar_triagem':1,'aceitar_residual':2}
     saida.sort(key=lambda a:prioridade.get(a['acao'],5))

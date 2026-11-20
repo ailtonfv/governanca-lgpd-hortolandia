@@ -27,6 +27,11 @@
   }form.addEventListener('change',update);update();
  });
  document.querySelectorAll('[data-ato34]').forEach(form=>{
+  function observacao(){const wrap=form.querySelector('[data-obrigatorio-observacao]');if(!wrap)return;
+   const active=form.elements.sem_dados_pessoais?.value==='nao';wrap.querySelector('textarea').required=active;
+   const badge=wrap.querySelector('[data-marcador]');badge.textContent=active?'* Obrigatório neste caso':'** Obrigatório ao responder Não';
+   badge.className='indicador-obrigatoriedade indicador-obrigatoriedade-'+(active?'obrigatorio':'condicional');
+  }form.addEventListener('change',observacao);observacao();
   function conditions(){const wrap=form.querySelector('[data-obrigatorio-triagem]');if(!wrap)return;
    const active=['elaborar','revisar','determinado_anpd'].includes(form.elements.resultado?.value);
    const input=wrap.querySelector('select');input.required=active;wrap.querySelector('[data-marcador]').textContent=active?'* Obrigatório':'** Obrigatório em alguns casos';wrap.querySelector('[data-marcador]').className='indicador-obrigatoriedade indicador-obrigatoriedade-'+(active?'obrigatorio':'condicional');

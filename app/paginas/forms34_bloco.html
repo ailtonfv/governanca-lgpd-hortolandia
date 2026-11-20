@@ -8,14 +8,15 @@
 <p>Origem: {% if estado.risco_id %}<a href="/forms34/{{ estado.risco_id }}/blocos/16?conta_id={{ conta_id|urlencode }}">{{ origem_texto }}</a>{% else %}{{ origem_texto }}{% endif %}</p>
 {% if bloqueio_edicao %}<p class="aviso-alerta">{{ bloqueio_edicao }}</p>{% endif %}
 {% if estado.conclusao %}<p class="mensagem mensagem-sucesso">Avaliação concluída. Não equivale a homologação jurídica nem encerra o Registro LGPD.</p><p>{{ autores.get(estado.conclusao.pessoa_id,'Autor registrado') }} · {{ estado.conclusao.em|hora_local }}</p><p>{{ ripd_texto }}</p>{% endif %}
-{% if estado.encerrada %}<p class="mensagem mensagem-sucesso">Concluída com verificação. O Registro LGPD permanece com seu histórico e suas pendências.</p>{% endif %}
+{% if bloco==9 and estado.aprendizagem_devolvida %}<div class="aviso-alerta"><strong>Aprendizagem devolvida à Secretaria para ajustes</strong><p>Observação do DPO: {{ estado.aprendizagem_devolvida.observacao }}</p><p>{{ autores.get(estado.aprendizagem_devolvida.pessoa_id,'DPO') }} · {{ estado.aprendizagem_devolvida.em|hora_local }}</p></div>{% endif %}
+{% if estado.encerrada %}<p class="mensagem mensagem-sucesso">{{ conclusao_automatica or 'Ação concluída automaticamente após a verificação aprovada' }}. O Registro LGPD permanece com seu histórico e suas pendências.</p>{% endif %}
 {% if 'relator' in papeis and not atos %}<p>Nada pendente para o Comitê neste risco</p>{% endif %}
 {% if ref.form==4 and bloco==7 and not estado.verificacao %}<p>Aguardando verificação por membro do Comitê de outra Secretaria.</p>{% endif %}
 {% if ref.form==4 and bloco==9 %}<p role="status">{{ situacao_aprendizagem }}</p>{% if not estado.verificada %}<p>A aprendizagem pode ser registrada depois da verificação da ação.</p>{% endif %}{% endif %}
 <p><span class="selo-d11" title="D11">Em deliberação</span> Não equivale a homologação.</p>
 {% if 'relator' in papeis %}<p>Você atua como Relator do Comitê: registra as deliberações do colegiado com referência à ata.</p>{% elif 'verificador' in papeis %}<p>Você atua como verificador independente: confere a execução e registra sua avaliação.</p>{% elif 'gabinete' in papeis %}<p>Você atua pelo Gabinete: registra decisões formais do Prefeito e suas referências documentais.</p>{% elif 'dpo' in papeis %}<p>Você atua como DPO: orienta, participa da avaliação conjunta e confere a aprendizagem.</p>{% elif 'secretaria' in papeis %}<p>Você atua pela Secretaria: registra os fatos, as propostas, a execução e a aprendizagem conforme sua habilitação.</p>{% endif %}
 {% if origem_nova %}<p role="status" class="aviso-alerta">O FORM 2 possui alterações posteriores. Esta avaliação mantém a origem examinada; a referência não foi trocada.</p>{% endif %}
-{% if ato %}<p class="mensagem mensagem-sucesso" role="status">{{ ato.nome }} em {{ ato.quando }} por {{ ato.autor|identidade_demonstrativa }}.</p>{% endif %}
+{% if ato %}<p class="mensagem mensagem-sucesso" role="status">{{ ato.nome }}{% if not ato.automatico %} em {{ ato.quando }} por {{ ato.autor|identidade_demonstrativa }}{% endif %}.</p>{% endif %}
 {% from '_leitura_ato34.html' import leitura %}{% from '_ato_forms34.html' import formulario %}{% from '_quadro_avaliacao34.html' import quadro %}{% from '_cartao_bloco.html' import cartao %}
 {% if erros_campos %}<p role="alert" class="mensagem mensagem-erro">Confira os campos indicados. Seus dados continuam na tela.</p>{% endif %}
 {% if ref.form==3 and bloco==14 %}

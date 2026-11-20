@@ -17,7 +17,7 @@ NOMES = {
     'pedir_cancelamento':'Cancelamento solicitado', 'cancelar':'Cancelamento aprovado',
     'aprender':'Aprendizagem registrada', 'conferir_aprendizagem':'Aprendizagem conferida',
     'autorizar_aprendizagem':'Aprendizagem autorizada', 'ingresso':'Ingresso registrado',
-    'encerramento_automatico':'Ação concluída', 'abrir_detalhes':'Detalhes do bloco mantidos visíveis',
+    'encerramento_automatico':'Ação concluída automaticamente após a verificação aprovada', 'abrir_detalhes':'Detalhes do bloco mantidos visíveis',
     'confirmar_gatilho_juridico':'Necessidade de manifestação registrada',
     'enviar_juridico':'Consulta encaminhada ao Jurídico', 'autorizar_referencia':'Consulta restrita autorizada',
     'referencia_registrada':'Referência jurídica registrada', 'adicionar_risco':'Novo risco registrado',
@@ -82,13 +82,14 @@ def conteudo_ato(acao,e,autores,unidades):
         return [(('DPO' if lado=='dpo' else 'Secretaria')+' — '+('Avaliação' if campo=='avaliacao' else 'Triagem'), texto)
                 for campo in ('avaliacao','triagem') for lado,texto in e.get(campo+'_posicoes',{}).items()]
     valor=e.get(chaves.get(acao,''),{})
+    if acao=='conferir_aprendizagem' and e.get('aprendizagem_devolvida'):valor=e['aprendizagem_devolvida']
     if acao=='aprender':valor={**valor, 'contexto':valor.get('contexto','Não informado')}
     if acao=='executar_medida':valor={**valor, 'resumo':valor.get('resumo','Não informado'),
                                     'cargo_responsavel':valor.get('cargo_responsavel') or 'Cargo não informado no ato anterior'}
     if acao=='manifestar_comite' and e.get('reavaliacao',{}).get('manifestacao_comite'):valor=e['reavaliacao']['manifestacao_comite']
     if acao=='planejar':valor={k:e.get(k) for k in ('plano','executor_id','cargo_responsavel','unidade_responsavel_id','prazo')}
     if acao.startswith('pedir_'):valor=e.get('decisoes_pendentes',{}).get(acao.removeprefix('pedir_'),{})
-    nomes={'contexto':'Contexto (relato impessoal)','resumo':'Resumo do que foi feito','texto':'Texto','justificativa':'Justificativa','ata':'Referência à ata','finalidade':'Finalidade',
+    nomes={'observacao':'Observação do DPO','contexto':'Contexto (relato impessoal)','resumo':'Resumo do que foi feito','texto':'Texto','justificativa':'Justificativa','ata':'Referência à ata','finalidade':'Finalidade',
            'favoravel':'Favorável','evidencia':'Evidência','aprovada':'Aprovada','plano':'Plano',
            'executor_id':'Executor registrado no ato anterior','cargo_responsavel':'Cargo responsável','unidade_responsavel_id':'Unidade responsável','referencia':'Referência do RIPD','documento':'Documento formal da decisão','prazo':'Prazo','diretriz':'Diretriz','escopo':'Escopo'}
     from app.regras_atos34 import FINALIDADES
@@ -116,10 +117,12 @@ def historico_visual(eventos, autores, unidades, mapa_blocos, identidade=None, r
         if acao in ('aceitar_residual','aprovar_plano'):
             d=e.get('aceitacao' if acao=='aceitar_residual' else 'plano_aprovado',{})
             if d.get('registrador')=='Gabinete':nome=f"Decisão do Prefeito, registrada pelo Gabinete em {horario(d['em'])}, conforme {d['documento']}"
+        if acao=='encerramento_automatico':nome=f'Ação concluída automaticamente em {horario(ev.ocorrido_em)}, após a verificação aprovada'
+        if acao=='conferir_aprendizagem' and e.get('aprendizagem_devolvida'):nome='Aprendizagem devolvida à Secretaria para ajustes'
         if e:anterior=e
         saida.append(dict(id=ev.id,comando_id=ev.comando_id,nome=nome,acao=acao,
                           ato=acao not in ('salvar_bloco','abrir_detalhes') and ev.tipo_evento.startswith('f34_'),
-                          autor=autores.get(ev.ator_id,ev.ator_id),quando=horario(ev.ocorrido_em),
+                          autor='Sistema' if acao=='encerramento_automatico' else autores.get(ev.ator_id,ev.ator_id),quando=horario(ev.ocorrido_em),
                           linhas=conteudo_ato(acao,e,autores,unidades)))
     return list(reversed(saida))
 

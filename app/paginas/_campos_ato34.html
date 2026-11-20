@@ -1,5 +1,5 @@
 {% macro campo(c,valor='',erro='') -%}
-<div class="campo-ato34"{% if c.condicional %} data-obrigatorio-{{ 'triagem' if c.nome=='unidade_id' else 'evidencia' }}{% endif %}>
+<div class="campo-ato34"{% if c.condicional %} data-obrigatorio-{{ 'triagem' if c.nome=='unidade_id' else 'observacao' if c.nome=='observacao' else 'evidencia' }}{% endif %}>
 <label for="ato-{{ c.uid }}">{{ c.rotulo }}
 <span class="indicador-obrigatoriedade indicador-obrigatoriedade-{{ 'condicional' if c.condicional else 'obrigatorio' if c.obrigatorio else 'facultativo' }}" data-marcador>
 <span class="{{ 'marcador-obrigatorio' if c.obrigatorio else '' }}">{{ '**' if c.condicional else '*' if c.obrigatorio else '****' }}</span> {{ 'Obrigatório em alguns casos' if c.condicional else 'Obrigatório' if c.obrigatorio else 'Facultativo / informativo' }}</span></label>

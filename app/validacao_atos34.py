@@ -28,6 +28,8 @@ OBRIGATORIOS={
 
 def obrigatorios(acao,dados):
     campos=set(OBRIGATORIOS.get(acao,()))
+    if acao == 'conferir_aprendizagem' and dados.get('sem_dados_pessoais') is False:
+        campos.add('observacao')
     if acao=='propor_triagem' and dados.get('resultado') in ('elaborar','revisar','determinado_anpd'):
         campos.add('unidade_id')
     return campos

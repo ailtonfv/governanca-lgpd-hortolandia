@@ -245,6 +245,9 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         destino_id=novo.id
     elif acao == 'salvar_bloco':
         exigir(papeis, 'secretaria', 'dpo')
+        from app.etapas_forms34 import pode_preencher
+        if not pode_preencher(e['form'], papeis):
+            raise PermissionError('As perguntas do FORM 4 são preenchidas pela Secretaria; o DPO realiza seus atos próprios.')
         bloqueio = motivo_bloqueio(e, dados.get('bloco'))
         if bloqueio:
             raise ValueError(bloqueio)
@@ -553,13 +556,24 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
                                  versao=e.get('aprendizagem', {}).get('versao', 0) + 1)
         e.pop('aprendizagem_conferida', None)
         e.pop('aprendizagem_autorizada', None)
+        e.pop('aprendizagem_devolvida', None)
     elif acao == 'conferir_aprendizagem':
         exigir(papeis, 'dpo')
         if not e.get('aprendizagem') or not e.get('verificada'):
             raise ValueError('Não há aprendizagem verificada para conferir.')
-        if dados.get('sem_dados_pessoais') is not True:
-            raise ValueError('Confirme a ausência de dados pessoais antes de disponibilizar.')
-        e['aprendizagem_conferida'] = dict(pessoa_id=pessoa.id, em=agora)
+        if e.get('aprendizagem_devolvida'):
+            raise ValueError('Aguarde a nova versão da aprendizagem pela Secretaria.')
+        if dados.get('sem_dados_pessoais') is False:
+            e['aprendizagem_devolvida'] = dict(pessoa_id=pessoa.id, em=agora,
+                observacao=_texto(dados, 'observacao'), versao=e['aprendizagem']['versao'])
+            e.pop('aprendizagem_conferida', None)
+            e.pop('aprendizagem_autorizada', None)
+        elif dados.get('sem_dados_pessoais') is True:
+            e['aprendizagem_conferida'] = dict(pessoa_id=pessoa.id, em=agora)
+            if dados.get('observacao'):
+                e['aprendizagem_conferida']['observacao'] = _texto(dados, 'observacao')
+        else:
+            raise ValueError('Informe Sim ou Não na conferência.')
     elif acao == 'autorizar_aprendizagem':
         exigir(papeis, 'secretaria')
         if not e.get('aprendizagem_conferida'):

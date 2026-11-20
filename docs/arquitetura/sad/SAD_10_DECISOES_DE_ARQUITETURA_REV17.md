@@ -1174,3 +1174,11 @@ Ciências automáticas ao Comitê e ao Gabinete são informação registrada, co
 O dashboard consulta fatos existentes, sem gravar atos, atualizar projeções persistidas ou aplicar migrações. Permissões são verificadas no servidor, antes da leitura dos Registros; filtros nunca ampliam o escopo. Gabinete, DPO e Comitê veem agregados; Secretário fica na própria unidade; AAL/ARP nos próprios Registros. A projeção exclui nomes de pessoas, textos de manifestações e referências de evidências. A única exceção de texto livre é a última versão de aprendizagem verificada, conferida e autorizada para consulta.
 
 Cobertura não mostra percentual sem inventário de referência aprovado. Circulação conta declarações estruturadas de categorias, sem inferir relações, contratos ou cláusulas a partir de texto livre. Incidentes e os demais itens excluídos da especificação permanecem indisponíveis. A implementação na branch não constitui aceite humano, homologação nem autorização de produção.
+
+## Complemento 12-G, grupo 1 — responsabilidades e devolução (Ailton, DPO, 20/11/2026)
+
+As perguntas da Secretaria no FORM 4 ficam somente para leitura para o DPO; a recusa também ocorre no servidor. A corresponsabilidade de preenchimento do FORM 3 permanece. Após o encerramento da ação, suas perguntas ficam protegidas, inclusive no bloco 9. Os atos próprios de aprendizagem, conferência e autorização continuam separados do preenchimento dessas perguntas.
+
+Na conferência negativa da aprendizagem, a observação do DPO é obrigatória. A orientação retorna à Secretaria, com observação, autoria, data e versão preservadas. Uma nova versão exige nova conferência antes de poder ser autorizada. A conclusão automática após a verificação é identificada como evento do sistema, com sua data; a autoria da verificação permanece no ato do verificador e os eventos antigos não são reescritos.
+
+Implementação demonstrativa na branch de trabalho, sem migração. A conferência automatizada não substitui a vistoria nem autoriza ativação ou merge.

@@ -246,6 +246,9 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
         if ato:
             evento_sucesso=next((h for h in hist if h['comando_id']==request.query_params.get('registrado')),None)
             ato['nome']=evento_sucesso['nome'] if evento_sucesso else 'Ato registrado'
+            if evento_sucesso and evento_sucesso['acao']=='encerramento_automatico':
+                ato['autor']='Sistema'
+                ato['automatico']=True
         ultimo=next((h for h in hist if h['ato']),None)
         situacao_topo=(ultimo['nome']+' em '+ultimo['quando']) if ultimo else e['situacao']
         if ref.form == 4:
@@ -275,7 +278,7 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
                 from app.acompanhamento_forms34 import titulo
                 origem_texto = titulo(risco, {**fonte, 'form':3})+' — '+origem_texto.split(' — ',1)[1]
             valores['F4-4.2.1'] = origem_texto
-        from app.etapas_forms34 import motivo_bloqueio, situacao_aprendizagem
+        from app.etapas_forms34 import motivo_bloqueio, situacao_aprendizagem, pode_preencher
         from app.acompanhamento_forms34 import resumo as resumo_acompanhamento
         acompanhamento = resumo_acompanhamento(s,obj,e,papeis,pessoa.id)
         situacao_topo = acompanhamento['situacao']
@@ -291,6 +294,8 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
             except (ValueError, PermissionError):pass
         from app.restrito_forms34 import pode_ler
         return paginas.TemplateResponse(request=request,name='forms34_bloco.html',status_code=status,context={
+            'pode_preencher':pode_preencher(ref.form,papeis),
+            'conclusao_automatica':next((h['nome'] for h in hist if h['acao']=='encerramento_automatico'),''),
             'bloqueio_edicao':bloqueio_edicao, 'acoes_vinculadas':vinculadas,
             'acompanhamento':acompanhamento,
             'situacao_aprendizagem':situacao_aprendizagem(e),

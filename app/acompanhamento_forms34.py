@@ -30,6 +30,10 @@ def resumo(sessao, obj, e, papeis, pessoa_id):
     ultimo = next((ev for ev in reversed(historico(sessao,obj.id)) if ev.tipo_evento.startswith('f34_')
                    and ev.tipo_evento not in ('f34_salvar_bloco','f34_abrir_detalhes')), None)
     situacao = NOMES.get(ultimo.tipo_evento.removeprefix('f34_'), e['situacao'])+' em '+horario(ultimo.ocorrido_em) if ultimo else e['situacao']
+    if ultimo and ultimo.tipo_evento == 'f34_encerramento_automatico':
+        situacao = f'Ação concluída automaticamente em {horario(ultimo.ocorrido_em)}, após a verificação aprovada'
+    if e.get('aprendizagem_devolvida'):
+        situacao = 'Aprendizagem devolvida à Secretaria para ajustes em '+horario(e['aprendizagem_devolvida']['em'])
     return dict(titulo=titulo(obj,e), situacao=situacao, bloco=bloco, pendente=bool(ato),
                 botao=ato['titulo'] if ato else 'Acompanhar',
                 pendencia=ato['titulo'] if ato else 'Nenhuma decisão aguardando o Gabinete' if 'gabinete' in papeis else 'Nenhum ato pendente para seu papel')
