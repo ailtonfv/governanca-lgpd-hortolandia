@@ -243,3 +243,10 @@ Nenhuma rota do dashboard grava no banco (teste).
 Modo de projeção sem texto livre e sem evidência (teste sobre o HTML).
 "Não disponível" e "Ainda não avaliado" aparecem onde previsto; nenhum zero falso.
 Vistoria em tela por Ailton, com o teste dos 5 segundos na Abertur
+
+## Complemento confirmado por Ailton — 20/11/2026
+
+1. Ciências automáticas ao Comitê e ao Gabinete aparecem como informação registrada, com data, sem contar como pendência nem como tempo de espera. A linha informativa da Abertura permanece, com o texto “ciência registrada no sistema”.
+2. A espera pela manifestação do DPO conta desde a confirmação conjunta do risco Alto ou Crítico, ou desde o pedido de cancelamento que exija a manifestação, até a manifestação registrada.
+
+Base autorizada: branch `lote-13-dashboard`, a partir de `f99c9fe` da branch do Lote 12. Correções posteriores do Lote 12 entram por merge da branch, sem rebase. Sem merge no main.

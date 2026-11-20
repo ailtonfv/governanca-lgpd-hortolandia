@@ -1164,3 +1164,13 @@ O plano aprovado do FORM 4 fica protegido, inclusive no servidor. Mudança subst
 A aprendizagem exige verificação aprovada, contexto impessoal, diretriz e aplicação/limites. Registra automaticamente a ação e a verificação de referência. A sequência é Secretaria, conferência do DPO e autorização da Secretaria. Alterar o aprendizado inicia nova versão, que exige nova conferência e autorização. Contexto ausente no legado é apresentado como não informado.
 
 Implementação demonstrativa sem migração. Competências permanecem como proposta em deliberação. Publicação da branch não autoriza merge ou ativação: a vistoria permanece no último commit autorizado até nova autorização expressa.
+
+## Complemento do Lote 13 — dashboard (Ailton, DPO, 20/11/2026)
+
+A especificação final do dashboard substitui, para implementação, as três partes de 19/11, preservadas como histórico. A unidade principal é o Registro LGPD, com composição por serviço, processo e atividade. Riscos, ações e participações são contagens próprias, identificadas. A faixa do Registro é a do pior risco residual com nota conjunta vigente; reavaliação pendente não substitui essa nota. A ação só aparece como concluída após verificação aprovada.
+
+Ciências automáticas ao Comitê e ao Gabinete são informação registrada, com data. Não são pendências, não iniciam espera e não comprovam entrega de comunicado. A linha informativa da Abertura permanece com a expressão “ciência registrada no sistema”. A espera pela manifestação do DPO começa na confirmação conjunta de risco Alto ou Crítico, ou no pedido de cancelamento que exija manifestação, e termina com a manifestação registrada. Rodadas são apuradas pelos eventos de abertura e fechamento.
+
+O dashboard consulta fatos existentes, sem gravar atos, atualizar projeções persistidas ou aplicar migrações. Permissões são verificadas no servidor, antes da leitura dos Registros; filtros nunca ampliam o escopo. Gabinete, DPO e Comitê veem agregados; Secretário fica na própria unidade; AAL/ARP nos próprios Registros. A projeção exclui nomes de pessoas, textos de manifestações e referências de evidências. A única exceção de texto livre é a última versão de aprendizagem verificada, conferida e autorizada para consulta.
+
+Cobertura não mostra percentual sem inventário de referência aprovado. Circulação conta declarações estruturadas de categorias, sem inferir relações, contratos ou cláusulas a partir de texto livre. Incidentes e os demais itens excluídos da especificação permanecem indisponíveis. A implementação na branch não constitui aceite humano, homologação nem autorização de produção.
