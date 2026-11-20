@@ -37,3 +37,6 @@
 .forms34 #historico34 dd{margin:0 0 .6rem;white-space:pre-wrap}
 
 #confirmar-ato [data-descricao]{white-space:pre-line;}
+
+.forms34 .agrupamento-perguntas34{border:0;padding:0;margin:0;min-width:0}
+.forms34 #historico34 [hidden]{display:none!important}

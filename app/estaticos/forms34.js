@@ -1,5 +1,5 @@
 (() => {
- const form=document.querySelector('[data-respostas34]');if(!form)return;
+ const form=document.querySelector('[data-respostas34]');if(!form || form.hasAttribute('data-somente-leitura'))return;
  let dirty=false,next=null;const dialog=document.querySelector('#sair34');
  function conditions(){document.querySelectorAll('[data-depende]').forEach(f=>{
    const origin=form.elements.namedItem(f.dataset.depende);if(!origin)return;
@@ -38,5 +38,5 @@ const finalidade=form.elements.finalidade,label=form.querySelector('label[for="a
 const textos={residual:'O Comitê é favorável ao tratamento proposto para o risco residual (RIPD e controles)?',
 avaliacao:form.dataset.perguntaAvaliacao,triagem:form.dataset.perguntaTriagem,
 prorrogacao:'O Comitê é favorável à prorrogação?',cancelamento:'O Comitê é favorável ao cancelamento?'};
-function ajustar(){if(label)label.firstChild.textContent=(textos[finalidade.value]||'Selecione a finalidade para indicar sua manifestação')+' ';}
+function ajustar(){if(label)label.firstChild.textContent=(textos[finalidade.value]||'O Comitê é favorável à finalidade selecionada?')+' ';}
 finalidade.addEventListener('change',ajustar);ajustar();})();

@@ -54,7 +54,8 @@ def lista(request:Request,conta_id:str,form:int|None=Query(default=None,ge=3,le=
             try:
                 _,ref,e,_,papeis,_=dominio.consultar(s,conta_id,obj.id)
                 if form is None or ref.form == form:
-                    visiveis.append(dict(obj=obj,estado=e,situacao=situacao_atual(e),registro=s.get(Registro,obj.registro_id)))
+                    from app.acompanhamento_forms34 import resumo
+                    visiveis.append(dict(obj=obj,estado=e,**resumo(s,obj,e,papeis,pessoa.id),registro=s.get(Registro,obj.registro_id)))
             except (ValueError,PermissionError):
                 try:
                     if pode_ler(s,conta_id,obj.id,dominio.estado(s,obj.id)):
@@ -64,7 +65,8 @@ def lista(request:Request,conta_id:str,form:int|None=Query(default=None,ge=3,le=
         contas=s.execute(select(Conta,Pessoa).join(Pessoa,Conta.pessoa_id==Pessoa.id)
             .where(Conta.ativa.is_(True),Pessoa.ativa.is_(True))).all()
         return paginas.TemplateResponse(request=request,name='forms34_lista.html',context={
-            'filtro_form':form,'conta_id':conta_id,'pessoa':pessoa,'objetos':visiveis,'referencias':referencias,'contas':contas})
+            'filtro_form':form,'conta_id':conta_id,'pessoa':pessoa,'objetos':sorted(visiveis,key=lambda i:not i['pendente']),'referencias':referencias,'contas':contas,
+            'gabinete':bool(unidades(s,pessoa.id,'demo34_gabinete'))})
 
 
 @router.api_route('/form2/participacoes/{pid}/encaminhar34',methods=['GET','POST'])
@@ -162,9 +164,12 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
         proposta_av=quadro_proposta(e,'avaliacao',autores,unidades_nomes,eventos)
         proposta_reavaliacao=quadro_proposta(e['reavaliacao'],'avaliacao',autores,unidades_nomes) if e.get('reavaliacao') else None
         proposta_tr=quadro_proposta(e,'triagem',autores,unidades_nomes,eventos)
-        hist=historico_visual(eventos,autores,unidades_nomes,{q['id']:q['bloco'] for q in perguntas(ref.form)})
+        hist=historico_visual(eventos,autores,unidades_nomes,{q['id']:q['bloco'] for q in perguntas(ref.form)},obj,ref)
         for item in hist:
             item['bloco']=__import__('app.atos_forms34_interface',fromlist=['ATOS']).ATOS.get(item['acao'],(0,0))[1]
+            if item['acao']=='ingresso' and e.get('risco_id'):
+                risco_origem = s.get(IdentidadeForms34,e['risco_id'])
+                if risco_origem:item['nome'] += f' (Risco {risco_origem.numero})'
         codigo_risco=obj.codigo.split('-')[-1]
 
         for a in atos:
@@ -197,6 +202,7 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
                         a['leitura'].extend([('Proposta de',quadro['autor']),*quadro['linhas']])
                         a['leitura'].extend([('Posição do DPO' if lado=='dpo' else 'Posição da Secretaria',texto) for lado,texto in alvo.get(campo+'_posicoes',{}).items()])
             if a['leitura']:a['resumo']+='\n'+'\n'.join(f'{k}: {v}' for k,v in a['leitura'])
+            if a['acao']=='executar_medida':a['resumo']='Confirmar o registro da execução? '+a['resumo']
             if a['acao']=='aceitar_residual':
                 residual=e['avaliacao']['residual'];a['resumo']+=f"\nRisco residual: {residual['nota']} — {residual['faixa']}"
             a['escala']={c['nome']:c for c in a['campos'] if c['nome'] in ('p','i','pr','ir')}
@@ -204,17 +210,17 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
         restantes=[a for a in atos if a is not proposta]
         encaminhamento_destacado=(e.get('respostas',{}).get('F3-3.59')=='Sim' and
                                   'Providência no FORM 4' in e.get('respostas',{}).get('F3-3.61',[]))
-        destaques=[a for a in restantes if ref.form==3 and bloco==16 and
+        destaques=[a for a in restantes if not a.get('recolhido') and ref.form==3 and bloco==16 and
                    (a['acao']=='concluir_avaliacao' or a['acao']=='encaminhar_acao' and encaminhamento_destacado)]
         destaques.sort(key=lambda a:a['acao']!='encaminhar_acao')
         restantes=[a for a in restantes if a not in destaques]
-        principal=restantes[0] if restantes else None
+        principal=next((a for a in restantes if not a.get('recolhido')), None)
         grade_atual=grade(ref.form,e['respostas'],e)
         registro=s.get(Registro,obj.registro_id)
         from app.apresentacao_atos34 import data_br
         valores = {'F3-3.1':registro.codigo_lgpd,'F4-4.1':registro.codigo_lgpd,
                    'F4-4.1.1':obj.codigo,'F3-3.2':s.get(Unidade,uid).nome,
-                   'F3-3.3':{'em_atendimento':'Em atendimento','aguardando':'Aguardando responsável','concluida':'Concluída'}.get(e.get('situacao_form2'),'Situação preservada na origem'),
+                   'F3-3.3':{'em_atendimento':'Em atendimento','aguardando':'Aguardando responsável','concluida':'Análise concluída'}.get(e.get('situacao_form2'),'Situação preservada na origem'),
                    'F4-4.15':e['situacao'],'F4-4.10':data_br(e.get('prazo')),
                    'F4-4.23':e.get('faixa_origem','Não avaliado'),
                    'F4-4.24':'Aceitação pendente de autoridade competente',
@@ -242,6 +248,19 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
             ato['nome']=evento_sucesso['nome'] if evento_sucesso else 'Ato registrado'
         ultimo=next((h for h in hist if h['ato']),None)
         situacao_topo=(ultimo['nome']+' em '+ultimo['quando']) if ultimo else e['situacao']
+        if ref.form == 4:
+            v = e.get('verificacao', {})
+            ex = e.get('execucao', {})
+            valores.update(v.get('respostas', {}))
+            valores['F4-4.19'] = ('Evidência informada pela Secretaria: '+ex['evidencia']+' · '+autores.get(ex.get('pessoa_id'), 'Autor registrado')+' · '+str(data_local(ex['em']))) if ex else 'Aguardando referência da execução'
+            valores['F4-4.18.1'] = (autores.get(v.get('pessoa_id'), 'Autor registrado')+' · '+unidades_nomes.get(v.get('unidade_id'), 'Secretaria registrada no ato')+' · '+str(data_local(v['em']))) if v else 'Aguardando verificação'
+            for q in itens:
+                if q['id'] == 'F4-4.18.1':q['enunciado'] = 'Responsável pela verificação'
+            for k in ('F4-4.10.1','F4-4.10.2','F4-4.10.3'):
+                valores[k] = 'Não houve pedido de prorrogação' if not e.get('prorrogacoes') and not e.get('decisoes_pendentes', {}).get('prorrogacao') else 'Consulte os atos de prorrogação no histórico'
+            for k in ('F4-4.15.1','F4-4.15.2'):
+                valores[k] = 'Não há pedido de cancelamento' if not e.get('cancelada') and not e.get('decisoes_pendentes', {}).get('cancelamento') else 'Consulte os atos de cancelamento no histórico'
+            valores['F4-4.16'] = f"{ultimo['quando']} — {ultimo['autor']}, {ultimo['nome']}" if ultimo else 'Nenhum ato registrado'
         from app.apresentacao_atos34 import ripd,mensagem_decisao,data_br
         origem_texto=f'FORM {ref.fonte_form}, versão {ref.fonte_versao} preservada.'
         if ref.form==4 and ref.fonte_form==3:
@@ -252,20 +271,41 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
             av=fonte.get('avaliacao') or {};res=av.get('residual',{})
             risco=s.get(IdentidadeForms34,e.get('risco_id'))
             origem_texto=f"Risco {risco.codigo.split('-')[-1] if risco else 'registrado'} — {res.get('faixa',e.get('faixa_origem','Não avaliado'))} ({res.get('nota','nota não disponível')}), "+('aceito pelo '+('Prefeito' if res.get('faixa')=='Crítico' else 'Secretário') if fonte.get('aceitacao') else 'sem aceitação registrada na origem')+f' · FORM 3, versão {ref.fonte_versao}'
+            if risco:
+                from app.acompanhamento_forms34 import titulo
+                origem_texto = titulo(risco, {**fonte, 'form':3})+' — '+origem_texto.split(' — ',1)[1]
+            valores['F4-4.2.1'] = origem_texto
+        from app.etapas_forms34 import motivo_bloqueio, situacao_aprendizagem
+        from app.acompanhamento_forms34 import resumo as resumo_acompanhamento
+        acompanhamento = resumo_acompanhamento(s,obj,e,papeis,pessoa.id)
+        situacao_topo = acompanhamento['situacao']
+        bloqueio_edicao = motivo_bloqueio(e, bloco)
+        vinculadas = []
+        for aid in e.get('acoes', []):
+            try:
+                aobj, _, ae, *_ = dominio.consultar(s, conta_id, aid)
+                ingresso_acao = next((ev for ev in dominio.historico(s, aid) if ev.tipo_evento == 'f34_ingresso'), None)
+                vinculadas.append(dict(id=aid, codigo=aobj.codigo.split('-')[-1], numero=int(aobj.codigo.split('-')[-1][1:]),
+                    autor=autores.get(ingresso_acao.ator_id, 'Autor registrado') if ingresso_acao else '',
+                    quando=str(data_local(ingresso_acao.ocorrido_em)) if ingresso_acao else ''))
+            except (ValueError, PermissionError):pass
         from app.restrito_forms34 import pode_ler
         return paginas.TemplateResponse(request=request,name='forms34_bloco.html',status_code=status,context={
+            'bloqueio_edicao':bloqueio_edicao, 'acoes_vinculadas':vinculadas,
+            'acompanhamento':acompanhamento,
+            'situacao_aprendizagem':situacao_aprendizagem(e),
             'destaques':destaques,'encaminhamento_destacado':encaminhamento_destacado,'origem_texto':origem_texto,'ripd_texto':ripd(e),'decisoes_gabinete':mensagem_decisao(e),'prazo_br':data_br(e.get('prazo')),
             'atos_salvos':[h for h in hist if h['ato'] and h['bloco']==bloco] if ref.form==4 else [],
             'falhas_r17':falhas_r17,'conferencia_r17':conferencia34(ref.form,e),'base_r17':f'/forms34/{obj.id}/blocos',
             'erros_campos':erros_campos,'acao_erro':acao_erro,'revisar':revisar,
-            'ato_proposta':proposta,'ato_principal':principal,'outros_atos':restantes[1:],
+            'ato_proposta':proposta,'ato_principal':principal,'outros_atos':[a for a in restantes if a is not principal],
             'valores_formulario':valores_enviados if acao_erro else valores_proposta(e.get('reavaliacao',e)),
             'matriz':matriz(),'situacao_avaliacao':situacao_avaliacao(e),
             'grade_visual':grade_visual(grade_atual,obj.id,conta_id,bloco,e),
             'titulo_bloco':titulo_bloco(next(g['titulo'] for g in grade_atual if g['numero']==bloco)),
             'proposta_reavaliacao':proposta_reavaliacao,'proposta_av':proposta_av,'proposta_tr':proposta_tr,'situacao_topo':situacao_topo,
             'historico_visual':hist,'so_atos':request.query_params.get('historico')=='atos' if request.query_params.get('filtrar') else request.query_params.get('historico','atos')!='todos',
-            'manifestacoes':[h for h in hist if h['acao'] in ('manifestar_dpo','manifestar_comite','aceitar_residual','aprovar_plano','verificar','cancelar')],
+            'manifestacoes':[h for h in hist if h['acao'] in ('manifestar_dpo','manifestar_comite','aceitar_residual','aprovar_plano','verificar','cancelar') and not (ref.form==4 and h['bloco']==bloco)],
             'valores_triagem':e.get('triagem') or {},
             'valores_comite':dict(autor_avaliacao=(proposta_reavaliacao or proposta_av or {}).get('autor','autor da proposta'),autor_triagem=(proposta_tr or {}).get('autor','autor da proposta')),
             'obj':obj,'ref':ref,'estado':e,'pessoa':pessoa,'papeis':papeis,'registro':registro,

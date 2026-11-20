@@ -82,10 +82,12 @@ def conteudo_ato(acao,e,autores,unidades):
         return [(('DPO' if lado=='dpo' else 'Secretaria')+' — '+('Avaliação' if campo=='avaliacao' else 'Triagem'), texto)
                 for campo in ('avaliacao','triagem') for lado,texto in e.get(campo+'_posicoes',{}).items()]
     valor=e.get(chaves.get(acao,''),{})
+    if acao=='aprender':valor={**valor, 'contexto':valor.get('contexto','Não informado')}
+    if acao=='executar_medida':valor={**valor, 'resumo':valor.get('resumo','Não informado')}
     if acao=='manifestar_comite' and e.get('reavaliacao',{}).get('manifestacao_comite'):valor=e['reavaliacao']['manifestacao_comite']
     if acao=='planejar':valor={k:e.get(k) for k in ('plano','executor_id','cargo_responsavel','unidade_responsavel_id','prazo')}
     if acao.startswith('pedir_'):valor=e.get('decisoes_pendentes',{}).get(acao.removeprefix('pedir_'),{})
-    nomes={'texto':'Texto','justificativa':'Justificativa','ata':'Referência à ata','finalidade':'Finalidade',
+    nomes={'contexto':'Contexto (relato impessoal)','resumo':'Resumo do que foi feito','texto':'Texto','justificativa':'Justificativa','ata':'Referência à ata','finalidade':'Finalidade',
            'favoravel':'Favorável','evidencia':'Evidência','aprovada':'Aprovada','plano':'Plano',
            'executor_id':'Executor registrado no ato anterior','cargo_responsavel':'Cargo responsável','unidade_responsavel_id':'Unidade responsável','referencia':'Referência do RIPD','documento':'Documento formal da decisão','prazo':'Prazo','diretriz':'Diretriz','escopo':'Escopo'}
     from app.regras_atos34 import FINALIDADES
@@ -93,11 +95,19 @@ def conteudo_ato(acao,e,autores,unidades):
     return [(rotulo,autores.get(v,v) if k=='executor_id' else unidades.get(v,v) if k=='unidade_responsavel_id' else FINALIDADES.get(v,v) if k=='finalidade' else data_br(v) if k=='prazo' else 'Sim' if v is True else 'Não' if v is False else v)
             for k,rotulo in nomes.items() if (v:=valor.get(k)) is not None]
 
-def historico_visual(eventos, autores, unidades, mapa_blocos):
+def historico_visual(eventos, autores, unidades, mapa_blocos, identidade=None, referencia=None):
     saida=[];anterior={}
     for ev in reversed(eventos):
         acao=ev.tipo_evento.removeprefix('f34_'); e=ev.conteudo.get('estado',{})
         nome=NOMES.get(acao, 'Registro de '+acao.replace('_',' '))
+        if ev.tipo_evento == 'base34_identidade_reservada' and identidade:
+            codigo=identidade.codigo.split('-')[-1]
+            nome=f"{'Risco' if identidade.tipo=='R' else 'Ação'} criado (identificador {codigo} reservado)"
+        if acao == 'ingresso' and referencia:
+            if e.get('form') == 3:
+                nome=f'Risco recebido no FORM 3, encaminhado pelo FORM 2 (versão {referencia.fonte_versao})'
+            else:
+                nome=f'Ação recebida no FORM 4, encaminhada pelo FORM {referencia.fonte_form}'
         if acao=='salvar_bloco':
             respostas=e.get('respostas',{});ant=anterior.get('respostas',{})
             blocos=sorted({mapa_blocos[k] for k in respostas if respostas[k]!=ant.get(k) and k in mapa_blocos})
@@ -107,7 +117,7 @@ def historico_visual(eventos, autores, unidades, mapa_blocos):
             if d.get('registrador')=='Gabinete':nome=f"Decisão do Prefeito, registrada pelo Gabinete em {horario(d['em'])}, conforme {d['documento']}"
         if e:anterior=e
         saida.append(dict(id=ev.id,comando_id=ev.comando_id,nome=nome,acao=acao,
-                          ato=acao not in ('salvar_bloco','abrir_detalhes'),
+                          ato=acao not in ('salvar_bloco','abrir_detalhes') and ev.tipo_evento.startswith('f34_'),
                           autor=autores.get(ev.ator_id,ev.ator_id),quando=horario(ev.ocorrido_em),
                           linhas=conteudo_ato(acao,e,autores,unidades)))
     return list(reversed(saida))
@@ -121,6 +131,9 @@ def situacao_bloco(form,n,e):
         return 'Aguardando avaliação' if n==14 else 'Aguardando triagem'
     if form==3 and n==16:return 'Avaliação concluída' if e.get('concluida') else 'Aguardando conclusão'
     if form==4:
+        if n==9:
+            from app.etapas_forms34 import situacao_aprendizagem
+            return situacao_aprendizagem(e)
         return {3:'Plano aprovado' if e.get('plano_aprovado') else 'Plano registrado · aguardando aprovação' if e.get('plano') else 'Aguardando plano',
                 4:'Prorrogação aguardando decisão' if e.get('decisoes_pendentes',{}).get('prorrogacao') else '',
                 6:'Cancelamento aprovado' if e.get('cancelada') else 'Execução registrada' if e.get('execucao') else 'Aguardando execução',
