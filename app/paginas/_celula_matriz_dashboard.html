@@ -1,0 +1,5 @@
+{% macro celula_matriz(celula, cor, letra, destino) -%}
+<td class="{{ 'dash-matriz-com-risco' if celula.numero else 'dash-matriz-vazia' }}" style="--faixa:{{ cor }};--letra:{{ letra }}">
+{% if celula.numero %}<a href="{{ destino }}"><strong>{{ celula.numero }}</strong> {{ 'risco' if celula.numero==1 else 'riscos' }}<span>{{ celula.faixa }}</span></a>{% else %}<span>{{ celula.faixa }}</span>{% endif %}
+</td>
+{%- endmacro %}
