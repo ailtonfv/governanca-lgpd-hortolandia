@@ -477,7 +477,9 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         if not e.get('plano_aprovado'):
             raise ValueError('A medida requer plano autorizado; a espera do DPO no FORM 3 não o bloqueia.')
         e['conferencia_execucao'] = exigir_r17(conferencia_etapa(e, 'execucao'), f'/forms34/{obj.id}/blocos')
-        e['execucao'] = dict(evidencia=_texto(dados, 'evidencia'), resumo=_texto(dados, 'resumo'), pessoa_id=pessoa.id, em=agora)
+        e['execucao'] = dict(evidencia=_texto(dados, 'evidencia'), resumo=_texto(dados, 'resumo'),
+                            cargo_responsavel=e.get('cargo_responsavel'), unidade_responsavel_id=uid,
+                            pessoa_id=pessoa.id, em=agora)
         e['situacao'] = 'Execução informada, aguardando verificação'
     elif acao == 'verificar':
         exigir(papeis, 'verificador')

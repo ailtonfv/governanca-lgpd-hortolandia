@@ -92,6 +92,8 @@ def test_verificacao_e_aprendizagem_separadas_do_plano(sessao, entrada):
     ato(sessao,obj,'verificar',conta=VERIFICADOR,aprovada=True,evidencia='Verificação fictícia',**respostas)
     e=estado(sessao,obj)
     assert e['execucao']['evidencia']=='Processo fictício 01'
+    assert e['execucao']['cargo_responsavel']=='Equipe da unidade executora'
+    assert e['execucao']['unidade_responsavel_id']
     assert e['verificacao']['quantidade_a_confirmar']==4
     assert e['verificacao']['pessoa_id'] != e['execucao']['pessoa_id']
     ato(sessao,obj,'aprender',contexto='Contexto fictício',diretriz='Diretriz fictícia',escopo='Limites fictícios')
@@ -137,6 +139,7 @@ def test_tela_verificacao_historico_e_aprendizagem(sessao, entrada):
     assert 'Referência fictícia 12F' in tela.text
     assert 'Salvar bloco 7' not in tela.text
     assert 'Responsável pela verificação' in tela.text
+    assert 'As perguntas seguem a numeração do documento-mestre (F4 = FORM 4).' in tela.text
     assert 'Aguardando verificação por membro' in tela.text
     verificador=client.get(f'/forms34/{obj}/blocos/7?conta_id={VERIFICADOR}')
     assert verificador.status_code==200

@@ -83,7 +83,8 @@ def conteudo_ato(acao,e,autores,unidades):
                 for campo in ('avaliacao','triagem') for lado,texto in e.get(campo+'_posicoes',{}).items()]
     valor=e.get(chaves.get(acao,''),{})
     if acao=='aprender':valor={**valor, 'contexto':valor.get('contexto','Não informado')}
-    if acao=='executar_medida':valor={**valor, 'resumo':valor.get('resumo','Não informado')}
+    if acao=='executar_medida':valor={**valor, 'resumo':valor.get('resumo','Não informado'),
+                                    'cargo_responsavel':valor.get('cargo_responsavel') or 'Cargo não informado no ato anterior'}
     if acao=='manifestar_comite' and e.get('reavaliacao',{}).get('manifestacao_comite'):valor=e['reavaliacao']['manifestacao_comite']
     if acao=='planejar':valor={k:e.get(k) for k in ('plano','executor_id','cargo_responsavel','unidade_responsavel_id','prazo')}
     if acao.startswith('pedir_'):valor=e.get('decisoes_pendentes',{}).get(acao.removeprefix('pedir_'),{})
