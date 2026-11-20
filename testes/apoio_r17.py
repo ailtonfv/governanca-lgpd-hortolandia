@@ -25,12 +25,13 @@ def completo2(base=None):
     return c
 
 
-def preencher34(sessao,obj):
+def preencher34(sessao,obj,blocos=None):
     from app.fluxo_forms34 import estado,executar
     from app.questionario_forms34 import perguntas,ativa
     from uuid import uuid4
     e=estado(sessao,obj)
     for bloco in range(1,17 if e['form']==3 else 10):
+        if blocos is not None and bloco not in blocos:continue
         e=estado(sessao,obj);campos={}
         for q in perguntas(e['form']):
             if q['bloco']!=bloco or q['tipo'] in ('ato','readonly','computed'):continue

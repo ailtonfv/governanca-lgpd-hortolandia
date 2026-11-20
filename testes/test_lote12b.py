@@ -80,7 +80,9 @@ def test_a_confirmar_encaminha_registra_e_repeticao_anterior_preservada(sessao,e
 
 
 def test_conclusao_f3_recusa_depois_aceita_e_preserva_respostas(sessao,entrada):
-    obj=entrar(sessao,entrada);avaliar(sessao,obj)
+    obj=entrar(sessao,entrada)
+    preencher34(sessao,obj,blocos={15})
+    avaliar(sessao,obj)
     ato(sessao,obj,'aceitar_residual',conta=SECRETARIO,justificativa='Justificativa fictícia')
     ato(sessao,obj,'propor_triagem',resultado='analise_adicional',justificativa='Triagem fictícia')
     ato(sessao,obj,'confirmar_triagem',conta='CONTA-E1')
@@ -88,8 +90,6 @@ def test_conclusao_f3_recusa_depois_aceita_e_preserva_respostas(sessao,entrada):
     with pytest.raises(FormularioIncompleto):ato(sessao,obj,'concluir_avaliacao')
     assert estado(sessao,obj)==antes
     preencher34(sessao,obj)
-    ato(sessao,obj,'propor_triagem',resultado='analise_adicional',justificativa='Triagem fictícia')
-    ato(sessao,obj,'confirmar_triagem',conta='CONTA-E1')
     ato(sessao,obj,'concluir_avaliacao')
     e=estado(sessao,obj)
     assert e['situacao']=='Avaliação concluída' and e['conferencia_r17']['quantidade_a_confirmar']>0
@@ -135,19 +135,17 @@ def test_form1_metadados_sem_mudanca():
     assert metadado_visual_obrigatoriedade('1.1')['marcador'] in ('*','**','****')
 
 
-def test_f4_encerramento_exige_preenchimento_registra_contagem(sessao,entrada):
+def test_f4_verificacao_cobra_somente_campos_do_verificador(sessao,entrada):
     from testes.test_lote12 import preparar_acao
+    from app.etapas_forms34 import VERIFICACAO
     obj=preparar_acao(sessao,entrada)
-    from app.questionario_forms34 import perguntas
-    bloco=next(q['bloco'] for q in perguntas(4) if q['id']=='F4-4.3')
-    ato(sessao,obj,'salvar_bloco',bloco=bloco,campos={'F4-4.3':''})
-    ato(sessao,obj,'executar_medida',evidencia='Evidência fictícia')
+    ato(sessao,obj,'executar_medida',resumo='Execução fictícia',evidencia='Evidência fictícia')
     antes=deepcopy(estado(sessao,obj))
-    with pytest.raises(FormularioIncompleto):
+    with pytest.raises(ValueError):
         ato(sessao,obj,'verificar',conta=VERIFICADOR,aprovada=True,evidencia='Verificação fictícia')
     assert estado(sessao,obj)==antes
-    ato(sessao,obj,'salvar_bloco',bloco=bloco,campos={'F4-4.3':'Resultado fictício'})
-    ato(sessao,obj,'verificar',conta=VERIFICADOR,aprovada=True,evidencia='Verificação fictícia')
+    ato(sessao,obj,'verificar',conta=VERIFICADOR,aprovada=True,evidencia='Verificação fictícia',
+        **{k:'A confirmar' for k in VERIFICACAO})
     e=estado(sessao,obj)
     assert e['encerrada'] and e['conferencia_r17']['quantidade_a_confirmar']>0
     ev=sessao.scalars(select(Evento).where(Evento.cadeia_id==obj,Evento.tipo_evento=='f34_encerramento_automatico')).one()

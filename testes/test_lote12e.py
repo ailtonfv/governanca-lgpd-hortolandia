@@ -42,13 +42,13 @@ def test_ripd_referencia_autoria_idempotencia_e_recusa(sessao,entrada):
 
 def test_execucao_por_outro_habilitado_mesma_unidade_e_verificacao_independente(sessao,entrada):
     obj=preparar_acao(sessao,entrada)
-    with pytest.raises(PermissionError):ato(sessao,obj,'executar_medida',conta='CONTA-C1',evidencia='Ref. fictícia')
+    with pytest.raises(PermissionError):ato(sessao,obj,'executar_medida',conta='CONTA-C1',evidencia='Ref. fictícia', resumo='Execução fictícia')
     sessao.add(Designacao(pessoa_id='PESSOA-C',unidade_id=entrada.unidade_id,papel='preenchedor'))
     sessao.commit()
-    ato(sessao,obj,'executar_medida',conta='CONTA-C1',evidencia='Ref. fictícia')
+    ato(sessao,obj,'executar_medida',conta='CONTA-C1',evidencia='Ref. fictícia', resumo='Execução fictícia')
     assert estado(sessao,obj)['execucao']['pessoa_id']=='PESSOA-C'
-    with pytest.raises(PermissionError):ato(sessao,obj,'verificar',conta='CONTA-C1',aprovada=True,evidencia='Fictícia')
-    ato(sessao,obj,'verificar',conta=VERIFICADOR,aprovada=True,evidencia='Fictícia')
+    with pytest.raises(PermissionError):ato(sessao,obj,'verificar',conta='CONTA-C1',aprovada=True,evidencia='Fictícia', **{k:'A confirmar' for k in ('F4-4.18','F4-4.20','F4-4.21','F4-4.22')})
+    ato(sessao,obj,'verificar',conta=VERIFICADOR,aprovada=True,evidencia='Fictícia', **{k:'A confirmar' for k in ('F4-4.18','F4-4.20','F4-4.21','F4-4.22')})
     assert estado(sessao,obj)['verificada']
 
 def test_gabinete_documento_obrigatorio_sem_mudar_aceitacao_existente(sessao,entrada):
