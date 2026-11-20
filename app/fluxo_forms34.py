@@ -212,6 +212,9 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
     agora = agora_utc().isoformat()
     f3 = e['form'] == 3
     if 'dpo' in papeis and acao in ('aceitar_residual','aprovar_plano','decidir_prorrogacao','cancelar','executar_medida','verificar'):
+    from app.etapas_forms34 import motivo_bloqueio, conferencia_etapa, validar_verificacao
+    if f3 and e.get('conclusao') and acao not in ('revisar_avaliacao', 'informar_ripd'):
+        raise ValueError('Avaliação concluída: use Reavaliar o risco para abrir uma nova rodada.')
         raise PermissionError('O DPO não exerce estes atos de autoridade, execução ou verificação.')
     if acao in ('propor_avaliacao', 'revisar_avaliacao', 'confirmar_avaliacao', 'propor_triagem', 'confirmar_triagem',
                 'sem_consenso', 'aceitar_residual', 'concluir_avaliacao', 'encaminhar_acao', 'informar_ripd') and not f3:
@@ -242,6 +245,9 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
     elif acao == 'salvar_bloco':
         exigir(papeis, 'secretaria', 'dpo')
         from app.questionario_forms34 import salvar
+        bloqueio = motivo_bloqueio(e, dados.get('bloco'))
+        if bloqueio:
+            raise ValueError(bloqueio)
         e['respostas'] = salvar(e['form'], e.get('respostas', {}), dados, e)
         complementos=dados.get('complementos',{})
         if not isinstance(complementos,dict) or set(complementos)-set(dados.get('campos',{})) or any(not isinstance(v,str) or len(v)>200 for v in complementos.values()):raise ValueError('Complemento inválido.')
@@ -266,6 +272,7 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
             raise ValueError('Sem consenso: aguarda deliberação do Comitê antes de reapresentar.')
         lado = _lado(papeis)
         nova = dict(evento=_texto(dados, 'evento'), causa=_texto(dados, 'causa'),
+        if acao == 'revisar_avaliacao':e['revisao_aberta'] = True
             consequencia=_texto(dados, 'consequencia'), avaliacao=propor_avaliacao(dados),
             avaliacao_proponente=dict(lado=lado,pessoa_id=pessoa.id,em=agora),
             avaliacao_confirmacoes={lado:dict(pessoa_id=pessoa.id,em=agora)}, avaliacao_sem_consenso=False)
@@ -273,6 +280,10 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
             # Proposta separada: nenhum consumidor da avaliação vigente muda antes do consenso.
             e['reavaliacao'] = nova
         else:
+            if e.get('conclusao'):
+                e.setdefault('conclusoes_anteriores', []).append(e.pop('conclusao'))
+            e['concluida'] = False
+            e['revisao_aberta'] = True
             e.update(nova)
             for k in ('aceitacao', 'manifestacao_dpo', 'manifestacao_comite', 'triagem'):
                 e.pop(k, None)
@@ -282,6 +293,8 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         campo = acao.removeprefix('confirmar_')
         alvo = e.get('reavaliacao', e) if campo=='avaliacao' else e
         _confirmar(alvo, campo, pessoa.id, papeis, agora)
+        if _consenso(alvo, campo):
+            raise ValueError('Resultado conjunto já confirmado. Use Reavaliar o risco.')
         if alvo is not e and _consenso(alvo, 'avaliacao'):
             e.update(e.pop('reavaliacao'))
             # Mesmo tratamento dos atos dependentes já existente na substituição da nota.
@@ -289,12 +302,16 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
                 e.pop(k, None)
             e['triagem_confirmacoes'] = {}
         e['situacao'] = 'Avaliação conjunta registrada' if _consenso(e, campo) else 'Aguardando confirmação'
+            e['deliberacoes_rodada'] = {}
+            e['acoes_rodada'] = []
     elif acao == 'sem_consenso':
         campo = dados.get('campo')
         if campo not in ('avaliacao', 'triagem'):
             raise ValueError('Indique a proposta em discussão.')
         alvo = e.get('reavaliacao', e) if campo=='avaliacao' else e
         if not alvo.get(campo):raise ValueError('Indique a proposta em discussão.')
+        if _consenso(alvo, campo):
+            raise ValueError('Resultado conjunto já confirmado. Use Reavaliar o risco.')
         lado = _lado(papeis)
         if any(c['pessoa_id']==pessoa.id for c in alvo.get(campo+'_confirmacoes',{}).values()):
             raise PermissionError('Quem propôs deve revisar a proposta; o outro lado registra a ausência de consenso.')
@@ -355,6 +372,8 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         if e.get('triagem_sem_consenso'):
             raise ValueError('Sem consenso: aguarda deliberação do Comitê antes de reapresentar.')
         lado = _lado(papeis)
+        if _consenso(e, 'triagem'):
+            raise ValueError('Triagem confirmada: use Reavaliar o risco.')
         if not _consenso(e, 'avaliacao'):
             raise ValueError('Confirme a avaliação em conjunto antes do resultado da triagem.')
         resultado = dados.get('resultado')
@@ -398,9 +417,19 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         e['conferencia_r17'] = exigir_r17(conferencia34(3,e), f'/forms34/{obj.id}/blocos')
         e['situacao'] = 'Avaliação concluída'
     elif acao == 'encaminhar_acao':
+        if e.get('reavaliacao'):
+            raise ValueError('Conclua a reavaliação em andamento antes de concluir a avaliação do risco.')
+        respostas = e.get('respostas', {})
+        indicadas = respostas.get('F3-3.59') == 'Sim' and 'Providência no FORM 4' in respostas.get('F3-3.61', [])
+        if indicadas and not e.get('acoes_rodada', e.get('acoes')):
+            raise ValueError('Encaminhe a providência indicada antes de concluir a avaliação do risco.')
         exigir(papeis, 'aal')
         motivo = _texto(dados, 'justificativa')
-        if e.get('acoes'):
+        e['concluida'] = True
+        e['conclusao'] = dict(pessoa_id=pessoa.id, em=agora, versao=versao,
+                             conferencia_r17=deepcopy(e['conferencia_r17']))
+        e['revisao_aberta'] = False
+        if e.get('acoes') and dados.get('outra') is not True:
             return fechar_comando(cmd, {'permitido': True, 'identidade_id': e['acoes'][-1],
                                         'existente': True})
         # R17 exige prontidão no encaminhamento do FORM 2; não bloqueia medidas protetivas do FORM 3.
@@ -417,6 +446,7 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         destino_id = a.id
     elif acao == 'planejar':
         exigir(papeis, 'secretaria')
+        e.setdefault('acoes_rodada', []).append(a.id)
         if e.get('plano_aprovado'):
             raise ValueError('Plano aprovado: alterações de prazo exigem pedido próprio.')
         from app.regras_atos34 import CARGOS
