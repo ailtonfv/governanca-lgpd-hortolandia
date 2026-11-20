@@ -1182,3 +1182,12 @@ As perguntas da Secretaria no FORM 4 ficam somente para leitura para o DPO; a re
 Na conferência negativa da aprendizagem, a observação do DPO é obrigatória. A orientação retorna à Secretaria, com observação, autoria, data e versão preservadas. Uma nova versão exige nova conferência antes de poder ser autorizada. A conclusão automática após a verificação é identificada como evento do sistema, com sua data; a autoria da verificação permanece no ato do verificador e os eventos antigos não são reescritos.
 
 Implementação demonstrativa na branch de trabalho, sem migração. A conferência automatizada não substitui a vistoria nem autoriza ativação ou merge.
+
+
+## Exceção autorizada — integração do dashboard em 20/11/2026
+
+Ailton autorizou excepcionalmente integrar `lote-13-dashboard`, no commit `4e6a991`, ao `main` somente por avanço direto, sem conflitos, sem rebase e sem apagar branches. Antes da integração, a etiqueta `antes-lote12` foi criada e publicada no commit `eb6e215`, preservando a referência anterior do `main`.
+
+A bateria integral será executada em **25/11/2026, após o merge**, por decisão expressa de Ailton. Ela não foi executada como condição desta integração excepcional. Os testes direcionados já registrados não substituem essa bateria; falhas antigas e eventuais falhas novas deverão ser distinguidas no relatório da execução. Este registro não representa homologação institucional nem aceite de produção.
+
+A integração e o push do `main` não ativam servidores de vistoria: cada porta permanece na pasta exclusiva e no commit expressamente autorizado. O registro desta exceção é um commit exclusivamente documental, posterior ao commit integrado do dashboard.
