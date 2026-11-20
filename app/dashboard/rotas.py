@@ -13,7 +13,7 @@ from app.dashboard import consultas as c
 router=APIRouter()
 paginas=Jinja2Templates(directory=Path(__file__).parents[1]/'paginas')
 paginas.env.filters['data_dashboard']=c.data_br
-TELAS={'abertura':'A Prefeitura em um olhar','risco':'Quais riscos existem e quanto os controles os reduzem?',
+TELAS={'abertura':'Visão geral da governança LGPD','risco':'Quais riscos existem e quanto os controles os reduzem?',
        'correcao':'As providências estão sendo cumpridas?','operacao':'Onde os Registros estão esperando?',
        'cobertura':'Quais Secretarias já mapearam seus serviços, processos e atividades?',
        'aprendizados':'O que a Prefeitura mudou por causa disso?','circulacao':'Para onde os dados pessoais vão?'}
