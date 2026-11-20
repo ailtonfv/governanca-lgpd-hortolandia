@@ -546,7 +546,8 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         exigir(papeis, 'secretaria')
         if not e.get('verificada') or e.get('cancelada'):
             raise ValueError('Aprendizagem somente após verificação aprovada.')
-        e['aprendizagem'] = dict(diretriz=_texto(dados, 'diretriz'), escopo=_texto(dados, 'escopo'),
+        e['aprendizagem'] = dict(contexto=_texto(dados, 'contexto'), diretriz=_texto(dados, 'diretriz'), escopo=_texto(dados, 'escopo'),
+                                 acao_id=obj.id, verificacao=deepcopy(e['verificacao']), pessoa_id=pessoa.id, em=agora,
                                  versao=e.get('aprendizagem', {}).get('versao', 0) + 1)
         e.pop('aprendizagem_conferida', None)
         e.pop('aprendizagem_autorizada', None)
