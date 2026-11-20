@@ -465,6 +465,9 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
             raise PermissionError('Prefeito não aprova plano fora do risco Crítico.')
         if not e.get('plano') or not (e.get('cargo_responsavel') or e.get('executor_id')) or not e.get('prazo'):
             raise ValueError('Informe plano, executor e prazo antes da aprovação.')
+        if e.get('plano_aprovado'):
+            raise ValueError('Plano já aprovado; conteúdo preservado.')
+        e['conferencia_plano'] = exigir_r17(conferencia_etapa(e, 'plano'), f'/forms34/{obj.id}/blocos')
         e['plano_aprovado'] = dict(pessoa_id=pessoa.id, em=agora, justificativa=_texto(dados, 'justificativa'))
         if faixa=='Crítico':e['plano_aprovado'].update(decisor='Prefeito',registrador='Gabinete',documento=_texto(dados,'documento',200))
         e['situacao'] = 'Plano aprovado'
@@ -473,7 +476,8 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         if 'dpo' in papeis:raise PermissionError('O DPO não registra execução.')
         if not e.get('plano_aprovado'):
             raise ValueError('A medida requer plano autorizado; a espera do DPO no FORM 3 não o bloqueia.')
-        e['execucao'] = dict(evidencia=_texto(dados, 'evidencia'), pessoa_id=pessoa.id, em=agora)
+        e['conferencia_execucao'] = exigir_r17(conferencia_etapa(e, 'execucao'), f'/forms34/{obj.id}/blocos')
+        e['execucao'] = dict(evidencia=_texto(dados, 'evidencia'), resumo=_texto(dados, 'resumo'), pessoa_id=pessoa.id, em=agora)
         e['situacao'] = 'Execução informada, aguardando verificação'
     elif acao == 'verificar':
         exigir(papeis, 'verificador')
@@ -483,8 +487,14 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
             raise ValueError('Aguarda evidência da execução.')
         if type(dados.get('aprovada')) is not bool:
             raise ValueError('Informe o resultado da verificação.')
+        respostas_verificacao = validar_verificacao(dados)
+        from app.fila_form2 import unidades
+        unidade_verificador = sorted(unidades(sessao, pessoa.id, 'demo34_verificador') - {uid})[0]
         e['verificacao'] = dict(aprovada=dados['aprovada'], evidencia=_texto(dados, 'evidencia'),
-                                pessoa_id=pessoa.id, em=agora)
+                                pessoa_id=pessoa.id, unidade_id=unidade_verificador, em=agora,
+                                respostas=respostas_verificacao,
+                                quantidade_a_confirmar=sum(v == 'A confirmar' for v in respostas_verificacao.values()))
+        e.setdefault('respostas', {}).update(respostas_verificacao)
         e['verificada'] = dados['aprovada']
         e['situacao'] = 'Verificação aprovada' if dados['aprovada'] else 'Requer ajuste na execução'
     elif acao in ('pedir_prorrogacao', 'pedir_cancelamento'):
@@ -556,7 +566,8 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         raise ValueError('Ato não disponível.')
     ev = _gravar_estado(sessao, cmd, obj, acao, e)
     if not f3 and acao not in ('salvar_bloco','abrir_detalhes') and e.get('verificada') and _sem_pendencia(e) and not e.get('encerrada'):
-        e['conferencia_r17'] = exigir_r17(conferencia34(4,e), f'/forms34/{obj.id}/blocos')
+        # Verificação cobra somente as respostas do verificador. Atos antigos são preservados.
+        e['conferencia_r17'] = retrato(conferencia34(4,e))
         e['encerrada'] = True
         e['situacao'] = 'Concluída com verificação'
         ev = _gravar_estado(sessao, cmd, obj, 'encerramento_automatico', e)
