@@ -79,6 +79,8 @@ from app.rotas_rev22_form1 import router as router_rev22_form1
 app.include_router(router_rev22_form1)
 from app.rotas_forms34 import router as router_forms34
 app.include_router(router_forms34)
+from app.dashboard.rotas import router as router_dashboard
+app.include_router(router_dashboard)
 paginas = Jinja2Templates(directory=PASTA_APP / "paginas")
 from app.identidade_demonstrativa import configurar_identidade
 configurar_identidade(paginas)
@@ -181,7 +183,14 @@ def central(
     from app.consultas_interface import usuarios_demonstracao
     pessoa_id = acesso["identidade"]["pessoa_id"]
     from app.central_instrumentos import cartoes_em_andamento
+    from app.dashboard.fontes import escopo_da_conta
+    try:
+        escopo_da_conta(sessao, conta_id)
+        exibir_dashboard = True
+    except PermissionError:
+        exibir_dashboard = False
     return paginas.TemplateResponse(request=request, name="central.html", context={
+        "exibir_dashboard": exibir_dashboard,
         "cartoes_forms": cartoes_em_andamento(sessao, conta_id),
         "gabinete": bool(unidades(sessao, pessoa_id, 'demo34_gabinete')),
         **acesso, "conta_id": conta_id,

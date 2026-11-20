@@ -28,6 +28,7 @@
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/instrumentos_registro.css') }}?v=20261119-12d-cartoes">
 <div class="central-acesso">
   <h1>Central de Acesso</h1>
+  {% if exibir_dashboard %}<p><a href="/dashboard?conta_id={{ conta_id|urlencode }}">Abrir dashboard LGPD — somente leitura</a></p>{% endif %}
   <p>Escolha um instrumento para ver os Registros autorizados na sua Secretaria.</p>
   <section class="contexto-central" aria-labelledby="titulo-contexto">
     <h2 id="titulo-contexto">{{ "Atuação: Encarregado de Dados (DPO)" if exibir_painel_dpo else "Secretaria de atuação" }}</h2>
