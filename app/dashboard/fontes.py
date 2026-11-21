@@ -26,6 +26,10 @@ def escopo_da_conta(sessao, conta):
     secretaria = unidades(sessao, pessoa.id, 'demo34_secretario')
     if secretaria:
         return Escopo('Secretário', frozenset(secretaria), None)
+    from app.continuidade_apa import unidades_em_que_e_apa_atual
+    secretaria = unidades_em_que_e_apa_atual(sessao, pessoa.id)
+    if secretaria:
+        return Escopo('APA', frozenset(secretaria), None)
     proprios = set()
     for p in sessao.scalars(select(ParticipacaoForm2).where(
             ParticipacaoForm2.tipo == 'principal', ParticipacaoForm2.responsavel_id == pessoa.id)):

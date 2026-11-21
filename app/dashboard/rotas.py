@@ -39,6 +39,21 @@ def dashboard(request:Request,tela:str='abertura',conta_id:str='CONTA-B1'):
     try:
         with Session(motor,autoflush=False) as sessao:
             sessao.execute(text('SET TRANSACTION READ ONLY'))
+            if tela == 'aprendizados':
+                from app.aprendizados_publicos import consultar
+                from app.dashboard.fontes import Escopo
+                from app.fila_form2 import pessoa_ativa
+                pessoa_ativa(sessao, conta_id)
+                aprendizado = consultar(sessao, conta_id, secretaria=filtros['secretaria'],
+                    palavra=request.query_params.get('palavra',''),
+                    fonte=carregar(sessao, Escopo('Consulta de aprendizados',None,None)))
+                try:
+                    escopo_da_conta(sessao, conta_id)
+                    dashboard_disponivel = True
+                except PermissionError:
+                    dashboard_disponivel = False
+                return paginas.TemplateResponse(request=request,name='aprendizados_publicos.html',
+                    context=dict(conta_id=conta_id, aprendizado=aprendizado, dashboard_disponivel=dashboard_disponivel))
             escopo=escopo_da_conta(sessao,conta_id)
             fonte=carregar(sessao,escopo)
             dados=c.filtrar(fonte,escopo,filtros)
@@ -83,8 +98,8 @@ def dashboard(request:Request,tela:str='abertura',conta_id:str='CONTA-B1'):
                       'aprendizados':['aprendizados'],'circulacao':['circulacao',*[f'instrumento_{n}' for n in range(4)]]}
             perfil=escopo.perfil
             titulo_perfil={'Gabinete':'Precisa da sua atenção','DPO':'Pendências com o Gabinete e o Comitê',
-                           'Comitê':'Pendente para o Comitê','Secretário':'Aguardando sua decisão','AAL/ARP':'Seus itens pendentes'}[perfil]
-            atencao_perfil=atencao if perfil in ('Gabinete','DPO') else [indices['fila_'+('AAL' if perfil=='AAL/ARP' else perfil)]]
+                           'Comitê':'Pendente para o Comitê','Secretário':'Aguardando sua decisão','APA':'Pendências da sua Secretaria','AAL/ARP':'Seus itens pendentes'}[perfil]
+            atencao_perfil=atencao if perfil in ('Gabinete','DPO') else [indices['fila_'+({'AAL/ARP':'AAL','APA':'Secretário'}.get(perfil,perfil))]]
             # A lista que compõe cada fila mantém somente metadados, mesmo nos perfis globais.
             pagina=max(0,int(request.query_params.get('pagina','0')))
             arts=indices['aprendizados']['lista'];pagina=min(pagina,max(0,len(arts)-1))

@@ -2061,3 +2061,7 @@ Os fluxos usam as mesmas listas autorizadas dos seus destinos; um item abre dire
 ### Lote 14 — apresentação inicial
 
 A primeira entrada de cada conta fictícia abre Como funciona. A marca é por conta e navegador (cookie com validade de um ano); limpar os cookies reapresenta a orientação. Não é autenticação nem ato institucional. Fluxograma e Como funciona permanecem acessíveis na Central.
+
+### Lote 14 — consulta por escopo
+
+O APA consulta o dashboard da própria Secretaria. Aprendizados autorizados têm consulta global, com busca e filtro livre de Secretaria, sem links para os casos de origem. Riscos e ações da própria unidade podem ser consultados sem conceder competência para atos. As contagens operacionais do dashboard permanecem calculadas pelas funções anteriores.

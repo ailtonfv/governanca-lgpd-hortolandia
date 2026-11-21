@@ -188,6 +188,7 @@ def central(
     pessoa_id = acesso["identidade"]["pessoa_id"]
     from app.central_instrumentos import cartoes_em_andamento, itens_em_andamento
     from app.caminho_central import caminho
+    from app.aprendizados_publicos import consultar as aprendizados_publicos
     listas = itens_em_andamento(sessao, conta_id)
     from app.dashboard.fontes import escopo_da_conta
     try:
@@ -199,6 +200,7 @@ def central(
         "exibir_dashboard": exibir_dashboard,
         "cartoes_forms": cartoes_em_andamento(sessao, conta_id, listas),
         "caminho": caminho(sessao, conta_id, listas),
+        "aprendizado": aprendizados_publicos(sessao, conta_id),
         "gabinete": bool(unidades(sessao, pessoa_id, 'demo34_gabinete')),
         **acesso, "conta_id": conta_id,
         "usuarios_demonstracao": usuarios_demonstracao(sessao, conta_id),

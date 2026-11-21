@@ -61,7 +61,7 @@ def consultar(sessao, conta_id, identidade_id):
         raise ValueError('Objeto inexistente.')
     ref = sessao.get(Referencia, obj.participacao_id)
     pessoa, papeis, uid = contexto(sessao, conta_id, ref)
-    exigir(papeis, 'secretaria', 'dpo', 'secretario', 'gabinete', 'verificador', 'relator', 'executor_unidade')
+    exigir(papeis, 'secretaria', 'dpo', 'secretario', 'gabinete', 'verificador', 'relator', 'executor_unidade', 'leitor_unidade')
     return obj, ref, estado(sessao, obj.id), pessoa, papeis, uid
 
 

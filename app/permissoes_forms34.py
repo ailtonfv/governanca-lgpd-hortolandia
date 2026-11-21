@@ -1,7 +1,7 @@
 """Escopo por pessoa e unidade; competências exclusivamente demonstrativas."""
 from sqlalchemy import select
 from app.fila_form2 import pessoa_ativa, unidades, autorizado
-from app.modelos import ParticipacaoForm2, AtribuicaoForm1Integral, Registro
+from app.modelos import ParticipacaoForm2, AtribuicaoForm1Integral, Registro, Designacao
 
 PAPEIS_DEMO = {'secretario': 'demo34_secretario', 'gabinete': 'demo34_gabinete',
                'verificador': 'demo34_verificador', 'relator': 'demo34_relator'}
@@ -12,6 +12,10 @@ def contexto(sessao, conta_id, referencia):
     registro = sessao.get(Registro, referencia.registro_id)
     uid = registro.unidade_principal_atual_id
     papeis = set()
+    # Leitura da própria unidade não atribui competência para nenhum ato.
+    vinculos = sessao.scalars(select(Designacao.papel).where(Designacao.pessoa_id == pessoa.id)).all()
+    if any(uid in unidades(sessao, pessoa.id, papel) for papel in set(vinculos)):
+        papeis.add('leitor_unidade')
     if unidades(sessao, pessoa.id, 'governanca_protecao_dados'):
         papeis.add('dpo')
     principal = sessao.scalar(select(ParticipacaoForm2).where(

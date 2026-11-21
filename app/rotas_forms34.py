@@ -320,7 +320,7 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
             'rotulos_atos':{'f34_'+k:v[3] for k,v in ATOS.items()},
             'atraso':dominio.em_atraso(e),'origem_nova':bool(origem and origem.versao!=ref.fonte_versao),
             'pode_restrito':pode_ler(s,conta_id,obj.id,e),
-            'papeis_visiveis':[{'secretaria':'Secretaria — preenchimento','aal':'AAL','dpo':'Encarregado de Dados (DPO)','secretario':'Secretário(a)','gabinete':'Gabinete do Prefeito','executor_unidade':'Executor habilitado da unidade','verificador':'Verificador do Comitê','relator':'Relator do Comitê'}[p] for p in sorted(papeis)],
+            'papeis_visiveis':[{'leitor_unidade':'Consulta da própria Secretaria','secretaria':'Secretaria — preenchimento','aal':'AAL','dpo':'Encarregado de Dados (DPO)','secretario':'Secretário(a)','gabinete':'Gabinete do Prefeito','executor_unidade':'Executor habilitado da unidade','verificador':'Verificador do Comitê','relator':'Relator do Comitê'}[p] for p in sorted(papeis)],
             'modelo_ripd_disponivel':MODELO_RIPD.is_file(),
             'historico':s.scalars(select(Evento).where(Evento.cadeia_id==obj.id).order_by(Evento.id.desc())).all()})
 

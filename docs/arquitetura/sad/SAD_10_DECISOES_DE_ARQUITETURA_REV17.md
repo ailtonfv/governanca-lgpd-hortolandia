@@ -1198,3 +1198,7 @@ A integração e o push do `main` não ativam servidores de vistoria: cada porta
 Providência sua é um item que exige atuação do servidor em sessão naquele momento. O que aguarda outra pessoa ou papel fica em acompanhamento. Central, fluxos e listas de Riscos e providências usam uma única função de domínio (`app/providencias.py`), sem decisão em template. Consultas solicitadas ao DPO ainda não manifestadas são providências suas; não se convertem em decisão vinculante nem alteram suas competências.
 
 As contagens da Operação e das demais telas do dashboard não são alteradas. Elas não usam a nova classificação. Se passarem a compartilhar essa função, a mudança depende de nova conferência antes da implementação. A projeção pessoal reutiliza escopos existentes e não concede acesso; dados históricos e atos permanecem intactos. Implementação na Parte 1 do Lote 14, sujeita a vistoria.
+
+### Lote 14 — camadas de consulta (Ailton, 21/11/2026)
+
+Pendências pessoais exigem ato do usuário em sessão; leitura dos Registros, riscos e ações abrange sua unidade; orientações autorizadas abrangem todas as unidades. A leitura não concede ato nem acesso à origem de outra unidade. O APA recebe o escopo de dashboard da própria Secretaria. Aprendizados mostram a última versão com verificação aprovada, conferência do DPO e autorização da Secretaria, inclusive durante revisão posterior ainda não autorizada.

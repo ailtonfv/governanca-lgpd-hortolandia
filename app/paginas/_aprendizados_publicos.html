@@ -1,0 +1,24 @@
+{% macro orientacao(item) %}
+<article class="dash-card">
+  <h3>Diretriz</h3><p>{{ item.diretriz }}</p>
+  <h4>Contexto</h4><p>{{ item.contexto }}</p>
+  <h4>Aplicação e limites</h4><p>{{ item.limites }}</p>
+  <footer>{{ item.secretaria }} · {{ item.registro }} · {{ item.item }}<br>
+    Verificação aprovada, conferência do DPO e autorização da Secretaria em {{ item.autorizado_texto }}.</footer>
+</article>
+{% endmacro %}
+<section aria-labelledby="aprendizados-prefeitura">
+  <h2 id="aprendizados-prefeitura">Aprendizados da Prefeitura</h2>
+  <p>{{ aprendizado.total }} orientações autorizadas para consulta</p>
+  <form method="get" action="/dashboard/aprendizados" class="dash-filtros">
+    <input type="hidden" name="conta_id" value="{{ conta_id }}">
+    <label>Palavra<input name="palavra" value="{{ aprendizado.palavra }}" maxlength="200"></label>
+    <label>Secretaria<select name="secretaria"><option value="">Todas as Secretarias</option>
+    {% for u in aprendizado.secretarias %}<option value="{{ u.id }}" {% if u.id==aprendizado.secretaria %}selected{% endif %}>{{ u.nome }}</option>{% endfor %}</select></label>
+    <button type="submit">Buscar aprendizados</button>
+  </form>
+  {% if lista_completa %}
+    {% for item in aprendizado.itens %}{{ orientacao(item) }}{% else %}<p>Nenhuma orientação autorizada neste filtro.</p>{% endfor %}
+  {% elif aprendizado.destaque %}{{ orientacao(aprendizado.destaque) }}{% else %}<p>Nenhuma orientação autorizada para consulta.</p>{% endif %}
+  {% if not lista_completa %}<p><a href="/dashboard/aprendizados?conta_id={{ conta_id|urlencode }}">Ver todos os aprendizados</a></p>{% endif %}
+</section>

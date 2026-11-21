@@ -158,7 +158,9 @@ def test_secretario_nao_acessa_outra_secretaria_por_url(sessao,entrada):
     outra=next(u for u in c.filtrar(carregar(sessao,escopo),escopo,{})['secretarias'] if u.id==propria)
     r=TestClient(app).get('/dashboard?conta_id='+SECRETARIO+'&secretaria=SECRETARIA-NAO-AUTORIZADA')
     assert r.status_code==403
-    for destino in ('risco','correcao','operacao','cobertura','aprendizados','circulacao'):
+    # Aprendizados tem filtro global; unidade inexistente é consulta inválida.
+    assert TestClient(app).get('/dashboard/aprendizados?conta_id='+SECRETARIO+'&secretaria=SECRETARIA-NAO-AUTORIZADA').status_code==400
+    for destino in ('risco','correcao','operacao','cobertura','circulacao'):
         assert TestClient(app).get('/dashboard/'+destino+'?conta_id='+SECRETARIO+'&secretaria=SECRETARIA-NAO-AUTORIZADA').status_code==403
 
 

@@ -25,7 +25,8 @@ def test_cartoes_filtram_escopo_e_nao_gravam(sessao,entrada):
     assert any(acao in i['href'] for i in beta[4])
     assert len(beta[2])==1 and 'Abrir participação' not in beta[2][0]['texto']
     alfa=itens_em_andamento(sessao,'CONTA-A1')
-    assert not alfa[2] and not alfa[3]
+    assert not alfa[2]
+    assert len(alfa[3]) == 1 and not alfa[3][0]['pendente']
     # Alfa já é executor habilitado da unidade (12-E): consulta a ação,
     # mas não tem providência enquanto o plano aguarda a Secretaria.
     assert len(alfa[4]) == 1 and acao in alfa[4][0]['href']
@@ -35,7 +36,7 @@ def test_cartoes_filtram_escopo_e_nao_gravam(sessao,entrada):
         r=c.get(f'/central/itens/{n}?conta_id=CONTA-B1')
         assert r.status_code==200
     assert c.get('/central/itens/5?conta_id=CONTA-B1').status_code==404
-    assert c.get(f'/forms34/{risco}/blocos/1?conta_id=CONTA-A1').status_code==403
+    assert c.get(f'/forms34/{risco}/blocos/1?conta_id=CONTA-A1').status_code==200
     assert [sessao.scalar(select(func.count()).select_from(m)) for m in (Evento,EventoAuditoria)]==antes
 
 
@@ -50,4 +51,7 @@ def test_lista_forms34_filtra_sem_conceder_acesso(sessao,entrada):
     for d in sessao.scalars(select(Designacao).where(Designacao.pessoa_id=='PESSOA-B',Designacao.papel=='aal_form2')):d.ativa=False
     sessao.commit()
     itens=itens_em_andamento(sessao,'CONTA-B1')
-    assert not itens[2] and not itens[3] and not itens[4]
+    assert not itens[2]
+    # Leitura da própria unidade permanece; a habilitação retirada não concede atos.
+    assert itens[3] and itens[4]
+    assert not any(i['pendente'] for n in (3,4) for i in itens[n])
