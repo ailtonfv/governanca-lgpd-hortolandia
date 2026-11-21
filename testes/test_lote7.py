@@ -12,7 +12,7 @@ def test_p102_progresso_completo():
     assert estado["progresso"]["1"] == {"respondidas": 3, "ativas": 3, "percentual": 100}
     assert estado["situacao"]["1"] == "✓ Todas as perguntas ativas respondidas"
 
-from fastapi.testclient import TestClient
+from testes.apoio_entrada import ClienteAposApresentacao as TestClient
 from app.main import app
 from testes.test_governanca_form2_v9 import principal
 

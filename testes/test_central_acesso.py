@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 from html import unescape
 import re
 
-from fastapi.testclient import TestClient
+from testes.apoio_entrada import ClienteAposApresentacao as TestClient
 import pytest
 from sqlalchemy import select
 
@@ -82,7 +82,8 @@ def test_cartoes_explicam_disponibilidade_sem_oferecer_acesso_direto():
     for numero, cartao in enumerate(cartoes[:4], 1):
         assert f'FORM {numero}' in cartao
         assert 'Seus itens em andamento' in cartao
-        assert 'Nenhum item em andamento para você.' in cartao
+        assert 'Nenhuma providência sua neste FORM.' in cartao
+        assert 'Em acompanhamento (0)' in cartao
         assert 'Disponível na demonstração, conforme as permissões do seu perfil.' in cartao
         assert f'>Acessar FORM {numero}</a>' in cartao
         assert cartao.count('acesso-instrumento') == 1

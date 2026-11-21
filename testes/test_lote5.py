@@ -27,7 +27,7 @@ def test_auditoria_dez_consultas_simultaneas():
 
 
 def test_painel_exige_designacao_vigente(sessao):
-    from fastapi.testclient import TestClient
+    from testes.apoio_entrada import ClienteAposApresentacao as TestClient
     from app.main import app
     from app.fila_form2 import agora
     from app.modelos import DesignacaoEncarregado
@@ -50,7 +50,7 @@ def test_exclusividade_no_dominio():
     with pytest.raises(ValueError):
         aplicar_bloco({},bloco=2,alteracoes={"F2-2.9.1":["ALT_01","A_CONFIRMAR"]},proxima_versao=1)
 
-from fastapi.testclient import TestClient
+from testes.apoio_entrada import ClienteAposApresentacao as TestClient
 from app.main import app
 from app.modelos import ParticipacaoForm2
 from testes.test_governanca_form2_v9 import principal

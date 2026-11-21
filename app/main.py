@@ -173,6 +173,7 @@ def central(
     request: Request,
     conta_id: str = Query(default="CONTA-A1", max_length=50),
     secretaria_id: str | None = Query(default=None, max_length=50),
+    entrar: bool = Query(default=False),
     sessao: Session = Depends(obter_sessao),
 ):
     acesso = carregar_central(sessao, conta_id)
@@ -180,6 +181,9 @@ def central(
         return _erro_acesso_central(request, conta_indisponivel=True)
     if secretaria_id is not None and secretaria_id not in acesso["secretarias"]:
         return _erro_acesso_central(request)
+    from app.apresentacao_entrada import apresentada, marcar
+    if not entrar and not apresentada(request, conta_id):
+        return RedirectResponse('/como-funciona?' + urlencode({'conta_id': conta_id}), status_code=303)
     from app.consultas_interface import usuarios_demonstracao
     pessoa_id = acesso["identidade"]["pessoa_id"]
     from app.central_instrumentos import cartoes_em_andamento, itens_em_andamento
@@ -191,7 +195,7 @@ def central(
         exibir_dashboard = True
     except PermissionError:
         exibir_dashboard = False
-    return paginas.TemplateResponse(request=request, name="central.html", context={
+    resposta = paginas.TemplateResponse(request=request, name="central.html", context={
         "exibir_dashboard": exibir_dashboard,
         "cartoes_forms": cartoes_em_andamento(sessao, conta_id, listas),
         "caminho": caminho(sessao, conta_id, listas),
@@ -203,6 +207,7 @@ def central(
         "outro_vinculo": any(v["papel"] != PAPEIS["dpo"] for v in acesso["identidade"]["designacoes"]),
         "selecao": secretaria_id or request.cookies.get(f"secretaria_{conta_id}"),
     })
+    return marcar(resposta, conta_id)
 
 
 @app.get("/como-funciona", response_class=HTMLResponse)
@@ -211,7 +216,11 @@ def apoio_entrada(request: Request, conta_id: str = Query(default="CONTA-A1", ma
     if carregar_central(sessao, conta_id) is None:
         return _erro_acesso_central(request, conta_indisponivel=True)
     pagina = "fluxograma" if request.url.path == "/fluxograma" else "como-funciona"
-    return paginas.TemplateResponse(request=request, name="apoio_" + pagina + ".html", context={"conta_id": conta_id})
+    resposta = paginas.TemplateResponse(request=request, name="apoio_" + pagina + ".html", context={"conta_id": conta_id})
+    if pagina == 'como-funciona':
+        from app.apresentacao_entrada import marcar
+        marcar(resposta, conta_id)
+    return resposta
 
 
 @app.get("/central/providencias", response_class=HTMLResponse)

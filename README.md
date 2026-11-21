@@ -2057,3 +2057,7 @@ Planos e decisões têm leitura antes da confirmação e histórico visível. O 
 A Central mostra os dois percursos dos FORMs e separa providências pessoais de acompanhamento. A classificação compartilhada em `app/providencias.py` é usada pela Central, seus fluxos e listas e por Riscos e providências. Uma atuação disponível por opção não é automaticamente uma pendência. Manifestações solicitadas e ainda não registradas entram para o DPO, preservado seu caráter consultivo. As filas e contagens do dashboard permanecem independentes e inalteradas.
 
 Os fluxos usam as mesmas listas autorizadas dos seus destinos; um item abre diretamente, vários abrem a lista filtrada. São exibidos os três itens mais antigos por data de criação/ingresso, com acesso à lista completa. Acompanhamento fica recolhido. Os links fixos abrem as páginas de apoio fornecidas, em leitura. O redirecionamento de primeiro acesso, aprendizados públicos e temas pertencem às próximas partes. Esta entrega não altera servidores de vistoria.
+
+### Lote 14 — apresentação inicial
+
+A primeira entrada de cada conta fictícia abre Como funciona. A marca é por conta e navegador (cookie com validade de um ano); limpar os cookies reapresenta a orientação. Não é autenticação nem ato institucional. Fluxograma e Como funciona permanecem acessíveis na Central.

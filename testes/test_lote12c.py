@@ -3,7 +3,7 @@ from pathlib import Path
 from types import SimpleNamespace
 import os,re
 import pytest
-from fastapi.testclient import TestClient
+from testes.apoio_entrada import ClienteAposApresentacao as TestClient
 from app.main import app
 from app.apresentacao_forms34 import descricao_nota34, PROBABILIDADE, IMPACTO
 from app.apresentacao_situacoes_form2 import situacao_origem,situacoes_complementacao

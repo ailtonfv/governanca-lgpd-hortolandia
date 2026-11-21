@@ -1,6 +1,6 @@
 import re
 
-from fastapi.testclient import TestClient
+from testes.apoio_entrada import ClienteAposApresentacao as TestClient
 
 from app.main import app
 from app.respostas_form2 import estados_regua_form2

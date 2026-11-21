@@ -1,7 +1,7 @@
 """Providências pessoais: estados sintéticos e atos reais, sem alteração de permissões."""
 from uuid import uuid4
 import pytest
-from fastapi.testclient import TestClient
+from testes.apoio_entrada import ClienteAposApresentacao as TestClient
 from app.main import app
 from app.providencias import classificar
 from app.central_instrumentos import itens_em_andamento

@@ -1,5 +1,5 @@
 """Cartões da Central: limites, permissões e destinos sem executar atos."""
-from fastapi.testclient import TestClient
+from testes.apoio_entrada import ClienteAposApresentacao as TestClient
 from sqlalchemy import select, func
 from app.main import app
 from app.modelos import Evento, EventoAuditoria, Designacao

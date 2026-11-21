@@ -4,7 +4,7 @@ from datetime import datetime, timezone, timedelta
 from types import SimpleNamespace as NS
 import pytest
 from sqlalchemy import select, func, event
-from fastapi.testclient import TestClient
+from testes.apoio_entrada import ClienteAposApresentacao as TestClient
 from app.main import app
 from app.banco import motor
 from app.dashboard import consultas as c

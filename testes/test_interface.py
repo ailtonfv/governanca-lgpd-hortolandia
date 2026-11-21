@@ -1,6 +1,6 @@
 """Primeiro corte HTTP: painel, flags e proteção de leitura."""
 
-from fastapi.testclient import TestClient
+from testes.apoio_entrada import ClienteAposApresentacao as TestClient
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
