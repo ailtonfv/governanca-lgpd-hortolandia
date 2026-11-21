@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Protótipo — Central de Acesso com fluxos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --azul:#0c3b5a; --azul-2:#155a86; --azul-claro:#e8f0f6; --fundo:#f3f6f9;
+    --texto:#1d2733; --cinza:#5b6875; --linha:#d5dde5; --branco:#fff;
+    --apoio:#7a8794; --destaque-bg:#fff7d6; --destaque-borda:#8a6d00;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,Arial,sans-serif;color:var(--texto);background:var(--fundo);line-height:1.45}
+  header.topo{background:var(--azul);color:#fff;padding:18px 0}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+  .topo .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .marca{display:flex;align-items:center;gap:14px}
+  .brasao{width:54px;height:54px;border-radius:50%;background:#f2c94c;border:3px solid #2e9e44;display:grid;place-items:center;font-weight:800;color:var(--azul);font-size:13px}
+  .marca small{display:block;font-weight:800;font-size:12px;letter-spacing:.04em}
+  .marca strong{font-size:20px;font-weight:800}
+  .aviso-demo{border:1px solid rgba(255,255,255,.7);border-radius:999px;padding:8px 16px;font-size:13px;max-width:430px}
+  .proto{background:#fff3c4;border-bottom:1px solid #e2c96a;font-size:13px;padding:8px 0;position:sticky;top:0;z-index:10}
+  .proto .wrap{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .proto label{font-weight:700}
+  .proto select{font:inherit;padding:4px 8px;border-radius:6px;border:1px solid #c9b25a}
+  h1{font-size:40px;color:var(--azul);margin:28px 0 6px;font-weight:800}
+  .sub{margin:0 0 4px}
+  a{color:var(--azul-2)}
+  .papel{background:#fff;border:1px solid var(--linha);border-radius:12px;padding:16px 20px;margin:18px 0;display:flex;gap:24px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+  .papel b{color:var(--azul)}
+  .resumo{font-weight:700}
+  .resumo.zero{font-weight:500;color:var(--cinza)}
+
+  /* Fluxos */
+  .fluxos{background:#fff;border:1px solid var(--linha);border-top:4px solid var(--azul);border-radius:12px;padding:20px 22px 10px;margin-bottom:22px}
+  .fluxos h2{margin:0 0 4px;font-size:22px;color:var(--azul)}
+  .legenda{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--cinza);margin:6px 0 14px}
+  .legenda span{display:inline-flex;align-items:center;gap:6px}
+  .amostra{width:22px;height:14px;border-radius:4px;border:1px solid var(--linha);background:#fff}
+  .amostra.atua{border:3px solid var(--azul)}
+  .amostra.prov{background:var(--destaque-bg);border:3px solid var(--azul)}
+  .fluxo{margin:6px 0 18px}
+  .fluxo h3{font-size:15px;margin:0 0 8px;color:var(--texto)}
+  .fluxo h3 em{font-style:normal;color:var(--cinza);font-weight:500}
+  .trilha{display:flex;align-items:stretch;gap:0;flex-wrap:nowrap}
+  .etapa{flex:1 1 0;min-width:0;max-width:230px;background:#fff;border:1px solid var(--linha);border-radius:10px;padding:10px 12px;position:relative;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:4px}
+  .etapa .num{font-size:11px;font-weight:700;color:var(--cinza);letter-spacing:.04em;text-transform:uppercase}
+  .etapa .nome{font-weight:700;font-size:15px;color:var(--azul)}
+  .etapa .quem{font-size:12.5px;color:var(--cinza)}
+  .etapa .marca-atua{display:none;font-size:12px;font-weight:700;color:var(--azul)}
+  .etapa .marca-prov{display:none;font-size:13px;font-weight:800;color:var(--azul);align-items:center;gap:6px}
+  .etapa.atua{border:3px solid var(--azul)}
+  .etapa.atua .marca-atua{display:block}
+  .etapa.prov{background:var(--destaque-bg);border:3px solid var(--azul);cursor:pointer}
+  .etapa.prov .marca-prov{display:inline-flex}
+  .etapa.prov .marca-atua{display:none}
+  .etapa.prov:hover{box-shadow:0 0 0 3px rgba(12,59,90,.15)}
+  .seta{flex:0 0 22px;display:grid;place-items:center;color:var(--apoio);font-size:18px}
+  .ramo{margin:8px 0 0 0;display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:13px;color:var(--cinza)}
+  .apoio{border:1.5px dashed var(--apoio);border-radius:8px;padding:6px 10px;background:#fafbfc}
+  .apoio.atua{border:3px solid var(--azul);background:#fff;color:var(--texto)}
+  .apoio.prov{border:3px solid var(--azul);background:var(--destaque-bg);color:var(--texto);font-weight:700}
+  .atalho{margin-top:8px;font-size:13px;color:var(--cinza);display:flex;align-items:center;gap:8px}
+  .atalho .tracejado{flex:0 0 40px;border-top:2px dashed var(--apoio)}
+  abbr{text-decoration:underline dotted;cursor:help}
+  .nota{font-size:12.5px;color:var(--cinza);margin:2px 0 12px}
+
+  /* Etiqueta Pendente (achado 104) */
+  .sino{width:16px;height:16px;flex:0 0 16px}
+  .etq-pend{display:inline-flex;align-items:center;gap:6px;background:var(--azul-claro);color:var(--azul);font-weight:800;border:1.5px solid var(--azul);border-radius:999px;padding:2px 10px;font-size:13px}
+  .etq-acomp{display:inline-block;color:var(--cinza);font-size:13px;font-weight:600}
+
+  /* Cartões atuais */
+  h2.secao{font-size:26px;color:var(--azul);margin:26px 0 12px}
+  .cartoes{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  .cartao{border-radius:12px;padding:18px 20px;border-left:5px solid}
+  .c1{background:#eaf2fb;border-color:#2f6db3}.c2{background:#e9f6ee;border-color:#2e8b57}
+  .c3{background:#fff4e6;border-color:#a86512}.c4{background:#f1ecfa;border-color:#6d4fa3}
+  .cartao small{font-weight:800;letter-spacing:.05em}
+  .cartao h4{margin:4px 0 2px;font-size:19px}
+  .cartao .perg{margin:0 0 10px;font-size:14.5px}
+  .item{margin:6px 0;font-size:14px}
+  .item a{font-weight:600}
+  .rodape{font-size:12px;color:var(--cinza);margin:40px 0 30px}
+  @media (max-width:820px){
+    .trilha{flex-wrap:wrap}
+    .cartoes{grid-template-columns:1fr}
+    .seta{transform:rotate(90deg);flex-basis:100%;height:16px}
+    .etapa{max-width:none}
+    h1{font-size:30px}
+  }
+
+.aprend{background:#fff;border:1px solid #d5dde5;border-left:6px solid #0c3b5a;border-radius:10px;padding:16px 20px;margin:22px 0 8px}
+.aprend .top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.aprend h2{margin:0;font-size:20px;color:#0c3b5a}.aprend .todos{font-size:13px;color:#5b6875}
+.aprend .busca{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap}.aprend input,.aprend select{font:inherit;padding:7px 10px;border:1px solid #b9c6d2;border-radius:6px}
+.aprend input{flex:1 1 260px}.aprend .card{background:#f4f7fa;border-radius:8px;padding:12px 14px;font-size:14px}
+.aprend .card b{color:#0c3b5a}.aprend .rod{font-size:12px;color:#5b6875;margin-top:6px}.aprend .prox{font-size:12px;color:#5b6875;margin-top:10px}
+</style>
+</head>
+<body>
+<header class="topo"><div class="wrap">
+  <div class="marca"><div class="brasao">PMH</div><div><small>PREFEITURA MUNICIPAL DE HORTOLÂNDIA</small><strong>Sistema Municipal de Governança LGPD</strong></div></div>
+  <div class="aviso-demo">Ambiente de demonstração — utilize exclusivamente dados fictícios.</div>
+</div></header>
+
+<div class="proto"><div class="wrap">
+  <label for="ver">Protótipo · ver como:</label>
+  <select id="ver">
+    <option value="beta">Servidor Beta — AAL / Secretaria</option>
+    <option value="alfa">Servidor Alfa — APA</option>
+    <option value="dpo">Encarregado de Dados — DPO</option>
+    <option value="verif">Membro do Comitê — verificador</option>
+    <option value="gab">Gabinete do Prefeito</option>
+  </select>
+  <span>Contagens ilustrativas. No sistema, vêm das mesmas regras das listas atuais.</span>
+</div></div>
+
+<main class="wrap">
+  <h1>Central de Acesso</h1>
+  <p class="sub"><a href="como-funciona.html"><b>Como funciona o sistema</b></a> · <a href="fluxograma.html"><b>Ver o fluxograma</b></a> · <a href="#">Abrir dashboard LGPD — somente leitura</a></p>
+
+  <section class="papel" aria-live="polite">
+    <div>Servidor em sessão: <b id="pNome">Servidor Beta (fictício)</b> · <span id="pPapel">AAL / Secretaria</span><br><span id="pSec" style="color:var(--cinza)">Planejamento Urbano e Gestão Estratégica</span></div>
+    <div id="pResumo" class="resumo">Você tem 3 providências pendentes</div>
+  </section>
+
+  <section class="fluxos" aria-labelledby="tFluxos">
+    <h2 id="tFluxos">Seu caminho no sistema</h2>
+    <div class="legenda">
+      <span><i class="amostra atua"></i>Você atua aqui</span>
+      <span><i class="amostra prov"></i>Há uma providência sua aqui (clique para abrir)</span>
+      <span><i class="amostra"></i>Etapa de outro papel</span>
+    </div>
+
+    <div class="fluxo">
+      <h3>1. Levantar e validar <em>· FORMs 1 e 2</em></h3>
+      <div class="trilha">
+        <a class="etapa" data-id="f1-levanta"><span class="num">FORM 1</span><span class="nome">Levantar o tratamento</span><span class="quem"><abbr title="Agente Público Autorizado: abre o Registro, indica o ARP e o AAL e confere o FORM 1">APA</abbr> envia ao <abbr title="Agente Responsável pelo Preenchimento: descreve os fatos do tratamento no FORM 1">ARP</abbr>, que descreve os fatos</span><span class="marca-atua">Sua parte</span><span class="marca-prov"></span></a>
+        <span class="seta">→</span>
+        <a class="etapa" data-id="f1-confere"><span class="num">FORM 1</span><span class="nome">Conferir e confirmar</span><span class="quem"><abbr title="Agente Público Autorizado: abre o Registro, indica o ARP e o AAL e confere o FORM 1">APA</abbr>; quem apresentou não confere</span><span class="marca-atua">Sua parte</span><span class="marca-prov"></span></a>
+        <span class="seta">→</span>
+        <a class="etapa" data-id="f2-analisa"><span class="num">FORM 2</span><span class="nome">Analisar</span><span class="quem"><abbr title="Agente de Análise de Legitimidade: assume e conclui a análise do FORM 2">AAL</abbr> assume pela fila</span><span class="marca-atua">Sua parte</span><span class="marca-prov"></span></a>
+        <span class="seta">→</span>
+        <a class="etapa" data-id="f2-conclui"><span class="num">FORM 2</span><span class="nome">Análise concluída</span><span class="quem"><abbr title="Agente de Análise de Legitimidade: assume e conclui a análise do FORM 2">AAL</abbr>; não equivale a homologação</span><span class="marca-atua">Sua parte</span><span class="marca-prov"></span></a>
+      </div>
+      <div class="ramo">Apoio à análise, quando necessário:
+        <span class="apoio" data-id="apoio-dpo"><abbr title="Encarregado de Dados: orienta e se manifesta, de modo consultivo; não preenche nem decide">DPO</abbr></span>
+        <span class="apoio" data-id="apoio-jur">Jurídico</span>
+        <span class="apoio" data-id="apoio-tema">Consultas temáticas</span>
+      </div>
+    </div>
+
+    <div class="fluxo">
+      <h3>2. Avaliar e corrigir <em>· FORMs 3 e 4</em></h3>
+      <div class="trilha">
+        <a class="etapa" data-id="f3-avalia"><span class="num">FORM 3</span><span class="nome">Avaliar o risco</span><span class="quem">Secretaria propõe; <abbr title="Encarregado de Dados: orienta e se manifesta, de modo consultivo; não preenche nem decide">DPO</abbr> confirma a nota</span><span class="marca-atua">Sua parte</span><span class="marca-prov"></span></a>
+        <span class="seta">→</span>
+        <a class="etapa" data-id="f3-decide"><span class="num">FORM 3</span><span class="nome">Decidir sobre o risco</span><span class="quem">Secretário; Crítico: Prefeito, pelo Gabinete</span><span class="marca-atua">Sua parte</span><span class="marca-prov"></span></a>
+        <span class="seta">→</span>
+        <a class="etapa" data-id="f4-plano"><span class="num">FORM 4</span><span class="nome">Plano aprovado</span><span class="quem">Secretaria propõe; autoridade aprova</span><span class="marca-atua">Sua parte</span><span class="marca-prov"></span></a>
+        <span class="seta">→</span>
+        <a class="etapa" data-id="f4-executa"><span class="num">FORM 4</span><span class="nome">Ação executada</span><span class="quem">Secretaria registra, com evidência</span><span class="marca-atua">Sua parte</span><span class="marca-prov"></span></a>
+        <span class="seta">→</span>
+        <a class="etapa" data-id="f4-verifica"><span class="num">FORM 4</span><span class="nome">Verificação independente</span><span class="quem">Comitê, de outra Secretaria</span><span class="marca-atua">Sua parte</span><span class="marca-prov"></span></a>
+        <span class="seta">→</span>
+        <a class="etapa" data-id="f4-aprende"><span class="num">FORM 4</span><span class="nome">Aprendizagem autorizada</span><span class="quem">Secretaria registra; <abbr title="Encarregado de Dados: orienta e se manifesta, de modo consultivo; não preenche nem decide">DPO</abbr> confere</span><span class="marca-atua">Sua parte</span><span class="marca-prov"></span></a>
+      </div>
+      <div class="atalho"><span class="tracejado"></span>Entrada direta no FORM 4: a análise do FORM 2 pode encaminhar uma providência sem passar pela avaliação de risco.</div>
+    </div>
+    <p class="nota">Um Registro pode estar em mais de uma etapa ao mesmo tempo. Com um item, o clique abre o item; com vários, abre a lista filtrada.</p>
+  </section>
+
+  <section class="aprend" aria-labelledby="tAprend">
+    <div class="top"><h2 id="tAprend">Aprendizados da Prefeitura</h2><span class="todos">Aberto a todos os servidores · todas as Secretarias</span></div>
+    <p style="margin:6px 0 0">1 orientação autorizada para consulta. Antes de tratar uma situação parecida, veja o que outras Secretarias já aprenderam.</p>
+    <div class="busca"><input type="search" placeholder="Buscar por palavra (ex.: atendimento, fichas, imagem)"><select><option>Todas as Secretarias</option></select><a href="#" style="align-self:center">Ver todos os aprendizados</a></div>
+    <div class="card"><b>Diretriz:</b> documentos com dados pessoais ficam fora da vista do público durante o atendimento presencial.<br><b>Aplicação e limites:</b> vale para balcões e recepções; locais com fluxo de público diferente pedem análise específica.
+      <div class="rod">Autorizado para consulta em 20/11/2026 · Ação verificada pelo Comitê · LGPD-2026-00005 · Ação 1 (A01)</div></div>
+    <p class="prox">Só aparecem aprendizados com verificação aprovada, conferência do DPO e autorização da Secretaria. O contexto é sempre um relato impessoal. Próximo passo (após 15/12): busca por tema, com lista mantida pelo DPO.</p>
+  </section>
+
+  <h2 class="secao">Instrumentos de cada Registro</h2>
+  <div class="cartoes" id="cartoes"></div>
+
+  <p class="rodape">Protótipo de Claude para o Lote 12-G/entrada — 21/11/2026. Dados e contagens ilustrativos.</p>
+</main>
+
+<script>
+const SINO='<svg class="sino" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 22a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22zm7-6V11a7 7 0 0 0-5.5-6.84V3.5a1.5 1.5 0 0 0-3 0v.66A7 7 0 0 0 5 11v5l-2 2v1h18v-1l-2-2z"/></svg>';
+const PAPEIS={
+  beta:{nome:'Servidor Beta (fictício)',papel:'AAL / Secretaria',sec:'Planejamento Urbano e Gestão Estratégica',
+    atua:['f2-analisa','f2-conclui','f3-avalia','f4-plano','f4-executa','f4-aprende'],
+    prov:{'f2-analisa':2,'f2-conclui':1,'f3-avalia':1},
+    cart:{1:[],2:[['p','LGPD-2026-00001 · Oficina cultural','Concluir a análise'],['p','LGPD-2026-00002 e mais 1','Analisar (2 Registros)']],3:[['p','LGPD-2026-00006 · Risco 1: Fichas na recepção (R01)','Propor a avaliação']],4:[['a','LGPD-2026-00005 · Ação 1: Proteger documentos no atendimento (A01)','Aprendizagem autorizada em 20/11/2026 às 12h10']]}},
+  alfa:{nome:'Servidor Alfa (fictício)',papel:'APA titular',sec:'Planejamento Urbano e Gestão Estratégica',
+    atua:['f1-confere'],prov:{'f1-confere':1},
+    cart:{1:[['p','LGPD-2026-00007 · Atendimento ao munícipe','Conferir e confirmar']],2:[],3:[],4:[]}},
+  dpo:{nome:'Encarregado de Dados (fictício)',papel:'DPO',sec:'Atuação em todas as Secretarias',
+    atua:['f3-avalia','f4-aprende','apoio-dpo'],prov:{'apoio-dpo':1},
+    cart:{1:[],2:[['p','LGPD-2026-00002 · Cadastro de eventos','Manifestar-se (participação aberta)']],3:[['a','LGPD-2026-00005 · Risco 1 (R01)','Avaliação concluída em 20/11/2026 às 12h15']],4:[]}},
+  verif:{nome:'Membro do Comitê — Esportes (fictício)',papel:'Verificador do Comitê',sec:'Esporte e Lazer',
+    atua:['f4-verifica'],prov:{},
+    cart:{1:[],2:[],3:[],4:[['a','LGPD-2026-00005 · Ação 1 (A01)','Verificação registrada em 20/11/2026 às 11h10']]}},
+  gab:{nome:'Gabinete do Prefeito (fictício)',papel:'Gabinete',sec:'Governo',
+    atua:['f3-decide','f4-plano'],prov:{},
+    cart:{1:null,2:null,3:[['a','LGPD-2026-00005 · Risco 1 (R01)','Avaliação concluída em 20/11/2026 às 12h15']],4:[['a','LGPD-2026-00005 · Ação 1 (A01)','Aprendizagem autorizada em 20/11/2026 às 12h10']]}}
+};
+const CART=[
+ {n:1,c:'c1',t:'Levantamento do tratamento',p:'Como esse processo, atividade ou serviço funciona hoje?'},
+ {n:2,c:'c2',t:'Validação jurídica e institucional',p:'Por que e em que condições esse tratamento pode ocorrer?'},
+ {n:3,c:'c3',t:'Avaliação de riscos e controles',p:'Que riscos o tratamento apresenta e quais controles existem?'},
+ {n:4,c:'c4',t:'Plano de ação, monitoramento e aprendizagem institucional',p:'O que precisa ser feito, por quem, até quando e como comprovar?'}];
+function render(k){
+  const P=PAPEIS[k];
+  document.getElementById('pNome').textContent=P.nome;
+  document.getElementById('pPapel').textContent=P.papel;
+  document.getElementById('pSec').textContent=P.sec;
+  const total=Object.values(P.prov).reduce((a,b)=>a+b,0);
+  const r=document.getElementById('pResumo');
+  r.className='resumo'+(total?'':' zero');
+  r.innerHTML=total?SINO.replace('class="sino"','class="sino" style="vertical-align:-2px;color:#0c3b5a"')+' Você tem '+total+(total>1?' providências pendentes':' providência pendente'):'Nenhuma providência sua agora. As etapas abaixo mostram o percurso.';
+  document.querySelectorAll('[data-id]').forEach(el=>{
+    const id=el.dataset.id; el.classList.remove('atua','prov');
+    if(!el.querySelector('.marca-prov')){ if(el.dataset.orig===undefined) el.dataset.orig=el.innerHTML; }
+    if(P.prov[id]){el.classList.add('prov');const m=el.querySelector('.marca-prov');const n=P.prov[id];
+      if(m)m.innerHTML=SINO+(n===1?'1 providência sua · abrir':n+' providências suas · ver lista');
+      else el.innerHTML=el.dataset.orig+' · '+n+(n===1?' providência sua':' providências suas');}
+    else{ if(el.dataset.orig!==undefined) el.innerHTML=el.dataset.orig;
+      if(P.atua.includes(id)) el.classList.add('atua');}
+  });
+  const box=document.getElementById('cartoes'); box.innerHTML='';
+  CART.forEach(c=>{
+    const itens=P.cart[c.n]; if(itens===null)return;
+    let h='<div class="cartao '+c.c+'"><small>FORM '+c.n+'</small><h4>'+c.t+'</h4><p class="perg">'+c.p+'</p>';
+    const pend=itens.filter(i=>i[0]==='p'), ac=itens.filter(i=>i[0]==='a');
+    if(pend.length){h+='<div class="etq-pend">'+SINO+'Pendente para você</div>';pend.forEach(i=>h+='<div class="item"><a href="#">'+i[1]+'</a><br><b>'+i[2]+'</b></div>');}
+    if(ac.length){h+='<div class="etq-acomp" style="margin-top:8px">Em acompanhamento</div>';ac.forEach(i=>h+='<div class="item"><a href="#">'+i[1]+'</a><br><span style="color:#5b6875">'+i[2]+'</span></div>');}
+    if(!itens.length)h+='<div class="item" style="color:#5b6875">Nenhum item para você.</div>';
+    box.insertAdjacentHTML('beforeend',h+'<p style="font-size:12.5px;color:#5b6875;margin:12px 0 0">Disponível na demonstração, conforme as permissões do seu perfil. Não equivale a homologação institucional.</p></div>');
+  });
+}
+document.getElementById('ver').addEventListener('change',e=>render(e.target.value));
+render('beta');
+</script>
+</body>
+</html>
