@@ -1,0 +1,27 @@
+{% macro explicar_siglas(texto) -%}
+{% set siglas = {'APA':'Agente Público Autorizado','ARP':'Agente Responsável pelo Preenchimento','AAL':'Agente de Análise de Legitimidade','DPO':'Encarregado de Dados — atuação consultiva'} %}
+{% for palavra in texto.split(' ') %}{% set sigla = palavra.strip('.,;:') %}{% if sigla in siglas %}<abbr title="{{ siglas[sigla] }}">{{ palavra }}</abbr>{% else %}{{ palavra }}{% endif %}{{ ' ' }}{% endfor %}
+{%- endmacro %}
+<link rel="stylesheet" href="/estaticos/caminho_central.css?v=14-1">
+{% macro etapa(e) %}
+<li class="etapa-caminho {{ 'sua-parte' if e.sua_parte else '' }} {{ 'tem-providencia' if e.quantidade else '' }}" data-etapa="{{ e.chave }}">
+  <h4>{% if e.quantidade %}<a href="{{ e.href }}">{{ e.titulo }}</a>{% else %}{{ e.titulo }}{% endif %}</h4>
+  <p>{{ explicar_siglas(e.explicacao) }}</p>
+  {% if e.sua_parte %}<strong class="marca-parte">Sua parte</strong>{% endif %}
+  {% if e.quantidade %}<p><span aria-hidden="true">🔔</span> {{ e.quantidade }} providência{{ 's' if e.quantidade != 1 else '' }} sua{{ 's' if e.quantidade != 1 else '' }}</p>
+  <ul>{% for item in e.itens %}<li><a href="{{ item.href }}">{{ item.texto }}</a></li>{% endfor %}</ul>
+  {% if e.quantidade > 3 %}<a href="{{ e.lista }}">Ver todos ({{ e.quantidade }})</a>{% endif %}
+  {% endif %}
+</li>
+{% endmacro %}
+<section class="caminho-central" aria-labelledby="titulo-caminho">
+  <h2 id="titulo-caminho">Seu caminho no sistema</h2>
+  <p>Borda forte: sua parte no percurso. Fundo amarelo e sino: providência sua agora.</p>
+  <p class="siglas-caminho"><abbr title="Agente Responsável pelo Preenchimento">ARP</abbr> · <abbr title="Agente Público Autorizado">APA</abbr> · <abbr title="Agente de Análise de Legitimidade">AAL</abbr> · <abbr title="Encarregado de Dados — atuação consultiva">DPO</abbr></p>
+  <h3>1. Levantar e validar (FORMs 1 e 2)</h3>
+  <ol class="trilha-caminho">{% for e in caminho if e.fluxo == 1 %}{{ etapa(e) }}{% endfor %}</ol>
+  <aside aria-label="Apoio opcional"><ul class="apoio-caminho">{% for e in caminho if e.fluxo == 0 %}{{ etapa(e) }}{% endfor %}</ul></aside>
+  <h3>2. Avaliar e corrigir (FORMs 3 e 4)</h3>
+  <ol class="trilha-caminho segunda-trilha">{% for e in caminho if e.fluxo == 2 %}{{ etapa(e) }}{% endfor %}</ol>
+  <p class="entrada-direta">Entrada direta no FORM 4: a análise do FORM 2 pode encaminhar uma providência sem passar pela avaliação de risco.</p>
+</section>

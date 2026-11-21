@@ -25,7 +25,11 @@ def test_cartoes_filtram_escopo_e_nao_gravam(sessao,entrada):
     assert any(acao in i['href'] for i in beta[4])
     assert len(beta[2])==1 and 'Abrir participação' not in beta[2][0]['texto']
     alfa=itens_em_andamento(sessao,'CONTA-A1')
-    assert not alfa[2] and not alfa[3] and not alfa[4]
+    assert not alfa[2] and not alfa[3]
+    # Alfa já é executor habilitado da unidade (12-E): consulta a ação,
+    # mas não tem providência enquanto o plano aguarda a Secretaria.
+    assert len(alfa[4]) == 1 and acao in alfa[4][0]['href']
+    assert not alfa[4][0]['pendente']
     c=TestClient(app)
     for n in range(1,5):
         r=c.get(f'/central/itens/{n}?conta_id=CONTA-B1')

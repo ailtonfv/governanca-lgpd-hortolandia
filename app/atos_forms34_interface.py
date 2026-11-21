@@ -97,7 +97,9 @@ def disponiveis(form, bloco, papeis, estado=None, pessoa_id=None, revisar=False)
         if k=='aprovar_plano':
             critico=estado.get('faixa_origem')=='Crítico'
             if not estado.get('plano') or (critico and 'gabinete' not in papeis) or (not critico and 'secretario' not in papeis):continue
-        if k=='manifestar_dpo' and estado.get('manifestacao_dpo'):continue
+        if k=='manifestar_dpo' and estado.get('manifestacao_dpo'):
+            from app.providencias import manifestacao_dpo_solicitada
+            if not manifestacao_dpo_solicitada(estado):continue
         if form==4:
             if k == 'executar_medida' and not estado.get('plano_aprovado'):continue
             if k == 'verificar' and not estado.get('execucao'):continue

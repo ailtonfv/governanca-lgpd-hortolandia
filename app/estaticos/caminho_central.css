@@ -1,0 +1,14 @@
+.caminho-central{background:#fff;border:1px solid #d6e0e6;border-top:4px solid #0c3b5a;border-radius:12px;padding:20px;margin:24px 0;color:#17212b}
+.caminho-central h2,.caminho-central h3{color:#0c3b5a}
+.trilha-caminho{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,175px),1fr));gap:12px;padding:0;list-style:none}
+.etapa-caminho{border:1px solid #d6e0e6;border-radius:10px;padding:12px;min-width:0;background:#f4f7f9;position:relative}
+.etapa-caminho h4{margin:0 0 8px}.etapa-caminho p{margin:8px 0;font-size:.9rem}
+.etapa-caminho a{color:#075985;overflow-wrap:anywhere}.etapa-caminho ul{padding-left:18px;font-size:.85rem}
+.etapa-caminho.sua-parte{border:3px solid #0c3b5a;padding:10px}
+.etapa-caminho.tem-providencia{background:#fff7d6}
+.marca-parte{font-size:.85rem;color:#0c3b5a}.apoio-caminho{list-style:none;padding:0;max-width:680px}
+.entrada-direta{border:1px dashed #5b6875;border-radius:8px;padding:12px}.siglas-caminho abbr{cursor:help}
+.itens-central details{margin:12px 0}.itens-central summary{cursor:pointer}
+.grupos-acompanhamento{margin:18px 0}.grupos-acompanhamento summary{cursor:pointer;font-weight:bold}
+
+@media(min-width:1100px){.segunda-trilha{grid-template-columns:repeat(6,minmax(0,1fr))}}

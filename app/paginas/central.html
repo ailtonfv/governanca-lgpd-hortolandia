@@ -10,10 +10,14 @@
     {% if numero in (1, 2, 3, 4) %}
     {% set resumo = cartoes_forms[numero] %}
     <section class="itens-central" aria-labelledby="itens-form{{ numero }}">
-      <h4 id="itens-form{{ numero }}">Seus itens em andamento</h4>{% if numero in (3,4) and gabinete and not resumo.itens|selectattr("pendente")|list %}<p>Nenhuma decisão aguardando o Gabinete</p>{% endif %}
-      {% if resumo.itens %}<ul>{% for item in resumo.itens %}<li>{% if numero in (3,4) %}<strong>{{ "Pendente para você" if item.pendente else "Em acompanhamento" }}</strong>{% endif %}<a href="{{ item.href }}" title="{{ item.texto }}">{% if numero!=2 and ' — ' in item.texto %}<span class="nome-item-central">{{ item.texto.rsplit(' — ',1)[0] }}</span><span class="situacao-item-central">{{ item.texto.rsplit(' — ',1)[1] }}</span>{% else %}<span class="nome-item-central duas-linhas">{{ item.texto }}</span>{% endif %}</a></li>{% endfor %}</ul>
-      {% else %}<p>Nenhum item em andamento para você.</p>{% endif %}
-      {% if resumo.mais %}<a class="mais-itens-central" href="{{ resumo.lista }}">e mais {{ resumo.mais }}</a>{% endif %}
+      <h4 id="itens-form{{ numero }}">Seus itens em andamento</h4>
+      {% if resumo.total_pendencias %}<p><strong>{{ resumo.total_pendencias }} providência{{ 's' if resumo.total_pendencias != 1 else '' }} sua{{ 's' if resumo.total_pendencias != 1 else '' }}</strong></p>
+      <ul>{% for item in resumo.pendencias %}<li><a href="{{ item.href }}">{{ item.texto }}</a> · {{ item.pendencia }}</li>{% endfor %}</ul>
+      {% if resumo.total_pendencias > 3 %}<a href="{{ resumo.lista }}&grupo=pendencias">Ver todos ({{ resumo.total_pendencias }})</a>{% endif %}
+      {% else %}<p>Nenhuma providência sua neste FORM.</p>{% endif %}
+      <details><summary>Em acompanhamento ({{ resumo.acompanhamento|length }})</summary>
+        <ul>{% for item in resumo.acompanhamento %}<li><a href="{{ item.href }}">{{ item.texto }}</a></li>{% endfor %}</ul>
+      </details>
     </section>
     <p class="situacao-instrumento">Disponível na demonstração, conforme as permissões do seu perfil. Não equivale a homologação institucional.</p>
     <a class="botao-link-secundario acesso-instrumento" href="{{ resumo.acesso }}">Acessar FORM {{ numero }}</a>
@@ -28,6 +32,7 @@
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/instrumentos_registro.css') }}?v=20261119-12d-cartoes">
 <div class="central-acesso">
   <h1>Central de Acesso</h1>
+  <nav aria-label="Orientações"><a href="/como-funciona?conta_id={{ conta_id|urlencode }}">Como funciona o sistema</a> · <a href="/fluxograma?conta_id={{ conta_id|urlencode }}">Ver o fluxograma</a></nav>
   {% if exibir_dashboard %}<p><a href="/dashboard?conta_id={{ conta_id|urlencode }}">Abrir dashboard LGPD — somente leitura</a></p>{% endif %}
   <p>Escolha um instrumento para ver os Registros autorizados na sua Secretaria.</p>
   <section class="contexto-central" aria-labelledby="titulo-contexto">
@@ -61,9 +66,10 @@
       </div>
       {% endif %}
     </dl>
-    {% if a_conferir %}<section><h2>Apresentações que aguardam sua conferência</h2>
-      {% for registro in a_conferir %}<p><a class="botao-link" href="{{ url_for('consultar_conferencia_interna', registro_id=registro.id) }}?conta_id={{ conta_id|urlencode }}">Conferir {{ registro.codigo_lgpd }} ({{ unidades_conferencia[registro.unidade_principal_atual_id] }})</a></p>{% endfor %}
-    </section>{% endif %}
+    {% for grupo in caminho if grupo.chave == 'f1-confere' and grupo.quantidade %}<section><h2>Apresentações que aguardam sua conferência</h2>
+      {% for item in grupo.itens %}<p><a class="botao-link" href="{{ item.href }}">Conferir {{ item.texto }}</a></p>{% endfor %}
+      {% if grupo.quantidade > 3 %}<a href="{{ grupo.lista }}">Ver todos ({{ grupo.quantidade }})</a>{% endif %}
+    </section>{% endfor %}
     <div class="navegacao-governanca">
       {% if not gabinete and secretarias and (not exibir_painel_dpo or outro_vinculo) %}
       <button class="botao-primario" type="submit" form="abrir-painel">Abrir Painel de Registros</button>
@@ -89,6 +95,7 @@
     </section>
   </section>
   <section aria-labelledby="titulo-instrumentos-central">
+    {% include '_caminho_central.html' %}
     <h2 id="titulo-instrumentos-central">Instrumentos de cada Registro</h2>
     <ul class="lista-instrumentos-registro">
       {% if not gabinete %}{{ cartao('levantamento', 'Levantamento do tratamento', 'Como esse processo, atividade ou serviço funciona hoje?', 'Disponível conforme autorização do Registro.', 'M6 3h9l4 4v14H6z M14 3v5h5 M9 12h7 M9 16h7', 1) }}

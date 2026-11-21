@@ -1,5 +1,5 @@
 {% extends 'base.html' %}{% block conteudo %}
-<h1>FORM {{ form }} · Seus itens em andamento</h1>
+<h1>{{ titulo_lista if titulo_lista else "FORM " ~ form ~ " · Seus itens em andamento" }}</h1>
 {% if itens %}<ul>{% for item in itens %}<li><a href="{{ item.href }}">{{ item.texto }}</a></li>{% endfor %}</ul>{% else %}<p>Nenhum item em andamento para você.</p>{% endif %}
 <p><a href="/central?conta_id={{ conta_id|urlencode }}">Voltar à Central de Acesso</a></p>
 {% endblock %}

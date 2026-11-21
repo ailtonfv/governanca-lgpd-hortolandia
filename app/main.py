@@ -182,7 +182,9 @@ def central(
         return _erro_acesso_central(request)
     from app.consultas_interface import usuarios_demonstracao
     pessoa_id = acesso["identidade"]["pessoa_id"]
-    from app.central_instrumentos import cartoes_em_andamento
+    from app.central_instrumentos import cartoes_em_andamento, itens_em_andamento
+    from app.caminho_central import caminho
+    listas = itens_em_andamento(sessao, conta_id)
     from app.dashboard.fontes import escopo_da_conta
     try:
         escopo_da_conta(sessao, conta_id)
@@ -191,7 +193,8 @@ def central(
         exibir_dashboard = False
     return paginas.TemplateResponse(request=request, name="central.html", context={
         "exibir_dashboard": exibir_dashboard,
-        "cartoes_forms": cartoes_em_andamento(sessao, conta_id),
+        "cartoes_forms": cartoes_em_andamento(sessao, conta_id, listas),
+        "caminho": caminho(sessao, conta_id, listas),
         "gabinete": bool(unidades(sessao, pessoa_id, 'demo34_gabinete')),
         **acesso, "conta_id": conta_id,
         "usuarios_demonstracao": usuarios_demonstracao(sessao, conta_id),
@@ -202,15 +205,39 @@ def central(
     })
 
 
+@app.get("/como-funciona", response_class=HTMLResponse)
+@app.get("/fluxograma", response_class=HTMLResponse)
+def apoio_entrada(request: Request, conta_id: str = Query(default="CONTA-A1", max_length=50), sessao: Session = Depends(obter_sessao)):
+    if carregar_central(sessao, conta_id) is None:
+        return _erro_acesso_central(request, conta_indisponivel=True)
+    pagina = "fluxograma" if request.url.path == "/fluxograma" else "como-funciona"
+    return paginas.TemplateResponse(request=request, name="apoio_" + pagina + ".html", context={"conta_id": conta_id})
+
+
+@app.get("/central/providencias", response_class=HTMLResponse)
+def providencias_central(request: Request, conta_id: str, etapa: str, sessao: Session = Depends(obter_sessao)):
+    if carregar_central(sessao, conta_id) is None:
+        return _erro_acesso_central(request, conta_indisponivel=True)
+    from app.central_instrumentos import itens_em_andamento
+    from app.caminho_central import ETAPAS, filtrar
+    titulos = {e[0]: e[2] for e in ETAPAS}
+    if etapa not in titulos:
+        raise HTTPException(404, "Etapa inexistente.")
+    listas = itens_em_andamento(sessao, conta_id)
+    itens = filtrar([i for lista in listas.values() for i in lista], etapa)
+    return paginas.TemplateResponse(request=request, name="central_itens.html", context={
+        "conta_id": conta_id, "titulo_lista": titulos[etapa], "itens": itens})
+
+
 @app.get("/central/itens/{form}", response_class=HTMLResponse)
-def itens_central(request: Request, form: int, conta_id: str = Query(default="CONTA-A1", max_length=50), sessao: Session = Depends(obter_sessao)):
+def itens_central(request: Request, form: int, grupo: str | None = None, conta_id: str = Query(default="CONTA-A1", max_length=50), sessao: Session = Depends(obter_sessao)):
     if form not in (1, 2, 3, 4):
         raise HTTPException(404, "FORM inexistente.")
     if carregar_central(sessao, conta_id) is None:
         return _erro_acesso_central(request, conta_indisponivel=True)
     from app.central_instrumentos import itens_em_andamento
     return paginas.TemplateResponse(request=request, name="central_itens.html", context={
-        "conta_id": conta_id, "form": form, "itens": itens_em_andamento(sessao, conta_id)[form]})
+        "conta_id": conta_id, "form": form, "itens": [i for i in itens_em_andamento(sessao, conta_id)[form] if grupo is None or (grupo == "pendencias") == i["pendente"]]})
 
 
 @app.get("/painel", response_class=HTMLResponse)

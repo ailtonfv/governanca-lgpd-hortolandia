@@ -1191,3 +1191,10 @@ Ailton autorizou excepcionalmente integrar `lote-13-dashboard`, no commit `4e6a9
 A bateria integral será executada em **25/11/2026, após o merge**, por decisão expressa de Ailton. Ela não foi executada como condição desta integração excepcional. Os testes direcionados já registrados não substituem essa bateria; falhas antigas e eventuais falhas novas deverão ser distinguidas no relatório da execução. Este registro não representa homologação institucional nem aceite de produção.
 
 A integração e o push do `main` não ativam servidores de vistoria: cada porta permanece na pasta exclusiva e no commit expressamente autorizado. O registro desta exceção é um commit exclusivamente documental, posterior ao commit integrado do dashboard.
+
+
+## Complemento — classificação pessoal na Central (Ailton, 21/11/2026)
+
+Providência sua é um item que exige atuação do servidor em sessão naquele momento. O que aguarda outra pessoa ou papel fica em acompanhamento. Central, fluxos e listas de Riscos e providências usam uma única função de domínio (`app/providencias.py`), sem decisão em template. Consultas solicitadas ao DPO ainda não manifestadas são providências suas; não se convertem em decisão vinculante nem alteram suas competências.
+
+As contagens da Operação e das demais telas do dashboard não são alteradas. Elas não usam a nova classificação. Se passarem a compartilhar essa função, a mudança depende de nova conferência antes da implementação. A projeção pessoal reutiliza escopos existentes e não concede acesso; dados históricos e atos permanecem intactos. Implementação na Parte 1 do Lote 14, sujeita a vistoria.

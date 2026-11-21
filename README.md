@@ -2050,3 +2050,10 @@ Na reavaliação, a nota conjunta vigente e os atos dependentes permanecem até 
 ### Ajustes demonstrativos 12-E — 19/11/2026
 
 Planos e decisões têm leitura antes da confirmação e histórico visível. O cargo responsável pelo plano não substitui a autoria pessoal da execução; a verificação permanece independente. O RIPD fica no processo da Secretaria e o sistema registra somente sua referência. Novas decisões críticas são registradas pelo Gabinete com documento formal, preservando os atos anteriores. Sem migração ou liberação para produção. A carga da nova conta na cópia em vistoria exige autorização específica de gravação.
+
+
+### Lote 14 — Parte 1, em conferência
+
+A Central mostra os dois percursos dos FORMs e separa providências pessoais de acompanhamento. A classificação compartilhada em `app/providencias.py` é usada pela Central, seus fluxos e listas e por Riscos e providências. Uma atuação disponível por opção não é automaticamente uma pendência. Manifestações solicitadas e ainda não registradas entram para o DPO, preservado seu caráter consultivo. As filas e contagens do dashboard permanecem independentes e inalteradas.
+
+Os fluxos usam as mesmas listas autorizadas dos seus destinos; um item abre diretamente, vários abrem a lista filtrada. São exibidos os três itens mais antigos por data de criação/ingresso, com acesso à lista completa. Acompanhamento fica recolhido. Os links fixos abrem as páginas de apoio fornecidas, em leitura. O redirecionamento de primeiro acesso, aprendizados públicos e temas pertencem às próximas partes. Esta entrega não altera servidores de vistoria.

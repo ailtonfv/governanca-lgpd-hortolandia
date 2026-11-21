@@ -163,3 +163,8 @@ Números abrem listas calculadas pela mesma função de consulta. Gráfico e tab
 Não se aplicam ao dashboard marcas de obrigatoriedade, salvamento, confirmação de atos ou bloqueio por pergunta: ele é somente leitura. O equivalente é a explicação da fonte e da regra, a distinção entre ausência de dado e zero verificado, e a recusa de acesso fora do escopo pelo servidor. A abertura de ato encaminha à tela do FORM, que conserva suas próprias permissões.
 
 Evidências visuais locais: pacote `entrega-lgpd-lote13/visual`. Vistoria humana e teste dos cinco segundos na Abertura continuam pendentes. Não há alteração das regras nem da aparência dos FORMs por este complemento.
+
+
+## Central com percurso — Parte 1 do Lote 14 (21/11/2026)
+
+Borda forte e “Sua parte” indicam competência; fundo amarelo-claro e sino identificam uma providência atual. Não exibir número em etapa sem pendências. O domínio classifica; os templates apenas apresentam. Um item abre seu destino; vários abrem a lista autorizada filtrada. Grupos mostram os três itens mais antigos por criação/ingresso e “Ver todos (N)”. Acompanhamento começa recolhido. Componentes: `app/providencias.py`, `app/caminho_central.py`, `app/paginas/_caminho_central.html`, `app/estaticos/caminho_central.css`. O dashboard não usa esta contagem pessoal.
