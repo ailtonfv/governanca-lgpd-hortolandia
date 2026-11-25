@@ -20,6 +20,7 @@ router=APIRouter()
 paginas=Jinja2Templates(directory=Path(__file__).parent/'paginas')
 from app.identidade_demonstrativa import configurar_identidade
 configurar_identidade(paginas)
+paginas.env.globals['consulta_cartilha_local'] = acesso_local_cartilha
 def sessao_rev22():
     with Session(motor) as s:yield s
 
@@ -39,6 +40,14 @@ def pagina(request:Request,registro_id:str,conta_id:str,bloco:int=1,conjunto:int
     registrar_auditoria(sessao,'consulta_form1_rev22','pessoa',identidade['pessoa_id'],{'registro_id':registro_id,'bloco':bloco})
     sessao.commit()
     conteudo=r.conteudo;adotada='revisao_22' in conteudo
+    atualizada=False
+    if not adotada and pode:
+        tinha_respostas=any(v not in (None,'',[]) for k,v in conteudo.get('respostas',{}).items() if k not in ('1.2','1.3'))
+        resultado=adotar(sessao,comando_id=str(uuid4()),conta_id=conta_id,registro_id=registro_id,versao_lida=r.versao_rascunho,confirmar=True)
+        if not resultado['permitido']: raise HTTPException(409,resultado['motivo'])
+        sessao.commit()
+        conteudo=r.conteudo;adotada=True;atualizada=tinha_respostas
+
     historico=None
     if adotada:
         from app.origem_form2 import ler_origem
@@ -49,7 +58,8 @@ def pagina(request:Request,registro_id:str,conta_id:str,bloco:int=1,conjunto:int
     row=rows[conjunto-1] if conjunto<=len(rows) else {'respostas':{},'complementos':{}}
     contexto={**valores,**row['respostas']}
     defs=definicoes()
-    from app.rev22_form1 import blocos_com_respostas
+    from app.rev22_form1 import blocos_com_respostas, contagem_blocos, condicoes_tela, orientacao_condicional
+    from app.ajudas_cartilha_form1 import ajudas_rev22
     from app.consultas_interface import _devolucao_para_interface
     respondidos = blocos_com_respostas(conteudo)
     campos=[q for q in defs.values() if q['block']==bloco]
@@ -59,7 +69,14 @@ def pagina(request:Request,registro_id:str,conta_id:str,bloco:int=1,conjunto:int
         q['valor']=origem.get('respostas',{}).get(q['id'])
         q['complemento']=origem.get('complementos',{}).get(q['id'],'')
         q['ativa']=ativa(q['id'],contexto)
+        q['orientacao_condicional']=orientacao_condicional(q['id'])
+        q.update(ajudas_rev22(q['id'],secoes_cartilha_disponiveis()))
+    if historico:
+        historico['perguntas']=[p for p in historico['perguntas'] if p['id'] in defs and defs[p['id']]['block']==bloco]
+        historico['conteudo']={k:v for k,v in historico.get('conteudo',{}).items() if (k=='participantes' and bloco==3) or (k=='destinatarios_10_2_1' and bloco==10)}
     return paginas.TemplateResponse(request=request,name='form1_rev22.html',context=dict(
+        atualizada=atualizada, contagens=contagem_blocos(conteudo), condicoes=condicoes_tela(), contexto_condicoes=contexto,
+        retirada_antiga=bool(conteudo.get('revisao_22',{}).get('legado',{}).get('9.2.1')),
         orientacao_levantamento=acesso_local_cartilha(request) and "levantamento" in secoes_cartilha_disponiveis(),
         edicao_cartilha=VERSAO_CARTILHA_AJUDAS_FORM1,
         salvamento_confirmado=request.query_params.get("salvo") == str(r.versao_rascunho),

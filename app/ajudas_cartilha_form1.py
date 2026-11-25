@@ -179,3 +179,15 @@ for _item in AJUDAS_CARTILHA_FORM1.values():
     _item["secao_id"] = next(
         chave for chave, titulo in SECOES_CARTILHA.items() if titulo == _item["secao"]
     )
+
+
+def ajudas_rev22(key, disponiveis):
+    from app.rev22_form1 import EQUIVALENCIA
+    import re
+    antigo = next((a for a, novo in EQUIVALENCIA.items() if novo == key), key)
+    ajuda = AJUDAS_CARTILHA_FORM1.get(antigo)
+    if ajuda:
+        ajuda = {**ajuda, 'versao': VERSAO_CARTILHA_AJUDAS_FORM1,
+                 'topico': re.sub(r'^\d+(?:\.\d+)*\s+', '', SECOES_CARTILHA[ajuda['secao_id']]),
+                 'disponivel': ajuda['secao_id'] in disponiveis}
+    return dict(ajuda_cartilha=ajuda, ajuda_alternativas=AJUDAS_ALTERNATIVAS_FORM1.get(antigo, ()))

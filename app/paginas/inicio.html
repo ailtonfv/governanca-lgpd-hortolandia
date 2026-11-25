@@ -102,7 +102,7 @@
           <p class="etiqueta codigo-registro">{{ registro.codigo_lgpd }}</p>
           <h3>{{ {'servico': 'Serviço', 'processo': 'Processo', 'atividade': 'Atividade'}.get(registro.tipo|lower, registro.tipo) }} · {{ registro.titulo|rotulo_f2 if instrumento == 'form2' else registro.titulo }}</h3>
           <p class="unidade-registro"><strong>Secretaria:</strong> {{ registro.unidade }}</p>
-          <p><strong>Situação do Registro:</strong> <span class="estado estado-{{ registro.estado_codigo }}">{{ registro.estado }}</span></p>
+          {% with etapa=registro.etapa_atual %}{% include '_etapa_registro.html' %}{% endwith %}
           {% if instrumento %}<p><strong>APA responsável:</strong> {{ registro.fluxo_conferencia.apa }}</p>{% endif %}
           {% if instrumento == 'form2' %}
           {% set acesso = registro.navegacao_form2 %}
@@ -118,6 +118,7 @@
           {% elif acesso.e_apa %}<p>Função nesta atividade: APA. Consulte a disponibilidade da origem e da designação.</p>
           {% else %}<p>Função nesta atividade: AAL designado. Consulte a preparação em modo de leitura.</p>{% endif %}
           {% else %}
+          {% if registro.etapa_atual.form1_confirmado %}<details><summary>Detalhes do FORM 1</summary>{% endif %}
           <p><strong>Situação do FORM 1:</strong> {{ registro.situacao_form1_integral }}</p>
           {% if instrumento == 'form1' %}
           <p><strong>Atuação neste levantamento:</strong> {% if registro.preenchimento_arp %}preenchimento pelo ARP{% elif registro.providencias | selectattr('categoria', 'equalto', 'conferencia_form1') | list %}conferência pelo APA{% else %}consulta ao levantamento{% endif %}.</p>
@@ -137,8 +138,9 @@
             {% include '_fluxo_conferencia.html' %}
           </details>
             {% if fluxo.tem_historico %}<a href="{{ url_for('detalhe_registro', registro_id=registro.id) }}?conta_id={{ conta_id }}#historico-conferencias-form1">Consultar histórico deste Registro</a>{% endif %}
+          {% if registro.etapa_atual.form1_confirmado %}</details>{% endif %}
           {% set providencias = tarefas if instrumento == 'form1' else registro.providencias %}
-          {% if providencias %}
+          {% if providencias and registro.etapa_atual.form == 1 %}
           <div class="providencias-registro" aria-label="Providências do Registro {{ registro.codigo_lgpd }}">
             {% for providencia in providencias %}
             <div class="providencia-registro providencia-{{ providencia.categoria }}{% if providencia.nivel %} alerta-{{ providencia.nivel }}{% endif %}">
@@ -156,8 +158,8 @@
           </div>
           {% else %}
           <div class="sem-providencia-registro">
-            {% if registro.ingresso_form2 %}<p>Ingressou na fila do FORM 2 em {{ (registro.ingresso_form2|data_local).split(" ")[0] }}.</p>{% else %}<p>Nenhuma providência de conferência pendente para seu perfil neste momento. Isso não significa que o FORM 1 esteja completo.</p>{% endif %}
-            {% if registro.responsavel_proxima_etapa %}
+            {% if registro.etapa_atual.form == 1 and registro.ingresso_form2 %}<p>Ingressou na fila do FORM 2 em {{ (registro.ingresso_form2|data_local).split(" ")[0] }}.</p>{% elif registro.etapa_atual.form == 1 %}<p>Nenhuma providência de conferência pendente para seu perfil neste momento. Isso não significa que o FORM 1 esteja completo.</p>{% endif %}
+            {% if false %}
             <p><strong>Responsável pela próxima etapa:</strong> {{ registro.responsavel_proxima_etapa }}</p>
             {% endif %}
           </div>

@@ -41,7 +41,10 @@
   {% set proxima = registro.form1_integral.proxima_providencia %}
   <section class="proxima-providencia" id="inicio-registro" aria-labelledby="titulo-proxima-providencia">
     <p class="etiqueta">O que fazer agora</p>
-    <h3 id="titulo-proxima-providencia">Próxima providência</h3>
+    <h3 id="titulo-proxima-providencia">Etapa atual</h3>
+{% with etapa=registro.etapa_atual %}{% include "_etapa_registro.html" %}{% endwith %}
+{% if registro.etapa_atual.form != 1 %}{% for item in registro.etapa_atual.minhas %}<p><a class="botao-link" href="{{ item.href }}">{{ item.rotulo }}</a></p>{% else %}<p>Nada a fazer por você agora.</p>{% endfor %}{% endif %}
+{% if registro.etapa_atual.form == 1 %}
     <p><strong>Seu papel neste Registro:</strong> {{ percurso.papel_conferente ~ " — conferiu a " ~ percurso.rotulo_apresentacao if percurso.papel_apresentante and percurso.confirmador_id == identidade.pessoa_id else proxima.papel }}.</p>
     <p>{% if percurso.papel_apresentante and percurso.atual == "conferir" and percurso.apresentante_id == identidade.pessoa_id %}Você apresentou esta versão. {{ percurso.proxima }} Aguarde a decisão.{% elif percurso.papel_apresentante and percurso.atual == "confirmar" %}{{ percurso.decidida_por }} confirmou a {{ percurso.rotulo_apresentacao }} em {{ percurso.decidida_em|data_local }}.{% else %}{{ proxima.descricao }}{% endif %}</p>
     {% if ingresso_na_fila %}<p>Encaminhado à fila do FORM 2 ({{ fila_unidade }}) em {{ ingresso_na_fila|data_local }}.{% if dpo_comunicado %} DPO comunicado.{% endif %}</p>{% endif %}
@@ -68,6 +71,7 @@
       <a class="botao-link botao-primario" href="/registros/{{ registro.id }}/form1-rev22?conta_id={{ conta_id|urlencode }}">{{ ('Corrigir FORM 1' if registro.form1_integral.devolucao_interna else 'Preencher FORM 1') if registro.form1_integral.pode_editar else 'Consultar FORM 1' }}</a>
     {% elif proxima.tipo == 'conferir' %}
       <a class="botao-link botao-primario" href="{{ url_for('consultar_conferencia_interna', registro_id=registro.id) }}?conta_id={{ conta_id }}">{{ proxima.rotulo }}</a>
+    {% endif %}
     {% endif %}
   </section>
 

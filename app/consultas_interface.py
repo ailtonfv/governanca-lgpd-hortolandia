@@ -896,6 +896,10 @@ def carregar_painel(sessao, conta_id, *, secretaria_id=None):
                 resumo["responsavel_proxima_etapa"] = (
                     f"{arp_atual.matricula} · {rotulo_interface(arp_atual.nome)} (ARP)"
                 )
+    from app.etapa_registro import etapa_atual
+    for resumo in registros:
+        resumo['etapa_atual'] = etapa_atual(sessao, sessao.get(Registro, resumo['id']), conta_id, resumo['fluxo_conferencia'])
+        resumo['responsavel_proxima_etapa'] = resumo['etapa_atual']['responsavel']
     pode_criar_registro = bool(unidades_apa) if secretaria_id is None else secretaria_id in unidades_apa
     return {
         "identidade": identidade,
@@ -974,6 +978,10 @@ def carregar_opcoes_novo_registro(sessao, conta_id):
             "unidades": [],
         })
         item["unidades"].append(unidade_id)
+    from app.workflow import registros_do_item
+    for item in objetos_por_id.values():
+        item['registros']=[dict(id=r.id,codigo=r.codigo_lgpd,contexto=r.contexto_atuacao_id,unidade=u)
+                          for u in item['unidades'] for r in registros_do_item(sessao,item['id'],u)]
     objetos = list(objetos_por_id.values())
     ids_objetos = set(objetos_por_id)
     linhas_canais = sessao.execute(
@@ -1563,4 +1571,6 @@ def carregar_registro(sessao, conta_id, registro_id):
             "compartilhamentos": DESTINATARIOS_COMPARTILHAMENTO,
         },
     }
+    from app.etapa_registro import etapa_atual
+    resumo['etapa_atual'] = etapa_atual(sessao, registro, conta_id, resumo['form1_integral']['fluxo_conferencia'])
     return identidade, resumo

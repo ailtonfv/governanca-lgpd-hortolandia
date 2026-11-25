@@ -91,6 +91,14 @@ def conflitos_de_equivalencia(sessao, objeto_ids, contexto_id):
              "registro_id": r.id} for v, r, o in linhas]
 
 
+def registros_do_item(sessao, objeto_id, unidade_id):
+    """Ocorrências ativas na mesma Secretaria; não altera a trava de contexto."""
+    return list(sessao.scalars(select(Registro).join(RegistroObjeto, RegistroObjeto.registro_id==Registro.id).where(
+        RegistroObjeto.objeto_id==objeto_id, RegistroObjeto.ativo.is_(True),
+        RegistroObjeto.papel.in_(PAPEIS_ASSUNTO), Registro.unidade_principal_atual_id==unidade_id,
+        Registro.estado_atual!='cancelado').order_by(Registro.codigo_lgpd)))
+
+
 def ocorrencias_na_familia(sessao, objeto_ids, contexto):
     """Verificação 2 (DA-38, item 6): o objeto já é assunto em OUTRO contexto da MESMA família?"""
     linhas = sessao.execute(
@@ -323,13 +331,21 @@ def criar_registro(sessao, *, comando_id, conta_id, unidade_id, contexto_id, tit
             for canal in canais_catalogo
         ]
 
+    # Serializa a consulta e a abertura do mesmo item, inclusive em contextos diferentes.
+    sessao.scalar(select(ObjetoCatalogo).where(ObjetoCatalogo.id==objeto_principal_id).with_for_update())
+    especie = {'servico':'serviço','processo':'processo','atividade':'atividade'}.get(objetos[objeto_principal_id].tipo_objeto,'item')
     # 2. verificação 1 — equivalência bloqueadora (todos os conflitos)
     conflitos = conflitos_de_equivalencia(sessao, assunto, contexto.id)
     if conflitos:
         for c in conflitos:
             c["acoes"] = acoes_para(sessao, pessoa_id, c.pop("registro_id"))
-        return negar("já existe Registro para objeto(s) deste pedido neste contexto", conflitos=conflitos)
+        return negar(f"Já existe o {conflitos[0]['registro_existente']} para este {especie} neste contexto.", conflitos=conflitos)
 
+    outros = [r for r in registros_do_item(sessao,objeto_principal_id,unidade_id) if r.contexto_atuacao_id != contexto_id]
+    if outros and (not isinstance(justificativa,str) or not justificativa.strip()):
+        return negar(f"Este {especie} já tem o {outros[0].codigo_lgpd} em outro contexto. Informe a justificativa para criar o novo Registro.")
+    if justificativa is not None and (not isinstance(justificativa,str) or len(justificativa)>2000):
+        return negar('Informe uma justificativa de até 2.000 caracteres.')
     # 3. verificação 2 — família de contexto (D2)
     advertencia = None
     ocorrencias = ocorrencias_na_familia(sessao, assunto, contexto)
@@ -356,6 +372,9 @@ def criar_registro(sessao, *, comando_id, conta_id, unidade_id, contexto_id, tit
         if decisoes:
             advertencia["decisoes_de_transversalidade"] = decisoes
 
+    if outros:
+        advertencia = {**(advertencia or {}), 'resolucao':'tratamento_autonomo',
+            'justificativa':justificativa.strip(), 'registros_outros_contextos':[r.codigo_lgpd for r in outros]}
     # 4. verificação 3 — alerta estrutural (não bloqueia)
     alertas = alertas_estruturais(sessao, assunto)
 
@@ -375,8 +394,7 @@ def criar_registro(sessao, *, comando_id, conta_id, unidade_id, contexto_id, tit
             raise ErroDeIntegridadeInesperado("a trava recusou, mas nenhum ocupante foi encontrado") from erro
         for c in conflitos:
             c["acoes"] = acoes_para(sessao, pessoa_id, c.pop("registro_id"))
-        return negar("já existe Registro para objeto(s) deste pedido neste contexto "
-                     "(barrado pela trava do banco)", conflitos=conflitos)
+        return negar(f"Já existe o {conflitos[0]['registro_existente']} para este {especie} neste contexto.", conflitos=conflitos)
 
     motivo = {None: "criado", "tratamento_autonomo": "criado com justificativa",
               "objeto_transversal": "criado — advertência resolvida por transversalidade vigente"}[

@@ -36,7 +36,7 @@
         <div><dt>Contexto</dt><dd>{{ conflito.contexto_nome }} ({{ conflito.contexto_id }})</dd></div>
         <div><dt>Situação</dt><dd>{{ conflito.estado }}</dd></div>
       </dl>
-      <a class="botao-link" href="{{ url_for('detalhe_registro', registro_id=conflito.id) }}?conta_id={{ conta_id }}">Consultar este Registro</a>
+      <a class="botao-link" href="{{ url_for('detalhe_registro', registro_id=conflito.id) }}?conta_id={{ conta_id }}">Abrir o Registro existente</a>
     </article>
     {% endfor %}
   </div>
@@ -64,12 +64,12 @@
       {% if 'tipo_objeto' in erros_campos %}<p class="erro-campo">Escolha Serviço, Processo ou Atividade.</p>{% endif %}
     </fieldset>
 
-    <label for="objeto_principal_id">3. Item do catálogo da demonstração <span class="marcador-obrigatorio" aria-label="obrigatório">*</span></label>
+    <label id="rotulo-item" for="objeto_principal_id">3. Item do catálogo da demonstração <span class="marcador-obrigatorio" aria-label="obrigatório">*</span></label>
     <select id="objeto_principal_id" name="objeto_principal_id" required
             {% if 'objeto_principal_id' in erros_campos %}aria-invalid="true" aria-describedby="erro-objeto_principal_id"{% endif %}>
       <option value="">Selecione depois de escolher o tipo</option>
       {% for objeto in objetos %}
-      <option value="{{ objeto.id }}" data-tipo="{{ objeto.tipo_objeto }}" data-unidades="{{ objeto.unidades|join(',') }}" {% if valores.objeto_principal_id == objeto.id %}selected{% endif %}>{{ {'servico': 'Serviço', 'processo': 'Processo', 'atividade': 'Atividade'}.get(objeto.tipo_objeto|lower, objeto.tipo_objeto) }} · {{ objeto.nome_canonico }}</option>
+      <option value="{{ objeto.id }}" data-registros='{{ objeto.registros|tojson }}' data-nome="{{ objeto.nome_canonico }}" data-tipo="{{ objeto.tipo_objeto }}" data-unidades="{{ objeto.unidades|join(',') }}" {% if valores.objeto_principal_id == objeto.id %}selected{% endif %}>{{ objeto.nome_canonico }}{% if objeto.registros %} — já tem Registro: {{ objeto.registros|map(attribute="codigo")|join(", ") }}{% endif %}</option>
       {% endfor %}
     </select>
     {% if 'objeto_principal_id' in erros_campos %}<p id="erro-objeto_principal_id" class="erro-campo">Selecione um item cadastrado para a Secretaria e o tipo escolhidos.</p>{% endif %}
@@ -127,9 +127,11 @@
     <p class="ajuda" id="exemplo-contexto">Selecione a área de atuação municipal relacionada ao serviço, processo ou atividade. O contexto classifica onde o objeto atua; não representa a finalidade do tratamento de dados pessoais, que será descrita no FORM 1.</p>
     <p class="ajuda" id="orientacao-contexto" aria-live="polite"></p>
 
+    <section id="aviso-duplicidade" aria-live="polite" hidden><p id="texto-duplicidade"></p><a id="abrir-existente">Abrir o Registro existente</a></section>
+    <div id="justificativa-outro-contexto" hidden><label for="justificativa">Justificativa para criar outro Registro em contexto diferente</label><textarea id="justificativa" name="justificativa" maxlength="2000" disabled></textarea></div>
     <div class="rodape-formulario">
       <p>Ao confirmar, o sistema criará o Registro LGPD e deixará o FORM 1 no estado “Não iniciado”.</p>
-      <button class="botao-primario" type="submit">Confirmar e criar Registro LGPD</button>
+      <p id="faltantes-abertura" aria-live="polite"></p><button id="confirmar-abertura" class="botao-primario" type="submit">Confirmar e criar Registro LGPD</button>
     </div>
   </form>
   {% else %}
@@ -149,6 +151,30 @@
   const semContextosCatalogo = document.getElementById('sem-contextos-catalogo');
   const ajudaContexto = document.getElementById('orientacao-contexto');
   const situacoesCanais = document.querySelectorAll('input[name="situacao_canais"]');
+  function atualizarDuplicidade() {
+    const tipo = document.querySelector('input[name="tipo_objeto"]:checked')?.value;
+    const especie = {servico:'serviço',processo:'processo',atividade:'atividade'}[tipo] || 'item';
+    const registros = JSON.parse(objeto.selectedOptions[0]?.dataset.registros || '[]').filter(r => r.unidade === unidade.value);
+    const mesmo = registros.find(r => r.contexto === contexto.value);
+    const outro = registros.find(r => r.contexto !== contexto.value);
+    const aviso = document.getElementById('aviso-duplicidade');
+    aviso.hidden = !registros.length;
+    document.getElementById('texto-duplicidade').textContent = mesmo ? `Já existe o ${mesmo.codigo} para este ${especie} neste contexto.` : outro ? `Este ${especie} já tem o ${outro.codigo} em outro contexto.` : '';
+    const link = document.getElementById('abrir-existente'), alvo = mesmo || outro;
+    if (alvo) link.href = '/registros/' + encodeURIComponent(alvo.id) + '?conta_id=' + encodeURIComponent({{ conta_id|tojson }});
+    const exige = Boolean(contexto.value && outro && !mesmo);
+    document.getElementById('justificativa-outro-contexto').hidden = !exige;
+    const just = document.getElementById('justificativa');
+    just.disabled = !exige; just.required = exige;
+    const falta = [];
+    if (!tipo) falta.push('tipo');
+    if (!objeto.value) falta.push('item');
+    if (!contexto.value) falta.push('contexto');
+    if (!document.querySelector('input[name="situacao_canais"]:checked')) falta.push('canais');
+    if (exige && !just.value.trim()) falta.push('justificativa');
+    document.getElementById('faltantes-abertura').textContent = mesmo ? 'Abra o Registro existente.' : falta.length ? 'Falta informar: ' + falta.join(', ') + '.' : 'Confira os dados antes de criar.';
+    document.getElementById('confirmar-abertura').disabled = Boolean(mesmo);
+  }
   function atualizarObrigatoriedadeCanais() {
     const identificados = document.querySelector('input[name="situacao_canais"][value="identificados"]')?.checked;
     const selecionados = [...camposCanais].filter((campo) => campo.checked);
@@ -157,8 +183,10 @@
       campo.required = Boolean(identificados && selecionados.length === 0 && indice === 0);
     });
     catalogoCanais.hidden = !identificados;
+    atualizarDuplicidade();
   }
   function atualizarAjudaContexto() {
+    atualizarDuplicidade();
     const opcoes = [...contexto.options].filter(opcao => opcao.value && !opcao.hidden);
     ajudaContexto.textContent = contexto.value ? contexto.selectedOptions[0].textContent :
       opcoes.length === 1 ? 'Confirme o contexto antes de criar o Registro. Único contexto cadastrado para este item. Selecione para confirmar: ' + opcoes[0].textContent : 'Selecione o contexto deste item. Ao trocar o item, escolha o contexto novamente.';
@@ -179,6 +207,8 @@
     atualizarObrigatoriedadeCanais();
   }
   function filtrarContextos(limpar = true) {
+    contexto.disabled = !objeto.value;
+    contexto.options[0].textContent = objeto.value ? "Escolha o contexto" : "Escolha primeiro o item, acima";
     let quantidadeVisivel = 0;
     for (const opcao of contexto.options) {
       const objetos = (opcao.dataset.objetos || '').split(',');
@@ -192,6 +222,10 @@
   }
   function filtrarObjetos(limpar = true) {
     const tipo = document.querySelector('input[name="tipo_objeto"]:checked')?.value;
+    const nomeTipo = {servico:'serviço',processo:'processo',atividade:'atividade'}[tipo];
+    objeto.disabled = !tipo;
+    objeto.options[0].textContent = nomeTipo ? 'Escolha o ' + nomeTipo : 'Escolha primeiro o tipo, acima';
+    document.getElementById('rotulo-item').textContent = nomeTipo ? '3. Qual ' + nomeTipo + ' será mapeado?' : '3. Item do catálogo';
     let quantidadeVisivel = 0;
     for (const opcao of objeto.options) {
       const unidades = (opcao.dataset.unidades || '').split(',');
@@ -212,6 +246,7 @@
     atualizarObrigatoriedadeCanais();
   }));
   camposCanais.forEach((campo) => campo.addEventListener('change', atualizarObrigatoriedadeCanais));
+  document.getElementById('justificativa').addEventListener('input', atualizarDuplicidade);
   filtrarObjetos(false);
 </script>{% endif %}
 {% endblock %}

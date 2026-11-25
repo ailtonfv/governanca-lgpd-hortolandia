@@ -1,0 +1,2 @@
+<p><strong>Etapa atual:</strong> {% if etapa.form == 'Ciclo completo' %}Ciclo completo{% if etapa.desde %} em {{ (etapa.desde|data_local)[:10] }}{% endif %}{% else %}FORM {{ etapa.form }} — {{ etapa.situacao }}{% if etapa.desde %}, desde {{ (etapa.desde|data_local)[:10] }}{% endif %}{% endif %}</p>
+{% if etapa.responsavel %}<p><strong>Responsável pela próxima etapa:</strong> {{ etapa.responsavel }}</p>{% endif %}

@@ -19,11 +19,11 @@
         <ul>{% for item in resumo.acompanhamento %}<li><a href="{{ item.href }}">{{ item.texto }}</a></li>{% endfor %}</ul>
       </details>
     </section>
-    <p class="situacao-instrumento">Disponível na demonstração, conforme as permissões do seu perfil. Não equivale a homologação institucional.</p>
+    
     <a class="botao-link-secundario acesso-instrumento" href="{{ resumo.acesso }}">Acessar FORM {{ numero }}</a>
     {% else %}
     <p class="situacao-instrumento">{{ situacao }}</p>
-    <button class="botao-link-secundario acesso-instrumento" type="button" disabled>{{ acesso }}</button>
+{% if area == "dashboard" %}<a class="botao-link-secundario acesso-instrumento" href="/dashboard?conta_id={{ conta_id|urlencode }}">{{ acesso }}</a>{% else %}<button class="botao-link-secundario acesso-instrumento" type="button" disabled>{{ acesso }}</button>{% endif %}
     {% endif %}
   </div>
 </li>
@@ -33,7 +33,7 @@
 <div class="central-acesso">
   <h1>Central de Acesso</h1>
   <nav aria-label="Orientações"><a href="/como-funciona?conta_id={{ conta_id|urlencode }}">Como funciona o sistema</a> · <a href="/fluxograma?conta_id={{ conta_id|urlencode }}">Ver o fluxograma</a></nav>
-  {% if exibir_dashboard %}<p><a href="/dashboard?conta_id={{ conta_id|urlencode }}">Abrir dashboard LGPD — somente leitura</a></p>{% endif %}
+
   {% if exibir_painel_dpo %}<p><a href="/temas/pedidos?conta_id={{ conta_id|urlencode }}">Pedidos de novos temas — Em análise</a></p>{% endif %}
   <p>Escolha um instrumento para ver os Registros autorizados na sua Secretaria.</p>
   <section class="contexto-central" aria-labelledby="titulo-contexto">
@@ -58,7 +58,7 @@
     <p class="aviso-leitura">Nenhuma Secretaria com vínculo vigente para esta identidade.</p>
     {% endif %}
     <dl class="agentes-central">
-      <div><dt>Servidor em sessão</dt><dd>{{ identificacao_servidor(identidade) }}</dd></div>
+      <div><dt>Servidor em sessão</dt><dd>{{ identificacao_servidor(identidade) }} · {{ papel_sessao }}</dd></div>
       {% if not gabinete and secretarias and (not exibir_painel_dpo or outro_vinculo) %}
       <div><dt>APA em exercício na Secretaria</dt>
         {% for secretaria in secretarias.values() %}
@@ -98,7 +98,7 @@
   <section aria-labelledby="titulo-instrumentos-central">
     {% include '_caminho_central.html' %}
     {% include '_aprendizados_publicos.html' %}
-    <h2 id="titulo-instrumentos-central">Instrumentos de cada Registro</h2>
+    <h2 id="titulo-instrumentos-central">Instrumentos de cada Registro</h2><p class="situacao-instrumento">Disponível na demonstração, conforme as permissões do seu perfil. Não equivale a homologação institucional.</p>
     <ul class="lista-instrumentos-registro">
       {% if not gabinete %}{{ cartao('levantamento', 'Levantamento do tratamento', 'Como esse processo, atividade ou serviço funciona hoje?', 'Disponível conforme autorização do Registro.', 'M6 3h9l4 4v14H6z M14 3v5h5 M9 12h7 M9 16h7', 1) }}
       {{ cartao('legitimidade', 'Validação jurídica e institucional', 'Por que e em que condições esse tratamento pode ocorrer?', 'Validação pelo AAL, com consulta ao Jurídico e ao DPO. Resultado não homologado nesta demonstração.', 'M12 3v16 M7 21h10 M4 7l16-2 M5 7l-3 7h6z M19 5l-3 7h6z', 2) }}
@@ -109,8 +109,7 @@
   <section class="gestao-central" aria-labelledby="titulo-gestao">
     <h2 id="titulo-gestao">Áreas de Gestão</h2>
     <ul class="lista-instrumentos-registro">
-      {{ cartao('dashboard', 'Dashboard LGPD', 'Indicadores consolidados de governança, Registros, pendências, riscos e providências.', 'Planejado', 'M3 3v17h18 M7 16v-4 M12 16V6 M17 16V9', acesso='Acessar Dashboard') }}
-      {{ cartao('ti', 'Administração Central — TI', 'Gestão técnica das 18 Secretarias: administração autorizada, monitoramento, integridade, configurações e auditoria.', 'Planejada. O acesso futuro exigirá habilitação específica e autenticação reforçada.', 'M3 3h18v7H3z M3 14h18v7H3z M6 6.5h1 M6 17.5h1', acesso='Acessar Administração Central') }}
+      {% if exibir_dashboard %}{{ cartao('dashboard', 'Dashboard LGPD', 'Indicadores consolidados de governança, Registros, pendências, riscos e providências.', 'Somente leitura. Você vê os dados que o seu perfil permite.', 'M3 3v17h18 M7 16v-4 M12 16V6 M17 16V9', acesso='Acessar Dashboard') }}{% endif %}
     </ul>
   </section>
 </div>

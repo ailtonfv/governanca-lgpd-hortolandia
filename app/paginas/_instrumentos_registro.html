@@ -13,10 +13,11 @@
       <h3>FORM 2 — Validação jurídica e institucional</h3>
       <p>Destina-se à análise jurídica e institucional do tratamento. Validação pelo AAL, com consulta ao Jurídico e ao DPO. Resultado não homologado nesta demonstração.</p>
       <a class="botao-link-secundario" href="/form2/filas?conta_id={{ conta_id|urlencode }}">Consultar fila do FORM 2</a>
+      {% for item in registro.etapa_atual.instrumentos[2] %}<p>{{ item.situacao }}{% if item.desde %} em {{ (item.desde|data_local)[:10] }}{% endif %}{% if item.href %} · <a href="{{ item.href }}">Consultar</a>{% endif %}</p>{% endfor %}
       <p class="ajuda">O agente autorizado assume a participação pela fila da unidade executora. A fila mostra somente as participações e solicitações acessíveis ao seu perfil.</p>
     </li>
-    <li data-instrumento="FORM3"><h3>FORM 3 — Avaliação de riscos e controles</h3><p>Destina-se à avaliação dos riscos e das medidas de controle do tratamento.</p><p><strong>Planejado — indisponível nesta etapa.</strong></p></li>
-    <li data-instrumento="FORM4"><h3>FORM 4 — Plano de ação, monitoramento e aprendizagem institucional</h3><p>Destina-se ao registro de providências, responsáveis, prazos, evidências e acompanhamento.</p><p><strong>Planejado — indisponível nesta etapa.</strong></p></li>
+    <li data-instrumento="FORM3"><h3>FORM 3 — Avaliação de riscos e controles</h3><p>Destina-se à avaliação dos riscos e das medidas de controle do tratamento.</p>{% for item in registro.etapa_atual.instrumentos[3] %}<p>{{ item.situacao }}{% if item.desde %} em {{ (item.desde|data_local)[:10] }}{% endif %}{% if item.href %} · <a href="{{ item.href }}">Consultar</a>{% endif %}</p>{% else %}<p>Sem avaliação de risco neste Registro.</p>{% endfor %}</li>
+    <li data-instrumento="FORM4"><h3>FORM 4 — Plano de ação, monitoramento e aprendizagem institucional</h3><p>Destina-se ao registro de providências, responsáveis, prazos, evidências e acompanhamento.</p>{% for item in registro.etapa_atual.instrumentos[4] %}<p>{{ item.situacao }}{% if item.desde %} em {{ (item.desde|data_local)[:10] }}{% endif %}{% if item.href %} · <a href="{{ item.href }}">Consultar</a>{% endif %}</p>{% else %}<p>Sem providência neste Registro.</p>{% endfor %}</li>
   </ul>
   <p class="ajuda">A navegação entre instrumentos não libera submissão, aprovação ou validação institucional.</p>
 </section>

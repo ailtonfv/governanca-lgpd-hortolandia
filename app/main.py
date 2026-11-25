@@ -198,6 +198,7 @@ def central(
         exibir_dashboard = False
     resposta = paginas.TemplateResponse(request=request, name="central.html", context={
         "exibir_dashboard": exibir_dashboard,
+        "papel_sessao": "Encarregado de Dados (DPO) — acompanhamento e manifestação consultiva" if unidades(sessao,pessoa_id,PAPEIS["dpo"]) else "AAL" if unidades(sessao,pessoa_id,PAPEIS["principal"]) else "APA" if unidades(sessao,pessoa_id,"gestor_fila") else "ARP" if unidades(sessao,pessoa_id,"preenchedor") else "Consulta",
         "cartoes_forms": cartoes_em_andamento(sessao, conta_id, listas),
         "caminho": caminho(sessao, conta_id, listas),
         "aprendizado": aprendizados_publicos(sessao, conta_id),
@@ -403,6 +404,7 @@ def criar_registro_pela_tela(
     contexto_id: str = Form(default="", max_length=20),
     situacao_canais: str = Form(default="", max_length=30),
     canais_ids: list[str] | None = Form(default=None),
+    justificativa: str = Form(default="", max_length=2000),
     sessao: Session = Depends(obter_sessao),
 ):
     valores = {
@@ -465,6 +467,7 @@ def criar_registro_pela_tela(
         objeto_principal_id=objeto.id,
         canais_confirmados_ids=canais_ids or [],
         situacao_canais=situacao_canais,
+        justificativa=justificativa, resolucao_familia="tratamento_autonomo" if justificativa.strip() else None,
     )
     sessao.commit()
     if resultado["permitido"]:
@@ -497,8 +500,8 @@ def criar_registro_pela_tela(
         )
         conflitos_codigos = [item["codigo_lgpd"] for item in conflitos_visiveis]
         motivo = (
-            "Já existe Registro LGPD para este item e contexto. "
-            "Consulte abaixo o mapeamento já disponível."
+            f"Já existe o {conflitos_visiveis[0]['codigo_lgpd']} para este "
+            f"{dict(servico='serviço',processo='processo',atividade='atividade').get(tipo_objeto,'item')} neste contexto."
             if conflitos_visiveis else
             "Já existe Registro LGPD para este item e contexto, mas seu perfil não "
             "possui acesso aos detalhes. Solicite orientação à governança responsável."

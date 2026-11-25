@@ -11,6 +11,55 @@ LACRE = '064216ae5a32bb189caea3f125ad8405314cbca12eac72a3679995f00b48a9c3'
 NOVOS = ('2.1.1', '3.4.2', '4.1.1', '4.1.2', '12.1.4')
 EQUIVALENCIA = dict(zip(('8.7','8.8','8.8.1','8.9'), ('WPP.1','WPP.2','WPP.3','WPP.4')))
 
+# Contagem de preenchimento, não obrigatoriedade (decisão de 25/11).
+EXCECOES_CONTAGEM = frozenset()
+CAMPOS_ABERTURA = frozenset(('1.2', '1.3'))
+
+
+def contagem_blocos(conteudo):
+    defs = definicoes()
+    gerais = conteudo.get('respostas', {})
+    saida = {}
+    for bloco in range(1, 15):
+        n = m = 0
+        for key, q in defs.items():
+            if q['block'] != bloco or key in CAMPOS_ABERTURA | EXCECOES_CONTAGEM:
+                continue
+            if q.get('informativa') or q.get('excecao') or q['kind'] in ('readonly', 'calculated', 'info'):
+                continue
+            grupos = [gerais]
+            if bloco in (3, 10) and key != f'{bloco}.1':
+                grupos = [{**gerais, **r.get('respostas', {})} for r in conteudo.get('conjuntos_rev22', {}).get(str(bloco), [])] or [gerais]
+            for respostas in grupos:
+                if not ativa(key, respostas): continue
+                m += 1
+                valor = respostas.get(key)
+                if isinstance(valor, str): valor = valor.strip()
+                if valor not in (None, '', [], 'Sem resposta'): n += 1
+        texto = 'Ainda não preenchido' if not n else '✓ Todas as perguntas respondidas' if n == m else f'◐ Em preenchimento · {n} de {m} perguntas respondidas'
+        saida[bloco] = dict(respondidas=n, ativas=m, texto=texto)
+    return saida
+
+
+def condicoes_tela():
+    """Dados da mesma política usada pelo servidor, sem enunciados no JavaScript."""
+    return {k: dict(conditions=q['conditions'], block=q['block']) for k, q in definicoes().items()}
+
+
+def orientacao_condicional(key):
+    q=definicoes()[key]
+    if key.startswith(('OUV.', 'ESIC.')):
+        return 'Perguntas sobre Ouvidoria e e-SIC aparecem se um desses canais for marcado em F1-2.1 ou nos canais adicionais.'
+    if key.startswith('WPP.'):
+        return 'Perguntas sobre WhatsApp aparecem quando esse canal é informado.'
+    conditions=q['conditions']
+    if conditions and isinstance(conditions[0],str): conditions=[conditions]
+    if conditions:
+        return 'Disponível quando '+ ' e '.join('a resposta a F1-'+k+' for '+ ' ou '.join(choices) for k,choices in conditions)+'.'
+    if key.startswith('3.') and key!='3.1':return 'Disponível quando a resposta a F1-3.1 for Sim.'
+    if key.startswith('10.') and key!='10.1':return 'Disponível quando a resposta a F1-10.1 for Sim ou Em alguns casos.'
+    return 'Disponível quando a pergunta de origem indicar uma situação aplicável.'
+
 def pre_validar(conteudo):
     """Consulta candidata; não presume uma nova matriz de obrigatoriedade."""
     avisos=[];respostas=conteudo.get('respostas',{})
