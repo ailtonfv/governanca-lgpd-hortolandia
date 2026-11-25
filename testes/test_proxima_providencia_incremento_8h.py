@@ -42,7 +42,7 @@ def test_arp_autorizado_inicia_form1_e_chega_ao_primeiro_bloco(sessao):
 
     # Assert
     trecho = _trecho_proxima_providencia(pagina.text)
-    assert "Próxima providência" in trecho
+    assert "Etapa atual" in trecho
     assert "Preencher FORM 1" in trecho
     assert "Você é o ARP atual" in trecho
     assert 'disabled aria-disabled="true"' in pagina.text
@@ -50,8 +50,9 @@ def test_arp_autorizado_inicia_form1_e_chega_ao_primeiro_bloco(sessao):
     assert "/form1-rev22?conta_id=CONTA-A1" in inicio.headers["location"]
     retomada = cliente.get(inicio.headers["location"])
     assert retomada.status_code == 200
-    assert "Preparar o FORM 1" in retomada.text
-    assert "Atualizar e continuar" in retomada.text
+    assert "Preparar o FORM 1" not in retomada.text
+    assert "Escolha um bloco para preencher." in retomada.text
+    assert 'name="r:1.1"' in retomada.text
 
 
 def test_arp_com_rascunho_recebe_continuacao_para_pendencia_ativa(sessao):

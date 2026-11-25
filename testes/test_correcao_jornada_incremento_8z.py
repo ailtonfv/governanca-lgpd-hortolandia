@@ -111,7 +111,7 @@ def test_duplicidade_identifica_registro_acessivel_e_oferece_consulta():
     assert "Gestão cadastral tributária (CTX-TRIB-01)" in resposta.text
     assert "Em andamento" in resposta.text
     assert f'/registros/{existente["registro_id"]}?conta_id=CONTA-A1' in resposta.text
-    assert "Consultar este Registro" in resposta.text
+    assert "Abrir o Registro existente" in resposta.text
 
 
 def test_duplicidade_de_outra_secretaria_nao_divulga_detalhes():

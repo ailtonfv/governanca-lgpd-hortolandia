@@ -74,8 +74,9 @@ def test_designacao_confirmada_permite_ao_arp_iniciar_no_bloco_1():
     destino = cliente.get(inicio.headers["location"])
     assert registro["codigo_lgpd"] in destino.text
     assert "FORM 1 · Bloco 1" in destino.text
-    assert "Preparar o FORM 1 para preenchimento" in destino.text
-    assert "Atualizar e continuar" in destino.text
+    assert "Preparar o FORM 1 para preenchimento" not in destino.text
+    assert "Escolha um bloco para preencher." in destino.text
+    assert 'name="r:1.1"' in destino.text
     assert "data-instrumento-regressao" not in destino.text
 
 
@@ -125,7 +126,8 @@ def test_painel_do_arp_inicia_form1_integral_diretamente_no_bloco_1():
     destino = cliente.get(inicio.headers["location"])
     assert destino.status_code == 200
     assert "FORM 1 · Bloco 1" in destino.text
-    assert "Preparar o FORM 1 para preenchimento" in destino.text
+    assert "Preparar o FORM 1 para preenchimento" not in destino.text
+    assert "Escolha um bloco para preencher." in destino.text
     assert "Preencher FORM 1" not in destino.text
     assert "data-instrumento-regressao" not in destino.text
     assert "questionario-sintetico-legado" not in destino.text
@@ -151,7 +153,7 @@ def test_salvar_e_avancar_preserva_resposta_sem_abrir_instrumento_legado(sessao)
         f"/registros/{registro['registro_id']}/form1-integral/bloco-1/salvar",
         data={
             "conta_id": "CONTA-A1", "comando_id": "8AH-AVANCAR-B1",
-            "versao_lida": "1", "acao_pos_salvar": "proximo",
+            "versao_lida": str(sessao.get(RascunhoForm1Integral, registro['registro_id']).versao_rascunho), "acao_pos_salvar": "proximo",
             "referencia_existente": "Não", "referencia_institucional": "",
             "fluxo_recorrente": "Sim",
         },
@@ -163,9 +165,12 @@ def test_salvar_e_avancar_preserva_resposta_sem_abrir_instrumento_legado(sessao)
     assert resposta.headers["location"].endswith("#titulo-bloco-2")
     retomada = cliente.get(resposta.headers["location"])
     assert "Bloco 1 atualizado" in retomada.text
-    assert 'value="Sim" selected' in retomada.text
+    atual = cliente.get(f"/registros/{registro['registro_id']}/form1-rev22?conta_id=CONTA-A1&bloco=1")
+    campo = re.search(r'<select[^>]+name="r:1\.4"[^>]*>(.*?)</select>', atual.text, re.S)
+    assert campo is not None and 'value="Sim" selected' in campo.group(1)
     assert "data-instrumento-regressao" not in retomada.text
     rascunho = sessao.get(RascunhoForm1Integral, registro["registro_id"])
+    sessao.refresh(rascunho)
     assert rascunho.conteudo["respostas"]["1.4"] == "Sim"
 
 

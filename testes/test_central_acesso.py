@@ -31,10 +31,10 @@ def test_entrada_sem_listagem_identifica_apa_e_reserva_planejados():
     assert "ARP" in usuarios["CONTA-G1"] and "APA titular" in usuarios["CONTA-A1"]
     assert all(" — " in nome for nome in usuarios.values())
     alterada = cliente.get("/central?conta_id=CONTA-G1&administracao_ti_autorizada=true&apa_id=PESSOA-G")
-    assert 'Servidor Épsilon (fictício) — MAT-FICT-0007</dd>' in alterada.text
+    assert 'Servidor Épsilon (fictício) — MAT-FICT-0007 · ARP</dd>' in alterada.text
     assert 'MAT-FICT-0001 — Servidor Alfa (fictício) (titular)' in alterada.text
-    assert 'Administração Central — TI' in alterada.text
-    assert '<a ' not in alterada.text.split('id="titulo-gestao"', 1)[1]
+    assert 'Administração Central — TI' not in alterada.text
+    assert 'href="/dashboard?conta_id=CONTA-G1">Acessar Dashboard</a>' in alterada.text
 
 
 def test_atalhos_da_central_por_papel_vigente(sessao):
@@ -78,17 +78,18 @@ def test_cartoes_explicam_disponibilidade_sem_oferecer_acesso_direto():
     # Convenção aprovada em 19/11: acesso à lista, sem executar atos.
     pagina = TestClient(app).get("/central").text
     cartoes = re.findall(r'<li class="cartao-central [^"]+">(.*?)</li>', pagina, re.S)
-    assert len(cartoes) == 6
+    assert len(cartoes) == 5
     for numero, cartao in enumerate(cartoes[:4], 1):
         assert f'FORM {numero}' in cartao
         assert 'Seus itens em andamento' in cartao
         assert 'Nenhuma providência sua neste FORM.' in cartao
         assert 'Em acompanhamento (0)' in cartao
-        assert 'Disponível na demonstração, conforme as permissões do seu perfil.' in cartao
+        assert 'Disponível na demonstração, conforme as permissões do seu perfil.' not in cartao
         assert f'>Acessar FORM {numero}</a>' in cartao
         assert cartao.count('acesso-instrumento') == 1
-    assert 'disabled>Acessar Dashboard</button>' in cartoes[4]
-    assert 'disabled>Acessar Administração Central</button>' in cartoes[5]
+    assert 'href="/dashboard?conta_id=CONTA-A1">Acessar Dashboard</a>' in cartoes[4]
+    assert 'Acessar Administração Central' not in pagina
+    assert pagina.count('Disponível na demonstração, conforme as permissões do seu perfil.') == 1
 
 
 @pytest.mark.parametrize("conta,rotulo", [

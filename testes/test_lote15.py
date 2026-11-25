@@ -54,7 +54,10 @@ def test_entrada_condicoes_e_ajudas(sessao):
         assert 'seção 6.10' not in tela
 
 
-def test_central_papel_dashboard_e_aviso_unico():
+def test_central_papel_dashboard_e_aviso_unico(sessao):
+    from app.modelos import Designacao
+    sessao.add(Designacao(pessoa_id='PESSOA-B', unidade_id='UNID-NORTE', papel='aal_form2', ativa=True))
+    sessao.commit()
     tela=TestClient(app).get('/central?conta_id=CONTA-B1').text
     assert '· AAL</dd>' in tela
     assert 'Administração Central — TI' not in tela

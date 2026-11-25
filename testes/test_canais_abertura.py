@@ -287,8 +287,8 @@ def test_tela_apresenta_canais_habituais_depois_do_objeto():
     resposta = cliente.get("/registros/novo", params={"conta_id": "CONTA-A1"})
 
     assert resposta.status_code == 200
-    assert resposta.text.index("3. Item do catálogo da demonstração") < resposta.text.index(
-        "4. Por quais canais as demandas chegam habitualmente?"
+    assert resposta.text.index("2. Item do catálogo da demonstração") < resposta.text.index(
+        "3. Por quais canais as demandas chegam habitualmente?"
     )
     assert "Presencial / balcão de atendimento" in resposta.text
     assert "Portal da Prefeitura" in resposta.text

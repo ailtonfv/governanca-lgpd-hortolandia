@@ -19,7 +19,7 @@
         <ul>{% for item in resumo.acompanhamento %}<li><a href="{{ item.href }}">{{ item.texto }}</a></li>{% endfor %}</ul>
       </details>
     </section>
-    
+
     <a class="botao-link-secundario acesso-instrumento" href="{{ resumo.acesso }}">Acessar FORM {{ numero }}</a>
     {% else %}
     <p class="situacao-instrumento">{{ situacao }}</p>

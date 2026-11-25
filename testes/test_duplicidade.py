@@ -76,13 +76,14 @@ def test_preenchedor_sem_papel_de_responsavel_nao_abre_registro():
 
 def test_outra_familia_nao_gera_advertencia():
     g1("CMD-D-14", CADASTRO, "CTX-TRIB-01")
-    r = g1("CMD-D-15", CADASTRO, "CTX-URB-01")
-    assert r["permitido"] and r["advertencia"] is None
+    r = g1("CMD-D-15", CADASTRO, "CTX-URB-01", justificativa="Contexto urbanístico distinto (fictício)")
+    assert r["permitido"] and r["advertencia"].get("familia") is None
+    assert r["advertencia"]["justificativa"] == "Contexto urbanístico distinto (fictício)"
 
 
 def test_mesma_familia_sem_resolucao_e_recusada():
     g1("CMD-D-16", CADASTRO, "CTX-TRIB-01")
-    r = g1("CMD-D-17", CADASTRO, "CTX-TRIB-03")
+    r = g1("CMD-D-17", CADASTRO, "CTX-TRIB-03", justificativa="Contexto distinto (fictício)")
     assert not r["permitido"] and r["advertencia"]["familia"] == "TRIB"
 
 

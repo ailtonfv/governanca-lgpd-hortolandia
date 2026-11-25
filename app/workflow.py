@@ -373,7 +373,7 @@ def criar_registro(sessao, *, comando_id, conta_id, unidade_id, contexto_id, tit
             advertencia["decisoes_de_transversalidade"] = decisoes
 
     if outros:
-        advertencia = {**(advertencia or {}), 'resolucao':'tratamento_autonomo',
+        advertencia = {**(advertencia or {}), 'resolucao':(advertencia or {}).get('resolucao','tratamento_autonomo'),
             'justificativa':justificativa.strip(), 'registros_outros_contextos':[r.codigo_lgpd for r in outros]}
     # 4. verificação 3 — alerta estrutural (não bloqueia)
     alertas = alertas_estruturais(sessao, assunto)

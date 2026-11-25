@@ -257,7 +257,7 @@ def test_composicoes_http_e_metodos_recusados(sessao,dados):
         assert 'Lista que compõe o indicador' in r.text
     assert client.post('/dashboard?conta_id=CONTA-B1',data={'acao':'qualquer'}).status_code==405
     assert client.get('/dashboard?conta_id=CONTA-B1&lista=inventada').status_code==404
-    assert 'Abrir dashboard LGPD' in client.get('/central?conta_id=CONTA-B1').text
+    assert 'href="/dashboard?conta_id=CONTA-B1">Acessar Dashboard</a>' in client.get('/central?conta_id=CONTA-B1').text
     # Exportação opcional para inspeção visual local, fora do Git e só com a massa _teste.
     import os
     from pathlib import Path

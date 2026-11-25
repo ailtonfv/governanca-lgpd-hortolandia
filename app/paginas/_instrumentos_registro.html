@@ -6,6 +6,7 @@
     <li data-instrumento="FORM1">
       <h3>FORM 1 — Levantamento do tratamento</h3>
       <p>Registra os fatos sobre coleta, uso, compartilhamento, guarda e proteção de dados pessoais.</p>
+      <p>{{ registro.form1_integral.fluxo_conferencia.estado }}</p>
       <a href="#titulo-form1-integral" class="botao-link-secundario">Consultar situação do FORM 1</a>
       <p class="ajuda">{% if registro.form1_integral.pode_editar %}Preenchimento autorizado como ARP.{% else %}Consulta; edição somente pelo ARP autorizado.{% endif %}</p>
     </li>

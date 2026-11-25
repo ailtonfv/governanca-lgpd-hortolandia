@@ -28,7 +28,8 @@ def test_fundamento_obrigatorio_e_uma_vigente_por_par():
 def test_transversalidade_resolve_advertencias_futuras_da_familia():
     g1("CMD-T-07", CADASTRO, "CTX-TRIB-01")
     decisao = declarar("CONTA-E1", "CMD-T-08")["decisao_id"]
-    r = g1("CMD-T-09", CADASTRO, "CTX-TRIB-03")                  # sem justificativa
+    # A deliberação de família permanece; a nova abertura também exige justificativa do contexto.
+    r = g1("CMD-T-09", CADASTRO, "CTX-TRIB-03", justificativa="Contexto de cobrança distinto (fictício)")
     assert r["permitido"] and "transversalidade" in r["motivo"]
     adv = evento_g1(r["codigo_lgpd"]).conteudo["advertencia_familia"]
     assert adv["resolucao"] == "objeto_transversal"

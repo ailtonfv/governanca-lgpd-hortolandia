@@ -344,4 +344,5 @@ def test_lista_de_origens_confirmadas_do_apa(sessao, monkeypatch):
     detalhe = cliente.get("/registros/" + registro["registro_id"], params={"conta_id": "CONTA-A1"})
     assert "Fila do FORM 2:" in detalhe.text and "Aguardando responsável" in detalhe.text
     painel = cliente.get("/painel", params={"conta_id": "CONTA-A1"})
-    assert "Ingressou na fila do FORM 2 em " in painel.text
+    assert "Etapa atual:" in painel.text
+    assert "FORM 2 — Aguardando atribuição de AAL pelo gestor da fila (APA), desde " in painel.text

@@ -45,6 +45,7 @@
 {% with etapa=registro.etapa_atual %}{% include "_etapa_registro.html" %}{% endwith %}
 {% if registro.etapa_atual.form != 1 %}{% for item in registro.etapa_atual.minhas %}<p><a class="botao-link" href="{{ item.href }}">{{ item.rotulo }}</a></p>{% else %}<p>Nada a fazer por você agora.</p>{% endfor %}{% endif %}
 {% if registro.etapa_atual.form == 1 %}
+    {% if proxima.tipo in ('consultar', 'aguardar_conferencia') or (proxima.tipo == 'indisponivel' and not registro.form1_integral.pode_atribuir_arp) %}<p>Nada a fazer por você agora.</p>{% endif %}
     <p><strong>Seu papel neste Registro:</strong> {{ percurso.papel_conferente ~ " — conferiu a " ~ percurso.rotulo_apresentacao if percurso.papel_apresentante and percurso.confirmador_id == identidade.pessoa_id else proxima.papel }}.</p>
     <p>{% if percurso.papel_apresentante and percurso.atual == "conferir" and percurso.apresentante_id == identidade.pessoa_id %}Você apresentou esta versão. {{ percurso.proxima }} Aguarde a decisão.{% elif percurso.papel_apresentante and percurso.atual == "confirmar" %}{{ percurso.decidida_por }} confirmou a {{ percurso.rotulo_apresentacao }} em {{ percurso.decidida_em|data_local }}.{% else %}{{ proxima.descricao }}{% endif %}</p>
     {% if ingresso_na_fila %}<p>Encaminhado à fila do FORM 2 ({{ fila_unidade }}) em {{ ingresso_na_fila|data_local }}.{% if dpo_comunicado %} DPO comunicado.{% endif %}</p>{% endif %}
@@ -153,6 +154,14 @@
     <span class="estado">{% if registro.form1_integral.rascunho %}Rascunho {{ registro.form1_integral.rascunho.versao }}{% else %}Não iniciado{% endif %}</span>
   </div>
   <p class="aviso-leitura status-submissao-form1">{% if not registro.form1_integral.rascunho %}O rascunho ainda não foi iniciado{% if registro.form1_integral.arp_atual %} pelo ARP {{ registro.form1_integral.arp_atual.nome }}{% endif %}. Depois de iniciado, os 14 blocos poderão ser acessados conforme seu papel.{% else %}O FORM 1 pode ser salvo e retomado mesmo incompleto. Salvar não conclui a análise institucional.{% endif %}</p>
+  {% if registro.etapa_atual.form != 1 %}
+  <details><summary>Conferência e ingresso do FORM 1 no FORM 2</summary>
+    {% if percurso.papel_apresentante and percurso.confirmador_id == identidade.pessoa_id %}<p>{{ percurso.papel_conferente }} — conferiu a {{ percurso.rotulo_apresentacao }}.</p>{% endif %}
+    {% if percurso.decidida_em %}<p>{{ percurso.decidida_por }} confirmou a {{ percurso.rotulo_apresentacao }} em {{ percurso.decidida_em|data_local }}.</p>{% endif %}
+    {% if ingresso_na_fila %}<p>Encaminhado à fila do FORM 2 ({{ fila_unidade }}) em {{ ingresso_na_fila|data_local }}.{% if dpo_comunicado %} DPO comunicado.{% endif %}</p>{% endif %}
+    {% if registro.form1_integral.pode_atribuir_arp and esta_na_fila %}<p>Fila do FORM 2: {{ fila_unidade }} · {{ "Responsável: " ~ fila_responsavel if fila_responsavel else "Aguardando responsável" }}.</p>{% endif %}
+  </details>
+  {% endif %}
   <p class="ajuda"><strong>Rascunho e apresentação:</strong> o rascunho é a versão de trabalho editável pelo ARP autorizado. Salvar pode atualizar essa versão, mas não altera apresentações históricas nem solicita nova conferência ao APA. Uma apresentação conferida permanece imutável; conferência interna não equivale a homologação ou submissão institucional.</p>
 
   {% if not registro.form1_integral.pode_editar %}

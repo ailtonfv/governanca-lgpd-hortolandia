@@ -49,7 +49,7 @@ def test_fluxo_mostra_estado_versao_e_papel_sem_criar_providencia(sessao, mesma_
     assert fluxo()['rotulo_apresentacao'] == rotulo
     assert fluxo()['devolucao_anterior'] is not None
     detalhe = TestClient(app).get(f"/registros/{registro['registro_id']}?conta_id=CONTA-A1")
-    for texto in (rotulo, "Reapresentação (após devolução de ", "Apresentada em ", "Devolvida em "):
+    for texto in (rotulo, "Reapresentado em ", "depois da devolução de ", "Apresentada em ", "Devolvida em "):
         assert texto in detalhe.text
     assert fluxo()['versao'] == ajuste['versao_rascunho']
     assert fluxo()['decidida_em'] is not None
