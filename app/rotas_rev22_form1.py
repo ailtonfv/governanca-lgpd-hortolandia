@@ -8,7 +8,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from app.banco import motor
-from app.continuidade_apa import conferente_da_apresentacao
+from app.continuidade_apa import conferente_da_apresentacao, unidades_em_que_e_apa_atual
 from app.modelos import ParticipacaoForm2,Registro,RascunhoForm1Integral,Unidade,ConferenciaInternaForm1Integral
 from app.consultas_interface import _identidade, _ids_visiveis
 from app.rascunho_form1_integral import _contexto_autorizado
@@ -75,6 +75,7 @@ def pagina(request:Request,registro_id:str,conta_id:str,bloco:int=1,conjunto:int
         historico['perguntas']=[p for p in historico['perguntas'] if p['id'] in defs and defs[p['id']]['block']==bloco]
         historico['conteudo']={k:v for k,v in historico.get('conteudo',{}).items() if (k=='participantes' and bloco==3) or (k=='destinatarios_10_2_1' and bloco==10)}
     return paginas.TemplateResponse(request=request,name='form1_rev22.html',context=dict(
+        pode_definir_retorno=reg.unidade_principal_atual_id in unidades_em_que_e_apa_atual(sessao,identidade["pessoa_id"]),
         atualizada=atualizada, contagens=contagem_blocos(conteudo), condicoes=condicoes_tela(), contexto_condicoes=contexto,
         retirada_antiga=bool(conteudo.get('revisao_22',{}).get('legado',{}).get('9.2.1')),
         orientacao_levantamento=acesso_local_cartilha(request) and "levantamento" in secoes_cartilha_disponiveis(),

@@ -341,7 +341,7 @@ def cobertura(d):
             confirmados=[linha(d,r.id) for r in rs if r.id in confirmados],concluidos=[linha(d,r.id) for r in rs if r.id in concluidos],
             registros=[linha(d,r.id) for r in rs],externos=[linha(d,rid) for rid in sorted(externos)]))
     return [quadro('secretarias','Secretarias com pelo menos um Registro',[l for l in linhas if l['total']],'Secretarias',
-                   'secretarias_ativas()','Quantidades; percentual depende de inventário de referência aprovado.',total_ativas=len(linhas)),
+                   'De onde vem: Secretarias ativas da tabela-mestre com pelo menos um Registro no seu escopo.','Quantidades; percentual depende de inventário de referência aprovado.',total_ativas=len(linhas)),
             quadro('cobertura','Secretarias ativas',linhas,'Secretarias')]
 
 

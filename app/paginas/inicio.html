@@ -132,9 +132,9 @@
           {% endif %}
           <p><strong>Responsável pelo rascunho:</strong> {{ fluxo.arp }}</p>
           <p class="resumo-conferencia-cartao"><strong>Conferência interna:</strong> {{ fluxo.estado }}{% if fluxo.rotulo_apresentacao %} · {{ fluxo.rotulo_apresentacao }}{% endif %}.</p>
-          {% if fluxo.devolucao_anterior %}<p><strong>Reapresentação (após devolução de {{ (fluxo.devolucao_anterior|data_local)[:5] }})</strong></p>{% endif %}
+          {% if fluxo.devolucao_anterior %}<p>Reapresentado em {{ (fluxo.apresentada_em|data_local)[:10] }}, depois da devolução de {{ (fluxo.devolucao_anterior|data_local)[:10] }}.</p>{% endif %}
           <details class="percurso-conferencia-cartao">
-            <summary>Entender o percurso ARP → APA → ARP</summary>
+            <summary>Como funciona o FORM 1: o ARP preenche, o APA confere e, se precisar, devolve ao ARP para ajuste.</summary>
             {% include '_fluxo_conferencia.html' %}
           </details>
             {% if fluxo.tem_historico %}<a href="{{ url_for('detalhe_registro', registro_id=registro.id) }}?conta_id={{ conta_id }}#historico-conferencias-form1">Consultar histórico deste Registro</a>{% endif %}

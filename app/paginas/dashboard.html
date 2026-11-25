@@ -1,5 +1,10 @@
 {% extends 'base.html' %}
 {% from '_celula_matriz_dashboard.html' import celula_matriz %}
+{% macro composicao(tipos) -%}
+{% set total=tipos.servico+tipos.processo+tipos.atividade %}{% if total %}
+{% set ns=namespace(partes=[]) %}{% for chave,singular,plural in [('servico','serviço','serviços'),('processo','processo','processos'),('atividade','atividade','atividades')] %}{% if tipos[chave] %}{% set ns.partes=ns.partes+[tipos[chave]|string+' '+(singular if tipos[chave]==1 else plural)] %}{% endif %}{% endfor %}
+<p>{{ total }} {{ 'Registro' if total==1 else 'Registros' }}: {% if ns.partes|length>1 %}{{ ns.partes[:-1]|join(', ') }} e {{ ns.partes[-1] }}{% else %}{{ ns.partes|join('') }}{% endif %}.</p>{% endif %}
+{%- endmacro %}
 {% block titulo %}Dashboard LGPD · {{ titulo }}{% endblock %}
 {% macro numero(ind) -%}
 {% if ind.disponivel %}<a class="dash-numero" href="{{ url(lista=ind.chave) }}">{{ ind.numero|numero_dashboard }}</a> <span>{{ {'Registros':'Registro','riscos':'risco','ações':'ação','participações':'participação','Secretarias':'Secretaria','aprendizados':'aprendizado'}.get(ind.unidade,ind.unidade) if ind.numero==1 else ind.unidade }}</span>{% elif ind.chave in ['form1','form2'] and filtros.faixa %}<strong>— não se aplica</strong>{% else %}<strong>Não disponível</strong>{% endif %}
@@ -7,7 +12,7 @@
 {% macro sobre(ind) -%}
 <details class="dash-sobre"><summary>ⓘ Sobre este número</summary><p>{{ ind.fonte or 'Fatos registrados nos FORMs' }}. {{ ind.regra }}</p>
 <p>Responsabilidade: {{ ind.papel or 'Secretaria' }}. Consulta em {{ agora|data_dashboard }}.</p>
-{% if ind.tipos %}<p>Registros distintos da lista por tipo: serviços {{ ind.tipos.servico }} · processos {{ ind.tipos.processo }} · atividades {{ ind.tipos.atividade }}.</p>{% endif %}</details>
+{% if ind.tipos %}{{ composicao(ind.tipos) }}{% endif %}</details>
 {%- endmacro %}
 {% macro cartao(ind,destino=none) -%}<article class="dash-card"><h2>{% if destino %}<a href="{{ url(destino) }}">{{ ind.titulo }}</a>{% else %}{{ ind.titulo }}{% endif %}</h2><p>{{ numero(ind) }}</p>{{ sobre(ind) }}</article>{%- endmacro %}
 {% macro efeitos(linhas) -%}<ul class="dash-efeitos">{% for l in linhas %}<li>{{ l.item }} · {{ l.situacao }}</li>{% else %}<li>Nenhum efeito registrado neste escopo.</li>{% endfor %}</ul>{%- endmacro %}
@@ -20,7 +25,7 @@
 <link rel="stylesheet" href="{{ url_for('estaticos',path='/dashboard.css') }}">
 <div class="dashboard"><p class="dash-contexto">Dashboard LGPD · {{ perfil }} · Somente leitura</p><h1>{{ titulo }}</h1>
 <p class="dash-deliberacao">Proposta em deliberação. Não equivale a homologação.</p>
-<nav class="dash-nav" aria-label="Telas do dashboard">{% for k,v in telas.items() %}<a href="{{ url(k) }}" {% if k==tela %}aria-current="page"{% endif %}>{{ {'abertura':'Abertura','risco':'Risco','correcao':'Correção','operacao':'Operação','cobertura':'Cobertura','aprendizados':'Aprendizados','circulacao':'Circulação'}[k] }}</a>{% endfor %}</nav>
+<nav class="dash-nav" aria-label="Telas do dashboard">{% for k,v in telas.items() %}<a href="{{ url(k) }}" {% if k==tela %}aria-current="page"{% endif %}>{{ {'abertura':'Visão geral','risco':'Riscos','correcao':'Providências','operacao':'Filas e prazos','cobertura':'Cobertura','aprendizados':'Aprendizados','circulacao':'Compartilhamento'}[k] }}</a>{% endfor %}</nav>
 <details class="dash-opcoes"><summary>Filtros · {{ mostrando }}</summary><form method="get" class="dash-filtros"><input type="hidden" name="conta_id" value="{{ conta_id }}">
 <label>Secretaria<select name="secretaria" {% if travada and secretarias|length==1 %}disabled{% endif %}><option value="">Todas no seu escopo</option>{% for u in secretarias %}<option value="{{ u.id }}" {% if filtros.secretaria==u.id %}selected{% endif %}>{{ u.nome }}</option>{% endfor %}</select></label>
 {% if travada and secretarias|length==1 %}<input type="hidden" name="secretaria" value="{{ secretarias[0].id }}">{% endif %}
@@ -29,7 +34,7 @@
 <label>Faixa de risco<select name="faixa"><option value="">Todas as faixas</option>{% for f in faixas %}<option {% if filtros.faixa==f %}selected{% endif %}>{{ f }}</option>{% endfor %}</select></label>
 <label>Etapa<select name="etapa"><option value="">Todas as etapas</option>{% for n in range(1,5) %}<option value="{{ n }}" {% if filtros.etapa==n|string %}selected{% endif %}>FORM {{ n }}</option>{% endfor %}</select></label>
 <button type="submit">Aplicar filtros</button><a href="/dashboard{{ '/'+tela if tela!='abertura' else '' }}?conta_id={{ conta_id|urlencode }}">Limpar filtros</a></form></details>
-<p><strong>Mostrando:</strong> {{ mostrando }}</p><p class="dash-contexto">Serviços {{ tipos.servico }} · processos {{ tipos.processo }} · atividades {{ tipos.atividade }}. Sem percentuais: inventário de referência ainda não aprovado.</p>
+<p><strong>Mostrando:</strong> {{ mostrando }}</p>{{ composicao(tipos) }}
 <p class="dash-perfil"><a href="/central?conta_id={{ conta_id|urlencode }}">Ver como: trocar servidor fictício</a></p>
 {% if selecao %}<section class="dash-composicao" id="composicao"><h2>{{ selecao.titulo }}</h2><p>{{ numero(selecao) }}</p>{{ sobre(selecao) }}{{ efeitos(selecao.lista) if selecao.chave=='efeito' else tabela(selecao.lista) }}<p><a href="{{ url() }}">Voltar ao painel</a></p></section>{% endif %}
 {% if tela=='abertura' %}

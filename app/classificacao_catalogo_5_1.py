@@ -116,3 +116,8 @@ def validar_classificacoes_catalogo_5_1(alternativas: tuple[str, ...]) -> list[s
         if extras:
             problemas.append("classificações sem categoria: " + ", ".join(extras))
     return problemas
+
+# Rótulo de apresentação; a chave histórica e a classificação não mudam.
+ROTULOS_EXIBICAO = {
+    'Pertencimento a povos ciganos / Roma, quando efetivamente tratado': 'Pertencimento a povo cigano (Calon, Rom ou Sinti)',
+}

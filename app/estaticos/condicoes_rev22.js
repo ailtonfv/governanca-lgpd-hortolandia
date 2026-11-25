@@ -33,6 +33,11 @@
     for (const campo of campos) {
       const id = campo.dataset.condicaoPergunta, aberta = ativa(id);
       campo.hidden = campo.disabled = !aberta;
+      const titulo = campo.querySelector('[data-titulo-condicional]');
+      if (titulo) {
+        const regra = JSON.parse(titulo.dataset.tituloCondicional);
+        titulo.textContent = respostas[regra.source] === regra.value ? 'F1-' + id + ' — ' + regra.text : titulo.dataset.tituloPadrao;
+      }
       const aviso = document.querySelector('[data-condicao-aviso="' + id + '"]');
       if (aviso) aviso.hidden = aberta;
     }

@@ -142,7 +142,7 @@
       <div><strong>{{ "APA suplente" if registro.form1_integral.apa_atual and registro.form1_integral.apa_atual.modalidade == "substituicao_temporaria" else "APA titular" }} em exercício</strong><br>{% if registro.form1_integral.apa_atual %}Matrícula {{ registro.form1_integral.apa_atual.matricula }} · {{ registro.form1_integral.apa_atual.nome }}{% else %}Não configurado{% endif %}{% if registro.form1_integral.apa_atual and registro.form1_integral.apa_atual.modalidade == 'substituicao_temporaria' %}<br><span class="ajuda">Substituição temporária</span>{% endif %}</div>
       <div><strong>ARP vigente</strong><br>{% if registro.form1_integral.arp_atual %}Matrícula {{ registro.form1_integral.arp_atual.matricula }} · {{ registro.form1_integral.arp_atual.nome }}<br><span class="ajuda">Designação vigente{% if registro.form1_integral.arp_atual.apa_tambem_arp %} · o APA em exercício também é o ARP{% endif %}</span>{% else %}Ainda não designado{% endif %}</div>
     </div>
-    <p class="ajuda">Cargo/função e e-mail institucional não são inventados quando não constam do cadastro disponível.</p>
+    <p class="ajuda">Cargo e e-mail institucional: não constam do cadastro.</p>
   </details>
 
   <div class="cabecalho-secao cabecalho-form1">
@@ -338,7 +338,7 @@
           {% for item in registro.form1_integral.historico_conferencias %}
           <li>
             <strong>{{ item.rotulo_apresentacao }}</strong> · {{ item.situacao }}.
-            {% if item.devolucao_anterior %}<p><strong>Reapresentação (após devolução de {{ (item.devolucao_anterior|data_local)[:5] }})</strong></p>{% endif %}
+            {% if item.devolucao_anterior %}<p>Reapresentado em {{ (item.solicitada_em|data_local)[:10] }}, depois da devolução de {{ (item.devolucao_anterior|data_local)[:10] }}.</p>{% endif %}
           <p>Apresentada em {{ item.solicitada_em|data_local }}.</p>
             {% if item.devolvida_em %}<p>Devolvida em {{ item.devolvida_em|data_local }}.</p>{% endif %}
             {% if item.confirmada_em %}<p>Confirmada em {{ item.confirmada_em|data_local }}.</p>{% endif %}

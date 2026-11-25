@@ -7,7 +7,7 @@ from uuid import uuid4
 import json
 
 VERSAO = 'F1-C3-REV22-CANDIDATA-v1'
-LACRE = '064216ae5a32bb189caea3f125ad8405314cbca12eac72a3679995f00b48a9c3'
+LACRE = '03cf8b3dd6137c1748ed43438c6516f9972c1b7a723cc98ef672f651e112de47'
 NOVOS = ('2.1.1', '3.4.2', '4.1.1', '4.1.2', '12.1.4')
 EQUIVALENCIA = dict(zip(('8.7','8.8','8.8.1','8.9'), ('WPP.1','WPP.2','WPP.3','WPP.4')))
 

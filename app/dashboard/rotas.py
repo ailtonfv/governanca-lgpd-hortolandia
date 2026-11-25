@@ -7,7 +7,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 from app.banco import motor
-from app.dashboard.fontes import escopo_da_conta, carregar, categorias_circulacao
+from app.dashboard.fontes import escopo_da_conta, carregar, categorias_circulacao, rotulo_perfil
 from app.dashboard import consultas as c
 
 router=APIRouter()
@@ -112,7 +112,7 @@ def dashboard(request:Request,tela:str='abertura',conta_id:str='CONTA-B1'):
             if filtros['faixa']:mostrando.append(filtros['faixa'])
             if filtros['etapa']:mostrando.append('FORM '+filtros['etapa'])
             return paginas.TemplateResponse(request=request,name='dashboard.html',context=dict(
-                conta_id=conta_id,tela=tela,titulo=TELAS[tela],telas=TELAS,perfil=perfil,titulo_perfil=titulo_perfil,
+                conta_id=conta_id,tela=tela,titulo=TELAS[tela],telas=TELAS,perfil=rotulo_perfil(sessao,conta_id,escopo),titulo_perfil=titulo_perfil,
                 filtros=filtros,secretarias=secretarias,travada=escopo.unidades is not None,faixas=c.FAIXAS,cores=CORES,
                 q=indices,url=url,selecao=selecao,quadros=[indices[k] for k in escolhas.get(tela,[]) if k in indices],
                 atencao=atencao_perfil,esteira=esteira,segmentos=segmentos,risco=linhas_risco,correcao=indices['acoes']['lista'],

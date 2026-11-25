@@ -425,6 +425,7 @@ def projetar_fluxo_conferencia(sessao, registro_id, unidade_id):
     return {
         "ultima_atividade": ultima,
         "devolucao_anterior": devolucao_anterior,
+        "apresentada_em": referencia.solicitada_em if referencia else None,
         "atual": atual, "estado": estado, "proxima": proxima, "responsavel": responsavel,
         "apa": apa, "arp": arp, "papel_conferente": papel_conferente,
         "papel_apresentante": papel_apresentante, "apresentante_id": referencia.solicitada_por_id if referencia else None,

@@ -110,3 +110,12 @@ def categorias_circulacao(dados):
         return resultado
     except (FileNotFoundError,KeyError,ValueError):
         return None  # Sem catálogo íntegro não se apresenta zero como resultado.
+
+
+def rotulo_perfil(sessao, conta_id, escopo):
+    if escopo.perfil != 'AAL/ARP': return escopo.perfil
+    pessoa=pessoa_ativa(sessao,conta_id)
+    papeis=[]
+    if unidades(sessao,pessoa.id,'aal_form2'):papeis.append('AAL')
+    if unidades(sessao,pessoa.id,'preenchedor'):papeis.append('ARP')
+    return ' e '.join(papeis) or 'Consulta'

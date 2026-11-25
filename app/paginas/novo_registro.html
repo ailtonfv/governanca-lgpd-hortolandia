@@ -15,7 +15,7 @@
     {% for unidade in unidades %}<option value="{{ unidade.id }}" {% if valores.unidade_id == unidade.id %}selected{% endif %}>{{ unidade.nome }}</option>{% endfor %}
   </select>
   {% endif %}
-  <p><strong>Agente identificado:</strong> {{ identidade.matricula }} — {{ identidade.nome|identidade_demonstrativa }}</p>
+  <p><strong>Servidor em sessão:</strong> {{ identidade.matricula }} — {{ identidade.nome|identidade_demonstrativa }}</p>
   {% if unidades %}<p class="ajuda">A Secretaria responsável coordena o Registro. Outras Secretarias poderão participar do tratamento.</p>{% endif %}
 </section>
 
@@ -54,7 +54,7 @@
     {% if 'unidade_id' in erros_campos %}<p id="erro-unidade_id" class="erro-campo">{% if unidades|length == 1 %}A Secretaria não foi confirmada. Confira a Secretaria responsável indicada acima antes de confirmar novamente.{% else %}Selecione uma Secretaria em que você seja o APA autorizado.{% endif %}</p>{% endif %}
 
     <fieldset>
-      <legend>2. Tipo de objeto <span class="marcador-obrigatorio" aria-label="obrigatório">*</span></legend>
+      <legend>1. Tipo de objeto <span class="marcador-obrigatorio" aria-label="obrigatório">*</span></legend>
       <p class="ajuda">Escolha a natureza do item que será documentado.</p>
       <div class="grade-opcoes grade-tipos">
         <label class="opcao"><input type="radio" name="tipo_objeto" value="servico" required {% if valores.tipo_objeto == 'servico' %}checked{% endif %}> <span><strong>Serviço</strong><br>Entrega ao cidadão, como oficinas culturais ou atendimento ao contribuinte.</span></label>
@@ -64,7 +64,7 @@
       {% if 'tipo_objeto' in erros_campos %}<p class="erro-campo">Escolha Serviço, Processo ou Atividade.</p>{% endif %}
     </fieldset>
 
-    <label id="rotulo-item" for="objeto_principal_id">3. Item do catálogo da demonstração <span class="marcador-obrigatorio" aria-label="obrigatório">*</span></label>
+    <label id="rotulo-item" for="objeto_principal_id">2. Item do catálogo da demonstração <span class="marcador-obrigatorio" aria-label="obrigatório">*</span></label>
     <select id="objeto_principal_id" name="objeto_principal_id" required
             {% if 'objeto_principal_id' in erros_campos %}aria-invalid="true" aria-describedby="erro-objeto_principal_id"{% endif %}>
       <option value="">Selecione depois de escolher o tipo</option>
@@ -74,11 +74,11 @@
     </select>
     {% if 'objeto_principal_id' in erros_campos %}<p id="erro-objeto_principal_id" class="erro-campo">Selecione um item cadastrado para a Secretaria e o tipo escolhidos.</p>{% endif %}
     {% if objeto_invalidado %}<p class="aviso-leitura">A seleção anterior foi removida porque o item não pertence mais à Secretaria e ao tipo informados.</p>{% endif %}
-    <p class="ajuda">A lista contém somente vínculos cadastrados para a Secretaria e o tipo escolhidos. Nesta demonstração, objetos e vínculos são fictícios e não representam inventário municipal homologado. Se o item adequado não aparecer, solicite revisão cadastral; não escolha outro por aproximação.</p>
+    <p class="ajuda">A lista contém somente vínculos cadastrados para a Secretaria e o tipo escolhidos. Nesta demonstração, objetos e vínculos são fictícios e não representam inventário municipal homologado. Se o item não aparecer, peça a inclusão à TI, responsável pelo catálogo operacional, antes de abrir o Registro. Não escolha outro item parecido.</p>
     <p id="sem-itens-catalogo" class="aviso-leitura" hidden>Nenhum item do tipo escolhido está vinculado a esta Secretaria no catálogo da demonstração. Solicite revisão cadastral.</p>
 
     <fieldset id="canais-habituais" aria-describedby="ajuda-canais" {% if not valores.objeto_principal_id %}disabled{% endif %} {% if 'situacao_canais' in erros_campos %}aria-invalid="true"{% endif %}>
-      <legend>4. Por quais canais as demandas chegam habitualmente? <span class="marcador-obrigatorio" aria-label="obrigatório">*</span></legend>
+      <legend>3. Por quais canais as demandas chegam habitualmente? <span class="marcador-obrigatorio" aria-label="obrigatório">*</span></legend>
       <p class="ajuda" id="ajuda-canais">Escolha primeiro o item do catálogo. Depois, declare quais canais são utilizados. Uma sugestão cadastral só fará parte da declaração se você marcar o canal e confirmar a criação do Registro.</p>
       <details><summary>O que é registrado?</summary><p>A declaração vale para este Registro e não altera o catálogo mestre. Os canais representam meios de entrada das demandas; não representam cidadãos, telefonemas nem protocolos individuais.</p></details>
       <label class="opcao opcao-situacao-canal">
@@ -114,7 +114,7 @@
       {% if 'situacao_canais' in erros_campos %}<p class="erro-campo">Confirme os canais identificados, a inexistência aplicável ou a insuficiência cadastral.</p>{% endif %}
     </fieldset>
 
-    <label for="contexto_id">5. Contexto de atuação <span class="marcador-obrigatorio" aria-label="obrigatório">*</span></label>
+    <label for="contexto_id">4. Contexto de atuação <span class="marcador-obrigatorio" aria-label="obrigatório">*</span></label>
     <select id="contexto_id" name="contexto_id" required
             aria-describedby="exemplo-contexto{% if 'contexto_id' in erros_campos %} erro-contexto_id{% endif %}"
             {% if 'contexto_id' in erros_campos %}aria-invalid="true"{% endif %}>
@@ -225,7 +225,7 @@
     const nomeTipo = {servico:'serviço',processo:'processo',atividade:'atividade'}[tipo];
     objeto.disabled = !tipo;
     objeto.options[0].textContent = nomeTipo ? 'Escolha o ' + nomeTipo : 'Escolha primeiro o tipo, acima';
-    document.getElementById('rotulo-item').textContent = nomeTipo ? '3. Qual ' + nomeTipo + ' será mapeado?' : '3. Item do catálogo';
+    document.getElementById('rotulo-item').textContent = nomeTipo ? '2. Qual ' + nomeTipo + ' será mapeado?' : '2. Item do catálogo';
     let quantidadeVisivel = 0;
     for (const opcao of objeto.options) {
       const unidades = (opcao.dataset.unidades || '').split(',');

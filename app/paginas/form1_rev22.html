@@ -4,7 +4,7 @@
 <div class="filas-form2 form1-rev22"><div class="conteudo-bloco-form1"><h1>FORM 1 · Bloco {{ bloco }}</h1>
 <p><strong>{{ registro.codigo_lgpd }}</strong> · {{ identidade.nome|identidade_demonstrativa }}</p>
 <div class="acoes-fila-form2"><a class="botao-link-secundario" href="/painel?conta_id={{ conta_id|urlencode }}">Voltar ao Painel</a></div>
-{% if bloco == 2 %}<p><a href="/registros/{{ registro.id }}/unidade-retorno?conta_id={{ conta_id|urlencode }}">Unidade de retorno de Ouvidoria/e-SIC · definição pelo APA</a></p>{% endif %}
+{% if bloco == 2 and pode_definir_retorno %}<p><a href="/registros/{{ registro.id }}/unidade-retorno?conta_id={{ conta_id|urlencode }}">Defina para qual unidade voltam as respostas de Ouvidoria e e-SIC deste Registro.</a></p>{% endif %}
 {% if (not adotada or bloco == 1) and orientacao_levantamento %}
 <div class="acoes-fila-form2"><a href="{{ url_for('consultar_cartilha_secao', registro_id=registro.id, edicao=edicao_cartilha, secao_id='levantamento') }}?conta_id={{ conta_id|urlencode }}" target="_blank" rel="noopener noreferrer">Consultar orientação na Cartilha: levantamento da realidade (abre em outra aba)</a></div>
 {% endif %}
@@ -24,11 +24,11 @@
 {% for repetida in ([false,true] if bloco in (3,10) else [false]) %}
 <form id="respostas-{{ 'conjunto' if repetida else 'bloco' }}" method="post"><input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="comando_id" value="{{ comando_id }}-{{ 'conjunto' if repetida else 'bloco' }}"><input type="hidden" name="versao" value="{{ r.versao_rascunho }}"><input type="hidden" name="bloco" value="{{ bloco }}">{% if repetida %}<input type="hidden" name="conjunto" value="{{ conjunto }}"><h2>Conjunto {{ conjunto }}</h2>{% endif %}
 <fieldset {% if not pode %}disabled{% endif %}>
-{% for q in campos if q.repetida==repetida %}<p data-condicao-aviso="{{ q.id }}" {% if q.ativa %}hidden{% endif %}>{{ q.orientacao_condicional }}</p><fieldset data-condicao-pergunta="{{ q.id }}" {% if not q.ativa %}disabled hidden{% endif %}><legend>F1-{{ q.id }} — {{ q.question }}</legend>
+{% for q in campos if q.repetida==repetida %}<p data-condicao-aviso="{{ q.id }}" {% if q.ativa %}hidden{% endif %}>{{ q.orientacao_condicional }}</p><fieldset data-condicao-pergunta="{{ q.id }}" {% if not q.ativa %}disabled hidden{% endif %}><legend data-titulo-padrao="F1-{{ q.id }} — {{ q.question }}" {% if q.question_by_answer %}data-titulo-condicional='{{ q.question_by_answer|tojson }}'{% endif %}>F1-{{ q.id }} — {{ q.question_by_answer.text if q.question_by_answer and contexto_condicoes.get(q.question_by_answer.source)==q.question_by_answer.value else q.question }}</legend>
 
 {% if q.id=='9.2.2' and retirada_antiga %}<p>Uma pergunta deste bloco foi retirada; sua resposta antiga está no histórico.</p>{% endif %}
-{% if q.kind=='multi' %}<input type="hidden" name="r:{{ q.id }}" value="">{% for a in q.options %}<label><input type="checkbox" name="r:{{ q.id }}" value="{{ a }}" {% if a in (q.valor or []) %}checked{% endif %}>{{ a }}</label>{% endfor %}
-{% elif q.kind in ('single','unit') %}<select aria-label="F1-{{ q.id }} — {{ q.question }}" name="r:{{ q.id }}"><option value="">Sem resposta</option>{% if q.kind=='unit' %}{% for u in unidades %}<option value="{{ u.id }}" {% if q.valor==u.id %}selected{% endif %}>{{ u.nome }}</option>{% endfor %}{% else %}{% for a in q.options %}<option {% if q.valor==a %}selected{% endif %}>{{ a }}</option>{% endfor %}{% endif %}</select>
+{% if q.kind=='multi' %}<input type="hidden" name="r:{{ q.id }}" value="">{% for a in q.options %}<label><input type="checkbox" name="r:{{ q.id }}" value="{{ a }}" {% if a in (q.valor or []) %}checked{% endif %}>{{ q.option_labels.get(a,a) if q.option_labels else a }}</label>{% endfor %}
+{% elif q.kind in ('single','unit') %}<select aria-label="F1-{{ q.id }} — {{ q.question }}" name="r:{{ q.id }}"><option value="">Sem resposta</option>{% if q.kind=='unit' %}{% for u in unidades %}<option value="{{ u.id }}" {% if q.valor==u.id %}selected{% endif %}>{{ u.nome }}</option>{% endfor %}{% else %}{% for a in q.options %}<option value="{{ a }}" {% if q.valor==a %}selected{% endif %}>{{ q.option_labels.get(a,a) if q.option_labels else a }}</option>{% endfor %}{% endif %}</select>
 {% else %}<textarea name="r:{{ q.id }}" aria-label="F1-{{ q.id }} — {{ q.question }}" maxlength="2000">{{ q.valor or '' }}</textarea>{% endif %}
 {% if q.options %}<label data-outro-form1 data-outro-origem="r:{{ q.id }}">Complemento, quando solicitado pela alternativa<input type="text" name="c:{{ q.id }}" value="{{ q.complemento }}" maxlength="1000"></label>{% endif %}
 {% with campo=q %}{% include '_ajuda_cartilha_form1.html' %}{% endwith %}
