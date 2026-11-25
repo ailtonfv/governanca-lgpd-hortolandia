@@ -3,18 +3,21 @@
   <h3>Diretriz</h3><p>{{ item.diretriz }}</p>
   <h4>Contexto</h4><p>{{ item.contexto }}</p>
   <h4>Aplicação e limites</h4><p>{{ item.limites }}</p>
+  <p><strong>Temas:</strong> {{ item.temas|join(' · ') }}</p>
   <footer>{{ item.secretaria }} · {{ item.registro }} · {{ item.item }}<br>
     Verificação aprovada, conferência do DPO e autorização da Secretaria em {{ item.autorizado_texto }}.</footer>
 </article>
 {% endmacro %}
-<section aria-labelledby="aprendizados-prefeitura">
+<link rel="stylesheet" href="{{ url_for('estaticos',path='/aprendizados_publicos.css') }}">
+<section class="aprendizados-publicos" aria-labelledby="aprendizados-prefeitura">
   <h2 id="aprendizados-prefeitura">Aprendizados da Prefeitura</h2>
-  <p>{{ aprendizado.total }} orientações autorizadas para consulta</p>
+  <p>{{ aprendizado.total }} {{ 'orientação autorizada' if aprendizado.total==1 else 'orientações autorizadas' }} para consulta</p>
   <form method="get" action="/dashboard/aprendizados" class="dash-filtros">
     <input type="hidden" name="conta_id" value="{{ conta_id }}">
     <label>Palavra<input name="palavra" value="{{ aprendizado.palavra }}" maxlength="200"></label>
     <label>Secretaria<select name="secretaria"><option value="">Todas as Secretarias</option>
     {% for u in aprendizado.secretarias %}<option value="{{ u.id }}" {% if u.id==aprendizado.secretaria %}selected{% endif %}>{{ u.nome }}</option>{% endfor %}</select></label>
+    <label>Tema<select name="tema"><option value="">Todos os temas</option>{% for t in aprendizado.temas %}<option value="{{ t.codigo }}" {% if t.codigo==aprendizado.tema %}selected{% endif %}>{{ t.codigo }} · {{ t.nome }}</option>{% endfor %}</select></label>
     <button type="submit">Buscar aprendizados</button>
   </form>
   {% if lista_completa %}

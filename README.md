@@ -2065,3 +2065,9 @@ A primeira entrada de cada conta fictícia abre Como funciona. A marca é por co
 ### Lote 14 — consulta por escopo
 
 O APA consulta o dashboard da própria Secretaria. Aprendizados autorizados têm consulta global, com busca e filtro livre de Secretaria, sem links para os casos de origem. Riscos e ações da própria unidade podem ser consultados sem conceder competência para atos. As contagens operacionais do dashboard permanecem calculadas pelas funções anteriores.
+
+### Lote 14 — temas das providências
+
+Catálogo preliminar fechado T01–T19, com tema principal e até dois complementares. O tema principal é exigido no envio do plano para aprovação; salvar temas parcialmente continua permitido. Aprendizados preservam a classificação da última versão autorizada. Pedidos de inclusão ficam em análise pelo DPO e não criam tema. Registros anteriores permanecem com Tema não informado. A migração é explícita, aditiva e restrita aos bancos de teste e à cópia nominal autorizada da 8015; não é executada ao iniciar o servidor.
+
+Verificação de fechamento do Lote 14: bateria completa com 1.229 verificações (1.178 aprovadas, 50 falhas e 1 ignorada). Em 25/11/2026, 49 falhas foram reproduzidas no código anterior `ec9a703`; a outra expectativa foi alinhada à consulta da própria Secretaria, preservando a recusa a outra unidade. O relatório local da entrega separa a rodada completa dos retestes direcionados. Não representa homologação nem merge no `main`.

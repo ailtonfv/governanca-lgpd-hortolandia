@@ -60,6 +60,12 @@ ATOS = {
 }
 
 ATOS['revisar_avaliacao']=(*ATOS['propor_avaliacao'][:3],'Reavaliar o risco',ATOS['propor_avaliacao'][4])
+TEMAS=[campo('tema_principal','Tema principal','select'),campo('temas_complementares','Temas complementares (até dois)','multi')]
+for acao in ('planejar','aprender'):
+    ATOS[acao][4].extend(TEMAS)
+ATOS['salvar_temas']=(4,3,('secretaria',),'Salvar temas (parcial)',TEMAS)
+ATOS['solicitar_tema']=(4,3,('secretaria',),'Nenhum tema serve? Solicitar inclusão',[
+    campo('nome_sugerido','Nome sugerido'),J])
 
 def disponiveis(form, bloco, papeis, estado=None, pessoa_id=None, revisar=False):
     candidatos=[dict(acao=k,titulo=v[3],campos=[dict(c) for c in v[4]]) for k,v in ATOS.items()
@@ -72,6 +78,7 @@ def disponiveis(form, bloco, papeis, estado=None, pessoa_id=None, revisar=False)
     saida=[]
     for a in candidatos:
         k=a['acao'];campo='triagem' if bloco==15 else 'avaliacao'
+        if k=='salvar_temas' and estado.get('plano_aprovado'):continue
         if form == 3 and estado.get('conclusao') and k not in ('revisar_avaliacao', 'informar_ripd'):continue
         if k == 'propor_triagem' and set(estado.get('avaliacao_confirmacoes', {})) != {'secretaria','dpo'}:continue
         if k == 'concluir_avaliacao' and (not estado.get('aceitacao') or estado.get('reavaliacao')):continue
@@ -131,6 +138,7 @@ def disponiveis(form, bloco, papeis, estado=None, pessoa_id=None, revisar=False)
             a['titulo']='Decisão do Prefeito — registrada pelo Gabinete'
             a['campos'].append(dict(nome='documento',rotulo='Documento formal da decisão (despacho, ofício ou processo nº)',tipo='text',opcoes=()))
         obrig=obrigatorios(k,{})
+        if k=='planejar':obrig.add('tema_principal')
         if k == 'verificar':
             from app.etapas_forms34 import VERIFICACAO
             obrig.update(VERIFICACAO)
@@ -158,6 +166,8 @@ def interpretar(acao, formulario):
             valor=valor=='sim'
         elif c['tipo']=='number':
             valor=int(valor) if valor else None
+        elif c['tipo']=='multi':
+            valor=formulario.getlist(c['nome']) if hasattr(formulario,'getlist') else formulario.get(c['nome'],[])
         dados[c['nome']]=valor
     if acao in ('propor_avaliacao','revisar_avaliacao'):
         dados['controles']=[dict(descricao=dados.pop('controle'),implementado=dados.pop('implementado'),

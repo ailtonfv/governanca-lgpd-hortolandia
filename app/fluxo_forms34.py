@@ -222,7 +222,7 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         raise ValueError('Ato exclusivo do FORM 3.')
     if acao in ('planejar', 'aprovar_plano', 'executar_medida', 'verificar', 'pedir_prorrogacao',
                 'decidir_prorrogacao', 'pedir_cancelamento', 'cancelar', 'aprender',
-                'conferir_aprendizagem', 'autorizar_aprendizagem') and f3:
+                'conferir_aprendizagem', 'autorizar_aprendizagem', 'salvar_temas', 'solicitar_tema') and f3:
         raise ValueError('Ato exclusivo do FORM 4.')
     if e.get('cancelada') or e.get('encerrada'):
         if acao not in ('aprender', 'conferir_aprendizagem', 'autorizar_aprendizagem'):
@@ -451,6 +451,16 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         e.setdefault('acoes', []).append(a.id)
         e.setdefault('acoes_rodada', []).append(a.id)
         destino_id = a.id
+    elif acao == 'salvar_temas':
+        exigir(papeis, 'secretaria')
+        if e.get('plano_aprovado'):
+            raise ValueError('Plano aprovado: temas preservados. Ajustes do aprendizado geram nova versão própria.')
+        from app.temas_form4 import validar as validar_temas
+        e['temas']=validar_temas(sessao,dados.get('tema_principal',''),dados.get('temas_complementares',[]))
+    elif acao == 'solicitar_tema':
+        exigir(papeis, 'secretaria')
+        e.setdefault('solicitacoes_tema',[]).append(dict(id=cmd.id,nome=_texto(dados,'nome_sugerido',200),
+            justificativa=_texto(dados,'justificativa'),pessoa_id=pessoa.id,em=agora,situacao='Em análise'))
     elif acao == 'planejar':
         exigir(papeis, 'secretaria')
         if e.get('plano_aprovado'):
@@ -458,6 +468,10 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         from app.regras_atos34 import CARGOS
         cargo=dados.get('cargo')
         if cargo not in CARGOS:raise ValueError('Escolha o cargo, função ou unidade responsável.')
+        from app.temas_form4 import validar as validar_temas
+        anteriores=e.get('temas',{})
+        e['temas']=validar_temas(sessao,dados.get('tema_principal',anteriores.get('principal','')),
+            dados.get('temas_complementares',anteriores.get('complementares',[])),obrigatorio=True)
         e.pop('executor_id',None)  # autoria anterior permanece nos eventos, não no novo cargo
         e.update(plano=_texto(dados,'plano'),cargo_responsavel=cargo,unidade_responsavel_id=uid,
                  prazo=date.fromisoformat(dados['prazo']).isoformat())
@@ -551,7 +565,13 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         exigir(papeis, 'secretaria')
         if not e.get('verificada') or e.get('cancelada'):
             raise ValueError('Aprendizagem somente após verificação aprovada.')
+        temas=deepcopy(e.get('aprendizagem',{}).get('temas',e.get('temas',{})))
+        if 'tema_principal' in dados or 'temas_complementares' in dados:
+            from app.temas_form4 import validar as validar_temas
+            temas=validar_temas(sessao,dados.get('tema_principal',temas.get('principal','')),
+                dados.get('temas_complementares',temas.get('complementares',[])),obrigatorio=bool(temas.get('principal')))
         e['aprendizagem'] = dict(contexto=_texto(dados, 'contexto'), diretriz=_texto(dados, 'diretriz'), escopo=_texto(dados, 'escopo'),
+                                 temas=temas,
                                  acao_id=obj.id, verificacao=deepcopy(e['verificacao']), pessoa_id=pessoa.id, em=agora,
                                  versao=e.get('aprendizagem', {}).get('versao', 0) + 1)
         e.pop('aprendizagem_conferida', None)
@@ -582,7 +602,7 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
     else:
         raise ValueError('Ato não disponível.')
     ev = _gravar_estado(sessao, cmd, obj, acao, e)
-    if not f3 and acao not in ('salvar_bloco','abrir_detalhes') and e.get('verificada') and _sem_pendencia(e) and not e.get('encerrada'):
+    if not f3 and acao not in ('salvar_bloco','abrir_detalhes','salvar_temas','solicitar_tema') and e.get('verificada') and _sem_pendencia(e) and not e.get('encerrada'):
         # Verificação cobra somente as respostas do verificador. Atos antigos são preservados.
         e['conferencia_r17'] = retrato(conferencia34(4,e))
         e['encerrada'] = True

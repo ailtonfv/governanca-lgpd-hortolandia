@@ -52,6 +52,8 @@ def entrar(s, p, form=3, **kw):
 
 
 def ato(s, obj, acao, conta='CONTA-B1', **dados):
+    # Planos da massa sintética usam tema aprovado; testes de ausência enviam vazio explicitamente.
+    if acao == 'planejar':dados.setdefault('tema_principal','T07')
     r = executar(s, conta_id=conta, comando_id=str(uuid4()), identidade_id=obj,
                  versao=estado(s,obj)['versao'], acao=acao, dados=dados)
     s.commit()

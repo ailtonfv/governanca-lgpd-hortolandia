@@ -1202,3 +1202,7 @@ As contagens da Operação e das demais telas do dashboard não são alteradas. 
 ### Lote 14 — camadas de consulta (Ailton, 21/11/2026)
 
 Pendências pessoais exigem ato do usuário em sessão; leitura dos Registros, riscos e ações abrange sua unidade; orientações autorizadas abrangem todas as unidades. A leitura não concede ato nem acesso à origem de outra unidade. O APA recebe o escopo de dashboard da própria Secretaria. Aprendizados mostram a última versão com verificação aprovada, conferência do DPO e autorização da Secretaria, inclusive durante revisão posterior ainda não autorizada.
+
+### Lote 14 — catálogo temático (Ailton, 21/11/2026)
+
+Catálogo fechado de temas de ações e aprendizados, separado de situação e risco. Um principal no envio do plano para aprovação; zero a dois complementares distintos. Salvamento parcial livre. A Secretaria ajusta os temas do aprendizado em nova versão, conferida pelo DPO e autorizada antes da consulta pública. Pedidos fundamentados não criam códigos; ficam em análise em fila provisória exclusiva do DPO. Sem inferência para o legado. Desativação conserva o código e as referências anteriores. Catálogo inicial em docs/planejamento/CATALOGO_TEMAS_FORM4_2026-11-21.md.

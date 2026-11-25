@@ -58,7 +58,9 @@ def test_proposta_somente_leitura_e_acesso(sessao,entrada):
     assert '<table>' in r.text and 'Deliberações pendentes' in r.text
     assert 'Em deliberação' in r.text and '<form' not in r.text
     assert c.post(url).status_code==405
-    assert c.get(url.replace('CONTA-B1','CONTA-A1')).status_code==403
+    # Lote 14: consulta da própria Secretaria; outra unidade continua recusada.
+    assert c.get(url.replace('CONTA-B1','CONTA-A1')).status_code==200
+    assert c.get(url.replace('CONTA-B1','CONTA-C1')).status_code==403
     evidencia('proposta_impacto',r.text)
 
 

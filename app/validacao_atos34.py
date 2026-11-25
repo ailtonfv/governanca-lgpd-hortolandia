@@ -18,6 +18,7 @@ OBRIGATORIOS={
  'enviar_juridico':('destinatario_id','motivo'),
  'autorizar_referencia':('pessoa_id','necessidade'),
  'planejar':('plano','cargo','prazo'), 'aprovar_plano':('justificativa',),
+ 'solicitar_tema':('nome_sugerido','justificativa'),
  'executar_medida':('resumo','evidencia'), 'verificar':('aprovada','evidencia'),
  'pedir_prorrogacao':('prazo','justificativa'),
  'decidir_prorrogacao':('aprovar','justificativa'),

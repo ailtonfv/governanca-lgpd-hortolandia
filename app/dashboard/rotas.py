@@ -46,6 +46,7 @@ def dashboard(request:Request,tela:str='abertura',conta_id:str='CONTA-B1'):
                 pessoa_ativa(sessao, conta_id)
                 aprendizado = consultar(sessao, conta_id, secretaria=filtros['secretaria'],
                     palavra=request.query_params.get('palavra',''),
+                    tema=request.query_params.get('tema',''),
                     fonte=carregar(sessao, Escopo('Consulta de aprendizados',None,None)))
                 try:
                     escopo_da_conta(sessao, conta_id)

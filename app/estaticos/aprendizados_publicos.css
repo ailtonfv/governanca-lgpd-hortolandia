@@ -1,0 +1,9 @@
+.aprendizados-publicos { margin: 1.5rem 0; padding: 1.25rem; background: white; border: 1px solid #cddde8; border-top: 4px solid #0c3b55; border-radius: .65rem; }
+.aprendizados-publicos .dash-filtros { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 1rem; align-items: end; margin: 1rem 0; }
+.aprendizados-publicos label { display: flex; flex-direction: column; gap: .4rem; min-width: 0; }
+.aprendizados-publicos input, .aprendizados-publicos select { box-sizing: border-box; width: 100%; min-width: 0; padding: .65rem; border: 1px solid #b6cbd9; border-radius: .4rem; font: inherit; }
+.aprendizados-publicos button { grid-column: 1/-1; justify-self: end; }
+.aprendizados-publicos .dash-card { padding: 1rem; background: #f4f8fa; border: 1px solid #d4e0e8; border-radius: .5rem; }
+.aprendizados-publicos footer { margin-top: 1rem; padding-top: .75rem; border-top: 1px solid #cddde8; }
+.dashboard nav.acoes { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; }
+@media(max-width:650px) { .aprendizados-publicos .dash-filtros { grid-template-columns: 1fr; } .aprendizados-publicos { padding: .8rem; } }

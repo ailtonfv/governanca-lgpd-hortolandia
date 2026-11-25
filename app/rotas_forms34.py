@@ -38,24 +38,34 @@ def url_objeto(obj,conta,bloco=1,**extra):
     return f'/forms34/{obj}/blocos/{bloco}?'+urlencode(dict(conta_id=conta,**extra))
 
 
+@router.get('/temas/pedidos')
+def pedidos_tema(request:Request,conta_id:str):
+    from app.pedidos_tema import consultar
+    with Session(motor) as s:
+        try:pedidos=consultar(s,conta_id)
+        except PermissionError as exc:raise HTTPException(403,str(exc)) from exc
+        return paginas.TemplateResponse(request=request,name='pedidos_tema.html',context=dict(conta_id=conta_id,pedidos=pedidos))
+
+
 def erro(request,conta,e,status=409,retorno='/forms34'):
     return paginas.TemplateResponse(request=request,name='forms34_erro.html',status_code=status,
         context={'conta_id':conta,'erro':str(e),'retorno':retorno,'conferencia_r17':getattr(e,'conferencia',None),'base_r17':getattr(e,'base','')})
 
 
 @router.get('/forms34')
-def lista(request:Request,conta_id:str,form:int|None=Query(default=None,ge=3,le=4)):
+def lista(request:Request,conta_id:str,form:int|None=Query(default=None,ge=3,le=4),tema:str=''):
     with Session(motor) as s:
         pessoa=pessoa_ativa(s,conta_id)
         visiveis=[]
         referencias=[]
+        from app.temas_form4 import corresponde, nomes, catalogo
         from app.restrito_forms34 import pode_ler
         for obj in s.scalars(select(IdentidadeForms34).order_by(IdentidadeForms34.codigo)):
             try:
                 _,ref,e,_,papeis,_=dominio.consultar(s,conta_id,obj.id)
-                if form is None or ref.form == form:
+                if (form is None or ref.form == form) and corresponde(e.get('temas'),tema):
                     from app.acompanhamento_forms34 import resumo
-                    visiveis.append(dict(obj=obj,estado=e,**resumo(s,obj,e,papeis,pessoa.id),registro=s.get(Registro,obj.registro_id)))
+                    visiveis.append(dict(obj=obj,estado=e,temas=nomes(s,e.get('temas')),**resumo(s,obj,e,papeis,pessoa.id),registro=s.get(Registro,obj.registro_id)))
             except (ValueError,PermissionError):
                 try:
                     if pode_ler(s,conta_id,obj.id,dominio.estado(s,obj.id)):
@@ -65,6 +75,7 @@ def lista(request:Request,conta_id:str,form:int|None=Query(default=None,ge=3,le=
         contas=s.execute(select(Conta,Pessoa).join(Pessoa,Conta.pessoa_id==Pessoa.id)
             .where(Conta.ativa.is_(True),Pessoa.ativa.is_(True))).all()
         return paginas.TemplateResponse(request=request,name='forms34_lista.html',context={
+            'temas':catalogo(s),'tema':tema,
             'filtro_form':form,'conta_id':conta_id,'pessoa':pessoa,'objetos':sorted(visiveis,key=lambda i:not i['pendente']),'referencias':referencias,'contas':contas,
             'gabinete':bool(unidades(s,pessoa.id,'demo34_gabinete'))})
 
@@ -157,6 +168,9 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
         origem=s.get(ParticipacaoForm2,e['origem_form2_id']) if e.get('origem_form2_id') else None
         revisar=request.query_params.get('revisar')=='1' or acao_erro=='revisar_avaliacao'
         atos=disponiveis(ref.form,bloco,papeis,e,pessoa.id,revisar)
+        from app.temas_form4 import configurar_campos, nomes as nomes_temas
+        if ref.form==4:
+            configurar_campos(s,atos,e)
         listas=escolhas(s,ref,papeis,uid)
         eventos=s.scalars(select(Evento).where(Evento.cadeia_id==obj.id).order_by(Evento.id.desc())).all()
         autores={p.id:p.nome for p in s.scalars(select(Pessoa))}
@@ -176,8 +190,8 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
             a['reavaliacao']=a['acao']=='revisar_avaliacao' and set(e.get('avaliacao_confirmacoes',{}))=={'secretaria','dpo'}
             a['comando_id']=str(uuid4())
             fonte_ato={'executar_medida':'execucao','verificar':'verificacao','aprender':'aprendizagem','informar_ripd':'referencia_ripd'}.get(a['acao'])
-            a['valores']=dict(e.get(fonte_ato,{}) if fonte_ato else {})
-            if a['acao']=='planejar':a['valores']=dict(plano=e.get('plano',''),cargo=e.get('cargo_responsavel',''),prazo=e.get('prazo',''))
+            a['valores']={**a.get('valores',{}),**dict(e.get(fonte_ato,{}) if fonte_ato else {})}
+            if a['acao']=='planejar':a['valores'].update(plano=e.get('plano',''),cargo=e.get('cargo_responsavel',''),prazo=e.get('prazo',''))
             a['valores']={k:('sim' if v else 'nao') if isinstance(v,bool) else v for k,v in a['valores'].items()}
             a['resumo']=f"{'Risco' if ref.form==3 else 'Ação'} {codigo_risco} ({s.get(Registro,obj.registro_id).codigo_lgpd}): {a['titulo']}. A autoria será registrada."
             for c in a['campos']:
@@ -294,6 +308,8 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
             except (ValueError, PermissionError):pass
         from app.restrito_forms34 import pode_ler
         return paginas.TemplateResponse(request=request,name='forms34_bloco.html',status_code=status,context={
+            'temas_acao':nomes_temas(s,e.get('temas')) if ref.form==4 else [],
+            'temas_aprendizagem':nomes_temas(s,e.get('aprendizagem',{}).get('temas')) if ref.form==4 else [],
             'pode_preencher':pode_preencher(ref.form,papeis),
             'conclusao_automatica':next((h['nome'] for h in hist if h['acao']=='encerramento_automatico'),''),
             'bloqueio_edicao':bloqueio_edicao, 'acoes_vinculadas':vinculadas,

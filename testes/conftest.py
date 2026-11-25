@@ -37,6 +37,8 @@ def banco_limpo(esquema):
     with Session(motor) as sessao, sessao.begin():
         pessoas.semear(sessao)
         catalogos.semear(sessao)
+        from carga_ficticia.temas_form4 import semear as semear_temas
+        semear_temas(sessao)
     yield
 
 

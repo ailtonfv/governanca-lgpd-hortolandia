@@ -6,6 +6,7 @@ RESULTADOS = {'elaborar':'Elaborar RIPD', 'revisar':'Revisar RIPD',
     'analise_adicional':'Precisa de análise adicional antes de decidir',
     'determinado_anpd':'Determinação da ANPD'}
 NOMES = {
+    'salvar_temas':'Temas salvos', 'solicitar_tema':'Pedido de novo tema registrado',
     'informar_ripd':'Referência do RIPD informada', 'propor_avaliacao':'Proposta de avaliação registrada', 'revisar_avaliacao':'Nova proposta de avaliação registrada',
     'confirmar_avaliacao':'Nota conjunta confirmada', 'propor_triagem':'Proposta de triagem registrada',
     'confirmar_triagem':'Triagem confirmada', 'manifestar_dpo':'Manifestação do DPO registrada',

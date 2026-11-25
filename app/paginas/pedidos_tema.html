@@ -1,0 +1,5 @@
+{% extends 'base.html' %}{% block conteudo %}
+<h1>Pedidos de novos temas</h1><p>Fila provisória do DPO. O pedido não cria tema; a ação continua utilizando o catálogo existente.</p>
+{% for p in pedidos %}<article><h2>{{ p.nome }} — {{ p.situacao }}</h2><p>{{ p.justificativa }}</p><p>{{ p.registro }} · {{ p.acao }} · {{ p.quando }}</p></article>{% else %}<p>Nenhum pedido registrado.</p>{% endfor %}
+<p><a href="/form2/painel-dpo?conta_id={{ conta_id|urlencode }}">Voltar ao painel do DPO</a></p>
+{% endblock %}

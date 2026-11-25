@@ -34,6 +34,7 @@
   <h1>Central de Acesso</h1>
   <nav aria-label="Orientações"><a href="/como-funciona?conta_id={{ conta_id|urlencode }}">Como funciona o sistema</a> · <a href="/fluxograma?conta_id={{ conta_id|urlencode }}">Ver o fluxograma</a></nav>
   {% if exibir_dashboard %}<p><a href="/dashboard?conta_id={{ conta_id|urlencode }}">Abrir dashboard LGPD — somente leitura</a></p>{% endif %}
+  {% if exibir_painel_dpo %}<p><a href="/temas/pedidos?conta_id={{ conta_id|urlencode }}">Pedidos de novos temas — Em análise</a></p>{% endif %}
   <p>Escolha um instrumento para ver os Registros autorizados na sua Secretaria.</p>
   <section class="contexto-central" aria-labelledby="titulo-contexto">
     <h2 id="titulo-contexto">{{ "Atuação: Encarregado de Dados (DPO)" if exibir_painel_dpo else "Secretaria de atuação" }}</h2>

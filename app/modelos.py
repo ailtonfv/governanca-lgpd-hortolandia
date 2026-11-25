@@ -10,6 +10,16 @@ class Base(DeclarativeBase):
     """Base comum de todas as tabelas da PoC."""
 
 
+class Tema(Base):
+    """Catálogo fechado; desativação preserva códigos e referências históricas."""
+    __tablename__ = 'tema'
+    codigo = Column(String(12), primary_key=True)
+    nome = Column(String(200), nullable=False)
+    use_quando = Column(Text, nullable=False)
+    nao_use_quando = Column(Text, nullable=False)
+    ativo = Column(Boolean, nullable=False, default=True)
+
+
 class ReferenciaParticipacaoForms34(Base):
     """Base técnica imutável. Não é fila, ingresso ou atribuição de competência."""
     __tablename__ = "referencia_participacao_forms34"
