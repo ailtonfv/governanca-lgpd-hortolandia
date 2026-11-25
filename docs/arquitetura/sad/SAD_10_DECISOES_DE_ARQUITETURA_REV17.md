@@ -1206,3 +1206,12 @@ Pendências pessoais exigem ato do usuário em sessão; leitura dos Registros, r
 ### Lote 14 — catálogo temático (Ailton, 21/11/2026)
 
 Catálogo fechado de temas de ações e aprendizados, separado de situação e risco. Um principal no envio do plano para aprovação; zero a dois complementares distintos. Salvamento parcial livre. A Secretaria ajusta os temas do aprendizado em nova versão, conferida pelo DPO e autorizada antes da consulta pública. Pedidos fundamentados não criam códigos; ficam em análise em fila provisória exclusiva do DPO. Sem inferência para o legado. Desativação conserva o código e as referências anteriores. Catálogo inicial em docs/planejamento/CATALOGO_TEMAS_FORM4_2026-11-21.md.
+
+
+## Lote 15 — decisões de Ailton, 25/11/2026
+
+- A etapa atual é projeção dos atos dos quatro FORMs, compartilhada pelo Painel e pelos detalhes; não constitui novo ato de conclusão. Ciclo completo: análise principal concluída sem encaminhamento, ou ações verificadas com aprendizagem autorizada.
+- FORM 1: contagem de perguntas ativas, excluindo informativas, exceções, condicionais fechadas e F1-1.2/F1-1.3. Resposta salva em confirmação conta; ausência de resposta não conta. Obrigatoriedade segue pendente; a R17 não foi estendida ao FORM 1.
+- Mesmo item e mesmo contexto permanecem bloqueados. Na mesma Secretaria, outro contexto exige justificativa. Preservadas as travas existentes e os históricos; nenhuma migração.
+- Atualizações editoriais locais do catálogo preservam valores internos. Ajudas passam a identificar o tópico, mantendo internamente a edição de referência.
+- Branch do lote parte de lote-14-entrada (37483f5), conforme autorização específica. Vistoria em pasta fixa e cópia própria na 8016; sem merge.

@@ -168,3 +168,8 @@ Evidências visuais locais: pacote `entrega-lgpd-lote13/visual`. Vistoria humana
 ## Central com percurso — Parte 1 do Lote 14 (21/11/2026)
 
 Borda forte e “Sua parte” indicam competência; fundo amarelo-claro e sino identificam uma providência atual. Não exibir número em etapa sem pendências. O domínio classifica; os templates apenas apresentam. Um item abre seu destino; vários abrem a lista autorizada filtrada. Grupos mostram os três itens mais antigos por criação/ingresso e “Ver todos (N)”. Acompanhamento começa recolhido. Componentes: `app/providencias.py`, `app/caminho_central.py`, `app/paginas/_caminho_central.html`, `app/estaticos/caminho_central.css`. O dashboard não usa esta contagem pessoal.
+
+
+### FORM 1 — contagem aprovada em 25/11/2026
+
+`rev22_form1.contagem_blocos` calcula respostas entre perguntas ativas. Exclui campos da abertura F1-1.2/F1-1.3, informativas, exceções e condicionais fechadas. Respostas de confirmação contam; ausência não conta. Os estados são “Ainda não preenchido”, “◐ Em preenchimento · N de M perguntas respondidas” e “✓ Todas as perguntas respondidas”. Não representa obrigatoriedade, aprovação ou conclusão. A obrigatoriedade do FORM 1 permanece em deliberação.

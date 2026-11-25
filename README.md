@@ -2071,3 +2071,8 @@ O APA consulta o dashboard da própria Secretaria. Aprendizados autorizados têm
 Catálogo preliminar fechado T01–T19, com tema principal e até dois complementares. O tema principal é exigido no envio do plano para aprovação; salvar temas parcialmente continua permitido. Aprendizados preservam a classificação da última versão autorizada. Pedidos de inclusão ficam em análise pelo DPO e não criam tema. Registros anteriores permanecem com Tema não informado. A migração é explícita, aditiva e restrita aos bancos de teste e à cópia nominal autorizada da 8015; não é executada ao iniciar o servidor.
 
 Verificação de fechamento do Lote 14: bateria completa com 1.229 verificações (1.178 aprovadas, 50 falhas e 1 ignorada). Em 25/11/2026, 49 falhas foram reproduzidas no código anterior `ec9a703`; a outra expectativa foi alinhada à consulta da própria Secretaria, preservando a recusa a outra unidade. O relatório local da entrega separa a rodada completa dos retestes direcionados. Não representa homologação nem merge no `main`.
+
+
+### Lote 15 — correções de entrada, Painel e FORM 1
+
+Branch `lote-15-pente-fino`, baseada em `37483f5`, sem merge. Etapa atual compartilhada entre Painel e detalhes; Central com acesso ao dashboard; FORM 1 com contagem de perguntas ativas, condições imediatas e ajuda por tópico da Cartilha. A obrigatoriedade do FORM 1 segue pendente. Duplicação no mesmo contexto permanece bloqueada; outro contexto na mesma Secretaria exige justificativa. Catálogo editorial atualizado somente no pacote privado, sem mudança dos valores históricos. Vistoria prevista na 8016 com cópia exclusiva da 8015, sem migração; resultados de verificação no relatório local da entrega.
