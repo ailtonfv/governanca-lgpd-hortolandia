@@ -26,7 +26,9 @@ def itens_em_andamento(sessao, conta_id):
         proxima = classificar(1, estado)
         itens[1].append(dict(desde=registro.criado_em.astimezone(timezone.utc).isoformat(), **proxima, texto=f"{r['codigo_lgpd']} · {r['titulo']} — {r['situacao_form1_integral']}",
                             href=(f"/registros/{r['id']}/form1-integral/conferencia-interna?{query}"
-                                  if proxima['ato'] == 'conferir' else f"/registros/{r['id']}?{query}")))
+                                  if proxima['ato'] == 'conferir' else
+                                  f"/registros/{r['id']}/form1-rev22?{query}" if proxima['pendente'] and proxima['etapa'] == 'f1-levanta' else
+                                  f"/registros/{r['id']}?{query}")))
     linhas = sessao.execute(select(ParticipacaoForm2, Registro).join(Registro,
         Registro.id == ParticipacaoForm2.registro_id).where(
         or_(ParticipacaoForm2.responsavel_id == pessoa.id,

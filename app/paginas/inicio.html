@@ -192,14 +192,14 @@
             </form>
             {% else %}
             {% set rotulo = tarefa.acao_rotulo %}
-            <a class="botao-link" aria-label="{{ rotulo }} do Registro {{ registro.codigo_lgpd }}" href="{{ url_registro }}#{{ tarefa.ancora }}">{{ rotulo }}</a>
+            <a class="botao-link" aria-label="{{ rotulo }} do Registro {{ registro.codigo_lgpd }}" href="{% if tarefa.categoria == 'preenchimento_form1' %}/registros/{{ registro.id }}/form1-rev22?conta_id={{ conta_id|urlencode }}{% else %}{{ url_registro }}#{{ tarefa.ancora }}{% endif %}">{{ rotulo }}</a>
             {% endif %}
           {% endfor %}
           {% if retomar %}
-          <a class="botao-link" aria-label="{{ 'Continuar FORM 1' if instrumento else 'Retomar rascunho' }} do Registro {{ registro.codigo_lgpd }}" href="{{ url_registro }}#{{ registro.preenchimento_arp.ancora }}">{{ 'Continuar FORM 1' if instrumento else 'Retomar rascunho do FORM 1' }}</a>
+          <a class="botao-link" aria-label="{{ 'Continuar FORM 1' if instrumento else 'Retomar rascunho' }} do Registro {{ registro.codigo_lgpd }}" href="/registros/{{ registro.id }}/form1-rev22?conta_id={{ conta_id|urlencode }}">{{ 'Continuar FORM 1' if instrumento else 'Retomar rascunho do FORM 1' }}</a>
           <p class="ajuda">A conferência preservou a versão apresentada. Seu rascunho continua editável; alterações não modificam aquela versão.</p>
           {% elif instrumento == 'form1' and not tarefas | selectattr('categoria', 'equalto', 'preenchimento_form1') | list %}
-          <a class="{{ 'botao-link-secundario' if tarefas else 'botao-link' }}" href="{{ url_registro }}#titulo-form1-integral">{{ 'Preencher FORM 1' if registro.preenchimento_arp else 'Consultar FORM 1' }}<span class="sr-apenas"> do Registro {{ registro.codigo_lgpd }}</span></a>
+          <a class="{{ 'botao-link-secundario' if tarefas else 'botao-link' }}" href="/registros/{{ registro.id }}/form1-rev22?conta_id={{ conta_id|urlencode }}">{{ 'Preencher FORM 1' if registro.preenchimento_arp else 'Consultar FORM 1' }}<span class="sr-apenas"> do Registro {{ registro.codigo_lgpd }}</span></a>
           {% endif %}
           {% endif %}
           {% if instrumento == 'form2' %}

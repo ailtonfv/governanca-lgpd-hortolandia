@@ -99,8 +99,13 @@ def dashboard(request:Request,tela:str='abertura',conta_id:str='CONTA-B1'):
                       'aprendizados':['aprendizados'],'circulacao':['circulacao',*[f'instrumento_{n}' for n in range(4)]]}
             perfil=escopo.perfil
             titulo_perfil={'Gabinete':'Precisa da sua atenção','DPO':'Pendências com o Gabinete e o Comitê',
-                           'Comitê':'Pendente para o Comitê','Secretário':'Aguardando sua decisão','APA':'Pendências da sua Secretaria','AAL/ARP':'Seus itens pendentes'}[perfil]
-            atencao_perfil=atencao if perfil in ('Gabinete','DPO') else [indices['fila_'+({'AAL/ARP':'AAL','APA':'Secretário'}.get(perfil,perfil))]]
+                           'Comitê':'Pendente para o Comitê','Secretário':'Aguardando sua decisão','APA':'Pendências da sua Secretaria','AAL':'Seus itens pendentes'}[perfil]
+            atencao_perfil=atencao if perfil in ('Gabinete','DPO') else [indices['fila_'+({'APA':'Secretário'}.get(perfil,perfil))]]
+            if perfil == 'AAL':
+                from app.dashboard.fontes import pendencias_do_aal
+                pessoal = pendencias_do_aal(sessao, conta_id, dados, agora)
+                indices[pessoal['chave']] = pessoal
+                atencao_perfil = [pessoal]
             # A lista que compõe cada fila mantém somente metadados, mesmo nos perfis globais.
             pagina=max(0,int(request.query_params.get('pagina','0')))
             arts=indices['aprendizados']['lista'];pagina=min(pagina,max(0,len(arts)-1))

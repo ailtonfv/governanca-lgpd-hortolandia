@@ -5,6 +5,7 @@
 {% from '_links_instrumentos.html' import identificacao_servidor, retorno_painel with context %}
 {% block titulo %}{% if modo_legado %}Questionário sintético legado · {% endif %}{{ registro.codigo_lgpd }} · Governança LGPD{% endblock %}
 {% block conteudo %}
+{% if registro.form1_integral.aviso_estrutura %}<p class="aviso-leitura" role="status">{{ registro.form1_integral.aviso_estrutura }}</p>{% endif %}
 <nav {% if not modo_legado %}id="retorno-painel-form1" class="retorno-painel-form1 navegacao-governanca"{% endif %} aria-label="Retorno ao painel">
   {% set lista_origem = request.query_params.get('instrumento') if request.query_params.get('secretaria_id') else none %}
   <a class="{{ 'voltar' if modo_legado else 'botao-link-secundario' }}" href="{{ retorno_painel(request, conta_id, 'form2' if lista_origem == 'form2' else 'form1') }}">{% if not modo_legado and lista_origem in ('form1','form2') %}Voltar à lista de Registros do {{ 'FORM 2' if lista_origem == 'form2' else 'FORM 1' }}{% else %}← Voltar ao painel{% if not modo_legado %} — Painel de Registros{% endif %}{% endif %}</a>

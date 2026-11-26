@@ -34,14 +34,19 @@ def escopo_da_conta(sessao, conta):
     for p in sessao.scalars(select(ParticipacaoForm2).where(
             ParticipacaoForm2.tipo == 'principal', ParticipacaoForm2.responsavel_id == pessoa.id)):
         if autorizado(sessao, pessoa, p): proprios.add(p.registro_id)
-    preenchimento = unidades(sessao, pessoa.id, 'preenchedor')
-    for a, r in sessao.execute(select(AtribuicaoForm1Integral, Registro).join(
-            Registro, Registro.id == AtribuicaoForm1Integral.registro_id).where(
-            AtribuicaoForm1Integral.arp_atual_id == pessoa.id)):
-        if r.unidade_principal_atual_id in preenchimento: proprios.add(r.id)
-    if proprios or preenchimento or unidades(sessao,pessoa.id,'aal_form2'):
-        return Escopo('AAL/ARP', None, frozenset(proprios))
+    if unidades(sessao,pessoa.id,'aal_form2'):
+        return Escopo('AAL', None, frozenset(proprios))
     raise PermissionError('Seu perfil não está habilitado para este dashboard.')
+
+
+def pendencias_do_aal(sessao, conta_id, dados, agora):
+    """Fila pessoal: responsável da participação, sem alterar filas institucionais."""
+    from app.dashboard.consultas import operacao
+    pessoa = pessoa_ativa(sessao, conta_id)
+    pessoais = {**dados, 'objetos': [], 'participacoes': [
+        p for p in dados['participacoes'] if p.responsavel_id == pessoa.id]}
+    fila = next(q for q in operacao(pessoais, agora) if q['chave'] == 'fila_AAL')
+    return {**fila, 'chave': 'minha_fila_AAL'}
 
 
 def carregar(sessao, escopo):

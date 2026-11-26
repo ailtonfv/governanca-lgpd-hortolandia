@@ -1164,7 +1164,15 @@ def carregar_registro(sessao, conta_id, registro_id):
         identidade, atribuicao_integral, registro
     )
     conteudo_integral = rascunho_integral.conteudo if rascunho_integral is not None else {}
-    catalogo_integral = catalogo_efetivo(conteudo_integral)
+    aviso_estrutura = None
+    try:
+        catalogo_integral = catalogo_efetivo(conteudo_integral)
+        estrutura_integral = versao_estrutura(conteudo_integral)
+    except ValueError:
+        # Consulta não reinterpreta nem regrava uma estrutura histórica divergente.
+        catalogo_integral = {}
+        estrutura_integral = "Versão anterior"
+        aviso_estrutura = "Este Registro foi gravado com uma versão anterior do FORM 1. As respostas continuam guardadas."
     condicoes_bloco12 = condicoes_guarda(conteudo_integral)
     operacoes_guarda = definicao_guarda()["operacoes"] if usa_guarda(conteudo_integral) else []
     ids_operacoes_guarda = {op[chave] for op in operacoes_guarda
@@ -1323,7 +1331,7 @@ def carregar_registro(sessao, conta_id, registro_id):
         )
         .order_by(Pessoa.nome)
     ).unique().all()
-    pre_validacao_integral = _pre_validar_rascunho_integral(
+    pre_validacao_integral = None if aviso_estrutura else _pre_validar_rascunho_integral(
         rascunho_integral,
         arp_atual=arp_atual,
         confirmacao_canais=confirmacao_canais,
@@ -1402,8 +1410,9 @@ def carregar_registro(sessao, conta_id, registro_id):
             "salvo_em": rascunho_integral.salvo_em,
         },
         "pre_validacao": pre_validacao_integral,
-        "perguntas_localizacao": perguntas_para_localizacao(conteudo_integral),
-        "versao_estrutura": versao_estrutura(conteudo_integral),
+        "aviso_estrutura": aviso_estrutura,
+        "perguntas_localizacao": [] if aviso_estrutura else perguntas_para_localizacao(conteudo_integral),
+        "versao_estrutura": estrutura_integral,
         "titulo_bloco_14": TITULO_BLOCO_14 if "revisao_18" in conteudo_integral else "Achados e pendências",
         "extensao_medidas": conteudo_integral.get("extensao_medidas"),
         "extensao_guarda": conteudo_integral.get("extensao_guarda"),
@@ -1502,7 +1511,7 @@ def carregar_registro(sessao, conta_id, registro_id):
             {"numero": 4, "titulo": "Guarda, situações observadas e pendências", "blocos": "12 a 14"},
         ),
     }
-    if "revisao_22" not in conteudo_integral:
+    if "revisao_22" not in conteudo_integral and not aviso_estrutura:
         resumo["form1_integral"].update({
             "campos_bloco_1": {
                 campo_id: {
