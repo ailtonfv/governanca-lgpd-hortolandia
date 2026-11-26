@@ -10,7 +10,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from app.banco import motor
 from app.modelos import (IdentidadeForms34, ReferenciaParticipacaoForms34, Registro, Pessoa,
-                         Conta, Unidade, ParticipacaoForm2, Evento)
+                         Conta, Unidade, ParticipacaoForm2, Evento, ContextoAtuacao)
 from app import fluxo_forms34 as dominio
 from app.permissoes_forms34 import contexto
 from app.fila_form2 import pessoa_ativa, autorizado, unidades
@@ -75,7 +75,7 @@ def lista(request:Request,conta_id:str,form:int|None=Query(default=None,ge=3,le=
         contas=s.execute(select(Conta,Pessoa).join(Pessoa,Conta.pessoa_id==Pessoa.id)
             .where(Conta.ativa.is_(True),Pessoa.ativa.is_(True))).all()
         return paginas.TemplateResponse(request=request,name='forms34_lista.html',context={
-            'temas':catalogo(s),'tema':tema,
+            'contextos':{c.id:c.nome for c in s.scalars(select(ContextoAtuacao))},'temas':catalogo(s),'tema':tema,
             'filtro_form':form,'conta_id':conta_id,'pessoa':pessoa,'objetos':sorted(visiveis,key=lambda i:not i['pendente']),'referencias':referencias,'contas':contas,
             'gabinete':bool(unidades(s,pessoa.id,'demo34_gabinete'))})
 
@@ -327,7 +327,7 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
             'bloqueio_edicao':bloqueio_edicao, 'acoes_vinculadas':vinculadas,
             'acompanhamento':acompanhamento,
             'situacao_aprendizagem':situacao_aprendizagem(e),
-            'aviso_regra_anterior':aviso_regra_anterior,'destaques':destaques,'encaminhamento_destacado':encaminhamento_destacado,'origem_texto':origem_texto,'ripd_texto':ripd(e),'decisoes_gabinete':mensagem_decisao(e),'prazo_br':data_br(e.get('prazo')),
+            'contexto_nome':getattr(s.get(ContextoAtuacao,registro.contexto_atuacao_id),'nome',''),'aviso_regra_anterior':aviso_regra_anterior,'destaques':destaques,'encaminhamento_destacado':encaminhamento_destacado,'origem_texto':origem_texto,'ripd_texto':ripd(e),'decisoes_gabinete':mensagem_decisao(e),'prazo_br':data_br(e.get('prazo')),
             'atos_salvos':[h for h in hist if h['ato'] and h['bloco']==bloco] if ref.form==4 else [],
             'falhas_r17':falhas_r17,'conferencia_r17':conferencia34(ref.form,e),'base_r17':f'/forms34/{obj.id}/blocos',
             'erros_campos':erros_campos,'acao_erro':acao_erro,'revisar':revisar,

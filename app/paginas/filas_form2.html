@@ -13,13 +13,13 @@
 {% if cartoes or (not gerenciaveis and not apenas_dpo) %}<h2>Participações da sua unidade</h2><p>Esta seção reúne as participações autorizadas para sua atuação e as solicitações de complementação à origem, inclusive seu histórico. A gestão dos responsáveis aparece mais abaixo, em quadro próprio.</p>
 {% for c in cartoes %}
 {% if loop.changed(c.aguardando is not none) %}<h3>{{ "Aguardando responsável" if c.aguardando else "Em acompanhamento" }}</h3>{% endif %}
-<article data-registro="{{ c.registro.id }}"><h3>{{ c.registro.codigo_lgpd }}</h3>{% if c.identificacao %}<p>{{ c.identificacao }}</p>{% endif %}
+<article data-registro="{{ c.registro.id }}"><h3>{{ identificar_registro(c.registro) }}</h3>{% if c.identificacao %}<p>{{ c.identificacao }}</p>{% endif %}
 {% for p in c.participacoes %}
 {% if aguarda_temporalidade(p.conteudo) %}<p class="selo-guarda">Guarda em definição</p>{% endif %}<p>{{ entradas[p.id] }}</p>
 {% if p.id in atribuidores %}<p>{{ atribuidores[p.id] }}</p>{% endif %}
 <p>{{ unidades[p.unidade_id].nome }} · {{ p.tipo }} · Situação da participação: {{ impedimentos.get(p.id, situacoes.get(p.estado, p.estado)) }}{% if p.responsavel_id %} · <strong>Responsável: {{ responsaveis[p.responsavel_id] }}</strong>{% endif %}</p>
 {% if c.origem %}<details><summary>Situação do FORM 1 na origem</summary><p>{{ c.origem }}</p></details>{% endif %}
-<div class="acoes-fila-form2"><a class="botao-link" href="/form2/participacoes/{{ p.id }}?conta_id={{ conta_id|urlencode }}">{{ c.registro.codigo_lgpd }} · {{ nomes_objetos[p.id] }} · Abrir participação{% if c.participacoes|length > 1 %} · {{ p.tipo }}{% endif %}</a></div>
+<div class="acoes-fila-form2"><a class="botao-link" href="/form2/participacoes/{{ p.id }}?conta_id={{ conta_id|urlencode }}">{{ identificar_registro(c.registro,nomes_objetos[p.id]) }} · Abrir participação{% if c.participacoes|length > 1 %} · {{ p.tipo }}{% endif %}</a></div>
 {% endfor %}
 {% for complemento in c.complementos %}
 {% if not c.participacoes %}<p>Situação da participação: {{ situacoes.get(complemento.p.estado, complemento.p.estado) }}.</p>{% endif %}
@@ -46,7 +46,7 @@
 {% if gerenciaveis %}<h2>Gestão da fila</h2>{% endif %}
 {% for p in gerenciaveis %}
 {% if loop.changed(p.responsavel_id is none) %}<h3>{{ 'Aguardando responsável' if p.responsavel_id is none else 'Com responsável' }}</h3>{% endif %}
-<article><h4>{{ registros[p.registro_id].codigo_lgpd }} · {{ unidades[p.unidade_id].nome }}</h4>{% if identificacoes is defined %}<p>{{ identificacoes[p.registro_id] }}</p>{% endif %}
+<article><h4>{{ identificar_registro(registros[p.registro_id]) }} · {{ unidades[p.unidade_id].nome }}</h4>{% if identificacoes is defined %}<p>{{ identificacoes[p.registro_id] }}</p>{% endif %}
 {% if p.id in atribuidores %}<p>{{ atribuidores[p.id] }}</p>{% endif %}
 <p>{{ impedimentos.get(p.id, situacoes.get(p.estado, p.estado)) }}{% if p.responsavel_id %} · Responsável: {{ responsaveis[p.responsavel_id] }}{% endif %}</p>{% if aguarda_temporalidade(p.conteudo) %}<p class="selo-guarda">Guarda em definição</p>{% endif %}<p>{{ entradas[p.id] }}</p>
 {% set acao = 'Atribuir responsável' if p.assumida_em is none else 'Reatribuir' %}

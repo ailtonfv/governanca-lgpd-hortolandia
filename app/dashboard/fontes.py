@@ -61,7 +61,9 @@ def carregar(sessao, escopo):
     if escopo.unidades is not None: secretarias = [u for u in secretarias if u.id in escopo.unidades]
     if escopo.registros is not None:
         secretarias = [u for u in secretarias if u.id in {r.unidade_principal_atual_id for r in registros}]
-    dados = dict(registros=registros, secretarias=secretarias, participacoes=[], objetos=[],
+    from app.modelos import ContextoAtuacao
+    contextos={c.id:c.nome for c in sessao.scalars(select(ContextoAtuacao))}
+    dados = dict(contextos=contextos,registros=registros, secretarias=secretarias, participacoes=[], objetos=[],
                  apresentacoes=[], complementos=[], snapshots={}, escopo=escopo)
     if not ids: return dados
     dados['participacoes'] = list(sessao.scalars(select(ParticipacaoForm2).where(ParticipacaoForm2.registro_id.in_(ids))))

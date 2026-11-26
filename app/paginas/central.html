@@ -12,11 +12,11 @@
     <section class="itens-central" aria-labelledby="itens-form{{ numero }}">
       <h4 id="itens-form{{ numero }}">Seus itens em andamento</h4>
       {% if resumo.total_pendencias %}<p><strong>{{ resumo.total_pendencias }} providência{{ 's' if resumo.total_pendencias != 1 else '' }} sua{{ 's' if resumo.total_pendencias != 1 else '' }}</strong></p>
-      <ul>{% for item in resumo.pendencias %}<li><a href="{{ item.href }}">{{ item.texto }}</a> · {{ item.pendencia }}</li>{% endfor %}</ul>
+      <ul>{% for item in resumo.pendencias %}<li><a href="{{ item.href }}">{{ item.texto }}</a> · {{ item.pendencia }}{% if item.contexto %}<p>Contexto: {{ item.contexto }}</p>{% endif %}</li>{% endfor %}</ul>
       {% if resumo.total_pendencias > 3 %}<a href="{{ resumo.lista }}&grupo=pendencias">Ver todos ({{ resumo.total_pendencias }})</a>{% endif %}
       {% else %}<p>Nenhuma providência sua neste FORM.</p>{% endif %}
       <details><summary>Em acompanhamento ({{ resumo.acompanhamento|length }})</summary>
-        <ul>{% for item in resumo.acompanhamento %}<li><a href="{{ item.href }}">{{ item.texto }}</a></li>{% endfor %}</ul>
+        <ul>{% for item in resumo.acompanhamento %}<li><a href="{{ item.href }}">{{ item.texto }}</a>{% if item.contexto %}<p>Contexto: {{ item.contexto }}</p>{% endif %}</li>{% endfor %}</ul>
       </details>
     </section>
 

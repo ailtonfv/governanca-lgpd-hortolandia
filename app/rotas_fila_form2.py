@@ -396,7 +396,7 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
     from app.modelos import ContextoAtuacao
     contextos = {c.id:c.nome for c in sessao.scalars(select(ContextoAtuacao))}
     tipos = {'processo':'Processo','servico':'Serviço','atividade':'Atividade'}
-    identificacoes = {rid:tipos.get(r.tipo_objeto,r.tipo_objeto)+' · '+contextos.get(r.contexto_atuacao_id,r.contexto_atuacao_id) for rid,r in registros.items()}
+    identificacoes = {rid:'Contexto: '+contextos.get(r.contexto_atuacao_id,'Não informado') for rid,r in registros.items()}
     for cartao in cartoes.values():
         cartao['identificacao'] = identificacoes[cartao['registro'].id]
     momento = agora()

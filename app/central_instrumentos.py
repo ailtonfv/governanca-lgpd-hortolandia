@@ -1,3 +1,4 @@
+from app.identificacao_registro import identificar
 """Leitura dos cartões: reutiliza o escopo das páginas de destino, sem conceder acesso."""
 from urllib.parse import urlencode
 from datetime import timezone
@@ -13,6 +14,8 @@ from app.leitura_atos34 import situacao_atual
 
 
 def itens_em_andamento(sessao, conta_id):
+    from app.modelos import ContextoAtuacao
+    contextos={c.id:c.nome for c in sessao.scalars(select(ContextoAtuacao))}
     pessoa = pessoa_ativa(sessao, conta_id)
     query = urlencode({'conta_id': conta_id})
     itens = {n: [] for n in range(1, 5)}
@@ -24,7 +27,7 @@ def itens_em_andamento(sessao, conta_id):
         registro = sessao.get(Registro, r['id'])
         estado = {**r, 'designar_arp': r['unidade_id'] in unidades_apa and not sessao.get(AtribuicaoForm1Integral, r['id'])}
         proxima = classificar(1, estado)
-        itens[1].append(dict(desde=registro.criado_em.astimezone(timezone.utc).isoformat(), **proxima, texto=f"{r['codigo_lgpd']} · {r['titulo']} — {r['situacao_form1_integral']}",
+        itens[1].append(dict(contexto=r.get('contexto_nome',''),desde=registro.criado_em.astimezone(timezone.utc).isoformat(), **proxima, texto=f"{identificar(r)} — {r['situacao_form1_integral']}",
                             href=(f"/registros/{r['id']}/form1-integral/conferencia-interna?{query}"
                                   if proxima['ato'] == 'conferir' else
                                   f"/registros/{r['id']}/form1-rev22?{query}" if proxima['pendente'] and proxima['etapa'] == 'f1-levanta' else
@@ -42,7 +45,7 @@ def itens_em_andamento(sessao, conta_id):
         complemento = sessao.scalar(select(ComplementoForm2).where(ComplementoForm2.participacao_id == p.id))
         abertas = list(sessao.scalars(select(ParticipacaoForm2.id).where(ParticipacaoForm2.origem_id == p.id, ParticipacaoForm2.estado != 'concluida')))
         proxima = classificar(2, dict(tipo=p.tipo, estado=p.estado, complemento=complemento.estado if complemento else None, consultas_abertas=bool(abertas)))
-        itens[2].append(dict(desde=p.entrada_em.astimezone(timezone.utc).isoformat(), **proxima, texto=f'{r.codigo_lgpd} · {nome} ({tipo})',
+        itens[2].append(dict(contexto=contextos.get(r.contexto_atuacao_id,''),desde=p.entrada_em.astimezone(timezone.utc).isoformat(), **proxima, texto=f'{identificar(r,nome)}',
                             href=f'/form2/participacoes/{p.id}?{query}'))
     for obj in sessao.scalars(select(IdentidadeForms34).order_by(IdentidadeForms34.codigo)):
         try:
@@ -52,7 +55,7 @@ def itens_em_andamento(sessao, conta_id):
         r = sessao.get(Registro, obj.registro_id)
         from app.acompanhamento_forms34 import resumo
         acompanhamento = resumo(sessao,obj,estado,papeis,pessoa.id)
-        itens[ref.form].append(dict(texto=f"{r.codigo_lgpd} · {acompanhamento['titulo']} — {acompanhamento['situacao']}",
+        itens[ref.form].append(dict(contexto=contextos.get(r.contexto_atuacao_id,''),texto=f"{identificar(r)} · {acompanhamento['titulo']} — {acompanhamento['situacao']}",
                                   **{k: acompanhamento[k] for k in ('pendente','etapa','ato','botao','pendencia')},
                                   desde=obj.criado_em.astimezone(timezone.utc).isoformat(),
                                   href=f"/forms34/{obj.id}/blocos/{acompanhamento['bloco']}?{query}"))

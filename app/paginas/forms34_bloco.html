@@ -1,7 +1,8 @@
 {% extends 'base.html' %}{% from '_faixa_ato.html' import faixa_ato %}
 {% block conteudo %}
 <link rel="stylesheet" href="{{ url_for('estaticos',path='/filas_form2.css') }}"><link rel="stylesheet" href="{{ url_for('estaticos',path='/forms34.css') }}?v=20261120-12f">
-<div class="forms34 filas-form2"><h1>{{ registro.codigo_lgpd }} · FORM {{ ref.form }} · Bloco {{ bloco }} — {{ titulo_bloco }}</h1>
+<div class="forms34 filas-form2"><h1>{{ identificar_registro(registro) }} · FORM {{ ref.form }} · Bloco {{ bloco }} — {{ titulo_bloco }}</h1>
+<p>Contexto: {{ contexto_nome }}</p>
 <p>As perguntas seguem a numeração do documento-mestre (F{{ ref.form }} = FORM {{ ref.form }}).</p>
 {% from '_conferencia_r17.html' import resumo as resumo_r17 %}{% if conferencia_r17 %}{{ resumo_r17(conferencia_r17,base_r17,conta_id,falhas_r17|default(false)) }}{% endif %}
 <h2>{{ acompanhamento.titulo }}</h2><p class="aviso-alerta">{{ acompanhamento.pendencia }}</p><p><strong>{{ pessoa.nome|identidade_demonstrativa }}</strong> · {{ papeis_visiveis|join(' / ') }}</p>

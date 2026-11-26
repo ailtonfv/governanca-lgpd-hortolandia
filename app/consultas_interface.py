@@ -657,7 +657,8 @@ def pode_consultar_registro(sessao, conta_id, registro_id):
     return bool(identidade and registro_id in _ids_visiveis(sessao, identidade))
 
 
-def _resumo_registro(registro, unidade):
+def _resumo_registro(registro, unidade, sessao):
+    contexto=sessao.get(ContextoAtuacao,registro.contexto_atuacao_id)
     return {
         "id": registro.id,
         "codigo_lgpd": registro.codigo_lgpd,
@@ -668,6 +669,7 @@ def _resumo_registro(registro, unidade):
         "unidade": unidade.nome,
         "unidade_id": registro.unidade_principal_atual_id,
         "contexto_id": registro.contexto_atuacao_id,
+        "contexto_nome": contexto.nome if contexto else "",
         "ciclo": registro.ciclo_atual,
     }
 
@@ -687,7 +689,7 @@ def carregar_painel(sessao, conta_id, *, secretaria_id=None):
         .where(Registro.id.in_(ids))
         .order_by(Registro.codigo_lgpd)
     ).all() if ids else []
-    registros = [_resumo_registro(registro, unidade) for registro, unidade in linhas]
+    registros = [_resumo_registro(registro, unidade, sessao) for registro, unidade in linhas]
 
     proximas_providencias_form1 = []
     proximas_conferencias_form1 = []
@@ -951,7 +953,7 @@ def carregar_conflitos_duplicidade_visiveis(sessao, conta_id, codigos):
     ).all()
     return [
         {
-            **_resumo_registro(registro, unidade),
+            **_resumo_registro(registro, unidade, sessao),
             "contexto_nome": contexto.nome,
         }
         for registro, unidade, contexto in linhas
@@ -1067,7 +1069,7 @@ def carregar_registro(sessao, conta_id, registro_id):
     if registro.id not in _ids_visiveis(sessao, identidade):
         return identidade, False
     unidade = sessao.get(Unidade, registro.unidade_principal_atual_id)
-    resumo = _resumo_registro(registro, unidade)
+    resumo = _resumo_registro(registro, unidade, sessao)
     contexto = sessao.get(ContextoAtuacao, registro.contexto_atuacao_id)
     resumo["contexto_nome"] = None if contexto is None else contexto.nome
     confirmacao_canais = sessao.get(ConfirmacaoCanaisRegistro, registro.id)

@@ -118,7 +118,8 @@ def filtrar(d, escopo, filtros):
 def linha(d, registro_id, item=None):
     r = next(r for r in d['registros'] if r.id == registro_id)
     u = next((u for u in d['secretarias'] if u.id == r.unidade_principal_atual_id),None)
-    l = dict(id=r.id, registro=r.codigo_lgpd, secretaria=u.nome if u else r.unidade_principal_atual_id,
+    from app.identificacao_registro import identificar
+    l = dict(id=r.id, registro=identificar(r),contexto=d.get('contextos',{}).get(getattr(r,'contexto_atuacao_id',None),''), secretaria=u.nome if u else r.unidade_principal_atual_id,
              unidade_id=r.unidade_principal_atual_id,tipo=r.tipo_objeto, item='',situacao='',desde=None,dias=None)
     if item:
         obj,e = item['obj'],item['estado']

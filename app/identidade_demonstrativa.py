@@ -19,6 +19,8 @@ def nomes_em_texto(valor):
 
 
 def configurar_identidade(paginas):
+    from app.identificacao_registro import identificar
+    paginas.env.globals['identificar_registro']=identificar
     from app.obrigatoriedade_forms import metadado_pergunta
     paginas.env.globals['metadado_r17'] = metadado_pergunta
     from app.apresentacao_atos34 import data_br

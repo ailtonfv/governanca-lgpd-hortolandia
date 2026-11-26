@@ -99,8 +99,8 @@
       {% set tarefas = registro.providencias | rejectattr('categoria', 'equalto', 'alerta') | list %}
       <article class="cartao-mapeamento" id="cartao-registro-{{ registro.id }}" tabindex="-1">
         <div class="cartao-mapeamento-conteudo">
-          <p class="etiqueta codigo-registro">{{ registro.codigo_lgpd }}</p>
-          <h3>{{ {'servico': 'Serviço', 'processo': 'Processo', 'atividade': 'Atividade'}.get(registro.tipo|lower, registro.tipo) }} · {{ registro.titulo|rotulo_f2 if instrumento == 'form2' else registro.titulo }}</h3>
+          <h3>{{ identificar_registro(registro) }}</h3>
+          <p>Contexto: {{ registro.contexto_nome }}</p>
           <p class="unidade-registro"><strong>Secretaria:</strong> {{ registro.unidade }}</p>
           {% if instrumento == 'form2' %}{% with etapa=registro.etapa_atual %}{% include '_etapa_registro.html' %}{% endwith %}{% else %}
           <p><strong>Etapa atual:</strong> FORM 1 — {{ registro.fluxo_conferencia.estado|lower }}, desde {{ (registro.fluxo_conferencia.desde|data_local)[:10] }} · <strong>Responsável:</strong> {{ registro.fluxo_conferencia.arp }}</p>
