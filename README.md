@@ -2124,3 +2124,17 @@ A duração do plano começa na aprovação. A verificação com redução parci
 A2 acrescenta condições estruturadas com uma providência por condição, referência conjunta do RIPD e solicitação jurídica explícita na aceitação Crítica. As condições em aberto impedem nova aprendizagem. Quatro testes direcionados aprovados; sem ativação na vistoria.
 
 Lote 16/A5: lista de lacunas e verificações nos blocos 13 e 16, controles com implementação/evidência e encaminhamento por origem estável. Catálogo público somente com identificadores e rótulos próprios; três itens permanecem desativados aguardando revisão. Sem migração.
+
+
+### Lote 16-B — A9 (sem ativação na vistoria)
+
+Dashboard com filas separadas de origem, Secretaria e verificação, pendências
+próprias do APA, condições de aceitação abertas e decisão posterior à ação.
+Cobertura em tabela; aprendizados com abas de navegação e modos Cartões/Lista;
+providências com origem, prazo e tempo de espera pela aprovação.
+Na circulação, o salvamento do bloco 8 distingue ausência de resposta de etapa
+ainda não alcançada, excluindo condicionais fechadas. O critério aprovado em
+26/11/2026 aparece em “Sobre este número” e no SAD 10.
+O filtro de todas as Secretarias dos aprendizados permanece disponível.
+Sem migração, gravação na base de vistoria ou mudança na porta 8018.
+Testes e corte da entrega registrados no relatório local.

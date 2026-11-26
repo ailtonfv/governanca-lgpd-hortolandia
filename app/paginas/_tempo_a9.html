@@ -1,0 +1,10 @@
+{% set inicio=l.marcas|selectattr('nome','equalto','Plano aprovado')|first %}
+{% set prazo=l.marcas|selectattr('nome','equalto','Prazo vigente')|first %}
+{% set hoje=l.marcas|selectattr('nome','equalto','Hoje')|first %}
+{% if inicio and prazo %}
+<svg role="img" aria-label="Prazo da providência: da aprovação até o prazo vigente; hoje indicado por linha vertical" viewBox="0 0 1000 100">
+<line x1="{{ 30+inicio.x*9 }}" x2="{{ 30+prazo.x*9 }}" y1="40" y2="40" stroke="#075985" stroke-width="12"/>
+<circle cx="{{ 30+inicio.x*9 }}" cy="40" r="6" fill="#17212b"/><circle cx="{{ 30+prazo.x*9 }}" cy="40" r="8" fill="#17212b"/>
+{% if hoje %}<line x1="{{ 30+hoje.x*9 }}" x2="{{ 30+hoje.x*9 }}" y1="10" y2="70" stroke="#17212b" stroke-width="3"/><text x="{{ 30+hoje.x*9 }}" y="90" text-anchor="middle">Hoje</text>{% endif %}</svg>
+<p>Plano aprovado: {{ l.inicio|data_dashboard }} · Prazo vigente: {{ l.prazo|data_dashboard }} · Hoje: {{ (agora|data_dashboard).split(' às ')[0] }}{% if l.fim %} · Fim: {{ l.fim|data_dashboard }}{% endif %}</p>
+{% elif l.espera_aprovacao is not none %}<p>Plano aguardando aprovação há {{ l.espera_aprovacao }} dias.</p>{% else %}<p>Prazo ainda não iniciado: aguarda plano e aprovação.</p>{% endif %}

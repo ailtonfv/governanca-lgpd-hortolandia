@@ -4,3 +4,5 @@
 .dash-tempo{overflow-x:auto}.dashboard .dash-tempo svg{min-width:640px}.dash-matriz{overflow-x:auto}.dash-matriz table{min-width:480px}.dash-barra meter::-webkit-meter-optimum-value{background:#0c3b5a}.dash-barra meter::-moz-meter-bar{background:#0c3b5a}.dash-barra meter::-webkit-meter-bar{background:#eaf0f5;border:0}.dashboard .dash-acoes button{width:auto;flex:0 0 auto}.dashboard .dash-acoes button[aria-pressed=true]{background:#0c3b5a;color:#fff}
 
 .dashboard .dash-matriz td.dash-matriz-com-risco{border:4px solid #17212b}.dash-matriz-com-risco strong{font-size:1.6rem;font-weight:800}.dash-matriz td.dash-matriz-vazia{border:4px solid transparent}
+
+.dash-matriz{display:flex;align-items:stretch;gap:.6rem}.dash-matriz>.dash-eixo{writing-mode:vertical-rl;transform:rotate(180deg);text-align:center;font-weight:700;margin:0}.dash-matriz table{flex:1}.dashboard .dash-tempo svg{max-height:130px}

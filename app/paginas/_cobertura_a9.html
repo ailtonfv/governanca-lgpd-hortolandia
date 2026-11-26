@@ -1,0 +1,4 @@
+<div class="dash-tabela"><table><caption>Cobertura por Secretaria, maior quantidade primeiro</caption><thead><tr><th>Secretaria</th><th>Registros</th><th>No FORM 1</th><th>Levantamento confirmado</th><th>Em análise</th><th>Análise concluída</th></tr></thead><tbody>
+{% for l in cobertura %}{% set n=loop.index0 %}{% if l.total %}<tr><th>{{ l.secretaria }}</th>{% for k in ['registros','form1','confirmados','em_analise','concluidos'] %}<td><a href="{{ url(lista='cobertura_'+n|string+'_'+k) }}">{{ l[k]|length }}</a></td>{% endfor %}</tr>{% endif %}{% endfor %}
+</tbody></table></div>
+{% set vazias=cobertura|rejectattr('total')|list %}{% if vazias %}<details><summary>{{ vazias|length }} Secretarias ainda sem Registro</summary><ul>{% for l in vazias %}<li>{{ l.secretaria }}</li>{% endfor %}</ul></details>{% endif %}

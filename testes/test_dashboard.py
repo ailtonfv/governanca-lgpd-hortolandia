@@ -93,7 +93,7 @@ def test_marco_dpo_abre_na_confirmacao_fecha_na_manifestacao_e_reabre(sessao,dad
     i=next(i for i in dados['objetos'] if i['obj'].tipo=='R')
     e=deepcopy(i['estado']);e['avaliacao']['residual']['faixa']='Alto';e['avaliacao']['residual']['nota']=12
     def ev(n,s):return NS(tipo_evento='f34_confirmar_avaliacao',ocorrido_em=AGORA-timedelta(days=n),conteudo={'estado':deepcopy(s)})
-    inicial=deepcopy(e);inicial['avaliacao_confirmacoes']={'secretaria':{}}
+    inicial=deepcopy(e);inicial['avaliacao_confirmacoes']={'secretaria':{'pessoa_id':'PESSOA-FICTICIA'}}
     fechado=deepcopy(e);fechado['manifestacao_dpo']={'em':(AGORA-timedelta(days=2)).isoformat()}
     i['eventos']=[ev(8,inicial),ev(5,e),ev(2,fechado),ev(1,e)];i['estado']=e
     filas={x['chave']:x for x in c.operacao(dados,AGORA)}
@@ -194,7 +194,7 @@ def test_reserva_sem_ingresso_nao_conta(sessao,entrada):
 def test_circulacao_ausencia_nao_e_zero(sessao,dados):
     assert c.circulacao(dados,None)[0]['numero'] is None
     q=c.circulacao(dados,{r.id:dict(categorias=set(),instrumentos=set()) for r in dados['registros']})
-    assert q[0]['numero']==0 and next(x for x in q if x['chave']=='instrumento_3')['numero']==1
+    assert q[0]['numero']==0 and next(x for x in q if x['chave']=='instrumento_4')['numero']==1
 
 
 def test_catalogo_circulacao_lido_sem_enunciados_ou_texto_livre(sessao,entrada):
@@ -204,7 +204,7 @@ def test_catalogo_circulacao_lido_sem_enunciados_ou_texto_livre(sessao,entrada):
     qs={q['id']:q for q in definicao_revisao(8)['itens']}
     categoria=qs['F2-8.2']['alternativas'][0]
     sim=next(a for a in qs['F2-8.7']['alternativas'] if a['rotulo']=='Sim')
-    entrada.conteudo={RASCUNHO:{'8':{'opcao:F2-8.2#1':[categoria['codigo']],'opcao:F2-8.7#1':[sim['codigo']],
+    entrada.conteudo={RASCUNHO:{'8':{'opcao:F2-8.1':['SIM'],'opcao:F2-8.2#1':[categoria['codigo']],'opcao:F2-8.7#1':[sim['codigo']],
                                     'texto:F2-8.2#1':'NOME-PESSOAL-FICTICIO-NAO-EXIBIR'}}}
     sessao.commit()
     dados=carregar(sessao,escopo_da_conta(sessao,'CONTA-B1'))
@@ -337,7 +337,7 @@ def test_paginas_com_aprendizado_autorizado_e_dados_de_projecao(sessao,dados,mon
 
 
 def test_espera_mediana_por_registro_sem_somar_participacoes():
-    rs=[NS(id=str(n),codigo_lgpd='LGPD-FICTICIO-'+str(n),unidade_principal_atual_id='U-FICTICIA',tipo_objeto='servico') for n in (1,2)]
+    rs=[NS(id=str(n),codigo_lgpd='LGPD-FICTICIO-'+str(n),unidade_principal_atual_id='U-FICTICIA',tipo_objeto='servico',titulo_objeto='Serviço fictício') for n in (1,2)]
     ps=[NS(id=str(n),registro_id=rid,tipo='juridico',concluida_em=None,estado='aguardando',entrada_em=AGORA-timedelta(days=espera))
         for n,(rid,espera) in enumerate([('1',8),('1',2),('2',4)])]
     d=dict(registros=rs,secretarias=[NS(id='U-FICTICIA',nome='Unidade fictícia')],participacoes=ps,objetos=[])

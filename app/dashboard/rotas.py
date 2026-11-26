@@ -54,7 +54,7 @@ def dashboard(request:Request,tela:str='abertura',conta_id:str='CONTA-B1'):
                 except PermissionError:
                     dashboard_disponivel = False
                 return paginas.TemplateResponse(request=request,name='aprendizados_publicos.html',
-                    context=dict(conta_id=conta_id, aprendizado=aprendizado, dashboard_disponivel=dashboard_disponivel))
+                    context=dict(conta_id=conta_id, aprendizado=aprendizado, dashboard_disponivel=dashboard_disponivel,telas=TELAS))
             escopo=escopo_da_conta(sessao,conta_id)
             fonte=carregar(sessao,escopo)
             dados=c.filtrar(fonte,escopo,filtros)
@@ -68,7 +68,7 @@ def dashboard(request:Request,tela:str='abertura',conta_id:str='CONTA-B1'):
             quadros=[c.ativos(dados),*risco,*correcao,*operacao,*cobertura,*aprendizados,*circulacao,*esteira,*atencao]
             # Listas de cobertura são também quadros: todo número abre sua composição.
             for n,l in enumerate(cobertura[1]['lista']):
-                for k in ('registros','confirmados','concluidos','externos'):
+                for k in ('registros','confirmados','concluidos','externos','form1','em_analise'):
                     quadros.append(c.quadro(f'cobertura_{n}_{k}',l['secretaria']+' · '+k,l[k]))
                 for t in c.TIPOS:
                     quadros.append(c.quadro(f'cobertura_{n}_{t}',l['secretaria']+' · '+t,[r for r in l['registros'] if r['tipo']==t]))
@@ -84,8 +84,6 @@ def dashboard(request:Request,tela:str='abertura',conta_id:str='CONTA-B1'):
                 valores={'conta_id':conta_id,**{k:v for k,v in filtros.items() if v},**extras}
                 return '/dashboard'+('' if destino=='abertura' else '/'+destino)+'?'+urlencode(valores)
             lista=request.query_params.get('lista')
-            if lista and lista not in indices:raise HTTPException(404,'Indicador indisponível neste escopo.')
-            selecao=indices.get(lista)
             # Nenhuma referência de evidência, nome de pessoa, objeto ORM ou estado cru vai ao template.
             secretarias=[dict(id=u.id,nome=u.nome) for u in fonte['secretarias']]
             linhas_risco=indices['riscos']['lista']
@@ -96,7 +94,7 @@ def dashboard(request:Request,tela:str='abertura',conta_id:str='CONTA-B1'):
             escolhas={'risco':['registros_avaliados','riscos'],
                       'correcao':['acoes','atrasadas'],
                       'operacao':['esperando','participacoes'], 'cobertura':['secretarias'],
-                      'aprendizados':['aprendizados'],'circulacao':['circulacao',*[f'instrumento_{n}' for n in range(4)]]}
+                      'aprendizados':['aprendizados'],'circulacao':['circulacao',*[f'instrumento_{n}' for n in range(5)]]}
             perfil=escopo.perfil
             titulo_perfil={'Gabinete':'Precisa da sua atenção','DPO':'Pendências com o Gabinete e o Comitê',
                            'Comitê':'Pendente para o Comitê','Secretário':'Aguardando sua decisão','APA':'Pendências da sua Secretaria','AAL':'Seus itens pendentes'}[perfil]
@@ -106,6 +104,12 @@ def dashboard(request:Request,tela:str='abertura',conta_id:str='CONTA-B1'):
                 pessoal = pendencias_do_aal(sessao, conta_id, dados, agora)
                 indices[pessoal['chave']] = pessoal
                 atencao_perfil = [pessoal]
+            if perfil == 'APA':
+                from app.dashboard.fontes import pendencias_do_apa
+                pessoal=pendencias_do_apa(sessao,conta_id,dados,agora)
+                indices[pessoal['chave']]=pessoal;atencao_perfil=[pessoal]
+            if lista and lista not in indices:raise HTTPException(404,'Indicador indisponível neste escopo.')
+            selecao=indices.get(lista)
             # A lista que compõe cada fila mantém somente metadados, mesmo nos perfis globais.
             pagina=max(0,int(request.query_params.get('pagina','0')))
             arts=indices['aprendizados']['lista'];pagina=min(pagina,max(0,len(arts)-1))
@@ -121,7 +125,7 @@ def dashboard(request:Request,tela:str='abertura',conta_id:str='CONTA-B1'):
                 filtros=filtros,secretarias=secretarias,travada=escopo.unidades is not None,faixas=c.FAIXAS,cores=CORES,
                 q=indices,url=url,selecao=selecao,quadros=[indices[k] for k in escolhas.get(tela,[]) if k in indices],
                 atencao=atencao_perfil,esteira=esteira,segmentos=segmentos,risco=linhas_risco,correcao=indices['acoes']['lista'],
-                filas=[indices['fila_'+k] for k in ('AAL','Jurídico','DPO','Secretário','Comitê','Gabinete')],
+                filas=[q for q in operacao if q['chave'].startswith('fila_')],
                 cobertura=cobertura[1]['lista'],circulacao=[x for x in circulacao if x['chave'].startswith('circulacao_')],
                 aprendizado=arts[pagina] if arts else None,pagina=pagina,aprendizados_total=len(arts),
                 lado='inerente' if request.query_params.get('lado')=='inerente' else 'residual',

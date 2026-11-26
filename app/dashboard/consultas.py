@@ -119,7 +119,7 @@ def linha(d, registro_id, item=None):
     r = next(r for r in d['registros'] if r.id == registro_id)
     u = next((u for u in d['secretarias'] if u.id == r.unidade_principal_atual_id),None)
     from app.identificacao_registro import identificar
-    l = dict(id=r.id, registro=identificar(r),contexto=d.get('contextos',{}).get(getattr(r,'contexto_atuacao_id',None),''), secretaria=u.nome if u else r.unidade_principal_atual_id,
+    l = dict(id=r.id, registro=identificar(r),servico=r.titulo_objeto,contexto=d.get('contextos',{}).get(getattr(r,'contexto_atuacao_id',None),''), secretaria=u.nome if u else r.unidade_principal_atual_id,
              unidade_id=r.unidade_principal_atual_id,tipo=r.tipo_objeto, item='',situacao='',desde=None,dias=None)
     if item:
         obj,e = item['obj'],item['estado']
@@ -169,7 +169,7 @@ def risco(d):
              quadro('registros_avaliados','Registros com risco avaliado',[linha(d,rid) for rid in sorted({i['obj'].registro_id for i in riscos if conjunta(i['estado']) and nota(i['estado']).get('nota') is not None})]),
              quadro('efeito','Efeito registrado dos controles',efeito,'riscos', 'Notas inerente e residual','Avaliação registrada; não mede redução causal comprovada.'),
              quadro('ripd','Riscos com triagem indicando RIPD',ripd,'riscos', 'Triagem conjunta','Não afirma elaboração ou conclusão do RIPD.','Secretaria e DPO')]
-    for chave,titulo in [('propostas','Propostas aguardando confirmação'),('sem_consenso','Sem consenso sem nota vigente'),('nao_avaliados','Ainda não avaliado')]:
+    for chave,titulo in [('propostas','Propostas aguardando confirmação'),('sem_consenso','Sem consenso (ainda sem nota)'),('nao_avaliados','Ainda não avaliado')]:
         quadros.append(quadro(chave,titulo,sem_nota[chave],'riscos','Eventos de ingresso e avaliação','Fora da matriz; ainda não valem como nota.'))
     for f in FAIXAS:
         quadros.append(quadro('riscos_faixa_'+str(FAIXAS.index(f)),f,[l for l in linhas if l['residual']['faixa']==f],'riscos'))
@@ -185,6 +185,12 @@ def risco(d):
             for impacto in range(1,6):
                 quadros.append(quadro(f'matriz_{lado}_{prob}_{impacto}',f'{lado.title()} · probabilidade {prob}, impacto {impacto}',
                     [l for l in linhas if l[lado].get('probabilidade')==prob and l[lado].get('impacto')==impacto],'riscos',faixa=pontuar(prob,impacto)['faixa']))
+    from app.dashboard.regras_a9 import decisao_posterior
+    posteriores=[]
+    for i in d['objetos']:
+        p=decisao_posterior(i['estado']) if i['obj'].tipo=='A' else None
+        if p:posteriores.append({**linha(d,i['obj'].registro_id,i),'residual':p['nota'],'situacao':p['decisao']})
+    quadros.append(quadro('decisoes_pos_acao','Depois da ação',posteriores,'ações',regra='Somente nota posterior confirmada pela Secretaria e pelo DPO; a decisão anterior não é reaproveitada.'))
     return quadros
 
 
@@ -206,10 +212,14 @@ def sem_consenso(e):
 
 
 def atencao(d, agora):
-    linhas={k:[] for k in ('criticos','ciencias','consenso','instrucao','planos')}
+    from app.dashboard.regras_a9 import condicoes_abertas, decisao_posterior
+    linhas={k:[] for k in ('criticos','ciencias','consenso','instrucao','planos','condicoes','residuais_pos','ripd_pendente')}
     for i in d['objetos']:
         e=i['estado']; l=linha(d,i['obj'].registro_id,i)
         if i['obj'].tipo=='R':
+            if condicoes_abertas(d,e):linhas['condicoes'].append(l)
+            if set(e.get('triagem_confirmacoes',{}))=={'secretaria','dpo'} and e.get('triagem',{}).get('resultado') in ('elaborar','revisar','determinado_anpd') and not e.get('referencia_ripd'):
+                linhas['ripd_pendente'].append(l)
             if conjunta(e) and nota(e).get('faixa')=='Crítico' and not e.get('aceitacao'):
                 pronto=bool(e.get('manifestacao_dpo') and residual_comite(e))
                 m=marco(i,lambda s: conjunta(s) and nota(s).get('faixa')=='Crítico' and bool(s.get('manifestacao_dpo')) and residual_comite(s) and not s.get('aceitacao')) if pronto else None
@@ -218,13 +228,18 @@ def atencao(d, agora):
             if sem_consenso(e):
                 m=marco(i,sem_consenso);linhas['consenso'].append({**l,'desde':m,'dias':dias(m,agora)})
         else:
+            posterior=decisao_posterior(e)
+            if posterior and posterior['pendente'] and posterior['nota']['faixa'] in ('Alto','Crítico'):
+                linhas['residuais_pos'].append({**l,'residual':posterior['nota']})
             if e.get('ciencia_prefeito'):
                 linhas['ciencias'].append({**l,'situacao':'ciência registrada no sistema','desde':e['ciencia_prefeito']['em'],'prazo':e.get('prazo')})
             if e.get('faixa_origem')=='Crítico' and e.get('plano') and not e.get('plano_aprovado') and not e.get('cancelada'):
-                linhas['planos'].append(l)
+                m=marco(i,lambda s: bool(s.get('plano')) and not s.get('plano_aprovado') and not s.get('cancelada'))
+                linhas['planos'].append({**l,'desde':m,'dias':dias(m,agora)})
     titulos={'criticos':'Riscos Críticos aguardando decisão do Prefeito','ciencias':'Segundas prorrogações: ciência registrada no sistema',
-             'consenso':'Avaliações sem consenso aguardando o Comitê','instrucao':'Em instrução (DPO/Comitê)','planos':'Planos aguardando aprovação'}
-    return [quadro(k,titulos[k],v,'ações' if k in ('ciencias','planos') else 'riscos','Eventos da rodada atual',
+             'consenso':'Avaliações sem consenso aguardando o Comitê','instrucao':'Em instrução (DPO/Comitê)','planos':'Planos aguardando aprovação',
+             'condicoes':'Aceitações condicionadas com condição em aberto','residuais_pos':'Riscos residuais Altos ou Críticos sem decisão após a ação','ripd_pendente':'RIPD indicado e não informado'}
+    return [quadro(k,titulos[k],v,'ações' if k in ('ciencias','planos','residuais_pos') else 'riscos','Eventos da rodada atual',
                    'Ciência automática é informação, não pendência nem espera.' if k=='ciencias' else 'Somente fatos registrados.',
                    'Comitê' if k=='consenso' else 'Gabinete') for k,v in linhas.items() if k!='planos' or v]
 
@@ -234,10 +249,17 @@ def dias(inicio, agora):
 
 
 def correcao(d, agora):
+    from app.dashboard.regras_a9 import condicoes_abertas
     linhas=[]
     for i in d['objetos']:
         if i['obj'].tipo!='A': continue
         e=i['estado']; l=linha(d,i['obj'].registro_id,i)
+        risco_origem=next((r['estado'] for r in d['objetos'] if r['obj'].id==e.get('risco_id')), {})
+        tipos=e.get('respostas',{}).get('F4-4.4',[])
+        espera=marco(i,lambda s: bool(s.get('plano')) and not s.get('plano_aprovado') and not s.get('cancelada'))
+        l.update(tipo_acao=', '.join(tipos) if isinstance(tipos,list) else tipos,
+                 faixa_origem=e.get('faixa_origem'),condicao_aberta=bool(condicoes_abertas(d,risco_origem)),
+                 espera_aprovacao=dias(espera,agora),desde=espera,dias=dias(espera,agora))
         aprovacao=next((ev for ev in i['eventos'] if ev.tipo_evento=='f34_aprovar_plano'),None)
         prorrogacoes=[]
         for ev in i['eventos']:
@@ -257,7 +279,7 @@ def correcao(d, agora):
     return [quadro('acoes','Ações acompanhadas',linhas,'ações','Eventos de plano, execução e verificação','Situações exclusivas; atraso é uma marca.'),
             quadro('atrasadas','Ações atrasadas',[l for l in linhas if l['atrasada']],'ações','Prazo vigente','Prazo anterior a hoje, sem verificação aprovada nem cancelamento.'),
             *[quadro('acao_'+str(n),t,[l for l in linhas if l['situacao']==t],'ações') for n,t in enumerate(F4)],
-            indisponivel('incidentes','Incidentes','O registro estruturado de incidentes será implementado após 15/12.')]
+            indisponivel('incidentes','Incidentes','O painel ainda não recebe os registros de incidentes (previsto para depois de 15/12).')]
 
 
 def esteira(d, filtros):
@@ -284,11 +306,15 @@ def esteira(d, filtros):
 
 
 def operacao(d, agora):
-    filas={k:[] for k in ('AAL','Jurídico','DPO','Secretário','Comitê','Gabinete')}
+    filas={k:[] for k in ('Origem (ARP/APA)','AAL','Jurídico','DPO','Secretaria (FORMs 3 e 4)','Secretário','Comitê','Verificação (Comitê)','Gabinete')}
     abertas=[]
     def incluir(papel,l,inicio,motivo):
         filas[papel].append({**l,'desde':inicio,'dias':dias(inicio,agora),'situacao':motivo})
     from app.consultas_dpo import aguardando_dpo
+    from app.dashboard.regras_a9 import secretaria_pendente
+    for o in d.get('esperas_origem',[]):
+        if o['registro_id'] in {r.id for r in d['registros']}:
+            incluir('Origem (ARP/APA)',{**linha(d,o['registro_id']),'etapa':'FORM 1'},o['desde'],o['situacao'])
     for p in d['participacoes']:
         if p.tipo == 'dpo' and not aguardando_dpo(p): continue
         if p.concluida_em or p.estado=='concluida': continue
@@ -297,6 +323,8 @@ def operacao(d, agora):
         incluir(papel,l,p.entrada_em,'Análise em aberto');abertas.append(l)
     for i in d['objetos']:
         e=i['estado']; l={**linha(d,i['obj'].registro_id,i),'etapa':'FORM '+str(e['form'])}
+        trabalho=secretaria_pendente(e)
+        if trabalho:incluir('Secretaria (FORMs 3 e 4)',l,marco(i,lambda s: secretaria_pendente(s)==trabalho),trabalho)
         regras=[]
         if e['form']==3:
             regras=[('DPO','Confirmar proposta',lambda s: any(x.get(c) and 'dpo' not in x.get(c+'_confirmacoes',{}) and not x.get(c+'_sem_consenso')
@@ -312,7 +340,7 @@ def operacao(d, agora):
                 return bool(pedido and s.get('faixa_origem') in ('Alto','Crítico') and
                     (not s.get('manifestacao_dpo') or momento(s['manifestacao_dpo']['em']) < momento(pedido['em'])))
             regras=[('Gabinete' if e.get('faixa_origem')=='Crítico' else 'Secretário','Aprovar plano',lambda s: bool(s.get('plano')) and not s.get('plano_aprovado') and not s.get('cancelada')),
-                ('Comitê','Verificar execução',lambda s:situacao_acao(s)==F4[2]),
+                ('Verificação (Comitê)','Verificar execução',lambda s:situacao_acao(s)==F4[2]),
                 ('Comitê','Manifestar-se sobre segunda prorrogação',lambda s:bool(s.get('decisoes_pendentes',{}).get('prorrogacao')) and s.get('prorrogacoes')==1 and s.get('manifestacao_comite',{}).get('finalidade')!='prorrogacao'),
                 ('Secretário','Decidir prorrogação',lambda s:bool(s.get('decisoes_pendentes',{}).get('prorrogacao')) and (s.get('prorrogacoes',0)!=1 or s.get('manifestacao_comite',{}).get('finalidade')=='prorrogacao')),
                 ('DPO','Manifestação sobre cancelamento',cancelamento_exige_dpo),
@@ -336,13 +364,16 @@ def operacao(d, agora):
 def cobertura(d):
     linhas=[]; confirmados={a.registro_id for a in d['apresentacoes'] if a.confirmada_em}
     concluidos={p.registro_id for p in d['participacoes'] if p.tipo=='principal' and (p.conteudo or {}).get('conclusao_analise')}
+    analise={p.registro_id for p in d['participacoes'] if p.tipo=='principal'}
     for u in d['secretarias']:
         rs=[r for r in d['registros'] if r.unidade_principal_atual_id==u.id]
         externos={p.registro_id for p in d['participacoes'] if p.unidade_id==u.id and p.registro_id not in {r.id for r in rs}}
         linhas.append(dict(id=u.id,registro='',secretaria=u.nome,tipo='',item='',situacao='',total=len(rs),
             servicos=sum(r.tipo_objeto=='servico' for r in rs),processos=sum(r.tipo_objeto=='processo' for r in rs),atividades=sum(r.tipo_objeto=='atividade' for r in rs),
             confirmados=[linha(d,r.id) for r in rs if r.id in confirmados],concluidos=[linha(d,r.id) for r in rs if r.id in concluidos],
+            form1=[linha(d,r.id) for r in rs if r.id not in analise],em_analise=[linha(d,r.id) for r in rs if r.id in analise and r.id not in concluidos],
             registros=[linha(d,r.id) for r in rs],externos=[linha(d,rid) for rid in sorted(externos)]))
+    linhas.sort(key=lambda l:(-l['total'],l['secretaria']))
     return [quadro('secretarias','Secretarias com pelo menos um Registro',[l for l in linhas if l['total']],'Secretarias',
                    'De onde vem: Secretarias ativas da tabela-mestre com pelo menos um Registro no seu escopo.','Quantidades; percentual depende de inventário de referência aprovado.',total_ativas=len(linhas)),
             quadro('cobertura','Secretarias ativas',linhas,'Secretarias')]
@@ -376,10 +407,16 @@ def circulacao(d, categorias):
             lista=[linha(d,r.id) for r in d['registros'] if r.unidade_principal_atual_id==u.id and categoria in categorias.get(r.id,{}).get('categorias',set())]
             resultado.append(quadro(f'circulacao_{nu}_{nc}',u.nome+' · '+categoria,lista,
                 fonte='F1-10.2 e F2-8.1/8.2',regra='Registros que declaram o tipo; não conta relações, empresas ou contratos distintos.',secretaria=u.nome,categoria=categoria))
-    for k,rotulo in enumerate(('Sim','Não','A confirmar','Sem resposta')):
-        lista=[linha(d,r.id) for r in d['registros'] if rotulo in categorias.get(r.id,{}).get('instrumentos',set()) or rotulo=='Sem resposta' and not categorias.get(r.id,{}).get('instrumentos')]
+    for k,rotulo in enumerate(('Sim','Não','A confirmar','Sem resposta','Ainda não chegou a esta pergunta')):
+        def corresponde(r):
+            v=categorias.get(r.id,{})
+            if not v.get('pergunta_ativa',True):return False
+            if rotulo=='Ainda não chegou a esta pergunta':return not v.get('bloco8_salvo',bool(v.get('instrumentos')))
+            if rotulo=='Sem resposta':return v.get('bloco8_salvo',False) and not v.get('instrumentos')
+            return rotulo in v.get('instrumentos',set())
+        lista=[linha(d,r.id) for r in d['registros'] if corresponde(r)]
         resultado.append(quadro('instrumento_'+str(k),'Instrumento formal: '+rotulo,lista,fonte='F2-8.7',
-            regra='Declaração estruturada, sem avaliação de cláusulas. Um Registro com destinatários distintos pode declarar mais de uma resposta.'))
+            regra='Sem salvamento do bloco 8: Ainda não chegou a esta pergunta. Bloco 8 salvo com pergunta ativa e vazia: Sem resposta. Condicional fechada fica fora dessas contagens. Fornecedores e operadores do bloco 9 não entram nesta conta. Declaração estruturada, sem avaliação de cláusulas.'))
     resultado.insert(0,quadro('circulacao','Registros com destinatários declarados',[linha(d,r.id) for r in d['registros'] if categorias.get(r.id,{}).get('categorias')],
         fonte='Categorias estruturadas do FORM 1 e FORM 2',regra='Não contamos relações, empresas ou contratos distintos, nem avaliamos cláusulas.'))
     return resultado

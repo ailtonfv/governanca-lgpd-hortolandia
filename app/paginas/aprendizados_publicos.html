@@ -3,8 +3,9 @@
 {% block conteudo %}
 <link rel="stylesheet" href="{{ url_for('estaticos',path='/dashboard.css') }}">
 <div class="dashboard"><p>Dashboard LGPD · Aprendizados · Somente leitura</p><h1>Aprendizados autorizados</h1>
+{% if dashboard_disponivel %}<nav class="dash-nav" aria-label="Telas do dashboard">{% for k,v in telas.items() %}<a href="/dashboard{{ '' if k=='abertura' else '/'+k }}?conta_id={{ conta_id|urlencode }}" {% if k=='aprendizados' %}aria-current="page"{% endif %}>{{ {'abertura':'Visão geral','risco':'Riscos','correcao':'Providências','operacao':'Filas e prazos','cobertura':'Cobertura','aprendizados':'Aprendizados','circulacao':'Compartilhamento'}[k] }}</a>{% endfor %}</nav>{% endif %}
 <p>Consulta às orientações de todas as Secretarias. Cada caso exige avaliação própria; a orientação não concede acesso aos documentos de origem.</p>
 {% set lista_completa=true %}{% include '_aprendizados_publicos.html' %}
 <nav class="acoes"><a href="/central?conta_id={{ conta_id|urlencode }}">Voltar à Central de Acesso</a>
 {% if dashboard_disponivel %}<a href="/dashboard?conta_id={{ conta_id|urlencode }}">Voltar ao dashboard</a>{% endif %}</nav></div>
-{% endblock %}
+<script defer src="{{ url_for('estaticos',path='/dashboard.js') }}"></script>{% endblock %}

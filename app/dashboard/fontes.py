@@ -49,6 +49,22 @@ def pendencias_do_aal(sessao, conta_id, dados, agora):
     return {**fila, 'chave': 'minha_fila_AAL'}
 
 
+def pendencias_do_apa(sessao, conta_id, dados, agora):
+    from app.consultas_interface import carregar_painel
+    from app.dashboard.consultas import linha, quadro, dias
+    painel=carregar_painel(sessao,conta_id)
+    permitidos={r.id:r for r in dados['registros']}
+    lista=[]
+    for r in painel.get('registros',[]):
+        if r['id'] not in permitidos:continue
+        motivos=[p['acao_rotulo'] for p in r.get('providencias',[]) if p['categoria']=='conferencia_form1']
+        if not sessao.get(AtribuicaoForm1Integral,r['id']):motivos.append('Designar responsável pelo preenchimento')
+        if motivos:
+            desde=next((o['desde'] for o in dados.get('esperas_origem',[]) if o['registro_id']==r['id']),permitidos[r['id']].criado_em)
+            lista.append({**linha(dados,r['id']),'situacao':' · '.join(motivos),'desde':desde,'dias':dias(desde,agora),'etapa':'FORM 1'})
+    return quadro('minha_fila_APA','Providências do APA',lista,regra='Conferências atribuídas ao APA em sessão e indicação de ARP. Não inclui decisões do Secretário.',papel='APA')
+
+
 def carregar(sessao, escopo):
     consulta = select(Registro)
     if escopo.unidades is not None:
@@ -64,7 +80,7 @@ def carregar(sessao, escopo):
     from app.modelos import ContextoAtuacao
     contextos={c.id:c.nome for c in sessao.scalars(select(ContextoAtuacao))}
     dados = dict(contextos=contextos,registros=registros, secretarias=secretarias, participacoes=[], objetos=[],
-                 apresentacoes=[], complementos=[], snapshots={}, escopo=escopo)
+                 apresentacoes=[], complementos=[], snapshots={}, esperas_origem=[], escopo=escopo)
     if not ids: return dados
     dados['participacoes'] = list(sessao.scalars(select(ParticipacaoForm2).where(ParticipacaoForm2.registro_id.in_(ids))))
     dados['apresentacoes'] = list(sessao.scalars(select(HistoricoConferenciaForm1Integral).where(
@@ -72,6 +88,21 @@ def carregar(sessao, escopo):
     pids = [p.id for p in dados['participacoes']]
     dados['complementos'] = list(sessao.scalars(select(ComplementoForm2).where(ComplementoForm2.participacao_id.in_(pids))))
     dados['snapshots'] = {s.id:s for s in sessao.scalars(select(VersaoForm1Integral).where(VersaoForm1Integral.registro_id.in_(ids)))}
+    from app.modelos import ConferenciaInternaForm1Integral
+    conferencias={c.registro_id:c for c in sessao.scalars(select(ConferenciaInternaForm1Integral).where(ConferenciaInternaForm1Integral.registro_id.in_(ids)))}
+    historicos={h.registro_id:h for h in dados['apresentacoes']}
+    em_analise={p.registro_id for p in dados['participacoes'] if p.tipo=='principal'}
+    for r in registros:
+        cf=conferencias.get(r.id); h=historicos.get(r.id)
+        if cf:
+            dados['esperas_origem'].append(dict(registro_id=r.id,desde=cf.solicitada_em,situacao='Conferência do FORM 1 pelo APA'))
+        elif h and h.devolvida_em and not h.confirmada_em:
+            dados['esperas_origem'].append(dict(registro_id=r.id,desde=h.devolvida_em,situacao='Ajustes do FORM 1 pela origem'))
+        elif r.id not in em_analise and r.estado_atual not in ('cancelado','encerrado','concluido'):
+            dados['esperas_origem'].append(dict(registro_id=r.id,desde=r.criado_em,situacao='Levantamento do FORM 1 pela origem'))
+    por_participacao={p.id:p.registro_id for p in dados['participacoes']}
+    for comp in dados['complementos']:
+        if comp.estado=='aberta':dados['esperas_origem'].append(dict(registro_id=por_participacao[comp.participacao_id],desde=comp.criada_em,situacao='Complementação solicitada à origem'))
     eventos = list(sessao.scalars(select(Evento).where(Evento.registro_id.in_(ids),
         Evento.cadeia_tipo == 'forms34_objeto').order_by(Evento.sequencia_cadeia)))
     por_objeto = {}
@@ -86,23 +117,32 @@ def carregar(sessao, escopo):
 
 def categorias_circulacao(dados):
     """Somente alternativas estruturadas, nunca campos de destinatários em texto livre."""
-    from app.form2_rev212 import indice_valores
+    from app.form2_rev212 import indice_valores, RASCUNHO, aplicavel, mapa_regras
+    from app.contrato_form2_respostas import carregar_contrato
     from app.respostas_form2 import definicao_revisao
     from app.extensao_medidas_form1 import catalogo_efetivo
     try:
         opcoes={q['id']:{a['codigo']:a['rotulo'] for a in q['alternativas']}
                 for q in definicao_revisao(8)['itens'] if q['id'] in ('F2-8.1','F2-8.2','F2-8.7')}
-        resultado={r.id:dict(categorias=set(),instrumentos=set()) for r in dados['registros']}
+        regras = mapa_regras(carregar_contrato())
+        resultado={r.id:dict(categorias=set(),instrumentos=set(),bloco8_salvo=False, pergunta_ativa=True) for r in dados['registros']}
         for p in dados['participacoes']:
             if p.tipo!='principal':continue
             valores=indice_valores(p.conteudo or {})
+            resultado[p.registro_id]['bloco8_salvo'] = '8' in (p.conteudo or {}).get(RASCUNHO,{})
+            ocorrencias = {'#1'} | {'#'+k.rsplit('#',1)[1] for k in valores if k.startswith(('opcao:F2-8.','texto:F2-8.')) and '#' in k}
+            ativas = [s for s in ocorrencias if aplicavel('F2-8.7',s,valores,(),regras)]
+            resultado[p.registro_id]['pergunta_ativa'] = bool(ativas) or (
+                not resultado[p.registro_id]['bloco8_salvo'] and not valores.get('opcao:F2-8.1'))
             for chave,vs in valores.items():
                 q=chave.removeprefix('opcao:').split('#')[0]
                 if not chave.startswith('opcao:') or q not in opcoes:continue
                 for v in vs if isinstance(vs,list) else [vs]:
                     rotulo=opcoes[q].get(v)
                     if not rotulo: continue
-                    if q=='F2-8.7': resultado[p.registro_id]['instrumentos'].add(rotulo)
+                    if q=='F2-8.7':
+                        sufixo='#'+chave.rsplit('#',1)[1] if '#' in chave else '#1'
+                        if sufixo in ativas: resultado[p.registro_id]['instrumentos'].add(rotulo)
                     elif v not in ('SIM','NAO','A_CONFIRMAR'):
                         resultado[p.registro_id]['categorias'].add(rotulo)
         ultimas={a.registro_id:a for a in dados['apresentacoes'] if a.confirmada_em}

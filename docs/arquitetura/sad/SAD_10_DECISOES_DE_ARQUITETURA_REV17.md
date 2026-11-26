@@ -1252,3 +1252,14 @@ Wi-Fi do FORM 2 exige declaração específica em F1-8.10; Saúde exige categori
 ### Lote 16-B — A8 (26/11/2026)
 
 Consulta pendente do DPO exige pergunta registrada pelo AAL e participação ainda não concluída. Orientação de ofício não gera espera pelo DPO. Painel e fila DPO da Operação compartilham a classificação no domínio. Orientações concluídas, solicitadas ou de ofício, ficam aguardando resposta do AAL responsável; a resposta utiliza o ato auditável existente, com as mesmas permissões e idempotência. A manifestação continua consultiva e não altera a análise principal. Ciências automáticas não entram como pendência. Sem migração ou alteração da vistoria; aceite em tela ainda pendente.
+
+
+### Complemento A9.7 — circulação no dashboard (26/11/2026)
+
+Decisão de Ailton: na F2-8.7, sem salvamento do bloco 8, o indicador é
+“Ainda não chegou a esta pergunta”; com o bloco 8 salvo, pergunta ativa e
+vazia, é “Sem resposta”. Condicional fechada fica fora dessas duas contagens.
+A consulta usa o salvamento já registrado, não presume visita à página e não
+cria eventos de navegação. O critério fica explícito em “Sobre este número”,
+que também informa a exclusão de fornecedores e operadores do bloco 9.
+Implementação no A9 do Lote 16-B; aceite visual pendente.
