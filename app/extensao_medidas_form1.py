@@ -72,7 +72,7 @@ def catalogo_efetivo(conteudo=None):
     if "revisao_22" in (conteudo or {}):
         versao_estrutura(conteudo)
         from app.rev22_form1 import catalogo
-        return catalogo()
+        return catalogo(conteudo["revisao_22"]["catalogo_sha256"])
     base = campos_por_id()
     from app.extensao_guarda_form1 import estender_catalogo_guarda
     estrutura = versao_estrutura(conteudo)

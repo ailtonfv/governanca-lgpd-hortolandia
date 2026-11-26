@@ -8,7 +8,7 @@ import json
 
 VERSAO = 'F1-C3-REV22-CANDIDATA-v1'
 LACRE = '6caa5e834c7c7efccb6c4b95f31707c21ece966c8e872a5dc2bc35d49143dd23'
-LACRES_HISTORICOS = frozenset(('49d70207702e3201b85f11cff44686d9f711310d4374c06842772094b98a92e8','03cf8b3dd6137c1748ed43438c6516f9972c1b7a723cc98ef672f651e112de47',))
+LACRES_HISTORICOS = frozenset(('064216ae5a32bb189caea3f125ad8405314cbca12eac72a3679995f00b48a9c3','49d70207702e3201b85f11cff44686d9f711310d4374c06842772094b98a92e8','03cf8b3dd6137c1748ed43438c6516f9972c1b7a723cc98ef672f651e112de47',))
 NOVOS = ('2.1.1', '3.4.2', '4.1.1', '4.1.2', '12.1.4')
 EQUIVALENCIA = dict(zip(('8.7','8.8','8.8.1','8.9'), ('WPP.1','WPP.2','WPP.3','WPP.4')))
 
@@ -115,15 +115,22 @@ def pre_validar(conteudo):
         incompletos=[],nao_aplicaveis=[],regras_pendentes=pendentes,avisos=avisos,por_bloco=[],
         quantidades={'avisos':len(avisos),'incompletos':0,'nao_aplicaveis':0,'regras_pendentes':1})
 
-def definicoes():
-    raw=(Path(__file__).parent/'catalogos/form1_rev22_privado.json').read_bytes()
-    if sha256(raw).hexdigest()!=LACRE: raise ValueError('Catálogo privado REV22 divergente.')
+PASTA_CATALOGOS = Path(__file__).parent/'catalogos'
+
+
+def definicoes(lacre=None):
+    esperado = lacre or LACRE
+    if esperado not in LACRES_HISTORICOS | {LACRE}:
+        raise ValueError('Estrutura REV22 divergente.')
+    nome = 'form1_rev22_privado.json' if esperado == LACRE else f'form1_rev22_{esperado}_privado.json'
+    raw=(PASTA_CATALOGOS/nome).read_bytes()
+    if sha256(raw).hexdigest()!=esperado: raise ValueError('Catálogo privado REV22 divergente.')
     return {q['id']:q for q in json.loads(raw)['items']}
 
-def catalogo():
+def catalogo(lacre=None):
     from app.form1_integral import CampoForm1Integral
     tipos={'multi':'seleção múltipla (combo com marcações)', 'single':'seleção única (combo)', 'unit':'seleção única (combo)', 'text':'texto curto'}
-    return {k:CampoForm1Integral(k, f"BLOCO {q['block']} — {q['title']}", q['question'],tipos[q['kind']],tuple(q['options']),q['help']) for k,q in definicoes().items()}
+    return {k:CampoForm1Integral(k, f"BLOCO {q['block']} — {q['title']}", q['question'],tipos[q['kind']],tuple(q['options']),q['help']) for k,q in definicoes(lacre).items()}
 
 def blocos_com_respostas(conteudo):
     campos = definicoes()
@@ -139,7 +146,7 @@ def blocos_com_respostas(conteudo):
 
 
 def respostas_conjuntos(conteudo):
-    defs=definicoes();itens=[]
+    defs=definicoes(conteudo.get("revisao_22", {}).get("catalogo_sha256"));itens=[]
     for bloco,rows in conteudo.get('conjuntos_rev22',{}).items():
         for indice,row in enumerate(rows,1):
             for k,v in row.get('respostas',{}).items():
