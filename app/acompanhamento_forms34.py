@@ -10,8 +10,7 @@ def titulo(obj, e):
     if not isinstance(texto, str):texto = None
     if texto:
         texto = ' '.join(texto.split())
-        if len(texto) > 120: texto = texto[:117].rstrip()+'…'
-    return f"{especie} {int(codigo[1:])}: {texto or 'Título ainda não informado'} ({codigo})"
+    return f"{especie} {codigo}: {texto or 'Título ainda não informado'}"
 
 
 def resumo(sessao, obj, e, papeis, pessoa_id):

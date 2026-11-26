@@ -15,7 +15,7 @@ NOMES = {
     'confirmar_avaliacao':'Nota conjunta confirmada', 'propor_triagem':'Proposta de triagem registrada',
     'confirmar_triagem':'Triagem confirmada', 'manifestar_dpo':'Manifestação do DPO registrada',
     'manifestar_comite':'Deliberação do Comitê registrada', 'aceitar_residual':'Aceitação do residual registrada',
-    'sem_consenso':'Ausência de consenso registrada', 'concluir_avaliacao':'Avaliação concluída',
+    'sem_consenso':'Ausência de consenso registrada', 'concluir_avaliacao':'Avaliação de risco concluída',
     'encaminhar_acao':'Providência encaminhada', 'planejar':'Plano registrado', 'aprovar_plano':'Plano aprovado',
     'executar_medida':'Execução registrada', 'verificar':'Verificação registrada',
     'pedir_prorrogacao':'Prorrogação solicitada', 'decidir_prorrogacao':'Prorrogação decidida',

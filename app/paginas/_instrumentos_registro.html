@@ -1,7 +1,7 @@
 <section class="instrumentos-registro" aria-labelledby="instrumentos-registro">
   <h2 id="instrumentos-registro" tabindex="-1">Instrumentos deste Registro</h2>
   <ul class="lista-instrumentos-registro">
-  {% set titulos = {1:'Levantamento do tratamento',2:'Validação jurídica e institucional',3:'Avaliação de riscos e controles',4:'Plano de ação, monitoramento e aprendizagem institucional'} %}
+  {% set titulos = {1:'Levantamento do tratamento',2:'Validação jurídica e institucional',3:'Avaliação de riscos',4:'Providências e aprendizado'} %}
   {% set proximos = {1:'O ARP preenche e apresenta ao APA para conferência.',2:'O FORM 2 começa depois que o APA confirmar o FORM 1.',3:'O FORM 3 começa depois da validação no FORM 2.',4:'O FORM 4 começa quando o FORM 3 indicar providências.'} %}
   {% for numero in (1,2,3,4) %}
     <li data-instrumento="FORM{{ numero }}"><h3>FORM {{ numero }} — {{ titulos[numero] }}</h3>

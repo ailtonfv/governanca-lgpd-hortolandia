@@ -35,7 +35,6 @@
 <label>Etapa<select name="etapa"><option value="">Todas as etapas</option>{% for n in range(1,5) %}<option value="{{ n }}" {% if filtros.etapa==n|string %}selected{% endif %}>FORM {{ n }}</option>{% endfor %}</select></label>
 <button type="submit">Aplicar filtros</button><a href="/dashboard{{ '/'+tela if tela!='abertura' else '' }}?conta_id={{ conta_id|urlencode }}">Limpar filtros</a></form></details>
 <p><strong>Mostrando:</strong> {{ mostrando }}</p>{{ composicao(tipos) }}
-<p class="dash-perfil"><a href="/central?conta_id={{ conta_id|urlencode }}">Ver como: trocar servidor fictício</a></p>
 {% if selecao %}<section class="dash-composicao" id="composicao"><h2>{{ selecao.titulo }}</h2><p>{{ numero(selecao) }}</p>{{ sobre(selecao) }}{{ efeitos(selecao.lista) if selecao.chave=='efeito' else tabela(selecao.lista) }}<p><a href="{{ url() }}">Voltar ao painel</a></p></section>{% endif %}
 {% if tela=='abertura' %}
 <div class="dash-abertura">

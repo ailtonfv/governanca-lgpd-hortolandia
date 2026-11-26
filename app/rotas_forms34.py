@@ -76,7 +76,7 @@ def lista(request:Request,conta_id:str,form:int|None=Query(default=None,ge=3,le=
             .where(Conta.ativa.is_(True),Pessoa.ativa.is_(True))).all()
         return paginas.TemplateResponse(request=request,name='forms34_lista.html',context={
             'contextos':{c.id:c.nome for c in s.scalars(select(ContextoAtuacao))},'temas':catalogo(s),'tema':tema,
-            'filtro_form':form,'conta_id':conta_id,'pessoa':pessoa,'objetos':sorted(visiveis,key=lambda i:not i['pendente']),'referencias':referencias,'contas':contas,
+            'pode_encaminhar':bool(unidades(s,pessoa.id,'aal_form2')),'filtro_form':form,'conta_id':conta_id,'pessoa':pessoa,'objetos':sorted(visiveis,key=lambda i:not i['pendente']),'referencias':referencias,'contas':contas,
             'gabinete':bool(unidades(s,pessoa.id,'demo34_gabinete'))})
 
 

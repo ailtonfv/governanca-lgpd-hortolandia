@@ -18,9 +18,10 @@
       <details><summary>Em acompanhamento ({{ resumo.acompanhamento|length }})</summary>
         <ul>{% for item in resumo.acompanhamento %}<li><a href="{{ item.href }}">{{ item.texto }}</a>{% if item.contexto %}<p>Contexto: {{ item.contexto }}</p>{% endif %}</li>{% endfor %}</ul>
       </details>
+      {% if numero==3 and resumo.concluidos %}<h4>Concluídos recentemente</h4><ul>{% for item in resumo.concluidos %}<li><a href="{{ item.href }}">{{ item.texto }}</a></li>{% endfor %}</ul>{% endif %}
     </section>
 
-    <a class="botao-link-secundario acesso-instrumento" href="{{ resumo.acesso }}">Acessar FORM {{ numero }}</a>
+    <a class="botao-link-secundario acesso-instrumento" href="{{ resumo.acesso }}">{{ 'Abrir Riscos e providências' if numero in (3,4) else 'Acessar FORM ' ~ numero }}</a>
     {% else %}
     <p class="situacao-instrumento">{{ situacao }}</p>
 {% if area == "dashboard" %}<a class="botao-link-secundario acesso-instrumento" href="/dashboard?conta_id={{ conta_id|urlencode }}">{{ acesso }}</a>{% else %}<button class="botao-link-secundario acesso-instrumento" type="button" disabled>{{ acesso }}</button>{% endif %}
@@ -103,8 +104,8 @@
     <ul class="lista-instrumentos-registro">
       {% if not gabinete %}{{ cartao('levantamento', 'Levantamento do tratamento', 'Como esse processo, atividade ou serviço funciona hoje?', 'Disponível conforme autorização do Registro.', 'M6 3h9l4 4v14H6z M14 3v5h5 M9 12h7 M9 16h7', 1) }}
       {{ cartao('legitimidade', 'Validação jurídica e institucional', 'Por que e em que condições esse tratamento pode ocorrer?', 'Validação pelo AAL, com consulta ao Jurídico e ao DPO. Resultado não homologado nesta demonstração.', 'M12 3v16 M7 21h10 M4 7l16-2 M5 7l-3 7h6z M19 5l-3 7h6z', 2) }}
-      {% endif %}{{ cartao('riscos', 'Avaliação de riscos e controles', 'Que riscos o tratamento apresenta e quais controles existem?', 'Disponível na demonstração. Consulte os riscos e as providências autorizados para seu perfil. Proposta em deliberação.', 'M12 2l8 3v6c0 5-3 8-8 11-5-3-8-6-8-11V5z M12 7v5 M12 16h.01', 3) }}
-      {{ cartao('providencias', 'Plano de ação, monitoramento e aprendizagem institucional', 'O que precisa ser feito, por quem, até quando e como comprovar?', 'Disponível na demonstração. Consulte os riscos e as providências autorizados para seu perfil. Proposta em deliberação.', 'M4 6l1.5 1.5L8 4 M11 6h9 M4 12l1.5 1.5L8 10 M11 12h9 M4 18l1.5 1.5L8 16 M11 18h9', 4) }}
+      {% endif %}{{ cartao('riscos', 'Avaliação de riscos', 'Que riscos o tratamento apresenta e que cuidados já existem?', 'Disponível na demonstração. Consulte os riscos e as providências autorizados para seu perfil. Proposta em deliberação.', 'M12 2l8 3v6c0 5-3 8-8 11-5-3-8-6-8-11V5z M12 7v5 M12 16h.01', 3) }}
+      {{ cartao('providencias', 'Providências e aprendizado', 'O que precisa ser feito, por quem, até quando, como comprovar e o que se aprendeu?', 'Disponível na demonstração. Consulte os riscos e as providências autorizados para seu perfil. Proposta em deliberação.', 'M4 6l1.5 1.5L8 4 M11 6h9 M4 12l1.5 1.5L8 10 M11 12h9 M4 18l1.5 1.5L8 16 M11 18h9', 4) }}
     </ul>
   </section>
   {% if exibir_dashboard %}<section class="gestao-central" aria-labelledby="titulo-gestao">

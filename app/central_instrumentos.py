@@ -55,7 +55,7 @@ def itens_em_andamento(sessao, conta_id):
         r = sessao.get(Registro, obj.registro_id)
         from app.acompanhamento_forms34 import resumo
         acompanhamento = resumo(sessao,obj,estado,papeis,pessoa.id)
-        itens[ref.form].append(dict(contexto=contextos.get(r.contexto_atuacao_id,''),texto=f"{identificar(r)} · {acompanhamento['titulo']} — {acompanhamento['situacao']}",
+        itens[ref.form].append(dict(concluido=bool(estado.get('concluida')),concluido_em=estado.get('conclusao',{}).get('em',''),contexto=contextos.get(r.contexto_atuacao_id,''),texto=f"{identificar(r)} · {acompanhamento['titulo']} — {acompanhamento['situacao']}",
                                   **{k: acompanhamento[k] for k in ('pendente','etapa','ato','botao','pendencia')},
                                   desde=obj.criado_em.astimezone(timezone.utc).isoformat(),
                                   href=f"/forms34/{obj.id}/blocos/{acompanhamento['bloco']}?{query}"))
@@ -71,6 +71,7 @@ def cartoes_em_andamento(sessao, conta_id, listas=None):
     return {n: dict(itens=lista[:3], mais=max(0, len(lista)-3),
                     pendencias=[i for i in lista if i.get('pendente')][:3],
                     total_pendencias=sum(bool(i.get('pendente')) for i in lista),
-                    acompanhamento=[i for i in lista if not i.get('pendente')],
+                    acompanhamento=[i for i in lista if not i.get('pendente') and not (n==3 and i.get('concluido'))],
+                    concluidos=sorted([i for i in lista if n==3 and i.get('concluido')],key=lambda i:i['concluido_em'],reverse=True)[:3],
                     lista=f'/central/itens/{n}?{query}', acesso=destinos[n])
             for n, lista in (listas if listas is not None else itens_em_andamento(sessao, conta_id)).items()}
