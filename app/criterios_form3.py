@@ -33,7 +33,8 @@ def projetar_guarda(sessao, ref, estado):
         return estado
     from app.modelos import VersaoForm1Integral
     snapshot = sessao.get(VersaoForm1Integral, ref.snapshot_form1_id)
-    respostas = (snapshot.conteudo or {}).get('respostas',{}) if snapshot else {}
+    pacote = (snapshot.conteudo or {}) if snapshot else {}
+    respostas = pacote.get('form1_integral', pacote).get('respostas',{})
     def contem(valor):
         if isinstance(valor, dict):return any(contem(v) for v in valor.values())
         if isinstance(valor, list):return any(contem(v) for v in valor)

@@ -33,7 +33,7 @@ def test_guarda_usa_snapshot_indicado_sem_gravar():
     class Sessao:
         def get(self,modelo,chave):
             assert chave=='versao-congelada'
-            return SimpleNamespace(conteudo={'respostas':{'12.1':{'valor':GUARDA}}})
+            return SimpleNamespace(conteudo={'form1_integral':{'respostas':{'12.1':{'valor':GUARDA}}}})
     e={'form':3,'respostas':{}}
     projetar_guarda(Sessao(),SimpleNamespace(snapshot_form1_id='versao-congelada'),e)
     assert e['respostas']['F3-3.35']==GUARDA
