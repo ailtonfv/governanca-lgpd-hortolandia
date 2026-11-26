@@ -30,3 +30,15 @@ C09 (coluna "Concluídos", aprovada);
 C16;
 C17 (textos do "Sobre este número" — Claude redige);
 C63 (instrumento formal com destinatários — confirmar no FORM 2).
+
+## Acréscimos do Lote 16, Parte C — somente backlog
+
+- C114: separar diagnóstico do tratamento por Registro e ficha por risco no FORM 3.
+- C111: identificação por matrícula em F1-9.1.1, com nome e lotação derivados do cadastro de RH mantido pela TI; demonstração somente com cadastro fictício. Para prestadores e terceiros, manter categoria, sem CPF. Ajustar a referência de F1-9.2.2 aos titulares. Antecipação somente com autorização de Ailton.
+- C111/C117: mudanças de lotação ou desligamento no RH sugerem revisão dos acessos declarados.
+- C134 b/C141 b: temas T01–T19 no plano e filtro de Aprendizados.
+- C136 c/C142 b: incluir fornecedores e operadores na Circulação.
+- C138 f/C139 e: integrar registros de incidentes ao dashboard.
+- Cobertura percentual somente após aprovação do inventário de referência.
+
+Arquivado em 26/11/2026; nenhum desses itens foi implementado neste fechamento do 16-B.
