@@ -102,7 +102,7 @@
           <h3>{{ identificar_registro(registro) }}</h3>
           <p>Contexto: {{ registro.contexto_nome }}</p>
           <p class="unidade-registro"><strong>Secretaria:</strong> {{ registro.unidade }}</p>
-          {% if instrumento == 'form2' %}{% with etapa=registro.etapa_atual %}{% include '_etapa_registro.html' %}{% endwith %}{% else %}
+          {% if instrumento == 'form2' or (not instrumento and registro.etapa_atual.form != 1) %}{% with etapa=registro.etapa_atual %}{% include '_etapa_registro.html' %}{% endwith %}{% else %}
           <p><strong>Etapa atual:</strong> FORM 1 — {{ registro.fluxo_conferencia.estado|lower }}, desde {{ (registro.fluxo_conferencia.desde|data_local)[:10] }} · <strong>Responsável:</strong> {{ registro.fluxo_conferencia.arp }}</p>
           {% endif %}
           {% if instrumento %}<p><strong>APA responsável:</strong> {{ registro.fluxo_conferencia.apa }}</p>{% endif %}
@@ -123,9 +123,10 @@
           {% set fluxo = registro.fluxo_conferencia %}
           <p>Blocos: {{ fluxo.blocos_com_respostas }} de 14 com respostas.</p>
           <a href="/como-funciona?conta_id={{ conta_id|urlencode }}">Como funciona o FORM 1</a>
-          {% if fluxo.apresentada_em %}<p class="resumo-conferencia-cartao"><strong>Conferência interna:</strong> {{ fluxo.estado }}{% if fluxo.rotulo_apresentacao %} · {{ fluxo.rotulo_apresentacao }}{% endif %}.</p>{% endif %}
+          {% if fluxo.apresentada_em %}<p class="resumo-conferencia-cartao"><strong>Conferência interna:</strong> {{ fluxo.estado }}{% if fluxo.rotulo_apresentacao %} · {{ fluxo.rotulo_apresentacao }}{% endif %}. <a href="{{ url_registro }}#historico-conferencias-form1">Consultar histórico de apresentações</a></p>{% endif %}
           {% for aviso in registro.providencias if aviso.justificativa_devolucao %}<p class="aviso-leitura"><strong>Justificativa do APA:</strong> {{ aviso.justificativa_devolucao }}</p>{% endfor %}
           {% endif %}
+          {% for aviso in registro.providencias if aviso.categoria == 'alerta' %}<p class="aviso-leitura">{{ aviso.rotulo }}</p>{% endfor %}
         </div>
         <div class="acoes-cartao-registro">
           {% set retomar = registro.preenchimento_arp and not registro.preenchimento_arp.nao_iniciado and registro.fluxo_conferencia.atual == 'confirmar' %}
@@ -144,14 +145,14 @@
             </form>
             {% else %}
             {% set rotulo = tarefa.acao_rotulo %}
-            <a class="botao-link" aria-label="{{ rotulo }} do Registro {{ registro.codigo_lgpd }}" href="{% if tarefa.categoria == 'preenchimento_form1' %}/registros/{{ registro.id }}/form1-rev22?conta_id={{ conta_id|urlencode }}{% else %}{{ url_registro }}#{{ tarefa.ancora }}{% endif %}">{{ rotulo }}</a>
+            <a class="botao-link" aria-label="{{ rotulo }} do Registro {{ registro.codigo_lgpd }}" href="{% if tarefa.categoria == 'preenchimento_form1' %}/registros/{{ registro.id }}/form1-rev22?conta_id={{ conta_id|urlencode }}{% if instrumento %}&amp;secretaria_id={{ secretaria.id|urlencode }}&amp;instrumento={{ instrumento }}{% endif %}{% else %}{{ url_registro }}#{{ tarefa.ancora }}{% endif %}">{{ rotulo }}</a>
             {% endif %}
           {% endfor %}
           {% if retomar %}
-          <a class="botao-link" aria-label="{{ 'Continuar FORM 1' if instrumento else 'Retomar rascunho' }} do Registro {{ registro.codigo_lgpd }}" href="/registros/{{ registro.id }}/form1-rev22?conta_id={{ conta_id|urlencode }}">{{ 'Continuar FORM 1' if instrumento else 'Retomar rascunho do FORM 1' }}</a>
+          <a class="botao-link" aria-label="{{ 'Continuar FORM 1' if instrumento else 'Retomar rascunho' }} do Registro {{ registro.codigo_lgpd }}" href="/registros/{{ registro.id }}/form1-rev22?conta_id={{ conta_id|urlencode }}{% if instrumento %}&amp;secretaria_id={{ secretaria.id|urlencode }}&amp;instrumento={{ instrumento }}{% endif %}">{{ 'Continuar FORM 1' if instrumento else 'Retomar rascunho do FORM 1' }}</a>
           <p class="ajuda">A conferência preservou a versão apresentada. Seu rascunho continua editável; alterações não modificam aquela versão.</p>
           {% elif instrumento == 'form1' and not tarefas | selectattr('categoria', 'equalto', 'preenchimento_form1') | list %}
-          <a class="{{ 'botao-link-secundario' if tarefas else 'botao-link' }}" href="/registros/{{ registro.id }}/form1-rev22?conta_id={{ conta_id|urlencode }}">{{ 'Preencher FORM 1' if registro.preenchimento_arp else 'Consultar FORM 1' }}<span class="sr-apenas"> do Registro {{ registro.codigo_lgpd }}</span></a>
+          <a class="{{ 'botao-link-secundario' if tarefas else 'botao-link' }}" href="/registros/{{ registro.id }}/form1-rev22?conta_id={{ conta_id|urlencode }}{% if instrumento %}&amp;secretaria_id={{ secretaria.id|urlencode }}&amp;instrumento={{ instrumento }}{% endif %}">{{ 'Preencher FORM 1' if registro.preenchimento_arp else 'Consultar FORM 1' }}<span class="sr-apenas"> do Registro {{ registro.codigo_lgpd }}</span></a>
           {% endif %}
           {% endif %}
           {% if instrumento == 'form2' %}
