@@ -1240,3 +1240,7 @@ Cada condição explicitamente informada gera uma ação própria, de prioridade
 Lacunas categóricas dos blocos 6–13 ficam em configuração pública por identificador. Ailton aprovou as naturezas separadas: lacuna, verificação e informação a confirmar. Incidente ocorrido e transferência internacional não são lacunas automaticamente. Respostas de condições fechadas e pendências institucionais de temporalidade não geram lacunas do Registro. A polaridade de F3-3.28 foi corrigida para Sim/Parcialmente, mantendo rótulo e sugestão. As demais polaridades conferidas permaneceram; F3-3.22, F3-3.29 e F3-3.44 continuam desativadas até a revisão específica.
 
 Encaminhamento conserva o identificador LAC e evita duplicação da mesma origem. Controles podem ser informados parcialmente; ausência de controle é exclusiva. Incoerências são avisos, aplicados somente quando o nome do controle existe no catálogo. Implementação demonstrativa sujeita à vistoria.
+
+### Lote 16 — A4, itens 1, 4, 5 e 6 (26/11/2026)
+
+Condições de F3-3.33, F3-3.41 e F3-3.42 explicitadas; detalhes de incidente ocultos quando fechados, sem apagar respostas anteriores. Guarda institucional pode ser projetada da versão congelada do FORM 1. População informada pelo DPO em configuração (250195, estimativa IBGE 2026); faixas anuais calculadas com arredondamento. F3-3.53 é leitura calculada: combinação de critério geral e específico gera somente aviso de possível alto risco de referência, sem homologação.

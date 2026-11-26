@@ -310,7 +310,9 @@
       "bloco": 9,
       "tipo": "single",
       "condicao": {
-        "tipo": "sempre"
+        "tipo": "igual",
+        "origem": "F3-3.32",
+        "codigo_valor": "ALT_01"
       }
     },
     {
@@ -376,7 +378,9 @@
       "bloco": 11,
       "tipo": "single",
       "condicao": {
-        "tipo": "sempre"
+        "tipo": "igual",
+        "origem": "F3-3.39",
+        "codigo_valor": "ALT_01"
       }
     },
     {
@@ -384,7 +388,9 @@
       "bloco": 11,
       "tipo": "single",
       "condicao": {
-        "tipo": "sempre"
+        "tipo": "igual",
+        "origem": "F3-3.39",
+        "codigo_valor": "ALT_01"
       }
     },
     {

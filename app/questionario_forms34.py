@@ -11,6 +11,7 @@ ATOS4 = {'F4-' + i for i in ('4.2.1','4.6','4.7','4.10','4.10.1','4.10.2','4.10.
     '4.15','4.15.1','4.15.2','4.16','4.18','4.18.1','4.19','4.20','4.21','4.22',
     '4.23','4.24','4.25')}
 DEPENDENCIAS = {
+    'F3-3.33':'F3-3.32', 'F3-3.41':'F3-3.39', 'F3-3.42':'F3-3.39',
     'F3-3.4.1': 'F3-3.4', 'F3-3.11.1': 'F3-3.11', 'F3-3.25.1': 'F3-3.25',
     'F3-3.40': 'F3-3.39', 'F3-3.58.1': 'F3-3.58',
     **{'F3-3.43.' + str(n): 'F3-3.43' for n in range(1,5)},
@@ -46,13 +47,18 @@ def perguntas(form):
             alternativas = opcoes(c, controles)
             if item['id'] == 'F3-3.47':
                 alternativas.append('Nenhum controle identificado')
+            if item['id'] == 'F3-3.35':
+                from app.criterios_form3 import GUARDA
+                alternativas.append(GUARDA)
+            if item['id'] == 'F3-3.6':
+                alternativas = [v for v in alternativas if v != 'Muito alto']
             if item['id']=='F4-4.13':alternativas.append('Referência do RIPD (processo ou arquivo onde está juntado)')
             if tipo == 'readonly' and alternativas:
                 tipo = 'single'  # consulta assistida exige confirmação humana, sem pré-marcação
             ato = item['id'] in (ATOS3 if form == 3 else ATOS4)
             if ato:
                 tipo = 'ato'
-            if item['id'] == 'F3-3.59':
+            if item['id'] in ('F3-3.59','F3-3.53'):
                 tipo = 'computed'
             if item['id'] == 'F3-3.61':
                 alternativas = [v for v in alternativas if v != 'Providência no FORM 4']

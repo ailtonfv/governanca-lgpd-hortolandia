@@ -63,7 +63,8 @@ def consultar(sessao, conta_id, identidade_id):
     pessoa, papeis, uid = contexto(sessao, conta_id, ref)
     exigir(papeis, 'secretaria', 'dpo', 'secretario', 'gabinete', 'verificador', 'relator', 'executor_unidade', 'leitor_unidade')
     from app.condicoes_aceitacao34 import enriquecer
-    return obj, ref, enriquecer(sessao, estado(sessao, obj.id)), pessoa, papeis, uid
+    from app.criterios_form3 import projetar_guarda
+    return obj, ref, projetar_guarda(sessao,ref,enriquecer(sessao, estado(sessao, obj.id))), pessoa, papeis, uid
 
 
 def _gravar_estado(sessao, comando, obj, acao, e):
@@ -203,6 +204,8 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
     e = estado(sessao, obj.id)
     from app.condicoes_aceitacao34 import enriquecer
     enriquecer(sessao,e)
+    from app.criterios_form3 import projetar_guarda
+    projetar_guarda(sessao,ref,e)
     cmd, repeticao = _abrir(sessao, comando_id, conta_id, 'f34_ato',
         dict(identidade_id=obj.id, versao=versao, acao=acao, dados=dados))
     if repeticao is not None:

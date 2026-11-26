@@ -3,7 +3,7 @@
  let dirty=false,next=null;const dialog=document.querySelector('#sair34');
  function conditions(){document.querySelectorAll('[data-depende]').forEach(f=>{
    const origin=form.elements.namedItem(f.dataset.depende);if(!origin)return;
-   f.disabled=origin.value!=='Sim';f.classList.toggle('bloqueada34',f.disabled);
+   f.disabled=origin.value!=='Sim';f.classList.toggle('bloqueada34',f.disabled);if(f.hasAttribute('data-ocultar-condicional'))f.hidden=f.disabled;
  });
  document.querySelectorAll('[data-prioridade-origem]').forEach(f=>{
    const origem=f.dataset.prioridadeOrigem, campo=form.elements.namedItem('F4-4.9');

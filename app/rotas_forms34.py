@@ -169,7 +169,15 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
                    for q in perguntas(ref.form) if q['bloco']==bloco]
         except (FileNotFoundError,ValueError) as exc:return erro(request,conta_id,exc,503)
         from app.opcao_outro import eh_outro
-        for q in itens:q['opcoes_outro']=[v for v in q['opcoes'] if eh_outro(v)]
+        from app.criterios_form3 import volume, alto_risco_referencia, GERAIS, ESPECIFICOS
+        for q in itens:
+            q['opcoes_outro']=[v for v in q['opcoes'] if eh_outro(v)]
+            q['ocultar_condicional']=q['id'] in ('F3-3.33','F3-3.41','F3-3.42') or q['id'].startswith('F3-3.43.')
+            if q['id']=='F3-3.6':q['ajuda']=volume()
+            if q['id']=='F3-3.53':q['ajuda']='Calculado a partir do bloco 3.'
+            if q['id']=='F3-3.10':
+                q['grupos']=[('Critérios gerais (ANPD)',GERAIS),('Critérios específicos (ANPD)',ESPECIFICOS),
+                    ('Outros fatores (Prefeitura)',[v for v in q['opcoes'] if v not in GERAIS+ESPECIFICOS])]
         origem=s.get(ParticipacaoForm2,e['origem_form2_id']) if e.get('origem_form2_id') else None
         revisar=request.query_params.get('revisar')=='1' or acao_erro=='revisar_avaliacao'
         atos=disponiveis(ref.form,bloco,papeis,e,pessoa.id,revisar)
@@ -250,6 +258,7 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
         registro=s.get(Registro,obj.registro_id)
         from app.apresentacao_atos34 import data_br
         valores = {'F3-3.1':registro.codigo_lgpd,'F4-4.1':registro.codigo_lgpd,
+                   'F3-3.53': 'Sim' if alto_risco_referencia(e['respostas']) else 'Não' if e['respostas'].get('F3-3.10') and e['respostas']['F3-3.10']!=['A confirmar'] else 'A confirmar',
                    'F3-3.59':'Providência encaminhada por lacuna' if e.get('encaminhamentos_lacunas') else 'Defina o destino e a prioridade na lista de lacunas deste bloco.',
                    'F4-4.1.1':obj.codigo,'F3-3.2':s.get(Unidade,uid).nome,
                    'F3-3.3':{'em_atendimento':'Em atendimento','aguardando':'Aguardando responsável','concluida':'Análise concluída'}.get(e.get('situacao_form2'),'Situação preservada na origem'),
@@ -327,7 +336,7 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
         from app.restrito_forms34 import pode_ler
         from app.lacunas_form3 import listar as listar_lacunas, incoerencias, DESTINOS
         return paginas.TemplateResponse(request=request,name='forms34_bloco.html',status_code=status,context={
-            'lacunas':listar_lacunas(e) if ref.form==3 else [], 'destinos_lacunas':DESTINOS,
+            'lacunas':listar_lacunas(e) if ref.form==3 else [], 'destinos_lacunas':DESTINOS, 'alto_risco_referencia':alto_risco_referencia(e['respostas']),
             'incoerencias_controles':incoerencias(e) if ref.form==3 else [],
             'temas_acao':nomes_temas(s,e.get('temas')) if ref.form==4 else [],
             'temas_aprendizagem':nomes_temas(s,e.get('aprendizagem',{}).get('temas')) if ref.form==4 else [],
