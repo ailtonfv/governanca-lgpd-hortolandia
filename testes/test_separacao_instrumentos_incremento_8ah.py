@@ -73,7 +73,7 @@ def test_designacao_confirmada_permite_ao_arp_iniciar_no_bloco_1():
     assert inicio.headers["location"].endswith("/form1-rev22?conta_id=CONTA-G1")
     destino = cliente.get(inicio.headers["location"])
     assert registro["codigo_lgpd"] in destino.text
-    assert "FORM 1 · Bloco 1" in destino.text
+    assert "FORM 1 · Preencher" in destino.text
     assert "Preparar o FORM 1 para preenchimento" not in destino.text
     assert "Escolha um bloco para preencher." in destino.text
     assert 'name="r:1.1"' in destino.text
@@ -125,7 +125,7 @@ def test_painel_do_arp_inicia_form1_integral_diretamente_no_bloco_1():
     assert "questionario-sintetico-legado" not in inicio.headers["location"]
     destino = cliente.get(inicio.headers["location"])
     assert destino.status_code == 200
-    assert "FORM 1 · Bloco 1" in destino.text
+    assert "FORM 1 · Preencher" in destino.text
     assert "Preparar o FORM 1 para preenchimento" not in destino.text
     assert "Escolha um bloco para preencher." in destino.text
     assert "Preencher FORM 1" not in destino.text

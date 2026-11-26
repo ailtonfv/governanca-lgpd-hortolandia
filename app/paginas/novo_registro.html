@@ -75,12 +75,12 @@
     </select>
     {% if 'objeto_principal_id' in erros_campos %}<p id="erro-objeto_principal_id" class="erro-campo">Selecione um item cadastrado para a Secretaria e o tipo escolhidos.</p>{% endif %}
     {% if objeto_invalidado %}<p class="aviso-leitura">A seleção anterior foi removida porque o item não pertence mais à Secretaria e ao tipo informados.</p>{% endif %}
-    <p class="ajuda">A lista contém somente vínculos cadastrados para a Secretaria e o tipo escolhidos. Nesta demonstração, objetos e vínculos são fictícios e não representam inventário municipal homologado. Se o item não aparecer, peça a inclusão à TI, responsável pelo catálogo operacional, antes de abrir o Registro. Não escolha outro item parecido.</p>
+    <p class="ajuda">A lista mostra os serviços, processos e atividades já cadastrados para a sua Secretaria. Se o seu não aparecer, peça a inclusão à TI antes de abrir o Registro. Não escolha um parecido.</p>
     <p id="sem-itens-catalogo" class="aviso-leitura" hidden>Nenhum item do tipo escolhido está vinculado a esta Secretaria no catálogo da demonstração. Solicite revisão cadastral.</p>
 
     <fieldset id="canais-habituais" aria-describedby="ajuda-canais" {% if not valores.objeto_principal_id %}disabled{% endif %} {% if 'situacao_canais' in erros_campos %}aria-invalid="true"{% endif %}>
       <legend>3. Por quais canais as demandas chegam habitualmente? <span class="marcador-obrigatorio" aria-label="obrigatório">*</span></legend>
-      <p class="ajuda" id="ajuda-canais">Escolha primeiro o item do catálogo. Depois, declare quais canais são utilizados. Uma sugestão cadastral só fará parte da declaração se você marcar o canal e confirmar a criação do Registro.</p>
+      <p class="ajuda" id="ajuda-canais">Os canais já conhecidos aparecem marcados como sugestão. Confira e desmarque o que não se aplica.</p>
       <details><summary>O que é registrado?</summary><p>A declaração vale para este Registro e não altera o catálogo mestre. Os canais representam meios de entrada das demandas; não representam cidadãos, telefonemas nem protocolos individuais.</p></details>
       <label class="opcao opcao-situacao-canal">
         <input type="radio" name="situacao_canais" value="identificados" required
@@ -125,7 +125,7 @@
     {% if 'contexto_id' in erros_campos %}<p id="erro-contexto_id" class="erro-campo">Selecione um contexto permitido para o item do catálogo.</p>{% endif %}
     {% if contexto_invalidado %}<p class="aviso-leitura">A seleção anterior foi removida porque esse contexto não é permitido para o item escolhido.</p>{% endif %}
     <p id="sem-contextos-catalogo" class="aviso-leitura" hidden>Nenhum contexto está vinculado a este item no catálogo da demonstração. Solicite revisão cadastral; não informe um contexto livre nem escolha uma opção incompatível.</p>
-    <p class="ajuda" id="exemplo-contexto">Selecione a área de atuação municipal relacionada ao serviço, processo ou atividade. O contexto classifica onde o objeto atua; não representa a finalidade do tratamento de dados pessoais, que será descrita no FORM 1.</p>
+    <p class="ajuda" id="exemplo-contexto">Escolha a área em que o serviço acontece. A finalidade do uso dos dados será descrita no FORM 1.</p>
     <p class="ajuda" id="orientacao-contexto" aria-live="polite"></p>
 
 
@@ -204,8 +204,9 @@
     for (const campo of camposCanais) {
       const sugerido = Boolean(objeto.value) && campo.dataset.objetosSugeridos.split(',').includes(objeto.value);
       campo.closest('label').querySelector('.sugestao-canal').hidden = !sugerido;
-      if (sugerido) temSugestao = true;
+      if (sugerido) { temSugestao = true; if (limpar) campo.checked = true; }
     }
+    if (limpar && temSugestao) document.querySelector('input[name="situacao_canais"][value="identificados"]').checked = true;
     canaisSemVinculo.hidden = !objeto.value || temSugestao;
     atualizarObrigatoriedadeCanais();
   }

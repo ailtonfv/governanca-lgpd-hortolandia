@@ -34,7 +34,7 @@ def test_abertura_explica_catalogo_demonstrativo_e_tres_situacoes_de_canais():
     # Assert
     assert pagina.status_code == 200
     assert "Item do catálogo da demonstração" in pagina.text
-    assert "não representam inventário municipal homologado" in pagina.text
+    assert "Se o seu não aparecer, peça a inclusão à TI" in pagina.text
     assert "Por quais canais as demandas chegam habitualmente?" in pagina.text
     assert "Conheço os canais utilizados" in pagina.text
     assert "Nenhum canal de entrada se aplica ao objeto" in pagina.text

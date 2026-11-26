@@ -32,14 +32,14 @@ def test_fluxo_mostra_estado_versao_e_papel_sem_criar_providencia(sessao, mesma_
     # Act / Assert: somente o estado persistido muda o destaque.
     assert _solicitar(sessao, registro, comando='CLAREZA-S1', conta=conta)['permitido']
     assert fluxo()['atual'] == 'conferir'
-    assert fluxo()['versao'] == 1
+    assert fluxo()['versao'] == 2
     assert '(APA)' in fluxo()['responsavel']
     assert _devolver(sessao, registro, comando='CLAREZA-DEV')['permitido']
     assert fluxo()['atual'] == 'devolver'
     assert '(ARP)' in fluxo()['responsavel']
     assert '(APA)' in fluxo()['decidida_por']
     ajuste = _salvar_ajuste(sessao, registro, comando='CLAREZA-AJUSTE', conta=conta)
-    assert fluxo()['versao'] == 1  # salvar não reapresenta nem confirma
+    assert fluxo()['versao'] == 2  # salvar não reapresenta nem confirma
     assert fluxo()['versao_atual'] == ajuste['versao_rascunho']
     assert _solicitar(sessao, registro, comando='CLAREZA-S2', conta=conta, versao=ajuste['versao_rascunho'])['permitido']
     assert fluxo()['atual'] == 'conferir'
@@ -85,7 +85,7 @@ def test_decisoes_distintas_com_ciencia_dialogo_e_autorizacao_preservada(sessao)
     assert 'Confirmar a conferência da versão 1?' not in html
     assert 'informações apresentadas por' in html
     assert 'id="historico-apresentacao-conferida"' in html
-    assert 'Apresentação 1 (rascunho 1)' in html
+    assert 'Apresentação 1 (rascunho 2)' in html
     assert '<details><summary>Dados técnicos</summary>' in html and '<dt>Snapshot técnico</dt>' in html
     assert 'data-cancelar-confirmacao autofocus' in html
     assert 'name="justificativa" maxlength="2000" required' in html
@@ -166,7 +166,7 @@ def test_fluxo_operacional_direto_em_todos_estados_sem_duplicar_historico(sessao
         assert 'Devolver para ajustes' in fluxo['texto'] and 'Confirmar conferência interna' in fluxo['texto']
         assert not any(e['tag'] in {'button', 'input', 'form', 'select'} for e in internos)
         assert any(e['tag'] == 'svg' and e['attrs'].get('aria-hidden') == 'true' for e in internos)
-        assert ('Apresentação 1 (rascunho 1)' in fluxo['texto']) is com_versao
+        assert ('Apresentação 1 (rascunho 2)' in fluxo['texto']) is com_versao
         assert 'não são aprovação jurídica' in fluxo['texto']
         historicos = [e for e in estrutura.elementos if e['attrs'].get('id') == 'historico-conferencias-form1']
         assert all(not any(a is fluxo for a in h['ancestrais']) for h in historicos)

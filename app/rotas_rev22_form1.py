@@ -12,7 +12,7 @@ from app.continuidade_apa import conferente_da_apresentacao, unidades_em_que_e_a
 from app.modelos import ParticipacaoForm2,ObjetoCatalogo,RegistroObjeto,Registro,RascunhoForm1Integral,Unidade,ConferenciaInternaForm1Integral
 from app.consultas_interface import _identidade, _ids_visiveis
 from app.rascunho_form1_integral import _contexto_autorizado
-from app.rev22_form1 import definicoes, ativa, adotar, salvar
+from app.rev22_form1 import definicoes, ativa, adotar, salvar, orientacao_sem_marcadores
 from app.cartilha_local import acesso_local_cartilha, secoes_cartilha_disponiveis
 from app.ajudas_cartilha_form1 import VERSAO_CARTILHA_AJUDAS_FORM1
 
@@ -81,6 +81,7 @@ def renderizar_bloco(request,registro_id,conta_id,bloco,conjunto,sessao,*,tentat
         for item in contagens.values():item.update(respondidas=0,texto='Ainda não preenchido')
     campos=[q for q in defs.values() if q['block']==bloco]
     for q in campos:
+        q['help']=orientacao_sem_marcadores(q.get('help',''))
         q['repetida']=bloco in (3,10) and q['id']!=f'{bloco}.1'
         origem=row if q['repetida'] else conteudo
         q['valor']=origem.get('respostas',{}).get(q['id'])
@@ -124,6 +125,9 @@ async def gravar(request:Request,registro_id:str,sessao:Session=Depends(sessao_r
     d=await request.form();conta=d.get('conta_id','');conjunto=d.get('conjunto')
     try:
         bloco=int(d.get('bloco','1'))
+        conjunto=int(conjunto) if conjunto else None
+        if bloco not in range(1,15) or (conjunto is not None and conjunto < 1):
+            raise ValueError('Bloco ou conjunto inválido.')
         args=dict(conta_id=conta,registro_id=registro_id,comando_id=d.get('comando_id'),versao_lida=int(d.get('versao','0')))
     except (ValueError,TypeError):
         raise HTTPException(400,'Bloco ou versão inválidos.')

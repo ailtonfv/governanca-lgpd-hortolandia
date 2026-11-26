@@ -330,7 +330,7 @@ def test_lista_de_origens_confirmadas_do_apa(sessao, monkeypatch):
     cliente = TestClient(app)
     fila = "/form2/filas"
     html = cliente.get(fila, params={"conta_id": "CONTA-A1"}).text
-    assert registro["codigo_lgpd"] in html and "Apresentação 1 (rascunho 1)" in html
+    assert registro["codigo_lgpd"] in html and "Apresentação 1 (rascunho 2)" in html
     from app.modelos import HistoricoConferenciaForm1Integral
     snapshot = sessao.scalar(select(HistoricoConferenciaForm1Integral.snapshot_id).where(
         HistoricoConferenciaForm1Integral.registro_id == registro["registro_id"]))

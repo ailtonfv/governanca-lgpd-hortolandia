@@ -66,7 +66,8 @@ def test_abertura_preenchimento_consulta_erro_e_historico_preservados(sessao):
         ("/registros/novo?conta_id=CONTA-A1", 200),
         (f"/registros/{rid}?conta_id=CONTA-G1", 200),
         (f"/registros/{rid}?conta_id=CONTA-A1", 200),
-        (f"/registros/{rid}?conta_id=CONTA-C1", 403),
+        (f"/registros/{rid}?conta_id=CONTA-C1", 200),
+        (f"/registros/{rid}/form1-rev22?conta_id=CONTA-C1", 403),
         (f"/registros/{rid}/form1-integral/conferencia-interna?conta_id=CONTA-A1", 200),
     ]
     for destino, status in paginas:

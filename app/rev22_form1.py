@@ -251,3 +251,18 @@ def salvar(sessao, *, comando_id,conta_id,registro_id,versao_lida,bloco,resposta
         for key in list(answers):
             if key in defs and not ativa(key,context):archive.append({'id':key,'valor':answers.pop(key),'complemento':extras.pop(key,None),'conjunto':cid,'versao':versao_lida+1})
     return _gravar(sessao,reg,pessoa,r,cmd,params,novo,'salvar_bloco_rev22_form1',{'bloco':bloco,'conjunto':conjunto})
+
+
+def orientacao_sem_marcadores(texto):
+    """A orientação é texto, não uma segunda representação de controles."""
+    linhas=[]
+    for linha in (texto or '').splitlines():
+        if '○' not in linha:
+            linhas.append(linha)
+            continue
+        partes=[p.strip() for p in linha.split('○')]
+        prefixo=partes[0]
+        alternativas=[p for p in partes[1:] if p]
+        lista=', '.join(alternativas[:-1])+' ou '+alternativas[-1] if len(alternativas)>1 else ''.join(alternativas)
+        linhas.append((prefixo+' ' if prefixo else 'Alternativas: ')+lista)
+    return '\n'.join(linhas)

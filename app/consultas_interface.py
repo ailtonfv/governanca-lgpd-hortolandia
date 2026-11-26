@@ -302,7 +302,7 @@ def _projetar_proxima_providencia_form1_integral(
             f"Retome pela primeira pendência ativa: pergunta {retomada['campo_id']} "
             f"do Bloco {retomada['bloco']}."
             if retomada is not None
-            else "Revise o rascunho e as pendências consultivas antes da futura submissão."
+            else "Continue o preenchimento. Quando terminar, apresente ao APA para conferência."
         )
         return {
             "tipo": "continuar",

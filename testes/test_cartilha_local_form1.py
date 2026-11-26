@@ -9,7 +9,7 @@ from fastapi.testclient import TestClient
 import pytest
 
 from app import cartilha_local
-from app.ajudas_cartilha_form1 import AJUDAS_CARTILHA_FORM1, SECOES_CARTILHA
+from app.ajudas_cartilha_form1 import AJUDAS_CARTILHA_FORM1, SECOES_CARTILHA, titulo_topico
 from app.main import app
 from app.modelos import RascunhoForm1Integral
 from testes.test_bloco5_form1_integral import _rascunho_pronto
@@ -74,7 +74,7 @@ def test_todos_links_abrem_secao_correta_sem_alterar_rascunho(sessao, documento_
         assert 'abre em outra aba' in pagina.text
         destino = cliente.get(link['href'])
         assert destino.status_code == 200
-        assert f'<h1 id="titulo-cartilha">{ajuda["secao"]}</h1>' in unescape(destino.text)
+        assert f'<h1 id="titulo-cartilha">{titulo_topico(ajuda["secao_id"])}</h1>' in unescape(destino.text)
         assert f'Orientação fictícia {ajuda["secao_id"]}' in destino.text
         assert 'Para voltar ao FORM, feche esta aba.' in destino.text
         elementos_destino = Elementos(destino.text).elementos

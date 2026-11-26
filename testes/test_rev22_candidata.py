@@ -51,8 +51,8 @@ def test_adocao_preserva_snapshot_e_controla_versao(sessao):
             if tag=='button':self.itens.append(dict(attrs))
     url=f'/registros/{rid}/form1-rev22?conta_id=CONTA-G1&bloco=2'
     tela=Botoes(c.get(url).text)
-    assert 'hidden' in next(b for b in tela.itens if b.get('id')=='apresentacao-apa')
-    tela_salva=Botoes(c.get(url+f'&salvo={draft.versao_rascunho}').text)
+    assert not any(b.get('id')=='apresentacao-apa' for b in tela.itens)
+    tela_salva=Botoes(c.get(url.replace('bloco=2','bloco=14')+f'&salvo={draft.versao_rascunho}').text)
     botoes=[b for b in tela_salva.itens if b.get('form')]
     assert [b.get('form') for b in botoes]==['respostas-bloco','respostas-bloco','form-apresentar-apa','form-apresentar-apa']
     assert botoes[0]['type']=='reset'

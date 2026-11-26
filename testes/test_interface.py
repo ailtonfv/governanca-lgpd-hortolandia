@@ -36,7 +36,7 @@ def test_painel_identifica_agente_e_mostra_apenas_seu_escopo():
         assert f'aria-describedby="{alvo}"' in resposta.text and f'id="{alvo}"' in resposta.text
     assert "Selecionar servidor por matrícula" not in resposta.text
     assert "Voltar à Central de Acesso" in resposta.text and "Trocar Secretaria" not in resposta.text
-    assert "Criar novo Registro LGPD" in resposta.text
+    assert "Iniciar novo Registro" in resposta.text
     assert "O Registro somente será criado após a confirmação dos dados iniciais." in resposta.text
     assert "Cada cartão reúne a situação do Registro" in resposta.text
     assert "Providências de conferência" in resposta.text
@@ -63,8 +63,8 @@ def test_painel_exibe_criacao_somente_para_responsavel_pelo_registro():
     responsavel = cliente.get("/", params={"conta_id": "CONTA-A1"})
     analista = cliente.get("/", params={"conta_id": "CONTA-B1"})
 
-    assert "Criar novo Registro LGPD" in responsavel.text
-    assert "Criar novo Registro LGPD" not in analista.text
+    assert "Iniciar novo Registro" in responsavel.text
+    assert "Iniciar novo Registro" not in analista.text
     assert "não abrir um novo Registro LGPD" in analista.text
     assert "Agente Público Autorizado responsável pelo Registro" in analista.text
 
@@ -84,8 +84,9 @@ def test_acesso_direto_a_registro_de_outra_unidade_e_negado_e_auditado():
         f"/registros/{registro['registro_id']}", params={"conta_id": "CONTA-C1"}
     )
 
-    assert resposta.status_code == 403
-    assert "Acesso negado" in resposta.text
+    assert resposta.status_code == 200
+    assert "Para participar deste Registro, fale com o APA" in resposta.text
+    assert "titulo-form1-integral" not in resposta.text and "<form" not in resposta.text
     with Session(motor) as sessao:
         evento = sessao.scalars(
             select(EventoAuditoria).where(EventoAuditoria.tipo_evento == "tentativa_negada")
@@ -121,8 +122,8 @@ def test_contexto_inicial_diferencia_contexto_e_finalidade_sem_exemplo_incoerent
 
     assert resposta.status_code == 200
     assert 'aria-describedby="exemplo-contexto"' in resposta.text
-    assert "Selecione a área de atuação municipal" in resposta.text
-    assert "não representa a finalidade do tratamento" in resposta.text
+    assert "Escolha a área em que o serviço acontece." in resposta.text
+    assert "A finalidade do uso dos dados será descrita no FORM 1." in resposta.text
     assert "fornecimento de medicamento de alto custo" not in resposta.text
 
 

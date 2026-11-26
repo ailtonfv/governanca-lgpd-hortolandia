@@ -40,7 +40,10 @@ def test_apa_consulta_campos_sem_controles_e_sem_modificar_rascunho(sessao):
     recusado = salvar_bloco_5_form1_integral(sessao, comando_id='LEITURA-NEGADA', conta_id='CONTA-A1', registro_id=rid, versao_lida=2, respostas={'5.1': ['Nome']})
     assert not recusado['permitido']
     sessao.rollback()
-    assert cliente.get(f'/registros/{rid}?conta_id=CONTA-C1').status_code == 403
+    reduzido = cliente.get(f'/registros/{rid}?conta_id=CONTA-C1')
+    assert reduzido.status_code == 200 and 'Para participar deste Registro, fale com o APA' in reduzido.text
+    assert 'consulta-integral-5.1' not in reduzido.text and '<form' not in reduzido.text
+    assert cliente.get(f'/registros/{rid}/form1-rev22?conta_id=CONTA-C1').status_code == 403
 
 
 def test_arp_mantem_campos_editaveis_sem_hachurado_e_destinos(sessao):

@@ -62,9 +62,13 @@ def test_segregacao_e_ausencia_de_conferente(sessao,suplente):
         sessao.scalar(select(Designacao).where(Designacao.unidade_id=="UNID-NORTE",
             Designacao.tipo_apa=="suplente")).ativa=False
         sessao.commit()
-    args=dict(registro_id=rid,versao_lida=1)
+    from testes.test_conferencia_interna_form1_integral_8ac import _salvar_para_apresentar
+    versao = _salvar_para_apresentar(sessao, {"registro_id":rid}, "CONTA-A1")
+    args = dict(registro_id=rid, versao_lida=versao)
     assert solicitar_conferencia_interna_form1_integral(sessao,**args,conta_id="CONTA-A1",comando_id="L4-SOL")["permitido"]
     sessao.commit()
+    from app.modelos import ConferenciaInternaForm1Integral
+    args["versao_lida"]=sessao.get(ConferenciaInternaForm1Integral,rid).versao_projecao
     assert not devolver_conferencia_interna_form1_integral(sessao,**args,conta_id="CONTA-A1",
         comando_id="L4-DEV",justificativa="Revisar")["permitido"]
     assert not confirmar_conferencia_interna_form1_integral(sessao,**args,conta_id="CONTA-A1",comando_id="L4-A")["permitido"]

@@ -123,7 +123,8 @@ def test_escolha_explicita_filtra_form2_e_retorna_ao_contexto(sessao, conta, rot
     assert ("designado como AAL" if conta == "CONTA-G1" else "acompanhar esta preparação como APA") in form2.text
     assert "APA responsável:" not in form2.text.split("<article", 1)[0]
     assert "APA responsável:" in form2.text.split("<article", 1)[1]
-    assert "Última atividade:" in form1.text
+    assert "Etapa atual:" in form1.text
+    assert "Blocos: 0 de 14 preenchidos." in form1.text
     assert outro not in form2.text and rotulo in form2.text
     assert form2.url.path == "/painel" and contagens(sessao) == antes
     cartao = form1.text.split(f'id="cartao-registro-{rid}"', 1)[1].split("</article>", 1)[0]
@@ -209,7 +210,7 @@ def test_selecao_recorta_cartoes_contadores_e_comando_de_abertura(sessao):
         assert painel.status_code == 200
         assert presente["codigo_lgpd"] in painel.text and ausente["codigo_lgpd"] not in painel.text
         assert 'aria-label="1 Registro disponível"' in painel.text
-        assert ("Criar novo Registro LGPD" in painel.text) is pode_abrir
+        assert ("Iniciar novo Registro" in painel.text) is pode_abrir
         assert 'name="secretaria_id"' not in painel.text and "Selecionar servidor por matrícula" not in painel.text
         retorno = cliente.get("/?conta_id=CONTA-A1")
         assert retorno.url.path == "/painel" and presente["codigo_lgpd"] in retorno.text

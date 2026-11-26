@@ -40,7 +40,8 @@ def test_contexto_exibe_nome_catalogado_acompanhado_do_codigo(sessao):
     )
 
     # Assert
-    assert "Gestão cadastral tributária (CTX-TRIB-01)" in pagina.text
+    assert 'title="CTX-TRIB-01">Gestão cadastral tributária</dd>' in pagina.text
+    assert "Gestão cadastral tributária (CTX-TRIB-01)" not in pagina.text
 
 
 def test_apa_de_abertura_e_em_exercicio_exibem_matricula_e_nome(sessao):

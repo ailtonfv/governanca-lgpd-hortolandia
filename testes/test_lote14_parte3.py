@@ -54,8 +54,12 @@ def test_aprendizado_outra_secretaria_sem_acesso_origem(sessao, entrada):
         assert pagina.status_code==200 and 'Diretriz fictícia autorizada' in pagina.text
         assert 'EVIDENCIA-NAO-PUBLICAVEL-FICTICIA' not in pagina.text
         assert '/forms34/' not in pagina.text and '/registros/' not in pagina.text
-    for caminho in (f'/forms34/{obj}/blocos/1',f'/forms34/{risco}/blocos/1',f'/registros/{entrada.registro_id}'):
+    for caminho in (f'/forms34/{obj}/blocos/1',f'/forms34/{risco}/blocos/1'):
         assert c.get(caminho,params={'conta_id':SECRETARIO}).status_code==403
+    reduzido=c.get(f'/registros/{entrada.registro_id}',params={'conta_id':SECRETARIO})
+    assert reduzido.status_code==200 and 'Para participar deste Registro, fale com o APA' in reduzido.text
+    assert 'EVIDENCIA-NAO-PUBLICAVEL-FICTICIA' not in reduzido.text and '/forms34/' not in reduzido.text
+    assert '<form' not in reduzido.text
     assert consultar(sessao,SECRETARIO,palavra='inexistente')['total']==0
     ato(sessao,obj,'aprender',contexto='Rascunho novo fictício',diretriz='NAO-PUBLICAR-NOVA',escopo='Limites fictícios')
     publicado=consultar(sessao,SECRETARIO)

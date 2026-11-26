@@ -144,6 +144,11 @@
           {% if registro.etapa_atual.form1_confirmado %}</details>{% endif %}
           {% endif %}
           {% set providencias = tarefas if instrumento == 'form1' else registro.providencias %}
+          {% if not registro.fluxo_conferencia.iniciado_pelo_servidor %}
+            {% for aviso in registro.providencias if aviso.categoria == 'alerta' %}
+              <p class="aviso-leitura"><strong>{{ aviso.rotulo }}:</strong> {{ aviso.situacao }}</p>
+            {% endfor %}
+          {% endif %}
           {% if providencias and registro.etapa_atual.form == 1 and registro.fluxo_conferencia.iniciado_pelo_servidor %}
           <div class="providencias-registro" aria-label="Providências do Registro {{ registro.codigo_lgpd }}">
             {% for providencia in providencias %}

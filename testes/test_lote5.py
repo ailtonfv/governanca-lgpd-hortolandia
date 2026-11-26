@@ -115,10 +115,14 @@ def test_conferencia_entre_titular_e_suplente(sessao):
         solicitar_conferencia_interna_form1_integral, confirmar_conferencia_interna_form1_integral,
     )
     rid, _ = base(sessao)
-    args = dict(registro_id=rid, versao_lida=1)
+    from testes.test_conferencia_interna_form1_integral_8ac import _salvar_para_apresentar
+    versao = _salvar_para_apresentar(sessao, {"registro_id":rid}, "CONTA-A1")
+    args = dict(registro_id=rid, versao_lida=versao)
     assert solicitar_conferencia_interna_form1_integral(sessao, **args, conta_id="CONTA-A1",
             comando_id="L5-AP")["permitido"]
     sessao.commit()
+    from app.modelos import ConferenciaInternaForm1Integral
+    args["versao_lida"]=sessao.get(ConferenciaInternaForm1Integral,rid).versao_projecao
     cliente = TestClient(app)
     registro = f"/registros/{rid}"
     espera = cliente.get(registro + "?conta_id=CONTA-A1")

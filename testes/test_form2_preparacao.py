@@ -402,11 +402,15 @@ def test_t03_conferencia_nao_e_gate_institucional_form2(sessao, decisao):
     from app.conferencia_interna_form1_integral import (solicitar_conferencia_interna_form1_integral,
         devolver_conferencia_interna_form1_integral, confirmar_conferencia_interna_form1_integral)
     rid, sid = base(sessao)
+    from testes.test_conferencia_interna_form1_integral_8ac import _salvar_para_apresentar
+    versao = _salvar_para_apresentar(sessao, {"registro_id":rid}, "CONTA-A1")
     solicitado = solicitar_conferencia_interna_form1_integral(sessao, comando_id="F2-CONF-I",
-        conta_id="CONTA-A1", registro_id=rid, versao_lida=1)
+        conta_id="CONTA-A1", registro_id=rid, versao_lida=versao)
     assert solicitado["permitido"]
     sessao.commit()
-    args = dict(comando_id="F2-CONF-D", conta_id="CONTA-F1", registro_id=rid, versao_lida=1)
+    from app.modelos import ConferenciaInternaForm1Integral
+    versao_conferencia=sessao.get(ConferenciaInternaForm1Integral,rid).versao_projecao
+    args = dict(comando_id="F2-CONF-D", conta_id="CONTA-F1", registro_id=rid, versao_lida=versao_conferencia)
     if decisao == "devolver":
         out = devolver_conferencia_interna_form1_integral(sessao, **args, justificativa="Rever informação fictícia")
     else:

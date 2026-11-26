@@ -54,6 +54,9 @@ def test_c165_erro_real_preserva_campos_no_bloco(sessao):
     assert '<html' in resposta.text and 'Qual?' in resposta.text
     sessao.expire_all()
     assert sessao.get(RascunhoForm1Integral,reg['registro_id']).conteudo==antes
+    for conjunto in ('inválido', '0'):
+        invalido=salvar(sessao,reg,c,url,2,{'conjunto':conjunto})
+        assert invalido.status_code==400 and '<html' in invalido.text
 
 
 def test_c165_c185_concorrencia_nao_sobrescreve_e_preserva_tentativa(sessao):
@@ -198,3 +201,24 @@ def test_c167_c169_c189_titulos_contexto_e_nome(sessao):
     assert 'Situação do Registro</dt>' not in tela
     resposta=salvar(sessao,reg,c,url,1,{'r:1.3':'Nome alternativo fictício'})
     assert resposta.status_code==200 and 'O nome difere do catálogo' in resposta.text
+
+
+def test_c176_orientacao_sem_controles_duplicados():
+    from app.rev22_form1 import orientacao_sem_marcadores
+    assert orientacao_sem_marcadores('○ A ○ B ○ C')=='Alternativas: A, B ou C'
+    assert orientacao_sem_marcadores('Ajuda fictícia sem controles.')=='Ajuda fictícia sem controles.'
+    assert all('○' not in orientacao_sem_marcadores(q.get('help','')) for q in definicoes().values())
+
+
+def test_c170_c183_c184_c188_textos_e_cartilha(sessao,documento_local):
+    reg,c,url=abrir(sessao)
+    html=c.get(f"/registros/{reg['registro_id']}?conta_id=CONTA-A1").text
+    assert 'Designar outro servidor para preencher (ARP)' in html
+    assert 'Revise o rascunho e as pendências consultivas' not in html
+    pagina=c.get(f"/registros/{reg['registro_id']}/cartilha/REV30.13/levantamento?conta_id=CONTA-G1")
+    assert pagina.status_code==200 and '<h1 id="titulo-cartilha">Levantamento da realidade</h1>' in pagina.text
+    assert 'Fluxo demonstrativo proposto na REV22' not in pagina.text
+    novo=c.get('/registros/novo?conta_id=CONTA-A1').text
+    assert 'Não escolha um parecido.' in novo
+    assert 'Confira e desmarque o que não se aplica.' in novo
+    assert 'Escolha a área em que o serviço acontece.' in novo

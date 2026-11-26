@@ -535,9 +535,10 @@ def consultar_cartilha_secao(
     secoes = secoes_cartilha_disponiveis() if edicao == VERSAO_CARTILHA_AJUDAS_FORM1 else {}
     if secao_id not in secoes:
         raise HTTPException(404, "Seção indisponível. Volte à aba do FORM 1.", headers=cabecalhos)
+    from app.ajudas_cartilha_form1 import titulo_topico
     return paginas.TemplateResponse(
         request=request, name="cartilha_secao.html",
-        context={"titulo_secao": SECOES_CARTILHA[secao_id], "edicao": edicao, "pagina_isolada": True,
+        context={"titulo_secao": titulo_topico(secao_id), "edicao": edicao, "pagina_isolada": True,
                  "conteudo_secao": secoes[secao_id]}, headers=cabecalhos,
     )
 
