@@ -163,7 +163,9 @@
     {% if registro.form1_integral.pode_atribuir_arp and esta_na_fila %}<p>Fila do FORM 2: {{ fila_unidade }} · {{ "Responsável: " ~ fila_responsavel if fila_responsavel else "Aguardando responsável" }}.</p>{% endif %}
   </details>
   {% endif %}
-  <p class="ajuda"><strong>Rascunho e apresentação:</strong> o rascunho é a versão de trabalho editável pelo ARP autorizado. Salvar pode atualizar essa versão, mas não altera apresentações históricas nem solicita nova conferência ao APA. Uma apresentação conferida permanece imutável; conferência interna não equivale a homologação ou submissão institucional.</p>
+  <p>Você pode salvar e continuar depois, mesmo incompleto.</p>
+  <p>Quando terminar, apresente ao APA. A versão apresentada fica guardada como estava.</p>
+  <p>Versão de trabalho: {{ registro.form1_integral.fluxo_conferencia.salvamentos }} salvamentos.</p>
 
   {% if not registro.form1_integral.pode_editar %}
   <div class="area-somente-leitura modo-consulta-form1" role="note">
@@ -293,7 +295,7 @@
     </section>
     {% endif %}
     <section class="bloco-form1-integral" aria-labelledby="titulo-conferencia-interna-form1">
-      <p class="etiqueta">Etapa preparatória · não submete o formulário</p>
+
       <h3 id="titulo-conferencia-interna-form1">Conferência interna pelo APA</h3>
       {% set fluxo = registro.form1_integral.fluxo_conferencia %}
       <div class="area-somente-leitura"><p class="selo-somente-leitura">Somente leitura · situação da conferência</p>{% with fluxo_compacto=true %}{% include '_fluxo_conferencia.html' %}{% endwith %}</div>

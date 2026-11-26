@@ -102,7 +102,7 @@ def test_c180_c182_c185_cartilha_em_todos_blocos_isolada(sessao,documento_local)
         assert link, bloco
         pagina=c.get(unescape(link.group(1)))
         assert pagina.status_code==200
-        assert 'Para voltar ao FORM, feche esta aba.' in pagina.text
+        assert 'Para voltar ao FORM, feche esta aba (no × da aba ou com Ctrl+W).' in pagina.text
         assert "img-src 'self' data:" in pagina.headers['content-security-policy']
         links=re.findall(r'<a[^>]+href="([^"]+)"',pagina.text)
         assert not any(a.startswith(('/central','/registros','/form')) for a in links)
@@ -177,7 +177,7 @@ def test_c158_c160_c186_papeis_e_criacao_so_apa(sessao):
     painel=c.get('/painel?conta_id=CONTA-A1&secretaria_id=UNID-NORTE').text
     assert 'APA · ARP' in painel
     card=re.search(r'<article class="cartao-mapeamento".*?</article>',painel,re.S).group()
-    assert 'Blocos: 0 de 14 preenchidos.' in card and 'Contagem inicial' not in card
+    assert 'Blocos: 0 de 14 com respostas.' in card and 'Contagem inicial' not in card
     assert 'resumo-conferencia-cartao' not in card
 
 

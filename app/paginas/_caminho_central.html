@@ -17,7 +17,7 @@
 <section class="caminho-central" aria-labelledby="titulo-caminho">
   <h2 id="titulo-caminho">Seu caminho no sistema</h2>
   <p><a href="/painel?conta_id={{ conta_id|urlencode }}">Ver Registros da Secretaria</a>{% if pode_abrir_registro %} · <a href="/registros/novo?conta_id={{ conta_id|urlencode }}">Iniciar novo Registro</a>{% endif %}</p>
-  <p>Borda forte: sua parte no percurso. Fundo amarelo e sino: providência sua agora.</p>
+  <p>Sua parte: etapas em que o seu papel pode atuar. Fundo amarelo e sino: providência sua agora.</p>
   <p class="siglas-caminho"><abbr title="Agente Responsável pelo Preenchimento">ARP</abbr> · <abbr title="Agente Público Autorizado">APA</abbr> · <abbr title="Agente de Análise de Legitimidade">AAL</abbr> · <abbr title="Encarregado de Dados — atuação consultiva">DPO</abbr></p>
   <h3>1. Levantar e validar (FORMs 1 e 2)</h3>
   <ol class="trilha-caminho">{% for e in caminho if e.fluxo == 1 %}{{ etapa(e) }}{% endfor %}</ol>

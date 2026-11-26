@@ -35,7 +35,7 @@
   <nav aria-label="Orientações"><a href="/como-funciona?conta_id={{ conta_id|urlencode }}">Como funciona o sistema</a> · <a href="/fluxograma?conta_id={{ conta_id|urlencode }}">Ver o fluxograma</a></nav>
 
   {% if exibir_painel_dpo %}<p><a href="/temas/pedidos?conta_id={{ conta_id|urlencode }}">Pedidos de novos temas — Em análise</a></p>{% endif %}
-  <p>Abra o Painel de Registros para ver os Registros autorizados na sua Secretaria.</p>
+  <p>Use Ver Registros da Secretaria para acompanhar os Registros{% if pode_abrir_registro %}, ou Iniciar novo Registro para mapear um serviço novo{% endif %}.</p>
   <section class="contexto-central" aria-labelledby="titulo-contexto">
     <h2 id="titulo-contexto">{{ "Atuação: Encarregado de Dados (DPO)" if exibir_painel_dpo else "Secretaria de atuação" }}</h2>
     {% if secretarias %}

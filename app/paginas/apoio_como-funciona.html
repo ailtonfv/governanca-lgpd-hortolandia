@@ -1,5 +1,5 @@
 {% extends 'base.html' %}{% block conteudo %}
-<div class="apoio-entrada"><p>Cada serviço, processo ou atividade tem um único Registro em cada contexto de atuação. Antes de abrir outro, consulte o existente.</p>
+<div class="apoio-entrada">
 <style>@scope (.apoio-entrada) {
 
   .apoio-entrada{--azul:#0c3b5a;--azul-2:#155a86;--azul-claro:#e8f0f6;--fundo:#f3f6f9;--texto:#1d2733;--cinza:#5b6875;--linha:#d5dde5;--apoio:#7a8794}
@@ -119,11 +119,12 @@
       <div class="regra"><b>O relato é impessoal; o procedimento é claro.</b> Nos campos livres, nada de nomes, CPF, protocolos ou prontuários.</div>
       <div class="regra"><b>A evidência fica na Secretaria.</b> O sistema guarda onde ela está, quem responde e a que decisão se liga.</div>
       <div class="regra"><b>Cada ato tem dono e data.</b> O histórico mostra quem fez o quê e quando; nada é apagado.</div>
+      <div class="regra"><b>Um Registro por serviço e contexto.</b> Antes de abrir outro, consulte o existente.</div>
     </div>
   </section>
 
   <div class="acoes"><a class="btn" href="/central?entrar=1&amp;conta_id={{ conta_id|urlencode }}">Ir para a Central de Acesso</a></div>
-  <p class="rodape">Ambiente de demonstração. Competências em deliberação institucional (D11).</p>
+  <p class="rodape">Ambiente de demonstração. As competências descritas aqui ainda serão aprovadas pela Prefeitura.</p>
 
 </div>
 

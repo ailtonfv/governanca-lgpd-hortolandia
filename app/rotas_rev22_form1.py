@@ -100,7 +100,9 @@ def renderizar_bloco(request,registro_id,conta_id,bloco,conjunto,sessao,*,tentat
         historico['perguntas']=[p for p in historico['perguntas'] if p['id'] in defs and defs[p['id']]['block']==bloco]
         historico['conteudo']={k:v for k,v in historico.get('conteudo',{}).items() if (k=='participantes' and bloco==3) or (k=='destinatarios_10_2_1' and bloco==10)}
     from app.ajudas_cartilha_form1 import topico_do_bloco
+    from app.rev22_form1 import grupos_condicionais, pendencias_automaticas
     return paginas.TemplateResponse(request=request,name='form1_rev22.html',status_code=status,context=dict(
+        grupos_condicionais=grupos_condicionais(campos), pendencias_automaticas=pendencias_automaticas(conteudo) if bloco==14 else [],
         iniciou=trabalho["iniciado"], aviso_apresentacao=aviso_apresentacao(conteudo),
         salvo_em=trabalho["ultimo"].ocorrido_em if trabalho["ultimo"] else None,
         nome_catalogo=(sessao.scalar(select(ObjetoCatalogo.nome_canonico).join(RegistroObjeto,RegistroObjeto.objeto_id==ObjetoCatalogo.id).where(RegistroObjeto.registro_id==registro_id,RegistroObjeto.papel=="PRINCIPAL",RegistroObjeto.ativo.is_(True))) or ""),

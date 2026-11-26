@@ -60,6 +60,41 @@ def orientacao_condicional(key):
     if key.startswith('10.') and key!='10.1':return 'Disponível quando a resposta a F1-10.1 for Sim ou Em alguns casos.'
     return 'Disponível quando a pergunta de origem indicar uma situação aplicável.'
 
+def grupos_condicionais(campos):
+    """Uma orientação por condição; mantém os identificadores para atualização na tela."""
+    grupos = {}
+    for q in campos:
+        texto = q['orientacao_condicional']
+        condicao = texto.removeprefix('Disponível quando ').rstrip('.')
+        if ' aparecem quando ' in condicao:
+            condicao = condicao.split(' aparecem quando ',1)[1]
+        elif ' aparecem se ' in condicao:
+            condicao = condicao.split(' aparecem se ',1)[1]
+        grupo = grupos.setdefault(texto, dict(ids=[], quantidade=0,
+            condicao=condicao))
+        grupo['ids'].append(q['id'])
+        grupo['quantidade'] += not q['ativa']
+    return list(grupos.values())
+
+
+def pendencias_automaticas(conteudo):
+    """Lista de respostas ativas A confirmar; não cria pendências nem altera dados."""
+    defs = definicoes()
+    gerais = conteudo.get('respostas', {})
+    grupos = [(gerais, None, None)]
+    for bloco, conjuntos in conteudo.get('conjuntos_rev22', {}).items():
+        grupos.extend(({**gerais, **c.get('respostas', {})}, int(bloco), n)
+                      for n,c in enumerate(conjuntos,1))
+    saida = []
+    for respostas, bloco, conjunto in grupos:
+        for key,valor in respostas.items():
+            q=defs.get(key)
+            if not q or (bloco is not None and (q['block'] != bloco or key == f'{bloco}.1')):continue
+            if 'A confirmar' in (valor if isinstance(valor,list) else [valor]) and ativa(key,respostas):
+                saida.append(dict(id=key,bloco=q['block'],conjunto=conjunto))
+    return saida
+
+
 def pre_validar(conteudo):
     """Consulta candidata; não presume uma nova matriz de obrigatoriedade."""
     avisos=[];respostas=conteudo.get('respostas',{})

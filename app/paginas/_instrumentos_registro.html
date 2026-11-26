@@ -8,7 +8,7 @@
     {% if numero == 1 %}
       <p><strong>Situação neste Registro:</strong> {{ registro.form1_integral.fluxo_conferencia.estado }}</p>
       <p>{{ proximos[numero] }}</p>
-      {% if registro.form1_integral.rascunho %}<a class="botao-link-secundario" href="#titulo-form1-integral">Ver situação do FORM 1</a>{% endif %}
+      {% if registro.form1_integral.rascunho %}<a class="botao-link-secundario" href="/registros/{{ registro.id }}/form1-rev22?conta_id={{ conta_id|urlencode }}">Ir ao preenchimento</a>{% endif %}
     {% else %}
       {% for item in registro.etapa_atual.instrumentos[numero] %}
         <p><strong>Situação neste Registro:</strong> {{ item.situacao }}{% if item.desde %} em {{ (item.desde|data_local)[:10] }}{% endif %}</p>

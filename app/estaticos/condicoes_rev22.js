@@ -38,8 +38,12 @@
         const regra = JSON.parse(titulo.dataset.tituloCondicional);
         titulo.textContent = respostas[regra.source] === regra.value ? 'F1-' + id + ' — ' + regra.text : titulo.dataset.tituloPadrao;
       }
-      const aviso = document.querySelector('[data-condicao-aviso="' + id + '"]');
-      if (aviso) aviso.hidden = aberta;
+    }
+    for (const aviso of document.querySelectorAll('[data-condicao-grupo]')) {
+      const ids = JSON.parse(aviso.dataset.condicaoGrupo);
+      const n = ids.filter(id => !ativa(id)).length;
+      aviso.hidden = n === 0;
+      aviso.textContent = n + (n === 1 ? ' pergunta aparece quando ' : ' perguntas aparecem quando ') + aviso.dataset.condicaoTexto + '.';
     }
   }
   document.querySelectorAll('.form1-rev22 form').forEach(f => {
