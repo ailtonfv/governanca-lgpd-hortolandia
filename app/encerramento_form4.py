@@ -12,6 +12,8 @@ def reducao_total(e):
 def pode_encerrar(e):
     if not e.get('verificada') or e.get('cancelada') or e.get('decisoes_pendentes'):
         return False
+    tipos=e.get('respostas',{}).get('F4-4.4',[])
+    if 'Elaborar/revisar RIPD' in tipos and not e.get('ripd_confirmado'):return False
     if reducao_total(e):
         return True
     nota = nota_confirmada(e)

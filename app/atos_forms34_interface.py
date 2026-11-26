@@ -25,13 +25,14 @@ ATOS = {
     campo('ata','Referência à ata'),campo('texto','Deliberação do colegiado','textarea'),
     campo('favoravel','Manifestação favorável','bool')]),
  'manifestar_dpo':(0,0,('dpo',),'Registrar manifestação do DPO',[campo('texto','Manifestação','textarea')]),
- 'informar_ripd':(3,15,S,'Informar referência do RIPD',[campo('referencia','Processo ou arquivo onde o RIPD está juntado (sem dados pessoais)')]),
+ 'informar_ripd':(3,15,('secretaria',),'Informar referência do RIPD',[campo('referencia','Processo ou arquivo onde o RIPD está juntado (sem dados pessoais)')]),
+ 'confirmar_ripd':(3,15,('dpo',),'Confirmar referência do RIPD',[]),
  'propor_triagem':(3,15,S,'Registrar proposta de triagem',[
     campo('resultado','Resultado','select',(('elaborar','Elaborar RIPD'),('revisar','Revisar RIPD'),
         ('nao_indicado','Não indicado neste momento'),('analise_adicional','Precisa de análise adicional antes de decidir'),('determinado_anpd','Determinação da ANPD'))),
     J,campo('unidade_id','Unidade que instruirá (quando houver RIPD)','unidade')]),
  'confirmar_triagem':(3,15,S,'Confirmar triagem proposta',[]),
- 'aceitar_residual':(3,14,('secretario','gabinete'),'Registrar aceitação do residual',[J]),
+ 'aceitar_residual':(3,14,('secretario','gabinete'),'Registrar aceitação do residual',[J,campo('condicoes','Condições da aceitação (opcional)','condicoes'),campo('solicitar_juridico','Solicitar manifestação jurídica?','bool_opcional'),campo('destinatario_id','Participante do Jurídico (se solicitar)','juridico'),campo('motivo_juridico','Motivo da solicitação ou da dispensa','textarea')]),
  'concluir_avaliacao':(3,16,S,'Concluir a avaliação do risco',[]),
  'encaminhar_acao':(3,16,('aal',),'Encaminhar providência ao FORM 4',[J]),
  'confirmar_gatilho_juridico':(3,16,('aal',),'Confirmar necessidade de manifestação',[
@@ -84,7 +85,7 @@ def disponiveis(form, bloco, papeis, estado=None, pessoa_id=None, revisar=False)
     for a in candidatos:
         k=a['acao'];campo='triagem' if bloco==15 else 'avaliacao'
         if k=='salvar_temas' and estado.get('plano_aprovado'):continue
-        if form == 3 and estado.get('conclusao') and k not in ('revisar_avaliacao', 'informar_ripd'):continue
+        if form == 3 and estado.get('conclusao') and k not in ('revisar_avaliacao', 'informar_ripd','confirmar_ripd'):continue
         if k == 'propor_triagem' and set(estado.get('avaliacao_confirmacoes', {})) != {'secretaria','dpo'}:continue
         if k == 'concluir_avaliacao' and (not estado.get('aceitacao') or estado.get('reavaliacao')):continue
         if k == 'encaminhar_acao' and estado.get('acoes'):
@@ -127,7 +128,7 @@ def disponiveis(form, bloco, papeis, estado=None, pessoa_id=None, revisar=False)
                     if not nota or estado.get('aceitacao_residual_acao') or 'dpo' in papeis:continue
                     if ('gabinete' if nota['faixa']=='Crítico' else 'secretario') not in papeis:continue
                     if 'gabinete' in papeis and nota['faixa']!='Crítico':continue
-            if k in ('aprender','conferir_aprendizagem','autorizar_aprendizagem') and not pode_encerrar(estado):continue
+            if k in ('aprender','conferir_aprendizagem','autorizar_aprendizagem') and (not pode_encerrar(estado) or estado.get('condicoes_abertas')):continue
             if k == 'executar_medida' and not estado.get('plano_aprovado'):continue
             if k == 'verificar' and not estado.get('execucao'):continue
             if k in ('aprender','conferir_aprendizagem','autorizar_aprendizagem') and (not estado.get('verificada') or estado.get('cancelada')):continue
@@ -139,6 +140,8 @@ def disponiveis(form, bloco, papeis, estado=None, pessoa_id=None, revisar=False)
             if k=='planejar' and estado.get('plano_aprovado'):continue
             if (estado.get('encerrada') or estado.get('cancelada')) and k not in ('aprender','conferir_aprendizagem','autorizar_aprendizagem',*posteriores,'manifestar_dpo','manifestar_comite'):continue
             if k in salvos and estado.get(salvos[k]) and not revisar and not (k == 'aprender' and estado.get('aprendizagem_devolvida')):continue
+        if k=='confirmar_ripd' and (not estado.get('referencia_ripd') or set(estado.get('referencia_ripd_confirmacoes',{}))=={'secretaria','dpo'}):continue
+        if k=='informar_ripd' and 'dpo' in papeis:continue
         if k=='informar_ripd' and estado.get('referencia_ripd') and not revisar:continue
         if k=='manifestar_comite':
             from app.regras_atos34 import finalidades,FINALIDADES
@@ -157,6 +160,11 @@ def disponiveis(form, bloco, papeis, estado=None, pessoa_id=None, revisar=False)
         if k in ('aceitar_residual','aprovar_plano','aceitar_residual_acao') and 'gabinete' in papeis:
             a['titulo']='Decisão do Prefeito — registrada pelo Gabinete'
             a['campos'].append(dict(nome='documento',rotulo='Documento formal da decisão (despacho, ofício ou processo nº)',tipo='text',opcoes=()))
+        if k=='aceitar_residual':
+            from app.questionario_forms34 import perguntas
+            for c in a['campos']:
+                if c['tipo']=='condicoes':c['opcoes']=[(v,v) for v in next(q['opcoes'] for q in perguntas(4) if q['id']=='F4-4.4')]
+            if estado['avaliacao']['residual']['faixa']!='Crítico':a['campos']=[c for c in a['campos'] if c['nome'] not in ('solicitar_juridico','destinatario_id','motivo_juridico')]
         obrig=obrigatorios(k,{})
         if k=='planejar':obrig.add('tema_principal')
         if k == 'verificar':
@@ -180,7 +188,14 @@ def interpretar(acao, formulario):
     dados={}
     for c in ATOS[acao][4]:
         valor=formulario.get(c['nome'],'')
-        if c['tipo']=='bool':
+        if c['tipo']=='condicoes':
+            getlist = formulario.getlist if hasattr(formulario,'getlist') else lambda k: formulario.get(k,[])
+            textos,tipos=getlist('condicao_texto'),getlist('condicao_tipo')
+            if len(textos)!=len(tipos):raise ErrosCampos({'condicoes':'Confira texto e tipo de cada condição.'})
+            valor=[dict(texto=t,tipo=p) for t,p in zip(textos,tipos) if t.strip() or p]
+        elif c['tipo']=='bool_opcional':
+            valor={'sim':True,'nao':False,'':None}.get(valor)
+        elif c['tipo']=='bool':
             if valor not in ('sim','nao'):
                 raise ErrosCampos({c['nome']:'Escolha Sim ou Não para este campo obrigatório.'})
             valor=valor=='sim'

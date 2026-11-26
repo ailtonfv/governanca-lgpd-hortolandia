@@ -40,3 +40,6 @@ avaliacao:form.dataset.perguntaAvaliacao,triagem:form.dataset.perguntaTriagem,
 prorrogacao:'O Comitê é favorável à prorrogação?',cancelamento:'O Comitê é favorável ao cancelamento?'};
 function ajustar(){if(label)label.firstChild.textContent=(textos[finalidade.value]||'O Comitê é favorável à finalidade selecionada?')+' ';}
 finalidade.addEventListener('change',ajustar);ajustar();})();
+
+// A2: cada linha é uma condição própria, validada novamente no domínio.
+document.querySelectorAll("[data-adicionar-condicao]").forEach(b=>b.addEventListener("click",()=>{const r=b.parentElement.querySelector("[data-condicao]").cloneNode(true);r.querySelectorAll("input,select").forEach(c=>c.value="");b.before(r);}));

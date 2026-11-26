@@ -62,7 +62,8 @@ def consultar(sessao, conta_id, identidade_id):
     ref = sessao.get(Referencia, obj.participacao_id)
     pessoa, papeis, uid = contexto(sessao, conta_id, ref)
     exigir(papeis, 'secretaria', 'dpo', 'secretario', 'gabinete', 'verificador', 'relator', 'executor_unidade', 'leitor_unidade')
-    return obj, ref, estado(sessao, obj.id), pessoa, papeis, uid
+    from app.condicoes_aceitacao34 import enriquecer
+    return obj, ref, enriquecer(sessao, estado(sessao, obj.id)), pessoa, papeis, uid
 
 
 def _gravar_estado(sessao, comando, obj, acao, e):
@@ -73,10 +74,10 @@ def _gravar_estado(sessao, comando, obj, acao, e):
 
 def _criar(sessao, comando, conta_id, registro_id, form, fonte_form, fonte_id, chave, inicial):
     refid = str(uuid5(NAMESPACE_URL, f'forms34/{registro_id}/{form}/{chave}'))
-    fixar_referencia(sessao, comando_id=_subchave(comando.id, 'ref'), conta_id=conta_id,
+    fixar_referencia(sessao, comando_id=_subchave(comando.id, 'ref:'+refid), conta_id=conta_id,
                      participacao_id=refid, registro_id=registro_id, form=form,
                      fonte_form=fonte_form, fonte_id=str(fonte_id))
-    reservado = reservar_identidade(sessao, comando_id=_subchave(comando.id, 'identidade'),
+    reservado = reservar_identidade(sessao, comando_id=_subchave(comando.id, 'identidade:'+refid),
         conta_id=conta_id, participacao_id=refid, tipo='R' if form == 3 else 'A', chave_origem=chave)
     obj = sessao.get(IdentidadeForms34, reservado['identidade_id'])
     if not reservado['existente']:
@@ -200,6 +201,8 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
     obj, ref, e, pessoa, papeis, uid = consultar(sessao, conta_id, identidade_id)
     _registro(sessao, obj.registro_id)
     e = estado(sessao, obj.id)
+    from app.condicoes_aceitacao34 import enriquecer
+    enriquecer(sessao,e)
     cmd, repeticao = _abrir(sessao, comando_id, conta_id, 'f34_ato',
         dict(identidade_id=obj.id, versao=versao, acao=acao, dados=dados))
     if repeticao is not None:
@@ -213,12 +216,12 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
     agora = agora_utc().isoformat()
     f3 = e['form'] == 3
     from app.etapas_forms34 import motivo_bloqueio, conferencia_etapa, validar_verificacao
-    if f3 and e.get('conclusao') and acao not in ('revisar_avaliacao', 'informar_ripd'):
+    if f3 and e.get('conclusao') and acao not in ('revisar_avaliacao', 'informar_ripd', 'confirmar_ripd'):
         raise ValueError('Avaliação concluída: use Reavaliar o risco para abrir uma nova rodada.')
     if 'dpo' in papeis and acao in ('aceitar_residual','aprovar_plano','decidir_prorrogacao','cancelar','executar_medida','verificar'):
         raise PermissionError('O DPO não exerce estes atos de autoridade, execução ou verificação.')
     if acao in ('propor_avaliacao', 'revisar_avaliacao', 'confirmar_avaliacao', 'propor_triagem', 'confirmar_triagem',
-                'sem_consenso', 'aceitar_residual', 'concluir_avaliacao', 'encaminhar_acao', 'informar_ripd') and not f3:
+                'sem_consenso', 'aceitar_residual', 'concluir_avaliacao', 'encaminhar_acao', 'informar_ripd', 'confirmar_ripd') and not f3:
         raise ValueError('Ato exclusivo do FORM 3.')
     if acao in ('planejar', 'aprovar_plano', 'executar_medida', 'verificar', 'pedir_prorrogacao',
                 'decidir_prorrogacao', 'pedir_cancelamento', 'cancelar', 'aprender',
@@ -234,7 +237,7 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
     destino_id = obj.id
     if acao in ('conferir_aprendizagem', 'autorizar_aprendizagem'):
         from app.encerramento_form4 import pode_encerrar
-        if not pode_encerrar(e):
+        if not pode_encerrar(e) or e.get('condicoes_abertas'):
             raise ValueError('Aguarda decisão sobre o risco residual após a ação antes da aprendizagem.')
     if acao == 'adicionar_risco':
         if not f3:
@@ -403,9 +406,24 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         e['triagem_sem_consenso'] = False
         e['triagem_confirmacoes'] = {lado: dict(pessoa_id=pessoa.id, em=agora)}
     elif acao == 'informar_ripd':
-        exigir(papeis,'secretaria','dpo')
+        exigir(papeis,'secretaria')
+        if 'dpo' in papeis:raise PermissionError('A Secretaria informa a referência; o DPO confirma.')
+        e['referencia_ripd_confirmacoes']={'secretaria':dict(pessoa_id=pessoa.id,em=agora)}
         e['referencia_ripd']=dict(referencia=_texto(dados,'referencia',200),pessoa_id=pessoa.id,
                                   em=agora,papel='DPO' if 'dpo' in papeis else 'Secretaria')
+    elif acao == 'confirmar_ripd':
+        exigir(papeis,'dpo')
+        if _consenso(e,'referencia_ripd'):raise ValueError('Referência já confirmada.')
+        _confirmar(e,'referencia_ripd',pessoa.id,papeis,agora)
+        _gravar_estado(sessao,cmd,obj,'referencia_ripd_confirmada',e)
+        from app.encerramento_form4 import pode_encerrar
+        for aid in e.get('acoes',[]):
+            ae=estado(sessao,aid)
+            enriquecer(sessao,ae)
+            if 'Elaborar/revisar RIPD' in ae.get('respostas',{}).get('F4-4.4',[]) and pode_encerrar(ae) and not ae.get('encerrada'):
+                ae['encerrada']=True
+                ae['situacao']='Concluída com verificação'
+                _gravar_estado(sessao,cmd,sessao.get(IdentidadeForms34,aid),'encerramento_automatico',ae)
     elif acao == 'aceitar_residual':
         if not _consenso(e, 'avaliacao'):
             raise ValueError('A nota ainda não tem as duas confirmações.')
@@ -416,10 +434,35 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         if 'gabinete' in papeis and faixa != 'Crítico':
             raise PermissionError('Prefeito atua somente no risco Crítico.')
         _pareceres(e, faixa)
+        if e.get('aceitacao'):raise ValueError('Aceitação já registrada; preserve o ato anterior.')
+        from app.condicoes_aceitacao34 import validar_condicoes
+        condicoes=validar_condicoes(dados.get('condicoes',[]))
+        if faixa=='Crítico':
+            if type(dados.get('solicitar_juridico')) is not bool:raise ValueError('Informe se deseja solicitar manifestação jurídica.')
+            if dados['solicitar_juridico']:
+                from app.fila_form2 import unidades
+                destinatario=sessao.get(Pessoa,dados.get('destinatario_id'))
+                if not destinatario or not destinatario.ativa or not unidades(sessao,destinatario.id,'juridico_form2'):raise ValueError('Escolha o participante habilitado do Jurídico.')
+                e['juridico']='consulta encaminhada ao Jurídico'
+                e['juridico_destinatario_id']=destinatario.id
+                e['escopos_restritos']=sorted(set(e.get('escopos_restritos',[]))|{pessoa.id,destinatario.id})
+            e['consulta_juridica_aceitacao']=dict(solicitada=dados['solicitar_juridico'],motivo=_texto(dados,'motivo_juridico',300),pessoa_id=pessoa.id,em=agora)
         e['aceitacao'] = dict(pessoa_id=pessoa.id, em=agora, justificativa=_texto(dados, 'justificativa'))
         if faixa=='Crítico':e['aceitacao'].update(decisor='Prefeito',registrador='Gabinete',documento=_texto(dados,'documento',200))
         if faixa in ('Alto', 'Crítico'):
             e['ciencia_comite'] = dict(em=agora, motivo='aceitação residual')
+        if condicoes:
+            fonte=_gravar_estado(sessao,cmd,obj,'aceitacao_condicionada',e)
+            e['condicoes_aceitacao']=[]
+            for n,c in enumerate(condicoes):
+                a=_criar(sessao,cmd,conta_id,obj.registro_id,4,3,fonte.id,f'condicao:{cmd.id}:{n}',
+                    dict(form=4,respostas={'F4-4.4':[c['tipo']],'F4-4.9':'Imediata'},
+                         prioridade_origem='Imediata',situacao='Em preenchimento',risco_id=obj.id,
+                         faixa_origem=faixa,motivo=c['texto'],condicao_aceitacao=True,
+                         prorrogacoes=0,prazo=None,executor_id=None,decisoes_pendentes={},escopos_restritos=[]))
+                e['condicoes_aceitacao'].append(dict(c,acao_id=a.id))
+                e.setdefault('acoes',[]).append(a.id)
+                e.setdefault('acoes_rodada',[]).append(a.id)
     elif acao == 'concluir_avaliacao':
         exigir(papeis, 'secretaria', 'dpo')
         if not _consenso(e, 'avaliacao'):
@@ -647,7 +690,7 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
     elif acao == 'aprender':
         exigir(papeis, 'secretaria')
         from app.encerramento_form4 import pode_encerrar
-        if not pode_encerrar(e):
+        if not pode_encerrar(e) or e.get('condicoes_abertas'):
             raise ValueError('Aprendizagem exige verificação aprovada e decisão sobre o risco que sobrou.')
         temas=deepcopy(e.get('aprendizagem',{}).get('temas',e.get('temas',{})))
         if 'tema_principal' in dados or 'temas_complementares' in dados:

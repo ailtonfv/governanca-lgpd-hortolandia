@@ -81,6 +81,8 @@ def etapa_atual(sessao, registro, conta_id, fluxo):
             instrumentos[e['form']].append(dict(situacao='Consulta restrita ao perfil autorizado',desde=None,href=None))
     f1=dict(estado=fluxo['estado'],responsavel=fluxo['responsavel'],desde=fluxo['ultima_atividade'][0] if fluxo['ultima_atividade'] else registro.criado_em)
     resultado=decidir_etapa(f1,participacoes,objetos)
+    from app.condicoes_aceitacao34 import selo
+    resultado['selos_condicoes']=[texto for item in objetos if item['form']==3 if (texto:=selo(sessao,item['estado']))]
     resultado.update(instrumentos=instrumentos, minhas=minhas, form1_confirmado=fluxo['atual']=='confirmar')
     if resultado['form']=='Ciclo completo': resultado['minhas']=[]
     return resultado

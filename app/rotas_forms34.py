@@ -154,9 +154,9 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
                 s.commit()
                 return RedirectResponse(url_objeto(r['identidade_id'],conta_id,bloco if r['identidade_id']==obj.id else 1,registrado=d.get('comando_id')),303)
             except FormularioIncompleto as exc:
-                s.rollback(); falhas_r17=True; valores_enviados=dict(d); acao_erro=acao; status=409
+                s.rollback(); falhas_r17=True; valores_enviados=dict(d,condicoes=[dict(texto=t,tipo=p) for t,p in zip(d.getlist('condicao_texto'),d.getlist('condicao_tipo'))]); acao_erro=acao; status=409
             except ErrosCampos as exc:
-                s.rollback(); erros_campos=exc.erros; valores_enviados=dict(d); acao_erro=acao; status=409
+                s.rollback(); erros_campos=exc.erros; valores_enviados=dict(d,condicoes=[dict(texto=t,tipo=p) for t,p in zip(d.getlist('condicao_texto'),d.getlist('condicao_tipo'))]); acao_erro=acao; status=409
             except (ValueError,PermissionError,KeyError) as exc:
                 s.rollback();return erro(request,conta_id,exc,403 if isinstance(exc,PermissionError) else 409,
                                            f'/forms34/{obj.id}/blocos/{bloco}')

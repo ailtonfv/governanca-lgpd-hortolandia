@@ -44,6 +44,7 @@ def perguntas(form):
             c = controles[item['id']]
             tipo = c['controle']
             alternativas = opcoes(c, controles)
+            if item['id']=='F4-4.13':alternativas.append('Referência do RIPD (processo ou arquivo onde está juntado)')
             if tipo == 'readonly' and alternativas:
                 tipo = 'single'  # consulta assistida exige confirmação humana, sem pré-marcação
             ato = item['id'] in (ATOS3 if form == 3 else ATOS4)
@@ -108,8 +109,13 @@ def salvar(form, anteriores, dados, estado):
             valores = valor if i['tipo'] == 'multi' else [valor]
             if not isinstance(valores, list) or any(not isinstance(v, str) for v in valores):
                 raise ValueError('Seleção inválida.')
+            if chave=='F4-4.4':
+                valores=[v for v in valores if v]
+                novo[chave]=valores
             if len(set(valores)) != len(valores) or any(v and v not in i['opcoes'] for v in valores):
                 raise ValueError('Alternativa fora do catálogo.')
+            if chave=='F4-4.4' and len(valores)>1 and valor!=anteriores.get(chave):
+                raise ValueError('Escolha um tipo por ação. Para dois tipos, registre duas providências.')
             if 'A confirmar' in valores and len(valores) > 1:
                 raise ValueError('A confirmar deve ficar sozinha.')
         elif not isinstance(valor, str) or len(valor) > (1000 if i['tipo'] == 'text_long' else 200):

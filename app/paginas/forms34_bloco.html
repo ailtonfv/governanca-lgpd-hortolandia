@@ -6,6 +6,7 @@
 {% from '_conferencia_r17.html' import resumo as resumo_r17 %}{% if conferencia_r17 %}{{ resumo_r17(conferencia_r17,base_r17,conta_id,falhas_r17|default(false)) }}{% endif %}
 <h2>{{ acompanhamento.titulo }}</h2><p class="aviso-alerta">{{ acompanhamento.pendencia }}</p><p><strong>{{ pessoa.nome|identidade_demonstrativa }}</strong> · {{ papeis_visiveis|join(' / ') }}</p>
 {% if ref.form==4 %}<p><strong>Temas da ação:</strong> {{ temas_acao|join(' · ') }}</p>{% if bloco==9 and estado.aprendizagem %}<p><strong>Temas desta versão do aprendizado:</strong> {{ temas_aprendizagem|join(' · ') }}</p>{% endif %}{% endif %}
+{% if estado.selo_condicoes %}<p class="aviso-alerta">{{ estado.selo_condicoes }}</p>{% endif %}
 <p>Origem: {% if estado.risco_id %}<a href="/forms34/{{ estado.risco_id }}/blocos/16?conta_id={{ conta_id|urlencode }}">{{ origem_texto }}</a>{% else %}{{ origem_texto }}{% endif %}</p>
 {% if bloqueio_edicao %}<p class="aviso-alerta">{{ bloqueio_edicao }}</p>{% endif %}
 {% if estado.conclusao %}<p class="mensagem mensagem-sucesso">Avaliação concluída. Não equivale a homologação jurídica nem encerra o Registro LGPD.</p><p>{{ autores.get(estado.conclusao.pessoa_id,'Autor registrado') }} · {{ estado.conclusao.em|hora_local }}</p><p>{{ ripd_texto }}</p>{% endif %}

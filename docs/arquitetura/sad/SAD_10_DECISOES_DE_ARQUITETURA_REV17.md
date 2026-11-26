@@ -1229,3 +1229,8 @@ O plano informa duração em dias corridos. Para risco Crítico ou prioridade Im
 Situação: implementação do A1 em andamento; sem ativação em vistoria.
 
 A1.4, complemento aprovado por Ailton: a Secretaria escolhe reavaliar o risco ou criar nova providência. A nota permanece conjunta e o novo plano exige aprovação própria. Aceitar o residual é ato do Secretário até Alto e do Prefeito no Crítico, registrado pelo Gabinete com referência formal. A aceitação anterior à ação não substitui a posterior. Atos antigos não são reabertos automaticamente; inconsistências são sinalizadas.
+
+
+## Lote 16 — A2: aceitação condicionada e referência conjunta
+
+Cada condição explicitamente informada gera uma ação própria, de prioridade Imediata, sem extrair obrigações de justificativas livres. Cada nova ação admite um tipo; seleções históricas múltiplas permanecem preservadas. Referência do RIPD: Secretaria informa e DPO confirma. A ação correspondente exige essa confirmação para encerrar; aprendizagem exige o cumprimento de todas as condições estruturadas. Para aceitação Crítica, registra-se a solicitação jurídica com participante habilitado, reutilizando a consulta restrita existente, ou a dispensa motivada. Selos presentes no Registro e FORMs; dashboard previsto no A9. Atos antigos não são refeitos.
