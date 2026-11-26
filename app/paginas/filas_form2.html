@@ -48,6 +48,8 @@
 <h3>Registros em que o DPO participou</h3>
 {% for concluida, titulo in [(false,'Em andamento'),(true,'Concluídas')] %}<h4>{{ titulo }}</h4><ul>
 {% for l in linhas if l.participou_dpo and (l.p.estado == 'concluida') == concluida %}<li>{{ identificar_registro(l.registro) }} · {{ l.secretaria }} · {{ situacoes.get(l.situacao,l.situacao) }} <a href="/form2/participacoes/{{ l.p.id }}/orientacao?conta_id={{ conta_id|urlencode }}">Ver</a>{% if aguarda_temporalidade(l.p.conteudo) %}<p class="selo-guarda">Guarda em definição</p>{% endif %}</li>{% else %}<li>Nenhum Registro.</li>{% endfor %}</ul>{% endfor %}
+{% set designacoes_pendentes = linhas|selectattr('p.id', 'in', impedimentos)|list %}
+{% if designacoes_pendentes %}<h3>Registros com designação pendente</h3><ul>{% for l in designacoes_pendentes %}<li>{{ identificar_registro(l.registro) }} · {{ l.secretaria }} · {{ l.situacao }} <a href="/form2/participacoes/{{ l.p.id }}/orientacao?conta_id={{ conta_id|urlencode }}">Consultar</a></li>{% endfor %}</ul>{% endif %}
 {% if sem_conferente %}<h3>Aguardando definição de quem fará a conferência</h3><ul>{% for codigo in sem_conferente %}<li>{{ codigo }}</li>{% endfor %}</ul>{% endif %}
 <p>Temporalidade em definição: {{ aguardando_guarda }} {{ 'Registro' if aguardando_guarda == 1 else 'Registros' }}{% for l in linhas if aguarda_temporalidade(l.p.conteudo) %} (<a href="/form2/participacoes/{{ l.p.id }}/orientacao?conta_id={{ conta_id|urlencode }}">{{ l.registro.codigo_lgpd }}</a>){% endfor %}.</p>
 <h2>Registros por Secretaria</h2><ul>{% for u in cobertura if u.total %}<li>{{ u.nome }} · {{ u.total }} {{ 'Registro' if u.total == 1 else 'Registros' }}</li>{% endfor %}</ul>

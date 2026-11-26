@@ -96,7 +96,7 @@ def test_guarda_no_bloco_fila_e_painel(sessao,principal):
     assert selo in c.get("/form2/filas?conta_id=CONTA-B1").text
     painel=c.get("/form2/filas?conta_id=CONTA-E1")
     assert painel.context["aguardando_guarda"]==1
-    assert "Registros aguardando definição de temporalidade: 1" in painel.text
+    assert "Temporalidade em definição: 1 Registro" in painel.text
 
 
 def test_reatribuicao_de_beta_para_eta(sessao,principal):
