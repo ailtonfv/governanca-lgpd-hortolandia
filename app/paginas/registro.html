@@ -122,9 +122,9 @@
   <details class="informacoes-institucionais-form1 area-somente-leitura">
     <summary>Informações do Registro — Somente leitura</summary>
     <dl>
-      <div><dt>Situação do Registro</dt><dd>{{ registro.estado }}</dd></div>
+
       <div><dt>Secretaria responsável</dt><dd>{{ registro.unidade }}</dd></div>
-      <div><dt>Contexto de atuação</dt><dd>{% if registro.contexto_nome %}{{ registro.contexto_nome }} ({{ registro.contexto_id }}){% else %}{{ registro.contexto_id }}{% endif %}</dd></div>
+      <div><dt>Contexto de atuação</dt><dd title="{{ registro.contexto_id }}">{{ registro.contexto_nome or "Contexto cadastrado" }}</dd></div>
     </dl>
     <div class="canais-confirmados">
       <strong>Canais declarados na abertura</strong>
@@ -148,7 +148,7 @@
 
   <div class="cabecalho-secao cabecalho-form1">
     <div>
-      <h2 id="titulo-form1-integral" tabindex="-1">FORM 1 — Levantamento Inicial do Tratamento de Dados Pessoais</h2>
+      <h2 id="titulo-form1-integral" tabindex="-1">FORM 1 · Situação e conferência</h2><p>Levantamento do tratamento</p>{% if registro.form1_integral.rascunho %}<a class="botao-link-secundario" href="/registros/{{ registro.id }}/form1-rev22?conta_id={{ conta_id|urlencode }}">{{ "Ir ao preenchimento" if registro.form1_integral.pode_editar else "Consultar respostas" }}</a>{% endif %}
     </div>
     <p class="objetivo-form1"><strong>Objetivo:</strong> Descreva como este serviço, processo ou atividade coleta, utiliza, compartilha, armazena e protege dados pessoais.</p>
     <span class="estado">{% if registro.form1_integral.fluxo_conferencia.iniciado_pelo_servidor %}Rascunho {{ registro.form1_integral.rascunho.versao }}{% else %}Não iniciado{% endif %}</span>
@@ -317,9 +317,9 @@
         <input type="hidden" name="conta_id" value="{{ conta_id }}">
         <input type="hidden" name="comando_id" value="{{ comando_solicitar_conferencia }}">
         <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
-        <button class="botao-primario" type="button" data-abrir-dialogo="apresentar-registro">Solicitar nova conferência interna do APA</button>
+        <button class="botao-primario" type="button" data-abrir-dialogo="apresentar-registro">Apresentar ao APA para conferência</button>
         {% call confirmacao(id="apresentar-registro", titulo="Apresentar o FORM 1 para conferência?", titulo_id="titulo-apresentar", principal="Apresentar ao APA", cancelar="Continuar revisando", tipo="submit", cancelar_attr="data-fechar-dialogo", registro=registro.codigo_lgpd) %}
-        <p>O APA receberá as respostas salvas. A edição ficará suspensa até a decisão.</p>
+        <p>{{ registro.form1_integral.aviso_apresentacao }}</p><p>A edição ficará suspensa até a decisão.</p>
         {% endcall %}
       </form>
       {% else %}
@@ -332,9 +332,9 @@
         <input type="hidden" name="conta_id" value="{{ conta_id }}">
         <input type="hidden" name="comando_id" value="{{ comando_solicitar_conferencia }}">
         <input type="hidden" name="versao_lida" value="{{ registro.form1_integral.rascunho.versao }}">
-        <button class="botao-primario" type="button" data-abrir-dialogo="apresentar-registro">Solicitar conferência interna do APA</button>
+        <button class="botao-primario" type="button" data-abrir-dialogo="apresentar-registro">Apresentar ao APA para conferência</button>
         {% call confirmacao(id="apresentar-registro", titulo="Apresentar o FORM 1 para conferência?", titulo_id="titulo-apresentar", principal="Apresentar ao APA", cancelar="Continuar revisando", tipo="submit", cancelar_attr="data-fechar-dialogo", registro=registro.codigo_lgpd) %}
-        <p>O APA receberá as respostas salvas. A edição ficará suspensa até a decisão.</p>
+        <p>{{ registro.form1_integral.aviso_apresentacao }}</p><p>A edição ficará suspensa até a decisão.</p>
         {% endcall %}
       </form>
       {% else %}

@@ -72,8 +72,9 @@
       {% if grupo.quantidade > 3 %}<a href="{{ grupo.lista }}">Ver todos ({{ grupo.quantidade }})</a>{% endif %}
     </section>{% endfor %}
     <div class="navegacao-governanca">
+      {% if pode_abrir_registro %}<a class="botao-link" href="/registros/novo?conta_id={{ conta_id|urlencode }}">Iniciar novo Registro</a>{% endif %}
       {% if not gabinete and secretarias and (not exibir_painel_dpo or outro_vinculo) %}
-      <button class="botao-primario" type="submit" form="abrir-painel">Abrir Painel de Registros</button>
+      <button class="botao-primario" type="submit" form="abrir-painel">Ver Registros da Secretaria</button>
       {% endif %}
 
       {% if exibir_painel_dpo %}

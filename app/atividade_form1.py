@@ -20,3 +20,12 @@ def atividade_form1(sessao, registro_id):
                 ultimo=salvos[-1] if salvos else None,
                 antes_atualizacao=bool(salvos and atualizacoes and
                     salvos[0].sequencia_cadeia < atualizacoes[-1].sequencia_cadeia))
+
+
+def aviso_apresentacao(conteudo):
+    from app.rev22_form1 import blocos_com_respostas
+    from app.consultas_interface import _blocos_sem_respostas
+    vazios = [n for n in range(1,15) if n not in blocos_com_respostas(conteudo)] if 'revisao_22' in conteudo else _blocos_sem_respostas(conteudo)
+    numeros = [str(n if isinstance(n,int) else n.get('numero',n.get('bloco'))) for n in vazios]
+    lista = ', '.join(numeros[:-1]) + ' e ' + numeros[-1] if len(numeros)>1 else ''.join(numeros)
+    return (('O bloco '+lista+' está sem resposta. ' if len(numeros)==1 else 'Os blocos '+lista+' estão sem resposta. ')+ 'O APA verá isso na conferência. Apresentar mesmo assim?') if numeros else 'O APA receberá as respostas salvas para conferência. Apresentar?'

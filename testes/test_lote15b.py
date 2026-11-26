@@ -129,3 +129,72 @@ def test_c187_c190_post_duplicado_recusado(sessao):
     assert 'Já existe' in resposta.text
     assert sessao.scalar(select(func.count()).select_from(Registro))==antes
     assert re.search(r'<button[^>]*id="confirmar-abertura"[^>]*disabled',resposta.text)
+
+
+def test_c175_c179_primeiro_salvamento_e_apresentacao_incompleta(sessao):
+    from app.conferencia_interna_form1_integral import solicitar_conferencia_interna_form1_integral as apresentar
+    reg,c,url=abrir(sessao)
+    r=sessao.get(RascunhoForm1Integral,reg['registro_id'])
+    negado=apresentar(sessao,comando_id='L15B-SEM-SALVAR',conta_id='CONTA-G1',registro_id=reg['registro_id'],versao_lida=r.versao_rascunho)
+    sessao.commit()
+    assert not negado['permitido'] and 'Salve ao menos um bloco' in negado['motivo']
+    assert 'id="apresentacao-apa"' not in c.get(url+'?conta_id=CONTA-G1&bloco=1').text
+    resposta=salvar(sessao,reg,c,url,1,{'r:1.1':'A confirmar'})
+    assert resposta.status_code==200 and re.search(r'Bloco 1 salvo às \d{2}h\d{2}',resposta.text)
+    bloco14=c.get(url+'?conta_id=CONTA-G1&bloco=14')
+    botao=re.search(r'<button id="apresentacao-apa"[^>]*>',bloco14.text).group()
+    assert 'disabled' not in botao and 'hidden' not in botao
+    assert 'O APA verá isso na conferência. Apresentar mesmo assim?' in bloco14.text
+    sessao.expire_all();r=sessao.get(RascunhoForm1Integral,reg['registro_id'])
+    resultado=apresentar(sessao,comando_id='L15B-APRESENTAR',conta_id='CONTA-G1',registro_id=reg['registro_id'],versao_lida=r.versao_rascunho)
+    assert resultado['permitido']
+
+
+def test_c181_salva_cabecalho_e_conjunto_atomicamente(sessao):
+    reg,c,url=abrir(sessao)
+    q=definicoes()['10.2']
+    from app.opcao_outro import eh_outro
+    valor=next(v for v in q['options'] if not eh_outro(v))
+    resposta=salvar(sessao,reg,c,url,10,{'conjunto':'1','r:10.1':'Sim','r:10.2':valor})
+    assert resposta.status_code==200, re.findall(r'<p>(.*?)</p>',resposta.text,re.S)[:5]
+    sessao.expire_all();r=sessao.get(RascunhoForm1Integral,reg['registro_id']);antes=deepcopy(r.conteudo)
+    assert antes['respostas']['10.1']=='Sim' and antes['conjuntos_rev22']['10'][0]['respostas']['10.2']==valor
+    falha=salvar(sessao,reg,c,url,10,{'conjunto':'1','r:10.1':'Em alguns casos','r:10.2':'Alternativa inexistente fictícia'})
+    assert falha.status_code==409
+    sessao.expire_all();assert sessao.get(RascunhoForm1Integral,reg['registro_id']).conteudo==antes
+    assert 'Salvar destinatário 1' in falha.text and 'Salvar conjunto' not in falha.text
+
+
+def test_c158_c160_c186_papeis_e_criacao_so_apa(sessao):
+    reg=_preparar(sessao,'L15B-APA',arp='PESSOA-A',conta_arp='CONTA-A1')
+    c=TestClient(app)
+    central=c.get('/central?conta_id=CONTA-A1').text
+    assert 'APA · ARP' in central and 'Iniciar novo Registro' in central
+    assert 'Iniciar novo Registro' not in c.get('/central?conta_id=CONTA-G1').text
+    painel=c.get('/painel?conta_id=CONTA-A1&secretaria_id=UNID-NORTE').text
+    assert 'APA · ARP' in painel
+    card=re.search(r'<article class="cartao-mapeamento".*?</article>',painel,re.S).group()
+    assert 'Blocos: 0 de 14 preenchidos.' in card and 'Contagem inicial' not in card
+    assert 'resumo-conferencia-cartao' not in card
+
+
+def test_c191_cartao_reduzido_sem_respostas(sessao):
+    reg,c,url=abrir(sessao)
+    assert salvar(sessao,reg,c,url,1,{'r:1.3':'CONTEUDO-RESTRITO-FICTICIO'}).status_code==200
+    from app.consultas_interface import _ids_visiveis,_identidade
+    from app.modelos import Conta
+    conta=next(conta.id for conta in sessao.scalars(select(Conta).where(Conta.ativa.is_(True))) if (i:=_identidade(sessao,conta.id)) and reg['registro_id'] not in _ids_visiveis(sessao,i))
+    tela=c.get(f"/registros/{reg['registro_id']}?conta_id={conta}")
+    assert tela.status_code==200 and 'fale com o APA da Secretaria' in tela.text
+    assert 'CONTEUDO-RESTRITO-FICTICIO' not in tela.text and 'form1-rev22' not in tela.text
+    assert set(__import__('app.consultas_interface',fromlist=['cartao_reduzido_registro']).cartao_reduzido_registro(sessao,conta,reg['registro_id']))=={'codigo','titulo','contexto','etapa','apa'}
+
+
+def test_c167_c169_c189_titulos_contexto_e_nome(sessao):
+    reg,c,url=abrir(sessao)
+    assert 'FORM 1 · Preencher' in c.get(url+'?conta_id=CONTA-G1').text
+    tela=c.get(f"/registros/{reg['registro_id']}?conta_id=CONTA-G1").text
+    assert 'FORM 1 · Situação e conferência' in tela and 'Ir ao preenchimento' in tela
+    assert 'Situação do Registro</dt>' not in tela
+    resposta=salvar(sessao,reg,c,url,1,{'r:1.3':'Nome alternativo fictício'})
+    assert resposta.status_code==200 and 'O nome difere do catálogo' in resposta.text

@@ -15,14 +15,14 @@
   <div>
     {% if instrumento %}<p class="etiqueta">{{ 'FORM 2 — Validação jurídica e institucional' if instrumento == 'form2' else 'FORM 1 — Levantamento do tratamento' }}</p>{% endif %}
     <h1>{{ titulo_pagina }}</h1>
-    <p><strong>Servidor em sessão:</strong> {{ identificacao_servidor(identidade) }}</p>
+    <p><strong>Servidor em sessão:</strong> {{ identificacao_servidor(identidade) }} · {{ papel_sessao }}</p>
     <p><strong>Secretaria de atuação:</strong> {{ secretaria.nome }}</p>
   </div>
 </section>
 
 {% if not instrumento and pode_criar_registro %}
 <div class="acao-painel">
-  <a class="botao-link" aria-describedby="ajuda-criacao" href="{{ url_for('novo_registro') }}?conta_id={{ conta_id }}&amp;unidade_id={{ secretaria.id|urlencode }}">Criar novo Registro LGPD</a>
+  <a class="botao-link" aria-describedby="ajuda-criacao" href="{{ url_for('novo_registro') }}?conta_id={{ conta_id }}&amp;unidade_id={{ secretaria.id|urlencode }}">Iniciar novo Registro</a>
   <p class="ajuda" id="ajuda-criacao">Inicia o mapeamento de um serviço, processo ou atividade da Secretaria. O Registro somente será criado após a confirmação dos dados iniciais.</p>
 </div>
 {% elif not instrumento %}
@@ -118,6 +118,9 @@
           {% elif acesso.e_apa %}<p>Função nesta atividade: APA. Consulte a disponibilidade da origem e da designação.</p>
           {% else %}<p>Função nesta atividade: AAL designado. Consulte a preparação em modo de leitura.</p>{% endif %}
           {% else %}
+          {% if not registro.fluxo_conferencia.iniciado_pelo_servidor and not registro.fluxo_conferencia.tem_historico %}
+          <p>Blocos: 0 de 14 preenchidos.</p><a href="/como-funciona?conta_id={{ conta_id|urlencode }}">Como funciona o FORM 1</a>
+          {% else %}
           {% if registro.etapa_atual.form1_confirmado %}<details><summary>Detalhes do FORM 1</summary>{% endif %}
           <p><strong>Situação do FORM 1:</strong> {{ registro.situacao_form1_integral }}</p>
           {% if instrumento == 'form1' %}
@@ -139,8 +142,9 @@
           </details>
             {% if fluxo.tem_historico %}<a href="{{ url_for('detalhe_registro', registro_id=registro.id) }}?conta_id={{ conta_id }}#historico-conferencias-form1">Consultar histórico deste Registro</a>{% endif %}
           {% if registro.etapa_atual.form1_confirmado %}</details>{% endif %}
+          {% endif %}
           {% set providencias = tarefas if instrumento == 'form1' else registro.providencias %}
-          {% if providencias and registro.etapa_atual.form == 1 %}
+          {% if providencias and registro.etapa_atual.form == 1 and registro.fluxo_conferencia.iniciado_pelo_servidor %}
           <div class="providencias-registro" aria-label="Providências do Registro {{ registro.codigo_lgpd }}">
             {% for providencia in providencias %}
             <div class="providencia-registro providencia-{{ providencia.categoria }}{% if providencia.nivel %} alerta-{{ providencia.nivel }}{% endif %}">
@@ -156,7 +160,7 @@
             </div>
             {% endfor %}
           </div>
-          {% else %}
+          {% elif registro.etapa_atual.form == 1 and registro.fluxo_conferencia.iniciado_pelo_servidor %}
           <div class="sem-providencia-registro">
             {% if registro.etapa_atual.form == 1 and registro.ingresso_form2 %}<p>Ingressou na fila do FORM 2 em {{ (registro.ingresso_form2|data_local).split(" ")[0] }}.</p>{% elif registro.etapa_atual.form == 1 %}<p>Nenhuma providência de conferência pendente para seu perfil neste momento. Isso não significa que o FORM 1 esteja completo.</p>{% endif %}
             {% if false %}

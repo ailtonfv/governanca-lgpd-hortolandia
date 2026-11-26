@@ -1215,3 +1215,8 @@ Catálogo fechado de temas de ações e aprendizados, separado de situação e r
 - Mesmo item e mesmo contexto permanecem bloqueados. Na mesma Secretaria, outro contexto exige justificativa. Preservadas as travas existentes e os históricos; nenhuma migração.
 - Atualizações editoriais locais do catálogo preservam valores internos. Ajudas passam a identificar o tópico, mantendo internamente a edição de referência.
 - Branch do lote parte de lote-14-entrada (37483f5), conforme autorização específica. Vistoria em pasta fixa e cópia própria na 8016; sem merge.
+
+
+### Deliberações do Lote 15-B — 26/11/2026
+
+Decisão de Ailton: C175/C179 permite apresentação incompleta e respostas a confirmar; exige ao menos um salvamento pelo servidor, com aviso dos blocos sem resposta antes do ato. C186 preserva abertura exclusiva do APA. C191 autoriza, sem acesso às respostas, somente cartão com identificação, contexto, etapa atual e contato do APA. C173 inclui o nome editável na contagem de preenchimento. A obrigatoriedade do FORM 1 continua em deliberação; a R17 não foi estendida. Implementado na branch do lote, sem merge ou ativação nas vistorias anteriores.

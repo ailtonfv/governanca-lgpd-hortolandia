@@ -186,7 +186,8 @@ def central(
     from app.apresentacao_entrada import apresentada, marcar
     if not entrar and not apresentada(request, conta_id):
         return RedirectResponse('/como-funciona?' + urlencode({'conta_id': conta_id}), status_code=303)
-    from app.consultas_interface import usuarios_demonstracao
+    from app.consultas_interface import usuarios_demonstracao, papeis_em_sessao
+    from app.continuidade_apa import unidades_em_que_e_apa_atual
     pessoa_id = acesso["identidade"]["pessoa_id"]
     from app.central_instrumentos import cartoes_em_andamento, itens_em_andamento
     from app.caminho_central import caminho
@@ -200,7 +201,8 @@ def central(
         exibir_dashboard = False
     resposta = paginas.TemplateResponse(request=request, name="central.html", context={
         "exibir_dashboard": exibir_dashboard,
-        "papel_sessao": "Encarregado de Dados (DPO) — acompanhamento e manifestação consultiva" if unidades(sessao,pessoa_id,PAPEIS["dpo"]) else "AAL" if unidades(sessao,pessoa_id,PAPEIS["principal"]) else "APA" if unidades(sessao,pessoa_id,"gestor_fila") else "ARP" if unidades(sessao,pessoa_id,"preenchedor") else "Consulta",
+        "papel_sessao": papeis_em_sessao(sessao,conta_id),
+        "pode_abrir_registro": bool(unidades_em_que_e_apa_atual(sessao,pessoa_id)),
         "cartoes_forms": cartoes_em_andamento(sessao, conta_id, listas),
         "caminho": caminho(sessao, conta_id, listas),
         "aprendizado": aprendizados_publicos(sessao, conta_id),
@@ -279,6 +281,7 @@ def painel_registros(
             return RedirectResponse(request.url_for("central").include_query_params(conta_id=conta_id), status_code=303)
     if secretaria_id not in secretarias:
         return _erro_acesso_central(request)
+    from app.consultas_interface import papeis_em_sessao
     painel = carregar_painel(sessao, conta_id, secretaria_id=secretaria_id)
     if painel is None:
         return _erro_acesso_central(request)
@@ -299,7 +302,7 @@ def painel_registros(
     resposta = paginas.TemplateResponse(
         request=request,
         name="inicio.html",
-        context={**painel, "conta_id": conta_id, "secretaria": secretarias[secretaria_id],
+        context={**painel, "papel_sessao":papeis_em_sessao(sessao,conta_id), "conta_id": conta_id, "secretaria": secretarias[secretaria_id],
                  "instrumento": instrumento, "registros_exibidos": registros_exibidos,
                  "pode_trocar_secretaria": len(secretarias) > 1},
     )
@@ -577,15 +580,9 @@ def detalhe_registro(
             },
         )
         sessao.commit()
-        return paginas.TemplateResponse(
-            request=request,
-            name="erro.html",
-            context={
-                "titulo": "Acesso negado",
-                "mensagem": "Este Registro não pertence ao alcance institucional do agente simulado.",
-            },
-            status_code=403,
-        )
+        from app.consultas_interface import cartao_reduzido_registro
+        return paginas.TemplateResponse(request=request,name='registro_reduzido.html',
+            context=dict(conta_id=conta_id,cartao=cartao_reduzido_registro(sessao,conta_id,registro_id)))
     from sqlalchemy import select
     from app.modelos import AvisoDpo, ParticipacaoForm2, Pessoa, Unidade
     participacao_principal = sessao.scalar(select(ParticipacaoForm2).where(

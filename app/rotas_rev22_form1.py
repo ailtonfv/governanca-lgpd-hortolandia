@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 from app.banco import motor
 from app.continuidade_apa import conferente_da_apresentacao, unidades_em_que_e_apa_atual
-from app.modelos import ParticipacaoForm2,Registro,RascunhoForm1Integral,Unidade,ConferenciaInternaForm1Integral
+from app.modelos import ParticipacaoForm2,ObjetoCatalogo,RegistroObjeto,Registro,RascunhoForm1Integral,Unidade,ConferenciaInternaForm1Integral
 from app.consultas_interface import _identidade, _ids_visiveis
 from app.rascunho_form1_integral import _contexto_autorizado
 from app.rev22_form1 import definicoes, ativa, adotar, salvar
@@ -20,6 +20,9 @@ router=APIRouter()
 paginas=Jinja2Templates(directory=Path(__file__).parent/'paginas')
 from app.identidade_demonstrativa import configurar_identidade
 configurar_identidade(paginas)
+from app.apresentacao_form2 import data_local
+paginas.env.filters['data_local']=data_local
+from app.atividade_form1 import atividade_form1, aviso_apresentacao
 paginas.env.globals['consulta_cartilha_local'] = acesso_local_cartilha
 def sessao_rev22():
     with Session(motor) as s:yield s
@@ -97,6 +100,9 @@ def renderizar_bloco(request,registro_id,conta_id,bloco,conjunto,sessao,*,tentat
         historico['conteudo']={k:v for k,v in historico.get('conteudo',{}).items() if (k=='participantes' and bloco==3) or (k=='destinatarios_10_2_1' and bloco==10)}
     from app.ajudas_cartilha_form1 import topico_do_bloco
     return paginas.TemplateResponse(request=request,name='form1_rev22.html',status_code=status,context=dict(
+        iniciou=trabalho["iniciado"], aviso_apresentacao=aviso_apresentacao(conteudo),
+        salvo_em=trabalho["ultimo"].ocorrido_em if trabalho["ultimo"] else None,
+        nome_catalogo=(sessao.scalar(select(ObjetoCatalogo.nome_canonico).join(RegistroObjeto,RegistroObjeto.objeto_id==ObjetoCatalogo.id).where(RegistroObjeto.registro_id==registro_id,RegistroObjeto.papel=="PRINCIPAL",RegistroObjeto.ativo.is_(True))) or ""),
         erro_bloco=erro, conflito_versao=bool(erro and erro.startswith('Este bloco foi alterado em outra aba.')),
         versao_formulario=tentativa.get('versao',r.versao_rascunho) if tentativa is not None else r.versao_rascunho,
         topico_bloco=topico_do_bloco(bloco,secoes_cartilha_disponiveis()),
@@ -136,6 +142,9 @@ async def gravar(request:Request,registro_id:str,sessao:Session=Depends(sessao_r
                     respostas[id]=vs if defs[id]['kind']=='multi' else (vs[0] if len(vs)==1 else None)
                     if defs[id]['kind']!='multi' and len(vs)>1:raise ValueError('Resposta única repetida.')
                 elif key.startswith('c:'):complementos[key[2:]]=d[key]
+            if d.get("escopo")=="conjunto":
+                respostas.pop(f"{bloco}.1",None)
+                complementos.pop(f"{bloco}.1",None)
             resultado=salvar(sessao,**args,bloco=bloco,respostas=respostas,complementos=complementos,conjunto=int(conjunto) if conjunto else None)
         if not resultado['permitido']:raise ValueError(resultado['motivo'])
         sessao.commit()

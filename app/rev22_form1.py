@@ -207,7 +207,8 @@ def salvar(sessao, *, comando_id,conta_id,registro_id,versao_lida,bloco,resposta
         rows=novo.setdefault('conjuntos_rev22',{}).setdefault(str(bloco),[])
         if conjunto>len(rows)+1:raise ValueError('Conjunto fora de sequência.')
         if conjunto==len(rows)+1:rows.append({'id':str(uuid4()),'respostas':{},'complementos':{}})
-        target=rows[conjunto-1];values=target['respostas'];fields.pop(f'{bloco}.1',None)
+        target=rows[conjunto-1];values=target['respostas']
+        if f'{bloco}.1' not in respostas:fields.pop(f'{bloco}.1',None)
     else:
         if bloco in (3,10):fields={f'{bloco}.1':fields[f'{bloco}.1']}
         target=novo;values=valores
@@ -223,8 +224,9 @@ def salvar(sessao, *, comando_id,conta_id,registro_id,versao_lida,bloco,resposta
             from app.modelos import Unidade
             unit=sessao.get(Unidade,v)
             if not unit or not unit.ativa or unit.id=='UNID-GOV':raise ValueError('Unidade fora da tabela-mestre ativa.')
-        if v is None:values.pop(key,None)
-        else:values[key]=v
+        destino=valores if repetidos and key==f'{bloco}.1' else values
+        if v is None:destino.pop(key,None)
+        else:destino[key]=v
     if valores.get('2.1') in valores.get('2.1.1',[]):raise ValueError('O canal principal não deve se repetir nos adicionais.')
     if valores.get('8.1') in ('Físico','Digital'):
         fisicos={'Processo administrativo físico','Arquivo físico da unidade'}
@@ -239,7 +241,7 @@ def salvar(sessao, *, comando_id,conta_id,registro_id,versao_lida,bloco,resposta
     for key in set(validated)|set(complementos or {}):
         # Somente valores de alternativas conhecidas; texto livre nunca é alternativa.
         if fields[key]['kind'] in ('single','multi') and ativa(key,merged):
-            validar_outro(values.get(key),extras.get(key,''),'F1-'+key)
+            validar_outro(merged.get(key),extras.get(key,''),'F1-'+key)
     # Respostas que saem de aplicabilidade ficam no histórico, sem reativação implícita.
     archive=novo.setdefault('inativas_rev22',[])
     groups=[(valores,novo.get('complementos',{}),None)]

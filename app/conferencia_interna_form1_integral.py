@@ -127,6 +127,11 @@ def solicitar_conferencia_interna_form1_integral(
             versao_atual=rascunho.versao_rascunho,
         )
 
+    from app.atividade_form1 import atividade_form1
+    if not atividade_form1(sessao, registro_id)['iniciado']:
+        return _negar(sessao, comando, ator_tipo, ator_id, conta_id, registro_id,
+            TIPO_COMANDO, 'Salve ao menos um bloco antes de apresentar ao APA.')
+
     snapshot, evento_snapshot = preparar_snapshot_na_transacao(
         sessao, comando=comando, registro=registro, rascunho=rascunho,
         pessoa_id=pessoa_id, momento=momento, reusar_existente=True,

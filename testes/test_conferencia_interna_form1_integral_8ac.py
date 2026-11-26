@@ -44,7 +44,23 @@ def _preparar(sessao, prefixo, *, arp="PESSOA-G", conta_arp="CONTA-G1"):
     return registro
 
 
+def _salvar_para_apresentar(sessao,registro,conta='CONTA-G1'):
+    """Pré-condição C175: preparar apresentação com um salvamento real."""
+    from app.atividade_form1 import atividade_form1
+    r=sessao.get(RascunhoForm1Integral,registro['registro_id'])
+    if not atividade_form1(sessao,r.registro_id)['iniciado']:
+        from uuid import uuid4
+        resultado=salvar_bloco_1_form1_integral(sessao,comando_id=str(uuid4()),conta_id=conta,
+            registro_id=r.registro_id,versao_lida=r.versao_rascunho,respostas={})
+        assert resultado['permitido']
+        sessao.commit()
+    return r.versao_rascunho
+
+
 def _solicitar(sessao, registro, comando="8AC-SOL", conta="CONTA-G1", versao=1):
+    atual=sessao.get(RascunhoForm1Integral,registro['registro_id']).versao_rascunho
+    preparada=_salvar_para_apresentar(sessao,registro,conta)
+    if versao==atual:versao=preparada
     resultado = solicitar_conferencia_interna_form1_integral(
         sessao, comando_id=comando, conta_id=conta,
         registro_id=registro["registro_id"], versao_lida=versao,
@@ -75,7 +91,7 @@ def test_arp_solicita_conferencia_incompleta_com_snapshot_e_sem_submeter(sessao)
     assert conferencia.situacao == "aguardando_conferencia_interna_apa"
     assert conferencia.solicitada_por_id == "PESSOA-G"
     assert conferencia.apa_em_exercicio_no_momento_id == "PESSOA-A"
-    assert snapshot.versao_rascunho == 1
+    assert snapshot.versao_rascunho == 2
     assert snapshot.conteudo["submissao_habilitada"] is False
     assert [item.tipo_evento for item in eventos] == [
         "preparar_snapshot_form1_integral",
@@ -86,9 +102,10 @@ def test_arp_solicita_conferencia_incompleta_com_snapshot_e_sem_submeter(sessao)
 
 def test_solicitacao_e_idempotente_e_nao_duplica(sessao):
     registro = _preparar(sessao, "8AC-IDEM")
+    versao_salva = _salvar_para_apresentar(sessao,registro)
     parametros = dict(
         comando_id="8AC-IDEM-SOL", conta_id="CONTA-G1",
-        registro_id=registro["registro_id"], versao_lida=1,
+        registro_id=registro["registro_id"], versao_lida=versao_salva,
     )
     primeiro = solicitar_conferencia_interna_form1_integral(sessao, **parametros)
     sessao.commit()
@@ -181,6 +198,7 @@ def test_apa_que_tambem_e_arp_pratica_dois_atos_separados(sessao):
 
 def test_falha_na_auditoria_reverte_snapshot_solicitacao_eventos_e_comando(sessao, monkeypatch):
     registro = _preparar(sessao, "8AC-RB")
+    versao_salva = _salvar_para_apresentar(sessao,registro)
 
     def falhar(*args, **kwargs):
         raise RuntimeError("falha fictícia controlada")
@@ -191,7 +209,7 @@ def test_falha_na_auditoria_reverte_snapshot_solicitacao_eventos_e_comando(sessa
     with pytest.raises(RuntimeError, match="falha fictícia"):
         solicitar_conferencia_interna_form1_integral(
             sessao, comando_id="8AC-RB-SOL", conta_id="CONTA-G1",
-            registro_id=registro["registro_id"], versao_lida=1,
+            registro_id=registro["registro_id"], versao_lida=versao_salva,
         )
         sessao.commit()
     sessao.rollback()
@@ -205,6 +223,7 @@ def test_falha_na_auditoria_reverte_snapshot_solicitacao_eventos_e_comando(sessa
 
 def test_solicitacoes_concorrentes_preservam_uma_unica_versao(sessao):
     registro = _preparar(sessao, "8AC-CONC")
+    versao_salva = _salvar_para_apresentar(sessao,registro)
     barreira = threading.Barrier(2)
     resultados = []
 
@@ -213,7 +232,7 @@ def test_solicitacoes_concorrentes_preservam_uma_unica_versao(sessao):
             barreira.wait()
             resultados.append(solicitar_conferencia_interna_form1_integral(
                 outra, comando_id=f"8AC-CONC-{numero}", conta_id="CONTA-G1",
-                registro_id=registro["registro_id"], versao_lida=1,
+                registro_id=registro["registro_id"], versao_lida=versao_salva,
             ))
 
     threads = [threading.Thread(target=solicitar, args=(numero,)) for numero in (1, 2)]
@@ -231,15 +250,16 @@ def test_solicitacoes_concorrentes_preservam_uma_unica_versao(sessao):
 
 def test_rota_solicita_e_exibe_ato_preparatorio_sem_acao_final(sessao):
     registro = _preparar(sessao, "8AC-HTTP")
+    versao_salva = _salvar_para_apresentar(sessao,registro)
     cliente = TestClient(app)
     detalhe = cliente.get(
         f"/registros/{registro['registro_id']}", params={"conta_id": "CONTA-G1"}
     )
     assert detalhe.status_code == 200
-    assert "Solicitar conferência interna do APA" in detalhe.text
+    assert "Apresentar ao APA para conferência" in detalhe.text
     resposta = cliente.post(
         f"/registros/{registro['registro_id']}/form1-integral/conferencia-interna/solicitar",
-        data={"conta_id": "CONTA-G1", "comando_id": "8AC-HTTP-SOL", "versao_lida": "1"},
+        data={"conta_id": "CONTA-G1", "comando_id": "8AC-HTTP-SOL", "versao_lida": str(versao_salva)},
         follow_redirects=True,
     )
     assert resposta.status_code == 200

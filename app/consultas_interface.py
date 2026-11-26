@@ -1,5 +1,6 @@
 """Consultas preparadas para a interface, sem regras de negócio nos templates."""
 
+from app.atividade_form1 import atividade_form1, aviso_apresentacao
 from app.extensao_medidas_form1 import catalogo_efetivo, versao_estrutura
 from app.continuidade_apa import AGUARDANDO_CONFERENTE, conferente_da_apresentacao
 from app.apresentacoes_form1 import rotulo_apresentacao
@@ -712,7 +713,7 @@ def carregar_painel(sessao, conta_id, *, secretaria_id=None):
         from app.atividade_form1 import atividade_form1
         iniciado_pelo_servidor = atividade_form1(sessao,registro.id)['iniciado']
         preenchimentos_arp[registro.id] = {
-            "blocos_vazios": blocos_vazios,
+            "blocos_vazios": blocos_vazios if iniciado_pelo_servidor else list(range(1,15)),
             "quantidade": pre_validacao["quantidades"]["incompletos"],
             "nao_iniciado": not iniciado_pelo_servidor,
             "ancora": f"titulo-bloco-{primeira['bloco']}" if primeira else "titulo-bloco-1",
@@ -1464,8 +1465,9 @@ def carregar_registro(sessao, conta_id, registro_id):
             }
             for indice, item in enumerate(historicos_conferencia)
         ],
+        "aviso_apresentacao": aviso_apresentacao(rascunho_integral.conteudo) if rascunho_integral else "",
         "pode_solicitar_conferencia": bool(
-            pode_editar_integral and rascunho_integral is not None
+            atividade_form1(sessao,registro_id)["iniciado"] and pode_editar_integral and rascunho_integral is not None
             and conferencia_integral is None
             and confirmacao_integral is None
             and (
@@ -1580,3 +1582,27 @@ def carregar_registro(sessao, conta_id, registro_id):
     from app.etapa_registro import etapa_atual
     resumo['etapa_atual'] = etapa_atual(sessao, registro, conta_id, resumo['form1_integral']['fluxo_conferencia'])
     return identidade, resumo
+
+
+def papeis_em_sessao(sessao,conta_id):
+    identidade=_identidade(sessao,conta_id,vinculos_vigentes=True)
+    if not identidade:return 'Consulta'
+    mapa={'responsavel_registro':'APA','preenchedor':'ARP','aal_form2':'AAL','gestor_fila':'gestor da fila','governanca_protecao_dados':'Encarregado de Dados (DPO)','juridico_form2':'Jurídico','curador':'Curador','demo34_gabinete':'Gabinete do Prefeito','demo34_secretario':'Secretário(a)','demo34_verificador':'Verificador do Comitê','demo34_relator':'Relator do Comitê'}
+    papeis={mapa[d['papel']] for d in identidade['designacoes'] if d['papel'] in mapa}
+    if sessao.scalar(select(AtribuicaoForm1Integral.registro_id).where(AtribuicaoForm1Integral.arp_atual_id==identidade['pessoa_id']).limit(1)):
+        papeis.add('ARP')
+    return ' · '.join(p for p in mapa.values() if p in papeis) or 'Consulta'
+
+
+def cartao_reduzido_registro(sessao,conta_id,registro_id):
+    # Contrato deliberadamente fechado: nenhuma resposta, documento ou anexo.
+    identidade=_identidade(sessao,conta_id,vinculos_vigentes=True)
+    registro=sessao.get(Registro,registro_id)
+    if not identidade or not registro:return None
+    contexto=sessao.get(ContextoAtuacao,registro.contexto_atuacao_id)
+    fluxo=projetar_fluxo_conferencia(sessao,registro.id,registro.unidade_principal_atual_id)
+    from app.etapa_registro import etapa_atual
+    etapa=etapa_atual(sessao,registro,conta_id,fluxo)
+    return dict(codigo=registro.codigo_lgpd,titulo=registro.titulo_objeto,
+                contexto=contexto.nome if contexto else 'Contexto cadastrado',
+                etapa=f"FORM {etapa['form']} — {etapa['situacao']}" if etapa['form']!='Ciclo completo' else 'Ciclo completo',apa=fluxo['apa'])

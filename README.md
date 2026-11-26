@@ -2085,3 +2085,10 @@ Verificação em 25/11/2026: bateria completa única com 1.235 testes (1.168 apr
 Correções em branch separada, sem ativação nas vistorias anteriores: validação de alternativas separada de texto livre; erros de edição apresentados no próprio bloco com a tentativa preservada; conflitos de versão mantêm a recusa de sobrescrita. A abertura técnica do FORM 1 não representa início do preenchimento pelo servidor. A contagem inclui o nome editável (C173), sem definir obrigatoriedade. A Cartilha permanece na edição local vigente, com acesso por tópico em todos os blocos, fallback para Levantamento da realidade e sem navegação de volta ao sistema. O brasão usa o mesmo recurso institucional. Instrumentos do Registro levam às próprias instâncias autorizadas.
 
 Validação da Parte A: 25 testes direcionados aprovados após adequação da expectativa de texto/isolamento da Cartilha. Conferência visual e bateria completa pendentes da entrega final. C164 identificado como defeito anterior ao Lote 15. Nenhuma migração.
+
+
+### Lote 15-B — Parte B
+
+A apresentação incompleta continua permitida, inclusive com respostas a confirmar, após ao menos um salvamento pelo servidor. O domínio verifica essa condição e a confirmação lista os blocos vazios. A ação aparece no bloco 14 e nos Detalhes. A abertura de Registro continua exclusiva do APA. O cartão reduzido para quem não tem acesso contém somente identificação, contexto, etapa e contato do APA. Os conjuntos dos blocos 3/10 e o cabeçalho podem ser salvos juntos em um único comando atômico; o salvamento individual permanece dentro do conjunto.
+
+Testes direcionados: 13 cenários novos da Parte A/B aprovados; 27 testes anteriores do ciclo de conferência executados, com 24 aprovados e as três falhas antigas de segregação já constantes da referência. Preparações de teste passaram a salvar antes de apresentar, preservando as verificações de idempotência, concorrência e rollback.

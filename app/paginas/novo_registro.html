@@ -4,7 +4,7 @@
 <p><a class="voltar" href="/?conta_id={{ conta_id }}">← Voltar ao painel</a></p>
 
 <section class="detalhe">
-  <h1>Novo Registro LGPD</h1>
+  <h1>Novo Registro LGPD</h1><p>Cada serviço, processo ou atividade tem um único Registro em cada contexto de atuação. Se já existir, o sistema mostra o Registro para você continuar nele.</p>
   {% if unidades|length == 1 %}
   <p><strong>Secretaria responsável:</strong> {{ nome_secretaria }}</p>
   {% elif unidades %}
@@ -66,7 +66,8 @@
 
     <label id="rotulo-item" for="objeto_principal_id">2. Item do catálogo da demonstração <span class="marcador-obrigatorio" aria-label="obrigatório">*</span></label>
     <select id="objeto_principal_id" name="objeto_principal_id" required
-            {% if 'objeto_principal_id' in erros_campos %}aria-invalid="true" aria-describedby="erro-objeto_principal_id"{% endif %}>
+        <section id="aviso-duplicidade" aria-live="polite" hidden><p id="texto-duplicidade"></p><a id="abrir-existente">Abrir o Registro existente</a></section>
+    {% if 'objeto_principal_id' in erros_campos %}aria-invalid="true" aria-describedby="erro-objeto_principal_id"{% endif %}>
       <option value="">Selecione depois de escolher o tipo</option>
       {% for objeto in objetos %}
       <option value="{{ objeto.id }}" data-registros='{{ objeto.registros|tojson }}' data-nome="{{ objeto.nome_canonico }}" data-tipo="{{ objeto.tipo_objeto }}" data-unidades="{{ objeto.unidades|join(',') }}" {% if valores.objeto_principal_id == objeto.id %}selected{% endif %}>{{ objeto.nome_canonico }}{% if objeto.registros %} — já tem Registro: {{ objeto.registros|map(attribute="codigo")|join(", ") }}{% endif %}</option>
@@ -127,7 +128,7 @@
     <p class="ajuda" id="exemplo-contexto">Selecione a área de atuação municipal relacionada ao serviço, processo ou atividade. O contexto classifica onde o objeto atua; não representa a finalidade do tratamento de dados pessoais, que será descrita no FORM 1.</p>
     <p class="ajuda" id="orientacao-contexto" aria-live="polite"></p>
 
-    <section id="aviso-duplicidade" aria-live="polite" hidden><p id="texto-duplicidade"></p><a id="abrir-existente">Abrir o Registro existente</a></section>
+
     <div id="justificativa-outro-contexto" hidden><label for="justificativa">Justificativa para criar outro Registro em contexto diferente</label><textarea id="justificativa" name="justificativa" maxlength="2000" disabled></textarea></div>
     <div class="rodape-formulario">
       <p id="efeito-abertura">Ao confirmar, o sistema criará o Registro LGPD e deixará o FORM 1 no estado “Não iniciado”.</p>
@@ -159,7 +160,7 @@
     const outro = registros.find(r => r.contexto !== contexto.value);
     const aviso = document.getElementById('aviso-duplicidade');
     aviso.hidden = !registros.length;
-    document.getElementById('texto-duplicidade').textContent = mesmo ? `Já existe o ${mesmo.codigo} para este ${especie} neste contexto.` : outro ? `Este ${especie} já tem o ${outro.codigo} em outro contexto.` : '';
+    document.getElementById('texto-duplicidade').textContent = mesmo ? `Já existe o ${mesmo.codigo} para este ${especie} neste contexto.` : outro ? `Este ${especie} já tem o Registro ${outro.codigo}. Um novo Registro só é aceito para outro contexto de atuação.` : '';
     const link = document.getElementById('abrir-existente'), alvo = mesmo || outro;
     if (alvo) link.href = '/registros/' + encodeURIComponent(alvo.id) + '?conta_id=' + encodeURIComponent({{ conta_id|tojson }});
     const exige = Boolean(contexto.value && outro && !mesmo);
