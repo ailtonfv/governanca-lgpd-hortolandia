@@ -18,6 +18,8 @@ def conteudo_decisao(acao,e,autores,unidades):
       'verificar':['planejar','executar_medida'], 'decidir_prorrogacao':['planejar','pedir_prorrogacao'],
       'cancelar':['planejar','pedir_cancelamento'],'conferir_aprendizagem':['aprender'],
       'autorizar_aprendizagem':['aprender','conferir_aprendizagem']}
+    if acao in ('confirmar_residual_acao','decidir_residual_acao','aceitar_residual_acao'):
+        return conteudo_ato('propor_residual_acao',e,autores,unidades)
     return [linha for fonte in fontes.get(acao,[]) for linha in conteudo_ato(fonte,e,autores,unidades)]
 
 def mensagem_decisao(e):

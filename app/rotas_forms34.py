@@ -191,9 +191,19 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
             a['comando_id']=str(uuid4())
             fonte_ato={'executar_medida':'execucao','verificar':'verificacao','aprender':'aprendizagem','informar_ripd':'referencia_ripd'}.get(a['acao'])
             a['valores']={**a.get('valores',{}),**dict(e.get(fonte_ato,{}) if fonte_ato else {})}
-            if a['acao']=='planejar':a['valores'].update(plano=e.get('plano',''),cargo=e.get('cargo_responsavel',''),prazo=e.get('prazo',''))
+            if a['acao']=='planejar':a['valores'].update(plano=e.get('plano',''),cargo=e.get('cargo_responsavel',''),duracao_dias=e.get('duracao_dias',''))
             a['valores']={k:('sim' if v else 'nao') if isinstance(v,bool) else v for k,v in a['valores'].items()}
             a['resumo']=f"{'Risco' if ref.form==3 else 'Ação'} {codigo_risco} ({s.get(Registro,obj.registro_id).codigo_lgpd}): {a['titulo']}. A autoria será registrada."
+            if a['acao']=='aprovar_plano':
+                from app.prazos_plano34 import vencimento_na_aprovacao
+                from app.apresentacao_atos34 import data_br
+                from app.eventos import agora_utc
+                try:
+                    previsto = vencimento_na_aprovacao(e, agora_utc())
+                    prazo_previsto = f"até {data_br(previsto)}, se aprovar hoje" if e.get('duracao_dias') else 'a Secretaria precisa registrar a duração antes da aprovação'
+                except ValueError as erro:
+                    prazo_previsto = str(erro)
+                a['resumo'] += f" Plano: {e.get('plano','')}. Cargo: {e.get('cargo_responsavel','')}. Prazo: {prazo_previsto}."
             for c in a['campos']:
                 c['uid']=a['acao']+'-'+c['nome']
                 if a['acao']=='manifestar_comite' and c['nome']=='favoravel':c['rotulo']='O Comitê é favorável ao tratamento proposto para o risco residual (RIPD e controles)?'
@@ -229,6 +239,8 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
         destaques.sort(key=lambda a:a['acao']!='encaminhar_acao')
         restantes=[a for a in restantes if a not in destaques]
         principal=next((a for a in restantes if not a.get('recolhido')), None)
+        from app.encerramento_form4 import aviso_anterior
+        aviso_regra_anterior = aviso_anterior(e)
         grade_atual=grade(ref.form,e['respostas'],e)
         registro=s.get(Registro,obj.registro_id)
         from app.apresentacao_atos34 import data_br
@@ -236,8 +248,8 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
                    'F4-4.1.1':obj.codigo,'F3-3.2':s.get(Unidade,uid).nome,
                    'F3-3.3':{'em_atendimento':'Em atendimento','aguardando':'Aguardando responsável','concluida':'Análise concluída'}.get(e.get('situacao_form2'),'Situação preservada na origem'),
                    'F4-4.15':e['situacao'],'F4-4.10':data_br(e.get('prazo')),
-                   'F4-4.23':e.get('faixa_origem','Não avaliado'),
-                   'F4-4.24':'Aceitação pendente de autoridade competente',
+                   'F4-4.23':(e.get('residual_acao') or {}).get('faixa','Ainda não avaliado') if set(e.get('residual_acao_confirmacoes',{}))=={'secretaria','dpo'} else 'Aguardando nota residual conjunta',
+                   'F4-4.24':'Aceitação posterior registrada' if e.get('aceitacao_residual_acao') else 'Aceitação pendente de autoridade competente',
                    'F3-3.52.5':'Aceitação registrada' if e.get('aceitacao') else 'Pendente de autoridade competente'}
         valores.update({'F4-4.6':unidades_nomes.get(e.get('unidade_responsavel_id') or (uid if e.get('plano') else None),'Ainda não informado'),
                         'F4-4.7':e.get('cargo_responsavel') or ('Cargo não informado no ato anterior' if e.get('plano') else 'Ainda não informado')})
@@ -315,7 +327,7 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
             'bloqueio_edicao':bloqueio_edicao, 'acoes_vinculadas':vinculadas,
             'acompanhamento':acompanhamento,
             'situacao_aprendizagem':situacao_aprendizagem(e),
-            'destaques':destaques,'encaminhamento_destacado':encaminhamento_destacado,'origem_texto':origem_texto,'ripd_texto':ripd(e),'decisoes_gabinete':mensagem_decisao(e),'prazo_br':data_br(e.get('prazo')),
+            'aviso_regra_anterior':aviso_regra_anterior,'destaques':destaques,'encaminhamento_destacado':encaminhamento_destacado,'origem_texto':origem_texto,'ripd_texto':ripd(e),'decisoes_gabinete':mensagem_decisao(e),'prazo_br':data_br(e.get('prazo')),
             'atos_salvos':[h for h in hist if h['ato'] and h['bloco']==bloco] if ref.form==4 else [],
             'falhas_r17':falhas_r17,'conferencia_r17':conferencia34(ref.form,e),'base_r17':f'/forms34/{obj.id}/blocos',
             'erros_campos':erros_campos,'acao_erro':acao_erro,'revisar':revisar,

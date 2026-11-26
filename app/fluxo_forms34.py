@@ -222,12 +222,20 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         raise ValueError('Ato exclusivo do FORM 3.')
     if acao in ('planejar', 'aprovar_plano', 'executar_medida', 'verificar', 'pedir_prorrogacao',
                 'decidir_prorrogacao', 'pedir_cancelamento', 'cancelar', 'aprender',
-                'conferir_aprendizagem', 'autorizar_aprendizagem', 'salvar_temas', 'solicitar_tema') and f3:
+                'conferir_aprendizagem', 'autorizar_aprendizagem', 'salvar_temas', 'solicitar_tema',
+                'propor_residual_acao', 'confirmar_residual_acao', 'decidir_residual_acao', 'aceitar_residual_acao') and f3:
         raise ValueError('Ato exclusivo do FORM 4.')
     if e.get('cancelada') or e.get('encerrada'):
-        if acao not in ('aprender', 'conferir_aprendizagem', 'autorizar_aprendizagem'):
+        permitidos = ('aprender', 'conferir_aprendizagem', 'autorizar_aprendizagem')
+        if not e.get('cancelada'):
+            permitidos += ('propor_residual_acao', 'confirmar_residual_acao', 'decidir_residual_acao', 'aceitar_residual_acao', 'manifestar_dpo', 'manifestar_comite')
+        if acao not in permitidos:
             raise ValueError('Ação encerrada; seu histórico permanece preservado.')
     destino_id = obj.id
+    if acao in ('conferir_aprendizagem', 'autorizar_aprendizagem'):
+        from app.encerramento_form4 import pode_encerrar
+        if not pode_encerrar(e):
+            raise ValueError('Aguarda decisão sobre o risco residual após a ação antes da aprendizagem.')
     if acao == 'adicionar_risco':
         if not f3:
             raise ValueError('Novo risco exige origem no FORM 3.')
@@ -461,6 +469,67 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         exigir(papeis, 'secretaria')
         e.setdefault('solicitacoes_tema',[]).append(dict(id=cmd.id,nome=_texto(dados,'nome_sugerido',200),
             justificativa=_texto(dados,'justificativa'),pessoa_id=pessoa.id,em=agora,situacao='Em análise'))
+    elif acao in ('propor_residual_acao', 'confirmar_residual_acao', 'decidir_residual_acao', 'aceitar_residual_acao'):
+        from app.encerramento_form4 import nota_confirmada, reducao_total
+        if not e.get('verificada') or reducao_total(e):
+            raise ValueError('Este ato exige verificação aprovada com risco ainda não totalmente reduzido.')
+        if acao == 'propor_residual_acao':
+            exigir(papeis, 'secretaria')
+            if 'dpo' in papeis:raise PermissionError('A Secretaria propõe; o DPO confirma.')
+            if nota_confirmada(e):raise ValueError('Nota posterior já confirmada; preserve esta decisão e reavalie o risco de origem.')
+            from app.avaliacao_risco34 import pontuar
+            nota = pontuar(dados.get('pr'), dados.get('ir'))
+            if nota['nota'] is None:raise ValueError('Informe probabilidade e impacto após a ação.')
+            e['residual_acao'] = dict(nota, justificativa=_texto(dados, 'justificativa'))
+            e['residual_acao_confirmacoes'] = {'secretaria':dict(pessoa_id=pessoa.id, em=agora)}
+        elif acao == 'confirmar_residual_acao':
+            exigir(papeis, 'dpo')
+            if nota_confirmada(e):raise ValueError('Nota posterior já confirmada.')
+            _confirmar(e, 'residual_acao', pessoa.id, papeis, agora)
+        else:
+            nota = nota_confirmada(e)
+            if not nota:raise ValueError('Aguarda nota residual confirmada pela Secretaria e pelo DPO.')
+            justificativa = _texto(dados, 'justificativa')
+            if acao == 'aceitar_residual_acao':
+                if 'dpo' in papeis:raise PermissionError('Aceitação cabe à autoridade competente, não ao DPO.')
+                exigir(papeis, 'gabinete' if nota['faixa']=='Crítico' else 'secretario')
+                if 'gabinete' in papeis and nota['faixa']!='Crítico':raise PermissionError('Gabinete registra somente a decisão de risco Crítico.')
+                if e.get('aceitacao_residual_acao'):raise ValueError('Aceitação posterior já registrada.')
+                _pareceres(e, nota['faixa'])
+                decisao = dict(pessoa_id=pessoa.id, em=agora, justificativa=justificativa, nota=deepcopy(nota))
+                if nota['faixa']=='Crítico':decisao.update(decisor='Prefeito', registrador='Gabinete', documento=_texto(dados,'documento',200))
+                e['aceitacao_residual_acao'] = decisao
+                e.setdefault('decisao_residual_acao', dict(decisao, opcao='aceitar'))
+            else:
+                exigir(papeis, 'secretaria')
+                if 'dpo' in papeis:raise PermissionError('A escolha de tratamento cabe à Secretaria.')
+                if e.get('decisao_residual_acao'):raise ValueError('Decisão posterior já registrada.')
+                opcao = dados.get('opcao')
+                if opcao not in ('reavaliar','nova_providencia'):raise ValueError('Escolha reavaliar o risco ou nova providência.')
+                risco = sessao.get(IdentidadeForms34, e.get('risco_id')) if e.get('risco_id') else None
+                re = estado(sessao, risco.id) if risco else None
+                if opcao == 'reavaliar':
+                    if not risco:raise ValueError('Esta ação não tem risco de origem; use nova providência.')
+                    if re.get('conclusao'):re.setdefault('conclusoes_anteriores', []).append(re.pop('conclusao'))
+                    re['concluida'] = False
+                    re['revisao_aberta'] = True
+                    re['reavaliacao_solicitada'] = dict(acao_id=obj.id,pessoa_id=pessoa.id,em=agora,justificativa=justificativa)
+                    _gravar_estado(sessao,cmd,risco,'reavaliacao_solicitada',re)
+                    destino_id = risco.id
+                else:
+                    fonte = historico(sessao, risco.id)[-1] if risco else None
+                    a = _criar(sessao,cmd,conta_id,obj.registro_id,4,3 if risco else ref.fonte_form,
+                        fonte.id if fonte else ref.fonte_id, 'residual-acao:'+obj.id+':'+cmd.id,
+                        dict(form=4,respostas={},situacao='Em preenchimento',risco_id=risco.id if risco else None,
+                             faixa_origem=nota['faixa'],motivo=justificativa,acao_anterior_id=obj.id,
+                             prorrogacoes=0,prazo=None,executor_id=None,decisoes_pendentes={},escopos_restritos=[]))
+                    destino_id = a.id
+                    if risco:
+                        re.setdefault('acoes',[]).append(a.id)
+                        re.setdefault('acoes_rodada',[]).append(a.id)
+                        _gravar_estado(sessao,cmd,risco,'providencia_pos_acao',re)
+                e['decisao_residual_acao'] = dict(opcao=opcao,pessoa_id=pessoa.id,em=agora,
+                    justificativa=justificativa,destino_id=destino_id,nota=deepcopy(nota))
     elif acao == 'planejar':
         exigir(papeis, 'secretaria')
         if e.get('plano_aprovado'):
@@ -468,24 +537,33 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         from app.regras_atos34 import CARGOS
         cargo=dados.get('cargo')
         if cargo not in CARGOS:raise ValueError('Escolha o cargo, função ou unidade responsável.')
+        if len(_texto(dados, 'plano')) < 30:
+            from app.validacao_atos34 import ErrosCampos
+            raise ErrosCampos({'plano': 'Descreva o plano com pelo menos 30 caracteres.'})
         from app.temas_form4 import validar as validar_temas
         anteriores=e.get('temas',{})
         e['temas']=validar_temas(sessao,dados.get('tema_principal',anteriores.get('principal','')),
             dados.get('temas_complementares',anteriores.get('complementares',[])),obrigatorio=True)
         e.pop('executor_id',None)  # autoria anterior permanece nos eventos, não no novo cargo
+        from app.prazos_plano34 import duracao_validada
+        duracao = duracao_validada(e, dados.get('duracao_dias'))
         e.update(plano=_texto(dados,'plano'),cargo_responsavel=cargo,unidade_responsavel_id=uid,
-                 prazo=date.fromisoformat(dados['prazo']).isoformat())
+                 duracao_dias=duracao, plano_registrado_em=agora, prazo=None)
     elif acao == 'aprovar_plano':
         faixa = _faixa(e)
         exigir(papeis, 'gabinete' if faixa == 'Crítico' else 'secretario')
         if 'gabinete' in papeis and faixa != 'Crítico':
             raise PermissionError('Prefeito não aprova plano fora do risco Crítico.')
-        if not e.get('plano') or not (e.get('cargo_responsavel') or e.get('executor_id')) or not e.get('prazo'):
-            raise ValueError('Informe plano, executor e prazo antes da aprovação.')
+        if not e.get('plano') or not (e.get('cargo_responsavel') or e.get('executor_id')) or not (e.get('duracao_dias') or e.get('prazo')):
+            raise ValueError('Informe plano, executor e duração antes da aprovação.')
         if e.get('plano_aprovado'):
             raise ValueError('Plano já aprovado; conteúdo preservado.')
+        if e.get('duracao_dias') is None:
+            raise ValueError('Antes de aprovar, peça à Secretaria que registre a duração do plano em dias corridos. A data anterior continua no histórico.')
         e['conferencia_plano'] = exigir_r17(conferencia_etapa(e, 'plano'), f'/forms34/{obj.id}/blocos')
-        e['plano_aprovado'] = dict(pessoa_id=pessoa.id, em=agora, justificativa=_texto(dados, 'justificativa'))
+        from app.prazos_plano34 import vencimento_na_aprovacao
+        e['prazo'] = vencimento_na_aprovacao(e, agora)
+        e['plano_aprovado'] = dict(pessoa_id=pessoa.id, em=agora, justificativa=_texto(dados, 'justificativa'), prazo=e['prazo'])
         if faixa=='Crítico':e['plano_aprovado'].update(decisor='Prefeito',registrador='Gabinete',documento=_texto(dados,'documento',200))
         e['situacao'] = 'Plano aprovado'
     elif acao == 'executar_medida':
@@ -493,6 +571,11 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         if 'dpo' in papeis:raise PermissionError('O DPO não registra execução.')
         if not e.get('plano_aprovado'):
             raise ValueError('A medida requer plano autorizado; a espera do DPO no FORM 3 não o bloqueia.')
+        if len(_texto(dados, 'resumo')) < 30:
+            from app.validacao_atos34 import ErrosCampos
+            raise ErrosCampos({'resumo': 'Descreva o que foi feito com pelo menos 30 caracteres.'})
+        if not e.get('cargo_responsavel'):
+            raise ValueError('Informe o cargo ou função responsável antes de registrar a execução.')
         e['conferencia_execucao'] = exigir_r17(conferencia_etapa(e, 'execucao'), f'/forms34/{obj.id}/blocos')
         e['execucao'] = dict(evidencia=_texto(dados, 'evidencia'), resumo=_texto(dados, 'resumo'),
                             cargo_responsavel=e.get('cargo_responsavel'), unidade_responsavel_id=uid,
@@ -563,8 +646,9 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
             e['ciencia_comite'] = dict(em=agora, motivo='cancelamento')
     elif acao == 'aprender':
         exigir(papeis, 'secretaria')
-        if not e.get('verificada') or e.get('cancelada'):
-            raise ValueError('Aprendizagem somente após verificação aprovada.')
+        from app.encerramento_form4 import pode_encerrar
+        if not pode_encerrar(e):
+            raise ValueError('Aprendizagem exige verificação aprovada e decisão sobre o risco que sobrou.')
         temas=deepcopy(e.get('aprendizagem',{}).get('temas',e.get('temas',{})))
         if 'tema_principal' in dados or 'temas_complementares' in dados:
             from app.temas_form4 import validar as validar_temas
@@ -583,13 +667,15 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
             raise ValueError('Não há aprendizagem verificada para conferir.')
         if e.get('aprendizagem_devolvida'):
             raise ValueError('Aguarde a nova versão da aprendizagem pela Secretaria.')
-        if dados.get('sem_dados_pessoais') is False:
+        if type(dados.get('sem_falha_exposta')) is not bool:
+            raise ValueError('Confirme se o relato não expõe falha aberta nem facilita exploração.')
+        if dados.get('sem_dados_pessoais') is False or dados.get('sem_falha_exposta') is False:
             e['aprendizagem_devolvida'] = dict(pessoa_id=pessoa.id, em=agora,
                 observacao=_texto(dados, 'observacao'), versao=e['aprendizagem']['versao'])
             e.pop('aprendizagem_conferida', None)
             e.pop('aprendizagem_autorizada', None)
         elif dados.get('sem_dados_pessoais') is True:
-            e['aprendizagem_conferida'] = dict(pessoa_id=pessoa.id, em=agora)
+            e['aprendizagem_conferida'] = dict(pessoa_id=pessoa.id, em=agora, sem_falha_exposta=True, sem_dados_pessoais=True)
             if dados.get('observacao'):
                 e['aprendizagem_conferida']['observacao'] = _texto(dados, 'observacao')
         else:
@@ -602,7 +688,8 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
     else:
         raise ValueError('Ato não disponível.')
     ev = _gravar_estado(sessao, cmd, obj, acao, e)
-    if not f3 and acao not in ('salvar_bloco','abrir_detalhes','salvar_temas','solicitar_tema') and e.get('verificada') and _sem_pendencia(e) and not e.get('encerrada'):
+    from app.encerramento_form4 import pode_encerrar
+    if not f3 and acao not in ('salvar_bloco','abrir_detalhes','salvar_temas','solicitar_tema') and pode_encerrar(e) and not e.get('encerrada'):
         # Verificação cobra somente as respostas do verificador. Atos antigos são preservados.
         e['conferencia_r17'] = retrato(conferencia34(4,e))
         e['encerrada'] = True

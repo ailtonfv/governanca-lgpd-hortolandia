@@ -17,19 +17,21 @@ OBRIGATORIOS={
  'confirmar_gatilho_juridico':('restringe_direitos',),
  'enviar_juridico':('destinatario_id','motivo'),
  'autorizar_referencia':('pessoa_id','necessidade'),
- 'planejar':('plano','cargo','prazo'), 'aprovar_plano':('justificativa',),
+ 'propor_residual_acao':('pr','ir','justificativa'), 'decidir_residual_acao':('opcao','justificativa'),
+ 'aceitar_residual_acao':('justificativa',),
+ 'planejar':('plano','cargo','duracao_dias'), 'aprovar_plano':('justificativa',),
  'solicitar_tema':('nome_sugerido','justificativa'),
  'executar_medida':('resumo','evidencia'), 'verificar':('aprovada','evidencia'),
  'pedir_prorrogacao':('prazo','justificativa'),
  'decidir_prorrogacao':('aprovar','justificativa'),
  'pedir_cancelamento':('justificativa',), 'cancelar':('justificativa',),
- 'aprender':('contexto','diretriz','escopo'), 'conferir_aprendizagem':('sem_dados_pessoais',),
+ 'aprender':('contexto','diretriz','escopo'), 'conferir_aprendizagem':('sem_dados_pessoais','sem_falha_exposta'),
  'abrir_detalhes':('motivo',), 'registrar_referencia':('referencia',)
 }
 
 def obrigatorios(acao,dados):
     campos=set(OBRIGATORIOS.get(acao,()))
-    if acao == 'conferir_aprendizagem' and dados.get('sem_dados_pessoais') is False:
+    if acao == 'conferir_aprendizagem' and (dados.get('sem_dados_pessoais') is False or dados.get('sem_falha_exposta') is False):
         campos.add('observacao')
     if acao=='propor_triagem' and dados.get('resultado') in ('elaborar','revisar','determinado_anpd'):
         campos.add('unidade_id')

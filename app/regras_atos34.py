@@ -7,7 +7,12 @@ def finalidades(e):
     if e.get('form')==4:
         candidatos = [k for k in ('prorrogacao','cancelamento') if e.get('decisoes_pendentes',{}).get(k)]
         m = e.get('manifestacao_comite', {})
-        return [k for k in candidatos if m.get('finalidade') != k or m.get('em', '') < e['decisoes_pendentes'][k].get('em', '')]
+        pendentes = [k for k in candidatos if m.get('finalidade') != k or m.get('em', '') < e['decisoes_pendentes'][k].get('em', '')]
+        from app.encerramento_form4 import nota_confirmada
+        nota = nota_confirmada(e)
+        if nota and nota['faixa']=='Crítico' and not e.get('aceitacao_residual_acao') and not e.get('deliberacoes_rodada',{}).get('residual'):
+            pendentes.append('residual')
+        return pendentes
     alvo=e.get('reavaliacao',e)
     candidatos = ([k for k in ('avaliacao','triagem') if (alvo if k=='avaliacao' else e).get(k+'_sem_consenso')]
                   + (['residual'] if e.get('avaliacao') and not e.get('aceitacao') else []))

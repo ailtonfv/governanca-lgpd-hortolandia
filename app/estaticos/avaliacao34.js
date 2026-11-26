@@ -28,7 +28,7 @@
  });
  document.querySelectorAll('[data-ato34]').forEach(form=>{
   function observacao(){const wrap=form.querySelector('[data-obrigatorio-observacao]');if(!wrap)return;
-   const active=form.elements.sem_dados_pessoais?.value==='nao';wrap.querySelector('textarea').required=active;
+   const active=form.elements.sem_dados_pessoais?.value==='nao'||form.elements.sem_falha_exposta?.value==='nao';wrap.querySelector('textarea').required=active;
    const badge=wrap.querySelector('[data-marcador]');badge.textContent=active?'* Obrigatório neste caso':'** Obrigatório ao responder Não';
    badge.className='indicador-obrigatoriedade indicador-obrigatoriedade-'+(active?'obrigatorio':'condicional');
   }form.addEventListener('change',observacao);observacao();

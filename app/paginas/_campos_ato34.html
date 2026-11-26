@@ -5,6 +5,7 @@
 <span class="{{ 'marcador-obrigatorio' if c.obrigatorio else '' }}">{{ '**' if c.condicional else '*' if c.obrigatorio else '****' }}</span> {{ 'Obrigatório em alguns casos' if c.condicional else 'Obrigatório' if c.obrigatorio else 'Facultativo / informativo' }}</span></label>
 {% set attrs %}id="ato-{{ c.uid }}" name="{{ c.nome }}" aria-describedby="erro-{{ c.uid }}" {% if c.obrigatorio %}required data-obrigatorio{% endif %}{% if erro %} aria-invalid="true"{% endif %}{% endset %}
 {% if c.tipo=='textarea' %}<textarea {{ attrs|safe }} maxlength="1000">{{ valor or '' }}</textarea>
+{% elif c.tipo=='inteiro' %}<input {{ attrs|safe }} type="number" min="1" step="1" value="{{ valor or '' }}">
 {% elif c.tipo=='multi' %}<select {{ attrs|safe }} multiple size="5">{% for chave,nome in c.lista %}<option value="{{ chave }}" {% if chave in valor %}selected{% endif %}>{{ nome }}</option>{% endfor %}</select><p>Selecione no máximo dois temas, diferentes do principal.</p>
 {% elif c.tipo in ['bool','select','unidade','executor','juridico','autoridade','number'] %}<select {{ attrs|safe }}><option value="">{{ 'Ainda não avaliado' if c.tipo=='number' else 'Escolha…' }}</option>{% for chave,nome in c.lista %}<option value="{{ chave }}" {% if chave|string==valor|string %}selected{% endif %}>{{ nome }}</option>{% endfor %}</select>
 {% else %}<input {{ attrs|safe }} type="{{ c.tipo }}" value="{{ valor or '' }}" maxlength="200">{% endif %}

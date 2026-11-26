@@ -1220,3 +1220,12 @@ Catálogo fechado de temas de ações e aprendizados, separado de situação e r
 ### Deliberações do Lote 15-B — 26/11/2026
 
 Decisão de Ailton: C175/C179 permite apresentação incompleta e respostas a confirmar; exige ao menos um salvamento pelo servidor, com aviso dos blocos sem resposta antes do ato. C186 preserva abertura exclusiva do APA. C191 autoriza, sem acesso às respostas, somente cartão com identificação, contexto, etapa atual e contato do APA. C173 inclui o nome editável na contagem de preenchimento. A obrigatoriedade do FORM 1 continua em deliberação; a R17 não foi estendida. Implementado na branch do lote, sem merge ou ativação nas vistorias anteriores.
+
+
+## Complemento do Lote 16 — prazo do plano (Ailton, 26/11/2026)
+
+O plano informa duração em dias corridos. Para risco Crítico ou prioridade Imediata, o limite é 30 dias. O vencimento é calculado na aprovação, e a confirmação da autoridade mostra a data prevista se aprovar hoje. O tempo de espera pela aprovação não consome a duração de execução. Planos e aprovações anteriores permanecem no histórico; um plano antigo ainda não aprovado precisa informar duração antes da futura aprovação. A contagem de espera no dashboard pertence ao A9, ainda não implementado neste item.
+
+Situação: implementação do A1 em andamento; sem ativação em vistoria.
+
+A1.4, complemento aprovado por Ailton: a Secretaria escolhe reavaliar o risco ou criar nova providência. A nota permanece conjunta e o novo plano exige aprovação própria. Aceitar o residual é ato do Secretário até Alto e do Prefeito no Crítico, registrado pelo Gabinete com referência formal. A aceitação anterior à ação não substitui a posterior. Atos antigos não são reabertos automaticamente; inconsistências são sinalizadas.

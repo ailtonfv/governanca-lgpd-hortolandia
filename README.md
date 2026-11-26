@@ -2107,3 +2107,8 @@ Textos de orientação e abertura simplificados; controles gráficos duplicados 
 Sete testes direcionados da Parte C e da integração da Cartilha aprovados. Bateria completa e conferência visual registradas no relatório local final.
 
 Fechamento do Lote 15-B: execução completa única com 1.243 casos identificáveis (1.169 aprovados, 73 falhas e 1 ignorado). O resumo numérico do pytest informa 1.250, mas o XML e as marcas do log enumeram 1.243; a consolidação usa os casos nominais. A comparação nominal encontrou 48 falhas antigas e 25 diferenças novas. Foi restaurado o aviso intersecretarial que a simplificação do cartão ocultava antes do primeiro salvamento; os cenários foram alinhados aos textos, à apresentação após salvamento e ao cartão reduzido aprovados, preservando verificações de permissão, versão e auditoria. Após retestes direcionados, o resultado consolidado por teste é 1.194 aprovados, 48 falhas antigas e 1 ignorado, incluindo os 15 testes novos aprovados. Não representa uma segunda bateria completa. O teste antigo da Cartilha passou. Sem push, merge ou migração; a vistoria na 8017 depende de cópia exclusiva e pasta fixada na entrega.
+
+
+### Lote 16 — A1 (em desenvolvimento, sem ativação)
+
+A duração do plano começa na aprovação. A verificação com redução parcial exige nota residual conjunta e decisão posterior; Alto/Crítico exigem aceitação pela autoridade. A Secretaria pode optar por reavaliação ou nova providência, preservando a nota vigente e a aprovação do novo plano. Atos anteriores permanecem registrados, com aviso quando não têm decisão posterior. A integração com as condições de aceitação pertence ao A2.

@@ -6,6 +6,10 @@ RESULTADOS = {'elaborar':'Elaborar RIPD', 'revisar':'Revisar RIPD',
     'analise_adicional':'Precisa de análise adicional antes de decidir',
     'determinado_anpd':'Determinação da ANPD'}
 NOMES = {
+    'propor_residual_acao':'Nota residual posterior proposta', 'confirmar_residual_acao':'Nota residual posterior confirmada',
+    'decidir_residual_acao':'Tratamento do risco residual após a ação decidido',
+    'aceitar_residual_acao':'Risco residual após a ação aceito',
+    'reavaliacao_solicitada':'Reavaliação solicitada após a ação', 'providencia_pos_acao':'Nova providência após a ação',
     'salvar_temas':'Temas salvos', 'solicitar_tema':'Pedido de novo tema registrado',
     'informar_ripd':'Referência do RIPD informada', 'propor_avaliacao':'Proposta de avaliação registrada', 'revisar_avaliacao':'Nova proposta de avaliação registrada',
     'confirmar_avaliacao':'Nota conjunta confirmada', 'propor_triagem':'Proposta de triagem registrada',
@@ -82,17 +86,24 @@ def conteudo_ato(acao,e,autores,unidades):
     if acao=='sem_consenso':
         return [(('DPO' if lado=='dpo' else 'Secretaria')+' — '+('Avaliação' if campo=='avaliacao' else 'Triagem'), texto)
                 for campo in ('avaliacao','triagem') for lado,texto in e.get(campo+'_posicoes',{}).items()]
+    if acao in ('propor_residual_acao','confirmar_residual_acao','decidir_residual_acao','aceitar_residual_acao'):
+        nota=e.get('residual_acao') or {}
+        d=e.get('aceitacao_residual_acao' if acao=='aceitar_residual_acao' else 'decisao_residual_acao',{})
+        linhas=[('Nota residual após a ação', f"{nota.get('probabilidade')} × {nota.get('impacto')} = {nota.get('nota')} — {nota.get('faixa')}"),('Justificativa',d.get('justificativa',nota.get('justificativa','')))]
+        if d.get('opcao'):linhas.append(('Decisão',{'reavaliar':'Reavaliar o risco','nova_providencia':'Nova providência','aceitar':'Aceitar o residual'}.get(d['opcao'],d['opcao'])))
+        if d.get('documento'):linhas.append(('Documento formal',d['documento']))
+        return linhas
     valor=e.get(chaves.get(acao,''),{})
     if acao=='conferir_aprendizagem' and e.get('aprendizagem_devolvida'):valor=e['aprendizagem_devolvida']
     if acao=='aprender':valor={**valor, 'contexto':valor.get('contexto','Não informado')}
     if acao=='executar_medida':valor={**valor, 'resumo':valor.get('resumo','Não informado'),
                                     'cargo_responsavel':valor.get('cargo_responsavel') or 'Cargo não informado no ato anterior'}
     if acao=='manifestar_comite' and e.get('reavaliacao',{}).get('manifestacao_comite'):valor=e['reavaliacao']['manifestacao_comite']
-    if acao=='planejar':valor={k:e.get(k) for k in ('plano','executor_id','cargo_responsavel','unidade_responsavel_id','prazo')}
+    if acao=='planejar':valor={k:e.get(k) for k in ('plano','executor_id','cargo_responsavel','unidade_responsavel_id','duracao_dias','prazo')}
     if acao.startswith('pedir_'):valor=e.get('decisoes_pendentes',{}).get(acao.removeprefix('pedir_'),{})
     nomes={'observacao':'Observação do DPO','contexto':'Contexto (relato impessoal)','resumo':'Resumo do que foi feito','texto':'Texto','justificativa':'Justificativa','ata':'Referência à ata','finalidade':'Finalidade',
            'favoravel':'Favorável','evidencia':'Evidência','aprovada':'Aprovada','plano':'Plano',
-           'executor_id':'Executor registrado no ato anterior','cargo_responsavel':'Cargo responsável','unidade_responsavel_id':'Unidade responsável','referencia':'Referência do RIPD','documento':'Documento formal da decisão','prazo':'Prazo','diretriz':'Diretriz','escopo':'Escopo'}
+           'executor_id':'Executor registrado no ato anterior','cargo_responsavel':'Cargo responsável','unidade_responsavel_id':'Unidade responsável','referencia':'Referência do RIPD','documento':'Documento formal da decisão','duracao_dias':'Duração após a aprovação (dias corridos)','prazo':'Prazo','diretriz':'Diretriz','escopo':'Escopo'}
     from app.regras_atos34 import FINALIDADES
     from app.apresentacao_atos34 import data_br
     return [(rotulo,autores.get(v,v) if k=='executor_id' else unidades.get(v,v) if k=='unidade_responsavel_id' else FINALIDADES.get(v,v) if k=='finalidade' else data_br(v) if k=='prazo' else 'Sim' if v is True else 'Não' if v is False else v)

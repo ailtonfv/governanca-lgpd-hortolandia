@@ -41,7 +41,11 @@ ATOS = {
  'autorizar_referencia':(3,16,('aal',),'Autorizar consulta restrita pela autoridade do caso',[
     campo('pessoa_id','Autoridade participante','autoridade'),campo('necessidade','Necessidade de acesso','textarea')]),
  'planejar':(4,3,('secretaria',),'Registrar plano e responsável',[
-    campo('plano','Plano de ação','textarea'),campo('cargo','Cargo, função ou unidade responsável','select'),campo('prazo','Prazo','date')]),
+    campo('plano','Plano de ação','textarea'),campo('cargo','Cargo, função ou unidade responsável','select'),campo('duracao_dias','Duração após a aprovação (dias corridos)','inteiro')]),
+ 'propor_residual_acao':(4,8,('secretaria',),'Propor nota residual após a ação',[campo('pr','Probabilidade residual (1 a 5)','number'),campo('ir','Impacto residual (1 a 5)','number'),J]),
+ 'confirmar_residual_acao':(4,8,('dpo',),'Confirmar nota residual após a ação',[]),
+ 'decidir_residual_acao':(4,8,('secretaria',),'Decidir sobre o risco residual após a ação',[campo('opcao','Tratamento do risco residual','select',(('reavaliar','Reavaliar o risco no FORM 3'),('nova_providencia','Nova providência'))),J]),
+ 'aceitar_residual_acao':(4,8,('secretario','gabinete'),'Aceitar o risco residual após a ação',[J]),
  'aprovar_plano':(4,3,('secretario','gabinete'),'Aprovar plano',[J]),
  'executar_medida':(4,6,('executor_unidade',),'Registrar execução',[campo('resumo','Resumo do que foi feito','textarea'), E]),
  'verificar':(4,7,('verificador',),'Registrar verificação independente',[
@@ -55,6 +59,7 @@ ATOS = {
     campo('contexto','Contexto (relato impessoal)','textarea'),campo('diretriz','Diretriz de procedimento','textarea'),campo('escopo','Aplicação e limites','textarea')]),
  'conferir_aprendizagem':(4,9,('dpo',),'Conferir aprendizagem',[
     campo('sem_dados_pessoais','Conferi a ausência de dados pessoais','bool'),
+    campo('sem_falha_exposta','O relato não expõe falha ainda aberta nem identifica sistema, fornecedor ou unidade de modo que facilite exploração?','bool'),
     campo('observacao','Observação do DPO (obrigatória ao responder Não)','textarea')]),
  'autorizar_aprendizagem':(4,9,('secretaria',),'Autorizar versão para consulta',[]),
 }
@@ -108,6 +113,21 @@ def disponiveis(form, bloco, papeis, estado=None, pessoa_id=None, revisar=False)
             from app.providencias import manifestacao_dpo_solicitada
             if not manifestacao_dpo_solicitada(estado):continue
         if form==4:
+            from app.encerramento_form4 import pode_encerrar, nota_confirmada, reducao_total
+            posteriores=('propor_residual_acao','confirmar_residual_acao','decidir_residual_acao','aceitar_residual_acao')
+            if k in posteriores:
+                nota=nota_confirmada(estado)
+                if not estado.get('verificada') or reducao_total(estado) or estado.get('cancelada'):continue
+                if k=='propor_residual_acao' and (nota or 'dpo' in papeis):continue
+                if k=='confirmar_residual_acao' and (nota or not estado.get('residual_acao')):continue
+                if k=='decidir_residual_acao':
+                    if not nota or estado.get('decisao_residual_acao') or 'dpo' in papeis:continue
+                    if not estado.get('risco_id'):a['campos'][0]['opcoes']=(('nova_providencia','Nova providência'),)
+                if k=='aceitar_residual_acao':
+                    if not nota or estado.get('aceitacao_residual_acao') or 'dpo' in papeis:continue
+                    if ('gabinete' if nota['faixa']=='Crítico' else 'secretario') not in papeis:continue
+                    if 'gabinete' in papeis and nota['faixa']!='Crítico':continue
+            if k in ('aprender','conferir_aprendizagem','autorizar_aprendizagem') and not pode_encerrar(estado):continue
             if k == 'executar_medida' and not estado.get('plano_aprovado'):continue
             if k == 'verificar' and not estado.get('execucao'):continue
             if k in ('aprender','conferir_aprendizagem','autorizar_aprendizagem') and (not estado.get('verificada') or estado.get('cancelada')):continue
@@ -117,7 +137,7 @@ def disponiveis(form, bloco, papeis, estado=None, pessoa_id=None, revisar=False)
             salvos={'planejar':'plano','aprovar_plano':'plano_aprovado','executar_medida':'execucao',
                     'verificar':'verificacao','aprender':'aprendizagem','conferir_aprendizagem':'aprendizagem_conferida','autorizar_aprendizagem':'aprendizagem_autorizada'}
             if k=='planejar' and estado.get('plano_aprovado'):continue
-            if (estado.get('encerrada') or estado.get('cancelada')) and k not in ('aprender','conferir_aprendizagem','autorizar_aprendizagem'):continue
+            if (estado.get('encerrada') or estado.get('cancelada')) and k not in ('aprender','conferir_aprendizagem','autorizar_aprendizagem',*posteriores,'manifestar_dpo','manifestar_comite'):continue
             if k in salvos and estado.get(salvos[k]) and not revisar and not (k == 'aprender' and estado.get('aprendizagem_devolvida')):continue
         if k=='informar_ripd' and estado.get('referencia_ripd') and not revisar:continue
         if k=='manifestar_comite':
@@ -134,7 +154,7 @@ def disponiveis(form, bloco, papeis, estado=None, pessoa_id=None, revisar=False)
             for q in perguntas(4):
                 if q['id'] in VERIFICACAO:
                     a['campos'].append(dict(nome=q['id'], rotulo=q['id']+' · '+q['enunciado'], tipo='select', opcoes=[(v,v) for v in q['opcoes']]))
-        if k in ('aceitar_residual','aprovar_plano') and 'gabinete' in papeis:
+        if k in ('aceitar_residual','aprovar_plano','aceitar_residual_acao') and 'gabinete' in papeis:
             a['titulo']='Decisão do Prefeito — registrada pelo Gabinete'
             a['campos'].append(dict(nome='documento',rotulo='Documento formal da decisão (despacho, ofício ou processo nº)',tipo='text',opcoes=()))
         obrig=obrigatorios(k,{})
@@ -142,7 +162,7 @@ def disponiveis(form, bloco, papeis, estado=None, pessoa_id=None, revisar=False)
         if k == 'verificar':
             from app.etapas_forms34 import VERIFICACAO
             obrig.update(VERIFICACAO)
-        if k in ('aceitar_residual','aprovar_plano') and 'gabinete' in papeis:obrig.add('documento')
+        if k in ('aceitar_residual','aprovar_plano','aceitar_residual_acao') and 'gabinete' in papeis:obrig.add('documento')
         for c in a['campos']:
             c['obrigatorio']=c['nome'] in obrig or c['tipo']=='bool'
             c['condicional']=(c['nome']=='unidade_id' and k=='propor_triagem') or (c['nome']=='evidencia' and k in ('propor_avaliacao','revisar_avaliacao')) or (c['nome']=='observacao' and k=='conferir_aprendizagem')
@@ -164,7 +184,7 @@ def interpretar(acao, formulario):
             if valor not in ('sim','nao'):
                 raise ErrosCampos({c['nome']:'Escolha Sim ou Não para este campo obrigatório.'})
             valor=valor=='sim'
-        elif c['tipo']=='number':
+        elif c['tipo'] in ('number','inteiro'):
             valor=int(valor) if valor else None
         elif c['tipo']=='multi':
             valor=formulario.getlist(c['nome']) if hasattr(formulario,'getlist') else formulario.get(c['nome'],[])
@@ -172,7 +192,7 @@ def interpretar(acao, formulario):
     if acao in ('propor_avaliacao','revisar_avaliacao'):
         dados['controles']=[dict(descricao=dados.pop('controle'),implementado=dados.pop('implementado'),
                                   evidencia=dados.pop('evidencia'))]
-    if acao in ('aceitar_residual','aprovar_plano') and formulario.get('documento'):dados['documento']=formulario['documento']
+    if acao in ('aceitar_residual','aprovar_plano','aceitar_residual_acao') and formulario.get('documento'):dados['documento']=formulario['documento']
     if acao == 'verificar':
         from app.etapas_forms34 import VERIFICACAO
         dados.update({k: formulario.get(k, '') for k in VERIFICACAO})
