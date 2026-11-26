@@ -99,18 +99,25 @@ def test_a97_sobre_numero_aparece_no_html(dados,monkeypatch):
     assert 'Fornecedores e operadores do bloco 9 não entram nesta conta.' in resposta.text
 
 
-def test_fila_apa_nao_usa_competencia_secretario(dados,monkeypatch):
+def test_fila_apa_nao_usa_competencia_secretario(sessao,dados,monkeypatch):
     from app.dashboard import fontes, rotas
-    from app import consultas_interface
+    from app import continuidade_apa
+    from app.modelos import ConferenciaInternaForm1Integral
+    from sqlalchemy.orm import Session
     from app.main import app
     from testes.apoio_entrada import ClienteAposApresentacao
     rid=dados['registros'][0].id
     monkeypatch.setattr(rotas,'carregar',lambda *_:deepcopy(dados))
-    monkeypatch.setattr(consultas_interface,'carregar_painel',lambda *_: {'registros':[
-        {'id':rid,'providencias':[dict(categoria='conferencia_form1',acao_rotulo='Conferir apresentação fictícia')]}]})
+    pessoa=fontes.pessoa_ativa(sessao,'CONTA-A1')
+    original=Session.get
+    def get_conferencia(db,model,key,**kwargs):
+        if model is ConferenciaInternaForm1Integral and key==rid:return NS(solicitada_em=AGORA)
+        return original(db,model,key,**kwargs)
+    monkeypatch.setattr(Session,'get',get_conferencia)
+    monkeypatch.setattr(continuidade_apa,'conferente_da_apresentacao',lambda *_:pessoa.id)
     resposta=ClienteAposApresentacao(app).get('/dashboard?conta_id=CONTA-A1&lista=minha_fila_APA')
     assert resposta.status_code==200
-    assert 'Conferir apresentação fictícia' in resposta.text
+    assert 'Conferir levantamento' in resposta.text
     assert 'Não inclui decisões do Secretário' in resposta.text
 
 

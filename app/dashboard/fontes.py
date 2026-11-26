@@ -50,18 +50,19 @@ def pendencias_do_aal(sessao, conta_id, dados, agora):
 
 
 def pendencias_do_apa(sessao, conta_id, dados, agora):
-    from app.consultas_interface import carregar_painel
+    from app.continuidade_apa import conferente_da_apresentacao
+    from app.modelos import ConferenciaInternaForm1Integral
     from app.dashboard.consultas import linha, quadro, dias
-    painel=carregar_painel(sessao,conta_id)
-    permitidos={r.id:r for r in dados['registros']}
+    pessoa=pessoa_ativa(sessao,conta_id)
     lista=[]
-    for r in painel.get('registros',[]):
-        if r['id'] not in permitidos:continue
-        motivos=[p['acao_rotulo'] for p in r.get('providencias',[]) if p['categoria']=='conferencia_form1']
-        if not sessao.get(AtribuicaoForm1Integral,r['id']):motivos.append('Designar responsável pelo preenchimento')
+    for r in dados['registros']:
+        cf=sessao.get(ConferenciaInternaForm1Integral,r.id)
+        motivos=[]
+        if cf and conferente_da_apresentacao(sessao,r,cf)==pessoa.id:motivos.append('Conferir levantamento')
+        if not sessao.get(AtribuicaoForm1Integral,r.id):motivos.append('Designar responsável pelo preenchimento')
         if motivos:
-            desde=next((o['desde'] for o in dados.get('esperas_origem',[]) if o['registro_id']==r['id']),permitidos[r['id']].criado_em)
-            lista.append({**linha(dados,r['id']),'situacao':' · '.join(motivos),'desde':desde,'dias':dias(desde,agora),'etapa':'FORM 1'})
+            desde=cf.solicitada_em if cf else r.criado_em
+            lista.append({**linha(dados,r.id),'situacao':' · '.join(motivos),'desde':desde,'dias':dias(desde,agora),'etapa':'FORM 1'})
     return quadro('minha_fila_APA','Providências do APA',lista,regra='Conferências atribuídas ao APA em sessão e indicação de ARP. Não inclui decisões do Secretário.',papel='APA')
 
 

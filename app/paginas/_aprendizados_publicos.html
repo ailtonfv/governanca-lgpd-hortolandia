@@ -5,7 +5,7 @@
   <h4>Contexto</h4><p>{{ item.contexto }}</p>
   <h4>Aplicação e limites</h4><p>{{ item.limites }}</p>
   <p><strong>Temas:</strong> {{ item.temas|join(' · ') }}</p>
-  <footer>{{ item.registro }} · {{ item.item }}<br>
+  <footer>{{ item.registro.split(' · ')[0] }} · {{ item.item }}<br>
     Verificação aprovada, conferência do DPO e autorização da Secretaria em {{ item.autorizado_texto }}.</footer>
 </article>
 {% endmacro %}
@@ -24,7 +24,7 @@
   {% if lista_completa %}
     <div class="dash-acoes"><button type="button" data-dash-modo="grafico" aria-pressed="true">Cartões</button><button type="button" data-dash-modo="tabela" aria-pressed="false">Lista</button></div>
     <div data-dash-grafico>{% for item in aprendizado.itens %}{{ orientacao(item) }}{% else %}<p>Nenhuma orientação autorizada neste filtro.</p>{% endfor %}</div>
-    <div data-dash-tabela class="dash-tabela"><table><caption>Aprendizados autorizados</caption><thead><tr><th>Secretaria · serviço</th><th>Diretriz</th><th>Autorizado em</th><th>Registro</th></tr></thead><tbody>{% for item in aprendizado.itens %}<tr><td>{{ item.secretaria }} · {{ item.servico }}</td><td>{{ item.diretriz }}</td><td>{{ item.autorizado_texto }}</td><td>{{ item.registro }}</td></tr>{% else %}<tr><td colspan="4">Nenhuma orientação autorizada neste filtro.</td></tr>{% endfor %}</tbody></table></div>
+    <div data-dash-tabela class="dash-tabela"><table><caption>Aprendizados autorizados</caption><thead><tr><th>Secretaria · serviço</th><th>Diretriz</th><th>Autorizado em</th><th>Registro</th></tr></thead><tbody>{% for item in aprendizado.itens %}<tr><td>{{ item.secretaria }} · {{ item.servico }}</td><td>{{ item.diretriz }}</td><td>{{ item.autorizado_texto }}</td><td>{{ item.registro.split(' · ')[0] }}</td></tr>{% else %}<tr><td colspan="4">Nenhuma orientação autorizada neste filtro.</td></tr>{% endfor %}</tbody></table></div>
   {% elif aprendizado.destaque %}{{ orientacao(aprendizado.destaque) }}{% else %}<p>Nenhuma orientação autorizada para consulta.</p>{% endif %}
   {% if not lista_completa %}<p><a href="/dashboard/aprendizados?conta_id={{ conta_id|urlencode }}">Ver todos os aprendizados</a></p>{% endif %}
 </section>

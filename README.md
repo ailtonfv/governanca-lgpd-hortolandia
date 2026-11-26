@@ -2138,3 +2138,11 @@ ainda não alcançada, excluindo condicionais fechadas. O critério aprovado em
 O filtro de todas as Secretarias dos aprendizados permanece disponível.
 Sem migração, gravação na base de vistoria ou mudança na porta 8018.
 Testes e corte da entrega registrados no relatório local.
+
+Fechamento do A9: uma bateria completa (1.309 casos: 1.259 aprovados,
+48 falhas antigas, uma falha nova e um ignorado). A dependência indevida da
+classificação pessoal foi retirada das filas institucionais, preservando o teste
+de isolamento. Retestes direcionados: 24 aprovados. Consolidado por caso:
+1.260 aprovados, as mesmas 48 falhas antigas e um ignorado; 15 testes novos
+aprovados. Não representa uma segunda bateria completa. Corte após A9;
+A3 (com C163) e os itens seguintes do 16-B permanecem pendentes.
