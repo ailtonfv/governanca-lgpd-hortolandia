@@ -28,7 +28,7 @@
 {% if bloco==14 %}<section class="aviso-leitura" id="pendencias-automaticas"><h2>Pendências automáticas</h2>
 {% if pendencias_automaticas %}<ul>{% for p in pendencias_automaticas %}<li><a href="?conta_id={{ conta_id|urlencode }}&bloco={{ p.bloco }}{% if p.conjunto %}&conjunto={{ p.conjunto }}{% endif %}#pergunta-{{ p.id }}">F1-{{ p.id }}{% if p.conjunto %} · {{ 'participante' if p.bloco==3 else 'destinatário' }} {{ p.conjunto }}{% endif %}</a> — A confirmar</li>{% endfor %}</ul>
 {% else %}<p>Nenhuma pendência automática até agora. As respostas 'A confirmar' aparecem aqui.</p>{% endif %}</section>{% endif %}
-{% for g in grupos_condicionais %}<p data-condicao-grupo='{{ g.ids|tojson }}' data-condicao-texto="{{ g.condicao }}" {% if not g.quantidade %}hidden{% endif %}>{{ g.quantidade }} {{ 'pergunta aparece' if g.quantidade==1 else 'perguntas aparecem' }} quando {{ g.condicao }}.</p>{% endfor %}
+
 
 <form id="respostas-bloco" method="post"><input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="comando_id" value="{{ comando_id }}-bloco"><input type="hidden" name="versao" value="{{ versao_formulario }}"><input type="hidden" name="bloco" value="{{ bloco }}">{% if bloco in (3,10) %}<input type="hidden" name="conjunto" value="{{ conjunto }}">{% endif %}
 <fieldset {% if not pode %}disabled{% endif %}>
@@ -43,7 +43,7 @@
 {% if q.id == '1.3' %}<p class="aviso-leitura" id="aviso-nome-catalogo" data-nome-catalogo="{{ nome_catalogo }}" {% if q.valor == nome_catalogo %}hidden{% endif %}>{% if not (q.valor or '')|trim %}Informe o nome. No catálogo: {{ nome_catalogo }}.{% else %}O nome difere do catálogo ({{ nome_catalogo }}). Se o catálogo estiver errado, peça a correção à TI.{% endif %}</p>{% endif %}
 {% if q.options %}<label data-outro-form1 data-outro-origem="r:{{ q.id }}">Complemento, quando solicitado pela alternativa<input type="text" name="c:{{ q.id }}" value="{{ q.complemento }}" maxlength="1000"></label>{% endif %}
 {% with campo=q %}{% include '_ajuda_cartilha_form1.html' %}{% endwith %}
-<details><summary>Orientação do item</summary><p style="white-space:pre-line">{{ q.help }}</p></details></fieldset>{% endfor %}
+<details><summary>Orientação do item</summary><p style="white-space:pre-line">{{ q.help }}</p></details></fieldset>{% for g in grupos_condicionais if g.apos==q.id %}<p data-condicao-grupo='{{ g.ids|tojson }}' data-condicao-texto="{{ g.condicao }}" {% if not g.quantidade %}hidden{% endif %}>{{ g.quantidade }} {{ 'pergunta aparece' if g.quantidade==1 else 'perguntas aparecem' }} quando {{ g.condicao }}.</p>{% endfor %}{% endfor %}
 {% if repetida %}{% if pode and not conflito_versao %}<button type="submit" name="escopo" value="conjunto" class="botao-link-secundario">Salvar {{ 'participante' if bloco==3 else 'destinatário' }} {{ conjunto }}</button>{% endif %}</section>{% endif %}
 {% endfor %}</fieldset></form>
 {% if pode and bloco == 14 %}<form id="form-apresentar-apa" method="post" hidden><input type="hidden" name="acao" value="conferir"><input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="comando_id" value="{{ comando_id }}-conferir"><input type="hidden" name="versao" value="{{ versao_formulario }}"></form>{% endif %}

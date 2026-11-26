@@ -49,9 +49,10 @@ def condicoes_tela():
 def orientacao_condicional(key):
     q=definicoes()[key]
     if key.startswith(('OUV.', 'ESIC.')):
-        return 'Perguntas sobre Ouvidoria e e-SIC aparecem se um desses canais for marcado em F1-2.1 ou nos canais adicionais.'
+        canal = 'Ouvidoria' if key.startswith('OUV.') else 'e-SIC'
+        return f'Disponível quando {canal} for marcado em F1-2.1 ou F1-2.1.1.'
     if key.startswith('WPP.'):
-        return 'Perguntas sobre WhatsApp aparecem quando esse canal é informado.'
+        return 'Disponível quando WhatsApp for marcado em F1-8.3 ou nos canais informados no bloco 2.'
     conditions=q['conditions']
     if conditions and isinstance(conditions[0],str): conditions=[conditions]
     if conditions:
@@ -63,6 +64,8 @@ def orientacao_condicional(key):
 def grupos_condicionais(campos):
     """Uma orientação por condição; mantém os identificadores para atualização na tela."""
     grupos = {}
+    import re
+    presentes = {q['id'] for q in campos}
     for q in campos:
         texto = q['orientacao_condicional']
         condicao = texto.removeprefix('Disponível quando ').rstrip('.')
@@ -70,8 +73,10 @@ def grupos_condicionais(campos):
             condicao = condicao.split(' aparecem quando ',1)[1]
         elif ' aparecem se ' in condicao:
             condicao = condicao.split(' aparecem se ',1)[1]
+        fontes = re.findall(r'F1-([\d.]+)', texto)
+        apos = next((f.rstrip('.') for f in fontes if f.rstrip('.') in presentes), None)
         grupo = grupos.setdefault(texto, dict(ids=[], quantidade=0,
-            condicao=condicao))
+            condicao=condicao, apos=apos or (campos[0]['id'] if campos else None)))
         grupo['ids'].append(q['id'])
         grupo['quantidade'] += not q['ativa']
     return list(grupos.values())

@@ -7,12 +7,12 @@
     <li data-instrumento="FORM{{ numero }}"><h3>FORM {{ numero }} — {{ titulos[numero] }}</h3>
     {% if numero == 1 %}
       <p><strong>Situação neste Registro:</strong> {{ registro.form1_integral.fluxo_conferencia.estado }}</p>
-      <p>{{ proximos[numero] }}</p>
-      {% if registro.form1_integral.rascunho %}<a class="botao-link-secundario" href="/registros/{{ registro.id }}/form1-rev22?conta_id={{ conta_id|urlencode }}">Ir ao preenchimento</a>{% endif %}
+      {% if not registro.etapa_atual.form1_confirmado %}<p>{{ proximos[numero] }}</p>{% endif %}
+      {% if registro.form1_integral.rascunho %}<a class="botao-link-secundario" href="/registros/{{ registro.id }}/form1-rev22?conta_id={{ conta_id|urlencode }}">{{ 'Consultar FORM 1' if registro.etapa_atual.form1_confirmado else 'Ir ao preenchimento' }}</a>{% endif %}
     {% else %}
       {% for item in registro.etapa_atual.instrumentos[numero] %}
         <p><strong>Situação neste Registro:</strong> {{ item.situacao }}{% if item.desde %} em {{ (item.desde|data_local)[:10] }}{% endif %}</p>
-        <p>Consulte o instrumento para ver a próxima providência autorizada para seu perfil.</p>
+        {% if item.href %}<p>Consulte o instrumento para ver a próxima providência autorizada para seu perfil.</p>{% elif numero == 2 %}<p>O FORM 2 está com o AAL.</p>{% endif %}
         {% if item.href %}<a class="botao-link-secundario" href="{{ item.href }}">Consultar FORM {{ numero }}</a>{% endif %}
       {% else %}<p><strong>Situação neste Registro:</strong> Não iniciado.</p><p>{{ proximos[numero] }}</p>{% endfor %}
     {% endif %}</li>

@@ -152,9 +152,9 @@
       <h2 id="titulo-form1-integral" tabindex="-1">FORM 1 · Situação e conferência</h2><p>Levantamento do tratamento</p>{% if registro.form1_integral.rascunho %}<a class="botao-link-secundario" href="/registros/{{ registro.id }}/form1-rev22?conta_id={{ conta_id|urlencode }}">{{ "Ir ao preenchimento" if registro.form1_integral.pode_editar else "Consultar respostas" }}</a>{% endif %}
     </div>
     <p class="objetivo-form1"><strong>Objetivo:</strong> Descreva como este serviço, processo ou atividade coleta, utiliza, compartilha, armazena e protege dados pessoais.</p>
-    <span class="estado">{% if registro.form1_integral.fluxo_conferencia.iniciado_pelo_servidor %}Rascunho {{ registro.form1_integral.rascunho.versao }}{% else %}Não iniciado{% endif %}</span>
+    {% if not registro.form1_integral.fluxo_conferencia.iniciado_pelo_servidor %}<span class="estado">Não iniciado</span>{% endif %}
   </div>
-  <p class="aviso-leitura status-submissao-form1">{% if not registro.form1_integral.rascunho %}O rascunho ainda não foi iniciado{% if registro.form1_integral.arp_atual %} pelo ARP {{ registro.form1_integral.arp_atual.nome }}{% endif %}. Depois de iniciado, os 14 blocos poderão ser acessados conforme seu papel.{% else %}O FORM 1 pode ser salvo e retomado mesmo incompleto. Salvar não conclui a análise institucional.{% endif %}</p>
+  {% if not registro.form1_integral.rascunho %}<p class="aviso-leitura status-submissao-form1">O rascunho ainda não foi iniciado{% if registro.form1_integral.arp_atual %} pelo ARP {{ registro.form1_integral.arp_atual.nome }}{% endif %}. Depois de iniciado, os 14 blocos poderão ser acessados conforme seu papel.</p>{% endif %}
   {% if registro.etapa_atual.form != 1 %}
   <details><summary>Conferência e ingresso do FORM 1 no FORM 2</summary>
     {% if percurso.papel_apresentante and percurso.confirmador_id == identidade.pessoa_id %}<p>{{ percurso.papel_conferente }} — conferiu a {{ percurso.rotulo_apresentacao }}.</p>{% endif %}
@@ -163,8 +163,8 @@
     {% if registro.form1_integral.pode_atribuir_arp and esta_na_fila %}<p>Fila do FORM 2: {{ fila_unidade }} · {{ "Responsável: " ~ fila_responsavel if fila_responsavel else "Aguardando responsável" }}.</p>{% endif %}
   </details>
   {% endif %}
-  <p>Você pode salvar e continuar depois, mesmo incompleto.</p>
-  <p>Quando terminar, apresente ao APA. A versão apresentada fica guardada como estava.</p>
+  {% if not registro.etapa_atual.form1_confirmado %}<p>Você pode salvar e continuar depois, mesmo incompleto.</p>
+  <p>Quando terminar, apresente ao APA. A versão apresentada fica guardada como estava.</p>{% endif %}
   <p>Versão de trabalho: {{ registro.form1_integral.fluxo_conferencia.salvamentos }} salvamentos.</p>
 
   {% if not registro.form1_integral.pode_editar %}

@@ -49,7 +49,7 @@ def etapa_atual(sessao, registro, conta_id, fluxo):
         responsavel = sessao.get(Pessoa, p.responsavel_id) if p.responsavel_id else None
         participacoes.append(dict(estado=p.estado, entrada_em=p.entrada_em, assumida_em=p.assumida_em,
             concluida_em=p.concluida_em, responsavel=(rotulo(responsavel.nome)+' (AAL)') if responsavel else None))
-        href = f'/form2/participacoes/{p.id}?{query}' if autorizado(sessao,pessoa,p) else None
+        href = f'/form2/participacoes/{p.id}?{query}' if autorizado(sessao,pessoa,p) and (not p.responsavel_id or p.responsavel_id == pessoa.id) else None
         instrumentos[2].append(dict(situacao='Análise concluída' if p.estado=='concluida' else 'Em análise' if responsavel else 'Aguardando AAL',
                                     desde=p.concluida_em or p.assumida_em or p.entrada_em, href=href))
         if href and p.responsavel_id == pessoa.id and p.estado != 'concluida':
