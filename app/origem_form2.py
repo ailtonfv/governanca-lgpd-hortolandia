@@ -58,7 +58,11 @@ def ler_origem(sessao, registro_id, snapshot_id):
     if "revisao_22" in fonte:
         from app.rev22_form1 import respostas_conjuntos
         perguntas.extend(respostas_conjuntos(fonte))
-    return {"snapshot": snapshot, "estrutura": estrutura, "perguntas": perguntas,
+    from app.modelos import Registro, Unidade
+    registro = sessao.get(Registro, registro_id)
+    unidade = sessao.get(Unidade, registro.unidade_principal_atual_id) if registro else None
+    secretaria_saude = bool(unidade and unidade.id == 'SEC-SAUDE')
+    return {"snapshot": snapshot, "estrutura": estrutura, "perguntas": perguntas, 'secretaria_saude':secretaria_saude,
             "conteudo": deepcopy(fonte), "canais": deepcopy(pacote.get("retrato_canais", {}))}
 
 

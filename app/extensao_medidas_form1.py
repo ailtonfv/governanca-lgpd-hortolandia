@@ -29,8 +29,8 @@ def versao_medidas(conteudo=None):
 
 def versao_estrutura(conteudo=None):
     if "revisao_22" in (conteudo or {}):
-        from app.rev22_form1 import VERSAO,LACRE
-        if conteudo["revisao_22"].get("versao") != VERSAO or conteudo["revisao_22"].get("catalogo_sha256") != LACRE:
+        from app.rev22_form1 import VERSAO,LACRE,LACRES_HISTORICOS
+        if conteudo["revisao_22"].get("versao") != VERSAO or conteudo["revisao_22"].get("catalogo_sha256") not in LACRES_HISTORICOS | {LACRE}:
             raise ValueError("Estrutura REV22 divergente.")
         return VERSAO
     from app.extensao_guarda_form1 import usa_guarda, VERSAO_GUARDA, VERSAO_COMBINADA

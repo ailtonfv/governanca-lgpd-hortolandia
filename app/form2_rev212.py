@@ -108,7 +108,12 @@ def montar_bloco(base):
 
 def ramos_origem(origem):
     respostas = origem.get("conteudo", {}).get("respostas", {})
-    return {k.partition(".")[0] for k, v in respostas.items() if v and "." in k}
+    ramos = {k.partition(".")[0] for k, v in respostas.items() if v and "." in k}
+    if respostas.get('8.10') == 'Sim':ramos.add('WIFI_IDENTIFICACAO')
+    categorias = respostas.get('5.1', [])
+    if 'Dados de saúde' in categorias or origem.get('secretaria_saude'):
+        ramos.add('SAUDE_DECLARADA')
+    return ramos
 
 
 def indice_valores(conteudo):
@@ -121,6 +126,7 @@ def indice_valores(conteudo):
 
 
 def aplicavel(q, conjunto, valores, ramos, regras):
+    if not subbloco_visivel(q,ramos):return False
     def avaliar(c):
         op, origem, codigo = c["operador"], c["origem"], c["codigo_valor"]
         if op == "SEMPRE":
@@ -139,6 +145,13 @@ def aplicavel(q, conjunto, valores, ramos, regras):
             else all(map(avaliar, condicoes)))
 
 
+def subbloco_visivel(ident, ramos):
+    if ident == 'F2-9.4':return False
+    if ident.startswith('F2-9W.'):return 'WIFI_IDENTIFICACAO' in ramos
+    if ident.startswith('F2-11S.'):return 'SAUDE_DECLARADA' in ramos
+    return True
+
+
 def condicoes_de_tela(itens, regras, valores, ramos):
     """Expõe os gatilhos locais e resolve na origem as condições externas ao bloco."""
     from app.contrato_form2_respostas import carregar_contrato
@@ -147,6 +160,7 @@ def condicoes_de_tela(itens, regras, valores, ramos):
         rotulos.update({(chave, codigo): rotulo for codigo, rotulo in alternativas})
     locais = {q["id"]: q for q in itens}
     for q in itens:
+        q['oculto_por_origem'] = not subbloco_visivel(q['id'],ramos)
         condicoes = []
         for regra in regras.get(q["id"], []):
             op, origem, codigo = (regra[k] for k in ("operador", "origem", "codigo_valor"))
