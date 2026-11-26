@@ -14,11 +14,11 @@ from testes.apoio_r17 import preencher34
 def acao_verificada(s, entrada):
     obj = entrar(s, entrada, 4)
     preencher34(s, obj)
-    ato(s, obj, 'planejar', plano='Plano fictício', cargo='Equipe da unidade executora', prazo='2027-01-15')
+    ato(s, obj, 'planejar', plano='Plano fictício para revisar e documentar os acessos.', cargo='Equipe da unidade executora', duracao_dias=30)
     ato(s, obj, 'aprovar_plano', conta=SECRETARIO, justificativa='Decisão fictícia')
-    ato(s, obj, 'executar_medida', resumo='Execução fictícia', evidencia='Processo fictício 01')
+    ato(s, obj, 'executar_medida', resumo='Execução fictícia: acessos revisados e documentados.', evidencia='Processo fictício 01')
     ato(s, obj, 'verificar', conta=VERIFICADOR, aprovada=True, evidencia='Referência fictícia',
-        **{k: 'A confirmar' for k in VERIFICACAO})
+        **{k: ('Sim' if k=='F4-4.22' else 'A confirmar') for k in VERIFICACAO})
     return obj
 
 
@@ -76,9 +76,9 @@ def test_grupo1_devolucao_exige_observacao_e_nova_conferencia(sessao, entrada):
         'sem_dados_pessoais':'nao','observacao':''})
     assert resposta.status_code==409 and 'Preencha este campo obrigatório.' in resposta.text
     with pytest.raises(ValueError):
-        ato(sessao,obj,'conferir_aprendizagem',conta='CONTA-E1',sem_dados_pessoais=False,observacao=' ')
+        ato(sessao,obj,'conferir_aprendizagem',conta='CONTA-E1',sem_dados_pessoais=False,sem_falha_exposta=True,observacao=' ')
     assert estado(sessao,obj)==anterior
-    ato(sessao,obj,'conferir_aprendizagem',conta='CONTA-E1',sem_dados_pessoais=False,
+    ato(sessao,obj,'conferir_aprendizagem',conta='CONTA-E1',sem_dados_pessoais=False,sem_falha_exposta=True,
         observacao='Orientação fictícia: retirar identificadores individuais.')
     e=estado(sessao,obj)
     assert e['aprendizagem_devolvida']['versao']==1
@@ -92,7 +92,7 @@ def test_grupo1_devolucao_exige_observacao_e_nova_conferencia(sessao, entrada):
     e=estado(sessao,obj)
     assert e['aprendizagem']['versao']==2 and not e.get('aprendizagem_devolvida')
     with pytest.raises(ValueError):ato(sessao,obj,'autorizar_aprendizagem')
-    ato(sessao,obj,'conferir_aprendizagem',conta='CONTA-E1',sem_dados_pessoais=True,observacao='Conferência fictícia da nova versão.')
+    ato(sessao,obj,'conferir_aprendizagem',conta='CONTA-E1',sem_dados_pessoais=True,sem_falha_exposta=True,observacao='Conferência fictícia da nova versão.')
     assert estado(sessao,obj)['aprendizagem_conferida']['observacao']=='Conferência fictícia da nova versão.'
     ato(sessao,obj,'autorizar_aprendizagem')
     assert estado(sessao,obj)['aprendizagem_autorizada']

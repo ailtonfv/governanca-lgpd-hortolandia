@@ -86,7 +86,7 @@ def test_navegacao_e_tipo_no_cartao(sessao,entrada):
     from app.modelos import Registro
     reg=sessao.get(Registro,entrada.registro_id)
     tipo={'processo':'Processo','servico':'Serviço','atividade':'Atividade'}[reg.tipo_objeto]
-    assert tipo+' · ' in fila.text
+    assert '('+tipo+')' in fila.text
     evidencia('fila',fila.text)
     obj=entrar(sessao,entrada,4)
     evidencia('form4_bloco1',c.get(f'/forms34/{obj}/blocos/1?conta_id=CONTA-B1').text)

@@ -81,23 +81,23 @@ def test_comite_recusa_duplicidade_na_rodada(sessao, entrada):
 def test_verificacao_e_aprendizagem_separadas_do_plano(sessao, entrada):
     obj = entrar(sessao, entrada, 4)
     preencher34(sessao, obj)
-    ato(sessao, obj, 'planejar', plano='Plano fictício', cargo='Equipe da unidade executora', prazo='2027-01-15')
+    ato(sessao, obj, 'planejar', plano='Plano fictício para revisar e documentar os acessos.', cargo='Equipe da unidade executora', duracao_dias=30)
     ato(sessao, obj, 'aprovar_plano', conta=SECRETARIO, justificativa='Aprovação fictícia')
     with pytest.raises(ValueError, match='Plano aprovado'):
         ato(sessao, obj, 'salvar_bloco', bloco=1, campos={})
-    ato(sessao, obj, 'executar_medida', resumo='Execução fictícia', evidencia='Processo fictício 01')
+    ato(sessao, obj, 'executar_medida', resumo='Execução fictícia: acessos revisados e documentados.', evidencia='Processo fictício 01')
     with pytest.raises(ValueError):ato(sessao,obj,'aprender',contexto='Fictício',diretriz='Fictícia',escopo='Fictício')
     with pytest.raises(ValueError):ato(sessao,obj,'verificar',conta=VERIFICADOR,aprovada=True,evidencia='Verificação fictícia')
-    respostas={k:'A confirmar' for k in VERIFICACAO}
+    respostas={k:('Sim' if k=='F4-4.22' else 'A confirmar') for k in VERIFICACAO}
     ato(sessao,obj,'verificar',conta=VERIFICADOR,aprovada=True,evidencia='Verificação fictícia',**respostas)
     e=estado(sessao,obj)
     assert e['execucao']['evidencia']=='Processo fictício 01'
     assert e['execucao']['cargo_responsavel']=='Equipe da unidade executora'
     assert e['execucao']['unidade_responsavel_id']
-    assert e['verificacao']['quantidade_a_confirmar']==4
+    assert e['verificacao']['quantidade_a_confirmar']==3
     assert e['verificacao']['pessoa_id'] != e['execucao']['pessoa_id']
     ato(sessao,obj,'aprender',contexto='Contexto fictício',diretriz='Diretriz fictícia',escopo='Limites fictícios')
-    ato(sessao,obj,'conferir_aprendizagem',conta='CONTA-E1',sem_dados_pessoais=True)
+    ato(sessao,obj,'conferir_aprendizagem',conta='CONTA-E1',sem_dados_pessoais=True,sem_falha_exposta=True)
     ato(sessao,obj,'autorizar_aprendizagem')
     ato(sessao,obj,'aprender',contexto='Contexto fictício revisto',diretriz='Diretriz fictícia',escopo='Limites fictícios')
     assert not estado(sessao,obj).get('aprendizagem_conferida')
@@ -108,6 +108,9 @@ def test_interface_nao_oferece_aprendizagem_antes_da_verificacao():
     e={'form':4,'execucao':{'evidencia':'Fictícia'}}
     assert not disponiveis(4,9,{'secretaria'},e,'PESSOA-B')
     e['verificada']=True
+    assert not disponiveis(4,9,{'secretaria'},e,'PESSOA-B')
+    e['encerrada']=True
+    e['verificacao']={'respostas':{'F4-4.22':'Sim'}}
     assert [a['acao'] for a in disponiveis(4,9,{'secretaria'},e,'PESSOA-B')]==['aprender']
 
 
@@ -130,9 +133,9 @@ def test_tela_verificacao_historico_e_aprendizagem(sessao, entrada):
     from html.parser import HTMLParser
     obj=entrar(sessao,entrada,4)
     preencher34(sessao,obj)
-    ato(sessao,obj,'planejar',plano='Plano fictício',cargo='Chefia da unidade',prazo='2027-01-15')
+    ato(sessao,obj,'planejar',plano='Plano fictício para revisar e documentar os acessos.',cargo='Chefia da unidade',duracao_dias=30)
     ato(sessao,obj,'aprovar_plano',conta=SECRETARIO,justificativa='Aprovação fictícia')
-    ato(sessao,obj,'executar_medida',resumo='Execução fictícia de teste',evidencia='Referência fictícia 12F')
+    ato(sessao,obj,'executar_medida',resumo='Execução fictícia: acessos revisados e documentados.',evidencia='Referência fictícia 12F')
     client=TestClient(app)
     tela=client.get(f'/forms34/{obj}/blocos/7?conta_id=CONTA-B1')
     assert tela.status_code==200
@@ -164,7 +167,7 @@ def test_tela_verificacao_historico_e_aprendizagem(sessao, entrada):
 
 def test_plano_incompleto_recusado_antes_aprovacao(sessao,entrada):
     obj=entrar(sessao,entrada,4)
-    ato(sessao,obj,'planejar',plano='Plano fictício',cargo='Chefia da unidade',prazo='2027-01-15')
+    ato(sessao,obj,'planejar',plano='Plano fictício para revisar e documentar os acessos.',cargo='Chefia da unidade',duracao_dias=30)
     with pytest.raises(FormularioIncompleto):
         ato(sessao,obj,'aprovar_plano',conta=SECRETARIO,justificativa='Aprovação fictícia')
     assert not estado(sessao,obj).get('plano_aprovado')

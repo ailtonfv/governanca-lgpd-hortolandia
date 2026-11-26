@@ -294,7 +294,7 @@ def test_tela_apresenta_canais_habituais_depois_do_objeto():
     assert "Portal da Prefeitura" in resposta.text
     assert 'data-objetos-sugeridos="OBJ-SRV-001"' in resposta.text
     assert "não altera o catálogo mestre" in resposta.text
-    assert "Nenhum canal de entrada se aplica ao objeto" in resposta.text
+    assert "Nenhum canal: o trabalho não começa por pedido de alguém" in resposta.text
     assert "Ainda preciso confirmar os canais" in resposta.text
     assert "cidadãos, telefonemas nem protocolos individuais" in resposta.text
 

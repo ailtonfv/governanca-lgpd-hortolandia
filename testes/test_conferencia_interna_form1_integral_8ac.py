@@ -162,7 +162,7 @@ def test_apa_recebe_providencia_e_consulta_snapshot_imutavel(sessao):
     assert painel_http.status_code == 200
     assert painel_http.text.count('class="cartao-mapeamento"') == 1
     assert "Conferir levantamento" in painel_http.text
-    assert "Responsável pela próxima etapa:" in painel_http.text
+    assert "Responsável:" in painel_http.text and "Conferência interna:" in painel_http.text
     assert pagina.status_code == 200
     assert "não é submissão" in pagina.text
     assert resultado["snapshot_id"] in sessao.scalars(

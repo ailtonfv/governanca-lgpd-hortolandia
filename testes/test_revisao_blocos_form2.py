@@ -16,7 +16,9 @@ def test_percurso_revisao_completo(sessao):
         pagina = cliente.get(f"{rota}/{bloco}", params=aal)
         assert pagina.status_code == 200
         ids.extend(re.findall(r'<legend>(F2-[^ ]+) —', pagina.text))
-    assert len(ids) == len(set(ids)) == 255
+    assert len(ids) == len(set(ids)) == 235
+    assert 'F2-9.4' not in ids
+    assert not any(i.startswith(('F2-9W.', 'F2-11S.')) for i in ids)
     assert cliente.get(f"{rota}/3", params={"conta_id": "CONTA-A1"}).status_code == 403
     for bloco, versao, campo, valor in [(3, 1, "comentario:F2-3.1", "Revisar exemplo fictício"),
                                          (14, 2, "texto:F2-14.2#2", "Ocorrência de ensaio")]:

@@ -41,7 +41,7 @@ def test_p97_p99_p100_central_e_nome_da_origem(sessao, principal):
     assert f"{registro.codigo_lgpd} · {nome} ({tipo})" in central.text
     assert esperado not in central.text
     fila = cliente.get("/form2/filas?conta_id=CONTA-B1")
-    assert esperado in fila.text
+    assert f"{registro.codigo_lgpd} · {nome} ({tipo})" in fila.text
 
 
 def test_p86_comentario_nao_cria_preenchimento():

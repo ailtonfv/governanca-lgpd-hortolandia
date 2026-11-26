@@ -34,13 +34,13 @@ def test_aprendizado_outra_secretaria_sem_acesso_origem(sessao, entrada):
     risco = entrar(sessao, entrada)
     obj = entrar(sessao, entrada, 4)
     preencher34(sessao, obj)
-    ato(sessao,obj,'planejar',plano='Plano fictício',cargo='Equipe da unidade executora',prazo='2027-01-15')
+    ato(sessao,obj,'planejar',plano='Plano fictício para revisar e documentar os acessos.',cargo='Equipe da unidade executora',duracao_dias=30)
     ato(sessao,obj,'aprovar_plano',conta=SECRETARIO,justificativa='Aprovação fictícia')
-    ato(sessao,obj,'executar_medida',resumo='Execução fictícia',evidencia='EVIDENCIA-NAO-PUBLICAVEL-FICTICIA')
+    ato(sessao,obj,'executar_medida',resumo='Execução fictícia: acessos revisados e documentados.',evidencia='EVIDENCIA-NAO-PUBLICAVEL-FICTICIA')
     ato(sessao,obj,'verificar',conta=VERIFICADOR,aprovada=True,evidencia='Conferência fictícia',**{k:'Sim' for k in VERIFICACAO})
     ato(sessao,obj,'aprender',contexto='Contexto fictício autorizado',diretriz='Diretriz fictícia autorizada',escopo='Limites fictícios')
     assert consultar(sessao,'CONTA-C1')['total'] == 0
-    ato(sessao,obj,'conferir_aprendizagem',conta='CONTA-E1',sem_dados_pessoais=True)
+    ato(sessao,obj,'conferir_aprendizagem',conta='CONTA-E1',sem_dados_pessoais=True,sem_falha_exposta=True)
     assert consultar(sessao,'CONTA-C1')['total'] == 0
     ato(sessao,obj,'autorizar_aprendizagem')
     # Secretário passa a representar exclusivamente outra Secretaria fictícia.

@@ -95,7 +95,7 @@ def test_decisoes_distintas_com_ciencia_dialogo_e_autorizacao_preservada(sessao)
     assert 'decisao_conferencia.js' in html
     assert consulta + '/confirmar' in html and consulta + '/devolver' in html
     assert 'Conferir não exige que todos os campos obrigatórios estejam preenchidos.' in html
-    assert 'aria-current="step"><strong>APA confere' in painel.text
+    assert 'Conferência interna:' in painel.text and 'Aguardando conferência interna' in painel.text
     assert '#historico-conferencias-form1' in painel.text
     for ator in ('CONTA-G1', 'CONTA-B1'):
         assert cliente.get(consulta + '?conta_id=' + ator).status_code == 403

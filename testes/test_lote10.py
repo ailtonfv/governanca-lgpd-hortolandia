@@ -8,7 +8,17 @@ from app.contrato_form2_respostas import carregar_contrato
 from testes.test_governanca_form2_v9 import principal
 
 
-def test_d9_treze_rotulos_codigos_e_destinos(principal):
+def test_d9_treze_rotulos_codigos_e_destinos(principal, monkeypatch):
+    import app.origem_form2 as rotas
+    original = rotas.ler_origem
+    def origem_temática(*args, **kwargs):
+        from copy import deepcopy
+        origem = dict(original(*args, **kwargs))
+        origem['conteudo'] = deepcopy(origem['conteudo'])
+        origem['conteudo'].setdefault('respostas', {}).update({'8.10':'Sim', '5.1':['Dados de saúde']})
+        return origem
+    monkeypatch.setattr(rotas, 'ler_origem', origem_temática)
+
     # Arrange: decisões explícitas e códigos do contrato anterior.
     tecnicas = ('F2-2.5','F2-2.6','F2-2.8','F2-2.9','F2-2.9.3',
                 'F2-8.4','F2-8.5','F2-11S.8','F2-14.5')

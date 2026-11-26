@@ -34,7 +34,7 @@ def test_entrada_sem_listagem_identifica_apa_e_reserva_planejados():
     assert 'Servidor Épsilon (fictício) — MAT-FICT-0007 · ARP</dd>' in alterada.text
     assert 'MAT-FICT-0001 — Servidor Alfa (fictício) (titular)' in alterada.text
     assert 'Administração Central — TI' not in alterada.text
-    assert 'href="/dashboard?conta_id=CONTA-G1">Acessar Dashboard</a>' in alterada.text
+    assert 'href="/dashboard?conta_id=CONTA-G1">Acessar Dashboard</a>' not in alterada.text
 
 
 def test_atalhos_da_central_por_papel_vigente(sessao):
@@ -85,7 +85,7 @@ def test_cartoes_explicam_disponibilidade_sem_oferecer_acesso_direto():
         assert 'Nenhuma providência sua neste FORM.' in cartao
         assert 'Em acompanhamento (0)' in cartao
         assert 'Disponível na demonstração, conforme as permissões do seu perfil.' not in cartao
-        assert f'>Acessar FORM {numero}</a>' in cartao
+        assert (f'>Acessar FORM {numero}</a>' if numero <= 2 else '>Abrir Riscos e providências</a>') in cartao
         assert cartao.count('acesso-instrumento') == 1
     assert 'href="/dashboard?conta_id=CONTA-A1">Acessar Dashboard</a>' in cartoes[4]
     assert 'Acessar Administração Central' not in pagina
@@ -124,7 +124,7 @@ def test_escolha_explicita_filtra_form2_e_retorna_ao_contexto(sessao, conta, rot
     assert "APA responsável:" not in form2.text.split("<article", 1)[0]
     assert "APA responsável:" in form2.text.split("<article", 1)[1]
     assert "Etapa atual:" in form1.text
-    assert "Blocos: 0 de 14 preenchidos." in form1.text
+    assert "Blocos: 0 de 14 com respostas." in form1.text
     assert outro not in form2.text and rotulo in form2.text
     assert form2.url.path == "/painel" and contagens(sessao) == antes
     cartao = form1.text.split(f'id="cartao-registro-{rid}"', 1)[1].split("</article>", 1)[0]
@@ -137,7 +137,7 @@ def test_escolha_explicita_filtra_form2_e_retorna_ao_contexto(sessao, conta, rot
         assert "Escolha um Registro</h2>" not in lista.text
         assert lista.text.count(">Voltar ao Painel geral de Registros</a>") == 1
     if conta == "CONTA-A1":  # Nesta massa, Alfa é o ARP do FORM 1 e Épsilon é o AAL do FORM 2.
-        retomadas = re.findall(r'href="([^"]+/registros/' + re.escape(rid) + r'\?[^"]+#titulo-bloco-\d+)"', form1.text)
+        retomadas = re.findall(r'href="([^"]*/registros/' + re.escape(rid) + r'/form1-rev22\?[^"]+)"', form1.text)
         assert retomadas and all("instrumento=form1" in href and "secretaria_id=UNID-NORTE" in href for href in retomadas)
     for tela, destino, filtro in [(form1, link1, "form1"), (form2, destino_form2(form2.text), "form2")]:
         resumo = re.search(r'class="botao-link-secundario" href="([^"]+)">Voltar ao Painel geral de Registros', tela.text).group(1)
@@ -146,7 +146,7 @@ def test_escolha_explicita_filtra_form2_e_retorna_ao_contexto(sessao, conta, rot
         pagina = cliente.get(destino)
         assert pagina.status_code == 200
         identidade = "Servidor Alfa (fictício) — MAT-FICT-0001" if conta == "CONTA-A1" else "Servidor Épsilon (fictício) — MAT-FICT-0007"
-        assert f"Servidor em sessão:</strong> {identidade}" in pagina.text
+        assert "Servidor em sessão:" in pagina.text and identidade in pagina.text
         if filtro == "form2":
             assert "APA responsável:" in pagina.text and "Função nesta atividade:" in pagina.text
             assert "Rascunho 1 (sem apresentação registrada)" in tela.text and "Designação em" in tela.text

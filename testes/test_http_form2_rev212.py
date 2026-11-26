@@ -58,7 +58,9 @@ def test_percurso_rascunho_http(monkeypatch):
         pagina = abrir(n)
         assert pagina.status_code == 200
         ids.extend(re.findall(r"<legend>(F2-[^ ]+) —", pagina.body.decode()))
-    assert len(ids) == len(set(ids)) == 255
+    assert len(ids) == len(set(ids)) == 235
+    assert 'F2-9.4' not in ids
+    assert not any(i.startswith(('F2-9W.', 'F2-11S.')) for i in ids)
     with pytest.raises(HTTPException) as erro:
         abrir(3, conta="FICTICIO-OUTRA")
     assert erro.value.status_code == 403

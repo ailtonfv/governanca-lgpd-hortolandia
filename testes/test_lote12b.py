@@ -139,13 +139,13 @@ def test_f4_verificacao_cobra_somente_campos_do_verificador(sessao,entrada):
     from testes.test_lote12 import preparar_acao
     from app.etapas_forms34 import VERIFICACAO
     obj=preparar_acao(sessao,entrada)
-    ato(sessao,obj,'executar_medida',resumo='Execução fictícia',evidencia='Evidência fictícia')
+    ato(sessao,obj,'executar_medida',resumo='Execução fictícia: acessos revisados e documentados.',evidencia='Evidência fictícia')
     antes=deepcopy(estado(sessao,obj))
     with pytest.raises(ValueError):
         ato(sessao,obj,'verificar',conta=VERIFICADOR,aprovada=True,evidencia='Verificação fictícia')
     assert estado(sessao,obj)==antes
     ato(sessao,obj,'verificar',conta=VERIFICADOR,aprovada=True,evidencia='Verificação fictícia',
-        **{k:'A confirmar' for k in VERIFICACAO})
+        **{k:('Sim' if k=='F4-4.22' else 'A confirmar') for k in VERIFICACAO})
     e=estado(sessao,obj)
     assert e['encerrada'] and e['conferencia_r17']['quantidade_a_confirmar']>0
     ev=sessao.scalars(select(Evento).where(Evento.cadeia_id==obj,Evento.tipo_evento=='f34_encerramento_automatico')).one()

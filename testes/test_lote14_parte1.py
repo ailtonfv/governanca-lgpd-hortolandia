@@ -49,10 +49,10 @@ def test_consulta_form2_aguarda_dpo_e_nao_beta(sessao, entrada):
 def test_execucao_aguarda_verificador_nao_secretaria(sessao, entrada):
     obj = entrar(sessao, entrada, 4)
     preencher34(sessao, obj)
-    ato(sessao, obj, 'planejar', plano='Plano fictício', cargo='Equipe da unidade executora', prazo='2027-01-15')
+    ato(sessao, obj, 'planejar', plano='Plano fictício para revisar e documentar os acessos.', cargo='Equipe da unidade executora', duracao_dias=30)
     assert not item(sessao, 'CONTA-B1', 4, obj)['pendente']
     ato(sessao, obj, 'aprovar_plano', conta=SECRETARIO, justificativa='Aprovação fictícia')
-    ato(sessao, obj, 'executar_medida', resumo='Execução fictícia', evidencia='Arquivo fictício 01')
+    ato(sessao, obj, 'executar_medida', resumo='Execução fictícia: acessos revisados e documentados.', evidencia='Arquivo fictício 01')
     assert not item(sessao, 'CONTA-B1', 4, obj)['pendente']
     assert item(sessao, VERIFICADOR, 4, obj)['ato'] == 'verificar'
     pagina = TestClient(app).get('/forms34', params={'conta_id':'CONTA-B1'})

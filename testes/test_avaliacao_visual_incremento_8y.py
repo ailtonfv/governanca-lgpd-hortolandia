@@ -37,7 +37,7 @@ def test_abertura_explica_catalogo_demonstrativo_e_tres_situacoes_de_canais():
     assert "Se o seu não aparecer, peça a inclusão à TI" in pagina.text
     assert "Por quais canais as demandas chegam habitualmente?" in pagina.text
     assert "Conheço os canais utilizados" in pagina.text
-    assert "Nenhum canal de entrada se aplica ao objeto" in pagina.text
+    assert "Nenhum canal: o trabalho não começa por pedido de alguém" in pagina.text
     assert "Ainda preciso confirmar os canais" in pagina.text
     assert "não significa ausência de canais" in pagina.text
     assert "não informe um contexto livre" in pagina.text

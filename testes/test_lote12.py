@@ -1,7 +1,7 @@
 """Regras demonstrativas; massa sintética e atos reais do domínio."""
 from testes.apoio_r17 import completo2, preencher34
 from copy import deepcopy
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime, timezone
 from uuid import uuid4
 import pytest
 from sqlalchemy import select, func
@@ -144,24 +144,26 @@ def test_prefeito_fora_critico_e_dpo_aceitando_recusados(sessao,entrada):
 def preparar_acao(s,p):
     obj=entrar(s,p,4)
     preencher34(s,obj)
-    ato(s,obj,'planejar',plano='Plano fictício',cargo='Chefia da unidade',prazo=(date.today()-timedelta(days=2)).isoformat())
-    ato(s,obj,'aprovar_plano',conta=SECRETARIO,justificativa='Fictícia')
+    ato(s,obj,'planejar',plano='Plano fictício para revisar e documentar os acessos.',cargo='Chefia da unidade',duracao_dias=1)
+    from unittest.mock import patch
+    with patch('app.fluxo_forms34.agora_utc', return_value=datetime.now(timezone.utc)-timedelta(days=3)):
+        ato(s,obj,'aprovar_plano',conta=SECRETARIO,justificativa='Fictícia')
     return obj
 
 
 def test_verificacao_segregacao_encerramento_aprendizagem(sessao,entrada):
     obj=preparar_acao(sessao,entrada)
-    with pytest.raises(ValueError,match='após verificação'):ato(sessao,obj,'aprender',diretriz='Fictícia',escopo='Fictício', contexto='Contexto fictício')
-    with pytest.raises(PermissionError):ato(sessao,obj,'executar_medida',conta='CONTA-E1',evidencia='Fictícia', resumo='Execução fictícia')
-    ato(sessao,obj,'executar_medida',evidencia='Fictícia', resumo='Execução fictícia')
+    with pytest.raises(ValueError,match='verificação aprovada'):ato(sessao,obj,'aprender',diretriz='Fictícia',escopo='Fictício', contexto='Contexto fictício')
+    with pytest.raises(PermissionError):ato(sessao,obj,'executar_medida',conta='CONTA-E1',evidencia='Fictícia', resumo='Execução fictícia: acessos revisados e documentados.')
+    ato(sessao,obj,'executar_medida',evidencia='Fictícia', resumo='Execução fictícia: acessos revisados e documentados.')
     for conta in ('CONTA-B1','CONTA-E1',RELATOR):
-        with pytest.raises(PermissionError):ato(sessao,obj,'verificar',conta=conta,aprovada=True,evidencia='Fictícia', **{k:'A confirmar' for k in ('F4-4.18','F4-4.20','F4-4.21','F4-4.22')})
-    ato(sessao,obj,'verificar',conta=VERIFICADOR,aprovada=True,evidencia='Fictícia', **{k:'A confirmar' for k in ('F4-4.18','F4-4.20','F4-4.21','F4-4.22')})
+        with pytest.raises(PermissionError):ato(sessao,obj,'verificar',conta=conta,aprovada=True,evidencia='Fictícia', **{k:('Sim' if k=='F4-4.22' else 'A confirmar') for k in ('F4-4.18','F4-4.20','F4-4.21','F4-4.22')})
+    ato(sessao,obj,'verificar',conta=VERIFICADOR,aprovada=True,evidencia='Fictícia', **{k:('Sim' if k=='F4-4.22' else 'A confirmar') for k in ('F4-4.18','F4-4.20','F4-4.21','F4-4.22')})
     assert estado(sessao,obj)['encerrada']
     assert not em_atraso(estado(sessao,obj))
     ato(sessao,obj,'aprender',diretriz='Diretriz fictícia',escopo='Escopo fictício', contexto='Contexto fictício')
     with pytest.raises(ValueError,match='DPO'):ato(sessao,obj,'autorizar_aprendizagem')
-    ato(sessao,obj,'conferir_aprendizagem',conta='CONTA-E1',sem_dados_pessoais=True)
+    ato(sessao,obj,'conferir_aprendizagem',conta='CONTA-E1',sem_dados_pessoais=True,sem_falha_exposta=True)
     ato(sessao,obj,'autorizar_aprendizagem')
     assert estado(sessao,obj)['aprendizagem_autorizada']
 
@@ -208,11 +210,11 @@ def test_migracao_excecao_exata(nome):
 def test_critico_triagem_conjunta_e_autoridade(sessao,entrada):
     obj=entrar(sessao,entrada);avaliar(sessao,obj,5)
     with pytest.raises(PermissionError):ato(sessao,obj,'aceitar_residual',conta=SECRETARIO,justificativa='Fictícia')
-    with pytest.raises(ValueError,match='DPO'):ato(sessao,obj,'aceitar_residual',conta=PREFEITO,documento='OFICIO-FICTICIO-12E',justificativa='Fictícia')
+    with pytest.raises(ValueError,match='DPO'):ato(sessao,obj,'aceitar_residual',conta=PREFEITO,documento='OFICIO-FICTICIO-12E',solicitar_juridico=False,motivo_juridico='Dispensa fictícia fundamentada',justificativa='Fictícia')
     ato(sessao,obj,'manifestar_dpo',conta='CONTA-E1',texto='Manifestação fictícia')
-    with pytest.raises(ValueError,match='Comitê'):ato(sessao,obj,'aceitar_residual',conta=PREFEITO,documento='OFICIO-FICTICIO-12E',justificativa='Fictícia')
+    with pytest.raises(ValueError,match='Comitê'):ato(sessao,obj,'aceitar_residual',conta=PREFEITO,documento='OFICIO-FICTICIO-12E',solicitar_juridico=False,motivo_juridico='Dispensa fictícia fundamentada',justificativa='Fictícia')
     ato(sessao,obj,'manifestar_comite',conta=RELATOR,finalidade='residual',ata='Ata fictícia',texto='Deliberação fictícia',favoravel=True)
-    ato(sessao,obj,'aceitar_residual',conta=PREFEITO,documento='OFICIO-FICTICIO-12E',justificativa='Fictícia')
+    ato(sessao,obj,'aceitar_residual',conta=PREFEITO,documento='OFICIO-FICTICIO-12E',solicitar_juridico=False,motivo_juridico='Dispensa fictícia fundamentada',justificativa='Fictícia')
     with pytest.raises(ValueError,match='triagem'):ato(sessao,obj,'concluir_avaliacao')
     ato(sessao,obj,'propor_triagem',resultado='elaborar',justificativa='Fictícia',unidade_id='UNID-NORTE')
     with pytest.raises(ValueError,match='triagem'):ato(sessao,obj,'concluir_avaliacao')
@@ -298,19 +300,19 @@ def test_multiplos_riscos_identidade_e_origem(sessao,entrada):
 
 def test_executor_mesma_pessoa_com_outra_conta_nao_verifica(sessao,entrada):
     obj=preparar_acao(sessao,entrada)
-    ato(sessao,obj,'executar_medida',evidencia='Fictícia', resumo='Execução fictícia')
+    ato(sessao,obj,'executar_medida',evidencia='Fictícia', resumo='Execução fictícia: acessos revisados e documentados.')
     sessao.add(Conta(id='CONTA-B-EXTRA-FICT',pessoa_id='PESSOA-B'))
     sessao.add(Designacao(pessoa_id='PESSOA-B',unidade_id='SEC-ESP',papel='demo34_verificador'))
     sessao.commit()
     with pytest.raises(PermissionError,match='independente'):
-        ato(sessao,obj,'verificar',conta='CONTA-B-EXTRA-FICT',aprovada=True,evidencia='Fictícia', **{k:'A confirmar' for k in ('F4-4.18','F4-4.20','F4-4.21','F4-4.22')})
+        ato(sessao,obj,'verificar',conta='CONTA-B-EXTRA-FICT',aprovada=True,evidencia='Fictícia', **{k:('Sim' if k=='F4-4.22' else 'A confirmar') for k in ('F4-4.18','F4-4.20','F4-4.21','F4-4.22')})
 
 
 def test_pedido_pendente_impede_so_encerramento(sessao,entrada):
     obj=preparar_acao(sessao,entrada)
     ato(sessao,obj,'pedir_prorrogacao',prazo=(date.today()+timedelta(days=1)).isoformat(),justificativa='Fictícia')
-    ato(sessao,obj,'executar_medida',evidencia='Fictícia', resumo='Execução fictícia')
-    ato(sessao,obj,'verificar',conta=VERIFICADOR,aprovada=True,evidencia='Fictícia', **{k:'A confirmar' for k in ('F4-4.18','F4-4.20','F4-4.21','F4-4.22')})
+    ato(sessao,obj,'executar_medida',evidencia='Fictícia', resumo='Execução fictícia: acessos revisados e documentados.')
+    ato(sessao,obj,'verificar',conta=VERIFICADOR,aprovada=True,evidencia='Fictícia', **{k:('Sim' if k=='F4-4.22' else 'A confirmar') for k in ('F4-4.18','F4-4.20','F4-4.21','F4-4.22')})
     assert not estado(sessao,obj).get('encerrada')
     ato(sessao,obj,'decidir_prorrogacao',conta=SECRETARIO,aprovar=False,justificativa='Fictícia')
     assert estado(sessao,obj)['encerrada']
@@ -381,19 +383,19 @@ def test_percurso_critico_dez_passos_sem_secretario_de_outra_unidade(sessao,entr
     ato(sessao,risco,'confirmar_triagem',conta='CONTA-E1')
     ato(sessao,risco,'manifestar_comite',conta=RELATOR,finalidade='residual',
         ata='ATA-FICT-12',texto='Deliberação fictícia',favoravel=True)
-    ato(sessao,risco,'aceitar_residual',conta=PREFEITO,documento='OFICIO-FICTICIO-12E',justificativa='Aceitação fictícia')
+    ato(sessao,risco,'aceitar_residual',conta=PREFEITO,documento='OFICIO-FICTICIO-12E',solicitar_juridico=False,motivo_juridico='Dispensa fictícia fundamentada',justificativa='Aceitação fictícia')
     # Act: pass from the frozen risk version to an action and complete the cycle.
     acao=ato(sessao,risco,'encaminhar_acao',justificativa='Providência fictícia')['identidade_id']
     assert acao!=risco
     ato(sessao,risco,'concluir_avaliacao')
     preencher34(sessao,acao)
-    ato(sessao,acao,'planejar',plano='Plano fictício verificável',cargo='Chefia da unidade',
-        prazo=(date.today()+timedelta(days=10)).isoformat())
-    ato(sessao,acao,'aprovar_plano',conta=PREFEITO,documento='OFICIO-FICTICIO-12E',justificativa='Aprovação fictícia')
-    ato(sessao,acao,'executar_medida',evidencia='Evidência fictícia', resumo='Execução fictícia')
-    ato(sessao,acao,'verificar',conta=VERIFICADOR,aprovada=True,evidencia='Conferência fictícia', **{k:'A confirmar' for k in ('F4-4.18','F4-4.20','F4-4.21','F4-4.22')})
+    ato(sessao,acao,'planejar',plano='Plano fictício para revisar e documentar os acessos.',cargo='Chefia da unidade',
+        duracao_dias=10)
+    ato(sessao,acao,'aprovar_plano',conta=PREFEITO,documento='OFICIO-FICTICIO-12E',solicitar_juridico=False,motivo_juridico='Dispensa fictícia fundamentada',justificativa='Aprovação fictícia')
+    ato(sessao,acao,'executar_medida',evidencia='Evidência fictícia', resumo='Execução fictícia: acessos revisados e documentados.')
+    ato(sessao,acao,'verificar',conta=VERIFICADOR,aprovada=True,evidencia='Conferência fictícia', **{k:('Sim' if k=='F4-4.22' else 'A confirmar') for k in ('F4-4.18','F4-4.20','F4-4.21','F4-4.22')})
     ato(sessao,acao,'aprender',diretriz='Diretriz fictícia',escopo='Escopo fictício', contexto='Contexto fictício')
-    ato(sessao,acao,'conferir_aprendizagem',conta='CONTA-E1',sem_dados_pessoais=True)
+    ato(sessao,acao,'conferir_aprendizagem',conta='CONTA-E1',sem_dados_pessoais=True,sem_falha_exposta=True)
     ato(sessao,acao,'autorizar_aprendizagem')
     # Assert: correct origin, independent verification and explicit learning authorization.
     e=estado(sessao,acao)

@@ -43,10 +43,10 @@ def test_plano_exige_tema_sem_bloquear_parcial(sessao,entrada):
     antes=estado(sessao,obj)
     for principal,complementares in [('',[]),('T07',['T01','T02','T03']),('T07',['T07']),('T07',['T01','T01']),('T99',[])]:
         with pytest.raises(ValueError):
-            ato(sessao,obj,'planejar',plano='Plano fictício',cargo='Equipe da unidade executora',prazo='2027-01-15',tema_principal=principal,temas_complementares=complementares)
+            ato(sessao,obj,'planejar',plano='Plano fictício para revisar e documentar os acessos.',cargo='Equipe da unidade executora',duracao_dias=30,tema_principal=principal,temas_complementares=complementares)
         sessao.rollback()
         assert estado(sessao,obj)==antes
-    ato(sessao,obj,'planejar',plano='Plano fictício',cargo='Equipe da unidade executora',prazo='2027-01-15',tema_principal='T07',temas_complementares=['T09','T04'])
+    ato(sessao,obj,'planejar',plano='Plano fictício para revisar e documentar os acessos.',cargo='Equipe da unidade executora',duracao_dias=30,tema_principal='T07',temas_complementares=['T09','T04'])
     assert estado(sessao,obj)['temas']['principal']=='T07'
     assert obj in c.get('/forms34?conta_id=CONTA-B1&tema=T04').text
     assert obj not in c.get('/forms34?conta_id=CONTA-B1&tema=T03').text
@@ -86,26 +86,26 @@ def test_migracao_aditiva_idempotente_e_tela(sessao,entrada):
     assert resposta.status_code==200
     assert estado(sessao,obj)['temas']=={'principal':'T07','complementares':['T04','T09']}
     antes=estado(sessao,obj)
-    recusado=c.post(url,data=dict(acao='planejar',versao=antes['versao'],comando_id=str(uuid4()),plano='Plano fictício',cargo='Equipe da unidade executora',prazo='2027-01-15',tema_principal=''))
+    recusado=c.post(url,data=dict(acao='planejar',versao=antes['versao'],comando_id=str(uuid4()),plano='Plano fictício para revisar e documentar os acessos.',cargo='Equipe da unidade executora',duracao_dias=30,tema_principal=''))
     assert recusado.status_code==409 and 'tema principal' in recusado.text
     assert estado(sessao,obj)==antes
 
 
 def test_temas_aprendizado_versao_e_busca_outra_unidade(sessao,entrada):
     obj=entrar(sessao,entrada,4);preencher34(sessao,obj)
-    ato(sessao,obj,'planejar',plano='Plano fictício',cargo='Equipe da unidade executora',prazo='2027-01-15',tema_principal='T07',temas_complementares=['T09'])
+    ato(sessao,obj,'planejar',plano='Plano fictício para revisar e documentar os acessos.',cargo='Equipe da unidade executora',duracao_dias=30,tema_principal='T07',temas_complementares=['T09'])
     ato(sessao,obj,'aprovar_plano',conta=SECRETARIO,justificativa='Aprovação fictícia')
-    ato(sessao,obj,'executar_medida',resumo='Execução fictícia',evidencia='Arquivo fictício')
+    ato(sessao,obj,'executar_medida',resumo='Execução fictícia: acessos revisados e documentados.',evidencia='Arquivo fictício')
     ato(sessao,obj,'verificar',conta=VERIFICADOR,aprovada=True,evidencia='Verificação fictícia',**{k:'Sim' for k in VERIFICACAO})
     ato(sessao,obj,'aprender',contexto='Contexto fictício',diretriz='Diretriz fictícia',escopo='Limites fictícios')
-    ato(sessao,obj,'conferir_aprendizagem',conta='CONTA-E1',sem_dados_pessoais=True)
+    ato(sessao,obj,'conferir_aprendizagem',conta='CONTA-E1',sem_dados_pessoais=True,sem_falha_exposta=True)
     ato(sessao,obj,'autorizar_aprendizagem')
     assert consultar(sessao,'CONTA-C1',tema='T09')['total']==1
     ato(sessao,obj,'aprender',contexto='Contexto fictício revisto',diretriz='Diretriz fictícia nova',escopo='Limites fictícios',tema_principal='T01',temas_complementares=['T02'])
     assert estado(sessao,obj)['aprendizagem']['versao']==2
     assert consultar(sessao,'CONTA-C1',tema='T09')['total']==1
     assert consultar(sessao,'CONTA-C1',tema='T02')['total']==0
-    ato(sessao,obj,'conferir_aprendizagem',conta='CONTA-E1',sem_dados_pessoais=True)
+    ato(sessao,obj,'conferir_aprendizagem',conta='CONTA-E1',sem_dados_pessoais=True,sem_falha_exposta=True)
     ato(sessao,obj,'autorizar_aprendizagem')
     assert consultar(sessao,'CONTA-C1',tema='T09')['total']==0
     assert consultar(sessao,'CONTA-C1',tema='T02')['total']==1

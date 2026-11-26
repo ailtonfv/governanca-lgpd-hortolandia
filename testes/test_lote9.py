@@ -178,7 +178,17 @@ def test_c8_secretaria_validada_funcoes_curto(sessao, principal):
     assert tela.status_code == 200 and 'name="unidade:F2-14.3#1"' in tela.text
 
 
-def test_n3_n4_n5_textos_na_tela(sessao, principal):
+def test_n3_n4_n5_textos_na_tela(sessao, principal, monkeypatch):
+    import app.origem_form2 as rotas
+    original = rotas.ler_origem
+    def origem_temática(*args, **kwargs):
+        from copy import deepcopy
+        origem = dict(original(*args, **kwargs))
+        origem['conteudo'] = deepcopy(origem['conteudo'])
+        origem['conteudo'].setdefault('respostas', {}).update({'8.10':'Sim', '5.1':['Dados de saúde']})
+        return origem
+    monkeypatch.setattr(rotas, 'ler_origem', origem_temática)
+
     principal.conteudo={**principal.conteudo,'respostas_etapa1':{'F2-2.9':'A_CONFIRMAR'}}
     sessao.commit(); cliente=TestClient(app)
     tela=cliente.get(f'/form2/participacoes/{principal.id}/blocos/14?conta_id=CONTA-B1')

@@ -27,7 +27,7 @@ def test_ripd_referencia_autoria_idempotencia_e_recusa(sessao,entrada):
     with pytest.raises(PermissionError):ato(sessao,obj,'informar_ripd',conta=GABINETE,referencia='PROC-FICTICIO')
     assert estado(sessao,obj)==antes
     comando=str(uuid4());versao=antes['versao']
-    args=dict(conta_id='CONTA-E1',comando_id=comando,identidade_id=obj,versao=versao,
+    args=dict(conta_id='CONTA-B1',comando_id=comando,identidade_id=obj,versao=versao,
               acao='informar_ripd',dados={'referencia':'PROCESSO-FICTICIO-12E'})
     primeiro=executar(sessao,**args);sessao.commit()
     repetido=executar(sessao,**args)
@@ -36,16 +36,18 @@ def test_ripd_referencia_autoria_idempotencia_e_recusa(sessao,entrada):
     sessao.commit()
     assert len(list(sessao.scalars(select(Evento).where(Evento.cadeia_id==obj,Evento.tipo_evento=='f34_informar_ripd'))))==1
     e=estado(sessao,obj)
-    assert e['referencia_ripd']['pessoa_id']=='PESSOA-E'
+    assert e['referencia_ripd']['pessoa_id']=='PESSOA-B'
     assert 'RIPD juntado em PROCESSO-FICTICIO-12E' in html(obj,15)
-    assert 'por DPO.' in html(obj,15)
+    assert 'por Secretaria.' in html(obj,15)
+    ato(sessao,obj,'confirmar_ripd',conta='CONTA-E1')
+    assert set(estado(sessao,obj)['referencia_ripd_confirmacoes']) == {'secretaria','dpo'}
 
 def test_execucao_por_outro_habilitado_mesma_unidade_e_verificacao_independente(sessao,entrada):
     obj=preparar_acao(sessao,entrada)
-    with pytest.raises(PermissionError):ato(sessao,obj,'executar_medida',conta='CONTA-C1',evidencia='Ref. fictícia', resumo='Execução fictícia')
+    with pytest.raises(PermissionError):ato(sessao,obj,'executar_medida',conta='CONTA-C1',evidencia='Ref. fictícia', resumo='Execução fictícia: acessos revisados e documentados.')
     sessao.add(Designacao(pessoa_id='PESSOA-C',unidade_id=entrada.unidade_id,papel='preenchedor'))
     sessao.commit()
-    ato(sessao,obj,'executar_medida',conta='CONTA-C1',evidencia='Ref. fictícia', resumo='Execução fictícia')
+    ato(sessao,obj,'executar_medida',conta='CONTA-C1',evidencia='Ref. fictícia', resumo='Execução fictícia: acessos revisados e documentados.')
     assert estado(sessao,obj)['execucao']['pessoa_id']=='PESSOA-C'
     with pytest.raises(PermissionError):ato(sessao,obj,'verificar',conta='CONTA-C1',aprovada=True,evidencia='Fictícia', **{k:'A confirmar' for k in ('F4-4.18','F4-4.20','F4-4.21','F4-4.22')})
     ato(sessao,obj,'verificar',conta=VERIFICADOR,aprovada=True,evidencia='Fictícia', **{k:'A confirmar' for k in ('F4-4.18','F4-4.20','F4-4.21','F4-4.22')})
@@ -63,18 +65,18 @@ def test_gabinete_documento_obrigatorio_sem_mudar_aceitacao_existente(sessao,ent
     assert 'Risco residual: 25 — Crítico' in tela
     assert 'RIPD: referência não informada.' in tela
     assert 'Texto fictício integral, sem inferência.' in tela
-    ato(sessao,obj,'aceitar_residual',conta=GABINETE,documento='OFICIO-FICT-12E',justificativa='Fictícia')
+    ato(sessao,obj,'aceitar_residual',conta=GABINETE,documento='OFICIO-FICT-12E',solicitar_juridico=False,motivo_juridico='Dispensa fictícia fundamentada',justificativa='Fictícia')
     assert estado(sessao,obj)['aceitacao']['decisor']=='Prefeito'
     assert 'Decisão do Prefeito, registrada pelo Gabinete em' in html(obj,14,GABINETE)
     assert 'conforme OFICIO-FICT-12E' in html(obj,14,GABINETE)
 
 def test_plano_conteudo_antes_da_aprovacao_e_campos_calculados(sessao,entrada):
     obj=entrar(sessao,entrada,4)
-    ato(sessao,obj,'planejar',plano='Plano fictício integral',cargo='Chefia da unidade',prazo='2027-01-15')
+    ato(sessao,obj,'planejar',plano='Plano fictício para revisar e documentar os acessos.',cargo='Chefia da unidade',duracao_dias=30)
     tela=html(obj,3,SECRETARIO)
-    assert 'Plano registrado em' in tela and '15/01/2027' in tela
-    assert tela.index('Plano fictício integral')<tela.index('value="aprovar_plano"')
-    assert 'Plano: Plano fictício integral' in tela
+    assert 'Plano registrado em' in tela and 'se aprovar hoje' in tela
+    assert tela.index('Plano fictício para revisar e documentar os acessos.')<tela.index('value="aprovar_plano"')
+    assert 'Plano: Plano fictício para revisar e documentar os acessos.' in tela
     assert 'Cargo responsável: Chefia da unidade' in tela
     assert 'value="planejar"' not in html(obj,3)
     assert 'Chefia da unidade' in html(obj,2)
@@ -91,13 +93,14 @@ def test_comite_finalidades_no_dominio_e_tela(sessao,entrada):
 
 def test_encaminhamento_em_destaque_e_origem_congelada(sessao,entrada):
     obj=entrar(sessao,entrada);avaliar(sessao,obj,5)
-    ato(sessao,obj,'salvar_bloco',bloco=16,campos={'F3-3.59':'Sim','F3-3.61':['Providência no FORM 4']})
+    # A5: os encaminhamentos são atos próprios; F3-3.59 é calculada.
     tela=html(obj,16)
     assert tela.index('id="ato-encaminhar_acao"')<tela.index('Outras ações disponíveis')
-    assert 'Encaminhe as providências e depois conclua a avaliação.' in tela
+    assert 'Lacunas encontradas e verificações' in tela
+    assert 'value="encaminhar_acao"' in tela
     acao=ato(sessao,obj,'encaminhar_acao',justificativa='Fictícia')['identidade_id']
     origem = html(acao,1)
-    assert 'Risco 1: Evento fictício (R01) — Crítico (25)' in origem
+    assert 'Evento fictício' in origem and 'R01' in origem and 'Crítico (25)' in origem
     assert f'/forms34/{obj}/blocos/16?conta_id=CONTA-B1' in origem
 
 def test_avisos_historico_datas_e_sem_native():
@@ -113,7 +116,7 @@ def test_avisos_historico_datas_e_sem_native():
 
 def test_recusa_cargo_arbitrario_e_mantem_legado(sessao,entrada):
     obj=entrar(sessao,entrada,4);antes=deepcopy(estado(sessao,obj))
-    with pytest.raises(ValueError):ato(sessao,obj,'planejar',plano='Fictício',cargo='Pessoa fictícia',prazo='2027-01-15')
+    with pytest.raises(ValueError):ato(sessao,obj,'planejar',plano='Fictício',cargo='Pessoa fictícia',duracao_dias=30)
     assert estado(sessao,obj)==antes
     from app.leitura_atos34 import conteudo_ato
     legado={'plano':'Fictício','executor_id':'p','prazo':'2027-01-15'}
@@ -132,8 +135,7 @@ def test_percurso_http_encaminha_planeja_e_exibe_proposta_sem_repetir_ato(sessao
     import os
     cliente=TestClient(app)
     risco=entrar(sessao,entrada);avaliar(sessao,risco)
-    ato(sessao,risco,'salvar_bloco',bloco=16,
-        campos={'F3-3.59':'Sim','F3-3.61':['Providência no FORM 4']})
+    # A5: providência registrada pelo ato próprio, sem edição da calculada.
     paginas={'item4_encaminhamento':html(risco,16)}
     comando=str(uuid4())
     resposta=cliente.post(f'/forms34/{risco}/blocos/16?conta_id=CONTA-B1',data={
@@ -146,14 +148,14 @@ def test_percurso_http_encaminha_planeja_e_exibe_proposta_sem_repetir_ato(sessao
     resposta=cliente.post(f'/forms34/{acao}/blocos/3?conta_id=CONTA-B1',data={
         'acao':'planejar','tema_principal':'T07','comando_id':comando,'versao':estado(sessao,acao)['versao'],
         'plano':'Plano fictício: restringir o acesso à equipe autorizada e registrar a evidência.',
-        'cargo':'Chefia da unidade','prazo':'2027-01-15'})
+        'cargo':'Chefia da unidade','duracao_dias':30})
     assert resposta.status_code==200 and 'Plano registrado em' in resposta.text
     assert 'name="acao" value="planejar"' not in resposta.text
     paginas['item2_plano_registrado']=resposta.text
     versao=estado(sessao,acao)['versao']
     paginas['item3_aprovacao']=html(acao,3,SECRETARIO)
     assert 'Plano: Plano fictício' in paginas['item3_aprovacao']
-    assert 'Prazo: 15/01/2027' in paginas['item3_aprovacao']
+    assert 'se aprovar hoje' in paginas['item3_aprovacao']
     assert estado(sessao,acao)['versao']==versao
     destino=os.environ.get('LGPD_EVIDENCIAS_12E')
     if destino:

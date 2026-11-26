@@ -76,7 +76,7 @@ def test_todos_links_abrem_secao_correta_sem_alterar_rascunho(sessao, documento_
         assert destino.status_code == 200
         assert f'<h1 id="titulo-cartilha">{titulo_topico(ajuda["secao_id"])}</h1>' in unescape(destino.text)
         assert f'Orientação fictícia {ajuda["secao_id"]}' in destino.text
-        assert 'Para voltar ao FORM, feche esta aba.' in destino.text
+        assert 'Para voltar ao FORM, feche esta aba (no × da aba ou com Ctrl+W).' in destino.text
         elementos_destino = Elementos(destino.text).elementos
         assert not any(t == 'form' for t, _, _ in elementos_destino)
         assert [a.get('src') for t, a, _ in elementos_destino if t == 'script'] == ['/estaticos/fechar_cartilha.js']

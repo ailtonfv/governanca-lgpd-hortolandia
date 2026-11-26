@@ -30,7 +30,7 @@ def test_adocao_preserva_snapshot_e_controla_versao(sessao):
     args=dict(conta_id='CONTA-G1',comando_id='ADOTA22',registro_id=rid,versao_lida=draft.versao_rascunho,confirmar=True)
     assert adotar(sessao,**args)['permitido']
     assert adotar(sessao,**args)['reexecutado']
-    assert len(definicoes())==145
+    assert len(definicoes())==146
     assert not set(NOVOS)&set(draft.conteudo['respostas'])
     snap=sessao.get(VersaoForm1Integral,draft.conteudo['revisao_22']['snapshot_anterior_id'])
     assert snap is not None
