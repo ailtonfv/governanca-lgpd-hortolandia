@@ -181,6 +181,8 @@ def disponiveis(form, bloco, papeis, estado=None, pessoa_id=None, revisar=False)
 
 
 def interpretar(acao, formulario):
+    if acao == 'destinar_lacuna':
+        return {k: formulario.get(k, '') for k in ('lacuna_id','destino','prioridade')}
     if acao not in ATOS:
         raise ValueError('Ato desconhecido.')
     from app.validacao_atos34 import validar,ErrosCampos
@@ -211,7 +213,10 @@ def interpretar(acao, formulario):
     if acao == 'verificar':
         from app.etapas_forms34 import VERIFICACAO
         dados.update({k: formulario.get(k, '') for k in VERIFICACAO})
-    if acao == 'encaminhar_acao':dados['outra'] = formulario.get('outra') == 'sim'
+    if acao == 'encaminhar_acao':
+        dados['outra'] = formulario.get('outra') == 'sim'
+        for chave in ('lacuna_id', 'prioridade', 'destino'):
+            if formulario.get(chave):dados[chave] = formulario[chave]
     return dados
 
 

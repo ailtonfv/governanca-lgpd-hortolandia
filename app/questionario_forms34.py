@@ -44,12 +44,18 @@ def perguntas(form):
             c = controles[item['id']]
             tipo = c['controle']
             alternativas = opcoes(c, controles)
+            if item['id'] == 'F3-3.47':
+                alternativas.append('Nenhum controle identificado')
             if item['id']=='F4-4.13':alternativas.append('Referência do RIPD (processo ou arquivo onde está juntado)')
             if tipo == 'readonly' and alternativas:
                 tipo = 'single'  # consulta assistida exige confirmação humana, sem pré-marcação
             ato = item['id'] in (ATOS3 if form == 3 else ATOS4)
             if ato:
                 tipo = 'ato'
+            if item['id'] == 'F3-3.59':
+                tipo = 'computed'
+            if item['id'] == 'F3-3.61':
+                alternativas = [v for v in alternativas if v != 'Providência no FORM 4']
             saida.append(dict(id=item['id'], bloco=bloco['numero'], titulo='Gatilhos de revisão e aprendizagem' if form==4 and bloco['numero']==9 else bloco['titulo'],
                 enunciado=texto_pergunta(item['enunciado']), tipo=tipo, opcoes=alternativas,
                 detalhe=item['id'] in DETALHES4, depende=DEPENDENCIAS.get(item['id']),
@@ -98,6 +104,10 @@ def salvar(form, anteriores, dados, estado):
     novo.update(campos)
     for chave, valor in campos.items():
         i = itens[chave]
+        if chave == 'F4-4.2' and estado.get('origem_lacuna'):
+            if valor != estado['origem_lacuna']['id']:
+                raise ValueError('A origem desta ação é a lacuna encaminhada; não pode ser substituída.')
+            continue
         if i['tipo'] in ('readonly', 'computed', 'ato'):
             raise ValueError('Este campo é registrado pelo ato próprio, não por edição livre.')
         if not ativa(i, novo, estado):
@@ -118,6 +128,8 @@ def salvar(form, anteriores, dados, estado):
                 raise ValueError('Escolha um tipo por ação. Para dois tipos, registre duas providências.')
             if 'A confirmar' in valores and len(valores) > 1:
                 raise ValueError('A confirmar deve ficar sozinha.')
+            if chave == 'F3-3.47' and 'Nenhum controle identificado' in valores and len(valores) > 1:
+                raise ValueError('Nenhum controle identificado deve ficar sozinho.')
         elif not isinstance(valor, str) or len(valor) > (1000 if i['tipo'] == 'text_long' else 200):
             raise ValueError('Texto fora do limite permitido.')
     from app.opcao_outro import validar_outro

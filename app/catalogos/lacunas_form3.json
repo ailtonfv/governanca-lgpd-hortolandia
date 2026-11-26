@@ -1,0 +1,703 @@
+{
+  "versao": "LACUNAS-F3-v1-2026-11-26",
+  "situacao": "Decisões gerais aprovadas por Ailton em 26/11/2026. Polaridades conferidas; F3-3.28 corrigida por decisão expressa. Itens sem revisão permanecem desativados.",
+  "fonte": [
+    "INSTRUCOES_LOTE16_PENTE_FINO_2026-11-24.md, A4 e A5",
+    "PENTE_FINO_TELAS_2026-11-22.md, C116 a C123",
+    "app/questionario_forms34.py (main ec9a703), funcao recolhida(): respostas que fecham os blocos 8, 9, 11 e 12"
+  ],
+  "regras_gerais": {
+    "parcialmente": "Onde 'Parcialmente' for opcao, conta sempre como desfavoravel.",
+    "a_confirmar": "Resposta 'A confirmar' (inclusive 'Requer analise', lida como 'A confirmar' pela A4.2) entra na lista com natureza 'a_confirmar', separada das lacunas. Destino padrao: 'Confirmar com a Secretaria'. Pode virar providencia se a Secretaria e o DPO quiserem.",
+    "condicional_fechada": "Pergunta que nao esta ativa (condicao do catalogo, A4.1) ou que esta recolhida nao gera lacuna, mesmo com resposta gravada antiga.",
+    "pergunta_da_prefeitura": "Respostas que descrevem a Prefeitura inteira nao geram lacuna do Registro: F3-3.35 = 'Em definicao pela Prefeitura (grupo de temporalidade)'. Contam no dashboard como pendencia institucional, nunca como providencia de cada Registro.",
+    "identificador": "Cada lacuna tem id estavel 'LAC-<id da pergunta>' (ex.: LAC-F3-3.18; no bloco 13, LAC-F3-3.47-<codigo do controle>). O encaminhamento do bloco 16 e a origem do FORM 4 (F4-4.2) guardam esse id.",
+    "nao_inferir": "Nenhuma lacuna nasce de texto livre. So das respostas listadas aqui.",
+    "natureza": {
+      "lacuna": "falta um cuidado; candidata a providencia no FORM 4",
+      "verificacao": "fato que exige conferir algo, nao necessariamente falha (ex.: dados fora do Brasil, incidente ja ocorrido)",
+      "a_confirmar": "falta informacao"
+    }
+  },
+  "itens": [
+    {
+      "id": "F3-3.16",
+      "bloco": 6,
+      "assunto": "Acesso limitado a quem precisa",
+      "desfavoravel": [
+        "Não",
+        "Parcialmente"
+      ],
+      "natureza": "lacuna",
+      "rotulo": "O acesso aos dados não está limitado a quem precisa deles.",
+      "acao_sugerida": "Revisar acesso/perfis",
+      "tema": "T07",
+      "conferir_enunciado": false,
+      "habilitada": true
+    },
+    {
+      "id": "F3-3.17",
+      "bloco": 6,
+      "assunto": "Perfis de acesso por função",
+      "desfavoravel": [
+        "Não",
+        "Parcialmente"
+      ],
+      "natureza": "lacuna",
+      "rotulo": "Não há perfis de acesso diferentes conforme a função.",
+      "acao_sugerida": "Revisar acesso/perfis",
+      "tema": "T07",
+      "conferir_enunciado": true,
+      "habilitada": true,
+      "conferido_em": "2026-11-26"
+    },
+    {
+      "id": "F3-3.18",
+      "bloco": 6,
+      "assunto": "Usuário ou senha compartilhados",
+      "desfavoravel": [
+        "Sim",
+        "Parcialmente"
+      ],
+      "natureza": "lacuna",
+      "rotulo": "Há usuário ou senha compartilhados entre pessoas.",
+      "acao_sugerida": "Revisar acesso/perfis",
+      "tema": "T07",
+      "conferir_enunciado": false,
+      "habilitada": true
+    },
+    {
+      "id": "F3-3.19",
+      "bloco": 6,
+      "assunto": "Registro de quem acessou",
+      "desfavoravel": [
+        "Não",
+        "Parcialmente"
+      ],
+      "natureza": "lacuna",
+      "rotulo": "Não há registro de quem acessou os dados.",
+      "acao_sugerida": "Revisar acesso/perfis",
+      "tema": "T07",
+      "tema_complementar": [
+        "T16"
+      ],
+      "conferir_enunciado": false,
+      "habilitada": true
+    },
+    {
+      "id": "F3-3.19.1",
+      "bloco": 6,
+      "assunto": "Trilha de auditoria consultável",
+      "desfavoravel": [
+        "Não",
+        "Parcialmente"
+      ],
+      "natureza": "lacuna",
+      "rotulo": "A trilha de auditoria não existe ou não pode ser consultada.",
+      "acao_sugerida": "Revisar acesso/perfis",
+      "tema": "T07",
+      "tema_complementar": [
+        "T16"
+      ],
+      "conferir_enunciado": false,
+      "habilitada": true
+    },
+    {
+      "id": "F3-3.20",
+      "bloco": 6,
+      "assunto": "Revisão periódica dos acessos",
+      "desfavoravel": [
+        "Não",
+        "Parcialmente"
+      ],
+      "natureza": "lacuna",
+      "rotulo": "Ninguém revê, de tempos em tempos, quem tem acesso.",
+      "acao_sugerida": "Revisar acesso/perfis",
+      "tema": "T07",
+      "conferir_enunciado": false,
+      "habilitada": true
+    },
+    {
+      "id": "F3-3.21",
+      "bloco": 7,
+      "assunto": "Canais pessoais ou não institucionais (e-mail, mensageiro, dispositivo pessoal, mídia removível, nuvem)",
+      "desfavoravel": [
+        "Sim",
+        "Parcialmente"
+      ],
+      "natureza": "lacuna",
+      "rotulo": "Os dados circulam por canal pessoal ou não institucional.",
+      "acao_sugerida": "Ação de canal de comunicação (WhatsApp/e-mail) do catálogo F4-4.4",
+      "tema": "T10",
+      "conferir_enunciado": true,
+      "habilitada": true,
+      "conferido_em": "2026-11-26"
+    },
+    {
+      "id": "F3-3.22",
+      "bloco": 7,
+      "assunto": "A CONFERIR: o texto desta pergunta não aparece nos documentos de Claude",
+      "desfavoravel": [],
+      "natureza": "lacuna",
+      "rotulo": "",
+      "acao_sugerida": "",
+      "tema": "",
+      "conferir_enunciado": true,
+      "nota": "Agente: ler o enunciado no catálogo privado e propor a resposta desfavorável no relatório. Não ligar esta linha até Claude revisar.",
+      "habilitada": false
+    },
+    {
+      "id": "F3-3.23",
+      "bloco": 7,
+      "assunto": "Planilhas ou cópias paralelas fora do sistema",
+      "desfavoravel": [
+        "Sim",
+        "Parcialmente"
+      ],
+      "natureza": "lacuna",
+      "rotulo": "Há planilhas ou cópias paralelas dos dados fora do sistema.",
+      "acao_sugerida": "Ação de guarda/cópias do catálogo F4-4.4",
+      "tema": "T11",
+      "tema_complementar": [
+        "T13"
+      ],
+      "conferir_enunciado": false,
+      "habilitada": true
+    },
+    {
+      "id": "F3-3.24",
+      "bloco": 7,
+      "assunto": "Papel guardado ou exposto em local inadequado",
+      "desfavoravel": [
+        "Sim",
+        "Parcialmente"
+      ],
+      "natureza": "lacuna",
+      "rotulo": "Documentos em papel ficam em local inadequado ou exposto.",
+      "acao_sugerida": "Adequação de armário, balcão ou tela (catálogo F4-4.4)",
+      "tema": "T12",
+      "conferir_enunciado": false,
+      "habilitada": true
+    },
+    {
+      "id": "F3-3.25",
+      "bloco": 8,
+      "assunto": "Pergunta de entrada: há terceiro no tratamento",
+      "desfavoravel": [],
+      "natureza": "entrada",
+      "nota": "Não gera lacuna. Com 'Não', o bloco 8 fica recolhido e nenhuma linha do bloco 8 entra na lista.",
+      "habilitada": true
+    },
+    {
+      "id": "F3-3.25.1",
+      "bloco": 8,
+      "condicao": "F3-3.25 = Sim",
+      "assunto": "Suporte ou armazenamento fora do Brasil",
+      "desfavoravel": [
+        "Sim"
+      ],
+      "natureza": "verificacao",
+      "rotulo": "Há tratamento fora do Brasil: conferir o mecanismo de transferência internacional (LGPD, arts. 33 a 36).",
+      "acao_sugerida": "Ação de território nacional / transferência internacional (catálogo F4-4.4)",
+      "tema": "T11",
+      "conferir_enunciado": true,
+      "habilitada": true,
+      "conferido_em": "2026-11-26"
+    },
+    {
+      "id": "F3-3.26",
+      "bloco": 8,
+      "condicao": "F3-3.25 = Sim",
+      "assunto": "Continuidade: o Município recupera os dados se o fornecedor sair",
+      "desfavoravel": [
+        "Não",
+        "Parcialmente"
+      ],
+      "natureza": "lacuna",
+      "rotulo": "O Município não conseguiria recuperar os dados se o fornecedor saísse.",
+      "acao_sugerida": "Plano de saída de fornecedor (catálogo F4-4.4)",
+      "tema": "T09",
+      "tema_complementar": [
+        "T16"
+      ],
+      "conferir_enunciado": true,
+      "habilitada": true,
+      "conferido_em": "2026-11-26"
+    },
+    {
+      "id": "F3-3.27",
+      "bloco": 8,
+      "condicao": "F3-3.25 = Sim",
+      "assunto": "Dependência do fornecedor para extrair ou usar os dados",
+      "desfavoravel": [
+        "Sim",
+        "Parcialmente"
+      ],
+      "natureza": "lacuna",
+      "rotulo": "O Município depende do fornecedor para extrair ou usar os próprios dados.",
+      "acao_sugerida": "Criar/alterar cláusula contratual (ver Anexo E da Cartilha)",
+      "tema": "T09",
+      "tema_complementar": [
+        "T11"
+      ],
+      "conferir_enunciado": true,
+      "habilitada": true,
+      "conferido_em": "2026-11-26"
+    },
+    {
+      "id": "F3-3.28",
+      "bloco": 8,
+      "condicao": "F3-3.25 = Sim",
+      "assunto": "Continuidade do serviço em falha do fornecedor",
+      "desfavoravel": [
+        "Sim",
+        "Parcialmente"
+      ],
+      "natureza": "lacuna",
+      "rotulo": "Não há como manter o serviço se o fornecedor falhar.",
+      "acao_sugerida": "Plano de saída de fornecedor (catálogo F4-4.4)",
+      "tema": "T16",
+      "tema_complementar": [
+        "T09"
+      ],
+      "conferir_enunciado": true,
+      "habilitada": true,
+      "conferido_em": "2026-11-26"
+    },
+    {
+      "id": "F3-3.29",
+      "bloco": 8,
+      "condicao": "F3-3.25 = Sim",
+      "assunto": "Subcontratação",
+      "desfavoravel": [],
+      "natureza": "lacuna",
+      "rotulo": "Há subcontratação sem autorização do Município.",
+      "acao_sugerida": "Criar/alterar cláusula contratual",
+      "tema": "T09",
+      "conferir_enunciado": true,
+      "nota": "Ter subcontratado não é falha. Só é lacuna se o enunciado perguntar por subcontratação SEM autorização ou SEM conhecimento do Município. Agente: informar o enunciado; até a revisão, deixar 'desfavoravel' vazio.",
+      "habilitada": false
+    },
+    {
+      "id": "F3-3.30",
+      "bloco": 8,
+      "condicao": "F3-3.25 = Sim",
+      "assunto": "Devolução e eliminação no fim do contrato",
+      "desfavoravel": [
+        "Não",
+        "Parcialmente"
+      ],
+      "natureza": "lacuna",
+      "rotulo": "O contrato não prevê devolução e eliminação dos dados no fim.",
+      "acao_sugerida": "Criar/alterar cláusula contratual ou Aditar contrato",
+      "tema": "T09",
+      "tema_complementar": [
+        "T13"
+      ],
+      "conferir_enunciado": false,
+      "habilitada": true
+    },
+    {
+      "id": "F3-3.31",
+      "bloco": 9,
+      "assunto": "Uso restrito à finalidade",
+      "desfavoravel": [
+        "Não",
+        "Parcialmente"
+      ],
+      "natureza": "lacuna",
+      "rotulo": "O uso dos dados não está restrito à finalidade validada.",
+      "acao_sugerida": "Ação de finalidade/minimização (catálogo F4-4.4)",
+      "tema": "T01",
+      "conferir_enunciado": true,
+      "nota": "Polaridade inferida de recolhida(): o bloco 9 fecha com F3-3.31 = Sim.",
+      "habilitada": true,
+      "conferido_em": "2026-11-26"
+    },
+    {
+      "id": "F3-3.32",
+      "bloco": 9,
+      "assunto": "Pergunta de entrada: há divulgação pública",
+      "desfavoravel": [],
+      "natureza": "entrada",
+      "nota": "Divulgar não é falha (pode ser obrigação legal). Não gera lacuna; só abre F3-3.33.",
+      "habilitada": true
+    },
+    {
+      "id": "F3-3.33",
+      "bloco": 9,
+      "condicao": "F3-3.32 = Sim (A4.1)",
+      "assunto": "Risco de reutilização depois da divulgação",
+      "desfavoravel": [
+        "Sim",
+        "Parcialmente"
+      ],
+      "natureza": "lacuna",
+      "rotulo": "Os dados divulgados podem ser reutilizados para outros fins.",
+      "acao_sugerida": "Ação de divulgação/minimização (catálogo F4-4.4)",
+      "tema": "T06",
+      "tema_complementar": [
+        "T01"
+      ],
+      "conferir_enunciado": false,
+      "habilitada": true
+    },
+    {
+      "id": "F3-3.34",
+      "bloco": 9,
+      "assunto": "Uso para finalidade diferente da validada no FORM 2",
+      "desfavoravel": [
+        "Sim",
+        "Parcialmente"
+      ],
+      "natureza": "lacuna",
+      "rotulo": "Há uso dos dados para finalidade diferente da validada no FORM 2.",
+      "acao_sugerida": "Ação de finalidade/minimização (catálogo F4-4.4)",
+      "tema": "T01",
+      "conferir_enunciado": false,
+      "habilitada": true
+    },
+    {
+      "id": "F3-3.35",
+      "bloco": 10,
+      "assunto": "Prazos de guarda definidos",
+      "desfavoravel": [
+        "Não"
+      ],
+      "natureza": "lacuna",
+      "rotulo": "O serviço não tem prazo de guarda definido.",
+      "acao_sugerida": "Ação de guarda (catálogo F4-4.4)",
+      "tema": "T13",
+      "conferir_enunciado": false,
+      "excecao": "Com 'Em definição pela Prefeitura (grupo de temporalidade)' (A4.4): NÃO é lacuna do Registro; conta como pendência institucional.",
+      "habilitada": true
+    },
+    {
+      "id": "F3-3.36",
+      "bloco": 10,
+      "assunto": "Procedimento e evidência de eliminação",
+      "desfavoravel": [
+        "Não",
+        "Parcialmente"
+      ],
+      "natureza": "lacuna",
+      "rotulo": "Não há procedimento ou registro de eliminação dos dados.",
+      "acao_sugerida": "Ação de descarte (catálogo F4-4.4)",
+      "tema": "T13",
+      "conferir_enunciado": false,
+      "habilitada": true
+    },
+    {
+      "id": "F3-3.37",
+      "bloco": 10,
+      "assunto": "Permanência indevida em cópias, backups, testes ou homologação",
+      "desfavoravel": [
+        "Sim",
+        "Parcialmente"
+      ],
+      "natureza": "lacuna",
+      "rotulo": "Os dados permanecem em cópias, backups ou ambientes de teste além do necessário.",
+      "acao_sugerida": "Ação de descarte/cópias (catálogo F4-4.4)",
+      "tema": "T13",
+      "tema_complementar": [
+        "T11"
+      ],
+      "conferir_enunciado": false,
+      "habilitada": true
+    },
+    {
+      "id": "F3-3.38",
+      "bloco": 10,
+      "assunto": "Termo de eliminação pelo terceiro",
+      "desfavoravel": [],
+      "natureza": "fora",
+      "nota": "Retirada ou escondida pela A4.8. Não entra na lista; a lacuna é coberta por F3-3.30.",
+      "habilitada": true
+    },
+    {
+      "id": "F3-3.39",
+      "bloco": 11,
+      "assunto": "Pergunta de entrada: há anonimização",
+      "desfavoravel": [],
+      "natureza": "entrada",
+      "nota": "Não anonimizar não é falha por si. Com 'Não', o bloco 11 não gera lacuna.",
+      "habilitada": true
+    },
+    {
+      "id": "F3-3.41",
+      "bloco": 11,
+      "condicao": "F3-3.39 = Sim (A4.1)",
+      "assunto": "Risco de reidentificação avaliado",
+      "desfavoravel": [
+        "Não",
+        "Parcialmente"
+      ],
+      "natureza": "lacuna",
+      "rotulo": "O risco de reidentificação do conjunto anonimizado não foi avaliado.",
+      "acao_sugerida": "Ação de anonimização/estatística (catálogo F4-4.4)",
+      "tema": "T19",
+      "conferir_enunciado": true,
+      "nota": "C121 tratou 'Não' como lacuna (falsa, por estar fora da condição).",
+      "habilitada": true,
+      "conferido_em": "2026-11-26"
+    },
+    {
+      "id": "F3-3.42",
+      "bloco": 11,
+      "condicao": "F3-3.39 = Sim (A4.1)",
+      "assunto": "Reavaliação periódica do conjunto anonimizado",
+      "desfavoravel": [
+        "Não",
+        "Parcialmente"
+      ],
+      "natureza": "lacuna",
+      "rotulo": "O conjunto anonimizado não é reavaliado periodicamente.",
+      "acao_sugerida": "Ação de anonimização/estatística (catálogo F4-4.4)",
+      "tema": "T19",
+      "conferir_enunciado": true,
+      "habilitada": true,
+      "conferido_em": "2026-11-26"
+    },
+    {
+      "id": "F3-3.43",
+      "bloco": 12,
+      "assunto": "Houve incidente",
+      "desfavoravel": [
+        "Sim"
+      ],
+      "natureza": "verificacao",
+      "rotulo": "Houve incidente: conferir se foi tratado no fluxo de incidentes da Prefeitura e se as providências foram concluídas.",
+      "acao_sugerida": "(nenhuma automática; o incidente tem fluxo próprio)",
+      "tema": "T17",
+      "conferir_enunciado": false,
+      "habilitada": true
+    },
+    {
+      "id": "F3-3.44",
+      "bloco": 12,
+      "assunto": "A CONFERIR (o bloco 12 fecha com F3-3.44 = Não)",
+      "desfavoravel": [
+        "Sim"
+      ],
+      "natureza": "verificacao",
+      "rotulo": "",
+      "acao_sugerida": "",
+      "tema": "T17",
+      "conferir_enunciado": true,
+      "nota": "Polaridade inferida de recolhida(). Agente: informar o enunciado e propor o rótulo; não ligar até a revisão.",
+      "habilitada": false
+    },
+    {
+      "id": "F3-3.45",
+      "bloco": 12,
+      "assunto": "Preservação de logs e mensagens para apurar incidente",
+      "desfavoravel": [
+        "Não",
+        "Parcialmente"
+      ],
+      "natureza": "lacuna",
+      "rotulo": "Não há como preservar registros (logs, mensagens) para apurar um incidente.",
+      "acao_sugerida": "Ação de segurança/registros (catálogo F4-4.4)",
+      "tema": "T16",
+      "tema_complementar": [
+        "T17"
+      ],
+      "conferir_enunciado": false,
+      "habilitada": true
+    },
+    {
+      "id": "F3-3.46",
+      "bloco": 12,
+      "assunto": "Equipe conhece e sabe acionar o fluxo de incidentes (texto novo, A4.7)",
+      "desfavoravel": [
+        "Não",
+        "Parcialmente"
+      ],
+      "natureza": "lacuna",
+      "rotulo": "A equipe não conhece ou não sabe acionar o fluxo de incidentes da Prefeitura.",
+      "acao_sugerida": "Capacitação/orientação da equipe (catálogo F4-4.4)",
+      "tema": "T18",
+      "tema_complementar": [
+        "T17"
+      ],
+      "conferir_enunciado": false,
+      "nota": "Resposta gravada antes da A4.7 ('Existe fluxo institucional?') NÃO gera lacuna: a pergunta mudou de sentido. Mostrar como 'A confirmar'.",
+      "habilitada": true
+    },
+    {
+      "id": "F3-3.47",
+      "bloco": 13,
+      "assunto": "Controles existentes",
+      "desfavoravel": [
+        "Nenhum controle identificado"
+      ],
+      "natureza": "lacuna",
+      "rotulo": "Nenhum controle identificado para este tratamento.",
+      "acao_sugerida": "(escolher conforme as outras lacunas)",
+      "tema": "T16",
+      "conferir_enunciado": false,
+      "por_controle": "Para cada controle marcado com 'Implementado? Não' ou 'Parcial' (A5.3): lacuna 'O controle <nome> foi indicado, mas não está implementado (ou está em parte).', id LAC-F3-3.47-<código do controle>, tema conforme o controle.",
+      "habilitada": true
+    },
+    {
+      "id": "F3-3.48",
+      "bloco": 13,
+      "assunto": "Controles implementados e com evidência",
+      "desfavoravel": [
+        "Não",
+        "Parcialmente"
+      ],
+      "natureza": "lacuna",
+      "rotulo": "Os controles não estão implementados ou não têm evidência.",
+      "acao_sugerida": "Ação de evidência/documentação (catálogo F4-4.4)",
+      "tema": "T16",
+      "conferir_enunciado": false,
+      "nota": "Se a A5.3 (implementação por controle) estiver ligada, esta linha cede lugar às linhas por controle, para não contar a mesma falha duas vezes.",
+      "habilitada": true
+    }
+  ],
+  "incoerencias_bloco13": {
+    "regra": "Aviso (não bloqueio) quando um controle marcado em F3-3.47 contradiz resposta anterior. Usar o nome exato da opção no catálogo privado; se a opção não existir, a regra não se aplica (não criar opção).",
+    "pares": [
+      {
+        "controle": "Login individual",
+        "contradiz": "F3-3.18 = Sim",
+        "aviso": "Login individual marcado, mas o bloco 6 diz que há usuário ou senha compartilhados."
+      },
+      {
+        "controle": "Trilha de auditoria",
+        "contradiz": "F3-3.19 = Não ou F3-3.19.1 = Não",
+        "aviso": "Trilha de auditoria marcada, mas o bloco 6 diz que não há registro de quem acessou."
+      },
+      {
+        "controle": "Perfis de acesso",
+        "contradiz": "F3-3.17 = Não",
+        "aviso": "Perfis de acesso marcados, mas o bloco 6 diz que não há perfis por função."
+      },
+      {
+        "controle": "Revisão periódica de acessos",
+        "contradiz": "F3-3.20 = Não",
+        "aviso": "Revisão de acessos marcada, mas o bloco 6 diz que ninguém revê os acessos."
+      },
+      {
+        "controle": "Rotina de descarte / eliminação",
+        "contradiz": "F3-3.36 = Não",
+        "aviso": "Rotina de descarte marcada, mas o bloco 10 diz que não há procedimento de eliminação."
+      },
+      {
+        "controle": "Cláusula contratual de proteção de dados",
+        "contradiz": "F3-3.30 = Não",
+        "aviso": "Cláusula contratual marcada, mas o bloco 8 diz que o contrato não prevê devolução e eliminação."
+      }
+    ]
+  },
+  "itens_form2_fornecedor_guarda": {
+    "origem": "Lote 16, A12.5: sub-bloco 'Dados guardados pelo fornecedor' do FORM 2, bloco 9. Os ids abaixo são propostos; usar os que o agente criar.",
+    "regra": "Respostas 'Não', 'Parcialmente' e 'A confirmar' entram na lista do FORM 3 do mesmo Registro, com natureza lacuna (Não, Parcialmente) ou a_confirmar.",
+    "itens": [
+      {
+        "id": "F2-9F.1",
+        "assunto": "Onde os dados ficam e em que país",
+        "desfavoravel": [
+          "Não se sabe"
+        ],
+        "natureza": "a_confirmar",
+        "rotulo": "Não se sabe onde o fornecedor guarda os dados.",
+        "tema": "T11",
+        "extra": "País fora do Brasil → natureza verificacao, rótulo 'Dados guardados fora do Brasil: conferir o mecanismo de transferência internacional.'"
+      },
+      {
+        "id": "F2-9F.2",
+        "assunto": "Cópia integral e periódica com o Município",
+        "desfavoravel": [
+          "Não",
+          "Parcialmente"
+        ],
+        "natureza": "lacuna",
+        "rotulo": "O Município não recebe cópia integral e periódica dos dados.",
+        "tema": "T09",
+        "tema_complementar": [
+          "T16"
+        ]
+      },
+      {
+        "id": "F2-9F.2a",
+        "assunto": "Acesso e extração a qualquer tempo, sem custo, com dicionário de dados (C145)",
+        "desfavoravel": [
+          "Não",
+          "Parcialmente"
+        ],
+        "natureza": "lacuna",
+        "rotulo": "O Município não consegue acessar e extrair os próprios dados a qualquer tempo, sem depender do fornecedor.",
+        "tema": "T09",
+        "tema_complementar": [
+          "T11"
+        ]
+      },
+      {
+        "id": "F2-9F.3",
+        "assunto": "Acesso da equipe do fornecedor limitado e registrado",
+        "desfavoravel": [
+          "Não",
+          "Parcialmente"
+        ],
+        "natureza": "lacuna",
+        "rotulo": "O acesso da equipe do fornecedor aos dados não é limitado nem registrado individualmente.",
+        "tema": "T07",
+        "tema_complementar": [
+          "T09"
+        ]
+      },
+      {
+        "id": "F2-9F.4",
+        "assunto": "Separação de outros clientes e proibição de uso próprio",
+        "desfavoravel": [
+          "Não",
+          "Parcialmente"
+        ],
+        "natureza": "lacuna",
+        "rotulo": "Os dados do Município não estão separados ou podem ser usados pelo fornecedor para outros fins.",
+        "tema": "T09",
+        "tema_complementar": [
+          "T01"
+        ]
+      },
+      {
+        "id": "F2-9F.5",
+        "assunto": "Criptografia e cópias de segurança testadas",
+        "desfavoravel": [
+          "Não",
+          "Parcialmente"
+        ],
+        "natureza": "lacuna",
+        "rotulo": "Não há criptografia ou cópias de segurança testadas.",
+        "tema": "T16"
+      },
+      {
+        "id": "F2-9F.6",
+        "assunto": "Prazo contratual de aviso de incidente",
+        "desfavoravel": [
+          "Não",
+          "Parcialmente"
+        ],
+        "natureza": "lacuna",
+        "rotulo": "O contrato não fixa prazo de aviso de incidente compatível com a comunicação à ANPD.",
+        "tema": "T09",
+        "tema_complementar": [
+          "T17"
+        ]
+      },
+      {
+        "id": "F2-9F.7",
+        "assunto": "Direito de pedir evidências e auditar",
+        "desfavoravel": [
+          "Não",
+          "Parcialmente"
+        ],
+        "natureza": "lacuna",
+        "rotulo": "O Município não tem direito de pedir evidências nem de auditar o fornecedor.",
+        "tema": "T09"
+      }
+    ]
+  }
+}

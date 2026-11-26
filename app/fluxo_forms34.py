@@ -264,6 +264,9 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
             raise ValueError(bloqueio)
         from app.questionario_forms34 import salvar
         e['respostas'] = salvar(e['form'], e.get('respostas', {}), dados, e)
+        if f3 and dados.get('bloco') == 13:
+            from app.lacunas_form3 import salvar_controles
+            salvar_controles(e, dados)
         complementos=dados.get('complementos',{})
         if not isinstance(complementos,dict) or set(complementos)-set(dados.get('campos',{})) or any(not isinstance(v,str) or len(v)>200 for v in complementos.values()):raise ValueError('Complemento inválido.')
         e.setdefault('complementos',{}).update(complementos)
@@ -483,8 +486,32 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         e['conclusao'] = dict(pessoa_id=pessoa.id, em=agora, versao=versao,
                              conferencia_r17=deepcopy(e['conferencia_r17']))
         e['revisao_aberta'] = False
+    elif acao == 'destinar_lacuna':
+        exigir(papeis, 'aal')
+        if not f3:
+            raise ValueError('Ato exclusivo do FORM 3.')
+        from app.lacunas_form3 import listar, validar_destino
+        lacuna = next((l for l in listar(e) if l['id'] == dados.get('lacuna_id')), None)
+        if not lacuna:
+            raise ValueError('Lacuna não está ativa nesta versão.')
+        validar_destino(dados)
+        e.setdefault('destinos_lacunas', {})[lacuna['id']] = dict(destino=dados['destino'], prioridade=dados['prioridade'])
     elif acao == 'encaminhar_acao':
         exigir(papeis, 'aal')
+        lacuna = None
+        if dados.get('lacuna_id'):
+            from app.lacunas_form3 import listar
+            lacuna = next((l for l in listar(e) if l['id'] == dados['lacuna_id']), None)
+            if not lacuna:
+                raise ValueError('Lacuna não está ativa nesta versão. Atualize a página.')
+            existente = e.get('encaminhamentos_lacunas', {}).get(lacuna['id'])
+            if existente:
+                return fechar_comando(cmd, {'permitido': True, 'identidade_id': existente['acao_id'], 'existente': True})
+            if dados.get('destino') != 'Providência no FORM 4':
+                raise ValueError('Escolha Providência no FORM 4 para criar a ação.')
+            if dados.get('prioridade') not in ('Imediata', 'Alta', 'Média', 'Baixa', 'A confirmar'):
+                raise ValueError('Escolha a prioridade desta lacuna.')
+            dados = {**dados, 'justificativa': lacuna['rotulo'], 'outra': True}
         motivo = _texto(dados, 'justificativa')
         if e.get('acoes') and dados.get('outra') is not True:
             return fechar_comando(cmd, {'permitido': True, 'identidade_id': e['acoes'][-1],
@@ -499,6 +526,19 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
                  situacao='Em preenchimento', risco_id=obj.id,
                  faixa_origem=_faixa(e), motivo=motivo, prorrogacoes=0, prazo=None,
                  executor_id=None, decisoes_pendentes={}, escopos_restritos=[]))
+        if lacuna:
+            ae = estado(sessao, a.id)
+            ae['origem_lacuna'] = deepcopy(lacuna)
+            ae['respostas'].update({'F4-4.2': lacuna['id'], 'F4-4.9': dados['prioridade']})
+            ae['prioridade_origem'] = dados['prioridade']
+            ae['tema_sugerido'] = lacuna.get('tema')
+            from app.modelos import Tema
+            tema = sessao.get(Tema, lacuna.get('tema')) if lacuna.get('tema') else None
+            if tema and tema.ativo:
+                ae['temas'] = {'principal': tema.codigo, 'complementares': []}
+            _gravar_estado(sessao, cmd, a, 'origem_lacuna', ae)
+            e.setdefault('encaminhamentos_lacunas', {})[lacuna['id']] = dict(
+                acao_id=a.id, prioridade=dados['prioridade'], destino=dados['destino'])
         e.setdefault('acoes', []).append(a.id)
         e.setdefault('acoes_rodada', []).append(a.id)
         destino_id = a.id

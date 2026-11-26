@@ -146,6 +146,11 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
                     for k in d:
                         if k.startswith(('F3-','F4-')) and k not in campos:campos[k]=d[k]
                     dados=dict(bloco=bloco,campos=campos,complementos={k.partition(':')[2]:d[k] for k in d if k.startswith('complemento:')})
+                    if ref.form == 3 and bloco == 13:
+                        selecionados=campos.get('F3-3.47',[])
+                        dados['controles_bloco13']={nome:dict(implementado=d.get('implementado:'+nome,''),evidencia=d.get('evidencia:'+nome,''))
+                            for nome in selecionados if nome not in ('A confirmar','Nenhum controle identificado')}
+                        dados['observacoes_controles']=d.get('observacoes_controles','')
                 elif acao=='abrir_detalhes':dados=dict(bloco=bloco,motivo=d.get('motivo',''))
                 else:dados=interpretar(acao,d)
                 r=dominio.executar(s,conta_id=conta_id,comando_id=d.get('comando_id'),identidade_id=obj.id,
@@ -245,6 +250,7 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
         registro=s.get(Registro,obj.registro_id)
         from app.apresentacao_atos34 import data_br
         valores = {'F3-3.1':registro.codigo_lgpd,'F4-4.1':registro.codigo_lgpd,
+                   'F3-3.59':'Providência encaminhada por lacuna' if e.get('encaminhamentos_lacunas') else 'Defina o destino e a prioridade na lista de lacunas deste bloco.',
                    'F4-4.1.1':obj.codigo,'F3-3.2':s.get(Unidade,uid).nome,
                    'F3-3.3':{'em_atendimento':'Em atendimento','aguardando':'Aguardando responsável','concluida':'Análise concluída'}.get(e.get('situacao_form2'),'Situação preservada na origem'),
                    'F4-4.15':e['situacao'],'F4-4.10':data_br(e.get('prazo')),
@@ -319,7 +325,10 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
                     quando=str(data_local(ingresso_acao.ocorrido_em)) if ingresso_acao else ''))
             except (ValueError, PermissionError):pass
         from app.restrito_forms34 import pode_ler
+        from app.lacunas_form3 import listar as listar_lacunas, incoerencias, DESTINOS
         return paginas.TemplateResponse(request=request,name='forms34_bloco.html',status_code=status,context={
+            'lacunas':listar_lacunas(e) if ref.form==3 else [], 'destinos_lacunas':DESTINOS,
+            'incoerencias_controles':incoerencias(e) if ref.form==3 else [],
             'temas_acao':nomes_temas(s,e.get('temas')) if ref.form==4 else [],
             'temas_aprendizagem':nomes_temas(s,e.get('aprendizagem',{}).get('temas')) if ref.form==4 else [],
             'pode_preencher':pode_preencher(ref.form,papeis),

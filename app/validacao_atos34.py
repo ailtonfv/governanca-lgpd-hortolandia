@@ -31,6 +31,8 @@ OBRIGATORIOS={
 
 def obrigatorios(acao,dados):
     campos=set(OBRIGATORIOS.get(acao,()))
+    if acao == 'encaminhar_acao' and dados.get('lacuna_id'):
+        campos.discard('justificativa')  # o domínio resolve a descrição pela origem estável
     if acao == 'conferir_aprendizagem' and (dados.get('sem_dados_pessoais') is False or dados.get('sem_falha_exposta') is False):
         campos.add('observacao')
     if acao=='propor_triagem' and dados.get('resultado') in ('elaborar','revisar','determinado_anpd'):

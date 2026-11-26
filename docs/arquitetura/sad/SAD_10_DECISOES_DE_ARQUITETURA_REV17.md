@@ -1234,3 +1234,9 @@ A1.4, complemento aprovado por Ailton: a Secretaria escolhe reavaliar o risco ou
 ## Lote 16 — A2: aceitação condicionada e referência conjunta
 
 Cada condição explicitamente informada gera uma ação própria, de prioridade Imediata, sem extrair obrigações de justificativas livres. Cada nova ação admite um tipo; seleções históricas múltiplas permanecem preservadas. Referência do RIPD: Secretaria informa e DPO confirma. A ação correspondente exige essa confirmação para encerrar; aprendizagem exige o cumprimento de todas as condições estruturadas. Para aceitação Crítica, registra-se a solicitação jurídica com participante habilitado, reutilizando a consulta restrita existente, ou a dispensa motivada. Selos presentes no Registro e FORMs; dashboard previsto no A9. Atos antigos não são refeitos.
+
+### Lote 16 — A5 (26/11/2026)
+
+Lacunas categóricas dos blocos 6–13 ficam em configuração pública por identificador. Ailton aprovou as naturezas separadas: lacuna, verificação e informação a confirmar. Incidente ocorrido e transferência internacional não são lacunas automaticamente. Respostas de condições fechadas e pendências institucionais de temporalidade não geram lacunas do Registro. A polaridade de F3-3.28 foi corrigida para Sim/Parcialmente, mantendo rótulo e sugestão. As demais polaridades conferidas permaneceram; F3-3.22, F3-3.29 e F3-3.44 continuam desativadas até a revisão específica.
+
+Encaminhamento conserva o identificador LAC e evita duplicação da mesma origem. Controles podem ser informados parcialmente; ausência de controle é exclusiva. Incoerências são avisos, aplicados somente quando o nome do controle existe no catálogo. Implementação demonstrativa sujeita à vistoria.

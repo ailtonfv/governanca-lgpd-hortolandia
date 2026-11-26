@@ -2114,3 +2114,5 @@ Fechamento do Lote 15-B: execução completa única com 1.243 casos identificáv
 A duração do plano começa na aprovação. A verificação com redução parcial exige nota residual conjunta e decisão posterior; Alto/Crítico exigem aceitação pela autoridade. A Secretaria pode optar por reavaliação ou nova providência, preservando a nota vigente e a aprovação do novo plano. Atos anteriores permanecem registrados, com aviso quando não têm decisão posterior. A integração com as condições de aceitação pertence ao A2.
 
 A2 acrescenta condições estruturadas com uma providência por condição, referência conjunta do RIPD e solicitação jurídica explícita na aceitação Crítica. As condições em aberto impedem nova aprendizagem. Quatro testes direcionados aprovados; sem ativação na vistoria.
+
+Lote 16/A5: lista de lacunas e verificações nos blocos 13 e 16, controles com implementação/evidência e encaminhamento por origem estável. Catálogo público somente com identificadores e rótulos próprios; três itens permanecem desativados aguardando revisão. Sem migração.

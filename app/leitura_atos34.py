@@ -6,6 +6,7 @@ RESULTADOS = {'elaborar':'Elaborar RIPD', 'revisar':'Revisar RIPD',
     'analise_adicional':'Precisa de análise adicional antes de decidir',
     'determinado_anpd':'Determinação da ANPD'}
 NOMES = {
+    'destinar_lacuna':'Destino e prioridade da lacuna registrados', 'origem_lacuna':'Origem da providência vinculada à lacuna',
     'propor_residual_acao':'Nota residual posterior proposta', 'confirmar_residual_acao':'Nota residual posterior confirmada',
     'decidir_residual_acao':'Tratamento do risco residual após a ação decidido',
     'aceitar_residual_acao':'Risco residual após a ação aceito',

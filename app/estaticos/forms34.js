@@ -43,3 +43,18 @@ finalidade.addEventListener('change',ajustar);ajustar();})();
 
 // A2: cada linha é uma condição própria, validada novamente no domínio.
 document.querySelectorAll("[data-adicionar-condicao]").forEach(b=>b.addEventListener("click",()=>{const r=b.parentElement.querySelector("[data-condicao]").cloneNode(true);r.querySelectorAll("input,select").forEach(c=>c.value="");b.before(r);}));
+
+// A5: opção exclusiva e detalhes dos controles selecionados.
+document.addEventListener('change', event => {
+  const field = event.target;
+  if (field.name !== 'F3-3.47') return;
+  const fields = [...document.querySelectorAll('input[name="F3-3.47"]')];
+  const exclusive = ['Nenhum controle identificado', 'A confirmar'];
+  if (field.checked) fields.forEach(other => {
+    if (other !== field && (exclusive.includes(field.value) || exclusive.includes(other.value))) other.checked = false;
+  });
+  const selected = fields.filter(i => i.checked).map(i => i.value);
+  document.querySelectorAll('[data-detalhe-controle]').forEach(el => {
+    el.hidden = !selected.includes(el.dataset.detalheControle);
+  });
+});
