@@ -6,7 +6,11 @@
 
 Em produção, o acesso será por autenticação real; `conta_id` é exclusivo da demonstração.
 
-**Parte 0 antes do Lote 16-A — 26/11/2026:** montagem local da Cartilha validada por `scripts/preparar_cartilha_entrega.py` (documento privado, fora do Git, hash e 14 destinos conferidos). Orientações de FORM 1 confirmado, cartões por permissão e avisos abaixo da pergunta de origem ajustados. Sete testes direcionados aprovados. A entrega conjunta aguarda as instruções do Lote 16-A; nenhuma ativação automática da vistoria.
+**Lote 16-A — fechamento em 26/11/2026, branch `lote-16-pente-fino`:** implementados A1, A2, A11.1, A10, A5, A4 (1/4/5/6), A11.2 e textos do item 8. Ponto de corte antes do 16-B, que permanece pendente. Bateria integral executada uma vez; depois, retestes dirigidos às divergências e aos testes novos. Resultado consolidado: 1.291 casos, 1.242 aprovados, 48 falhas antigas e um ignorado. Última rodada dirigida: 80 testes aprovados (48 casos corrigidos e 32 do Lote 16, incluindo a proteção histórica). Parte 0: cinco testes novos, também aprovados. Não equivale a uma segunda bateria integral nem a aceite em tela.
+
+A vistoria 8018 usa cópia própria e pasta exclusiva fixada em commit. Não houve migração nem alteração da 8017. A leitura de origens REV22 históricas usa o catálogo correspondente, validado pelo lacre, sem reescrever snapshots. Os arquivos históricos privados e a Cartilha continuam somente no pacote local. Publicação da branch sem merge no `main`.
+
+**Parte 0 antes do Lote 16-A — 26/11/2026:** montagem local da Cartilha validada por `scripts/preparar_cartilha_entrega.py` (documento privado, fora do Git, hash e 14 destinos conferidos). Orientações de FORM 1 confirmado, cartões por permissão e avisos abaixo da pergunta de origem ajustados. Sete testes direcionados aprovados. Parte incorporada à entrega conjunta do Lote 16-A, em branch própria e vistoria isolada na porta 8018.
 
 **Lote 15-C — 26/11/2026:** consulta de Registros com estrutura anterior do FORM 1 preserva o conteúdo e apresenta aviso; acesso ao dashboard não é concedido somente pelo papel de ARP, e a fila pessoal do AAL considera o próprio responsável. Links de preenchimento abrem os blocos; cartões, orientações e referências de pendências foram simplificados. Validado com testes direcionados; bateria integral reservada para antes do Lote 16 e do congelamento. Entrega separada, sem ativação automática na 8017.
 
