@@ -214,8 +214,8 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
                 try:
                     previsto = vencimento_na_aprovacao(e, agora_utc())
                     prazo_previsto = f"até {data_br(previsto)}, se aprovar hoje" if e.get('duracao_dias') else 'a Secretaria precisa registrar a duração antes da aprovação'
-                except ValueError as erro:
-                    prazo_previsto = str(erro)
+                except ValueError as erro_prazo:
+                    prazo_previsto = str(erro_prazo)
                 a['resumo'] += f" Plano: {e.get('plano','')}. Cargo: {e.get('cargo_responsavel','')}. Prazo: {prazo_previsto}."
             for c in a['campos']:
                 c['uid']=a['acao']+'-'+c['nome']
