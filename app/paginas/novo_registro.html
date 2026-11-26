@@ -66,13 +66,14 @@
 
     <label id="rotulo-item" for="objeto_principal_id">2. Item do catálogo da demonstração <span class="marcador-obrigatorio" aria-label="obrigatório">*</span></label>
     <select id="objeto_principal_id" name="objeto_principal_id" required
-        <section id="aviso-duplicidade" aria-live="polite" hidden><p id="texto-duplicidade"></p><a id="abrir-existente">Abrir o Registro existente</a></section>
+    {% if not valores.tipo_objeto %}disabled{% endif %}
     {% if 'objeto_principal_id' in erros_campos %}aria-invalid="true" aria-describedby="erro-objeto_principal_id"{% endif %}>
-      <option value="">Selecione depois de escolher o tipo</option>
+      <option value="">Escolha primeiro o tipo, acima</option>
       {% for objeto in objetos %}
       <option value="{{ objeto.id }}" data-registros='{{ objeto.registros|tojson }}' data-nome="{{ objeto.nome_canonico }}" data-tipo="{{ objeto.tipo_objeto }}" data-unidades="{{ objeto.unidades|join(',') }}" {% if valores.objeto_principal_id == objeto.id %}selected{% endif %}>{{ objeto.nome_canonico }}{% if objeto.registros %} — já tem Registro: {{ objeto.registros|map(attribute="codigo")|join(", ") }}{% endif %}</option>
       {% endfor %}
     </select>
+    <section id="aviso-duplicidade" aria-live="polite" hidden><p id="texto-duplicidade"></p><a id="abrir-existente">Abrir o Registro existente</a></section>
     {% if 'objeto_principal_id' in erros_campos %}<p id="erro-objeto_principal_id" class="erro-campo">Selecione um item cadastrado para a Secretaria e o tipo escolhidos.</p>{% endif %}
     {% if objeto_invalidado %}<p class="aviso-leitura">A seleção anterior foi removida porque o item não pertence mais à Secretaria e ao tipo informados.</p>{% endif %}
     <p class="ajuda">A lista mostra os serviços, processos e atividades já cadastrados para a sua Secretaria. Se o seu não aparecer, peça a inclusão à TI antes de abrir o Registro. Não escolha um parecido.</p>
@@ -132,7 +133,7 @@
     <div id="justificativa-outro-contexto" hidden><label for="justificativa">Justificativa para criar outro Registro em contexto diferente</label><textarea id="justificativa" name="justificativa" maxlength="2000" disabled></textarea></div>
     <div class="rodape-formulario">
       <p id="efeito-abertura">Ao confirmar, o sistema criará o Registro LGPD e deixará o FORM 1 no estado “Não iniciado”.</p>
-      <p id="faltantes-abertura" aria-live="polite"></p><button id="confirmar-abertura" class="botao-primario" type="submit" disabled>Confirmar e criar Registro LGPD</button>
+      <p id="faltantes-abertura" aria-live="polite">Falta informar: tipo, item, canais, contexto.</p><button id="confirmar-abertura" class="botao-primario" type="submit" disabled>Confirmar e criar Registro LGPD</button>
     </div>
   </form>
   {% else %}

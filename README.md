@@ -6,6 +6,8 @@
 
 Em produção, o acesso será por autenticação real; `conta_id` é exclusivo da demonstração.
 
+**Correção C199/C200 — 26/11/2026:** restaurado o seletor do item na abertura do Registro: visível e desativado antes da escolha do tipo, habilitado com os itens aplicáveis depois da escolha. Corrigida a estrutura HTML do aviso de duplicidade e restaurada a indicação dos campos faltantes. Cinco testes direcionados aprovados; interação conferida em navegador com HTML renderizado e dados fictícios. Não altera permissões, dashboard nem ativa automaticamente a entrega na vistoria.
+
 **Atualização demonstrativa — 20/11/2026, Lote 12-F:** o AAL pode concluir a etapa de análise do FORM 2 sem homologação jurídica e mantendo separados os encaminhamentos. FORMs 3 e 4 possuem fluxo demonstrativo: avaliação conjunta, decisão, plano, execução, verificação independente e aprendizagem. Conclusões e planos aprovados ficam protegidos; revisões preservam o histórico. R17 é cobrada por etapa, nunca no salvamento parcial. Competências continuam em deliberação; não se autoriza produção. A entrega na branch não altera automaticamente o servidor de vistoria nem representa merge no `main`.
 
 ## Dashboard demonstrativo — Lote 13, 20/11/2026
