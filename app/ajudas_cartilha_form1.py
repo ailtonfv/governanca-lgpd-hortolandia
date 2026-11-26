@@ -191,3 +191,30 @@ def ajudas_rev22(key, disponiveis):
                  'topico': re.sub(r'^\d+(?:\.\d+)*\s+', '', SECOES_CARTILHA[ajuda['secao_id']]),
                  'disponivel': ajuda['secao_id'] in disponiveis}
     return dict(ajuda_cartilha=ajuda, ajuda_alternativas=AJUDAS_ALTERNATIVAS_FORM1.get(antigo, ()))
+
+
+TOPICOS_BLOCO = {
+    1: 'Levantamento da realidade', 14: 'Levantamento da realidade',
+    2: 'Competência, finalidade e hipótese legal',
+    3: 'Operador, terceiros, OSCs e entidades parceiras',
+    4: 'Assistência, vulnerabilidade e dados socioeconômicos',
+    5: 'Hipóteses legais e dados sensíveis',
+    6: 'Fluxos, sistemas e circulação da informação',
+    7: 'Fluxos, sistemas e circulação da informação',
+    8: 'Sistemas institucionais e circulação documental',
+    9: 'Dados, acesso, compartilhamento e publicação',
+    10: 'Dados, acesso, compartilhamento e publicação',
+    11: 'Retenção, temporalidade e descarte',
+    12: 'Retenção, temporalidade e descarte',
+    13: 'Exposição física, visual e trabalho remoto',
+}
+
+
+def titulo_topico(secao_id):
+    import re
+    return re.sub(r'^\d+(?:\.\d+)*\s+', '', SECOES_CARTILHA[secao_id])
+
+
+def topico_do_bloco(bloco, disponiveis):
+    secao = next((k for k in disponiveis if titulo_topico(k) == TOPICOS_BLOCO[bloco]), 'levantamento')
+    return dict(id=secao, titulo=titulo_topico(secao)) if secao in disponiveis else None

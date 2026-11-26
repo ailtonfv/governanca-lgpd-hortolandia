@@ -27,7 +27,7 @@ def test_etapa_atual_cenarios_aprovados():
 
 def test_contagem_ativas_sem_r17():
     inicio=contagem_blocos({'respostas':{'1.2':'Tipo fictício','1.3':'Nome fictício'}})[1]
-    assert inicio['respondidas']==0 and inicio['texto']=='Ainda não preenchido'
+    assert inicio['respondidas']==1 and 'Em preenchimento' in inicio['texto']  # C173: nome editável conta.
     nao=contagem_blocos({'respostas':{'1.1':'Não'}})[1]
     sim=contagem_blocos({'respostas':{'1.1':'Sim'}})[1]
     assert sim['ativas']==nao['ativas']+1

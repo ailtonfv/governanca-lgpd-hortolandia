@@ -26,6 +26,10 @@ def sessao_rev22():
 
 @router.get('/registros/{registro_id}/form1-rev22')
 def pagina(request:Request,registro_id:str,conta_id:str,bloco:int=1,conjunto:int=1,sessao:Session=Depends(sessao_rev22)):
+    return renderizar_bloco(request,registro_id,conta_id,bloco,conjunto,sessao)
+
+
+def renderizar_bloco(request,registro_id,conta_id,bloco,conjunto,sessao,*,tentativa=None,erro=None,status=200):
     identidade=_identidade(sessao,conta_id,vinculos_vigentes=True)
     if not identidade or registro_id not in _ids_visiveis(sessao,identidade):raise HTTPException(403,'Registro fora do seu acesso.')
     if not 1<=bloco<=14 or not 1<=conjunto<=100:raise HTTPException(400,'Bloco ou conjunto inválido.')
@@ -41,15 +45,17 @@ def pagina(request:Request,registro_id:str,conta_id:str,bloco:int=1,conjunto:int
     sessao.commit()
     conteudo=r.conteudo;adotada='revisao_22' in conteudo
     atualizada=False
-    if not adotada and pode:
+    if not adotada and pode and tentativa is None:
         tinha_respostas=any(v not in (None,'',[]) for k,v in conteudo.get('respostas',{}).items() if k not in ('1.2','1.3'))
         resultado=adotar(sessao,comando_id=str(uuid4()),conta_id=conta_id,registro_id=registro_id,versao_lida=r.versao_rascunho,confirmar=True)
         if not resultado['permitido']: raise HTTPException(409,resultado['motivo'])
         sessao.commit()
         conteudo=r.conteudo;adotada=True;atualizada=tinha_respostas
 
+    from app.atividade_form1 import atividade_form1
+    trabalho=atividade_form1(sessao,registro_id)
     historico=None
-    if adotada:
+    if adotada and trabalho['antes_atualizacao']:
         from app.origem_form2 import ler_origem
         historico=ler_origem(sessao,registro_id,conteudo['revisao_22']['snapshot_anterior_id'])
     rows=conteudo.get('conjuntos_rev22',{}).get(str(bloco),[])
@@ -58,25 +64,44 @@ def pagina(request:Request,registro_id:str,conta_id:str,bloco:int=1,conjunto:int
     row=rows[conjunto-1] if conjunto<=len(rows) else {'respostas':{},'complementos':{}}
     contexto={**valores,**row['respostas']}
     defs=definicoes()
+    if tentativa is not None:
+        for chave in tentativa:
+            if chave.startswith('r:') and chave[2:] in defs:
+                itens=[v for v in tentativa.getlist(chave) if v]
+                contexto[chave[2:]]=itens if defs[chave[2:]]['kind']=='multi' else (itens[0] if itens else '')
     from app.rev22_form1 import blocos_com_respostas, contagem_blocos, condicoes_tela, orientacao_condicional
     from app.ajudas_cartilha_form1 import ajudas_rev22
     from app.consultas_interface import _devolucao_para_interface
-    respondidos = blocos_com_respostas(conteudo)
+    respondidos = blocos_com_respostas(conteudo) if trabalho['iniciado'] else set()
+    contagens=contagem_blocos(conteudo)
+    if not trabalho['iniciado']:
+        for item in contagens.values():item.update(respondidas=0,texto='Ainda não preenchido')
     campos=[q for q in defs.values() if q['block']==bloco]
     for q in campos:
         q['repetida']=bloco in (3,10) and q['id']!=f'{bloco}.1'
         origem=row if q['repetida'] else conteudo
         q['valor']=origem.get('respostas',{}).get(q['id'])
         q['complemento']=origem.get('complementos',{}).get(q['id'],'')
+        if tentativa is not None:
+            chave='r:'+q['id']
+            if chave in tentativa:
+                valores_digitados=[v for v in tentativa.getlist(chave) if v]
+                q['valor']=valores_digitados if q['kind']=='multi' else (valores_digitados[0] if valores_digitados else '')
+            if 'c:'+q['id'] in tentativa:q['complemento']=tentativa['c:'+q['id']]
+        q['erro']=erro if erro and erro.startswith('F1-'+q['id']+':') else None
         q['ativa']=ativa(q['id'],contexto)
         q['orientacao_condicional']=orientacao_condicional(q['id'])
         q.update(ajudas_rev22(q['id'],secoes_cartilha_disponiveis()))
     if historico:
         historico['perguntas']=[p for p in historico['perguntas'] if p['id'] in defs and defs[p['id']]['block']==bloco]
         historico['conteudo']={k:v for k,v in historico.get('conteudo',{}).items() if (k=='participantes' and bloco==3) or (k=='destinatarios_10_2_1' and bloco==10)}
-    return paginas.TemplateResponse(request=request,name='form1_rev22.html',context=dict(
+    from app.ajudas_cartilha_form1 import topico_do_bloco
+    return paginas.TemplateResponse(request=request,name='form1_rev22.html',status_code=status,context=dict(
+        erro_bloco=erro, conflito_versao=bool(erro and erro.startswith('Este bloco foi alterado em outra aba.')),
+        versao_formulario=tentativa.get('versao',r.versao_rascunho) if tentativa is not None else r.versao_rascunho,
+        topico_bloco=topico_do_bloco(bloco,secoes_cartilha_disponiveis()),
         pode_definir_retorno=reg.unidade_principal_atual_id in unidades_em_que_e_apa_atual(sessao,identidade["pessoa_id"]),
-        atualizada=atualizada, contagens=contagem_blocos(conteudo), condicoes=condicoes_tela(), contexto_condicoes=contexto,
+        atualizada=atualizada, contagens=contagens, condicoes=condicoes_tela(), contexto_condicoes=contexto,
         retirada_antiga=bool(conteudo.get('revisao_22',{}).get('legado',{}).get('9.2.1')),
         orientacao_levantamento=acesso_local_cartilha(request) and "levantamento" in secoes_cartilha_disponiveis(),
         edicao_cartilha=VERSAO_CARTILHA_AJUDAS_FORM1,
@@ -115,7 +140,15 @@ async def gravar(request:Request,registro_id:str,sessao:Session=Depends(sessao_r
         if not resultado['permitido']:raise ValueError(resultado['motivo'])
         sessao.commit()
     except (ValueError,PermissionError) as e:
-        sessao.rollback();raise HTTPException(409,str(e))
+        sessao.rollback()
+        # Permissão é conferida antes de devolver qualquer página com respostas.
+        if _contexto_autorizado(sessao,conta,registro_id)[-1] is not None:
+            raise HTTPException(403,'Seu perfil não permite alterar este Registro.')
+        mensagem=str(e)
+        if 'desatualizad' in mensagem:
+            mensagem='Este bloco foi alterado em outra aba. Recarregue a página antes de salvar.'
+        return renderizar_bloco(request,registro_id,conta,bloco,int(conjunto or 1),sessao,
+                               tentativa=d,erro=mensagem,status=409)
     destino=dict(conta_id=conta,bloco=bloco,conjunto=conjunto or 1)
     if d.get('acao') not in ('adotar','conferir'):
         destino['salvo']=sessao.get(RascunhoForm1Integral,registro_id).versao_rascunho

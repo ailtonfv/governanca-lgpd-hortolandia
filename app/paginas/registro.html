@@ -151,7 +151,7 @@
       <h2 id="titulo-form1-integral" tabindex="-1">FORM 1 — Levantamento Inicial do Tratamento de Dados Pessoais</h2>
     </div>
     <p class="objetivo-form1"><strong>Objetivo:</strong> Descreva como este serviço, processo ou atividade coleta, utiliza, compartilha, armazena e protege dados pessoais.</p>
-    <span class="estado">{% if registro.form1_integral.rascunho %}Rascunho {{ registro.form1_integral.rascunho.versao }}{% else %}Não iniciado{% endif %}</span>
+    <span class="estado">{% if registro.form1_integral.fluxo_conferencia.iniciado_pelo_servidor %}Rascunho {{ registro.form1_integral.rascunho.versao }}{% else %}Não iniciado{% endif %}</span>
   </div>
   <p class="aviso-leitura status-submissao-form1">{% if not registro.form1_integral.rascunho %}O rascunho ainda não foi iniciado{% if registro.form1_integral.arp_atual %} pelo ARP {{ registro.form1_integral.arp_atual.nome }}{% endif %}. Depois de iniciado, os 14 blocos poderão ser acessados conforme seu papel.{% else %}O FORM 1 pode ser salvo e retomado mesmo incompleto. Salvar não conclui a análise institucional.{% endif %}</p>
   {% if registro.etapa_atual.form != 1 %}
@@ -483,7 +483,7 @@
         </select>
 
         <div class="rodape-formulario">
-          <p>Rascunho {{ registro.form1_integral.rascunho.versao }} · último salvamento por {{ registro.form1_integral.rascunho.salvo_por }}</p>
+          {% if registro.form1_integral.fluxo_conferencia.iniciado_pelo_servidor %}<p>Rascunho {{ registro.form1_integral.rascunho.versao }} · último salvamento por {{ registro.form1_integral.rascunho.salvo_por }}</p>{% else %}<p>Não iniciado</p>{% endif %}
           {% set numero_bloco = 1 %}{% include '_acoes_salvar_bloco_form1.html' %}
         </div>
       </form>

@@ -88,6 +88,8 @@ paginas.env.filters["rotulo_apresentacao"] = rotulo_apresentacao
 paginas.env.globals["consulta_cartilha_local"] = acesso_local_cartilha
 paginas.env.filters.update(data_local=data_local, rotulo_f2=rotulo_demonstrativo)
 FUSO_OFICIAL = ZoneInfo("America/Sao_Paulo")
+from app.erros_interface import instalar as instalar_erros_interface
+instalar_erros_interface(app)
 
 
 def _mensagem_salvamento(resultado, descricao):
@@ -520,19 +522,19 @@ def consultar_cartilha_secao(
     cabecalhos = {
         "Cache-Control": "private, no-store", "X-Robots-Tag": "noindex, nofollow",
         "Referrer-Policy": "no-referrer", "X-Content-Type-Options": "nosniff",
-        "Content-Security-Policy": "default-src 'none'; style-src 'self'; img-src data:; frame-ancestors 'none'; base-uri 'none'; form-action 'none'",
+        "Content-Security-Policy": "default-src 'none'; style-src 'self'; script-src 'self'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'; form-action 'none'",
     }
     if not acesso_local_cartilha(request):
-        return HTMLResponse("Consulta da Cartilha restrita ao ambiente local da PoC.", status_code=403, headers=cabecalhos)
+        raise HTTPException(403, "Consulta da Cartilha restrita ao ambiente local da PoC.", headers=cabecalhos)
     identidade, registro = carregar_registro(sessao, conta_id, registro_id)
     if not identidade or not registro:
-        return HTMLResponse("Consulta não disponível para este Registro e agente.", status_code=403, headers=cabecalhos)
+        raise HTTPException(403, "Consulta não disponível para este Registro e agente.", headers=cabecalhos)
     secoes = secoes_cartilha_disponiveis() if edicao == VERSAO_CARTILHA_AJUDAS_FORM1 else {}
     if secao_id not in secoes:
-        return HTMLResponse("Seção da Cartilha REV30.13 indisponível. Volte à aba do FORM 1; suas respostas permanecem lá.", status_code=404, headers=cabecalhos)
+        raise HTTPException(404, "Seção indisponível. Volte à aba do FORM 1.", headers=cabecalhos)
     return paginas.TemplateResponse(
         request=request, name="cartilha_secao.html",
-        context={"titulo_secao": SECOES_CARTILHA[secao_id], "edicao": edicao,
+        context={"titulo_secao": SECOES_CARTILHA[secao_id], "edicao": edicao, "pagina_isolada": True,
                  "conteudo_secao": secoes[secao_id]}, headers=cabecalhos,
     )
 

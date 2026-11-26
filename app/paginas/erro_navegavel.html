@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% block conteudo %}
+<section class="cartao"><h1>Não foi possível continuar</h1><p role="alert">{{ mensagem }}</p>
+{% if pagina_isolada %}<p>Para voltar ao FORM, feche esta aba.</p>{% else %}<a class="botao-link-secundario" href="/central?conta_id={{ conta_id|urlencode }}">Voltar à Central de Acesso</a>{% endif %}
+</section>
+{% endblock %}

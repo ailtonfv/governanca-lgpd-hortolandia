@@ -1,24 +1,22 @@
-{% from '_links_instrumentos.html' import link_form2 with context %}
 <section class="instrumentos-registro" aria-labelledby="instrumentos-registro">
   <h2 id="instrumentos-registro" tabindex="-1">Instrumentos deste Registro</h2>
-  <p>Quatro instrumentos integrados ao mesmo Registro LGPD. A disponibilidade depende da etapa implementada e da sua autorização.</p>
   <ul class="lista-instrumentos-registro">
-    <li data-instrumento="FORM1">
-      <h3>FORM 1 — Levantamento do tratamento</h3>
-      <p>Registra os fatos sobre coleta, uso, compartilhamento, guarda e proteção de dados pessoais.</p>
-      <p>{{ registro.form1_integral.fluxo_conferencia.estado }}</p>
-      <a href="#titulo-form1-integral" class="botao-link-secundario">Consultar situação do FORM 1</a>
-      <p class="ajuda">{% if registro.form1_integral.pode_editar %}Preenchimento autorizado como ARP.{% else %}Consulta; edição somente pelo ARP autorizado.{% endif %}</p>
-    </li>
-    <li data-instrumento="FORM2">
-      <h3>FORM 2 — Validação jurídica e institucional</h3>
-      <p>Destina-se à análise jurídica e institucional do tratamento. Validação pelo AAL, com consulta ao Jurídico e ao DPO. Resultado não homologado nesta demonstração.</p>
-      <a class="botao-link-secundario" href="/form2/filas?conta_id={{ conta_id|urlencode }}">Consultar fila do FORM 2</a>
-      {% for item in registro.etapa_atual.instrumentos[2] %}<p>{{ item.situacao }}{% if item.desde %} em {{ (item.desde|data_local)[:10] }}{% endif %}{% if item.href %} · <a href="{{ item.href }}">Consultar</a>{% endif %}</p>{% endfor %}
-      <p class="ajuda">O agente autorizado assume a participação pela fila da unidade executora. A fila mostra somente as participações e solicitações acessíveis ao seu perfil.</p>
-    </li>
-    <li data-instrumento="FORM3"><h3>FORM 3 — Avaliação de riscos e controles</h3><p>Destina-se à avaliação dos riscos e das medidas de controle do tratamento.</p>{% for item in registro.etapa_atual.instrumentos[3] %}<p>{{ item.situacao }}{% if item.desde %} em {{ (item.desde|data_local)[:10] }}{% endif %}{% if item.href %} · <a href="{{ item.href }}">Consultar</a>{% endif %}</p>{% else %}<p>Sem avaliação de risco neste Registro.</p>{% endfor %}</li>
-    <li data-instrumento="FORM4"><h3>FORM 4 — Plano de ação, monitoramento e aprendizagem institucional</h3><p>Destina-se ao registro de providências, responsáveis, prazos, evidências e acompanhamento.</p>{% for item in registro.etapa_atual.instrumentos[4] %}<p>{{ item.situacao }}{% if item.desde %} em {{ (item.desde|data_local)[:10] }}{% endif %}{% if item.href %} · <a href="{{ item.href }}">Consultar</a>{% endif %}</p>{% else %}<p>Sem providência neste Registro.</p>{% endfor %}</li>
+  {% set titulos = {1:'Levantamento do tratamento',2:'Validação jurídica e institucional',3:'Avaliação de riscos e controles',4:'Plano de ação, monitoramento e aprendizagem institucional'} %}
+  {% set proximos = {1:'O ARP preenche e apresenta ao APA para conferência.',2:'O FORM 2 começa depois que o APA confirmar o FORM 1.',3:'O FORM 3 começa depois da validação no FORM 2.',4:'O FORM 4 começa quando o FORM 3 indicar providências.'} %}
+  {% for numero in (1,2,3,4) %}
+    <li data-instrumento="FORM{{ numero }}"><h3>FORM {{ numero }} — {{ titulos[numero] }}</h3>
+    {% if numero == 1 %}
+      <p><strong>Situação neste Registro:</strong> {{ registro.form1_integral.fluxo_conferencia.estado }}</p>
+      <p>{{ proximos[numero] }}</p>
+      {% if registro.form1_integral.rascunho %}<a class="botao-link-secundario" href="#titulo-form1-integral">Ver situação do FORM 1</a>{% endif %}
+    {% else %}
+      {% for item in registro.etapa_atual.instrumentos[numero] %}
+        <p><strong>Situação neste Registro:</strong> {{ item.situacao }}{% if item.desde %} em {{ (item.desde|data_local)[:10] }}{% endif %}</p>
+        <p>Consulte o instrumento para ver a próxima providência autorizada para seu perfil.</p>
+        {% if item.href %}<a class="botao-link-secundario" href="{{ item.href }}">Consultar FORM {{ numero }}</a>{% endif %}
+      {% else %}<p><strong>Situação neste Registro:</strong> Não iniciado.</p><p>{{ proximos[numero] }}</p>{% endfor %}
+    {% endif %}</li>
+  {% endfor %}
   </ul>
   <p class="ajuda">A navegação entre instrumentos não libera submissão, aprovação ou validação institucional.</p>
 </section>

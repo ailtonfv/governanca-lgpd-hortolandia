@@ -130,8 +130,8 @@
     <section id="aviso-duplicidade" aria-live="polite" hidden><p id="texto-duplicidade"></p><a id="abrir-existente">Abrir o Registro existente</a></section>
     <div id="justificativa-outro-contexto" hidden><label for="justificativa">Justificativa para criar outro Registro em contexto diferente</label><textarea id="justificativa" name="justificativa" maxlength="2000" disabled></textarea></div>
     <div class="rodape-formulario">
-      <p>Ao confirmar, o sistema criará o Registro LGPD e deixará o FORM 1 no estado “Não iniciado”.</p>
-      <p id="faltantes-abertura" aria-live="polite"></p><button id="confirmar-abertura" class="botao-primario" type="submit">Confirmar e criar Registro LGPD</button>
+      <p id="efeito-abertura">Ao confirmar, o sistema criará o Registro LGPD e deixará o FORM 1 no estado “Não iniciado”.</p>
+      <p id="faltantes-abertura" aria-live="polite"></p><button id="confirmar-abertura" class="botao-primario" type="submit" disabled>Confirmar e criar Registro LGPD</button>
     </div>
   </form>
   {% else %}
@@ -169,11 +169,13 @@
     const falta = [];
     if (!tipo) falta.push('tipo');
     if (!objeto.value) falta.push('item');
+    const canais = document.querySelector('input[name="situacao_canais"]:checked');
+    if (!canais || (canais.value === 'identificados' && ![...camposCanais].some(c => c.checked))) falta.push('canais');
     if (!contexto.value) falta.push('contexto');
-    if (!document.querySelector('input[name="situacao_canais"]:checked')) falta.push('canais');
     if (exige && !just.value.trim()) falta.push('justificativa');
     document.getElementById('faltantes-abertura').textContent = mesmo ? 'Abra o Registro existente.' : falta.length ? 'Falta informar: ' + falta.join(', ') + '.' : 'Confira os dados antes de criar.';
-    document.getElementById('confirmar-abertura').disabled = Boolean(mesmo);
+    document.getElementById('confirmar-abertura').disabled = Boolean(mesmo || falta.length);
+    document.getElementById('efeito-abertura').textContent = mesmo ? 'Este Registro já existe. Abra o Registro existente para continuar.' : 'Ao confirmar, o sistema criará o Registro LGPD e deixará o FORM 1 no estado “Não iniciado”.';
   }
   function atualizarObrigatoriedadeCanais() {
     const identificados = document.querySelector('input[name="situacao_canais"][value="identificados"]')?.checked;

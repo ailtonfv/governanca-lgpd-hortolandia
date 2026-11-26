@@ -474,3 +474,5 @@ dialog :is([data-cancelar], [data-fechar-dialogo]) { font-size: .9rem; backgroun
 .mapa-blocos-form1 :is([aria-current="page"],[aria-current="step"]) .progresso-bloco > span{background:#fff;}
 
 .mapa-blocos-form1 :is(.cartao-bloco,button,.titulo-bloco-form2),.grade34 a{hyphens:none;}
+/* Abertura: estado indisponível explícito; o domínio repete as recusas. */
+#confirmar-abertura:disabled { background: #e1e5e8; color: #505d66; border-color: #aab3ba; cursor: not-allowed; opacity: 1; }

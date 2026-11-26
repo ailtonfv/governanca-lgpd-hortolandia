@@ -6,6 +6,7 @@
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/filas_form2.css') }}"><div class="filas-form2">
 {% set apenas_dpo = dpo and not gerenciaveis and not pode_encaminhar and not (cartoes|rejectattr("participacoes", "equalto", [])|map(attribute="participacoes")|sum(start=[])|rejectattr("tipo", "equalto", "dpo")|list) %}
 <h1>{{ "Painel do DPO" if apenas_dpo else "Filas do FORM 2" }}</h1>
+<p>A participação ocorre pela fila da unidade executora, conforme habilitação e atribuição autorizadas.</p>
 {{ faixa_ato(mensagem_atribuicao, ato_registrado) }}
 <p>{{ pessoa.nome|identidade_demonstrativa }} · Demonstração com dados fictícios.</p>
 <div class="acoes-fila-form2"><a class="botao-link-secundario" href="/central?conta_id={{ conta_id|urlencode }}">Voltar à Central de Acesso</a></div>

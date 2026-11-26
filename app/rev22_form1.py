@@ -13,7 +13,7 @@ EQUIVALENCIA = dict(zip(('8.7','8.8','8.8.1','8.9'), ('WPP.1','WPP.2','WPP.3','W
 
 # Contagem de preenchimento, não obrigatoriedade (decisão de 25/11).
 EXCECOES_CONTAGEM = frozenset()
-CAMPOS_ABERTURA = frozenset(('1.2', '1.3'))
+CAMPOS_ABERTURA = frozenset(('1.2',))  # C173: nome editável também integra a contagem.
 
 
 def contagem_blocos(conteudo):
@@ -212,7 +212,10 @@ def salvar(sessao, *, comando_id,conta_id,registro_id,versao_lida,bloco,resposta
         if bloco in (3,10):fields={f'{bloco}.1':fields[f'{bloco}.1']}
         target=novo;values=valores
     if not isinstance(respostas,dict) or not set(respostas)<=set(fields):raise ValueError('Campo fora do bloco.')
-    validated={k:validar(fields[k],v) for k,v in respostas.items()}
+    validated={}
+    for k,v in respostas.items():
+        try: validated[k]=validar(fields[k],v)
+        except ValueError as erro: raise ValueError(f'F1-{k}: {erro}') from erro
     merged={**valores,**values,**validated}
     for key,v in validated.items():
         if v is not None and not ativa(key,merged):raise ValueError(f'F1-{key}: salve a pergunta de origem antes de responder este campo.')
@@ -234,7 +237,9 @@ def salvar(sessao, *, comando_id,conta_id,registro_id,versao_lida,bloco,resposta
         else:extras.pop(key,None)
     from app.opcao_outro import validar_outro
     for key in set(validated)|set(complementos or {}):
-        if ativa(key,merged):validar_outro(values.get(key),extras.get(key,''),'F1-'+key)
+        # Somente valores de alternativas conhecidas; texto livre nunca é alternativa.
+        if fields[key]['kind'] in ('single','multi') and ativa(key,merged):
+            validar_outro(values.get(key),extras.get(key,''),'F1-'+key)
     # Respostas que saem de aplicabilidade ficam no histórico, sem reativação implícita.
     archive=novo.setdefault('inativas_rev22',[])
     groups=[(valores,novo.get('complementos',{}),None)]

@@ -359,6 +359,8 @@ def _ultimo_historico_conferencia(sessao, registro_id):
 
 def projetar_fluxo_conferencia(sessao, registro_id, unidade_id):
     """Resumo de leitura para telas já autorizadas; não atribui tarefas/permissões."""
+    from app.atividade_form1 import atividade_form1
+    trabalho = atividade_form1(sessao, registro_id)
     historico = _ultimo_historico_conferencia(sessao, registro_id)
     pendente = sessao.get(ConferenciaInternaForm1Integral, registro_id)
     atribuicao = sessao.get(AtribuicaoForm1Integral, registro_id)
@@ -375,7 +377,7 @@ def projetar_fluxo_conferencia(sessao, registro_id, unidade_id):
     arp = rotulo(atribuicao.arp_atual_id if atribuicao else None, "ARP")
     situacao = pendente.situacao if pendente else historico.situacao if historico else None
     atual, estado, proxima, responsavel = (
-        "preencher", "Sem apresentação para conferência",
+        "preencher", "Em preenchimento" if trabalho['iniciado'] else "Não iniciado",
         "O ARP preenche e pode apresentar uma versão, mesmo incompleta, quando autorizado.", arp,
     )
     if atribuicao is None:
@@ -416,7 +418,7 @@ def projetar_fluxo_conferencia(sessao, registro_id, unidade_id):
             estado = proxima = AGUARDANDO_CONFERENTE
     referencia = pendente or historico
     atividades = [
-        (rascunho.salvo_em if rascunho else None, "Rascunho salvo"),
+        (trabalho['ultimo'].ocorrido_em if trabalho['ultimo'] else None, "Rascunho salvo"),
         (referencia.solicitada_em if referencia else None, "Versão apresentada"),
         (historico.devolvida_em if historico else None, "Devolução para ajustes"),
         (historico.confirmada_em if historico else None, "Conferência confirmada"),
@@ -424,6 +426,7 @@ def projetar_fluxo_conferencia(sessao, registro_id, unidade_id):
     ultima = max((a for a in atividades if a[0] is not None), default=None)
     return {
         "ultima_atividade": ultima,
+        "iniciado_pelo_servidor": trabalho['iniciado'],
         "devolucao_anterior": devolucao_anterior,
         "apresentada_em": referencia.solicitada_em if referencia else None,
         "atual": atual, "estado": estado, "proxima": proxima, "responsavel": responsavel,
@@ -706,10 +709,12 @@ def carregar_painel(sessao, conta_id, *, secretaria_id=None):
         )
         primeira = next((p for p in pre_validacao["incompletos"] if p["destino_navegavel"]), None)
         blocos_vazios = _blocos_sem_respostas(rascunho.conteudo if rascunho else {})
+        from app.atividade_form1 import atividade_form1
+        iniciado_pelo_servidor = atividade_form1(sessao,registro.id)['iniciado']
         preenchimentos_arp[registro.id] = {
             "blocos_vazios": blocos_vazios,
             "quantidade": pre_validacao["quantidades"]["incompletos"],
-            "nao_iniciado": rascunho is None,
+            "nao_iniciado": not iniciado_pelo_servidor,
             "ancora": f"titulo-bloco-{primeira['bloco']}" if primeira else "titulo-bloco-1",
         }
         conferencia = sessao.get(ConferenciaInternaForm1Integral, registro.id)
@@ -736,7 +741,7 @@ def carregar_painel(sessao, conta_id, *, secretaria_id=None):
             "tipo": registro.tipo_objeto.capitalize(),
             "titulo": rotulo_interface(registro.titulo_objeto),
             "situacao": (
-                "Não iniciado" if proxima["tipo"] == "iniciar"
+                "Não iniciado" if not iniciado_pelo_servidor
                 else "Devolvido para ajustes" if proxima["tipo"] == "corrigir"
                 else "Em preenchimento"
             ),
@@ -884,7 +889,7 @@ def carregar_painel(sessao, conta_id, *, secretaria_id=None):
             )
         elif confirmacao is not None:
             resumo["situacao_form1_integral"] = "Conferência interna confirmada"
-        elif rascunho is not None:
+        elif resumo["fluxo_conferencia"]["iniciado_pelo_servidor"]:
             resumo["situacao_form1_integral"] = "Em preenchimento"
         elif atribuicao is not None:
             resumo["situacao_form1_integral"] = "Não iniciado"

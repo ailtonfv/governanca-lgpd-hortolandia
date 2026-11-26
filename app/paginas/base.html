@@ -11,9 +11,9 @@
   <main class="conteudo">
     {% block conteudo %}{% endblock %}
   </main>
-<script defer src="{{ url_for('estaticos', path='/selecao_exclusiva.js') }}"></script>
+{% if not pagina_isolada %}<script defer src="{{ url_for('estaticos', path='/selecao_exclusiva.js') }}"></script>
 <dialog id="confirmar-ato" aria-labelledby="titulo-ato"><h2 id="titulo-ato"></h2><p data-descricao></p>
 <div class="acoes-fila-form2"><button type="button" data-cancelar autofocus>Cancelar e revisar as opções</button>
 <button class="botao-primario" type="button" data-confirmar>Confirmar</button></div></dialog>
-<script defer src="{{ url_for('estaticos', path='/ato_registrado.js') }}"></script><script src="/estaticos/obrigatoriedade.js" defer></script></body>
+<script defer src="{{ url_for('estaticos', path='/ato_registrado.js') }}"></script><script src="/estaticos/obrigatoriedade.js" defer></script>{% endif %}</body>
 </html>
