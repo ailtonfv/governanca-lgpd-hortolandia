@@ -91,7 +91,8 @@ def test_retorno_dpo_e_resposta_aal(sessao, principal):
     assert respondida.status_code == 200 and "Resposta registrada em " in respondida.text
     historico = cliente.get(url + "?conta_id=CONTA-E1")
     assert "Revisão registrada." in historico.text and "Servidor Beta" in historico.text
-    assert "Respondida em " in cliente.get("/form2/painel-dpo?conta_id=CONTA-E1").text
+    painel = cliente.get("/form2/painel-dpo?conta_id=CONTA-E1")
+    assert [l['consulta'].id for l in painel.context['grupos_dpo']['respondidas']] == [consulta.id]
     sessao.refresh(principal)
     assert principal.estado == estado
 
@@ -147,7 +148,7 @@ def test_bloco_parcial_e_avisos_de_guarda(principal):
     assert "Em preenchimento · 1 de 10 perguntas ativas" in salvo.text and salvo.text.count("Guarda em definição") >= 2
     assert "Respostas completas" not in salvo.text
     painel = c.get("/form2/painel-dpo?conta_id=CONTA-E1")
-    assert "Guarda em definição" in painel.text
+    assert "Temporalidade em definição: 1 Registro" in painel.text
 
 
 def test_exclusividade_do_catalogo_completo():

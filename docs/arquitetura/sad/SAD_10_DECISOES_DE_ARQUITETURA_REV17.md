@@ -1248,3 +1248,7 @@ Condições de F3-3.33, F3-3.41 e F3-3.42 explicitadas; detalhes de incidente oc
 ### Lote 16 — A11.2 (26/11/2026)
 
 Wi-Fi do FORM 2 exige declaração específica em F1-8.10; Saúde exige categoria de saúde na origem ou a unidade SEC-SAUDE. F2-9.4 fica oculto e inativo. A nova pergunta do FORM 1 permanece somente no pacote privado; nenhum enunciado é publicado. Lacre anterior reconhecido para leitura histórica, sem reescrever snapshots. Registro próprio da TI não foi criado: pertence à carga posterior.
+
+### Lote 16-B — A8 (26/11/2026)
+
+Consulta pendente do DPO exige pergunta registrada pelo AAL e participação ainda não concluída. Orientação de ofício não gera espera pelo DPO. Painel e fila DPO da Operação compartilham a classificação no domínio. Orientações concluídas, solicitadas ou de ofício, ficam aguardando resposta do AAL responsável; a resposta utiliza o ato auditável existente, com as mesmas permissões e idempotência. A manifestação continua consultiva e não altera a análise principal. Ciências automáticas não entram como pendência. Sem migração ou alteração da vistoria; aceite em tela ainda pendente.

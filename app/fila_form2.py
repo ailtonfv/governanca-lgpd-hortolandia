@@ -400,7 +400,7 @@ def manifestar_de_oficio(sessao, *, conta_id, participacao_id, comando_id, texto
             raise PermissionError("A manifestação de ofício exige atuação do DPO.")
     else:
         sessao.refresh(alvo)
-        if (alvo.tipo != "dpo" or not (alvo.conteudo or {}).get("de_oficio") or
+        if (alvo.tipo != "dpo" or alvo.estado != "concluida" or not (alvo.manifestacao or "").strip() or
                 principal.responsavel_id != pessoa.id or not autorizado(sessao, pessoa, principal)):
             raise PermissionError("Somente o AAL responsável responde à orientação.")
         if decisao not in ("Acolhida", "Acolhida em parte", "Não acolhida"):

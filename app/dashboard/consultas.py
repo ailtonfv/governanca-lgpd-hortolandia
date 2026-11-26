@@ -288,7 +288,9 @@ def operacao(d, agora):
     abertas=[]
     def incluir(papel,l,inicio,motivo):
         filas[papel].append({**l,'desde':inicio,'dias':dias(inicio,agora),'situacao':motivo})
+    from app.consultas_dpo import aguardando_dpo
     for p in d['participacoes']:
+        if p.tipo == 'dpo' and not aguardando_dpo(p): continue
         if p.concluida_em or p.estado=='concluida': continue
         papel={'principal':'AAL','tematica':'AAL','juridico':'Jurídico','dpo':'DPO'}[p.tipo]
         l={**linha(d,p.registro_id),'id':p.id,'item':'Participação '+('principal' if p.tipo=='principal' else p.tipo),'etapa':'FORM 2'}

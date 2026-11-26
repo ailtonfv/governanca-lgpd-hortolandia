@@ -61,7 +61,7 @@ def test_atalhos_da_central_por_papel_vigente(sessao):
     assert "Atuação: Encarregado de Dados (DPO)" in central.text
     assert "APA em exercício na Secretaria" not in central.text
     painel_dpo = cliente.get("/form2/painel-dpo?conta_id=CONTA-E1")
-    assert 'id="painel-dpo"' in painel_dpo.text and "Tempo até ter responsável" in painel_dpo.text
+    assert 'id="painel-dpo"' in painel_dpo.text and 'data-grupo-dpo="aguardando_dpo"' in painel_dpo.text
     cobertura = painel_dpo.context["cobertura"]
     assert len(cobertura) == 18 and all("Governança de proteção" not in u["nome"] for u in cobertura)
     assert "Outras 18 unidades sem ingresso" in painel_dpo.text

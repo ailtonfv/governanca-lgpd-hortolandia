@@ -10,7 +10,7 @@
 {{ faixa_ato(mensagem_atribuicao, ato_registrado) }}
 <p>{{ pessoa.nome|identidade_demonstrativa }} · Demonstração com dados fictícios.</p>
 <div class="acoes-fila-form2"><a class="botao-link-secundario" href="/central?conta_id={{ conta_id|urlencode }}">Voltar à Central de Acesso</a></div>
-{% if cartoes or (not gerenciaveis and not apenas_dpo) %}<h2>Participações da sua unidade</h2><p>Esta seção reúne as participações autorizadas para sua atuação e as solicitações de complementação à origem, inclusive seu histórico. A gestão dos responsáveis aparece mais abaixo, em quadro próprio.</p>
+{% if not dpo and (cartoes or (not gerenciaveis and not apenas_dpo)) %}<h2>Participações da sua unidade</h2><p>Esta seção reúne as participações autorizadas para sua atuação e as solicitações de complementação à origem, inclusive seu histórico. A gestão dos responsáveis aparece mais abaixo, em quadro próprio.</p>
 {% for c in cartoes %}
 {% if loop.changed(c.aguardando is not none) %}<h3>{{ "Aguardando responsável" if c.aguardando else "Em acompanhamento" }}</h3>{% endif %}
 <article data-registro="{{ c.registro.id }}"><h3>{{ identificar_registro(c.registro) }}</h3>{% if c.identificacao %}<p>{{ c.identificacao }}</p>{% endif %}
@@ -36,12 +36,23 @@
 <label>Apresentação confirmada<select name="snapshot_id" required><option value="">Escolha…</option>{% for v in encaminhaveis.values() %}<option value="{{ v.snapshot }}">{{ v.codigo }} · {{ v.rotulo }}</option>{% endfor %}</select></label>
 <button>Encaminhar para a fila</button></form></details>
 {% endif %}
-{% if dpo %}<h2 id="painel-dpo">Acompanhamento do DPO</h2><p><a href="/temas/pedidos?conta_id={{ conta_id|urlencode }}">Pedidos de novos temas — Em análise</a></p><p>Entrada registra o início da participação. Comunicação registra a criação do aviso de ingresso.</p>
-<div class="tabela-filas"><table><thead><tr><th>Registro</th><th>Situação do Registro</th><th>Comunicado ao DPO em</th><th>Secretaria</th><th>Entrada na fila</th><th>Tempo até ter responsável</th><th>Tempo aguardando DPO<br><small>Desde a consulta em aberto mais antiga</small></th><th>Orientação consultiva</th></tr></thead>
-<tbody>{% for l in linhas %}<tr><td>{{ l.registro.codigo_lgpd }}{% if aguarda_temporalidade(l.p.conteudo) %}<span class="selo-guarda">Guarda em definição</span>{% endif %}</td><td>{{ situacoes.get(l.situacao,l.situacao) }}{% if l.consulta_pendente %} · Aguardando manifestação{% endif %}</td><td>{{ l.comunicado_em|hora_local if l.comunicado_em else "Sem comunicação registrada" }}</td><td>{{ l.secretaria }}</td><td>{{ l.p.entrada_em|hora_local }}</td><td>{{ l.espera }}</td><td>{{ l.dpo }}</td><td>{% if l.aguarda_resposta_aal %}<p>Aguardando resposta do AAL</p>{% endif %}{% if l.ultima_resposta %}<p>Respondida em {{ l.ultima_resposta|hora_local }}</p>{% endif %}<a class="botao-link" href="/form2/participacoes/{{ l.p.id }}/orientacao?conta_id={{ conta_id|urlencode }}#manifestacao">Manifestar-se</a></td></tr>{% endfor %}</tbody></table></div>
+{% if dpo %}
+<h2 id="painel-dpo">Acompanhamento do DPO</h2>
+<p><a href="/temas/pedidos?conta_id={{ conta_id|urlencode }}">Pedidos de novos temas — Em análise</a></p>
+{% for chave, titulo in [('aguardando_dpo','Aguardando sua orientação'),('aguardando_aal','Aguardando resposta do AAL'),('respondidas','Respondidas')] %}
+<section data-grupo-dpo="{{ chave }}"><h3>{{ titulo }}</h3>
+{% if grupos_dpo[chave] %}<div class="tabela-filas"><table><thead><tr><th>Registro</th><th>Secretaria</th><th>Serviço</th><th>Pergunta em</th><th>Aguarda há</th><th>Ação</th></tr></thead><tbody>
+{% for l in grupos_dpo[chave] %}<tr><td>{{ l.registro.codigo_lgpd }}</td><td>{{ l.secretaria }}</td><td>{{ l.registro.titulo_objeto }}</td><td>{{ l.consulta.entrada_em|hora_local if not l.consulta.conteudo.de_oficio else 'Orientação de ofício' }}</td><td>{{ l.espera if chave == 'aguardando_dpo' else '—' }}</td><td><a class="botao-link" href="/form2/participacoes/{{ l.principal.id }}/orientacao?conta_id={{ conta_id|urlencode }}">{{ 'Responder' if chave == 'aguardando_dpo' else 'Ver' }}</a></td></tr>{% endfor %}
+</tbody></table></div>{% else %}<p>Nenhum Registro neste grupo.</p>{% endif %}</section>
+{% endfor %}
+<h3>Registros em que o DPO participou</h3>
+{% for concluida, titulo in [(false,'Em andamento'),(true,'Concluídas')] %}<h4>{{ titulo }}</h4><ul>
+{% for l in linhas if l.participou_dpo and (l.p.estado == 'concluida') == concluida %}<li>{{ identificar_registro(l.registro) }} · {{ l.secretaria }} · {{ situacoes.get(l.situacao,l.situacao) }} <a href="/form2/participacoes/{{ l.p.id }}/orientacao?conta_id={{ conta_id|urlencode }}">Ver</a>{% if aguarda_temporalidade(l.p.conteudo) %}<p class="selo-guarda">Guarda em definição</p>{% endif %}</li>{% else %}<li>Nenhum Registro.</li>{% endfor %}</ul>{% endfor %}
 {% if sem_conferente %}<h3>Aguardando definição de quem fará a conferência</h3><ul>{% for codigo in sem_conferente %}<li>{{ codigo }}</li>{% endfor %}</ul>{% endif %}
-<p>Registros aguardando definição de temporalidade: {{ aguardando_guarda }}</p><h2>Ingresso por unidade ativa</h2><ul>{% for u in cobertura if u.total %}<li>{{ u.nome }} · {{ u.total }} {{ 'ingresso' if u.total == 1 else 'ingressos' }}</li>{% endfor %}</ul>
-{% set zeradas = cobertura|rejectattr('total')|list %}{% if zeradas %}<details><summary>Outras {{ zeradas|length }} unidades sem ingresso</summary><ul>{% for u in zeradas %}<li>{{ u.nome }}</li>{% endfor %}</ul></details>{% endif %}{% endif %}
+<p>Temporalidade em definição: {{ aguardando_guarda }} {{ 'Registro' if aguardando_guarda == 1 else 'Registros' }}{% for l in linhas if aguarda_temporalidade(l.p.conteudo) %} (<a href="/form2/participacoes/{{ l.p.id }}/orientacao?conta_id={{ conta_id|urlencode }}">{{ l.registro.codigo_lgpd }}</a>){% endfor %}.</p>
+<h2>Registros por Secretaria</h2><ul>{% for u in cobertura if u.total %}<li>{{ u.nome }} · {{ u.total }} {{ 'Registro' if u.total == 1 else 'Registros' }}</li>{% endfor %}</ul>
+{% set zeradas = cobertura|rejectattr('total')|list %}{% if zeradas %}<details><summary>Outras {{ zeradas|length }} unidades sem ingresso</summary><ul>{% for u in zeradas %}<li>{{ u.nome }}</li>{% endfor %}</ul></details>{% endif %}
+{% endif %}
 
 {% if gerenciaveis %}<h2>Gestão da fila</h2>{% endif %}
 {% for p in gerenciaveis %}

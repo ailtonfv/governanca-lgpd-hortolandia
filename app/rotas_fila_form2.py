@@ -307,7 +307,20 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
     from app.modelos import ConferenciaInternaForm1Integral
     sem_conferente = [registros[c.registro_id].codigo_lgpd for c in sessao.scalars(
         select(ConferenciaInternaForm1Integral)) if not conferente_da_apresentacao(sessao, registros[c.registro_id], c)] if dpo else []
+    from app.consultas_dpo import aguardando_dpo, situacao_consulta
+    grupos_dpo = {k: [] for k in ('aguardando_dpo','aguardando_aal','respondidas')}
+    principais_por_id = {p.id:p for p in principais}
+    if dpo:
+        for consulta in sessao.scalars(select(ParticipacaoForm2).where(ParticipacaoForm2.tipo == 'dpo').order_by(ParticipacaoForm2.entrada_em)):
+            grupo = situacao_consulta(consulta)
+            principal = principais_por_id.get(consulta.origem_id)
+            if grupo and principal:
+                registro = registros[principal.registro_id]
+                grupos_dpo[grupo].append(dict(consulta=consulta, principal=principal,
+                    registro=registro, secretaria=unidades[registro.unidade_principal_atual_id].nome,
+                    espera=duracao_fila(consulta.entrada_em, agora())))
     linhas = []
+    ids_com_consulta = {l['principal'].id for grupo in grupos_dpo.values() for l in grupo}
     for p in principais:
         consultas = sessao.scalars(select(ParticipacaoForm2).where(
             ParticipacaoForm2.origem_id == p.id, ParticipacaoForm2.tipo == "dpo",
@@ -321,7 +334,8 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
             "fila": unidades[p.unidade_id].nome,
             "espera": duracao_fila(p.entrada_em, p.assumida_em or agora()),
             "dpo": duracao_fila(min(q.entrada_em for q in consultas), agora()) if consultas else "—",
-            "comunicado_em": comunicados.get(p.id), "consulta_pendente": bool(consultas), "situacao": p.estado})
+            "comunicado_em": comunicados.get(p.id), "consulta_pendente": any(aguardando_dpo(q) for q in consultas), "situacao": p.estado,
+            "participou_dpo": p.id in ids_com_consulta})
     from carga_ficticia.pessoas import SECRETARIAS
     secretarias = {codigo for codigo, _ in SECRETARIAS}
     cobertura = [{"nome": u.nome, "total": sum(registros[p.registro_id].unidade_principal_atual_id == u.id for p in principais)}
@@ -429,7 +443,7 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
     return paginas.TemplateResponse(request=request, name="filas_form2.html",
         context={"ato_registrado": ato_registrado(sessao, chave, conta_id), "nomes_objetos": nomes_objetos, "referencias": referencias, "mensagem_atribuicao": mensagem, "atribuidores": atribuidores, "cartoes": ordenados, "identificacoes":identificacoes, "entradas": entradas, "pode_encaminhar": bool(unidades_apa), "encaminhaveis": encaminhaveis,
                  "conta_id": conta_id, "pessoa": pessoa, "participacoes": participacoes,
-                 "registros": registros, "unidades": unidades, "linhas": linhas,
+                 "registros": registros, "unidades": unidades, "linhas": linhas, "grupos_dpo": grupos_dpo,
                  "impedimentos": impedimentos, "complementos": complementos, "gerenciaveis": gerenciaveis, "agentes": {p.id: candidatos_atribuicao(sessao, p, pessoa.id) for p in gerenciaveis},
                  "responsaveis": responsaveis, "dpo": dpo, "sem_conferente": sem_conferente, "aguardando_guarda": len({p.registro_id for p in principais if aguarda_temporalidade(p.conteudo)}), "cobertura": cobertura, "comando_id": str(uuid4())})
 
@@ -675,13 +689,16 @@ def consultar_orientacoes(request: Request, participacao_id: str, conta_id: str,
     from app.origem_form2 import ler_origem
     from app.respostas_form2 import RASCUNHO
     origem = ler_origem(sessao, principal.registro_id, principal.snapshot_id)
+    from app.consultas_dpo import aguardando_dpo, respostas_para_leitura
+    consultas = list(consultas)
+    pendentes = [c for c in consultas if aguardando_dpo(c)]
     return paginas.TemplateResponse(request=request, name="orientacao_dpo.html", context={
         "pessoa": pessoa, "p": principal, "secretaria": sessao.get(Unidade,principal.unidade_id),
         "aal": sessao.get(Pessoa,principal.responsavel_id) if principal.responsavel_id else None,
         "revisoes": (principal.conteudo or {}).get(RASCUNHO, {}), "referencia": rotulo_apresentacao(origem["snapshot"]), "perguntas": origem["perguntas"],
         "retorno": retorno_consultivo(request,sessao,conta_id,principal),
         "registro": sessao.get(Registro, principal.registro_id), "conta_id": conta_id,
-        "orientacoes": list(consultas),
+        "orientacoes": consultas, "consultas_pendentes": pendentes, "respostas_legiveis": respostas_para_leitura(principal.conteudo or {}),
         "comando_id": str(uuid4()),
     })
 
