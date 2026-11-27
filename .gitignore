@@ -72,6 +72,7 @@ DECISOES_FORMS_3_4_*.md
 /app/catalogos/form2_rev21_2_privado.json
 
 /app/catalogos/form1_rev22_privado.json
+/app/catalogos/topicos_cartilha.json
 
 # FORMs 3/4: enunciados ficam no pacote restrito, nunca nos commits.
 /app/catalogos/form3_rev22_v9_privado.json
