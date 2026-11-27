@@ -16,3 +16,13 @@ def test_textos_aprovados_e_catalogo_local_sem_mudar_codigo_docs():
     assert 'Processo administrativo eletrônico municipal' not in q['options']
     assert 'DOCS' in q['options']
     assert q['option_labels']['DOCS']=='DOCS (inclui aprovações on-line)'
+
+
+def test_g11_dicas_compartilhadas():
+    from fastapi.testclient import TestClient
+    from app.main import app
+
+    resposta = TestClient(app).get('/como-funciona?conta_id=CONTA-A1')
+    assert resposta.status_code == 200
+    assert 'Dicas para usar o sistema' in resposta.text and 'F3-3.28' in resposta.text
+    assert 'A Cartilha abre em outra aba' in resposta.text

@@ -10,6 +10,10 @@
   {% include '_cabecalho_institucional.html' %}
   <main class="conteudo">
     {% block conteudo %}{% endblock %}
+    {% set rota = request.url.path %}
+    {% if not pagina_isolada and ('/form1-rev22' in rota or '/form1-integral' in rota or '/form2/participacoes/' in rota or '/form2/preparacoes/' in rota or ('/forms34/' in rota and '/blocos/' in rota)) %}
+    <footer><p class="ajuda">Dica: Ctrl+F procura uma pergunta pelo número ou por uma palavra.</p></footer>
+    {% endif %}
   </main>
 {% if not pagina_isolada %}<script defer src="{{ url_for('estaticos', path='/selecao_exclusiva.js') }}"></script>
 <dialog id="confirmar-ato" aria-labelledby="titulo-ato"><h2 id="titulo-ato"></h2><p data-descricao></p>
