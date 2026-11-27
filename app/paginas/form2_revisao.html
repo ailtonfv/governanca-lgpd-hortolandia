@@ -75,7 +75,7 @@
 <label>Comentário sobre {{ q.id }}<textarea name="{{ com }}" rows="2" maxlength="2000">{{ valores.get(com,'') }}</textarea></label>
 </fieldset>
 {% endfor %}
-<button type="button" id="descartar-alteracoes">Descartar alterações</button><button type="submit" class="botao-primario">Salvar rascunho do Bloco {{ numero }}</button>
+<div class="acoes-fila-form2 barra-salvar-bloco"><button type="button" id="descartar-alteracoes">Descartar alterações</button><button type="submit" class="botao-primario">Salvar rascunho do Bloco {{ numero }}</button></div>
 </form></div>
 <script defer src="{{ url_for('estaticos', path='/form2_revisao.js') }}"></script>
 <script defer src="/estaticos/complementos_form2.js"></script>{% endblock %}

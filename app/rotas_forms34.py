@@ -306,7 +306,7 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
                 valores[k] = 'Não há pedido de cancelamento' if not e.get('cancelada') and not e.get('decisoes_pendentes', {}).get('cancelamento') else 'Consulte os atos de cancelamento no histórico'
             valores['F4-4.16'] = f"{ultimo['quando']} — {ultimo['autor']}, {ultimo['nome']}" if ultimo else 'Nenhum ato registrado'
         from app.apresentacao_atos34 import ripd,mensagem_decisao,data_br
-        origem_texto=f'FORM {ref.fonte_form}, versão {ref.fonte_versao} preservada.'
+        origem_texto=f'FORM {ref.fonte_form} deste Registro, referência examinada preservada.'
         if ref.form==4 and ref.fonte_form==3:
             import json
             fonte=json.loads(ref.fonte_canonica) if isinstance(ref.fonte_canonica,str) else ref.fonte_canonica
@@ -314,7 +314,7 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
             fonte=fonte.get('estado',fonte)
             av=fonte.get('avaliacao') or {};res=av.get('residual',{})
             risco=s.get(IdentidadeForms34,e.get('risco_id'))
-            origem_texto=f"Risco {risco.codigo.split('-')[-1] if risco else 'registrado'} — {res.get('faixa',e.get('faixa_origem','Não avaliado'))} ({res.get('nota','nota não disponível')}), "+('aceito pelo '+('Prefeito' if res.get('faixa')=='Crítico' else 'Secretário') if fonte.get('aceitacao') else 'sem aceitação registrada na origem')+f' · FORM 3, versão {ref.fonte_versao}'
+            origem_texto=f"Risco {risco.codigo.split('-')[-1] if risco else 'registrado'} — {res.get('faixa',e.get('faixa_origem','Não avaliado'))} ({res.get('nota','nota não disponível')}), "+('aceito pelo '+('Prefeito' if res.get('faixa')=='Crítico' else 'Secretário') if fonte.get('aceitacao') else 'sem aceitação registrada na origem')+(f" em {data_br(fonte['aceitacao']['em'])}" if fonte.get('aceitacao',{}).get('em') else '')
             if risco:
                 from app.acompanhamento_forms34 import titulo
                 origem_texto = titulo(risco, {**fonte, 'form':3})+' — '+origem_texto.split(' — ',1)[1]

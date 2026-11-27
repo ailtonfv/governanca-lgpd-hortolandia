@@ -173,3 +173,8 @@ Borda forte e “Sua parte” indicam competência; fundo amarelo-claro e sino i
 ### FORM 1 — contagem aprovada em 25/11/2026
 
 `rev22_form1.contagem_blocos` calcula respostas entre perguntas ativas. Exclui campos da abertura F1-1.2/F1-1.3, informativas, exceções e condicionais fechadas. Respostas de confirmação contam; ausência não conta. Os estados são “Ainda não preenchido”, “◐ Em preenchimento · N de M perguntas respondidas” e “✓ Todas as perguntas respondidas”. Não representa obrigatoriedade, aprovação ou conclusão. A obrigatoriedade do FORM 1 permanece em deliberação.
+
+
+### Lote 16-B — A3 e C163
+
+Os blocos dos FORMs 3 e 4 usam `_situacao_forms34.html` para situação, papel e próxima providência. Manifestações completas ficam no bloco 14 do FORM 3 e no bloco 8 do FORM 4; nos demais, um link com a quantidade. A nota vigente mantém sua matriz durante a reavaliação. A classe compartilhada `barra-salvar-bloco` mantém o salvamento dos FORMs 2 a 4 visível, com espaço reservado no fim da página e sem ampliar permissões. Inspeção visual na vistoria ainda pendente.

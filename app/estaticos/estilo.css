@@ -476,3 +476,10 @@ dialog :is([data-cancelar], [data-fechar-dialogo]) { font-size: .9rem; backgroun
 .mapa-blocos-form1 :is(.cartao-bloco,button,.titulo-bloco-form2),.grade34 a{hyphens:none;}
 /* Abertura: estado indisponível explícito; o domínio repete as recusas. */
 #confirmar-abertura:disabled { background: #e1e5e8; color: #505d66; border-color: #aab3ba; cursor: not-allowed; opacity: 1; }
+
+/* C163: uma barra por formulário, fora da grade e com espaço reservado. */
+.barra-salvar-bloco{position:fixed;inset:auto 0 0;z-index:30;background:#fff;border-top:1px solid #D6E0E6;padding:.65rem 1rem;box-shadow:0 -2px 8px #17212b18;display:flex;gap:.75rem;justify-content:flex-end;flex-wrap:wrap}
+body:has(.barra-salvar-bloco){padding-bottom:7rem}
+@media(max-width:600px){body:has(.barra-salvar-bloco){padding-bottom:11rem}}
+.situacao-bloco34{padding:1rem;border-left:4px solid #075985;background:#edf5fa;margin:1rem 0}
+.agrupamento-perguntas34>legend{display:block;margin-bottom:1rem}

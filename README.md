@@ -2146,3 +2146,6 @@ de isolamento. Retestes direcionados: 24 aprovados. Consolidado por caso:
 1.260 aprovados, as mesmas 48 falhas antigas e um ignorado; 15 testes novos
 aprovados. Não representa uma segunda bateria completa. Corte após A9;
 A3 (com C163) e os itens seguintes do 16-B permanecem pendentes.
+
+
+Lote 16-B (A3/C163): situação e próxima providência no topo dos blocos dos FORMs 3 e 4; manifestações concentradas nos blocos próprios; barra de salvamento compartilhada nos FORMs 2 a 4. Implementado na branch de trabalho, ainda sem aceite visual.
