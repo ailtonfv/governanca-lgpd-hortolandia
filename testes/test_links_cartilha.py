@@ -1,76 +1,68 @@
-"""Referências CART de tela; a edição instalada permanece fora do Git."""
-from html import unescape
+"""Integridade das chaves editoriais e abertura contextual da Cartilha."""
 from pathlib import Path
 import re
 
 import pytest
 from fastapi import Request
 
-from app import cartilha_local
+from app import cartilha_local, cartilha_topicos
 from app.clausulas_lgpd import catalogo
 from app.main import app
+from app.mapa_cartilha import FORM2_CLAUSULAS, FORM4_CLAUSULAS
 from app.rotas_fila_form2 import paginas
 from testes.test_bloco5_form1_integral import _rascunho_pronto
-from testes.test_cartilha_local_form1 import cliente, documento_local
+from testes.test_cartilha_local_form1 import cliente, documento_integrado
 from testes.test_p1_usabilidade_form1 import Elementos
 
 
-@pytest.fixture
-def destinos_instalados():
-    if not cartilha_local.CAMINHO_CARTILHA.is_file():
-        pytest.skip("Instale localmente a Cartilha REV30.13 para conferir os destinos reais.")
-    secoes = cartilha_local.secoes_cartilha_disponiveis()
-    assert secoes, "Edição instalada indisponível ou diferente da edição conferida."
-    return cartilha_local.destinos_cartilha_clausulas(catalogo()["links"], secoes)
-
-
-def test_todas_as_chaves_cart_resolvem_exceto_as_pendencias_conhecidas(destinos_instalados):
+def test_chaves_das_telas_resolvem_na_edicao_instalada():
+    doc = cartilha_local.CAMINHO_CARTILHA_INTEGRADA
+    catalogo_local = cartilha_topicos.CAMINHO_TOPICOS
+    if not doc.is_file() and not catalogo_local.is_file():
+        pytest.skip("Instale localmente a REV30.24 e o catálogo de tópicos para conferir os destinos reais.")
     raiz = Path(__file__).resolve().parents[1] / "app"
     chaves = {
         chave
         for arquivo in raiz.rglob("*")
-        if arquivo.suffix in {".html", ".py", ".js", ".json"}
+        if arquivo != catalogo_local and arquivo.suffix in {".html", ".py", ".js", ".json"}
         for chave in re.findall(r"\bCART-\d+\b", arquivo.read_text(encoding="utf-8-sig"))
     }
-    assert chaves
-    ausentes = sorted(chaves - destinos_instalados.keys() - {"CART-28", "CART-52"})
-    assert not ausentes, "Chaves sem destino na Cartilha instalada: " + ", ".join(ausentes)
+    assert chaves == cartilha_topicos.CHAVES_CARTILHA
+    topicos = cartilha_topicos.catalogo_topicos()
+    ausentes = sorted(chaves - cartilha_topicos.destinos_integrados(topicos).keys())
+    assert not ausentes, "Chaves sem marcador disponível na edição instalada: " + ", ".join(ausentes)
 
 
-@pytest.mark.parametrize("chave", [
-    pytest.param("CART-28", marks=pytest.mark.xfail(strict=True,
-        reason="O tópico sobre contratos, terceiros, OSCs e Cultura não tem destino na REV30.13.")),
-    pytest.param("CART-52", marks=pytest.mark.xfail(strict=True,
-        reason="O Anexo E consta como proposta e não tem destino na REV30.13.")),
-])
-def test_pendencias_editoriais_da_cartilha(chave, destinos_instalados):
-    assert chave in destinos_instalados, f"{chave} sem destino na Cartilha instalada"
+def _requisicao():
+    return Request({"type": "http", "scheme": "http", "server": ("testserver", 80),
+                    "headers": [], "router": app.router, "client": ("127.0.0.1", 50123)})
 
 
-def test_link_de_clausulas_abre_apenas_para_registro_visivel_no_ambiente_local(sessao, documento_local):
-    registro = _rascunho_pronto(sessao, "CARTILHA-CLAUSULAS")
-    rid = registro["registro_id"]
-    escopo = {
-        "type": "http", "scheme": "http", "server": ("testserver", 80), "headers": [],
-        "router": app.router, "client": ("127.0.0.1", 50123),
-    }
+def test_sem_marcador_real_ou_chave_desconhecida_nao_ha_link(documento_integrado, monkeypatch):
+    topicos = cartilha_topicos.catalogo_topicos()
+    invalido = {**topicos, "CART-52": {**topicos["CART-52"], "ancora": "inexistente"}}
+    monkeypatch.setattr(cartilha_topicos, "catalogo_topicos", lambda: invalido)
+    links = cartilha_topicos.links_topicos(_requisicao(), "CONTA-A1", ("CART-28", "CART-52", "CART-99"), "registro")
+    assert [link["chave"] for link in links] == ["CART-28"]
+
+
+def test_links_do_quadro_de_clausulas_e_do_anexo_abrem_documento(sessao, documento_integrado):
+    rid = _rascunho_pronto(sessao, "CARTILHA-CLAUSULAS")["registro_id"]
     clausulas = catalogo()
-    links = clausulas["links"]
-    disponiveis = cartilha_local.links_cartilha_clausulas(Request(escopo), sessao, "CONTA-A1", rid, links)
-    assert [link["chave"] for link in disponiveis] == ["CART-11"]
-    for arquivo, condicao in (
-        ("_clausulas_form2.html", {"numero": 9, "ativa": lambda *_: True, "clausulas_lgpd": clausulas, "valores": {}}),
-        ("_clausulas_form4.html", {"ref": {"form": 4}, "bloco": 2, "clausulas_acao": [{"codigo": "B01"}],
-                                  "clausulas_aviso": clausulas["aviso_fixo"], "estado": {}}),
+    for arquivo, chaves, condicao in (
+        ("_clausulas_form2.html", FORM2_CLAUSULAS,
+         {"numero": 9, "ativa": lambda *_: True, "clausulas_lgpd": clausulas, "valores": {}}),
+        ("_clausulas_form4.html", FORM4_CLAUSULAS,
+         {"ref": {"form": 4}, "bloco": 2, "clausulas_acao": [{"codigo": "B01"}],
+          "clausulas_aviso": clausulas["aviso_fixo"], "estado": {}}),
     ):
-        html = paginas.get_template(arquivo).render(links_cartilha_clausulas=disponiveis, **condicao)
-        [link] = [attrs for tag, attrs, _ in Elementos(html).elementos if tag == "a"]
-        assert link["data-cartilha-chave"] == "CART-11"
-        assert link["target"] == "_blank" and set(link["rel"].split()) == {"noopener", "noreferrer"}
-        resposta = cliente.get(link["href"])
-        assert resposta.status_code == 200
-        assert "Operador, terceiros, OSCs e entidades parceiras" in unescape(resposta.text)
-
-    assert not cartilha_local.links_cartilha_clausulas(Request(escopo), sessao, "INEXISTENTE", rid, links)
-    remoto = Request({**escopo, "client": ("192.0.2.10", 50123)})
-    assert not cartilha_local.links_cartilha_clausulas(remoto, sessao, "CONTA-A1", rid, links)
+        links_cartilha = cartilha_topicos.links_topicos(_requisicao(), "CONTA-A1", chaves, rid)
+        html = paginas.get_template(arquivo).render(links_cartilha_clausulas=links_cartilha, **condicao)
+        links = [attrs for tag, attrs, _ in Elementos(html).elementos if tag == "a"]
+        assert tuple(link["data-cartilha-chave"] for link in links) == chaves
+        for link in links:
+            assert link["target"] == "_blank"
+            assert set(link["rel"].split()) == {"noopener", "noreferrer"}
+            resposta = cliente.get(link["href"])
+            assert resposta.status_code == 200
+            assert f'Tópico fictício {link["data-cartilha-chave"]}' in resposta.text

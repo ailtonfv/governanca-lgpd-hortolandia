@@ -55,11 +55,8 @@ A triagem cobre os 48 casos que formavam a referência histórica da entrega. Os
 | `testes/test_unidade_guarda_form2.py::test_catalogo_local_indisponivel_preserva_preparacao[True]` | Preparação preservada quando catálogo local tem JSON inválido | O cabeçalho da régua tenta abrir o catálogo inválido e gera erro em vez de exibir a preparação. | **(b)** A régua usa a numeração dos blocos quando o catálogo é inválido ou está indisponível. | — |
 | `testes/test_usabilidade_consolidada_form1.py::test_javascript_navega_com_sessao_antiga_e_storage_indisponivel` | Navegação com sessão antiga e armazenamento indisponível | A navegação explícita agora aplica 24 px mais altura da barra. A retomada preserva o deslocamento salvo. | **(a)** Teste atualizado. | — |
 
-## Pendências editoriais do G15
+## Fechamento da integração da Cartilha
 
-| Teste | Motivo da falha esperada | O que falta |
-| --- | --- | --- |
-| `testes/test_links_cartilha.py::test_pendencias_editoriais_da_cartilha[CART-28]` | A seção sobre contratos, terceiros, OSCs e Cultura não resolve na Cartilha instalada. | Confirmar a seção na edição aprovada e validar a abertura local. |
-| `testes/test_links_cartilha.py::test_pendencias_editoriais_da_cartilha[CART-52]` | O Anexo E ainda consta como proposta, sem destino na edição instalada. | Publicar o destino na edição aprovada e validar a abertura local. |
+CART-28 e CART-52 passaram a resolver na edição local REV30.24 e saíram das falhas esperadas. A suíte verifica as chaves usadas nas telas contra os marcadores da edição instalada.
 
-A matriz do FORM 2 fica em `docs/planejamento/GOV_FORMS_REV18_02/correspondencia_v1.csv`, distribuída por canal institucional. Quando o CSV estiver presente, o teste volta à execução normal e divergências da matriz são reportadas como falhas. As expectativas da Cartilha são estritas e exigem revisão quando os destinos passam a resolver.
+A matriz do FORM 2 fica em `docs/planejamento/GOV_FORMS_REV18_02/correspondencia_v1.csv`, distribuída por canal institucional. Quando o CSV estiver presente, o teste volta à execução normal e divergências da matriz são reportadas como falhas.
