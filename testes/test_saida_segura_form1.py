@@ -32,7 +32,8 @@ def test_barra_unica_dialogo_e_destino_da_conta_sem_legado(sessao):
         assert 'id="titulo-bloco-14"' in pagina.text
     css = cliente.get('/estaticos/estilo.css').text
     assert '.retorno-painel-form1 { position: sticky;' in css
-    assert 'var(--altura-retorno-form1, 0px)' in css
+    posicao = cliente.get('/estaticos/posicao_form1.js').text
+    assert "barra.getBoundingClientRect().height" in posicao
     assert '.acoes-saida-form1 { flex-direction: column;' in css
 
 

@@ -36,15 +36,15 @@ def test_arp_sem_rascunho_recebe_acao_para_iniciar_form1(sessao):
     # Assert
     assert pagina.status_code == 200
     assert registro["codigo_lgpd"] in pagina.text
-    assert "Situação do FORM 1:</strong> Não iniciado" in pagina.text
-    assert "O rascunho do FORM 1 ainda não foi iniciado." in pagina.text
+    assert "Etapa atual:</strong> FORM 1" in pagina.text
+    assert "Blocos: 0 de 14 com respostas." in pagina.text
     assert ">Preencher FORM 1</button>" in pagina.text
     assert (
         f'action="http://testserver/registros/{registro["registro_id"]}/form1-integral/iniciar"'
     ) in pagina.text
     assert 'name="conta_id" value="CONTA-A1"' in pagina.text
     assert (
-        'aria-label="0 providência(s) de conferência">0</span>'
+        'aria-label="0 providências de conferência">0</span>'
         in pagina.text
     )
 
@@ -125,7 +125,7 @@ def test_cartoes_atribuem_acoes_corretas_a_alfa_e_epsilon(sessao):
     for pagina in (pagina_alfa, pagina_epsilon):
         assert pagina.status_code == 200
         assert pagina.text.count('class="cartao-mapeamento"') == 2
-        assert 'aria-label="0 providência(s) de conferência">0</span>' in pagina.text
+        assert 'aria-label="0 providências de conferência">0</span>' in pagina.text
         assert registro_alfa["codigo_lgpd"] in pagina.text
         assert registro_epsilon["codigo_lgpd"] in pagina.text
 
@@ -149,16 +149,13 @@ def test_arp_com_rascunho_e_pendencias_recebe_proxima_providencia(sessao):
 
     # Assert
     assert pagina.status_code == 200
-    assert "Responsável pela próxima etapa:" in pagina.text
+    assert "Responsável:</strong>" in pagina.text
     assert registro["codigo_lgpd"] in pagina.text
     assert "Atividade tributária fictícia" in pagina.text
-    assert "Situação do FORM 1:</strong> Em preenchimento" in pagina.text
-    assert "campo(s) obrigatório(s) ativo(s) incompleto(s)" in pagina.text
+    assert "Etapa atual:</strong> FORM 1" in pagina.text
+    assert "Blocos sem respostas salvas" in pagina.text
     assert "Preencher FORM 1" in pagina.text
-    assert (
-        f'/registros/{registro["registro_id"]}?conta_id=CONTA-G1#titulo-bloco-'
-        in pagina.text
-    )
+    assert f'/registros/{registro["registro_id"]}/form1-rev22?conta_id=CONTA-G1' in pagina.text
     assert "Nenhuma pendência ou próxima ação para este agente." not in pagina.text
 
 
@@ -212,9 +209,7 @@ def test_arp_sem_resposta_obrigatoria_pendente_e_encaminhado_a_pre_validacao(
     # Assert
     assert pagina.status_code == 200
     assert registro["codigo_lgpd"] in pagina.text
-    assert "Nenhum campo obrigatório ativo incompleto" in pagina.text
-    assert (
-        f'/registros/{registro["registro_id"]}?conta_id=CONTA-G1'
-        "#titulo-pre-validacao-form1"
-    ) in pagina.text
+    assert "Blocos sem respostas salvas" in pagina.text
+    assert f'/registros/{registro["registro_id"]}/form1-rev22?conta_id=CONTA-G1' in pagina.text
+    assert 'aria-label="Preencher FORM 1 do Registro ' in pagina.text
     assert "Preencher FORM 1" in pagina.text

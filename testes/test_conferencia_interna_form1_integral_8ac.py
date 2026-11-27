@@ -175,7 +175,7 @@ def test_apa_recebe_providencia_e_consulta_snapshot_imutavel(sessao):
     )) == 1
 
 
-def test_apa_que_tambem_e_arp_pratica_dois_atos_separados(sessao):
+def test_apresentacao_do_apa_arp_nao_abre_conferencia_para_si(sessao):
     registro = _preparar(
         sessao, "8AC-MESMA-PESSOA", arp="PESSOA-A", conta_arp="CONTA-A1"
     )
@@ -184,7 +184,8 @@ def test_apa_que_tambem_e_arp_pratica_dois_atos_separados(sessao):
     )
     painel = carregar_painel(sessao, "CONTA-A1")
     assert resultado["permitido"]
-    assert painel["proximas_conferencias_form1"]
+    assert not painel["proximas_conferencias_form1"]
+    assert carregar_painel(sessao, "CONTA-F1")["proximas_conferencias_form1"]
     assert sessao.scalars(select(Evento).where(
         Evento.comando_id == "8AC-MESMA-SOL"
     )).all()

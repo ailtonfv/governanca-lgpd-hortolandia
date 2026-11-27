@@ -37,7 +37,7 @@ def test_regua_horizontal_oferece_quatorze_destinos_e_foco_acessivel(sessao):
     assert estilo.status_code == 200
     assert ".regua-navegacao-blocos" in estilo.text
     assert "overflow-x: auto" in estilo.text
-    assert "min-width: max-content" in estilo.text
+    assert ":focus-visible" in estilo.text
 
 
 def test_navegacao_alerta_alteracoes_nao_salvas_sem_remover_respostas(sessao):

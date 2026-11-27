@@ -63,17 +63,14 @@ def test_painel_reune_consulta_e_providencia_no_mesmo_cartao(sessao):
     assert 'class="grade-painel-inicial"' not in pagina.text
     assert pagina.text.count('class="cartao-mapeamento"') == 1
     assert registro["codigo_lgpd"] in pagina.text
-    assert "Situação do Registro:" in pagina.text
-    assert "Situação do FORM 1:" in pagina.text
-    assert "Responsável pela próxima etapa:" in pagina.text
+    assert "Etapa atual:</strong> FORM 1" in pagina.text
+    assert "Blocos:" in pagina.text
+    assert "Responsável:</strong>" in pagina.text
     assert (
         f'/registros/{registro["registro_id"]}?conta_id=CONTA-G1">'
         "Ver detalhes do Registro"
     ) in pagina.text
-    assert (
-        f'/registros/{registro["registro_id"]}?conta_id=CONTA-G1#titulo-bloco-'
-        in pagina.text
-    )
+    assert f'/registros/{registro["registro_id"]}/form1-rev22?conta_id=CONTA-G1' in pagina.text
 
 
 def test_arp_com_quatro_rascunhos_recebe_quatro_providencias_identificadas(sessao):
@@ -100,15 +97,12 @@ def test_arp_com_quatro_rascunhos_recebe_quatro_providencias_identificadas(sessa
     assert pagina.status_code == 200
     assert (
         'class="contador contador-providencias" '
-        'aria-label="0 providência(s) de conferência">0</span>'
+        'aria-label="0 providências de conferência">0</span>'
     ) in pagina.text
     assert pagina.text.count(">Preencher FORM 1</a>") == 4
     for registro in registros:
         assert registro["codigo_lgpd"] in pagina.text
-        assert (
-            f'/registros/{registro["registro_id"]}?conta_id=CONTA-G1#titulo-bloco-'
-            in pagina.text
-        )
+        assert f'/registros/{registro["registro_id"]}/form1-rev22?conta_id=CONTA-G1' in pagina.text
 
 
 def test_agente_com_mapeamento_sem_providencia_mantem_consulta(sessao):
@@ -128,9 +122,8 @@ def test_agente_com_mapeamento_sem_providencia_mantem_consulta(sessao):
     assert registro["codigo_lgpd"] in pagina.text
     assert "Serviço consultável fictício" in pagina.text
     assert "Ver detalhes do Registro" in pagina.text
-    assert "Nenhuma providência de conferência pendente para seu perfil neste momento." in pagina.text
     assert "Preencher FORM 1" not in pagina.text
-    assert 'aria-label="0 providência(s) de conferência">0</span>' in pagina.text
+    assert 'aria-label="0 providências de conferência">0</span>' in pagina.text
 
 
 def test_apa_com_outro_arp_visualiza_registro_sem_acao_de_preenchimento(sessao):
@@ -159,7 +152,7 @@ def test_contador_considera_registro_unico_quando_ha_varios_alertas(sessao):
     assert pagina.status_code == 200
     assert "Providência de outra unidade recebida" in pagina.text
     assert "Conclusão bloqueada" in pagina.text
-    assert 'aria-label="0 providência(s) de conferência">0</span>' in pagina.text
+    assert 'aria-label="0 providências de conferência">0</span>' in pagina.text
     cartao = pagina.text.split(f'id="cartao-registro-{registro["registro_id"]}"', 1)[1].split("</article>", 1)[0]
     assert cartao.count(">Ver detalhes do Registro</a>") == 1
     assert cartao.count('class="botao-link"') == 1

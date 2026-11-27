@@ -53,7 +53,8 @@ def test_interface_unifica_aviso_e_distingue_conclusao_de_envio(sessao):
     assert pagina.text.count(
         "Ambiente de demonstração — utilize exclusivamente dados fictícios."
     ) == 1
-    assert "A conclusão institucional do FORM 1 ainda não está habilitada" in pagina.text
+    assert "O FORM 2 começa depois que o APA confirmar o FORM 1." in pagina.text
+    assert "/form1-integral/submeter" not in pagina.text
     assert "a submissão ainda não está disponível neste ambiente" not in pagina.text
     assert "Canais declarados na abertura" in pagina.text
     assert "Nenhum canal foi confirmado como aplicável" not in pagina.text
@@ -79,7 +80,7 @@ def test_interface_reconhece_quando_apa_tambem_e_arp(sessao):
 
     # Assert
     assert "Designação vigente · o APA em exercício também é o ARP" in pagina.text
-    assert "Servidor Alfa (fictício)" not in pagina.text
+    assert "MAT-FICT-0001 — Servidor Alfa (fictício)" in pagina.text
     assert "Matrícula MAT-FICT-0001 · Servidor Alfa" in pagina.text
 
 

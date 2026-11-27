@@ -111,7 +111,7 @@ def test_9_7_2_outra_hipotese_persiste_complemento(sessao,participacao):
     key='texto:F2-9.7.2#1'; nota='Hipótese fictícia para apreciação jurídica.'
     soup=salvar_http(sessao,participacao,9,{'opcao:F2-9.1':'SIM','opcao:F2-9.7.1#1':'SIM','opcao:F2-9.7.2#1':'OUTRA',key:nota})
     assert participacao.conteudo[RASCUNHO]['9'][key]==nota
-    assert soup[key]['texto'].strip()==nota
+    assert soup[key].get('value', soup[key]['texto']).strip()==nota
     option=next(a for a in soup['opcao:F2-9.7.2#1']['opcoes'] if a.get('value')=='OUTRA')
     assert option['texto'].strip()=='Outra hipótese do art. 33 (especificar)'
 

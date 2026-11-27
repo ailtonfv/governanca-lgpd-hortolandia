@@ -19,7 +19,7 @@ def test_limite_critico_e_imediato():
 
 
 def test_g12_titulo_obrigatorio_com_limite_e_alternativa_historica():
-    from app.acompanhamento_forms34 import titulo_providencia
+    from app.apresentacao_forms34 import titulo_providencia
     from app.validacao_atos34 import validar
 
     dados = dict(plano='Plano de teste', cargo='Equipe', duracao_dias=30)

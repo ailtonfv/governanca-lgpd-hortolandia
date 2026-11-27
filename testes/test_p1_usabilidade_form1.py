@@ -96,7 +96,7 @@ def test_avisos_sao_apresentados_separadamente_e_nao_impedem_salvar(sessao):
     sessao.commit()
     pagina = cliente.get(f'/registros/{registro["registro_id"]}?conta_id=CONTA-A1')
     assert salvo['permitido'] and pagina.status_code == 200
-    assert '1 aviso(s) informativo(s)' in pagina.text
+    assert '1 aviso informativo' in pagina.text
     assert 'não entram no contador de obrigatórios incompletos' in pagina.text
     assert 'data-pendencia-campo="2.12"' in pagina.text
     assert 'Sem alterações para salvar.' in pagina.text

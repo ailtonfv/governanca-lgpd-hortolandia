@@ -49,7 +49,7 @@ def test_unidade_isola_origens_e_reutiliza_anotacao(sessao, monkeypatch):
         unidade = pagina.text.split('id="unidade-guarda"', 1)[1].split('id="anotacoes"', 1)[0]
         assert pagina.text.count('href="#unidade-guarda"') == 1
         assert pagina.text.index('id="mapa-etapas"') < pagina.text.index('href="#unidade-guarda"')
-        mapa = pagina.text.split('<ol class="mapa-blocos-form1 regua-form2">', 1)[1].split('</ol>', 1)[0]
+        mapa = re.search(r'<ol class="mapa-blocos-form1 regua-form2[^"]*">(.*?)</ol>', pagina.text, re.S)[1]
         assert re.findall(r'<strong class="numero-bloco">(\d+)</strong>', mapa) == [str(n) for n in range(1, 15)]
         assert re.findall(r'data-etapa="(\d)"', mapa) == list("11112223333324")
         assert 'href="#unidade-guarda"' not in apa.text

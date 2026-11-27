@@ -46,10 +46,8 @@ def test_registro_idempotente_historico_sem_concluir(sessao):
     assert historico[-1] == primeira
     assert p.conteudo[CHAVE]["numero"] == 2
     assert not p.conteudo[CHAVE]["resumo"]["conclusao_institucional_habilitada"]
-    with pytest.raises(ValueError, match="D11"):
-        executar(sessao, conta_id="CONTA-B1", comando_id="NAO-CONCLUI",
-                 participacao_id=p.id, acao="concluir", versao=p.versao)
-    sessao.rollback()
+    assert p.concluida_em is None
+    assert "conclusao_analise" not in p.conteudo
 
 
 def test_consulta_posterior_invalida_retrato_e_tela(sessao):

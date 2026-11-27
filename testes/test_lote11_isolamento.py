@@ -58,17 +58,21 @@ def test_create_all_nao_instala_protecoes():
                                 ('identidade_forms34', 'proteger_forms34'),
                                 ('referencia_participacao_forms34', 'proteger_forms34')]:
             c.execute(text(f'DROP TRIGGER IF EXISTS {trigger} ON {tabela}'))
+    contagem = text("""
+        SELECT count(*) FROM pg_trigger
+        WHERE tgrelid IN ('evento'::regclass, 'identidade_forms34'::regclass,
+                          'referencia_participacao_forms34'::regclass)
+          AND tgname IN ('proteger_evento_forms34', 'proteger_forms34')
+    """)
     try:
         # Act: create_all sobre banco com tabelas existentes também não instala.
         Base.metadata.create_all(motor)
         # Assert: só a migração explícita reinstala os três triggers.
         with motor.connect() as c:
-            assert c.scalar(text("SELECT count(*) FROM pg_trigger WHERE tgname IN "
-                "('proteger_evento_forms34','proteger_forms34')")) == 0
+            assert c.scalar(contagem) == 0
         aplicar(motor)
         with motor.connect() as c:
-            assert c.scalar(text("SELECT count(*) FROM pg_trigger WHERE tgname IN "
-                "('proteger_evento_forms34','proteger_forms34')")) == 3
+            assert c.scalar(contagem) == 3
     finally:
         aplicar(motor)
 

@@ -85,8 +85,8 @@ def test_falha_de_validacao_nao_avanca_para_o_proximo_bloco(sessao):
     assert resposta.status_code == 303
     assert unquote(resposta.headers["location"]).endswith("#titulo-bloco-5")
     pagina = cliente.get(resposta.headers["location"])
-    assert 'class="mensagem mensagem-registro mensagem-erro"' in pagina.text
-    assert 'role="alert" aria-live="assertive"' in pagina.text
+    assert 'id="mensagem-registro" class="mensagem mensagem-erro mensagem-registro"' in pagina.text
+    assert 'aria-live="assertive" role="alert"' in pagina.text
     with Session(motor) as verificacao:
         rascunho = verificacao.get(RascunhoForm1Integral, registro["registro_id"])
         assert rascunho.versao_rascunho == 1

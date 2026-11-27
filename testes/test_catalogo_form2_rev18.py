@@ -13,6 +13,8 @@ from pathlib import Path
 from unittest.mock import patch
 from zipfile import ZipFile
 
+import pytest
+
 from app import catalogo_form2_rev18 as leitor
 
 
@@ -58,6 +60,8 @@ class TestCatalogoForm2(unittest.TestCase):
             self.assertEqual(re.findall(r'<small class="titulo-bloco-form2">([^<]+)</small>', html),
                              list(titulos.values()))
 
+    @pytest.mark.xfail(not MATRIZ.is_file(), strict=True, raises=FileNotFoundError,
+                       reason="A matriz editorial REV18 v1 precisa ser instalada pelo canal interno da TI.")
     def test_correspondencia_dos_250_itens_com_a_matriz(self):
         with MATRIZ.open(encoding="utf-8-sig", newline="") as arquivo:
             linhas = list(csv.DictReader(arquivo, delimiter=";"))

@@ -45,7 +45,7 @@ def titulos_blocos_form2():
     """Preserva o título completo de cada bloco na navegação."""
     try:
         blocos = carregar_catalogo()["blocos"]
-    except FileNotFoundError:
+    except (OSError, ValueError, KeyError, TypeError):
         return {}
     titulos = {}
     for bloco in blocos:

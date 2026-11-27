@@ -302,26 +302,21 @@ def test_interface_inicia_e_salva_bloco_1(sessao):
         f"/registros/{registro['registro_id']}/form1-integral/iniciar",
         data={"conta_id": "CONTA-A1", "comando_id": "CMD-F1I-HTTP-INICIO"},
     )
-    salvamento = cliente.post(
-        f"/registros/{registro['registro_id']}/form1-integral/bloco-1/salvar",
-        data={
-            "conta_id": "CONTA-A1",
-            "comando_id": "CMD-F1I-HTTP-SALVAR",
-            "versao_lida": "1",
-            "referencia_existente": "Não",
-            "referencia_institucional": "",
-            "fluxo_recorrente": "Sim",
-        },
-    )
 
-    assert inicio.status_code == 200 and "Bloco 1 de 14" in inicio.text
-    assert "Cadastro imobiliário fictício" in inicio.text
-    assert salvamento.status_code == 200
-    assert "Rascunho salvo com sucesso às" in salvamento.text
-    assert "Bloco 1 atualizado." in salvamento.text
-    assert "Rascunho 2" in salvamento.text
-    assert "Questionário resumido de demonstração" not in salvamento.text
-    assert "Salvar e permanecer neste bloco" in salvamento.text
+    assert inicio.status_code == 200 and "Levantamento do tratamento · Bloco 1" in inicio.text
+    assert inicio.url.path == f"/registros/{registro['registro_id']}/form1-rev22"
+    assert registro["codigo_lgpd"] in inicio.text
+    dado = "Cadastro imobiliário fictício atualizado"
+    salvamento = cliente.post(
+        inicio.url.path,
+        data={"conta_id": "CONTA-A1", "comando_id": "CMD-F1I-HTTP-SALVAR",
+              "versao": inicio.context["versao_formulario"], "bloco": 1, "r:1.3": dado},
+    )
+    assert salvamento.status_code == 200 and "Bloco 1 salvo às" in salvamento.text
+    assert dado in salvamento.text and "Salvar bloco 1" in salvamento.text
+    sessao.expire_all()
+    salvo = sessao.get(RascunhoForm1Integral, registro["registro_id"])
+    assert salvo.conteudo["respostas"]["1.3"] == dado
 
 
 def test_migracao_12_recria_tabela_do_rascunho_integral():

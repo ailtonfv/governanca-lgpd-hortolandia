@@ -42,7 +42,7 @@ def test_designacao_arp_exibe_somente_controles_pertinentes_ao_modo(sessao):
     assert 'data-painel-modo-arp="outro" hidden' in pagina.text
     assert "Confirmar que assumirei o preenchimento" in pagina.text
     assert "Confirmar designação do ARP" in pagina.text
-    assert 'id="arp_pessoa_id" name="arp_pessoa_id" disabled' in pagina.text
+    assert 'id="arp_pessoa_id" name="arp_pessoa_id" aria-describedby="nome-arp-selecionado" disabled' in pagina.text
     assert "selecao.disabled = valor !== 'outro'" in pagina.text
     assert "selecao.required = valor === 'outro'" in pagina.text
     assert "A designação atual permanece válida até a confirmação" in pagina.text

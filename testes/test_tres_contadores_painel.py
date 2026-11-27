@@ -93,7 +93,7 @@ def test_contador_reutiliza_condicionais_e_exclui_avisos_facultativos(sessao):
         else:
             assert {'2.12.1', '2.12.2'} <= {x['campo_id'] for x in pv['incompletos']}
     html = cliente.get('/?conta_id=CONTA-G1').text
-    for titulo in ('Registros disponíveis', 'Providências de conferência', 'Campos obrigatórios pendentes'):
+    for titulo in ('Registros disponíveis', 'Providências de conferência', 'Blocos sem respostas salvas'):
         assert titulo in html
     assert 'Zero providências não significa FORM 1 completo' in html
     css = (Path(__file__).resolve().parents[1]/'app/estaticos/estilo.css').read_text(encoding='utf-8')

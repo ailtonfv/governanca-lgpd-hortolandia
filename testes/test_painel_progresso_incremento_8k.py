@@ -43,10 +43,10 @@ def test_painel_distingue_salvamento_pendencias_e_dependencias(sessao):
     assert progresso["quantidade_governanca"] > 0
     assert 'data-blocos-salvos="5"' in pagina.text
     assert "<strong>2 de 14</strong><span>blocos possuem respostas salvas" in pagina.text
-    assert "dependência(s) institucional(is) ou regra(s) de governança" in pagina.text
+    assert "de governança." in pagina.text
     assert "Pendências a resolver" in pagina.text
     assert 'class="contador-pendencias-form1"' in pagina.text
-    assert "pendências segundo a política atualmente configurada" in pagina.text
+    assert "segundo a política atualmente configurada" in pagina.text
     assert "Há informações obrigatórias a resolver." in pagina.text
 
 

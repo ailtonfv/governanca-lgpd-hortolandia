@@ -269,7 +269,7 @@ def test_falha_na_auditoria_reverte_devolucao_integralmente(sessao, monkeypatch)
     )) == 0
 
 
-def test_apa_igual_arp_preserva_papeis_e_submissao_bloqueada(sessao):
+def test_devolucao_apresentada_pelo_apa_arp_exige_outro_apa(sessao):
     # Arrange
     registro = _preparar(
         sessao, "8AF-MESMA", arp="PESSOA-A", conta_arp="CONTA-A1"
@@ -277,7 +277,9 @@ def test_apa_igual_arp_preserva_papeis_e_submissao_bloqueada(sessao):
 
     # Act
     _solicitar(sessao, registro, comando="8AF-MESMA-S1", conta="CONTA-A1")
-    devolucao = _devolver(sessao, registro, comando="8AF-MESMA-DEV")
+    recusa = _devolver(sessao, registro, comando="8AF-MESMA-RECUSA")
+    assert not recusa["permitido"]
+    devolucao = _devolver(sessao, registro, comando="8AF-MESMA-DEV", conta="CONTA-F1")
 
     # Assert
     eventos = sessao.scalars(select(Evento).where(
@@ -287,7 +289,7 @@ def test_apa_igual_arp_preserva_papeis_e_submissao_bloqueada(sessao):
             "devolver_conferencia_interna_form1_integral",
         )),
     ).order_by(Evento.sequencia_cadeia)).all()
-    assert devolucao["submissao_habilitada"] is False
+    assert devolucao["permitido"] and devolucao["submissao_habilitada"] is False
     assert [evento.conteudo["papel_ator"] for evento in eventos] == ["ARP", "APA"]
     assert len({evento.comando_id for evento in eventos}) == 2
     assert not any(evento.tipo_evento in {

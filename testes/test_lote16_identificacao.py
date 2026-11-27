@@ -1,4 +1,6 @@
 """A11.1: identificação compartilhada sem mudar as contagens."""
+from html import unescape
+import re
 from testes.apoio_entrada import ClienteAposApresentacao as TestClient
 from app.main import app
 from app.identificacao_registro import identificar
@@ -16,5 +18,6 @@ def test_identificacao_nas_paginas(sessao,entrada):
         separador='&' if '?' in caminho else '?'
         resposta=c.get(caminho+separador+'conta_id=CONTA-B1')
         assert resposta.status_code==200, caminho
-        assert esperado in resposta.text, (caminho,[l for l in resposta.text.splitlines() if r.codigo_lgpd in l][:6])
+        texto = unescape(re.sub(r'<[^>]+>', '', resposta.text))
+        assert esperado in texto, caminho
     assert identificar({'codigo_lgpd':'LGPD-2026-99999','titulo':'Objeto fictício','tipo':'Servico'})=='LGPD-2026-99999 · Objeto fictício (Serviço)'

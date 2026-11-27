@@ -53,13 +53,14 @@ def test_apa_que_tambem_e_arp_ve_acao_antes_dos_quadros_e_redesignacao_recolhida
 
     # Assert
     trecho = _trecho_proxima_providencia(pagina.text)
-    assert "Seu papel neste Registro:</strong> APA e ARP" in trecho
+    assert "Seu papel neste Registro:</strong>" in trecho
+    assert "ARP" in trecho
     assert "Preencher FORM 1" in trecho
     assert pagina.text.index('class="proxima-providencia"') < pagina.text.index(
         'class="informacoes-institucionais-form1 '
     )
     assert "Informações do Registro — Somente leitura" in pagina.text
-    assert "ARP vigente:</strong> matrícula MAT-FICT-0001 · Servidor Alfa" in pagina.text
+    assert "<strong>ARP vigente</strong><br>Matrícula MAT-FICT-0001 · Servidor Alfa" in pagina.text
     assert '<details class="alteracao-arp">' in pagina.text
     assert '<details class="alteracao-arp" open' not in pagina.text
     assert "Alterar responsável pelo preenchimento" in pagina.text

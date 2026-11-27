@@ -28,33 +28,27 @@ def contagens(sessao):
 def test_painel_registro_form2_retorno_apa_e_preparador(sessao):
     rid, sid = base(sessao)
     pid = iniciar(sessao, rid, sid)["preparacao_id"]
-    for conta, texto, editavel in [("CONTA-A1", "Acompanhar preparação", False),
-                                   ("CONTA-G1", "Iniciar preparação", True)]:
-        central = cliente.get("/central", params={"conta_id": conta})
-        destino_painel = re.search(r'<form action="([^"]+/painel)"', central.text).group(1)
-        painel = cliente.get(destino_painel,
-                            params={"conta_id": conta, "secretaria_id": "UNID-NORTE"})
-        assert painel.status_code == 200 and "Voltar à Central de Acesso" in painel.text
-        caminho = f"/registros/{rid}?conta_id={conta}#instrumentos-registro"
-        assert caminho in painel.text
+    for conta, editavel in (("CONTA-A1", False), ("CONTA-G1", True)):
+        params = {"conta_id": conta, "secretaria_id": "UNID-NORTE", "instrumento": "form2"}
+        painel = cliente.get("/painel", params=params)
+        assert painel.status_code == 200
+        caminho = f"/registros/{rid}"
         antes = contagens(sessao)
-        pagina = cliente.get(caminho)
-        assert pagina.status_code == 200
-        assert contagens(sessao) == antes  # exibir link não registra consulta ao FORM 2
-        assert texto in artigo(pagina.text, 2)
-        assert 'href="#titulo-form1-integral"' in artigo(pagina.text, 1)
-        assert 'id="titulo-form1-integral" tabindex="-1"' in pagina.text
-        destino = destino_form2(pagina.text)
-        assert f"/registros/{rid}/form2/preparacao?conta_id={conta}" in destino
+        pagina = cliente.get(caminho, params={"conta_id": conta})
+        assert pagina.status_code == 200 and contagens(sessao) == antes
+        assert 'id="instrumentos-registro" tabindex="-1"' in pagina.text
+        destino = destino_form2(painel.text)
+        assert f"{caminho}/form2/preparacao" in destino
         assert f"preparacao_id={pid}" in destino and "#" not in destino
         form2 = cliente.get(destino)
         assert form2.status_code == 200
         assert ('id="anotacao"' in form2.text) is editavel
-        assert caminho in form2.text and "Voltar ao Registro" in form2.text
-        assert f'/painel?conta_id={conta}&amp;instrumento=form2' in form2.text
-        for numero in (3,4):
-            planejado = artigo(pagina.text, numero)
-            assert "Planejado" in planejado and "<a " not in planejado and "<button" not in planejado
+        assert "Voltar ao Registro" in form2.text
+        assert "/painel?" in form2.text and "instrumento=form2" in form2.text
+        for numero in (3, 4):
+            nao_iniciado = artigo(pagina.text, numero)
+            assert "Não iniciado" in nao_iniciado and "<a " not in nao_iniciado
+
 
 
 @pytest.mark.parametrize("situacao", ["ausente", "expirada", "futura", "inativa", "politica", "conta_inativa", "pessoa_inativa"])
@@ -84,7 +78,7 @@ def test_preparador_sem_designacao_nao_recebe_link_listagem_ou_origem(sessao):
     preparador = {"conta_id": "CONTA-G1"}
     pagina = cliente.get(f"/registros/{rid}", params=preparador)
     assert 'data-acesso-form2' not in artigo(pagina.text, 2)
-    assert "designação pelo APA" in artigo(pagina.text, 2)
+    assert "O FORM 2 começa depois que o APA confirmar o FORM 1." in artigo(pagina.text, 2)
     painel = cliente.get("/painel", params={**preparador, "secretaria_id": "UNID-NORTE", "instrumento": "form2"})
     assert painel.status_code == 200 and rid not in painel.text
     antes = contagens(sessao)
@@ -191,7 +185,9 @@ def test_apa_tambem_preparador_e_estado_sem_edicao(sessao):
     assert not proj["pode_editar"]
     pagina = cliente.get(f"/registros/{rid}",params={"conta_id":"CONTA-A1"})
     assert "Retomar preparação" not in artigo(pagina.text,2)
-    assert 'id="anotacao"' not in cliente.get(destino_form2(pagina.text)).text
+    consulta = cliente.get(f"/registros/{rid}/form2/preparacao",
+                           params={"conta_id": "CONTA-A1", "preparacao_id": pid})
+    assert consulta.status_code == 200 and 'id="anotacao"' not in consulta.text
 
 
 def test_infraestrutura_ausente_nao_quebra_detalhes(sessao,monkeypatch):
@@ -225,7 +221,7 @@ def test_links_nativos_foco_e_layout_sem_dependencia_nova():
     assert "flex-wrap: wrap" in css
 
 
-def test_dashboard_e_reserva_estatica_sem_rotas_ou_acoes(sessao):
+def test_dashboard_tem_rota_de_consulta_a_partir_da_central(sessao):
     from app.main import app
     rid,sid = base(sessao)
     painel = cliente.get("/painel?conta_id=CONTA-A1")
@@ -235,8 +231,9 @@ def test_dashboard_e_reserva_estatica_sem_rotas_ou_acoes(sessao):
     for url in urls:
         pagina = cliente.get(url)
         assert pagina.status_code == 200 and "Dashboard LGPD" not in pagina.text
-    assert "Dashboard LGPD" in cliente.get("/central").text
-    assert not any("dashboard" in caminho.lower() for caminho in app.openapi()["paths"])
+    central = cliente.get("/central", params={"conta_id": "CONTA-E1", "entrar": "true"})
+    assert 'href="/dashboard?conta_id=CONTA-E1"' in central.text
+    assert set(app.openapi()["paths"]["/dashboard"]) == {"get"}
 
 
 def test_habilitacao_de_um_registro_nao_oferece_link_em_outro(sessao):

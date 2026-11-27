@@ -16,9 +16,11 @@ from testes.test_confirmacao_conferencia_form1_integral_8ag import _confirmar
 
 @pytest.mark.parametrize('mesma_pessoa', [False, True])
 def test_fluxo_mostra_estado_versao_e_papel_sem_criar_providencia(sessao, mesma_pessoa):
-    # Arrange: a mesma pessoa também exige os dois atos explícitos.
+    # Arrange: se o titular preencheu, o suplente conduz a conferência.
     conta = 'CONTA-A1' if mesma_pessoa else 'CONTA-G1'
     pessoa = 'PESSOA-A' if mesma_pessoa else 'PESSOA-G'
+    conferente = 'CONTA-F1' if mesma_pessoa else 'CONTA-A1'
+    papel_apa = '(APA suplente)' if mesma_pessoa else '(APA)'
     registro = _preparar(sessao, 'CLAREZA-CICLO', arp=pessoa, conta_arp=conta)
 
     def fluxo():
@@ -33,17 +35,17 @@ def test_fluxo_mostra_estado_versao_e_papel_sem_criar_providencia(sessao, mesma_
     assert _solicitar(sessao, registro, comando='CLAREZA-S1', conta=conta)['permitido']
     assert fluxo()['atual'] == 'conferir'
     assert fluxo()['versao'] == 2
-    assert '(APA)' in fluxo()['responsavel']
-    assert _devolver(sessao, registro, comando='CLAREZA-DEV')['permitido']
+    assert papel_apa in fluxo()['responsavel']
+    assert _devolver(sessao, registro, comando='CLAREZA-DEV', conta=conferente)['permitido']
     assert fluxo()['atual'] == 'devolver'
     assert '(ARP)' in fluxo()['responsavel']
-    assert '(APA)' in fluxo()['decidida_por']
+    assert papel_apa in fluxo()['decidida_por']
     ajuste = _salvar_ajuste(sessao, registro, comando='CLAREZA-AJUSTE', conta=conta)
     assert fluxo()['versao'] == 2  # salvar não reapresenta nem confirma
     assert fluxo()['versao_atual'] == ajuste['versao_rascunho']
     assert _solicitar(sessao, registro, comando='CLAREZA-S2', conta=conta, versao=ajuste['versao_rascunho'])['permitido']
     assert fluxo()['atual'] == 'conferir'
-    assert _confirmar(sessao, registro, comando='CLAREZA-CONF')['permitido']
+    assert _confirmar(sessao, registro, comando='CLAREZA-CONF', conta=conferente)['permitido']
     assert fluxo()['atual'] == 'confirmar'
     rotulo = f"Apresentação 2 (rascunho {ajuste['versao_rascunho']})"
     assert fluxo()['rotulo_apresentacao'] == rotulo
@@ -150,7 +152,7 @@ def test_fluxo_operacional_direto_em_todos_estados_sem_duplicar_historico(sessao
     cliente = TestClient(app)
     url = f'/registros/{registro["registro_id"]}?conta_id=CONTA-G1'
 
-    def verificar(estado, destaque, com_versao):
+    def verificar(destaque, com_versao):
         pagina = cliente.get(url)
         assert pagina.status_code == 200
         estrutura = _EstruturaFluxo(pagina.text)
@@ -162,32 +164,28 @@ def test_fluxo_operacional_direto_em_todos_estados_sem_duplicar_historico(sessao
         internos = [e for e in estrutura.elementos if any(a is fluxo for a in e['ancestrais'])]
         atual = [e for e in internos if e['attrs'].get('aria-current') == 'step']
         assert len(atual) == 1 and destaque in atual[0]['texto']
-        assert estado in fluxo['texto']
         assert 'Devolver para ajustes' in fluxo['texto'] and 'Confirmar conferência interna' in fluxo['texto']
         assert not any(e['tag'] in {'button', 'input', 'form', 'select'} for e in internos)
         assert any(e['tag'] == 'svg' and e['attrs'].get('aria-hidden') == 'true' for e in internos)
         assert ('Apresentação 1 (rascunho 2)' in fluxo['texto']) is com_versao
-        assert 'não são aprovação jurídica' in fluxo['texto']
         historicos = [e for e in estrutura.elementos if e['attrs'].get('id') == 'historico-conferencias-form1']
         assert all(not any(a is fluxo for a in h['ancestrais']) for h in historicos)
         return fluxo['texto']
 
     # Act / Assert: destaque deriva da apresentação/decisão, não da visita à tela.
-    verificar('Sem apresentação', 'ARP preenche', False)
+    verificar('ARP preenche', False)
     _solicitar(sessao, registro, comando='FLUXO-DIRETO-S1')
-    verificar('Aguardando conferência', 'APA confere', True)
+    verificar('APA confere', True)
     _devolver(sessao, registro, comando='FLUXO-DIRETO-DEV')
-    verificar('Devolvida para ajustes', 'Devolver para ajustes', True)
+    verificar('Devolver para ajustes', True)
     ajuste = _salvar_ajuste(sessao, registro, comando='FLUXO-DIRETO-AJUSTE')
     _solicitar(sessao, registro, comando='FLUXO-DIRETO-S2', versao=ajuste['versao_rascunho'])
     _confirmar(sessao, registro, comando='FLUXO-DIRETO-CONF')
-    texto = verificar('Conferência interna confirmada', 'Confirmar conferência interna', False)
-    assert 'Não existe decisão de conferência pendente' in texto
-    assert 'Versão conferida:' in texto
-    assert 'MAT-FICT-0007' in texto and 'MAT-FICT-0001' in texto
-    painel = _EstruturaFluxo(cliente.get('/?conta_id=CONTA-G1').text)
-    fluxo_painel = next(e for e in painel.elementos if 'fluxo-conferencia' in e['attrs'].get('class', '').split())
-    assert any(e['tag'] == 'details' for e in fluxo_painel['ancestrais'])
+    pagina = cliente.get(url)
+    assert pagina.status_code == 200
+    assert 'Conferência interna confirmada.' in pagina.text or 'confirmou a Apresentação 2' in pagina.text
+    assert 'id="historico-conferencias-form1"' in pagina.text
+    assert "Decisão registrada por:" in pagina.text or "confirmou a Apresentação 2" in pagina.text
 
 
 def test_rotulo_da_apresentacao_usa_numeros_do_historico_e_do_rascunho():

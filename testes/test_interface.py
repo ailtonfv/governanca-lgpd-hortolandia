@@ -29,7 +29,7 @@ def test_painel_identifica_agente_e_mostra_apenas_seu_escopo():
     assert 'lang="pt-BR"' in resposta.text
     assert "Ambiente de demonstração — utilize exclusivamente dados fictícios." in resposta.text
     assert "Servidor Alfa" in resposta.text
-    assert "Servidor em sessão:</strong> Servidor Alfa — MAT-FICT-0001" in resposta.text
+    assert "Servidor em sessão:</strong> Servidor Alfa (fictício) — MAT-FICT-0001 · APA" in resposta.text
     assert "Agente simulado" not in resposta.text
     for ajuda in ("ajuda-detalhes", "ajuda-instrumentos"):
         alvo = f"{ajuda}-{norte['registro_id']}"
@@ -40,7 +40,7 @@ def test_painel_identifica_agente_e_mostra_apenas_seu_escopo():
     assert "O Registro somente será criado após a confirmação dos dados iniciais." in resposta.text
     assert "Cada cartão reúne a situação do Registro" in resposta.text
     assert "Providências de conferência" in resposta.text
-    assert "Campos obrigatórios pendentes" in resposta.text
+    assert "Blocos sem respostas salvas" in resposta.text
     assert "Mapeamentos disponíveis para você" in resposta.text
     assert norte["codigo_lgpd"] in resposta.text
     assert sul["codigo_lgpd"] not in resposta.text
@@ -72,8 +72,8 @@ def test_painel_exibe_criacao_somente_para_responsavel_pelo_registro():
 def test_seletor_demonstrativo_da_central_identifica_as_pessoas_por_matricula():
     resposta = cliente.get("/central", params={"conta_id": "CONTA-A1"})
 
-    assert "MAT-FICT-0001 · Alfa" in resposta.text
-    assert "MAT-FICT-0007 · Épsilon" in resposta.text
+    assert "MAT-FICT-0001 · Servidor Alfa (fictício)" in resposta.text
+    assert "MAT-FICT-0007 · Servidor Épsilon (fictício)" in resposta.text
     assert "Este ambiente de demonstração não solicita senha" in resposta.text
 
 

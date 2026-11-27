@@ -94,7 +94,8 @@ def test_a97_sobre_numero_aparece_no_html(dados,monkeypatch):
     resposta=ClienteAposApresentacao(app).get('/dashboard/circulacao?conta_id=CONTA-B1')
     assert resposta.status_code==200
     assert 'Sobre este número' in resposta.text
-    assert 'Bloco 8 salvo com pergunta ativa e vazia: Sem resposta.' in resposta.text
+    assert 'FORM 2, bloco 8, pergunta F2-8.7' in resposta.text
+    assert 'Bloco do FORM 2 salvo com pergunta ativa e vazia: Sem resposta.' in resposta.text
     assert 'Condicional fechada fica fora dessas contagens.' in resposta.text
     assert 'Fornecedores e operadores do bloco 9 não entram nesta conta.' in resposta.text
 

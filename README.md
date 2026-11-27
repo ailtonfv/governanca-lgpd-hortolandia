@@ -10,7 +10,9 @@ Em produção, o acesso será por autenticação real; `conta_id` é exclusivo d
 
 No complemento G9 a G13, a reavaliação abre uma rodada editável com os blocos a revisar. O FORM 4 exige título de até 80 caracteres ao registrar o plano, com alternativa abreviada da F4-4.3 nas providências antigas. No bloco 16 do FORM 3, lacunas com a mesma sugestão começam agrupadas. A Secretaria pode separar ou juntar itens. Cada lacuna mantém seu vínculo, e repetir o encaminhamento do grupo reaproveita a providência existente.
 
-Os grupos G1 a G13 ficam nesta branch para vistoria futura. A porta 8020 segue vinculada ao Lote 16.
+Os grupos G1 a G16 ficam nesta branch para vistoria futura. A porta 8020 segue vinculada ao Lote 16.
+
+O complemento final ajusta a leitura do dashboard e verifica as ligações para a Cartilha instalada. A referência para a bateria da entrega e a justificativa de cada caso estão em [Falhas conhecidas do Lote 17](FALHAS_CONHECIDAS.md).
 
 **Verificação do complemento G9 a G13.** Bateria completa única de 1.344 casos. A primeira passagem registrou 1.292 aprovações, 51 falhas e um caso ignorado. Após três retestes aprovados, o resultado consolidado é de 1.295 aprovações, as mesmas 48 falhas antigas e um caso ignorado.
 

@@ -19,14 +19,15 @@ def test_cabecalho_institucional_separa_objetivo_e_situacao_operacional(sessao):
     )
 
     # Assert
-    assert "FORM 1 — Levantamento Inicial do Tratamento de Dados Pessoais" in pagina.text
+    assert "FORM 1 · Situação e conferência" in pagina.text
+    assert "Levantamento do tratamento" in pagina.text
     assert "Ambiente de demonstração — utilize exclusivamente dados fictícios." in pagina.text
     assert (
         "Descreva como este serviço, processo ou atividade coleta, utiliza, "
         "compartilha, armazena e protege dados pessoais."
     ) in pagina.text
-    assert "Situação operacional:" in pagina.text
-    assert "O rascunho pode ser salvo e retomado mesmo incompleto." in pagina.text
+    assert '<span class="estado">Não iniciado</span>' in pagina.text
+    assert "O rascunho ainda não foi iniciado" in pagina.text
     assert "PoC ampliada · contrato 3 candidato" not in pagina.text
 
 
@@ -56,6 +57,6 @@ def test_apa_de_abertura_e_em_exercicio_exibem_matricula_e_nome(sessao):
     # Assert
     identidade = "Matrícula MAT-FICT-0001 · Servidor Alfa"
     assert "APA de abertura" in pagina.text
-    assert "APA em exercício" in pagina.text
+    assert "APA titular em exercício" in pagina.text
     assert pagina.text.count(identidade) >= 2
 

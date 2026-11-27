@@ -53,7 +53,8 @@ def _preparar_s2(sessao, prefixo, *, mesma_pessoa=False):
     s1 = _solicitar(
         sessao, registro, comando=f"{prefixo}-S1", conta=conta_arp,
     )
-    _devolver(sessao, registro, comando=f"{prefixo}-DEV")
+    conta_apa = "CONTA-F1" if mesma_pessoa else "CONTA-A1"
+    assert _devolver(sessao, registro, comando=f"{prefixo}-DEV", conta=conta_apa)["permitido"]
     ajuste = _salvar_ajuste(
         sessao, registro, comando=f"{prefixo}-AJ", conta=conta_arp,
     )
@@ -232,14 +233,16 @@ def test_falha_na_auditoria_reverte_confirmacao(sessao, monkeypatch):
     assert sessao.get(Comando, "8AG-RB-CONF") is None
 
 
-def test_apa_igual_arp_confirma_em_ato_separado(sessao):
+def test_apa_suplente_confirma_em_ato_distinto_da_apresentacao_do_titular(sessao):
     # Arrange
     registro, _s1, _s2 = _preparar_s2(
         sessao, "8AG-MESMA", mesma_pessoa=True
     )
 
     # Act
-    resultado = _confirmar(sessao, registro, comando="8AG-MESMA-CONF")
+    recusa = _confirmar(sessao, registro, comando="8AG-MESMA-RECUSA")
+    assert not recusa["permitido"]
+    resultado = _confirmar(sessao, registro, comando="8AG-MESMA-CONF", conta="CONTA-F1")
 
     # Assert
     eventos = sessao.scalars(select(Evento).where(

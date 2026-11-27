@@ -87,7 +87,7 @@ for (const indisponivel of [false, true]) {
     }
     assert.equal(focado, titulos[inicial - 1]);
     assert.equal(rolado, focado);
-    assert.equal(blocos[inicial - 1].getBoundingClientRect().top, 96 + alturaBarra);
+    assert.equal(blocos[inicial - 1].getBoundingClientRect().top, (retomando ? 96 : 24) + alturaBarra);
     assert.ok(ordem.indexOf(etapas.find(p => !p.hidden)) < ordem.indexOf(progresso));
     assert.equal(blocos.filter(b => !b.hidden).length, 1);
     if (!retomando) eventos.load();
@@ -96,7 +96,7 @@ for (const indisponivel of [false, true]) {
       assert.equal(rolado, titulos[n - 1]);
       assert.equal(janela.location.hash, '#titulo-bloco-' + n);
       assert.equal(blocos[n - 1].hidden, false);
-      assert.equal(blocos[n - 1].getBoundingClientRect().top, 96 + alturaBarra);
+      assert.equal(blocos[n - 1].getBoundingClientRect().top, 24 + alturaBarra);
     }
     anterior.click();
     assert.equal(rolado, titulos[1]);
