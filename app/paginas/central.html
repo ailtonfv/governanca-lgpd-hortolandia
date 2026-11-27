@@ -83,7 +83,7 @@
       {% endif %}
     </div>
     <section class="identidade-demonstrativa">
-      <h3>Trocar servidor fictício</h3>
+      <h3 id="escolher-servidor">Trocar servidor fictício</h3>
       {% if request.query_params.get("troca") == "1" %}<p class="mensagem mensagem-sucesso" role="status">Agora você está como: {{ dict(usuarios_demonstracao).get(conta_id) }}</p>{% endif %}
       <form action="{{ url_for('central') }}" method="get">
         <label for="conta_id">Selecionar servidor por matrícula</label>

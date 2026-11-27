@@ -1,3 +1,4 @@
+{% set sessao_atual = sessao_cabecalho() if not pagina_isolada and sessao_cabecalho is defined else none %}
 <header class="topo">
   <div class="identidade-institucional">
     <img class="brasao-institucional"
@@ -9,5 +10,9 @@
     </div>
   </div>
   <span class="selo">Ambiente de demonstração — utilize exclusivamente dados fictícios.</span>
-  {% if not pagina_isolada and request.url.path.rstrip("/") != "/central" %}<a class="central-cabecalho" href="/central?conta_id={{ (conta_id or request.query_params.get('conta_id','CONTA-A1'))|urlencode }}">Central de Acesso (trocar servidor)</a>{% endif %}
+  {% if not sessao_atual and not pagina_isolada and request.url.path.rstrip("/") != "/central" %}<a class="central-cabecalho" href="/central?conta_id={{ (conta_id or request.query_params.get('conta_id','CONTA-A1'))|urlencode }}">Central de Acesso (trocar servidor)</a>{% endif %}
 </header>
+{% if sessao_atual %}
+<div class="faixa-sessao"><span><strong>Em sessão:</strong> {{ sessao_atual.nome|identidade_demonstrativa }} · {{ sessao_atual.papel }}</span>
+{% if request.url.path.rstrip("/") == "/central" %}<a class="central-sessao" href="#escolher-servidor">Central de Acesso (trocar servidor)</a>{% else %}<a class="central-sessao" href="/central?conta_id={{ (conta_id or request.query_params.get('conta_id'))|urlencode }}">Central de Acesso (trocar servidor)</a>{% endif %}</div>
+{% endif %}

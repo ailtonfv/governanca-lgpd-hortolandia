@@ -1601,8 +1601,8 @@ def carregar_registro(sessao, conta_id, registro_id):
     return identidade, resumo
 
 
-def papeis_em_sessao(sessao,conta_id):
-    identidade=_identidade(sessao,conta_id,vinculos_vigentes=True)
+def papeis_em_sessao(sessao,conta_id, *, identidade=None):
+    identidade=identidade or _identidade(sessao,conta_id,vinculos_vigentes=True)
     if not identidade:return 'Consulta'
     mapa={'responsavel_registro':'APA','preenchedor':'ARP','aal_form2':'AAL','gestor_fila':'gestor da fila','governanca_protecao_dados':'Encarregado de Dados (DPO)','juridico_form2':'Jurídico','curador':'Curador','demo34_gabinete':'Gabinete do Prefeito','demo34_secretario':'Secretário(a)','demo34_verificador':'Verificador do Comitê','demo34_relator':'Relator do Comitê'}
     papeis={mapa[d['papel']] for d in identidade['designacoes'] if d['papel'] in mapa}

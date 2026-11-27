@@ -431,6 +431,13 @@ button[aria-busy="true"] { cursor: wait; }
 .estado-bloco[hidden] { display: none !important; }
 
 .central-cabecalho {color:white; margin-inline-start:auto; text-decoration:underline;}
+.faixa-sessao {
+  position: sticky; top: 0; z-index: 35;
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: .35rem 1rem;
+  padding: .45rem max(1rem, calc((100% - 1120px) / 2));
+  color: var(--azul-escuro); background: #f4f7f9; border-bottom: 1px solid #d6e0e6;
+}
+#escolher-servidor { scroll-margin-top: 5rem; }
 
 .aviso-alerta, .aviso-dados { padding:.75rem 1rem; border-inline-start:4px solid #966200; background:#fff3ce; color:#382b11; }
 .selo-guarda,.selo-d11 {display:inline-block;padding:.25rem .5rem;border:1px solid #94752a;border-radius:.4rem;background:#fff7db;color:#443500;font-weight:600;}

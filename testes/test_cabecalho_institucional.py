@@ -53,6 +53,25 @@ def test_painel_dos_perfis_compartilha_identidade_sem_novo_controle(conta):
     conferir_cabecalho(resposta)
 
 
+def test_faixa_compartilhada_identifica_conta_de_cada_aba():
+    alfa = cliente.get('/central?conta_id=CONTA-A1&entrar=true').text
+    dpo = cliente.get('/central?conta_id=CONTA-E1&entrar=true').text
+    for html, nome, papel in (
+        (alfa, 'Servidor Alfa (fictício)', 'APA'),
+        (dpo, 'Encarregado de Dados (fictício)', 'Encarregado de Dados (DPO)'),
+    ):
+        faixa = html.split('class="faixa-sessao"', 1)[1].split('</div>', 1)[0]
+        assert f'{nome} · {papel}' in faixa
+        assert 'href="#escolher-servidor"' in faixa
+
+
+def test_papel_principal_no_form34():
+    from app.identidade_demonstrativa import papel_principal_forms34
+
+    assert papel_principal_forms34({'aal', 'executor_unidade', 'leitor_unidade', 'secretaria'}) == 'AAL'
+    assert papel_principal_forms34({'dpo', 'leitor_unidade'}) == 'Encarregado de Dados (DPO)'
+
+
 def test_abertura_preenchimento_consulta_erro_e_historico_preservados(sessao):
     registro = _preparar(sessao, "BRASAO-FICT")
     rid = registro["registro_id"]
