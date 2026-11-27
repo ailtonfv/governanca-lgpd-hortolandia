@@ -69,10 +69,21 @@ def test_destinos_texto_e_indicacao(sessao,entrada,tres,quatro,frase):
     from copy import deepcopy
     d=deepcopy(entrada.conteudo);d['rascunho_form2_rev21_2']['14'].update({'opcao:F2-14.5':['SIM' if tres else 'NAO'],'opcao:F2-14.6':['SIM' if quatro else 'NAO']});entrada.conteudo=d;sessao.commit()
     c=TestClient(app);r=c.get(f'/form2/participacoes/{entrada.id}/encaminhar34?conta_id=CONTA-B1');assert r.status_code==200
-    assert f'Você indicou no bloco 14: {frase}.' in r.text
-    assert 'title="F2-14.5"' in r.text and 'title="F2-14.6"' in r.text
-    assert '>Avaliar os riscos (FORM 3)</option>' in r.text
-    assert '>Providência direta, sem avaliação de risco (FORM 4)</option>' in r.text
+    assert '/blocos/14' in str(r.url)
+    from html.parser import HTMLParser
+    class Campos(HTMLParser):
+        def __init__(self):super().__init__();self.entradas=[];self.nome=None
+        def handle_starttag(self,tag,attrs):
+            dados=dict(attrs)
+            if tag=='select':self.nome=dados.get('name')
+            if tag=='option':self.entradas.append({**dados,'name':self.nome})
+        def handle_endtag(self,tag):
+            if tag=='select':self.nome=None
+    html=Campos();html.feed(r.text)
+    for item,valor in [('F2-14.5',tres),('F2-14.6',quatro)]:
+        campo=next((q for q in html.entradas if q.get('name')=='opcao:'+item and q.get('value')==('SIM' if valor else 'NAO')),None)
+        assert campo is not None and 'selected' in campo
+    assert '/encaminhar34' not in r.text
     evidencia('encaminhamento',r.text)
 
 

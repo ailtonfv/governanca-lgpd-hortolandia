@@ -63,7 +63,10 @@ def test_campos_invalidos_mantem_dados_na_pagina(sessao,entrada):
 def test_destino_invalido_tem_erro_proprio(sessao,entrada):
     r=TestClient(app).post(f'/form2/participacoes/{entrada.id}/encaminhar34?conta_id=CONTA-B1',data={'versao':entrada.versao,'comando_id':str(uuid4()),'form':''})
     assert r.status_code==409
-    assert 'Escolha para onde encaminhar' in r.text and 'aria-invalid="true"' in r.text
+    assert 'O encaminhamento ocorre ao concluir a análise do FORM 2.' in r.text
+    from app.modelos import IdentidadeForms34
+    from sqlalchemy import select
+    assert not sessao.scalars(select(IdentidadeForms34)).all()
 
 def test_outro_salva_parcial_e_exige_qual_ao_concluir(sessao,entrada):
     from app.questionario_forms34 import perguntas
@@ -98,12 +101,12 @@ def test_preview_mesmas_25_notas_do_dominio():
 def test_form2_complemento_vazio_pendente_para_conclusao():
     from app.respostas_form2 import aplicar_revisao
     from app.form2_rev212 import RASCUNHO
-    base={RASCUNHO:{'10':{'opcao:F2-10.1':['ALT_02'],'texto:F2-10.1':'Complemento fictício'}}}
-    novo,_=aplicar_revisao(base,10,{'texto:F2-10.1':['']},demonstrativo=True)
+    base={RASCUNHO:{'9':{'opcao:F2-9.1':['SIM'],'opcao:F2-9.6.1#1':['SIM'],'texto:F2-9.6.1#1':'Complemento fictício'}}}
+    novo,_=aplicar_revisao(base,9,{'texto:F2-9.6.1#1':['']},demonstrativo=True)
     from app.obrigatoriedade_forms import conferencia2
-    assert novo[RASCUNHO]['10']['texto:F2-10.1']==''
-    assert 'F2-10.1' in [i['item'] for i in conferencia2(novo)['faltantes']]
-    assert base[RASCUNHO]['10']['texto:F2-10.1']=='Complemento fictício'
+    assert novo[RASCUNHO]['9']['texto:F2-9.6.1#1']==''
+    assert 'F2-9.6.1#1' in [i['item'] for i in conferencia2(novo)['faltantes']]
+    assert base[RASCUNHO]['9']['texto:F2-9.6.1#1']=='Complemento fictício'
 
 
 def test_form1_nao_apaga_qual_mantendo_outro(sessao):

@@ -54,8 +54,8 @@ def test_f2_salvamento_parcial_nao_conclui():
 def test_f2_encaminhamento_recusado_com_links_e_sem_evento(sessao,entrada):
     entrada.conteudo={'rascunho_form2_rev21_2':{'14':{'opcao:F2-14.5':['SIM']}}};sessao.commit()
     antes=sessao.scalars(select(Evento.id)).all()
-    r=TestClient(app).post(f'/form2/participacoes/{entrada.id}/encaminhar34?conta_id=CONTA-B1',data={
-        'form':'3','versao':entrada.versao,'comando_id':str(uuid4())})
+    r=TestClient(app).post(f'/form2/participacoes/{entrada.id}?conta_id=CONTA-B1',data={
+        'acao':'concluir','conta_id':'CONTA-B1','versao':entrada.versao,'comando_id':str(uuid4())})
     assert r.status_code==409
     assert f'/form2/participacoes/{entrada.id}/blocos/1?conta_id=CONTA-B1' in r.text
     assert 'perguntas sem resposta' in r.text
