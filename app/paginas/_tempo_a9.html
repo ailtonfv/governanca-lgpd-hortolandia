@@ -1,10 +1,22 @@
 {% set inicio=l.marcas|selectattr('nome','equalto','Plano aprovado')|first %}
 {% set prazo=l.marcas|selectattr('nome','equalto','Prazo vigente')|first %}
 {% set hoje=l.marcas|selectattr('nome','equalto','Hoje')|first %}
+{% set fim=l.marcas|selectattr('nome','equalto','Fim')|first %}
 {% if inicio and prazo %}
-<svg role="img" aria-label="Prazo da providência: da aprovação até o prazo vigente; hoje indicado por linha vertical" viewBox="0 0 1000 100">
-<line x1="{{ 30+inicio.x*9 }}" x2="{{ 30+prazo.x*9 }}" y1="40" y2="40" stroke="#075985" stroke-width="12"/>
-<circle cx="{{ 30+inicio.x*9 }}" cy="40" r="6" fill="#17212b"/><circle cx="{{ 30+prazo.x*9 }}" cy="40" r="8" fill="#17212b"/>
-{% if hoje %}<line x1="{{ 30+hoje.x*9 }}" x2="{{ 30+hoje.x*9 }}" y1="10" y2="70" stroke="#17212b" stroke-width="3"/><text x="{{ 30+hoje.x*9 }}" y="90" text-anchor="middle">Hoje</text>{% endif %}</svg>
-<p>Plano aprovado: {{ l.inicio|data_dashboard }} · Prazo vigente: {{ l.prazo|data_dashboard }} · Hoje: {{ (agora|data_dashboard).split(' às ')[0] }}{% if l.fim %} · Fim: {{ l.fim|data_dashboard }}{% endif %}</p>
+{% set x_inicio=30+inicio.x*9 %}{% set x_prazo=30+prazo.x*9 %}
+<svg role="img" aria-label="Prazo da providência, da aprovação até o prazo vigente" viewBox="0 0 1000 130">
+  <line x1="{{ x_inicio }}" x2="{{ x_prazo }}" y1="62" y2="62" stroke="#075985" stroke-width="12"/>
+  {% if hoje %}<line x1="{{ 30+hoje.x*9 }}" x2="{{ 30+hoje.x*9 }}" y1="51" y2="74" stroke="#17212b" stroke-width="3"/><text x="{{ 30+hoje.x*9 }}" y="121" text-anchor="middle">Hoje</text>{% endif %}
+  <circle cx="{{ x_inicio }}" cy="62" r="6" fill="#17212b"/>
+  <circle cx="{{ x_prazo }}" cy="62" r="8" fill="#17212b"/>
+  <text x="{{ x_inicio }}" y="16" text-anchor="{{ 'end' if x_inicio>710 else 'start' }}">Plano aprovado em {{ (l.inicio|data_dashboard).split(' às ')[0] }}</text>
+  <text x="{{ x_prazo }}" y="100" text-anchor="{{ 'end' if x_prazo>710 else 'start' }}">Prazo vigente em {{ l.prazo|data_dashboard }}</text>
+  {% if l.concluida_em and fim %}
+  {% set x_fim=30+fim.x*9 %}
+  <path d="M {{ x_fim }} 44 V 72" stroke="#126446" stroke-width="3"/>
+  <circle cx="{{ x_fim }}" cy="62" r="5" fill="#126446" stroke="#fff" stroke-width="1"/>
+  <text x="{{ x_fim }}" y="37" text-anchor="{{ 'end' if x_fim>710 else 'start' }}">Concluída em {{ (l.concluida_em|data_dashboard).split(' às ')[0] }}</text>
+  {% endif %}
+</svg>
+<p>Plano aprovado: {{ l.inicio|data_dashboard }} · Prazo vigente: {{ l.prazo|data_dashboard }} · Hoje: {{ (agora|data_dashboard).split(' às ')[0] }}{% if l.concluida_em %} · Concluída em {{ l.concluida_em|data_dashboard }}{% elif l.fim %} · Fim: {{ l.fim|data_dashboard }}{% endif %}</p>
 {% elif l.espera_aprovacao is not none %}<p>Plano aguardando aprovação há {{ l.espera_aprovacao }} dias.</p>{% else %}<p>Prazo ainda não iniciado: aguarda plano e aprovação.</p>{% endif %}

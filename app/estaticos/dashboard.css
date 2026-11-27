@@ -6,3 +6,4 @@
 .dashboard .dash-matriz td.dash-matriz-com-risco{border:4px solid #17212b}.dash-matriz-com-risco strong{font-size:1.6rem;font-weight:800}.dash-matriz td.dash-matriz-vazia{border:4px solid transparent}
 
 .dash-matriz{display:flex;align-items:stretch;gap:.6rem}.dash-matriz>.dash-eixo{writing-mode:vertical-rl;transform:rotate(180deg);text-align:center;font-weight:700;margin:0}.dash-matriz table{flex:1}.dashboard .dash-tempo svg{max-height:130px}
+.dash-id{white-space:nowrap}

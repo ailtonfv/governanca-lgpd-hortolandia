@@ -7,3 +7,4 @@
 .aprendizados-publicos footer { margin-top: 1rem; padding-top: .75rem; border-top: 1px solid #cddde8; }
 .dashboard nav.acoes { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; }
 @media(max-width:650px) { .aprendizados-publicos .dash-filtros { grid-template-columns: 1fr; } .aprendizados-publicos { padding: .8rem; } }
+.aprendizados-publicos .dash-id{white-space:nowrap}

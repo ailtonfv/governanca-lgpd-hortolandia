@@ -280,6 +280,62 @@ def test_verificacao_recusada_nao_encerra_linha_tempo(sessao,dados):
     assert linha['fim'] is None and not linha['encerrada'] and linha['situacao']=='Em execução'
 
 
+def test_lote17_dashboard_vazios_e_responsaveis(sessao, dados, monkeypatch):
+    from app.dashboard import rotas
+
+    vazios = {**dados, 'registros': [], 'objetos': [], 'participacoes': [], 'apresentacoes': []}
+    monkeypatch.setattr(rotas, 'carregar', lambda *_: deepcopy(vazios))
+    monkeypatch.setattr(rotas, 'categorias_circulacao', lambda *_: {})
+    cliente = TestClient(app)
+    for tela, assunto in (
+        ('risco', 'riscos com nota conjunta'), ('correcao', 'providências'),
+        ('operacao', 'Registros nas filas'), ('aprendizados', 'aprendizados autorizados'),
+        ('circulacao', 'destinatários declarados'),
+    ):
+        resposta = cliente.get(f'/dashboard/{tela}?conta_id=CONTA-E1')
+        assert resposta.status_code == 200
+        assert resposta.text.count(f'Ainda não há {assunto} neste escopo.') == 1
+        assert '<div data-dash-grafico' not in resposta.text
+        assert '<div data-dash-tabela' not in resposta.text
+
+    painel = cliente.get('/dashboard?conta_id=CONTA-E1').text
+    assert 'no seu escopo..' not in painel
+    assert 'Providências atrasadas' in painel
+    assert c.atencao(vazios, AGORA)[-1]['papel'] == 'Secretaria'
+    a = next(i for i in dados['objetos'] if i['obj'].tipo == 'A')
+    a['estado'].update(plano='Plano fictício', faixa_origem='Crítico')
+    assert {q['chave']: q['papel'] for q in c.atencao(dados, AGORA)} == {
+        'criticos': 'Gabinete', 'ciencias': 'Gabinete', 'consenso': 'Comitê',
+        'instrucao': 'DPO e Comitê', 'planos': 'Gabinete', 'condicoes': 'Secretaria',
+        'residuais_pos': 'Secretaria e autoridade da faixa', 'ripd_pendente': 'Secretaria',
+    }
+
+
+def test_lote17_dashboard_marca_verificacao_e_residual_sem_quebrar_id(sessao, dados, monkeypatch):
+    from app.dashboard import rotas
+
+    a = next(i for i in dados['objetos'] if i['obj'].tipo == 'A')
+    a['eventos'].append(NS(tipo_evento='f34_aprovar_plano', ocorrido_em=AGORA-timedelta(days=10),
+                           conteudo={'estado': {'prazo': '2026-11-23'}}))
+    a['estado'].update(plano_aprovado={'em': '2026-11-10T12:00:00+00:00'}, prazo='2026-11-23',
+                       verificada=True, verificacao={'aprovada': True, 'em': AGORA.isoformat()},
+                       residual_acao={'faixa': 'Alto'}, residual_acao_confirmacoes={'secretaria': {}, 'dpo': {}},
+                       decisao_residual_acao={'opcao': 'reavaliar'})
+    linha = c.correcao(dados, AGORA)[0]['lista'][0]
+    assert linha['situacao'] == 'Concluída e verificada'
+    assert linha['situacao_exibida'] == 'Verificada · risco que sobrou: reavaliação solicitada'
+    a['estado'].pop('decisao_residual_acao')
+    assert c.correcao(dados, AGORA)[0]['lista'][0]['situacao_exibida'].endswith('aguardando decisão')
+    a['estado']['decisao_residual_acao'] = {'opcao': 'reavaliar'}
+    monkeypatch.setattr(rotas, 'carregar', lambda *_: deepcopy(dados))
+    resposta = TestClient(app).get('/dashboard/correcao?conta_id=CONTA-E1')
+    assert resposta.status_code == 200
+    assert resposta.text.count(linha['situacao_exibida']) == 2
+    for marco in ('Plano aprovado em 10/11/2026', 'Prazo vigente em 23/11/2026', 'Concluída em 20/11/2026'):
+        assert marco + '</text>' in resposta.text
+    assert f'<span class="dash-id">{linha["registro"].split(" · ")[0]}</span>' in resposta.text
+
+
 def test_matriz_usa_mesma_faixa_do_form3(sessao,dados):
     from app.avaliacao_risco34 import pontuar
     q={x['chave']:x for x in c.risco(dados)}

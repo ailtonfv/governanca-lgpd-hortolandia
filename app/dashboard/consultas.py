@@ -242,9 +242,14 @@ def atencao(d, agora):
     titulos={'criticos':'Riscos Críticos aguardando decisão do Prefeito','ciencias':'Segundas prorrogações: ciência registrada no sistema',
              'consenso':'Avaliações sem consenso aguardando o Comitê','instrucao':'Em instrução (DPO/Comitê)','planos':'Planos aguardando aprovação',
              'condicoes':'Aceitações condicionadas com condição em aberto','residuais_pos':'Riscos residuais Altos ou Críticos sem decisão após a providência','ripd_pendente':'RIPD indicado e não informado'}
+    responsaveis = {
+        'criticos': 'Gabinete', 'ciencias': 'Gabinete', 'consenso': 'Comitê',
+        'instrucao': 'DPO e Comitê', 'planos': 'Gabinete', 'condicoes': 'Secretaria',
+        'residuais_pos': 'Secretaria e autoridade da faixa', 'ripd_pendente': 'Secretaria',
+    }
     return [quadro(k,titulos[k],v,'providências' if k in ('ciencias','planos','residuais_pos') else 'riscos','Eventos da rodada atual',
                    'Ciência automática é informação, não pendência nem espera.' if k=='ciencias' else 'Somente fatos registrados.',
-                   'Comitê' if k=='consenso' else 'Gabinete') for k,v in linhas.items() if k!='planos' or v]
+                   responsaveis[k]) for k,v in linhas.items() if k!='planos' or v]
 
 
 def dias(inicio, agora):
@@ -252,7 +257,7 @@ def dias(inicio, agora):
 
 
 def correcao(d, agora):
-    from app.dashboard.regras_a9 import condicoes_abertas
+    from app.dashboard.regras_a9 import condicoes_abertas, decisao_posterior
     linhas=[]
     for i in d['objetos']:
         if i['obj'].tipo!='A': continue
@@ -270,10 +275,19 @@ def correcao(d, agora):
             if ev.tipo_evento=='f34_decidir_prorrogacao' and s.get('prorrogacoes',0)>len(prorrogacoes):
                 prorrogacoes.append(dict(numero=s['prorrogacoes'],em=ev.ocorrido_em,prazo=s.get('prazo'),
                     parecer=s.get('manifestacao_comite',{}).get('favoravel'),ciencia=bool(s.get('ciencia_prefeito'))))
+        posterior = decisao_posterior(e)
+        verificacao = e.get('verificacao') or {}
+        concluida_em = verificacao.get('em') if e.get('verificada') and verificacao.get('aprovada') and not e.get('cancelada') else None
+        situacao_exibida = l['situacao']
+        if posterior and (posterior['pendente'] or posterior['decisao'] == 'Reavaliação solicitada'):
+            situacao_exibida = 'Verificada · risco que sobrou: ' + posterior['decisao'].lower()
+        elif concluida_em and (verificacao.get('respostas') or e.get('respostas', {})).get('F4-4.22') == 'Não' and not posterior:
+            situacao_exibida = 'Verificada · risco que sobrou: aguardando avaliação conjunta'
         l.update(inicio=aprovacao.ocorrido_em if aprovacao else None,
             prazo_original=aprovacao.conteudo['estado'].get('prazo') if aprovacao else None,
             prazo=e.get('prazo'),prorrogacoes=prorrogacoes,atrasada=atrasada(e,momento(agora).astimezone(LOCAL).date()),
-            fim=(e.get('cancelada') or (e.get('verificacao') if e.get('verificada') and e.get('verificacao',{}).get('aprovada') else {}) or {}).get('em'),
+            fim=(e.get('cancelada') or {}).get('em') or concluida_em,
+            concluida_em=concluida_em,situacao_exibida=situacao_exibida,
             dias_restantes=(date.fromisoformat(e['prazo'])-momento(agora).astimezone(LOCAL).date()).days if e.get('prazo') else None,
             encerrada=bool(e.get('cancelada') or e.get('verificada')),
             origem=next((f"Risco {r['obj'].numero}" for r in d['objetos'] if r['obj'].id==e.get('risco_id')),'FORM 2'),
@@ -418,8 +432,8 @@ def circulacao(d, categorias):
             if rotulo=='Sem resposta':return v.get('bloco8_salvo',False) and not v.get('instrumentos')
             return rotulo in v.get('instrumentos',set())
         lista=[linha(d,r.id) for r in d['registros'] if corresponde(r)]
-        resultado.append(quadro('instrumento_'+str(k),'Instrumento formal: '+rotulo,lista,fonte='F2-8.7',
-            regra='Sem salvamento do bloco 8: Ainda não chegou a esta pergunta. Bloco 8 salvo com pergunta ativa e vazia: Sem resposta. Condicional fechada fica fora dessas contagens. Fornecedores e operadores do bloco 9 não entram nesta conta. Declaração estruturada, sem avaliação de cláusulas.'))
+        resultado.append(quadro('instrumento_'+str(k),'Instrumento formal: '+rotulo,lista,fonte='FORM 2, bloco 8, pergunta F2-8.7',
+            regra='Bloco do FORM 2 ainda não salvo: Ainda não chegou a esta pergunta. Bloco do FORM 2 salvo com pergunta ativa e vazia: Sem resposta. Condicional fechada fica fora dessas contagens. Fornecedores e operadores do bloco 9 não entram nesta conta. Declaração estruturada, sem avaliação de cláusulas.'))
     resultado.insert(0,quadro('circulacao','Registros com destinatários declarados',[linha(d,r.id) for r in d['registros'] if categorias.get(r.id,{}).get('categorias')],
         fonte='Categorias estruturadas do FORM 1 e FORM 2',regra='Não contamos relações, empresas ou contratos distintos, nem avaliamos cláusulas.'))
     return resultado

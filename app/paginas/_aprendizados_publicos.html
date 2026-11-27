@@ -23,8 +23,10 @@
   </form>
   {% if lista_completa %}
     <div class="dash-acoes"><button type="button" data-dash-modo="grafico" aria-pressed="true">Cartões</button><button type="button" data-dash-modo="tabela" aria-pressed="false">Lista</button></div>
-    <div data-dash-grafico>{% for item in aprendizado.itens %}{{ orientacao(item) }}{% else %}<p>Nenhuma orientação autorizada neste filtro.</p>{% endfor %}</div>
-    <div data-dash-tabela class="dash-tabela"><table><caption>Aprendizados autorizados</caption><thead><tr><th>Secretaria · serviço</th><th>Diretriz</th><th>Autorizado em</th><th>Registro</th></tr></thead><tbody>{% for item in aprendizado.itens %}<tr><td>{{ item.secretaria }} · {{ item.servico }}</td><td>{{ item.diretriz }}</td><td>{{ item.autorizado_texto }}</td><td>{{ item.registro.split(' · ')[0] }}</td></tr>{% else %}<tr><td colspan="4">Nenhuma orientação autorizada neste filtro.</td></tr>{% endfor %}</tbody></table></div>
+{% if aprendizado.itens %}
+    <div data-dash-grafico>{% for item in aprendizado.itens %}{{ orientacao(item) }}{% endfor %}</div>
+    <div data-dash-tabela class="dash-tabela"><table><caption>Aprendizados autorizados</caption><thead><tr><th>Secretaria · serviço</th><th>Diretriz</th><th>Autorizado em</th><th>Registro</th></tr></thead><tbody>{% for item in aprendizado.itens %}<tr><td>{{ item.secretaria }} · {{ item.servico }}</td><td>{{ item.diretriz }}</td><td>{{ item.autorizado_texto }}</td><td><span class="dash-id">{{ item.registro.split(' · ')[0] }}</span></td></tr>{% endfor %}</tbody></table></div>
+{% else %}<p class="dash-vazio">Ainda não há aprendizados autorizados neste escopo.</p>{% endif %}
   {% elif aprendizado.destaque %}{{ orientacao(aprendizado.destaque) }}{% else %}<p>Nenhuma orientação autorizada para consulta.</p>{% endif %}
   {% if not lista_completa %}<p><a href="/dashboard/aprendizados?conta_id={{ conta_id|urlencode }}">Ver todos os aprendizados</a></p>{% endif %}
 </section>
