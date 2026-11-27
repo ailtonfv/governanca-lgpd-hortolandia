@@ -1263,3 +1263,14 @@ A consulta usa o salvamento já registrado, não presume visita à página e nã
 cria eventos de navegação. O critério fica explícito em “Sobre este número”,
 que também informa a exclusão de fornecedores e operadores do bloco 9.
 Implementação no A9 do Lote 16-B; aceite visual pendente.
+
+### Lote 16-B — complementos do A11, decisão de Ailton em 26/11/2026
+
+- HORTOPREV está fora do escopo. Não há exceção de controlador; F2-10.1 é somente leitura, com o Município de Hortolândia. F2-10.2 mantém a análise sobre outra entidade.
+- A decisão de que não cabe Registro exige justificativa e encerra o Registro. Instrumentos iniciados e seus históricos permanecem consultáveis, sem exclusão nem novos atos.
+- Salvar F2-14.5/14.6 não encaminha. Somente o ato do AAL de concluir a análise aplica os destinos selecionados, com controle de versão e idempotência. O resultado provém de F2-14.1; não há segunda resposta paralela. A conclusão continua sem equivaler a homologação jurídica.
+- O novo risco recebe cópia editável do contexto do anterior com proveniência, sem copiar sua avaliação ou decisões. Referências às origens permanecem congeladas.
+- O A12 usa exclusivamente o JSON orientativo fornecido, autorizado expressamente como configuração versionada. Não se publica catálogo privado, Documento-Mestre ou arquivo da Cartilha. Os tópicos da nova edição da Cartilha ainda não disponíveis no mapa local não recebem links presumidos.
+- A vistoria permanece isolada na 8018. A nova entrega terá pasta fixa na 8020 e cópia nova a partir de `lgpd_lote16_331e12ebe3d0`, criada apenas quando Ailton executar o preparador. Sem migração e sem ativação automática.
+
+Situação: implementação demonstrativa na branch; testes e limites no relatório local de fechamento. Sem merge no main. Vistoria visual pendente.

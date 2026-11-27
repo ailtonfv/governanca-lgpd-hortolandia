@@ -6,6 +6,16 @@
 
 Em produção, o acesso será por autenticação real; `conta_id` é exclusivo da demonstração.
 
+**Lote 16-B — fechamento em 27/11/2026, branch `lote-16-pente-fino`:** A8, A9, A3 e A7 já entregues; esta rodada completa A11.3–7, A4 restante, A6 e A12, com ressalvas, e aplica parte dos ajustes editoriais da Parte B. O controlador é fixo; o encerramento justificado mantém instrumentos somente para leitura; os destinos do FORM 2 produzem efeito apenas na conclusão da análise. Sem merge no `main`.
+
+Verificação: uma bateria integral de 1.331 casos, seguida de retestes direcionados e um teste adicional. Consolidado de **1.332 casos: 1.283 aprovados, as mesmas 48 falhas antigas e um ignorado**, sem falhas novas remanescentes. São 16 testes novos nesta rodada. Não representa segunda execução integral nem aceite visual.
+
+Ponto de corte: Parte B ainda tem C72b, C82a, C85d/e, C91b e C99/C104 pendentes; C79 e C83a estão parciais. A12 preserva integralmente o JSON autorizado; links da nova Cartilha sem destino instalado ficam pendentes. Relatório detalhado e evidências ficam no pacote local `entrega-lgpd-lote16b-final-20261126`, fora do Git.
+
+A 8018 e sua cópia permanecem intactas. O pacote prepara a 8020 em pasta exclusiva do commit final e cria uma nova cópia da base da 8018 somente quando o usuário executar o preparador no PowerShell. Nenhuma porta foi ativada, nenhuma cópia criada e nenhuma migração executada neste fechamento.
+
+As entradas abaixo documentam cortes anteriores; o estado corrente é o fechamento acima.
+
 **Lote 16-B — A8, 26/11/2026:** o painel do DPO separa consultas aguardando orientação, orientações aguardando resposta do AAL e histórico respondido. A mesma função de domínio seleciona consultas pendentes para o painel e a fila DPO da Operação; manifestações de ofício não geram espera pelo DPO. A consulta exibe respostas por extenso, agrupadas por bloco, a partir do catálogo instalado. Ponto de corte após A8: A9 e demais itens do 16-B continuam pendentes. Sem ativação na 8018 e sem porta nova; publicação somente da branch.
 
 Verificação do A8: 22 testes direcionados aprovados, incluindo três novos. A única bateria integral resultou em 1.243 aprovados, 50 falhas e um ignorado. Duas diferenças foram tratadas: expectativa do novo texto de temporalidade e preservação, no painel DPO, do aviso de designação pendente da DA-51. Cinco retestes dirigidos passaram. Consolidado: 1.294 casos, 1.245 aprovados, as mesmas 48 falhas antigas e um ignorado; não representa segunda execução integral. Vistoria visual pendente. Parte C apenas acrescentada ao backlog.
