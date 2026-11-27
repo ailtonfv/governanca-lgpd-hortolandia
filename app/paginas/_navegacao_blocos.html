@@ -1,0 +1,10 @@
+{% macro navegacao(anterior, proximo, retorno, rotulo_retorno) -%}
+<section class="moldura-navegacao-blocos" aria-label="Navegação do instrumento">
+  {{ caller() }}
+  <nav class="comandos-navegacao-blocos" aria-label="Percorrer blocos">
+    <div>{% if anterior %}<a class="botao-link-secundario" href="{{ anterior }}">Bloco anterior</a>{% endif %}</div>
+    <a href="{{ retorno }}">{{ rotulo_retorno }}</a>
+    <div>{% if proximo %}<a class="botao-link" href="{{ proximo }}">Próximo bloco</a>{% endif %}</div>
+  </nav>
+</section>
+{%- endmacro %}

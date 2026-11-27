@@ -5,7 +5,7 @@
 <p>Contexto: {{ contexto_nome }}</p>
 {% include '_situacao_forms34.html' %}
 {% from '_ato_forms34.html' import formulario %}
-{% if tarefa_atual %}
+{% if tarefa_atual and tarefa_atual.acao != 'concluir_avaliacao' %}
 {% set a = tarefa_atual %}
 {{ formulario(a,estado,registro,obj,matriz,valores_formulario if acao_erro==a.acao else valores_triagem if a.acao=='propor_triagem' else valores_comite if a.acao=='manifestar_comite' else a.valores,erros_campos if acao_erro==a.acao else {},true) }}
 {% endif %}
@@ -57,8 +57,6 @@
 {% if manifestacoes and ((ref.form==3 and bloco==14) or (ref.form==4 and bloco==8)) %}<section id="manifestacoes34"><h2>Manifestações e decisões registradas</h2>{% for m in manifestacoes %}<article class="leitura-ato34"><h3>{{ m.nome }} — {{ m.quando }}</h3><p>{{ m.autor|identidade_demonstrativa }}</p><dl>{% for nome,valor in m.linhas %}<dt>{{ nome }}</dt><dd>{{ valor }}</dd>{% endfor %}</dl></article>{% endfor %}</section>{% endif %}
 {% if ato_principal %}{{ formulario(ato_principal,estado,registro,obj,matriz,valores_formulario if acao_erro==ato_principal.acao else valores_triagem if ato_principal.acao=='propor_triagem' else valores_comite if ato_principal.acao=='manifestar_comite' else ato_principal.valores,erros_campos if acao_erro==ato_principal.acao else {},not ato_proposta) }}{% endif %}
 {% if outros_atos %}<details class="outros-atos34" {% if acao_erro %}open{% endif %}><summary>Outras ações disponíveis para seu papel</summary>{% for a in outros_atos %}{{ formulario(a,estado,registro,obj,matriz,valores_formulario if acao_erro==a.acao else valores_triagem if a.acao=='propor_triagem' else valores_comite if a.acao=='manifestar_comite' else a.valores,erros_campos if acao_erro==a.acao else {},false) }}{% endfor %}</details>{% endif %}
-<nav class="acoes-fila-form2"><a href="/forms34?conta_id={{ conta_id|urlencode }}">Voltar a Riscos e providências</a>{% if bloco>1 %}<a href="{{ bloco-1 }}?conta_id={{ conta_id|urlencode }}">Bloco anterior</a>{% endif %}{% if bloco<grade|length %}<a href="{{ bloco+1 }}?conta_id={{ conta_id|urlencode }}">Próximo bloco</a>{% endif %}</nav>
-<section class="grade-form2 grade-form2-compacta"><nav class="regua-navegacao-blocos" aria-label="Blocos do FORM {{ ref.form }}"><ol class="mapa-blocos-form1 regua-form2 regua-com-titulos-form2">{% for g in grade_visual %}{{ cartao(g.numero,g.titulo,g.texto,g.href,g.atual,g.respondidas>0,false,false,false,g) }}{% endfor %}</ol></nav></section>
 {% if ref.form==3 and bloco in [3,15] and alto_risco_referencia %}<p class="aviso-alerta">Possível alto risco, pelos critérios de referência da ANPD (Resolução CD/ANPD nº 2/2022, art. 4º).</p>{% endif %}
 {% if ref.form==3 and bloco==3 and estado.respostas.get('F3-3.6')=='Alto' %}<p class="aviso-alerta">Volume alto: confira se cabe marcar Larga escala.</p>{% endif %}
 {% if ref.form==3 and bloco in [13,16] %}{% include '_lacunas_form3.html' %}{% endif %}
@@ -70,6 +68,12 @@
 {% if estado.aprendizagem_autorizada %}<a href="/forms34/{{ obj.id }}/aprendizagem?conta_id={{ conta_id|urlencode }}">Consultar versão autorizada da aprendizagem</a>{% endif %}
 <p class="selo-d11">Em deliberação: regras propostas, sem homologação.</p><details id="historico34"><summary>Histórico de registros e salvamentos</summary>
 <form method="get"><input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="filtrar" value="1"><label><input type="checkbox" name="historico" value="atos" {{ 'checked' if so_atos else '' }} data-filtro-historico> Mostrar só atos</label><noscript><button>Aplicar filtro do histórico</button></noscript></form>
-<ul>{% for h in historico_visual %}<li data-historico-ato="{{ 'sim' if h.ato else 'nao' }}" {% if so_atos and not h.ato %}hidden{% endif %}><strong>{{ h.nome }}</strong> · {{ h.quando }} · {{ h.autor|identidade_demonstrativa }}{% if h.linhas %}<details><summary>Ver texto</summary><dl>{% for nome,valor in h.linhas %}<dt>{{ nome }}</dt><dd>{{ valor }}</dd>{% endfor %}</dl></details>{% endif %}</li>{% endfor %}</ul></details></div>
+<ul>{% for h in historico_visual %}<li data-historico-ato="{{ 'sim' if h.ato else 'nao' }}" {% if so_atos and not h.ato %}hidden{% endif %}><strong>{{ h.nome }}</strong> · {{ h.quando }} · {{ h.autor|identidade_demonstrativa }}{% if h.linhas %}<details><summary>Ver texto</summary><dl>{% for nome,valor in h.linhas %}<dt>{{ nome }}</dt><dd>{{ valor }}</dd>{% endfor %}</dl></details>{% endif %}</li>{% endfor %}</ul></details>
+{% if tarefa_atual and tarefa_atual.acao == 'concluir_avaliacao' %}{{ formulario(tarefa_atual,estado,registro,obj,matriz,{},erros_campos if acao_erro==tarefa_atual.acao else {},true) }}{% endif %}
+{% from '_navegacao_blocos.html' import navegacao %}
+{% set conta_query = '?conta_id=' ~ (conta_id|urlencode) %}
+{% call navegacao((bloco-1) ~ conta_query if bloco>1 else none, (bloco+1) ~ conta_query if bloco<grade|length else none, '/forms34' ~ conta_query, 'Voltar a Riscos e providências') %}
+<section class="grade-form2 grade-form2-compacta"><nav class="regua-navegacao-blocos" aria-label="Blocos do FORM {{ ref.form }}"><ol class="mapa-blocos-form1 regua-form2 regua-com-titulos-form2">{% for g in grade_visual %}{{ cartao(g.numero,g.titulo,g.texto,g.href,g.atual,g.respondidas>0,false,false,false,g) }}{% endfor %}</ol></nav></section>
+{% endcall %}</div>
 <dialog id="sair34"><h2>Há alterações não salvas</h2><div class="acoes-fila-form2"><button type="button" data-voltar34>Voltar ao bloco</button><button type="button" data-sair34>Sair sem salvar</button><button type="button" class="botao-primario" data-salvar34>Salvar e continuar</button></div></dialog>
 <script src="{{ url_for('estaticos',path='/forms34.js') }}?v=20261120-12f" defer></script><script src="{{ url_for('estaticos',path='/avaliacao34.js') }}?v=20261120-12f" defer></script><script src="/estaticos/outro.js" defer></script>{% endblock %}

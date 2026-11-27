@@ -1,0 +1,14 @@
+<section id="conclusao-form2">
+<h2>Concluir a análise</h2>
+<p>Proposta em deliberação. A conclusão desta etapa não equivale a homologação jurídica.</p>
+<form method="post" action="/form2/participacoes/{{ p.id }}">
+<input type="hidden" name="conta_id" value="{{ conta_id }}">
+<input type="hidden" name="comando_id" value="{{ (comando_id ~ 'conclusao')|chave_comando }}">
+<input type="hidden" name="versao" value="{{ p.versao }}">
+<input type="hidden" name="acao" value="concluir">
+<p>O resultado será o que foi salvo na <a href="{{ base_r17 }}/14?conta_id={{ conta_id|urlencode }}#F2-14.1">F2-14.1</a>.</p>
+{% if conferencia_r17.grupos %}<p>Faltam {{ conferencia_r17.grupos|length }} blocos obrigatórios:</p>
+<ul>{% for g in conferencia_r17.grupos %}<li><a href="{{ base_r17 }}/{{ g.bloco }}?conta_id={{ conta_id|urlencode }}">Bloco {{ g.bloco }} — {{ g.quantidade }} perguntas sem resposta</a></li>{% endfor %}</ul>{% endif %}
+<button class="botao-primario" data-confirmar-ato="Concluir a análise de {{ registro.codigo_lgpd }}, {{ rotulo_origem }}? Os destinos indicados na F2-14.5 e F2-14.6 serão aplicados nesta conclusão.">Concluir a análise e aplicar os destinos indicados</button>
+</form>
+</section>

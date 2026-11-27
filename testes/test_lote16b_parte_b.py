@@ -34,3 +34,14 @@ def test_b_telas_nao_mostram_asteriscos(sessao,entrada):
     resposta=cliente.get(f'/forms34/{obj}/blocos/1?conta_id=CONTA-B1')
     assert resposta.status_code==200
     assert '**** Preenchido' not in resposta.text and '* Obrigatório' not in resposta.text
+
+
+def test_g4_navegacao_unica_depois_das_perguntas_e_lacunas(sessao, entrada):
+    cliente = ClienteAposApresentacao(app)
+    form2 = cliente.get(f'/form2/participacoes/{entrada.id}/blocos/14?conta_id=CONTA-B1')
+    risco = entrar(sessao, entrada, 3)
+    form3 = cliente.get(f'/forms34/{risco}/blocos/13?conta_id=CONTA-B1')
+    for resposta, conteudo in ((form2, 'Salvar bloco 14'), (form3, 'Lacunas encontradas e verificações')):
+        assert resposta.status_code == 200
+        assert resposta.text.count('class="moldura-navegacao-blocos"') == 1
+        assert resposta.text.index(conteudo) < resposta.text.index('class="moldura-navegacao-blocos"')

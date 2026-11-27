@@ -158,7 +158,7 @@
           {% if instrumento == 'form2' %}
           <a class="botao-link-secundario" href="{{ url_registro }}#instrumentos-registro">Consultar detalhes e instrumentos do Registro</a>
           {% else %}
-          <a class="{{ 'botao-link' if not instrumento and not tarefas and not retomar else 'botao-link-secundario' }}" aria-label="Ver detalhes do Registro {{ registro.codigo_lgpd }}" aria-describedby="ajuda-detalhes-{{ registro.id }}" href="{{ url_registro }}#inicio-registro">Ver detalhes do Registro</a>
+          <a class="{{ 'botao-link' if not instrumento and not tarefas and not retomar else 'botao-link-secundario' }}" aria-label="Ver detalhes do Registro {{ registro.codigo_lgpd }}" aria-describedby="ajuda-detalhes-{{ registro.id }}" href="{{ url_registro }}">Ver detalhes do Registro</a>
           <p class="ajuda" id="ajuda-detalhes-{{ registro.id }}">Consulte a identificação, os responsáveis e a situação geral deste Registro.</p>
           <a class="botao-link-secundario" href="{{ url_registro }}#instrumentos-registro" aria-label="Consultar instrumentos do Registro {{ registro.codigo_lgpd }}" aria-describedby="ajuda-instrumentos-{{ registro.id }}">Instrumentos deste Registro</a>
           <p class="ajuda" id="ajuda-instrumentos-{{ registro.id }}">Veja os quatro FORMs e quais estão disponíveis para seu perfil.</p>
