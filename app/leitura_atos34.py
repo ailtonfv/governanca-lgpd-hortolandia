@@ -8,9 +8,9 @@ RESULTADOS = {'elaborar':'Elaborar RIPD', 'revisar':'Revisar RIPD',
 NOMES = {
     'destinar_lacuna':'Destino e prioridade da lacuna registrados', 'origem_lacuna':'Origem da providência vinculada à lacuna',
     'propor_residual_acao':'Nota residual posterior proposta', 'confirmar_residual_acao':'Nota residual posterior confirmada',
-    'decidir_residual_acao':'Tratamento do risco residual após a ação decidido',
-    'aceitar_residual_acao':'Risco residual após a ação aceito',
-    'reavaliacao_solicitada':'Reavaliação solicitada após a ação', 'providencia_pos_acao':'Nova providência após a ação',
+    'decidir_residual_acao':'Tratamento do risco residual após a providência decidido',
+    'aceitar_residual_acao':'Risco residual após a providência aceito',
+    'reavaliacao_solicitada':'Reavaliação solicitada após a providência', 'providencia_pos_acao':'Nova providência após a providência',
     'salvar_temas':'Temas salvos', 'solicitar_tema':'Pedido de novo tema registrado',
     'informar_ripd':'Referência do RIPD informada', 'propor_avaliacao':'Proposta de avaliação registrada', 'revisar_avaliacao':'Nova proposta de avaliação registrada',
     'confirmar_avaliacao':'Nota conjunta confirmada', 'propor_triagem':'Proposta de triagem registrada',
@@ -90,7 +90,7 @@ def conteudo_ato(acao,e,autores,unidades):
     if acao in ('propor_residual_acao','confirmar_residual_acao','decidir_residual_acao','aceitar_residual_acao'):
         nota=e.get('residual_acao') or {}
         d=e.get('aceitacao_residual_acao' if acao=='aceitar_residual_acao' else 'decisao_residual_acao',{})
-        linhas=[('Nota residual após a ação', f"{nota.get('probabilidade')} × {nota.get('impacto')} = {nota.get('nota')} — {nota.get('faixa')}"),('Justificativa',d.get('justificativa',nota.get('justificativa','')))]
+        linhas=[('Nota residual após a providência', f"{nota.get('probabilidade')} × {nota.get('impacto')} = {nota.get('nota')} — {nota.get('faixa')}"),('Justificativa',d.get('justificativa',nota.get('justificativa','')))]
         if d.get('opcao'):linhas.append(('Decisão',{'reavaliar':'Reavaliar o risco','nova_providencia':'Nova providência','aceitar':'Aceitar o residual'}.get(d['opcao'],d['opcao'])))
         if d.get('documento'):linhas.append(('Documento formal',d['documento']))
         return linhas
@@ -122,7 +122,7 @@ def historico_visual(eventos, autores, unidades, mapa_blocos, identidade=None, r
             if e.get('form') == 3:
                 nome=f'Risco recebido no FORM 3, encaminhado pelo FORM 2 (versão {referencia.fonte_versao})'
             else:
-                nome=f'Ação recebida no FORM 4, encaminhada pelo FORM {referencia.fonte_form}'
+                nome=f'Providência recebida no FORM 4, encaminhada pelo FORM {referencia.fonte_form}'
         if acao=='salvar_bloco':
             respostas=e.get('respostas',{});ant=anterior.get('respostas',{})
             blocos=sorted({mapa_blocos[k] for k in respostas if respostas[k]!=ant.get(k) and k in mapa_blocos})

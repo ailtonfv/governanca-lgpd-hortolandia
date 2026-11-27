@@ -34,6 +34,8 @@ def titulo_bloco(texto, form=None, numero=None):
         return 'Terceiros, PPPs, concessões e dependência do fornecedor'
     import re
     titulo=texto[:1].upper()+texto[1:].lower()
+    if form == 4:
+        titulo = titulo.replace('Identificação da ação', 'Identificação da providência')
     return re.sub(r'\b(ripd|lgpd|dpo|anpd|form|ppps)\b',lambda m:'PPPs' if m[0].lower()=='ppps' else m[0].upper(),titulo,flags=re.I)
 
 def grade_visual(grade,obj,conta,bloco,estado=None):

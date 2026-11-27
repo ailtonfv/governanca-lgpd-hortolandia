@@ -100,7 +100,7 @@ def test_encaminhamento_em_destaque_e_origem_congelada(sessao,entrada):
     assert 'value="encaminhar_acao"' in tela
     acao=ato(sessao,obj,'encaminhar_acao',justificativa='Fictícia')['identidade_id']
     origem = html(acao,1)
-    assert 'Evento fictício' in origem and 'R01' in origem and 'Crítico (25)' in origem
+    assert 'Risco 1: Evento fictício' in origem and 'Crítico (25)' in origem
     assert f'/forms34/{obj}/blocos/16?conta_id=CONTA-B1' in origem
 
 def test_avisos_historico_datas_e_sem_native():

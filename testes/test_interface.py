@@ -261,7 +261,7 @@ def test_g1_pela_tela_cria_registro_contextualizado_e_form1_nao_iniciado():
 
     assert resposta.status_code == 200
     assert "Registro criado. Agora confirme quem será o responsável pelo preenchimento" in resposta.text
-    assert "ciclo 1" in resposta.text
+    assert 'class="etiqueta">Ciclo 1</p>' in resposta.text
     assert "Certidão de débitos" in resposta.text
     assert "Planejamento Urbano e Gestão Estratégica" in resposta.text
     assert "CTX-TRIB-03" in resposta.text

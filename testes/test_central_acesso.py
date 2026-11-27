@@ -82,7 +82,7 @@ def test_cartoes_explicam_disponibilidade_sem_oferecer_acesso_direto():
     for numero, cartao in enumerate(cartoes[:4], 1):
         assert f'FORM {numero}' in cartao
         assert 'Seus itens em andamento' in cartao
-        assert 'Nenhuma providência sua neste FORM.' in cartao
+        assert 'Você não tem providências agora.' in cartao
         assert 'Em acompanhamento (0)' in cartao
         assert 'Disponível na demonstração, conforme as permissões do seu perfil.' not in cartao
         assert (f'>Acessar FORM {numero}</a>' if numero <= 2 else '>Abrir Riscos e providências</a>') in cartao

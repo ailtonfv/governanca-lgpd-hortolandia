@@ -190,7 +190,7 @@ def risco(d):
     for i in d['objetos']:
         p=decisao_posterior(i['estado']) if i['obj'].tipo=='A' else None
         if p:posteriores.append({**linha(d,i['obj'].registro_id,i),'residual':p['nota'],'situacao':p['decisao']})
-    quadros.append(quadro('decisoes_pos_acao','Depois da ação',posteriores,'ações',regra='Somente nota posterior confirmada pela Secretaria e pelo DPO; a decisão anterior não é reaproveitada.'))
+    quadros.append(quadro('decisoes_pos_acao','Depois da providência',posteriores,'providências',regra='Somente nota posterior confirmada pela Secretaria e pelo DPO; a decisão anterior não é reaproveitada.'))
     return quadros
 
 
@@ -238,8 +238,8 @@ def atencao(d, agora):
                 linhas['planos'].append({**l,'desde':m,'dias':dias(m,agora)})
     titulos={'criticos':'Riscos Críticos aguardando decisão do Prefeito','ciencias':'Segundas prorrogações: ciência registrada no sistema',
              'consenso':'Avaliações sem consenso aguardando o Comitê','instrucao':'Em instrução (DPO/Comitê)','planos':'Planos aguardando aprovação',
-             'condicoes':'Aceitações condicionadas com condição em aberto','residuais_pos':'Riscos residuais Altos ou Críticos sem decisão após a ação','ripd_pendente':'RIPD indicado e não informado'}
-    return [quadro(k,titulos[k],v,'ações' if k in ('ciencias','planos','residuais_pos') else 'riscos','Eventos da rodada atual',
+             'condicoes':'Aceitações condicionadas com condição em aberto','residuais_pos':'Riscos residuais Altos ou Críticos sem decisão após a providência','ripd_pendente':'RIPD indicado e não informado'}
+    return [quadro(k,titulos[k],v,'providências' if k in ('ciencias','planos','residuais_pos') else 'riscos','Eventos da rodada atual',
                    'Ciência automática é informação, não pendência nem espera.' if k=='ciencias' else 'Somente fatos registrados.',
                    'Comitê' if k=='consenso' else 'Gabinete') for k,v in linhas.items() if k!='planos' or v]
 
@@ -278,7 +278,7 @@ def correcao(d, agora):
         linhas.append(l)
     return [quadro('acoes','Providências acompanhadas',linhas,'providências','Eventos de plano, execução e verificação','Situações exclusivas; atraso é uma marca.'),
             quadro('atrasadas','Providências atrasadas',[l for l in linhas if l['atrasada']],'providências','Prazo vigente','Prazo anterior a hoje, sem verificação aprovada nem cancelamento.'),
-            *[quadro('acao_'+str(n),t,[l for l in linhas if l['situacao']==t],'ações') for n,t in enumerate(F4)],
+            *[quadro('acao_'+str(n),t,[l for l in linhas if l['situacao']==t],'providências') for n,t in enumerate(F4)],
             indisponivel('incidentes','Incidentes','O painel ainda não recebe os registros de incidentes (previsto para depois de 15/12).')]
 
 

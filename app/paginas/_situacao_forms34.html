@@ -3,6 +3,6 @@
 <p>{% if estado.conclusao %}Avaliação concluída em {{ estado.conclusao.em|hora_local }} por {{ autores.get(estado.conclusao.pessoa_id,'Autor registrado')|identidade_demonstrativa }}.{% else %}{{ acompanhamento.situacao }}{% set ultimo=historico_visual|selectattr('ato')|first %}{% if ultimo %} · por {{ ultimo.autor|identidade_demonstrativa }}{% endif %}.{% endif %}</p>
 <p>Você atua como: {{ papel_principal34 }}.</p>
 {% if acompanhamento.pendente %}<p><strong>{{ 'Próximo passo:' if acompanhamento.ato == 'propor_residual_acao' else 'Sua tarefa agora:' }}</strong> {{ acompanhamento.pendencia }}{% if acompanhamento.ato == 'propor_residual_acao' %} (bloco 8){% endif %}.{% if acompanhamento.bloco != bloco %} <a href="/forms34/{{ obj.id }}/blocos/{{ acompanhamento.bloco }}?conta_id={{ conta_id|urlencode }}">Ir ao bloco {{ acompanhamento.bloco }}</a>{% endif %}</p>
-{% else %}<p>Nada a fazer por você agora.</p>{% endif %}
+{% else %}<p>Você não tem providências agora.</p>{% endif %}
 {% if bloqueio_edicao %}<p>{{ bloqueio_edicao }}</p>{% endif %}
 </section>

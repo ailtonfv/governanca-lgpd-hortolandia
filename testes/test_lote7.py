@@ -42,7 +42,7 @@ def test_p103_p105_p106_telas(principal):
     central = cliente.get("/central?conta_id=CONTA-B1")
     assert 'class="central-cabecalho"' not in central.text
     tela = cliente.get(f"/form2/participacoes/{principal.id}?conta_id=CONTA-B1")
-    assert 'class="central-cabecalho"' in tela.text
+    assert 'class="central-sessao"' in tela.text
     assert 'data-area-tematica hidden' in tela.text
     assert 'data-destino-fixo data-dpo=' in tela.text
     dpo = cliente.get(f"/form2/participacoes/{principal.id}/orientacao?conta_id=CONTA-E1")

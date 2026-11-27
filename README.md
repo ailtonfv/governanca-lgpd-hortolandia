@@ -12,6 +12,8 @@ Para o título das providências, a lista e a Central usam a resposta da F4-4.3,
 
 Os grupos G1 a G8 ficam nesta branch para vistoria futura. A porta 8020 segue vinculada ao Lote 16.
 
+**Verificação do Lote 17.** Bateria integral única com 1.337 casos identificáveis no XML do pytest. Na primeira passagem, 1.283 aprovações, 53 falhas e um caso ignorado. Cinco divergências em relação à base do Lote 16 tiveram reteste aprovado. O resultado consolidado é de 1.288 aprovações, as mesmas 48 falhas antigas e um caso ignorado. A justificativa da triagem voltou a ficar antes do botão de confirmação. A validação responsiva em tela continua pendente.
+
 **Lote 16-B — fechamento em 27/11/2026, branch `lote-16-pente-fino`:** A8, A9, A3 e A7 já entregues; esta rodada completa A11.3–7, A4 restante, A6 e A12, com ressalvas, e aplica parte dos ajustes editoriais da Parte B. O controlador é fixo; o encerramento justificado mantém instrumentos somente para leitura; os destinos do FORM 2 produzem efeito apenas na conclusão da análise. Sem merge no `main`.
 
 Verificação: uma bateria integral de 1.331 casos, seguida de retestes direcionados e um teste adicional. Consolidado de **1.332 casos: 1.283 aprovados, as mesmas 48 falhas antigas e um ignorado**, sem falhas novas remanescentes. São 16 testes novos nesta rodada. Não representa segunda execução integral nem aceite visual.

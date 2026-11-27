@@ -91,7 +91,7 @@ def test_navegacao_e_tipo_no_cartao(sessao,entrada):
     c=TestClient(app)
     r=c.get(f'/form2/participacoes/{entrada.id}/blocos/14?conta_id=CONTA-B1');assert r.status_code==200
     assert 'Voltar ao resumo do FORM 2' in r.text
-    assert 'navegacao-form2' in r.text
+    assert 'class="moldura-navegacao-blocos"' in r.text
     evidencia('form2_bloco14',r.text)
     fila=c.get('/form2/filas?conta_id=CONTA-B1');assert fila.status_code==200
     from app.modelos import Registro

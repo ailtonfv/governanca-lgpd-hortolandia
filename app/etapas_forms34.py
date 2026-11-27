@@ -51,7 +51,7 @@ def situacao_aprendizagem(e):
     if not e.get('verificada'):
         return 'Aguardando verificação' if not e.get('verificacao') else 'Requer ajuste na execução'
     from app.encerramento_form4 import pode_encerrar
-    if not pode_encerrar(e):return 'Aguardando decisão sobre o risco residual após a ação'
+    if not pode_encerrar(e):return 'Aguardando decisão sobre o risco residual após a providência'
     if not e.get('aprendizagem'):
         return 'Aprendizagem não registrada'
     if e.get('aprendizagem_devolvida'):

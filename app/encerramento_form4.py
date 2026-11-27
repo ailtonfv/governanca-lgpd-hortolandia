@@ -26,5 +26,5 @@ def pode_encerrar(e):
 
 def aviso_anterior(e):
     if e.get('encerrada') and not reducao_total(e) and not e.get('decisao_residual_acao'):
-        return 'Esta ação foi encerrada por uma regra anterior. O risco residual depois da ação ainda não tem decisão.'
+        return 'Esta providência foi encerrada por uma regra anterior. O risco residual depois da providência ainda não tem decisão.'
     return ''

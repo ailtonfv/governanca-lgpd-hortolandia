@@ -214,6 +214,8 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
                 a['resumo']=f"{rotulo}: confirmar a triagem proposta por {proposta_tr['lado']} — "+RESULTADOS.get(e['triagem']['resultado'],'')
             from app.apresentacao_atos34 import conteudo_decisao
             a['leitura']=conteudo_decisao(a['acao'],e,autores,unidades_nomes)
+            if a['acao'] == 'confirmar_triagem' and proposta_tr:
+                a['leitura'] = [('Proposta de', proposta_tr['autor']), *proposta_tr['linhas']]
             if a['acao']=='manifestar_comite':
                 for campo,quadro in (('avaliacao',proposta_reavaliacao or proposta_av),('triagem',proposta_tr)):
                     alvo=e.get('reavaliacao',e) if campo=='avaliacao' else e
@@ -242,7 +244,7 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
         valores = {'F3-3.1':registro.codigo_lgpd,'F4-4.1':registro.codigo_lgpd,
                    'F3-3.53': 'Sim' if alto_risco_referencia(e['respostas']) else 'Não' if e['respostas'].get('F3-3.10') and e['respostas']['F3-3.10']!=['A confirmar'] else 'A confirmar',
                    'F3-3.59':'Providência encaminhada por lacuna' if e.get('encaminhamentos_lacunas') else 'Defina o destino e a prioridade na lista de lacunas deste bloco.',
-                   'F4-4.1.1':obj.codigo,'F3-3.2':s.get(Unidade,uid).nome,
+                   'F4-4.1.1':rotulo,'F3-3.2':s.get(Unidade,uid).nome,
                    'F3-3.3':{'em_atendimento':'Em atendimento','aguardando':'Aguardando responsável','concluida':'Análise concluída'}.get(e.get('situacao_form2'),'Situação preservada na origem'),
                    'F4-4.15':e['situacao'],'F4-4.10':data_br(e.get('prazo')),
                    'F4-4.23':(e.get('residual_acao') or {}).get('faixa','Ainda não avaliado') if set(e.get('residual_acao_confirmacoes',{}))=={'secretaria','dpo'} else 'Aguardando nota residual conjunta',

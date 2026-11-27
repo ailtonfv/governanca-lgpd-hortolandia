@@ -56,7 +56,8 @@ def test_execucao_aguarda_verificador_nao_secretaria(sessao, entrada):
     assert not item(sessao, 'CONTA-B1', 4, obj)['pendente']
     assert item(sessao, VERIFICADOR, 4, obj)['ato'] == 'verificar'
     pagina = TestClient(app).get('/forms34', params={'conta_id':'CONTA-B1'})
-    assert pagina.status_code == 200 and 'Em acompanhamento (1)' in pagina.text
+    assert pagina.status_code == 200 and '<h2>Em andamento</h2>' in pagina.text
+    assert f'/forms34/{obj}/blocos/' in pagina.text
 
 
 @pytest.mark.parametrize('conta', ['CONTA-B1','CONTA-A1','CONTA-E1',VERIFICADOR,'CONTA-DEMO34-GAB'])
