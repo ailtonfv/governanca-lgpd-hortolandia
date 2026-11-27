@@ -8,9 +8,7 @@
 <p><strong>{{ registro.codigo_lgpd }}</strong> · <strong>Servidor em sessão:</strong> {{ identificacao_servidor(identidade) }}</p>
 <div class="acoes-fila-form2"><a class="botao-link-secundario" href="/registros/{{ registro.id }}?conta_id={{ conta_id|urlencode }}#titulo-form1-integral">Ver situação e conferência</a></div>
 {% if bloco == 2 and pode_definir_retorno %}<p><a href="/registros/{{ registro.id }}/unidade-retorno?conta_id={{ conta_id|urlencode }}">Defina para qual unidade voltam as respostas de Ouvidoria e e-SIC deste Registro.</a></p>{% endif %}
-{% if topico_bloco and consulta_cartilha_local(request) %}
-<div class="acoes-fila-form2"><a href="{{ url_for('consultar_cartilha_secao', registro_id=registro.id, edicao=edicao_cartilha, secao_id=topico_bloco.id) }}?conta_id={{ conta_id|urlencode }}" target="_blank" rel="noopener noreferrer">Na Cartilha: {{ topico_bloco.titulo }} (abre em outra aba)</a></div>
-{% endif %}
+{% include '_links_cartilha.html' %}
 {% if devolucao and not conferencia and (pode or e_apa) %}
 <section class="aviso-conferencia-apa"><strong>Devolvido para ajustes pelo APA</strong><p>Justificativa: {{ devolucao.justificativa }}</p></section>
 {% endif %}

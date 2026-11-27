@@ -4,20 +4,27 @@ from html import unescape
 from pathlib import Path
 import pytest
 from testes.test_lote15b import abrir
-from testes.test_cartilha_local_form1 import documento_local
+from testes.test_cartilha_local_form1 import documento_integrado, documento_local
 from testes.test_lote11 import fonte
 from testes.apoio_entrada import ClienteAposApresentacao as TestClient
 from app.main import app
 
 
-def test_c217_cartilha_presente_nos_14_blocos(sessao,documento_local):
+def test_c217_cartilha_presente_nos_14_blocos(sessao,documento_integrado):
+    from app.mapa_cartilha import FORM1_BLOCOS
+
     reg,c,url=abrir(sessao)
     for bloco in range(1,15):
         html=c.get(url+f'?conta_id=CONTA-G1&bloco={bloco}').text
         link=re.search(r'<a[^>]+href="([^"]*/cartilha/[^"]+)"[^>]*>Na Cartilha:',html)
         assert link,bloco
         assert '(abre em outra aba)' in html
-        assert c.get(unescape(link[1])).status_code==200
+        destino = unescape(link[1])
+        chave = FORM1_BLOCOS[bloco][0]
+        assert f'/cartilha/REV30.24/{chave}?' in destino
+        pagina = c.get(destino)
+        assert pagina.status_code==200
+        assert f'Orientação fictícia de {chave}.' in pagina.text
 
 
 def test_c217_montagem_recusa_documento_ausente_e_confere_copia(tmp_path,documento_local,monkeypatch):

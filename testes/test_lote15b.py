@@ -10,7 +10,7 @@ from app.modelos import RascunhoForm1Integral
 from app.rev22_form1 import definicoes, contagem_blocos
 from app.consultas_interface import carregar_registro
 from testes.test_conferencia_interna_form1_integral_8ac import _preparar
-from testes.test_cartilha_local_form1 import documento_local
+from testes.test_cartilha_local_form1 import documento_integrado, documento_local
 
 
 def abrir(sessao):
@@ -94,7 +94,7 @@ def test_c171_c172_instrumentos_sem_instancia_nao_abrem_fila(sessao):
         assert f'O FORM {numero} começa' in card
 
 
-def test_c180_c182_c185_cartilha_em_todos_blocos_isolada(sessao,documento_local):
+def test_c180_c182_c185_cartilha_em_todos_blocos_isolada(sessao,documento_integrado):
     reg,c,url=abrir(sessao)
     for bloco in range(1,15):
         html=c.get(url+f'?conta_id=CONTA-G1&bloco={bloco}').text

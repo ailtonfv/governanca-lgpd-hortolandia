@@ -1,0 +1,3 @@
+{% for link in links_cartilha %}
+<p class="referencia-cartilha-form1"><a data-cartilha-chave="{{ link.chave }}" href="{{ link.url }}" target="_blank" rel="noopener noreferrer">{{ link.rotulo }} <span>(abre em outra aba)</span></a></p>
+{% endfor %}

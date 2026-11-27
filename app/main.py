@@ -532,14 +532,25 @@ def consultar_cartilha_secao(
     identidade, registro = carregar_registro(sessao, conta_id, registro_id)
     if not identidade or not registro:
         raise HTTPException(403, "Consulta não disponível para este Registro e agente.", headers=cabecalhos)
-    secoes = secoes_cartilha_disponiveis() if edicao == VERSAO_CARTILHA_AJUDAS_FORM1 else {}
-    if secao_id not in secoes:
-        raise HTTPException(404, "Seção indisponível. Volte à aba do FORM 1.", headers=cabecalhos)
+    from app.cartilha_local import EDICAO_INTEGRADA
     from app.ajudas_cartilha_form1 import titulo_topico
+    from app.cartilha_topicos import catalogo_topicos, destinos_integrados
+
+    if edicao == EDICAO_INTEGRADA:
+        topicos = catalogo_topicos()
+        conteudo = destinos_integrados(topicos).get(secao_id)
+        titulo = topicos[secao_id]["nome"] if conteudo else None
+    elif edicao == VERSAO_CARTILHA_AJUDAS_FORM1:
+        conteudo = secoes_cartilha_disponiveis().get(secao_id)
+        titulo = titulo_topico(secao_id) if conteudo else None
+    else:
+        conteudo = None
+    if not conteudo:
+        raise HTTPException(404, "Seção indisponível. Volte à aba do FORM 1.", headers=cabecalhos)
     return paginas.TemplateResponse(
         request=request, name="cartilha_secao.html",
-        context={"titulo_secao": titulo_topico(secao_id), "edicao": edicao, "pagina_isolada": True,
-                 "conteudo_secao": secoes[secao_id]}, headers=cabecalhos,
+        context={"titulo_secao": titulo, "edicao": edicao, "pagina_isolada": True,
+                 "conteudo_secao": conteudo}, headers=cabecalhos,
     )
 
 

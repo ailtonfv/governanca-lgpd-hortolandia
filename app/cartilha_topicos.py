@@ -36,3 +36,19 @@ def catalogo_topicos():
 def destinos_integrados(topicos):
     ancoras = {t["ancora"]: chave for chave, t in topicos.items() if not t.get("retirado")}
     return secoes_cartilha_integrada(ancoras) if ancoras else {}
+
+
+def links_topicos(request, conta_id, chaves, registro_id):
+    from app.cartilha_local import acesso_local_cartilha
+
+    if not chaves or not acesso_local_cartilha(request):
+        return []
+    topicos = catalogo_topicos()
+    destinos = destinos_integrados(topicos)
+    return [
+        {"chave": chave, "rotulo": "Na Cartilha: " + topicos[chave]["nome"],
+         "url": request.url_for("consultar_cartilha_secao", registro_id=registro_id,
+                                edicao=EDICAO_INTEGRADA, secao_id=chave
+                               ).include_query_params(conta_id=conta_id)}
+        for chave in dict.fromkeys(chaves) if chave in destinos
+    ]

@@ -13,8 +13,6 @@ from app.modelos import ParticipacaoForm2,ObjetoCatalogo,RegistroObjeto,Registro
 from app.consultas_interface import _identidade, _ids_visiveis
 from app.rascunho_form1_integral import _contexto_autorizado
 from app.rev22_form1 import definicoes, ativa, adotar, salvar, orientacao_sem_marcadores
-from app.cartilha_local import acesso_local_cartilha, secoes_cartilha_disponiveis
-from app.ajudas_cartilha_form1 import VERSAO_CARTILHA_AJUDAS_FORM1
 
 router=APIRouter()
 paginas=Jinja2Templates(directory=Path(__file__).parent/'paginas')
@@ -23,7 +21,6 @@ configurar_identidade(paginas)
 from app.apresentacao_form2 import data_local
 paginas.env.filters['data_local']=data_local
 from app.atividade_form1 import atividade_form1, aviso_apresentacao
-paginas.env.globals['consulta_cartilha_local'] = acesso_local_cartilha
 def sessao_rev22():
     with Session(motor) as s:yield s
 
@@ -74,6 +71,8 @@ def renderizar_bloco(request,registro_id,conta_id,bloco,conjunto,sessao,*,tentat
                 contexto[chave[2:]]=itens if defs[chave[2:]]['kind']=='multi' else (itens[0] if itens else '')
     from app.rev22_form1 import blocos_com_respostas, contagem_blocos, condicoes_tela, orientacao_condicional
     from app.ajudas_cartilha_form1 import ajudas_rev22
+    from app.cartilha_topicos import links_topicos
+    from app.mapa_cartilha import FORM1_BLOCOS, topicos_pergunta_form1
     from app.consultas_interface import _devolucao_para_interface
     respondidos = blocos_com_respostas(conteudo) if trabalho['iniciado'] else set()
     contagens=contagem_blocos(conteudo)
@@ -95,11 +94,15 @@ def renderizar_bloco(request,registro_id,conta_id,bloco,conjunto,sessao,*,tentat
         q['erro']=erro if erro and erro.startswith('F1-'+q['id']+':') else None
         q['ativa']=ativa(q['id'],contexto)
         q['orientacao_condicional']=orientacao_condicional(q['id'])
-        q.update(ajudas_rev22(q['id'],secoes_cartilha_disponiveis()))
+        q.update(ajudas_rev22(q['id'], ()))
+        ajuda = q['ajuda_cartilha'] or {}
+        q['cartilha_integrada'] = True
+        q['links_cartilha'] = links_topicos(
+            request, conta_id, topicos_pergunta_form1(q['id'], ajuda.get('secao_id')), registro_id,
+        )
     if historico:
         historico['perguntas']=[p for p in historico['perguntas'] if p['id'] in defs and defs[p['id']]['block']==bloco]
         historico['conteudo']={k:v for k,v in historico.get('conteudo',{}).items() if (k=='participantes' and bloco==3) or (k=='destinatarios_10_2_1' and bloco==10)}
-    from app.ajudas_cartilha_form1 import topico_do_bloco
     from app.rev22_form1 import grupos_condicionais, pendencias_automaticas
     return paginas.TemplateResponse(request=request,name='form1_rev22.html',status_code=status,context=dict(
         grupos_condicionais=grupos_condicionais(campos), pendencias_automaticas=pendencias_automaticas(conteudo) if bloco==14 else [],
@@ -108,12 +111,10 @@ def renderizar_bloco(request,registro_id,conta_id,bloco,conjunto,sessao,*,tentat
         nome_catalogo=(sessao.scalar(select(ObjetoCatalogo.nome_canonico).join(RegistroObjeto,RegistroObjeto.objeto_id==ObjetoCatalogo.id).where(RegistroObjeto.registro_id==registro_id,RegistroObjeto.papel=="PRINCIPAL",RegistroObjeto.ativo.is_(True))) or ""),
         erro_bloco=erro, conflito_versao=bool(erro and erro.startswith('Este bloco foi alterado em outra aba.')),
         versao_formulario=tentativa.get('versao',r.versao_rascunho) if tentativa is not None else r.versao_rascunho,
-        topico_bloco=topico_do_bloco(bloco,secoes_cartilha_disponiveis()),
+        links_cartilha=links_topicos(request, conta_id, FORM1_BLOCOS[bloco], registro_id),
         pode_definir_retorno=reg.unidade_principal_atual_id in unidades_em_que_e_apa_atual(sessao,identidade["pessoa_id"]),
         atualizada=atualizada, contagens=contagens, condicoes=condicoes_tela(), contexto_condicoes=contexto,
         retirada_antiga=bool(conteudo.get('revisao_22',{}).get('legado',{}).get('9.2.1')),
-        orientacao_levantamento=acesso_local_cartilha(request) and "levantamento" in secoes_cartilha_disponiveis(),
-        edicao_cartilha=VERSAO_CARTILHA_AJUDAS_FORM1,
         salvamento_confirmado=request.query_params.get("salvo") == str(r.versao_rascunho),
         e_apa=identidade["pessoa_id"] == conferente, falta_conferente=conferencia and not conferente,
         registro=reg,r=r,identidade=identidade,conta_id=conta_id,bloco=bloco,conjunto=conjunto,

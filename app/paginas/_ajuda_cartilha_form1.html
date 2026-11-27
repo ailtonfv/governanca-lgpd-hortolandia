@@ -1,4 +1,4 @@
-{% if campo.ajuda_cartilha or campo.ajuda_alternativas %}
+{% if campo.ajuda_cartilha or campo.ajuda_alternativas or campo.links_cartilha %}
 <details class="ajuda-cartilha-form1" id="ajuda-cartilha-{{ campo.id }}">
   <summary>Entenda esta pergunta</summary>
   <div class="conteudo-ajuda-cartilha-form1">
@@ -16,11 +16,19 @@
     {% if campo.ajuda_cartilha %}
     <p>{{ campo.ajuda_cartilha.texto }}</p>
     <p>{{ campo.ajuda_cartilha.limite }}</p>
+    {% if not campo.cartilha_integrada %}
     <p class="referencia-cartilha-form1"><strong>Na Cartilha:</strong> {{ campo.ajuda_cartilha.topico or campo.ajuda_cartilha.secao.split(" ", 1)[-1] }}</p>
     {% if campo.ajuda_cartilha.disponivel and consulta_cartilha_local(request) %}
     <p><a href="{{ url_for('consultar_cartilha_secao', registro_id=registro.id, edicao=campo.ajuda_cartilha.versao, secao_id=campo.ajuda_cartilha.secao_id) }}?conta_id={{ conta_id | urlencode }}" target="_blank" rel="noopener noreferrer">Consultar este item da Cartilha <span>(abre em outra aba)</span></a></p>
     {% else %}
     <p class="ajuda">Consulta da Cartilha indisponível neste ambiente. A referência acima permanece disponível; solicite a edição de referência ao responsável pela PoC.</p>
+    {% endif %}
+    {% endif %}
+    {% endif %}
+    {% if campo.cartilha_integrada %}
+    {% with links_cartilha=campo.links_cartilha %}{% include '_links_cartilha.html' %}{% endwith %}
+    {% if campo.ajuda_cartilha and not campo.links_cartilha %}
+    <p class="ajuda">Consulta da Cartilha indisponível neste ambiente.</p>
     {% endif %}
     {% endif %}
   </div>

@@ -1,6 +1,7 @@
 """Consulta editorial isolada: documento sintético, sem publicar a Cartilha interna."""
 from copy import deepcopy
 import hashlib
+import json
 from html import escape, unescape
 from io import BytesIO
 from zipfile import ZipFile
@@ -16,6 +17,34 @@ from testes.test_bloco5_form1_integral import _rascunho_pronto
 from testes.test_p1_usabilidade_form1 import Elementos
 
 cliente = TestClient(app, client=("127.0.0.1", 50123))
+
+
+@pytest.fixture
+def documento_integrado(tmp_path, monkeypatch):
+    from app import cartilha_topicos
+
+    caminho = tmp_path / "cartilha_integrada_ficticia.docx"
+    arquivo_topicos = tmp_path / "topicos_ficticios.json"
+    topicos = {chave: {"nome": f"Tópico fictício {chave}", "ancora": f"marcador_{chave[-2:]}"}
+               for chave in sorted(cartilha_topicos.CHAVES_CARTILHA)}
+    partes = []
+    for chave, topico in topicos.items():
+        numero = int(chave[-2:])
+        partes.append(
+            f'<w:p><w:pPr><w:pStyle w:val="Heading2"/></w:pPr>'
+            f'<w:bookmarkStart w:id="{numero}" w:name="{topico["ancora"]}"/>'
+            f'<w:r><w:t>{topico["nome"]}</w:t></w:r><w:bookmarkEnd w:id="{numero}"/></w:p>'
+            f'<w:p><w:r><w:t>Orientação fictícia de {chave}.</w:t></w:r></w:p>'
+        )
+    with ZipFile(caminho, "w") as doc:
+        doc.writestr("word/document.xml", f'<w:document xmlns:w="{cartilha_local.NS["w"]}">'
+                     f'<w:body>{"".join(partes)}</w:body></w:document>')
+        doc.writestr("word/_rels/document.xml.rels", '<Relationships/>')
+    arquivo_topicos.write_text(json.dumps({"edicao": cartilha_local.EDICAO_INTEGRADA, "topicos": topicos}), encoding="utf-8")
+    monkeypatch.setattr(cartilha_local, "CAMINHO_CARTILHA_INTEGRADA", caminho)
+    monkeypatch.setattr(cartilha_local, "SHA256_CARTILHA_INTEGRADA", hashlib.sha256(caminho.read_bytes()).hexdigest())
+    monkeypatch.setattr(cartilha_topicos, "CAMINHO_TOPICOS", arquivo_topicos)
+    return topicos
 
 
 @pytest.fixture
