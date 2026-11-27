@@ -257,6 +257,8 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
             situacao_form2=e.get('situacao_form2'),situacao='Em preenchimento',avaliacao=None,
             avaliacao_confirmacoes={},triagem=None,triagem_confirmacoes={},juridico='não solicitado',
             escopos_restritos=[],motivo=motivo)
+        from app.contexto_novo_risco import copiar
+        inicial.update(copiar(dict(e,versao=versao),obj.codigo.split('-')[-1]))
         _gravar_estado(sessao,cmd,novo,'ingresso',inicial)
         destino_id=novo.id
     elif acao == 'salvar_bloco':
@@ -268,7 +270,10 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         if bloqueio:
             raise ValueError(bloqueio)
         from app.questionario_forms34 import salvar
-        e['respostas'] = salvar(e['form'], e.get('respostas', {}), dados, e)
+        anteriores=e.get('respostas',{})
+        novas=salvar(e['form'], anteriores, dados, e)
+        e['contexto_copiado']={k:v for k,v in e.get('contexto_copiado',{}).items() if novas.get(k)==anteriores.get(k)}
+        e['respostas'] = novas
         if f3 and dados.get('bloco') == 13:
             from app.lacunas_form3 import salvar_controles
             salvar_controles(e, dados)
