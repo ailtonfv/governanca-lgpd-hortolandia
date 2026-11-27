@@ -174,10 +174,11 @@ async def revisao_form2(request: Request, registro_id: str, preparacao_id: str, 
             chave = nome.split(":", 1)[1]
             if ativa(chave.partition("#")[0], conjunto_da_chave(chave)):
                 pendencias.append(chave)
+    from app.cartilha_local import acesso_local_cartilha
     from app.cartilha_topicos import links_por_pergunta, links_topicos
     from app.consultas_interface import pode_consultar_registro
     from app.mapa_cartilha import FORM2_BLOCOS, FORM2_PERGUNTAS, GRADE_CARTILHA
-    cartilha_visivel = pode_consultar_registro(sessao, conta_id, registro_id)
+    cartilha_visivel = acesso_local_cartilha(request) and pode_consultar_registro(sessao, conta_id, registro_id)
     return paginas.TemplateResponse(request=request, name="form2_revisao.html", status_code=409 if erro else 200,
         headers={"Cache-Control": "private, no-store"},
         context={"secretarias_selecao": secretarias_ativas(sessao), "registro": dados["registro"], "prep": prep, "bloco": definicao, "valores": valores,

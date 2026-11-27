@@ -28,6 +28,7 @@
     {% if campo.cartilha_integrada %}
     {% with links_cartilha=campo.links_cartilha %}{% include '_links_cartilha.html' %}{% endwith %}
     {% if campo.ajuda_cartilha and not campo.links_cartilha %}
+    <p class="referencia-cartilha-form1"><strong>Na Cartilha:</strong> {{ campo.ajuda_cartilha.topico }}</p>
     <p class="ajuda">Consulta da Cartilha indisponível neste ambiente.</p>
     {% endif %}
     {% endif %}

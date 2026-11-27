@@ -27,7 +27,8 @@
 {% if bloco == 13 %}
 {% for sugestao, itens_grupo in grupo|groupby('acao_sugerida') %}
 {% set referencia_cartilha = ' (ver na Cartilha: Cláusulas orientativas para terceiros)' %}
-{% set orientacoes_cartilha = links_cartilha_lacunas and referencia_cartilha in (sugestao or '') %}
+{% set lacunas_contratuais = itens_grupo|selectattr('pergunta', 'in', ['F3-3.27', 'F3-3.30'])|list %}
+{% set orientacoes_cartilha = links_cartilha_lacunas and (lacunas_contratuais or referencia_cartilha in (sugestao or '')) %}
 <details><summary>{{ (sugestao|replace(referencia_cartilha, '') if orientacoes_cartilha else sugestao) or 'Sem sugestão registrada' }} — {{ itens_grupo|length }} {{ ('lacuna' if itens_grupo|length == 1 else 'lacunas') if natureza == 'lacuna' else ('item' if itens_grupo|length == 1 else 'itens') }}</summary>
 {% if orientacoes_cartilha %}{% with links_cartilha=links_cartilha_lacunas %}{% include '_links_cartilha.html' %}{% endwith %}{% endif %}
 <ul>{% for l in itens_grupo %}<li><a href="/forms34/{{ obj.id }}/blocos/{{ l.bloco }}?conta_id={{ conta_id|urlencode }}#{{ l.pergunta }}">{{ l.pergunta }}</a> · {{ l.rotulo }}

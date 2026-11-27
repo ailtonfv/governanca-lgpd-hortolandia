@@ -6,6 +6,16 @@
 
 Em produção, o acesso será por autenticação real; `conta_id` é exclusivo da demonstração.
 
+**Lote 18 — Cartilha integrada.** A branch `lote-18-cartilha` parte de `3b7b750`. Os 14 blocos do FORM 1, os FORMs 2 a 4 e o dashboard abrem tópicos da REV30.24 candidata em outra aba. A chave CART permanece estável e o link mostra o nome do tópico. A REV30.13 continua disponível para as referências históricas do FORM 1.
+
+Para reproduzir a instalação, obtenha pelo canal institucional o pacote da Cartilha e coloque os arquivos abaixo na cópia de trabalho. Confira os hashes do anexo ao termo de transferência.
+
+- Cartilha atual em `documentos_locais/cartilha/CARTILHA_LGPD_REV30_24_CANDIDATA_2026-11-27.docx`.
+- Catálogo da Cartilha em `app/catalogos/topicos_cartilha.json`.
+- Cartilha histórica em `documentos_locais/cartilha/CARTILHA_LGPD_HORTOLANDIA_REV30_13_MARCO_03-11-2026.docx`.
+
+A consulta está disponível no ambiente local, dentro das permissões da tela de origem. Os documentos e o catálogo ficam fora do Git. O anexo local lista telas, chaves e resultados de resolução. A vistoria visual e o aceite institucional são etapas posteriores.
+
 **Lote 17 — correções da primeira metade da vistoria.** A branch `lote-17-vistoria-8020` parte de `e7e347f`. O painel do DPO e a Central usam a tarefa vigente dos FORMs 3 e 4. A faixa de sessão identifica o servidor fictício e seu papel. A navegação dos blocos usa uma moldura compartilhada. Os ajustes também cobrem mensagens de recusa, nota residual, datas em horário de Brasília, condicionais e lacunas.
 
 No complemento G9 a G13, a reavaliação abre uma rodada editável com os blocos a revisar. O FORM 4 exige título de até 80 caracteres ao registrar o plano, com alternativa abreviada da F4-4.3 nas providências antigas. No bloco 16 do FORM 3, lacunas com a mesma sugestão começam agrupadas. A Secretaria pode separar ou juntar itens. Cada lacuna mantém seu vínculo, e repetir o encaminhamento do grupo reaproveita a providência existente.
