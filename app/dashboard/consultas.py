@@ -123,7 +123,7 @@ def linha(d, registro_id, item=None):
              unidade_id=r.unidade_principal_atual_id,tipo=r.tipo_objeto, item='',situacao='',desde=None,dias=None)
     if item:
         obj,e = item['obj'],item['estado']
-        l.update(id=obj.id, item=f"{'Risco' if obj.tipo=='R' else 'Ação'} {obj.numero} ({obj.codigo.split('-')[-1]})",
+        l.update(id=obj.id, item=f"{'Risco' if obj.tipo=='R' else 'Providência'} {obj.numero}",
                  situacao=situacao_risco(e) if obj.tipo=='R' else situacao_acao(e))
     return l
 
@@ -161,7 +161,7 @@ def risco(d):
         linhas.append(l)
         if n.get('metodologia')==inerente.get('metodologia')==METODOLOGIA and inerente.get('nota') is not None:
             titulo = ' '.join(str(e.get('evento') or 'Título ainda não informado').split())
-            efeito.append({**l, 'item':f"Risco {i['obj'].numero}: {titulo} ({i['obj'].codigo.split('-')[-1]})",
+            efeito.append({**l, 'item':f"Risco {i['obj'].numero}: {titulo}",
                 'situacao':f"{inerente['nota']} {inerente['faixa']} → {n['nota']} {n['faixa']}" + (' · nenhuma redução' if n['nota']>=inerente['nota'] else '')})
         if set(e.get('triagem_confirmacoes',{}))=={'secretaria','dpo'} and e.get('triagem',{}).get('resultado') in ('elaborar','revisar','determinado_anpd'):
             ripd.append(l)
@@ -273,11 +273,11 @@ def correcao(d, agora):
             fim=(e.get('cancelada') or (e.get('verificacao') if e.get('verificada') and e.get('verificacao',{}).get('aprovada') else {}) or {}).get('em'),
             dias_restantes=(date.fromisoformat(e['prazo'])-momento(agora).astimezone(LOCAL).date()).days if e.get('prazo') else None,
             encerrada=bool(e.get('cancelada') or e.get('verificada')),
-            origem=next((f"Risco {r['obj'].numero} ({r['obj'].codigo.split('-')[-1]})" for r in d['objetos'] if r['obj'].id==e.get('risco_id')),'FORM 2'),
+            origem=next((f"Risco {r['obj'].numero}" for r in d['objetos'] if r['obj'].id==e.get('risco_id')),'FORM 2'),
             verificador='Comitê' if e.get('verificada') else 'Aguardando verificação')
         linhas.append(l)
-    return [quadro('acoes','Ações acompanhadas',linhas,'ações','Eventos de plano, execução e verificação','Situações exclusivas; atraso é uma marca.'),
-            quadro('atrasadas','Ações atrasadas',[l for l in linhas if l['atrasada']],'ações','Prazo vigente','Prazo anterior a hoje, sem verificação aprovada nem cancelamento.'),
+    return [quadro('acoes','Providências acompanhadas',linhas,'providências','Eventos de plano, execução e verificação','Situações exclusivas; atraso é uma marca.'),
+            quadro('atrasadas','Providências atrasadas',[l for l in linhas if l['atrasada']],'providências','Prazo vigente','Prazo anterior a hoje, sem verificação aprovada nem cancelamento.'),
             *[quadro('acao_'+str(n),t,[l for l in linhas if l['situacao']==t],'ações') for n,t in enumerate(F4)],
             indisponivel('incidentes','Incidentes','O painel ainda não recebe os registros de incidentes (previsto para depois de 15/12).')]
 

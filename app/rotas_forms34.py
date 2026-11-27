@@ -178,7 +178,8 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
             if item['acao']=='ingresso' and e.get('risco_id'):
                 risco_origem = s.get(IdentidadeForms34,e['risco_id'])
                 if risco_origem:item['nome'] += f' (Risco {risco_origem.numero})'
-        codigo_risco=obj.codigo.split('-')[-1]
+        from app.acompanhamento_forms34 import rotulo_objeto
+        rotulo = rotulo_objeto(obj)
 
         for a in atos:
             a['reavaliacao']=a['acao']=='revisar_avaliacao' and set(e.get('avaliacao_confirmacoes',{}))=={'secretaria','dpo'}
@@ -187,7 +188,7 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
             a['valores']={**a.get('valores',{}),**dict(e.get(fonte_ato,{}) if fonte_ato else {})}
             if a['acao']=='planejar':a['valores'].update(plano=e.get('plano',''),cargo=e.get('cargo_responsavel',''),duracao_dias=e.get('duracao_dias',''))
             a['valores']={k:('sim' if v else 'nao') if isinstance(v,bool) else v for k,v in a['valores'].items()}
-            a['resumo']=f"{'Risco' if ref.form==3 else 'Ação'} {codigo_risco} ({s.get(Registro,obj.registro_id).codigo_lgpd}): {a['titulo']}. A autoria será registrada."
+            a['resumo']=f"{rotulo} ({s.get(Registro,obj.registro_id).codigo_lgpd}): {a['titulo']}. A autoria será registrada."
             if a['acao']=='aprovar_plano':
                 from app.prazos_plano34 import vencimento_na_aprovacao
                 from app.apresentacao_atos34 import data_br
@@ -204,13 +205,13 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
                 c['lista']=(list(enumerate(PROBABILIDADE if c['nome'] in ('p','pr') else IMPACTO,1)) if c['tipo']=='number' else [('sim','Sim'),('nao','Não')] if c['tipo']=='bool' else listas.get(c['tipo'],c.get('opcoes',())))
                 if c['tipo']=='number':c['lista']=[(k,f'{k} — {v}') for k,v in c['lista']]
             if a['acao']=='confirmar_avaliacao' and e.get('avaliacao'):
-                av=e.get('reavaliacao',e)['avaliacao'];a['resumo']=f"Risco {obj.codigo.split('-')[-1]}: inerente {av['inerente']['nota']} ({av['inerente']['faixa']}), residual {av['residual']['nota']} ({av['residual']['faixa']}). Confirmar esta proposta?"
+                av=e.get('reavaliacao',e)['avaliacao'];a['resumo']=f"{rotulo}: inerente {av['inerente']['nota']} ({av['inerente']['faixa']}), residual {av['residual']['nota']} ({av['residual']['faixa']}). Confirmar esta proposta?"
             if a['acao']=='confirmar_avaliacao':
                 a['resumo']+=' Com a sua confirmação, a nota passa a valer como nota conjunta.'
                 faixa=e.get('reavaliacao',e).get('avaliacao',{}).get('residual',{}).get('faixa')
                 if faixa=='Crítico':a['resumo']+=' O risco Crítico segue para triagem de RIPD, manifestação do Comitê e aceitação pelo Prefeito.'
             if a['acao']=='confirmar_triagem' and proposta_tr:
-                a['resumo']=f"Risco {codigo_risco}: confirmar a triagem proposta por {proposta_tr['lado']} — "+RESULTADOS.get(e['triagem']['resultado'],'')
+                a['resumo']=f"{rotulo}: confirmar a triagem proposta por {proposta_tr['lado']} — "+RESULTADOS.get(e['triagem']['resultado'],'')
             from app.apresentacao_atos34 import conteudo_decisao
             a['leitura']=conteudo_decisao(a['acao'],e,autores,unidades_nomes)
             if a['acao']=='manifestar_comite':

@@ -71,6 +71,8 @@ def itens_em_andamento(sessao, conta_id):
         itens[ref.form].append(dict(concluido=bool(estado.get('concluida')),concluido_em=estado.get('conclusao',{}).get('em',''),contexto=contextos.get(r.contexto_atuacao_id,''),texto=f"{identificar(r)} · {acompanhamento['titulo']} — {acompanhamento['situacao']}",
                                   **{k: acompanhamento[k] for k in ('pendente','etapa','ato','botao','pendencia')},
                                   registro_rotulo=identificar(r), titulo=acompanhamento['titulo'],
+                                  descricao=acompanhamento['descricao'], rotulo=acompanhamento['rotulo'],
+                                  situacao=acompanhamento['situacao'],
                                   confirmacao_dpo_desde=datetime.fromisoformat(confirmacao_dpo) if confirmacao_dpo else None,
                                   desde=obj.criado_em.astimezone(timezone.utc).isoformat(),
                                   href=f"/forms34/{obj.id}/blocos/{acompanhamento['bloco']}?{query}"))

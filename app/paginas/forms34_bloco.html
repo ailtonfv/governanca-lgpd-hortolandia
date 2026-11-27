@@ -9,7 +9,7 @@
 {% set a = tarefa_atual %}
 {{ formulario(a,estado,registro,obj,matriz,valores_formulario if acao_erro==a.acao else valores_triagem if a.acao=='propor_triagem' else valores_comite if a.acao=='manifestar_comite' else a.valores,erros_campos if acao_erro==a.acao else {},true) }}
 {% endif %}
-{% if ref.form==4 %}<p><strong>Temas da ação:</strong> {{ temas_acao|join(' · ') }}</p>{% if bloco==9 and estado.aprendizagem %}<p><strong>Temas desta versão do aprendizado:</strong> {{ temas_aprendizagem|join(' · ') }}</p>{% endif %}{% endif %}
+{% if ref.form==4 %}<p><strong>Temas da providência:</strong> {{ temas_acao|join(' · ') }}</p>{% if bloco==9 and estado.aprendizagem %}<p><strong>Temas desta versão do aprendizado:</strong> {{ temas_aprendizagem|join(' · ') }}</p>{% endif %}{% endif %}
 {% from '_conferencia_r17.html' import resumo as resumo_r17 %}{% if conferencia_r17 %}{{ resumo_r17(conferencia_r17,base_r17,conta_id,falhas_r17|default(false)) }}{% endif %}
 {% if estado.selo_condicoes %}<p class="aviso-alerta">{{ estado.selo_condicoes }}</p>{% endif %}
 {% if ref.form==3 and not estado.referencia_ripd %}<p>{{ ripd_texto }}</p>{% endif %}
@@ -17,7 +17,7 @@
 {% if bloco==9 and estado.aprendizagem_devolvida %}<div class="aviso-alerta"><strong>Aprendizagem devolvida à Secretaria para ajustes</strong><p>Observação do DPO: {{ estado.aprendizagem_devolvida.observacao }}</p><p>{{ autores.get(estado.aprendizagem_devolvida.pessoa_id,'DPO') }} · {{ estado.aprendizagem_devolvida.em|hora_local }}</p></div>{% endif %}
 {% if aviso_regra_anterior %}<p class="aviso-alerta" role="alert">{{ aviso_regra_anterior }}</p>{% endif %}
 {% if ref.form==4 and bloco==8 and estado.residual_acao %}<section><h2>Nota residual após a ação</h2><p>{{ estado.residual_acao.probabilidade }} × {{ estado.residual_acao.impacto }} = {{ estado.residual_acao.nota }} — {{ estado.residual_acao.faixa }}</p><p>{{ estado.residual_acao.justificativa }}</p><p>{{ 'Nota conjunta confirmada' if estado.residual_acao_confirmacoes|length==2 else 'Proposta da Secretaria, aguardando confirmação do DPO' }}</p></section>{% endif %}
-{% if estado.encerrada %}<p class="mensagem mensagem-sucesso">{{ conclusao_automatica or 'Ação concluída automaticamente após a verificação aprovada' }}. O Registro LGPD permanece com seu histórico e suas pendências.</p>{% endif %}
+{% if estado.encerrada %}<p class="mensagem mensagem-sucesso">{{ conclusao_automatica or 'Providência concluída automaticamente após a verificação aprovada' }}. O Registro LGPD permanece com seu histórico e suas pendências.</p>{% endif %}
 {% if 'relator' in papeis and not atos %}<p>Nada pendente para o Comitê neste risco</p>{% endif %}
 {% if ref.form==4 and bloco==7 and not estado.verificacao %}<p>Aguardando verificação por membro do Comitê de outra Secretaria.</p>{% endif %}
 {% if ref.form==4 and bloco==9 %}<p role="status">{{ situacao_aprendizagem }}</p>{% if not estado.verificada %}<p>A aprendizagem pode ser registrada depois da verificação da ação.</p>{% endif %}{% endif %}
@@ -48,7 +48,7 @@
 {% if ref.form==3 and (bloco==15 or 'gabinete' in papeis) %}<p class="aviso-alerta">{{ ripd_texto }}</p>{% if bloco!=15 %}{{ leitura(proposta_tr) }}{% endif %}{% endif %}
 {% for mensagem in decisoes_gabinete if (ref.form==3 and bloco==14) or (ref.form==4 and bloco==8) %}<p class="mensagem mensagem-sucesso">{{ mensagem }}</p>{% endfor %}
 {% if ref.form==3 and bloco==16 %}
-{% for a in acoes_vinculadas %}<p class="mensagem mensagem-sucesso">Providência encaminhada: <a href="/forms34/{{ a.id }}/blocos/3?conta_id={{ conta_id|urlencode }}">Ação {{ a.numero }} ({{ a.codigo }})</a> · {{ a.quando }} · {{ a.autor }}. Acompanhe o plano e a execução no FORM 4.</p>{% endfor %}
+{% for a in acoes_vinculadas %}<p class="mensagem mensagem-sucesso">Providência encaminhada: <a href="/forms34/{{ a.id }}/blocos/3?conta_id={{ conta_id|urlencode }}">Providência {{ a.numero }}</a> · {{ a.quando }} · {{ a.autor }}. Acompanhe o plano e a execução no FORM 4.</p>{% endfor %}
 {% if proposta_tr and proposta_tr.confirmada and estado.triagem.resultado in ['elaborar','revisar','determinado_anpd'] and 'Elaboração ou revisão de RIPD' not in estado.respostas.get('F3-3.61',[]) %}<p class="aviso-alerta">A triagem indicou RIPD, mas o encaminhamento não inclui RIPD.</p>{% endif %}
 {% if destaques %}{% if encaminhamento_destacado %}<p>Encaminhe as providências e depois conclua a avaliação.</p>{% endif %}{% for a in destaques %}{{ formulario(a,estado,registro,obj,matriz,valores_formulario if acao_erro==a.acao else {},erros_campos if acao_erro==a.acao else {},true) }}{% endfor %}{% endif %}
 {% endif %}

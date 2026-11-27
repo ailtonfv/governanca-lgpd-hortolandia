@@ -32,7 +32,7 @@ def test_efeito_com_titulo_sem_residual_repetido(sessao,dados,monkeypatch):
         assert linhas
         for linha in linhas:
             texto=unescape(re.sub('<[^>]+>','',linha)).strip()
-            assert texto=='Risco 1: Exposição fictícia (R01) · 25 Crítico → 25 Crítico · nenhuma redução'
+            assert texto=='Risco 1: Exposição fictícia · 25 Crítico → 25 Crítico · nenhuma redução'
             assert 'Residual' not in texto
 
 

@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% from '_links_instrumentos.html' import identificacao_servidor %}
 {% block titulo %}Central de Acesso{% endblock %}
+{% macro item_central(item) -%}
+{% if item.rotulo %}<a href="{{ item.href }}"><strong>{{ item.descricao }}</strong></a><br><small>{{ item.rotulo }} · {{ item.registro_rotulo }}</small><br>{{ item.situacao }}
+{% else %}<a href="{{ item.href }}">{{ item.texto }}</a>{% endif %}
+{%- endmacro %}
 {% macro cartao(area, titulo, objetivo, situacao, icone, numero='', acesso='') %}
 <li class="cartao-central area-{{ area }}">
   <svg class="icone-central" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="{{ icone }}"/></svg>
@@ -11,12 +15,12 @@
     {% set resumo = cartoes_forms[numero] %}
     <section class="itens-central" aria-labelledby="itens-form{{ numero }}">
       <h4 id="itens-form{{ numero }}">Seus itens em andamento</h4>
-      {% if resumo.total_pendencias %}<p><strong>{{ resumo.total_pendencias }} providência{{ 's' if resumo.total_pendencias != 1 else '' }} sua{{ 's' if resumo.total_pendencias != 1 else '' }}</strong></p>
-      <ul>{% for item in resumo.pendencias %}<li><a href="{{ item.href }}">{{ item.texto }}</a> · {{ item.pendencia }}{% if item.contexto %}<p>Contexto: {{ item.contexto }}</p>{% endif %}</li>{% endfor %}</ul>
+      {% if resumo.total_pendencias %}<p><strong>Suas providências ({{ resumo.total_pendencias }})</strong></p>
+      <ul>{% for item in resumo.pendencias %}<li>{{ item_central(item) }} · {{ item.pendencia }}{% if item.contexto %}<p>Contexto: {{ item.contexto }}</p>{% endif %}</li>{% endfor %}</ul>
       {% if resumo.total_pendencias > 3 %}<a href="{{ resumo.lista }}&grupo=pendencias">Ver todos ({{ resumo.total_pendencias }})</a>{% endif %}
-      {% else %}<p>Nenhuma providência sua neste FORM.</p>{% endif %}
+      {% else %}<p>Você não tem providências agora.</p>{% endif %}
       <details><summary>Em acompanhamento ({{ resumo.acompanhamento|length }})</summary>
-        <ul>{% for item in resumo.acompanhamento %}<li><a href="{{ item.href }}">{{ item.texto }}</a>{% if item.contexto %}<p>Contexto: {{ item.contexto }}</p>{% endif %}</li>{% endfor %}</ul>
+        <ul>{% for item in resumo.acompanhamento %}<li>{{ item_central(item) }}{% if item.contexto %}<p>Contexto: {{ item.contexto }}</p>{% endif %}</li>{% endfor %}</ul>
       </details>
       {% if numero==3 and resumo.concluidos %}<h4>Concluídos recentemente</h4><ul>{% for item in resumo.concluidos %}<li><a href="{{ item.href }}">{{ item.texto }}</a></li>{% endfor %}</ul>{% endif %}
     </section>

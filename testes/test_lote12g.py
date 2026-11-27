@@ -54,7 +54,7 @@ def test_grupo1_encerramento_bloqueia_perguntas_e_exibe_autoria_automatica(sessa
     tela = TestClient(app).get(f'/forms34/{obj}/blocos/9?conta_id=CONTA-B1')
     assert tela.status_code == 200
     assert 'Salvar bloco 9' not in tela.text
-    assert 'Ação concluída automaticamente em ' in tela.text
+    assert 'Providência concluída automaticamente em ' in tela.text
     assert 'após a verificação aprovada' in tela.text
     from app.leitura_atos34 import historico_visual
     from app.fluxo_forms34 import historico

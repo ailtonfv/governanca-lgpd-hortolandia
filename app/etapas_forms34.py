@@ -28,7 +28,7 @@ def motivo_bloqueio(estado, bloco):
             return 'Triagem confirmada. Mudanças exigem Reavaliar o risco.'
     else:
         if estado.get('encerrada') or estado.get('cancelada'):
-            return 'Ação encerrada: perguntas somente para leitura. Mudanças exigem reavaliação do risco.'
+            return 'Providência encerrada: perguntas somente para leitura. Mudanças exigem reavaliação do risco.'
         if bloco == 7:
             return 'As respostas deste bloco são registradas no ato de verificação independente.'
         if estado.get('plano_aprovado') and bloco in BLOCOS_PLANO:

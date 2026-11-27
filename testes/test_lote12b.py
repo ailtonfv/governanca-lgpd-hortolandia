@@ -166,7 +166,7 @@ def test_conclusao_historica_sem_r17_nao_recalculada(sessao,entrada):
     antes=deepcopy(ev.conteudo)
     assert not conferencia34(4,e)['pronto']
     r=TestClient(app).get(f'/forms34/{obj}/blocos/1?conta_id=CONTA-B1')
-    assert r.status_code==200 and 'Ação concluída automaticamente em ' in r.text
+    assert r.status_code==200 and 'Providência concluída automaticamente em ' in r.text
     assert 'após a verificação aprovada' in r.text and 'Sistema' in r.text
     sessao.refresh(ev)
     assert ev.conteudo==antes and estado(sessao,obj)['encerrada']

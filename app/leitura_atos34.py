@@ -23,7 +23,7 @@ NOMES = {
     'pedir_cancelamento':'Cancelamento solicitado', 'cancelar':'Cancelamento aprovado',
     'aprender':'Aprendizagem registrada', 'conferir_aprendizagem':'Aprendizagem conferida',
     'autorizar_aprendizagem':'Aprendizagem autorizada', 'ingresso':'Ingresso registrado',
-    'encerramento_automatico':'Ação concluída automaticamente após a verificação aprovada', 'abrir_detalhes':'Detalhes do bloco mantidos visíveis',
+    'encerramento_automatico':'Providência concluída automaticamente após a verificação aprovada', 'abrir_detalhes':'Detalhes do bloco mantidos visíveis',
     'confirmar_gatilho_juridico':'Necessidade de manifestação registrada',
     'enviar_juridico':'Consulta encaminhada ao Jurídico', 'autorizar_referencia':'Consulta restrita autorizada',
     'referencia_registrada':'Referência jurídica registrada', 'adicionar_risco':'Novo risco registrado',
@@ -130,7 +130,7 @@ def historico_visual(eventos, autores, unidades, mapa_blocos, identidade=None, r
         if acao in ('aceitar_residual','aprovar_plano'):
             d=e.get('aceitacao' if acao=='aceitar_residual' else 'plano_aprovado',{})
             if d.get('registrador')=='Gabinete':nome=f"Decisão do Prefeito, registrada pelo Gabinete em {horario(d['em'])}, conforme {d['documento']}"
-        if acao=='encerramento_automatico':nome=f'Ação concluída automaticamente em {horario(ev.ocorrido_em)}, após a verificação aprovada'
+        if acao=='encerramento_automatico':nome=f'Providência concluída automaticamente em {horario(ev.ocorrido_em)}, após a verificação aprovada'
         if acao=='conferir_aprendizagem' and e.get('aprendizagem_devolvida'):nome='Aprendizagem devolvida à Secretaria para ajustes'
         if e:anterior=e
         saida.append(dict(id=ev.id,comando_id=ev.comando_id,nome=nome,acao=acao,
