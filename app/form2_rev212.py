@@ -108,10 +108,16 @@ def montar_bloco(base):
         q["opcoes_outro"]=[a["codigo"] for a in q["alternativas"] if eh_outro(a["rotulo"])]
         from app.classificacao_analise_form2 import classificar
         classificar(q)
+        from app.textos_parte_b16 import ajustar2
+        ajustar2(q)
         itens.append(q)
     if base['numero']==9:
         from app.clausulas_lgpd import perguntas2
         itens.extend(perguntas2())
+    if base['numero']==12:
+        from app.textos_parte_b16 import TITULO12
+        base={**base,'titulo':TITULO12}
+        itens.sort(key=lambda q:q['id']!='F2-12.8')
     return {**base, "itens": itens, "versao": "REV21.2"}
 
 

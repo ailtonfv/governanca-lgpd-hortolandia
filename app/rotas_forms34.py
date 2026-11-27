@@ -91,6 +91,19 @@ async def ingresso(request:Request,pid:str,conta_id:str):
         return RedirectResponse(f'/form2/participacoes/{pid}/blocos/14?conta_id={conta_id}',303)
 
 
+def escolhas(s,ref,papeis,uid):
+    r={'unidade':[(u.id,u.nome) for u in s.scalars(select(Unidade).where(Unidade.ativa.is_(True)))],
+       'juridico':[],'executor':[],'autoridade':[]}
+    for p in s.scalars(select(Pessoa).where(Pessoa.ativa.is_(True))):
+        if unidades(s,p.id,'juridico_form2'):r['juridico'].append((p.id,p.nome))
+        if (uid in unidades(s,p.id,'preenchedor')|unidades(s,p.id,'aal_form2')
+                and not unidades(s,p.id,'governanca_protecao_dados')):
+            r['executor'].append((p.id,p.nome))
+        if uid in unidades(s,p.id,'demo34_secretario') or unidades(s,p.id,'demo34_gabinete'):
+            r['autoridade'].append((p.id,p.nome))
+    return r
+
+
 @router.api_route('/forms34/{objeto_id}/blocos/{bloco}',methods=['GET','POST'])
 async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
     with Session(motor) as s:
@@ -236,6 +249,15 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
                    'F3-3.52.5':'Aceitação registrada' if e.get('aceitacao') else 'Pendente de autoridade competente'}
         valores.update({'F4-4.6':unidades_nomes.get(e.get('unidade_responsavel_id') or (uid if e.get('plano') else None),'Ainda não informado'),
                         'F4-4.7':e.get('cargo_responsavel') or ('Cargo não informado no ato anterior' if e.get('plano') else 'Ainda não informado')})
+        if ref.form==3 and e.get('situacao_form2')!='concluida':
+            import json
+            fonte_leitura=json.loads(ref.fonte_canonica) if isinstance(ref.fonte_canonica,str) else ref.fonte_canonica
+            quando=fonte_leitura.get('ocorrido_em')
+            valores['F3-3.3']='Risco encaminhado pelo AAL durante a análise do FORM 2'+(f' (versão de {data_br(quando)}).' if quando else '. Data preservada no histórico da origem.')
+        if ref.form==4:
+            for q in itens:
+                if q['id']=='F4-4.9' and e.get('prioridade_origem'):q['ajuda']='Prioridade herdada do FORM 3: '+e['prioridade_origem']
+                if q['id']=='F4-4.27' and e.get('faixa_origem')=='Crítico':q['ajuda']='Sugestão para risco Crítico: revisar em seis meses.'
         if e.get('triagem'):
             valores.update({'F3-3.55':RESULTADOS.get(e['triagem'].get('resultado'),'Ainda não avaliado'),
                             'F3-3.56':e['triagem'].get('justificativa',''),
@@ -270,7 +292,11 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
                 if q['id'] == 'F4-4.18.1':q['enunciado'] = 'Responsável pela verificação'
             for k in ('F4-4.10.1','F4-4.10.2','F4-4.10.3'):
                 valores[k] = 'Não houve pedido de prorrogação' if not e.get('prorrogacoes') and not e.get('decisoes_pendentes', {}).get('prorrogacao') else 'Consulte os atos de prorrogação no histórico'
-            for k in ('F4-4.15.1','F4-4.15.2'):
+            if not e.get('prorrogacoes') and not e.get('decisoes_pendentes',{}).get('prorrogacao'):
+                valores['F4-4.10.1']='Prorrogação: não solicitada'
+                itens=[q for q in itens if q['id'] not in ('F4-4.10.2','F4-4.10.3')]
+            valores['F4-4.15.1'] = f"{ultimo['quando']} — {ultimo['autor']}, {ultimo['nome']}" if ultimo else 'Nenhuma alteração registrada'
+            for k in ('F4-4.15.2',):
                 valores[k] = 'Não há pedido de cancelamento' if not e.get('cancelada') and not e.get('decisoes_pendentes', {}).get('cancelamento') else 'Consulte os atos de cancelamento no histórico'
             valores['F4-4.16'] = f"{ultimo['quando']} — {ultimo['autor']}, {ultimo['nome']}" if ultimo else 'Nenhum ato registrado'
         from app.apresentacao_atos34 import ripd,mensagem_decisao,data_br

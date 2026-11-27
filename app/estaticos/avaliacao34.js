@@ -13,7 +13,7 @@
     if(s.nota!==null){const cell=box.querySelector(`[data-p="${p}"][data-i="${i}"] [data-marca]`);if(cell)cell.textContent+=(cell.textContent?' / ':'')+mark;}
    }
    const a=scores.inerente,b=scores.residual;
-   const evidencia=form?.querySelector('[data-obrigatorio-evidencia]');if(evidencia){const active=a.nota!==null&&b.nota!==null&&b.nota<a.nota;evidencia.querySelector('textarea').required=active;const badge=evidencia.querySelector('[data-marcador]');badge.textContent=active?'* Obrigatório':'** Obrigatório em alguns casos';badge.className='indicador-obrigatoriedade indicador-obrigatoriedade-'+(active?'obrigatorio':'condicional');}
+   const evidencia=form?.querySelector('[data-obrigatorio-evidencia]');if(evidencia){const active=a.nota!==null&&b.nota!==null&&b.nota<a.nota;evidencia.querySelector('textarea').required=active;const badge=evidencia.querySelector('[data-marcador]');badge.textContent=active?'Obrigatório':'Obrigatório se a condição indicada estiver ativa';badge.className='indicador-obrigatoriedade indicador-obrigatoriedade-'+(active?'obrigatorio':'condicional');}
    box.querySelector('[data-efeito]').textContent=a.nota===null||b.nota===null?'Efeito dos controles: ainda não avaliado':b.nota<a.nota?`De ${a.nota} (${a.faixa}) para ${b.nota} (${b.faixa}). Exige controle implementado e evidência.`:b.nota===a.nota?'Sem redução da nota após os controles.':'A nota residual é superior à inerente; confira e justifique.';
    const notes={Pequeno:'Aceitação pela autoridade da Secretaria.',Moderado:'Aceitação pela autoridade da Secretaria.',Alto:'Manifestação do DPO, ciência do Comitê e aceitação pela autoridade da Secretaria.',Crítico:'Crítico: controles imediatos, triagem de RIPD, manifestação do DPO e do Comitê, aceitação pelo Prefeito.'};
    box.querySelector('[data-exigencia]').textContent=notes[b.faixa]||'';
@@ -29,12 +29,12 @@
  document.querySelectorAll('[data-ato34]').forEach(form=>{
   function observacao(){const wrap=form.querySelector('[data-obrigatorio-observacao]');if(!wrap)return;
    const active=form.elements.sem_dados_pessoais?.value==='nao'||form.elements.sem_falha_exposta?.value==='nao';wrap.querySelector('textarea').required=active;
-   const badge=wrap.querySelector('[data-marcador]');badge.textContent=active?'* Obrigatório neste caso':'** Obrigatório ao responder Não';
+   const badge=wrap.querySelector('[data-marcador]');badge.textContent=active?'Obrigatório neste caso':'*Obrigatório ao responder Não';
    badge.className='indicador-obrigatoriedade indicador-obrigatoriedade-'+(active?'obrigatorio':'condicional');
   }form.addEventListener('change',observacao);observacao();
   function conditions(){const wrap=form.querySelector('[data-obrigatorio-triagem]');if(!wrap)return;
    const active=['elaborar','revisar','determinado_anpd'].includes(form.elements.resultado?.value);
-   const input=wrap.querySelector('select');input.required=active;wrap.querySelector('[data-marcador]').textContent=active?'* Obrigatório':'** Obrigatório em alguns casos';wrap.querySelector('[data-marcador]').className='indicador-obrigatoriedade indicador-obrigatoriedade-'+(active?'obrigatorio':'condicional');
+   const input=wrap.querySelector('select');input.required=active;wrap.querySelector('[data-marcador]').textContent=active?'Obrigatório':'Obrigatório se a condição indicada estiver ativa';wrap.querySelector('[data-marcador]').className='indicador-obrigatoriedade indicador-obrigatoriedade-'+(active?'obrigatorio':'condicional');
   }form.addEventListener('change',conditions);conditions();
  });
  document.addEventListener('submit',e=>{

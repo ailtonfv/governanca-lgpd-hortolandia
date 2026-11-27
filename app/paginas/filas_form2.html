@@ -10,12 +10,12 @@
 {{ faixa_ato(mensagem_atribuicao, ato_registrado) }}
 <p>{{ pessoa.nome|identidade_demonstrativa }} · Demonstração com dados fictícios.</p>
 <div class="acoes-fila-form2"><a class="botao-link-secundario" href="/central?conta_id={{ conta_id|urlencode }}">Voltar à Central de Acesso</a></div>
-{% if not dpo and (cartoes or (not gerenciaveis and not apenas_dpo)) %}<h2>Participações da sua unidade</h2><p>Esta seção reúne as participações autorizadas para sua atuação e as solicitações de complementação à origem, inclusive seu histórico. A gestão dos responsáveis aparece mais abaixo, em quadro próprio.</p>
+{% if not dpo and (cartoes or (not gerenciaveis and not apenas_dpo)) %}{% if pode_encaminhar and not participacoes %}<h2>Pedidos do AAL à sua Secretaria</h2><p>Aqui aparecem os Registros em análise no FORM 2 para os quais o AAL pode pedir complementação ao FORM 1.</p>{% else %}<h2>Participações da sua unidade</h2>{% endif %}
 {% for c in cartoes %}
-{% if loop.changed(c.aguardando is not none) %}<h3>{{ "Aguardando responsável" if c.aguardando else "Em acompanhamento" }}</h3>{% endif %}
+{% if loop.changed(c.grupo) %}<h3>{{ c.grupo }}</h3>{% endif %}
 <article data-registro="{{ c.registro.id }}"><h3>{{ identificar_registro(c.registro) }}</h3>{% if c.identificacao %}<p>{{ c.identificacao }}</p>{% endif %}
 {% for p in c.participacoes %}
-{% if aguarda_temporalidade(p.conteudo) %}<p class="selo-guarda">Guarda em definição</p>{% endif %}<p>{{ entradas[p.id] }}</p>
+{% if aguarda_temporalidade(p.conteudo) %}<p class="selo-guarda">Prazo de guarda: em definição pela Prefeitura</p>{% endif %}<p>{{ entradas[p.id] }}</p>
 {% if p.id in atribuidores %}<p>{{ atribuidores[p.id] }}</p>{% endif %}
 <p>{{ unidades[p.unidade_id].nome }} · {{ p.tipo }} · Situação da participação: {{ impedimentos.get(p.id, situacoes.get(p.estado, p.estado)) }}{% if p.responsavel_id %} · <strong>Responsável: {{ responsaveis[p.responsavel_id] }}</strong>{% endif %}</p>
 {% if c.origem %}<details><summary>Situação do FORM 1 na origem</summary><p>{{ c.origem }}</p></details>{% endif %}
@@ -26,7 +26,7 @@
 {% if complemento.situacao %}<details><summary>Detalhes da origem</summary><p>Complementação do FORM 1: {{ complemento.situacao }}.</p></details>{% endif %}
 <div class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/participacoes/{{ complemento.p.id }}/governanca?conta_id={{ conta_id|urlencode }}">Pendências com a origem (FORM 1)</a></div>
 {% endfor %}</article>
-{% else %}<p>Nenhum Registro nas filas autorizadas para esta conta.</p>{% endfor %}{% endif %}
+{% else %}<p>{{ 'Nenhum pedido aberto' if pode_encaminhar and not participacoes else 'Nenhum Registro nas filas autorizadas para esta conta.' }}</p>{% endfor %}{% endif %}
 {% if pode_encaminhar and encaminhaveis %}
 <details><summary>Encaminhar versão do FORM 1 já confirmada</summary>
 <p>O APA pode encaminhar uma origem com conferência interna confirmada à fila do FORM 2.</p>
@@ -47,7 +47,7 @@
 {% endfor %}
 <h3>Registros em que o DPO participou</h3>
 {% for concluida, titulo in [(false,'Em andamento'),(true,'Concluídas')] %}<h4>{{ titulo }}</h4><ul>
-{% for l in linhas if l.participou_dpo and (l.p.estado == 'concluida') == concluida %}<li>{{ identificar_registro(l.registro) }} · {{ l.secretaria }} · {{ situacoes.get(l.situacao,l.situacao) }} <a href="/form2/participacoes/{{ l.p.id }}/orientacao?conta_id={{ conta_id|urlencode }}">Ver</a>{% if aguarda_temporalidade(l.p.conteudo) %}<p class="selo-guarda">Guarda em definição</p>{% endif %}</li>{% else %}<li>Nenhum Registro.</li>{% endfor %}</ul>{% endfor %}
+{% for l in linhas if l.participou_dpo and (l.p.estado == 'concluida') == concluida %}<li>{{ identificar_registro(l.registro) }} · {{ l.secretaria }} · {{ situacoes.get(l.situacao,l.situacao) }} <a href="/form2/participacoes/{{ l.p.id }}/orientacao?conta_id={{ conta_id|urlencode }}">Ver</a>{% if aguarda_temporalidade(l.p.conteudo) %}<p class="selo-guarda">Prazo de guarda: em definição pela Prefeitura</p>{% endif %}</li>{% else %}<li>Nenhum Registro.</li>{% endfor %}</ul>{% endfor %}
 {% set designacoes_pendentes = linhas|selectattr('p.id', 'in', impedimentos)|list %}
 {% if designacoes_pendentes %}<h3>Registros com designação pendente</h3><ul>{% for l in designacoes_pendentes %}<li>{{ identificar_registro(l.registro) }} · {{ l.secretaria }} · {{ l.situacao }} <a href="/form2/participacoes/{{ l.p.id }}/orientacao?conta_id={{ conta_id|urlencode }}">Consultar</a></li>{% endfor %}</ul>{% endif %}
 {% if sem_conferente %}<h3>Aguardando definição de quem fará a conferência</h3><ul>{% for codigo in sem_conferente %}<li>{{ codigo }}</li>{% endfor %}</ul>{% endif %}
@@ -61,10 +61,10 @@
 {% if loop.changed(p.responsavel_id is none) %}<h3>{{ 'Aguardando responsável' if p.responsavel_id is none else 'Com responsável' }}</h3>{% endif %}
 <article><h4>{{ identificar_registro(registros[p.registro_id]) }} · {{ unidades[p.unidade_id].nome }}</h4>{% if identificacoes is defined %}<p>{{ identificacoes[p.registro_id] }}</p>{% endif %}
 {% if p.id in atribuidores %}<p>{{ atribuidores[p.id] }}</p>{% endif %}
-<p>{{ impedimentos.get(p.id, situacoes.get(p.estado, p.estado)) }}{% if p.responsavel_id %} · Responsável: {{ responsaveis[p.responsavel_id] }}{% endif %}</p>{% if aguarda_temporalidade(p.conteudo) %}<p class="selo-guarda">Guarda em definição</p>{% endif %}<p>{{ entradas[p.id] }}</p>
+<p>{{ impedimentos.get(p.id, situacoes.get(p.estado, p.estado)) }}{% if p.responsavel_id %} · Responsável: {{ responsaveis[p.responsavel_id] }}{% endif %}</p>{% if aguarda_temporalidade(p.conteudo) %}<p class="selo-guarda">Prazo de guarda: em definição pela Prefeitura</p>{% endif %}<p>{{ entradas[p.id] }}</p>
 {% set acao = 'Atribuir responsável' if p.assumida_em is none else 'Reatribuir' %}
 {% if not agentes[p.id] %}<p>{{ 'Não há outro AAL habilitado nesta fila' if p.tipo in ('principal','tematica') else 'Não há outro responsável habilitado nesta fila' }}.</p>{% else %}
-<details><summary>{{ acao }} — {{ registros[p.registro_id].codigo_lgpd }} · {{ p.tipo }}</summary>
+<details><summary>{{ acao }} — {{ registros[p.registro_id].codigo_lgpd }}</summary>
 <form method="post" action="/form2/participacoes/{{ p.id }}/reatribuir">
 <input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="comando_id" value="{{ (comando_id ~ "-" ~ p.id)|chave_comando }}"><input type="hidden" name="versao" value="{{ p.versao }}">
 <label>Novo responsável <select name="responsavel_id" required><option value="">Escolha…</option>{% for a in agentes[p.id] %}<option value="{{ a.id }}">{{ a.nome|identidade_demonstrativa }}</option>{% endfor %}</select></label>

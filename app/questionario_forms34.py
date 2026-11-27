@@ -67,6 +67,11 @@ def perguntas(form):
                 enunciado='A equipe deste serviço conhece e sabe acionar o fluxo?' if item['id']=='F3-3.46' else texto_pergunta(item['enunciado']), tipo=tipo, opcoes=alternativas,
                 detalhe=item['id'] in DETALHES4, depende=DEPENDENCIAS.get(item['id']),
                 ajuda='Fluxo institucional de incidentes da Prefeitura: existe' if item['id']=='F3-3.46' else ''))
+    for q in saida:
+        if form==3 and q['bloco']==14:q['titulo']='Avaliação do risco: antes e depois dos cuidados'
+        if q['id']=='F3-3.2':q['enunciado']='Qual é a Secretaria responsável?'
+        if q['id']=='F3-3.39':q['ajuda']='Mascarar ou desfocar não é anonimizar.'
+        if q['id']=='F4-4.27':q['enunciado']='Data prevista para revisão (opcional)'
     return saida
 
 

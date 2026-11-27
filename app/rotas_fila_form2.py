@@ -425,7 +425,10 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
     for cartao in cartoes.values():
         aguardando = [p.entrada_em for p in cartao["participacoes"] if not p.responsavel_id and p.estado == "aguardando"]
         cartao["aguardando"] = min(aguardando) if aguardando else None
-    ordenados = sorted(cartoes.values(), key=lambda c: (c["aguardando"] is None, c["aguardando"] or momento))
+    from app.textos_parte_b16 import grupo_fila
+    ordem_grupos=['Sua análise','Aguardando responsável','Da sua unidade, com outro AAL','Em acompanhamento']
+    for c in cartoes.values():c['grupo']=grupo_fila(c,pessoa.id)
+    ordenados = sorted(cartoes.values(), key=lambda c: (ordem_grupos.index(c['grupo']),c['aguardando'] or momento))
     unidades_apa = [u.id for u in unidades.values() if u.ativa and
                     pessoa_e_apa_em_exercicio(sessao, pessoa.id, u.id)]
     confirmadas = sessao.scalars(select(HistoricoConferenciaForm1Integral)
@@ -568,7 +571,7 @@ def bloco_fila(request: Request, participacao_id: str, bloco: int, conta_id: str
     origem = ler_origem(sessao, p.registro_id, p.snapshot_id)
     conteudo = p.conteudo or {}
     definicao = projetar_bloco(conteudo, bloco) if bloco in (1, 2) else definicao_revisao(bloco)
-    projetar_fatos_abertura(definicao['itens'], origem)
+    projetar_fatos_abertura(definicao['itens'], origem, {u.id:u.nome for u in sessao.scalars(select(Unidade))})
     regras = mapa_regras(carregar_contrato())
     valores = indice_valores(conteudo)
     valores_bloco = conteudo.get(RASCUNHO, {}).get(str(bloco), {})

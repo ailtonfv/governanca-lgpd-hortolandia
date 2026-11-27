@@ -3,7 +3,7 @@
 {% block conteudo %}
 {% set situacoes = {'aguardando': 'aguardando responsável', 'em_atendimento': 'em atendimento', 'concluida': 'concluída'} %}
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/filas_form2.css') }}"><div class="filas-form2">
-<h1>{{ registro.codigo_lgpd }} · Participação {{ p.tipo }}</h1>{% from '_conferencia_r17.html' import resumo as resumo_r17 %}{% if conferencia_r17 %}{{ resumo_r17(conferencia_r17,base_r17,conta_id,false) }}{% endif %}
+<h1>{{ identificar_registro(registro) }} · Análise do FORM 2</h1>{% from '_conferencia_r17.html' import resumo as resumo_r17 %}{% if conferencia_r17 %}{{ resumo_r17(conferencia_r17,base_r17,conta_id,false) }}{% endif %}
 {% for c in consultas if c.tipo=='dpo' and c.estado=='concluida' and c.manifestacao and not c.conteudo.get('resposta') %}<p class="aviso-alerta">O DPO deixou uma orientação em {{ c.entrada_em|hora_local }} · <a href="#responder-{{ c.id }}">Responder</a></p>{% endfor %}
 {% if registro.estado_atual=="encerrado_nao_cabe" %}<p class="aviso-alerta">Registro encerrado: instrumentos preservados somente para leitura.</p>{% endif %}{% if retorno %}<p class="mensagem mensagem-sucesso" role="status">{{ retorno }}</p>{% endif %}{% if assumida %}<p class="mensagem mensagem-sucesso" role="status">Você assumiu a participação {{ p.tipo }} do {{ registro.codigo_lgpd }}. A análise usa a {{ rotulo_origem }}.</p>{% endif %}
 <p><strong>Versão do FORM 1 em análise:</strong> {{ rotulo_origem }}</p>
@@ -11,7 +11,7 @@
 {% include '_atuacao_form2.html' %}
 <div class="acoes-fila-form2"><a class="botao-link-secundario" href="/form2/filas?conta_id={{ conta_id|urlencode }}">Voltar às filas</a>
 <a class="botao-link-secundario" href="/form2/participacoes/{{ p.id }}/governanca?conta_id={{ conta_id|urlencode }}">Pendências com a origem (FORM 1)</a></div>
-{% if aguarda_temporalidade(p.conteudo) %}<p class="selo-guarda">Guarda em definição</p>{% endif %}
+{% if aguarda_temporalidade(p.conteudo) %}<p class="selo-guarda">Prazo de guarda: em definição pela Prefeitura</p>{% endif %}
 <p>Situação: {{ situacoes.get(p.estado, p.estado) }}</p>{% if p.responsavel_id == pessoa.id %}<p>{{ p.questao }}</p>{% endif %}
 {% if p.tipo == 'principal' and p.responsavel_id == pessoa.id %}{% include '_regua_fila_form2.html' %}
 {% set proximo = namespace(numero=none) %}

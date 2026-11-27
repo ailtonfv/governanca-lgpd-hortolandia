@@ -51,4 +51,6 @@ def titulos_blocos_form2():
     for bloco in blocos:
         titulo = bloco["titulo"]
         titulos[bloco["numero"]] = titulo.capitalize().replace("form 1", "FORM 1")
+    from app.textos_parte_b16 import TITULO12
+    titulos[12]=TITULO12
     return titulos
