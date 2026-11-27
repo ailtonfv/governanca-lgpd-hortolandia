@@ -142,7 +142,10 @@ def test_tela_verificacao_historico_e_aprendizagem(sessao, entrada):
     assert 'Referência fictícia 12F' in tela.text
     assert 'Salvar bloco 7' not in tela.text
     assert 'Responsável pela verificação' in tela.text
-    assert 'As perguntas seguem a numeração do documento-mestre (F4 = FORM 4).' in tela.text
+    # A3 retira a explicação técnica; mantém identificação e situação visíveis.
+    assert 'As perguntas seguem a numeração do documento-mestre' not in tela.text
+    assert 'Situação da providência' in tela.text
+    assert 'Você atua como:' in tela.text
     assert 'Aguardando verificação por membro' in tela.text
     verificador=client.get(f'/forms34/{obj}/blocos/7?conta_id={VERIFICADOR}')
     assert verificador.status_code==200

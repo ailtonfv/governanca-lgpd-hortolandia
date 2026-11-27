@@ -23,6 +23,8 @@ def test_a3_situacao_perguntas_e_manifestacoes_no_bloco_certo(sessao,entrada):
         assert r.status_code==200
         soup=Tags(r.text)
         assert soup.classe('situacao-bloco34')
+        quadro=r.text.split('aria-label="Situação e próxima providência"',1)[1].split('</section>',1)[0]
+        assert ' · por ' in quadro and 'Você atua como:' in quadro
         assert 'As perguntas seguem a numeração' not in r.text
         assert 'Detalhe disponível para consulta' not in r.text
         assert bool(soup.id('manifestacoes34'))==(bloco==14)

@@ -2149,3 +2149,5 @@ A3 (com C163) e os itens seguintes do 16-B permanecem pendentes.
 
 
 Lote 16-B (A3/C163): situação e próxima providência no topo dos blocos dos FORMs 3 e 4; manifestações concentradas nos blocos próprios; barra de salvamento compartilhada nos FORMs 2 a 4. Implementado na branch de trabalho, ainda sem aceite visual.
+
+Fechamento parcial do 16-B (A3/C163 e A7, 26/11/2026): 1.316 testes na bateria única; 1.266 aprovados, 49 falhas e 1 ignorado. A diferença para a referência era uma expectativa textual retirada por decisão do A3. Após atualização dessa expectativa e complemento da autoria, 8 retestes passaram. Consolidado: 1.267 aprovados, as mesmas 48 falhas antigas e 1 ignorado; 7 testes novos aprovados. Ponto de corte após A7: A11.3–7, A4 restante, A6, A12 e Parte B continuam pendentes. A vistoria 8018 permanece na versão anterior.

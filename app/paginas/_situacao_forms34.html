@@ -1,6 +1,6 @@
 <section class="situacao-bloco34" aria-label="Situação e próxima providência">
 <h2>{{ 'Situação do risco' if ref.form==3 else 'Situação da providência' }}</h2>
-<p>{% if estado.conclusao %}Avaliação concluída em {{ estado.conclusao.em|hora_local }} por {{ autores.get(estado.conclusao.pessoa_id,'Autor registrado')|identidade_demonstrativa }}.{% else %}{{ acompanhamento.situacao }}.{% endif %}</p>
+<p>{% if estado.conclusao %}Avaliação concluída em {{ estado.conclusao.em|hora_local }} por {{ autores.get(estado.conclusao.pessoa_id,'Autor registrado')|identidade_demonstrativa }}.{% else %}{{ acompanhamento.situacao }}{% set ultimo=historico_visual|selectattr('ato')|first %}{% if ultimo %} · por {{ ultimo.autor|identidade_demonstrativa }}{% endif %}.{% endif %}</p>
 <p>Você atua como: {{ papeis_visiveis|join(' · ') }}.</p>
 <p>{{ acompanhamento.pendencia if acompanhamento.pendente else 'Nada a fazer por você agora.' }}</p>
 {% if bloqueio_edicao %}<p>{{ bloqueio_edicao }}</p>{% endif %}
