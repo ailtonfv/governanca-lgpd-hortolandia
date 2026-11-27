@@ -2,13 +2,20 @@
 {% for aviso in incoerencias_controles %}<p class="aviso-alerta">{{ aviso }}</p>{% endfor %}
 {% for natureza,titulo in [('lacuna','Lacunas'),('verificacao','Verificações'),('a_confirmar','A confirmar')] %}
 {% set grupo=lacunas|selectattr('natureza','equalto',natureza)|list %}
-{% if grupo %}<h3>{{ titulo }}</h3>{% for l in grupo %}<article class="leitura-ato34"><p><a href="/forms34/{{ obj.id }}/blocos/{{ l.bloco }}?conta_id={{ conta_id|urlencode }}#{{ l.pergunta }}">{{ l.pergunta }}</a> · {{ l.rotulo }}</p>
+{% if grupo %}<h3>{{ titulo }}</h3>
+{% if bloco == 13 %}
+{% for sugestao, itens_grupo in grupo|groupby('acao_sugerida') %}
+<details><summary>{{ sugestao or 'Sem sugestão registrada' }} — {{ itens_grupo|length }} {{ ('lacuna' if itens_grupo|length == 1 else 'lacunas') if natureza == 'lacuna' else ('item' if itens_grupo|length == 1 else 'itens') }}</summary>
+<ul>{% for l in itens_grupo %}<li><a href="/forms34/{{ obj.id }}/blocos/{{ l.bloco }}?conta_id={{ conta_id|urlencode }}#{{ l.pergunta }}">{{ l.pergunta }}</a> · {{ l.rotulo }}
+{% set encaminhada=estado.get('encaminhamentos_lacunas',{}).get(l.id) %}{% if encaminhada %}<a href="/forms34/{{ encaminhada.acao_id }}/blocos/1?conta_id={{ conta_id|urlencode }}">Consultar providência encaminhada</a>{% endif %}</li>{% endfor %}</ul></details>
+{% endfor %}
+{% else %}{% for l in grupo %}<article class="leitura-ato34"><p><a href="/forms34/{{ obj.id }}/blocos/{{ l.bloco }}?conta_id={{ conta_id|urlencode }}#{{ l.pergunta }}">{{ l.pergunta }}</a> · {{ l.rotulo }}</p>
 {% if l.acao_sugerida %}<p>Sugestão: {{ l.acao_sugerida }}</p>{% endif %}
 {% set encaminhada=estado.get('encaminhamentos_lacunas',{}).get(l.id) %}
 {% if encaminhada %}<a href="/forms34/{{ encaminhada.acao_id }}/blocos/1?conta_id={{ conta_id|urlencode }}">Consultar providência encaminhada</a>
 {% elif bloco==16 and 'aal' in papeis and not estado.get('conclusao') %}
 <form method="post" class="acoes-lacuna"><input type="hidden" name="lacuna_id" value="{{ l.id }}"><input type="hidden" name="justificativa" value="{{ l.rotulo }}"><input type="hidden" name="versao" value="{{ estado.versao }}"><input type="hidden" name="comando_id" value="{{ comando_id }}">
 {% set escolha=estado.get('destinos_lacunas',{}).get(l.id,{}) %}<label>Destino<select name="destino">{% for destino in destinos_lacunas %}<option {% if destino==escolha.get('destino',l.destino) %}selected{% endif %}>{{ destino }}</option>{% endfor %}</select></label><label>Prioridade<select name="prioridade"><option value="">Escolha…</option>{% for p in ['Imediata','Alta','Média','Baixa','A confirmar'] %}<option {% if p==escolha.get("prioridade") %}selected{% endif %}>{{ p }}</option>{% endfor %}</select></label><button name="acao" value="destinar_lacuna">Salvar destino e prioridade</button><button name="acao" value="encaminhar_acao">Criar providência no FORM 4</button></form>
-{% endif %}</article>{% endfor %}{% endif %}{% endfor %}
+{% endif %}</article>{% endfor %}{% endif %}{% endif %}{% endfor %}
 {% if not lacunas %}<p>Nenhuma lacuna ou verificação identificada nas respostas ativas.</p>{% endif %}
 </section>

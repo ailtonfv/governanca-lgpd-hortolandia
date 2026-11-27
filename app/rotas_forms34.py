@@ -368,7 +368,7 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
             'valores_formulario':valores_enviados if acao_erro else valores_proposta(e.get('reavaliacao',e)),
             'matriz':matriz(),'situacao_avaliacao':situacao_avaliacao(e),
             'grade_visual':grade_visual(grade_atual,obj.id,conta_id,bloco,e),
-            'titulo_bloco':titulo_bloco(next(g['titulo'] for g in grade_atual if g['numero']==bloco)),
+            'titulo_bloco':titulo_bloco(next(g['titulo'] for g in grade_atual if g['numero']==bloco), ref.form, bloco),
             'proposta_reavaliacao':proposta_reavaliacao,'proposta_av':proposta_av,'proposta_tr':proposta_tr,'situacao_topo':situacao_topo,
             'historico_visual':hist,'so_atos':request.query_params.get('historico')=='atos' if request.query_params.get('filtrar') else request.query_params.get('historico','atos')!='todos',
             'manifestacoes':[h for h in hist if h['acao'] in ('manifestar_dpo','manifestar_comite','aceitar_residual','aprovar_plano','verificar','cancelar') and not (ref.form==4 and h['bloco']==bloco)],

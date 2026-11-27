@@ -63,6 +63,8 @@ def test_encaminhar_lacuna_preserva_origem_e_nao_duplica(sessao,entrada):
         assert 'Lacunas encontradas e verificações' in page.text
         assert 'Consultar providência encaminhada' in page.text
     assert 'Salvar destino e prioridade' not in c.get(f'/forms34/{r}/blocos/16?conta_id=CONTA-E1').text
+    bloco8 = c.get(f'/forms34/{r}/blocos/8?conta_id=CONTA-B1')
+    assert 'Bloco 8 — Terceiros, PPPs, concessões e dependência do fornecedor' in bloco8.text
     with pytest.raises(PermissionError):
         ato(sessao,r,'destinar_lacuna',conta='CONTA-E1',**dados)
 

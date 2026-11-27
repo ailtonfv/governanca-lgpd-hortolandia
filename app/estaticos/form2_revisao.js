@@ -17,9 +17,16 @@
       });
       const ativa = grupo.dataset.modo === 'ou' ? resultados.some(Boolean) : resultados.every(Boolean);
       grupo.disabled = !ativa;
+      grupo.hidden = !ativa;
       grupo.querySelector('[data-ajuda-condicao]').hidden = ativa;
       const aviso = grupo.querySelector('[data-aviso-complemento]');
       if (aviso) aviso.hidden = !ativa;
+    }
+    for (const pergunta of form.querySelectorAll('.resposta-form2')) {
+      const controles = Array.from(pergunta.querySelectorAll('.controle-condicional'));
+      if (controles.length && controles.every(controle => controle.hasAttribute('data-gatilhos'))) {
+        pergunta.hidden = controles.every(controle => controle.hidden);
+      }
     }
     const alerta = document.getElementById('alerta-fundamento');
     if (alerta) alerta.hidden = !form.querySelector('[name="opcao:F2-3.1"][value="ANALISE_JURIDICA"]:checked') || form.elements.namedItem('opcao:F2-3.4')?.value === 'SIM';

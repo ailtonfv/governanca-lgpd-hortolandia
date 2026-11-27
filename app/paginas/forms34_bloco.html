@@ -1,7 +1,8 @@
 {% extends 'base.html' %}{% from '_faixa_ato.html' import faixa_ato %}
 {% block conteudo %}
 <link rel="stylesheet" href="{{ url_for('estaticos',path='/filas_form2.css') }}"><link rel="stylesheet" href="{{ url_for('estaticos',path='/forms34.css') }}?v=20261120-12f">
-<div class="forms34 filas-form2"><h1>{{ identificar_registro(registro) }} · FORM {{ ref.form }} · Bloco {{ bloco }} — {{ titulo_bloco }}</h1>
+<div class="forms34 filas-form2"><p class="etiqueta">{{ identificar_registro(registro) }}</p>
+<h1>FORM {{ ref.form }} · Bloco {{ bloco }} — {{ titulo_bloco }}</h1>
 <p>Contexto: {{ contexto_nome }}</p>
 {% include '_situacao_forms34.html' %}
 {% from '_ato_forms34.html' import formulario %}

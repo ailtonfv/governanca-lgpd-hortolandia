@@ -25,8 +25,9 @@
 </dialog>
 {% endif %}
 <section class="identificacao-registro" aria-labelledby="titulo-registro">
-  <p class="etiqueta">{{ {'servico': 'Serviço', 'processo': 'Processo', 'atividade': 'Atividade'}.get(registro.tipo|lower, registro.tipo) }} · ciclo {{ registro.ciclo }}</p>
+  <p class="etiqueta">Ciclo {{ registro.ciclo }}</p>
   <h1 id="titulo-registro">{{ identificar_registro(registro) }}</h1>
+  {% if registro.contexto_nome %}<p>Contexto: {{ registro.contexto_nome }}</p>{% endif %}
   {% if not modo_legado %}
   <p><strong>Servidor em sessão:</strong> {{ identificacao_servidor(identidade) }} · <strong>Secretaria responsável:</strong> {{ registro.unidade }}</p>
   {% endif %}

@@ -29,7 +29,9 @@ def valores_proposta(e):
 def matriz():
     return [[dict(p=p,i=i,**pontuar(p,i)) for i in range(1,6)] for p in range(5,0,-1)]
 
-def titulo_bloco(texto):
+def titulo_bloco(texto, form=None, numero=None):
+    if (form, numero) == (3, 8):
+        return 'Terceiros, PPPs, concessões e dependência do fornecedor'
     import re
     titulo=texto[:1].upper()+texto[1:].lower()
     return re.sub(r'\b(ripd|lgpd|dpo|anpd|form|ppps)\b',lambda m:'PPPs' if m[0].lower()=='ppps' else m[0].upper(),titulo,flags=re.I)
@@ -43,7 +45,7 @@ def grade_visual(grade,obj,conta,bloco,estado=None):
         texto=g['texto'] if g['m'] else ''
         if g['n'] and g['n']==g['m']:
             texto='✓ Todas respondidas · '+str(g['a_confirmar'])+' a confirmar' if g.get('a_confirmar') else '✓ Todas as perguntas ativas respondidas'
-        saida.append(dict(numero=g['numero'],titulo=titulo_bloco(g['titulo']),
+        saida.append(dict(numero=g['numero'],titulo=titulo_bloco(g['titulo'], estado.get('form') if estado else None, g['numero']),
             texto=texto,situacao_ato=ato,respondidas=g['n'],ativas=g['m'],percentual=g['percentual'],
             href=f'/forms34/{obj}/blocos/{g["numero"]}?'+urlencode({'conta_id':conta}),atual=g['numero']==bloco))
     return saida
