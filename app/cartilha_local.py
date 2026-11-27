@@ -18,6 +18,10 @@ from app.ajudas_cartilha_form1 import (
 )
 
 CAMINHO_CARTILHA = Path(__file__).resolve().parent.parent / "documentos_locais" / "cartilha" / ARQUIVO_CARTILHA
+EDICAO_INTEGRADA = "REV30.24"
+ARQUIVO_CARTILHA_INTEGRADA = "CARTILHA_LGPD_REV30_24_CANDIDATA_2026-11-27.docx"
+CAMINHO_CARTILHA_INTEGRADA = CAMINHO_CARTILHA.with_name(ARQUIVO_CARTILHA_INTEGRADA)
+SHA256_CARTILHA_INTEGRADA = "d1b017de7b5156c8ebb34b801bd364f3cc84f908398093186c7b9d44e951701e"
 NS = {
     "w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
     "a": "http://schemas.openxmlformats.org/drawingml/2006/main",
@@ -49,11 +53,11 @@ def _nivel(paragrafo):
     return int(numero[1]) if numero else None
 
 
-@lru_cache(maxsize=2)
-def _ler_edicao(caminho, mtime_ns, tamanho):
+@lru_cache(maxsize=4)
+def _ler_edicao(caminho, mtime_ns, tamanho, digest, secoes_mapeadas, *, por_marcador=False):
     dados = Path(caminho).read_bytes()
-    if hashlib.sha256(dados).hexdigest() != SHA256_CARTILHA:
-        return {}  # Outra edição não pode receber os destinos da REV30.13.
+    if hashlib.sha256(dados).hexdigest() != digest:
+        return {}
     with ZipFile(BytesIO(dados)) as arquivo:
         documento = ET.fromstring(arquivo.read("word/document.xml"))
         relacoes = ET.fromstring(arquivo.read("word/_rels/document.xml.rels"))
@@ -99,11 +103,16 @@ def _ler_edicao(caminho, mtime_ns, tamanho):
             return resultado
 
         secoes, atual = {}, None
-        por_titulo = {titulo: chave for chave, titulo in SECOES_CARTILHA.items()}
+        destinos = dict(secoes_mapeadas)
+        nome_marcador = f"{{{NS['w']}}}name"
         for elemento in documento.find("w:body", NS):
             nivel = _nivel(elemento) if elemento.tag == f"{{{NS['w']}}}p" else None
             if nivel is not None and nivel <= 2:
-                atual = por_titulo.get(_texto(elemento))
+                if por_marcador:
+                    atual = next((destinos[nome] for marca in elemento.findall(".//w:bookmarkStart", NS)
+                                  if (nome := marca.get(nome_marcador)) in destinos), None)
+                else:
+                    atual = destinos.get(_texto(elemento))
                 if atual:
                     secoes[atual] = []
                 continue
@@ -114,9 +123,21 @@ def _ler_edicao(caminho, mtime_ns, tamanho):
 
 def secoes_cartilha_disponiveis():
     """Ajuda permanece; link só existe para seção efetivamente disponível."""
+    return _secoes_locais(CAMINHO_CARTILHA, SHA256_CARTILHA,
+                         tuple((titulo, chave) for chave, titulo in SECOES_CARTILHA.items()))
+
+
+def secoes_cartilha_integrada(ancoras):
+    """Indexa as seções pelos marcadores internos da edição conferida."""
+    return _secoes_locais(CAMINHO_CARTILHA_INTEGRADA, SHA256_CARTILHA_INTEGRADA,
+                         tuple(ancoras.items()), por_marcador=True)
+
+
+def _secoes_locais(caminho, digest, destinos, *, por_marcador=False):
     try:
-        estado = CAMINHO_CARTILHA.stat()
-        return _ler_edicao(str(CAMINHO_CARTILHA), estado.st_mtime_ns, estado.st_size)
+        estado = caminho.stat()
+        return _ler_edicao(str(caminho), estado.st_mtime_ns, estado.st_size, digest, destinos,
+                          por_marcador=por_marcador)
     except (OSError, BadZipFile, ET.ParseError, KeyError, ValueError):
         return {}
 
