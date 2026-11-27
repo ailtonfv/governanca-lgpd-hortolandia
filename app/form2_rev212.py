@@ -75,6 +75,9 @@ def montar_bloco(base):
             continue
         q.update(redacao)
         q['ajudas_usuario'] = orientacoes_ao_usuario(q.get('instrucao', ''))
+        if chave == 'F2-13.1':
+            q['enunciado'] = 'Este serviço orienta o titular a usar o canal institucional ou tem canal próprio?'
+            q['ajudas_usuario'].append('Canal institucional da Prefeitura: Encarregado de Dados (canal oficial).')
         if chave == 'F2-7.10.1':
             rotulos = {'SIM':'Exclusivamente institucional', 'NAO':'Pode ter uso diverso', 'A_CONFIRMAR':'A confirmar'}
             for alternativa in q['alternativas']:
@@ -146,7 +149,7 @@ def aplicavel(q, conjunto, valores, ramos, regras):
 
 
 def subbloco_visivel(ident, ramos):
-    if ident == 'F2-9.4':return False
+    if ident in ('F2-9.4','F2-14.8.1','F2-14.8.2'):return False
     if ident.startswith('F2-9W.'):return 'WIFI_IDENTIFICACAO' in ramos
     if ident.startswith('F2-11S.'):return 'SAUDE_DECLARADA' in ramos
     return True

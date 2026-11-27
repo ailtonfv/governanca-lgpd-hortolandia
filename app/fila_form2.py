@@ -191,8 +191,8 @@ def executar(sessao, *, conta_id, comando_id, participacao_id, acao, versao,
             if p.tipo == "principal":
                 from app.obrigatoriedade_forms import conferencia_participacao, exigir
                 conferida = exigir(conferencia_participacao(sessao, p), f'/form2/participacoes/{p.id}/blocos')
-                if not texto.strip():
-                    raise ValueError("Registre o resultado da análise antes de concluir.")
+                from app.resultado_analise_form2 import resultado_salvo
+                texto = resultado_salvo(p.conteudo or {})
                 p.conteudo = {**(p.conteudo or {}), 'conclusao_analise': {
                     'pessoa_id': pessoa.id, 'em': agora().isoformat(), 'snapshot_id': p.snapshot_id,
                     'versao': p.versao, 'resultado': texto.strip(), 'conferencia_r17': conferida,
