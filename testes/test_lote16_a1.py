@@ -89,6 +89,38 @@ def test_parcial_nao_encerra_e_secretaria_cria_novo_plano(sessao, entrada):
     assert estado(sessao,obj)['encerrada']
 
 
+def test_pendencia_residual_do_dpo_aparece_no_painel_e_no_topo(sessao, entrada):
+    from fastapi.testclient import TestClient
+    from app.central_instrumentos import itens_em_andamento
+    from app.main import app
+
+    obj = verificar_acao(sessao, entrada)
+    ato(sessao, obj, 'propor_residual_acao', pr=2, ir=3,
+        justificativa='Nota fictícia posterior')
+    itens = itens_em_andamento(sessao, 'CONTA-E1')
+    pendencia = next(item for item in itens[4] if obj in item['href'])
+    assert pendencia['ato'] == 'confirmar_residual_acao'
+    assert pendencia['confirmacao_dpo_desde']
+    assert f'/forms34/{obj}/blocos/8' in pendencia['href']
+
+    cliente = TestClient(app)
+    painel = cliente.get('/form2/painel-dpo?conta_id=CONTA-E1')
+    assert painel.status_code == 200
+    assert 'Aguardando sua confirmação (FORMs 3 e 4)' in painel.text
+    assert pendencia['href'] in painel.text
+    bloco = cliente.get(pendencia['href'])
+    assert bloco.status_code == 200
+    assert 'Sua tarefa agora:' in bloco.text
+    principal = bloco.text.index('id="ato-confirmar_residual_acao"')
+    assert bloco.text.index('Sua tarefa agora:') < principal
+    assert bloco.text.count('id="ato-confirmar_residual_acao"') == 1
+    assert 'Nota fictícia posterior' in bloco.text[principal:]
+
+    ato(sessao, obj, 'confirmar_residual_acao', conta='CONTA-E1')
+    itens = itens_em_andamento(sessao, 'CONTA-E1')
+    assert not any(item['ato'] == 'confirmar_residual_acao' for item in itens[4])
+
+
 def test_critico_posterior_exige_gabinete_e_documento(sessao, entrada):
     obj=verificar_acao(sessao,entrada)
     ato(sessao,obj,'propor_residual_acao',pr=5,ir=5,justificativa='Nota fictícia posterior')

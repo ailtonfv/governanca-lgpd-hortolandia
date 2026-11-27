@@ -317,6 +317,16 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
         from app.acompanhamento_forms34 import resumo as resumo_acompanhamento
         acompanhamento = resumo_acompanhamento(s,obj,e,papeis,pessoa.id)
         situacao_topo = acompanhamento['situacao']
+        tarefa_atual = next((a for a in atos if acompanhamento['bloco'] == bloco
+                            and a['acao'] == acompanhamento['ato']), None)
+        if tarefa_atual is proposta and tarefa_atual:
+            proposta = None
+        if tarefa_atual in destaques:
+            destaques = [a for a in destaques if a is not tarefa_atual]
+        if tarefa_atual in restantes:
+            restantes = [a for a in restantes if a is not tarefa_atual]
+        if tarefa_atual:
+            principal = None
         bloqueio_edicao = motivo_bloqueio(e, bloco)
         if registro.estado_atual=='encerrado_nao_cabe':
             bloqueio_edicao='Registro encerrado: instrumentos preservados somente para leitura.'
@@ -343,7 +353,7 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
             'pode_preencher':pode_preencher(ref.form,papeis),
             'conclusao_automatica':next((h['nome'] for h in hist if h['acao']=='encerramento_automatico'),''),
             'bloqueio_edicao':bloqueio_edicao, 'acoes_vinculadas':vinculadas,
-            'acompanhamento':acompanhamento,
+            'acompanhamento':acompanhamento, 'tarefa_atual':tarefa_atual,
             'situacao_aprendizagem':situacao_aprendizagem(e),
             'contexto_nome':getattr(s.get(ContextoAtuacao,registro.contexto_atuacao_id),'nome',''),'aviso_regra_anterior':aviso_regra_anterior,'destaques':destaques,'encaminhamento_destacado':encaminhamento_destacado,'origem_texto':origem_texto,'ripd_texto':ripd(e),'decisoes_gabinete':mensagem_decisao(e),'prazo_br':data_br(e.get('prazo')),
             'atos_salvos':[h for h in hist if h['ato'] and h['bloco']==bloco] if ref.form==4 else [],

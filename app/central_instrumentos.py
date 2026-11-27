@@ -1,7 +1,7 @@
 from app.identificacao_registro import identificar
 """Leitura dos cartões: reutiliza o escopo das páginas de destino, sem conceder acesso."""
 from urllib.parse import urlencode
-from datetime import timezone
+from datetime import datetime, timezone
 from sqlalchemy import select, or_
 from app.consultas_interface import carregar_painel
 from app.fila_form2 import pessoa_ativa, autorizado
@@ -11,6 +11,17 @@ from app.continuidade_apa import unidades_em_que_e_apa_atual
 from app.origem_form2 import nome_objeto_em_analise
 from app.fluxo_forms34 import consultar
 from app.leitura_atos34 import situacao_atual
+
+
+def inicio_confirmacao_dpo(estado, ato):
+    if ato == 'confirmar_avaliacao':
+        rodada = estado.get('reavaliacao') or estado
+        return rodada.get('avaliacao_confirmacoes', {}).get('secretaria', {}).get('em')
+    if ato == 'confirmar_residual_acao':
+        return estado.get('residual_acao_confirmacoes', {}).get('secretaria', {}).get('em')
+    if ato == 'conferir_aprendizagem':
+        return estado.get('aprendizagem', {}).get('em')
+    return None
 
 
 def itens_em_andamento(sessao, conta_id):
@@ -55,8 +66,12 @@ def itens_em_andamento(sessao, conta_id):
         r = sessao.get(Registro, obj.registro_id)
         from app.acompanhamento_forms34 import resumo
         acompanhamento = resumo(sessao,obj,estado,papeis,pessoa.id)
+        confirmacao_dpo = (inicio_confirmacao_dpo(estado, acompanhamento['ato'])
+                           if 'dpo' in papeis else None)
         itens[ref.form].append(dict(concluido=bool(estado.get('concluida')),concluido_em=estado.get('conclusao',{}).get('em',''),contexto=contextos.get(r.contexto_atuacao_id,''),texto=f"{identificar(r)} · {acompanhamento['titulo']} — {acompanhamento['situacao']}",
                                   **{k: acompanhamento[k] for k in ('pendente','etapa','ato','botao','pendencia')},
+                                  registro_rotulo=identificar(r), titulo=acompanhamento['titulo'],
+                                  confirmacao_dpo_desde=datetime.fromisoformat(confirmacao_dpo) if confirmacao_dpo else None,
                                   desde=obj.criado_em.astimezone(timezone.utc).isoformat(),
                                   href=f"/forms34/{obj.id}/blocos/{acompanhamento['bloco']}?{query}"))
     for lista in itens.values():

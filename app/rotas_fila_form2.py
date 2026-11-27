@@ -309,8 +309,15 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
         select(ConferenciaInternaForm1Integral)) if not conferente_da_apresentacao(sessao, registros[c.registro_id], c)] if dpo else []
     from app.consultas_dpo import aguardando_dpo, situacao_consulta
     grupos_dpo = {k: [] for k in ('aguardando_dpo','aguardando_aal','respondidas')}
+    confirmacoes_dpo = []
     principais_por_id = {p.id:p for p in principais}
     if dpo:
+        from app.central_instrumentos import itens_em_andamento
+        itens = itens_em_andamento(sessao, conta_id)
+        confirmacoes_dpo = [
+            {**item, 'espera': duracao_fila(item['confirmacao_dpo_desde'], agora())}
+            for form in (3, 4) for item in itens[form] if item['confirmacao_dpo_desde']
+        ]
         for consulta in sessao.scalars(select(ParticipacaoForm2).where(ParticipacaoForm2.tipo == 'dpo').order_by(ParticipacaoForm2.entrada_em)):
             grupo = situacao_consulta(consulta)
             principal = principais_por_id.get(consulta.origem_id)
@@ -448,6 +455,7 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
         context={"ato_registrado": ato_registrado(sessao, chave, conta_id), "nomes_objetos": nomes_objetos, "referencias": referencias, "mensagem_atribuicao": mensagem, "atribuidores": atribuidores, "cartoes": ordenados, "identificacoes":identificacoes, "entradas": entradas, "pode_encaminhar": bool(unidades_apa), "encaminhaveis": encaminhaveis,
                  "conta_id": conta_id, "pessoa": pessoa, "participacoes": participacoes,
                  "registros": registros, "unidades": unidades, "linhas": linhas, "grupos_dpo": grupos_dpo,
+                 "confirmacoes_dpo": confirmacoes_dpo,
                  "impedimentos": impedimentos, "complementos": complementos, "gerenciaveis": gerenciaveis, "agentes": {p.id: candidatos_atribuicao(sessao, p, pessoa.id) for p in gerenciaveis},
                  "responsaveis": responsaveis, "dpo": dpo, "sem_conferente": sem_conferente, "aguardando_guarda": len({p.registro_id for p in principais if aguarda_temporalidade(p.conteudo)}), "cobertura": cobertura, "comando_id": str(uuid4())})
 

@@ -38,6 +38,13 @@
 {% endif %}
 {% if dpo %}
 <h2 id="painel-dpo">Acompanhamento do DPO</h2>
+<section aria-labelledby="confirmacoes-dpo-forms34">
+<h3 id="confirmacoes-dpo-forms34">Aguardando sua confirmação (FORMs 3 e 4)</h3>
+{% for item in confirmacoes_dpo %}
+<article><h4>{{ item.registro_rotulo }}</h4><p>{{ item.titulo }}</p>
+<p>Aguarda há {{ item.espera }}</p><p><a class="botao-link" href="{{ item.href }}">{{ item.botao }}</a></p></article>
+{% else %}<p>Nenhuma confirmação pendente.</p>{% endfor %}
+</section>
 <p><a href="/temas/pedidos?conta_id={{ conta_id|urlencode }}">Pedidos de novos temas — Em análise</a></p>
 {% for chave, titulo in [('aguardando_dpo','Aguardando sua orientação'),('aguardando_aal','Aguardando resposta do AAL'),('respondidas','Respondidas')] %}
 <section data-grupo-dpo="{{ chave }}"><h3>{{ titulo }}</h3>

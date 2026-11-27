@@ -101,6 +101,8 @@ def classificar(form, estado, papeis=(), pessoa_id=None):
             return escolher('f3-decide', 'encaminhar_acao')
         return escolher('f3-decide', 'concluir_avaliacao')
 
+    from app.encerramento_form4 import nota_confirmada, reducao_total
+
     if estado.get('cancelada'):
         return resultado('f4-executa', 6)
     pedidos = estado.get('decisoes_pendentes', {})
@@ -122,6 +124,22 @@ def classificar(form, estado, papeis=(), pessoa_id=None):
         return escolher('f4-verifica', 'verificar')
     if not estado.get('verificada'):
         return resultado('f4-executa', 6)
+    if not reducao_total(estado):
+        nota = nota_confirmada(estado)
+        if not nota:
+            ato = 'confirmar_residual_acao' if estado.get('residual_acao') else 'propor_residual_acao'
+            titulos = {
+                'confirmar_residual_acao': 'Confirmar a nota do risco que sobrou',
+                'propor_residual_acao': 'Propor a nota do risco que sobrou',
+            }
+            return (resultado('f4-verifica', 8, ato, titulos[ato])
+                    if ato in candidatos else resultado('f4-verifica', 8))
+        if not estado.get('decisao_residual_acao'):
+            atual = escolher('f4-verifica', 'decidir_residual_acao', 'aceitar_residual_acao')
+            return atual if atual['pendente'] else resultado('f4-verifica', 8)
+        if nota['faixa'] in ('Alto', 'Crítico') and not estado.get('aceitacao_residual_acao'):
+            atual = escolher('f4-verifica', 'aceitar_residual_acao')
+            return atual if atual['pendente'] else resultado('f4-verifica', 8)
     if not estado.get('aprendizagem') or estado.get('aprendizagem_devolvida'):
         return escolher('f4-aprende', 'aprender')
     if not estado.get('aprendizagem_conferida'):
