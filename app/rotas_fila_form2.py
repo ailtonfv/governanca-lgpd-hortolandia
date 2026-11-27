@@ -599,6 +599,7 @@ def bloco_fila(request: Request, participacao_id: str, bloco: int, conta_id: str
         "comando_id": str(uuid4()),
         "finalidade_validada": conteudo.get(RASCUNHO, {}).get("2", {}).get("texto:F2-2.3"),
         "secretarias_selecao": secretarias_ativas(sessao),
+        "clausulas_lgpd":__import__("app.clausulas_lgpd",fromlist=["catalogo"]).catalogo() if bloco==9 else None,
         "fatos_origem": origem["conteudo"],
         "registro": sessao.get(Registro, p.registro_id),
         "secretaria": sessao.get(Unidade, sessao.get(Registro, p.registro_id).unidade_principal_atual_id),

@@ -109,6 +109,9 @@ def montar_bloco(base):
         from app.classificacao_analise_form2 import classificar
         classificar(q)
         itens.append(q)
+    if base['numero']==9:
+        from app.clausulas_lgpd import perguntas2
+        itens.extend(perguntas2())
     return {**base, "itens": itens, "versao": "REV21.2"}
 
 
@@ -119,6 +122,8 @@ def ramos_origem(origem):
     categorias = respostas.get('5.1', [])
     if 'Dados de saúde' in categorias or origem.get('secretaria_saude'):
         ramos.add('SAUDE_DECLARADA')
+    from app.clausulas_lgpd import guarda_fornecedor
+    if guarda_fornecedor(respostas):ramos.add('FORNECEDOR_GUARDA')
     return ramos
 
 
@@ -132,6 +137,7 @@ def indice_valores(conteudo):
 
 
 def aplicavel(q, conjunto, valores, ramos, regras):
+    if q=='F2-9C.1':return 'FORNECEDOR_GUARDA' in ramos or 'SIM' in valores.get('opcao:F2-9.1',[])
     if not subbloco_visivel(q,ramos):return False
     def avaliar(c):
         op, origem, codigo = c["operador"], c["origem"], c["codigo_valor"]
@@ -152,6 +158,7 @@ def aplicavel(q, conjunto, valores, ramos, regras):
 
 
 def subbloco_visivel(ident, ramos):
+    if ident.startswith('F2-9F.'):return 'FORNECEDOR_GUARDA' in ramos
     if ident in ('F2-9.4','F2-14.8.1','F2-14.8.2'):return False
     if ident.startswith('F2-9W.'):return 'WIFI_IDENTIFICACAO' in ramos
     if ident.startswith('F2-11S.'):return 'SAUDE_DECLARADA' in ramos

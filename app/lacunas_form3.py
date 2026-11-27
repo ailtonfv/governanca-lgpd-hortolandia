@@ -80,6 +80,13 @@ def listar(estado):
         saida.append(dict(id='LAC-F3-3.47-'+codigo_controle(nome), pergunta='F3-3.47', bloco=13,
             natureza='lacuna', rotulo=f"O controle {nome} foi indicado, mas sua implementação é {controle['implementado']}.",
             tema='T16', acao_sugerida='', destino=''))
+    if estado.get('fornecedor_guarda_dados'):
+        from app.clausulas_lgpd import perguntas_fornecedor
+        for q in perguntas_fornecedor():
+            valores=estado.get('respostas_fornecedor',{}).get(q['id'],[])
+            if not set(valores)&{'NAO','PARCIALMENTE','A_CONFIRMAR'}:continue
+            confirmar='A_CONFIRMAR' in valores
+            saida.append(dict(id='LAC-'+q['id'],pergunta=q['id'],bloco=8,natureza='a_confirmar' if confirmar else 'lacuna',rotulo=q['enunciado'],tema=None,acao_sugerida='Criar/alterar cláusula contratual',destino='Confirmar com a Secretaria' if confirmar else ''))
     return saida
 
 

@@ -110,6 +110,7 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
                     for k in d:
                         if k.startswith(('F3-','F4-')) and k not in campos:campos[k]=d[k]
                     dados=dict(bloco=bloco,campos=campos,complementos={k.partition(':')[2]:d[k] for k in d if k.startswith('complemento:')})
+                    if ref.form==4:dados['clausulas_contrato']={k.partition(':')[2]:d[k] for k in d if k.startswith('clausula:')}
                     if ref.form == 3 and bloco == 13:
                         selecionados=campos.get('F3-3.47',[])
                         dados['controles_bloco13']={nome:dict(implementado=d.get('implementado:'+nome,''),evidencia=d.get('evidencia:'+nome,''))
@@ -304,8 +305,11 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
                     quando=str(data_local(ingresso_acao.ocorrido_em)) if ingresso_acao else ''))
             except (ValueError, PermissionError):pass
         from app.restrito_forms34 import pode_ler
+        from app.clausulas_lgpd import aplica4,itens4,pendencias4,catalogo as catalogo_clausulas
         from app.lacunas_form3 import listar as listar_lacunas, incoerencias, DESTINOS
         return paginas.TemplateResponse(request=request,name='forms34_bloco.html',status_code=status,context={
+            'clausulas_acao':itens4(e.get('fornecedor_guarda_dados',False)) if ref.form==4 and aplica4(e['respostas']) else [],
+            'clausulas_pendentes':pendencias4(e) if ref.form==4 else [],'clausulas_aviso':catalogo_clausulas()['aviso_fixo'],
             'lacunas':listar_lacunas(e) if ref.form==3 else [], 'destinos_lacunas':DESTINOS, 'alto_risco_referencia':alto_risco_referencia(e['respostas']),
             'incoerencias_controles':incoerencias(e) if ref.form==3 else [],
             'temas_acao':nomes_temas(s,e.get('temas')) if ref.form==4 else [],

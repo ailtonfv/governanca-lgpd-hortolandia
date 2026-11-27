@@ -34,6 +34,7 @@
 {% if numero in (1,2) %}
 {% set fatos = fatos_origem.get('respostas', {}) %}
 {% set unidade_origem = fatos.get('2.4.2') if fatos.get('2.4') == 'Não' else fatos.get('2.3') %}
+{% include '_clausulas_form2.html' %}
 {% for q in bloco.itens if not q.oculto_por_origem %}<fieldset id="{{ q.id }}" {% if q.edicao == "habilitada" %}{{ gatilhos(q) }}{% endif %} {% if q.edicao == "habilitada" and not q.ativa %}disabled{% endif %}><legend>{{ q.id }} · {{ q.enunciado|replace("na Seção 2","no bloco 2")|replace("Seção 2","Bloco 2") }} {{ marca(q,2,q.ativa if q.edicao=="habilitada" else ativa(q.id,'')) }}</legend>
 {% if q.edicao == 'habilitada' %}{{ ajuda(q, q.ativa) }}{% endif %}
 {% if q.id == 'F2-1.2' %}<p>Secretaria do Registro: <strong>{{ secretaria.nome }}</strong>.</p>{% endif %}

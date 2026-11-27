@@ -122,6 +122,9 @@ def ingressar(sessao, *, conta_id, comando_id, participacao_id, versao, form, ju
     if not any(v in ('Sim', 'SIM') for v in respostas.get('opcao:' + item, [])):
         raise ValueError(f'Confirme {item} no FORM 2 antes deste ato.')
     sinais = sinais_form2(p.conteudo or {})
+    from app.origem_form2 import ler_origem
+    from app.clausulas_lgpd import guarda_fornecedor
+    fornecedor=guarda_fornecedor(ler_origem(sessao,p.registro_id,p.snapshot_id)['conteudo'].get('respostas',{}))
     from app.gatilhos_juridicos34 import motivos
     gatilhos = motivos(p.conteudo or {})
     if form == 4 and sinais and not any(v in ('Sim', 'SIM') for v in respostas.get('opcao:F2-14.5', [])):
@@ -141,7 +144,7 @@ def ingressar(sessao, *, conta_id, comando_id, participacao_id, versao, form, ju
     if existente:
         raise ValueError('Esta versão já foi encaminhada; consulte o objeto existente.')
     obj = _criar(sessao, cmd, conta_id, p.registro_id, form, 2, fonte.id, chave,
-        dict(form=form, respostas={}, sinais=sinais, sinais_origem=sinais, origem_form2_id=p.id, situacao_form2=p.estado,
+        dict(form=form, respostas={}, respostas_fornecedor={k.removeprefix('opcao:'):v for k,v in respostas.items() if fornecedor and k.startswith('opcao:F2-9F.')},fornecedor_guarda_dados=fornecedor, sinais=sinais, sinais_origem=sinais, origem_form2_id=p.id, situacao_form2=p.estado,
              decisao_nao_encaminhar=justificativa, situacao='Em preenchimento',
              avaliacao=None, confirmacoes={}, triagem=None, triagem_confirmacoes={},
              prorrogacoes=0, prazo=None, executor_id=None, decisoes_pendentes={},
@@ -274,6 +277,10 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         novas=salvar(e['form'], anteriores, dados, e)
         e['contexto_copiado']={k:v for k,v in e.get('contexto_copiado',{}).items() if novas.get(k)==anteriores.get(k)}
         e['respostas'] = novas
+        if f3 and 'F3-3.46' in dados.get('campos',{}):e['revisao_texto_346']=True
+        if not f3 and dados.get('bloco')==2:
+            from app.clausulas_lgpd import validar4
+            e['clausulas_contrato']=validar4(novas,dados.get('clausulas_contrato',{}),e.get('fornecedor_guarda_dados',False))
         if f3 and dados.get('bloco') == 13:
             from app.lacunas_form3 import salvar_controles
             salvar_controles(e, dados)
@@ -532,7 +539,7 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         chave = f'f3:{obj.id}:v{fonte.sequencia_cadeia}'
         a = _criar(sessao, cmd, conta_id, obj.registro_id, 4, 3, fonte.id, chave,
             dict(form=4, respostas={'F4-4.9':e.get('respostas',{}).get('F3-3.60','')},
-                 prioridade_origem=e.get('respostas',{}).get('F3-3.60'),
+                 prioridade_origem=e.get('respostas',{}).get('F3-3.60'),fornecedor_guarda_dados=e.get('fornecedor_guarda_dados',False),
                  situacao='Em preenchimento', risco_id=obj.id,
                  faixa_origem=_faixa(e), motivo=motivo, prorrogacoes=0, prazo=None,
                  executor_id=None, decisoes_pendentes={}, escopos_restritos=[]))

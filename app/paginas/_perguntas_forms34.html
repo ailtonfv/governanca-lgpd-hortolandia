@@ -22,4 +22,5 @@
 <label>Observações<textarea name="observacoes_controles" maxlength="1000">{{ estado.get('observacoes_controles','') }}</textarea></label>
 {% endif %}
 {% endif %}</fieldset>{% endfor %}
+{% include '_clausulas_form4.html' %}
 {% if not bloqueio_edicao and (ref.form!=3 or bloco!=14) and pode_preencher %}<div class="acoes-fila-form2 barra-salvar-bloco"><button type="reset" class="botao-link-secundario">Descartar alterações</button><button class="botao-primario">Salvar bloco {{ bloco }}</button></div>{% endif %}</fieldset></form>

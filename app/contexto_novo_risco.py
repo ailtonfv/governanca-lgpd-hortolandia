@@ -8,4 +8,6 @@ def copiar(estado,codigo):
     respostas={k:deepcopy(v) for k,v in estado.get('respostas',{}).items() if k in ids}
     return dict(respostas=respostas,contexto_copiado={k:dict(codigo=codigo,versao=estado['versao']) for k in respostas},
         complementos={k:v for k,v in deepcopy(estado.get('complementos',{})).items() if k in respostas},
-        controles_bloco13=deepcopy(estado.get('controles_bloco13',{})),observacoes_controles=estado.get('observacoes_controles',''))
+        controles_bloco13=deepcopy(estado.get('controles_bloco13',{})),observacoes_controles=estado.get('observacoes_controles',''),
+        fornecedor_guarda_dados=estado.get('fornecedor_guarda_dados',False),
+        respostas_fornecedor=deepcopy(estado.get('respostas_fornecedor',{})))

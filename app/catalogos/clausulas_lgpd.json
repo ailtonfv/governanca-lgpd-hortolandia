@@ -1,0 +1,199 @@
+{
+  "versao": "CLAUSULAS-LGPD-v1-2026-11-25",
+  "fonte": {
+    "documento": "Cartilha LGPD REV30.23 (candidata de 24/11/2026)",
+    "topico": "Cláusulas orientativas para terceiros (seção 11.3; o sistema cita pelo tópico, nunca pelo número)",
+    "extraido_por": "Claude, 25/11/2026, com as marcas de revisão aceitas; texto literal"
+  },
+  "situacao": "Texto orientativo, não minuta. A Procuradoria ou o Jurídico e Compras/Contratos validam. Ajustes de texto se fazem neste arquivo, sem mexer em código.",
+  "aviso_fixo": "Quadro orientativo, não minuta. Jurídico e Compras/Contratos validam o texto.",
+  "links": {
+    "topico_contratos": {
+      "chave": "CART-28",
+      "rotulo": "Na Cartilha: Contratos, terceiros, OSCs e Cultura"
+    },
+    "topico_operador": {
+      "chave": "CART-11",
+      "rotulo": "Na Cartilha: Operador, terceiros, OSCs e entidades parceiras"
+    },
+    "anexo_e": {
+      "chave": "CART-52 (proposta; ainda fora do mapa de 24/11)",
+      "rotulo": "Na Cartilha: Anexo E — Modelo orientativo de cláusulas para fornecedor que trata e guarda dados pessoais"
+    }
+  },
+  "abertura": "O quadro abaixo deve ser adaptado ao objeto concreto e submetido à análise e validação da Procuradoria ou do Jurídico competente antes da formalização.",
+  "como_usar": {
+    "introducao": "Antes das cláusulas, quatro passos organizam o trabalho de quem planeja, contrata ou fiscaliza.",
+    "passos": [
+      {
+        "n": 1,
+        "titulo": "Regra geral, para todo contrato (Parte A).",
+        "texto": "Identifique apenas os signatários necessários. Separe o que fica nos autos (habilitação, procurações, certidões, documentos de fiscalização), o que vai no instrumento assinado (identificação funcional e representação necessária) e o que vai para a publicação (PNCP, portal municipal, Diário Oficial). Não publique CPF, RG, endereço residencial nem outros dados excedentes de signatários, preservando a publicidade que a lei exige."
+      },
+      {
+        "n": 2,
+        "titulo": "A pergunta que decide.",
+        "texto": "A empresa, entidade ou sistema trata dados pessoais em nome do Município, segundo as instruções dele? Exemplos: compra de mobiliário, não; software que processa cadastros de munícipes, sim; OSC que executa projeto com inscrição de participantes, depende: se atua por orientação do Município, sim; se trata os dados para finalidade própria, a relação é outra (tópico \"Contratos, terceiros, OSCs e Cultura\")."
+      },
+      {
+        "n": 3,
+        "titulo": "Se a resposta for sim (Parte B),",
+        "texto": "use os temas do quadro abaixo, de preferência já no Termo de Referência ou no edital. Nos contratos em vigor sem essas previsões, o gestor ou fiscal registra a situação e encaminha à unidade competente (tópico \"Operador, terceiros, OSCs e entidades parceiras\")."
+      },
+      {
+        "n": 4,
+        "titulo": "É quadro orientativo, não minuta.",
+        "texto": "A Procuradoria ou o Jurídico e Compras/Contratos validam o texto de cada instrumento. O sistema mostra este mesmo roteiro no FORM 2, quando houver terceiro, e no FORM 4, nas ações sobre cláusula contratual. Quando o fornecedor também trata e guarda os dados, use o modelo do Anexo E (seção 11.6)."
+      }
+    ],
+    "adaptacao_para_tela": {
+      "passo": 4,
+      "texto_tela": "A Procuradoria ou o Jurídico e Compras/Contratos validam o texto de cada instrumento. Quando o fornecedor também trata e guarda os dados, use o modelo do Anexo E.",
+      "motivo": "Na tela, saem a frase que descreve o próprio sistema e o número de seção (regra de 23/11: citar a Cartilha por tópico). Nenhuma outra palavra foi alterada."
+    }
+  },
+  "parte_a": {
+    "titulo": "Parte A — Regra geral, para todo contrato",
+    "quando": "Sempre que houver terceiro (FORM 1 ou FORM 2).",
+    "texto": "Identifique apenas os signatários necessários. Separe o que fica nos autos (habilitação, procurações, certidões, documentos de fiscalização), o que vai no instrumento assinado (identificação funcional e representação necessária) e o que vai para a publicação (PNCP, portal municipal, Diário Oficial). Não publique CPF, RG, endereço residencial nem outros dados excedentes de signatários, preservando a publicidade que a lei exige."
+  },
+  "pergunta_que_decide": {
+    "pergunta_form2": "A empresa trata dados em nome do Município?",
+    "opcoes": [
+      "Sim",
+      "Não",
+      "A confirmar"
+    ],
+    "orientacao": "A empresa, entidade ou sistema trata dados pessoais em nome do Município, segundo as instruções dele? Exemplos: compra de mobiliário, não; software que processa cadastros de munícipes, sim; OSC que executa projeto com inscrição de participantes, depende: se atua por orientação do Município, sim; se trata os dados para finalidade própria, a relação é outra (tópico \"Contratos, terceiros, OSCs e Cultura\").",
+    "efeito": "Com Sim, a Parte B fica destacada."
+  },
+  "parte_b": {
+    "titulo": "Parte B — Quando a empresa trata dados em nome do Município",
+    "orientacao": "use os temas do quadro abaixo, de preferência já no Termo de Referência ou no edital. Nos contratos em vigor sem essas previsões, o gestor ou fiscal registra a situação e encaminha à unidade competente (tópico \"Operador, terceiros, OSCs e entidades parceiras\").",
+    "temas": [
+      {
+        "codigo": "B01",
+        "tema": "Finalidade e instruções",
+        "texto": "Tratar dados apenas para as finalidades necessárias à execução do objeto e conforme instruções documentadas do Município, ressalvadas obrigações legais próprias devidamente identificadas."
+      },
+      {
+        "codigo": "B02",
+        "tema": "Segurança e incidentes",
+        "texto": "Adotar medidas técnicas e administrativas adequadas e comunicar, sem atraso indevido, incidentes relacionados aos dados tratados."
+      },
+      {
+        "codigo": "B03",
+        "tema": "Subcontratação",
+        "texto": "Subcontratados com acesso a dados devem estar sujeitos a obrigações compatíveis, com identificação e controle quando aplicável."
+      },
+      {
+        "codigo": "B04",
+        "tema": "Acesso, exportação e portabilidade",
+        "texto": "O Município deve poder acessar e obter os dados e informações necessários à execução, fiscalização e continuidade do objeto durante a vigência, inclusive em formato estruturado, reutilizável e apto à migração, conforme a natureza do sistema."
+      },
+      {
+        "codigo": "B05",
+        "tema": "Continuidade e encerramento",
+        "texto": "Término, rescisão ou substituição do fornecedor não deve impedir a continuidade do serviço nem a recuperação de dados, históricos, metadados e relações necessárias."
+      },
+      {
+        "codigo": "B06",
+        "tema": "Entrega e eliminação",
+        "texto": "A eliminação ocorre somente após entrega integral, validação e aceite pelo Município, ressalvadas hipóteses legais de conservação; deve alcançar, quando tecnicamente aplicável, produção, homologação, testes, arquivos temporários e cópias de segurança."
+      },
+      {
+        "codigo": "B07",
+        "tema": "Evidência",
+        "texto": "O terceiro emite Declaração/Termo de Eliminação com escopo, data, ambientes abrangidos e eventual informação mantida por obrigação legal. A declaração não afasta responsabilidade por uso, divulgação ou permanência indevida posterior."
+      },
+      {
+        "codigo": "B08",
+        "tema": "Registros e evidências",
+        "texto": "Manter, quando aplicável, registros suficientes das operações realizadas no contrato e disponibilizar evidências necessárias à fiscalização e à prestação de contas, inclusive sobre acessos, compartilhamentos, incidentes, medidas corretivas, devolução e eliminação."
+      },
+      {
+        "codigo": "B09",
+        "tema": "Uso próprio e bases derivadas",
+        "texto": "Não reutilizar dados para finalidade própria. Eventual uso de dados anonimizados, estatísticas, bases derivadas ou produtos informacionais depende de análise e, quando cabível, de previsão contratual específica."
+      },
+      {
+        "codigo": "B10",
+        "tema": "Instruções incompatíveis",
+        "texto": "Observar a legislação aplicável e comunicar ao Município instruções que o contratado considere incompatíveis com suas obrigações de proteção de dados."
+      }
+    ]
+  },
+  "fornecedor_guarda_dados": {
+    "titulo": "Quando o fornecedor do software também guarda os dados",
+    "quando": "Sub-bloco do FORM 2, bloco 9 (Lote 16, A12.5): F1-11.2 indica infraestrutura do fornecedor ou F1-8.2.2 = Sim.",
+    "introducao": "É comum: o sistema da Secretaria roda e armazena a base no ambiente da própria empresa, porque a Prefeitura não tem onde hospedá-la. Nesse caso, além dos temas do quadro acima, o instrumento deve tratar de:",
+    "temas": [
+      {
+        "codigo": "F1",
+        "tema": "Onde os dados ficam",
+        "texto": "Ambiente próprio do fornecedor ou nuvem de outra empresa (o que é subcontratação), e em que país. Mudança de local depende de aviso prévio ao Município.",
+        "pergunta_form2": "F2-9F.1"
+      },
+      {
+        "codigo": "F2",
+        "tema": "Cópia sob guarda do Município",
+        "texto": "Cópia integral, periódica e em formato aberto, entregue ao Município durante todo o contrato, e não só no fim. Quem só tem os dados no fornecedor depende dele para continuar o serviço.",
+        "pergunta_form2": "F2-9F.2"
+      },
+      {
+        "codigo": "F3",
+        "tema": "Acesso da equipe do fornecedor",
+        "texto": "Quem da empresa pode ver os dados (suporte, desenvolvimento), por qual motivo, com registro individual e consultável pelo Município. Dados reais não vão para ambiente de teste sem anonimização.",
+        "pergunta_form2": "F2-9F.3"
+      },
+      {
+        "codigo": "F4",
+        "tema": "Separação dos clientes",
+        "texto": "Os dados do Município ficam separados dos de outros clientes da empresa, e não alimentam o produto, estatísticas ou outros clientes.",
+        "pergunta_form2": "F2-9F.4"
+      },
+      {
+        "codigo": "F5",
+        "tema": "Proteção técnica",
+        "texto": "Criptografia no armazenamento e na transmissão, cópias de segurança testadas e controle de acesso por perfil.",
+        "pergunta_form2": "F2-9F.5"
+      },
+      {
+        "codigo": "F6",
+        "tema": "Aviso de incidente ao Município",
+        "texto": "Prazo curto, definido no contrato, compatível com os 3 dias úteis que a Prefeitura tem para comunicar a ANPD e os titulares.",
+        "pergunta_form2": "F2-9F.6"
+      },
+      {
+        "codigo": "F7",
+        "tema": "Fiscalização",
+        "texto": "Direito de o Município pedir evidências (relatórios de acesso, de cópias, de incidentes) e de auditar, diretamente ou por terceiro.",
+        "pergunta_form2": "F2-9F.7"
+      }
+    ],
+    "acesso_do_municipio": {
+      "codigo": "F2a",
+      "pergunta_form2": "F2-9F.2a",
+      "origem": "C145 e Anexo E, Cláusula 2. O texto vem da pergunta 2a do Lote 16 (A12.5); a Cartilha trata do tema no Anexo E."
+    },
+    "nota_ripd": {
+      "titulo": "Quanto maior e mais sensível a base, mais cedo vale o RIPD.",
+      "texto": "Base com muitas pessoas em situação de vulnerabilidade e muitos atributos por pessoa reúne critérios de alto risco: a triagem de RIPD e a necessidade de cada atributo devem ser examinadas antes da contratação ou na renovação."
+    }
+  },
+  "lista_conferencia_form4": {
+    "quando": "Ações F4-4.4 \"Criar/alterar cláusula contratual\" e \"Aditar contrato\".",
+    "enunciado": "O contrato já tem previsão sobre…",
+    "opcoes": [
+      "Sim",
+      "Não",
+      "A confirmar"
+    ],
+    "itens": [
+      "parte_b.temas[*]",
+      "fornecedor_guarda_dados.temas[*] (só com o sub-bloco do fornecedor aberto)",
+      "fornecedor_guarda_dados.acesso_do_municipio (idem)"
+    ],
+    "regra": "Cada item mostra o nome do tema e, abaixo, o texto orientativo. Os itens com Não ou A confirmar aparecem na descrição da ação. Com o sub-bloco do fornecedor aberto, mostrar o link do Anexo E. O sistema não gera minuta."
+  }
+}
