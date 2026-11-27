@@ -83,7 +83,7 @@ def test_da51_sem_habilitado_estado_na_fila_e_dpo(sessao, principal):
 def test_d1_dezoito_complementos_contam_so_depois_do_texto():
     from app.complementos_form2 import ITENS, codigos_com_complemento, falta_complemento
     itens = {q['id']:q for n in range(4,15) for q in definicao_revisao(n)['itens']}
-    assert len(ITENS) == 18
+    assert len(ITENS) == 17 and 'F2-10.1' not in ITENS  # A11: controlador fixo, sem complemento
     for chave in ITENS:
         q = itens[chave]; codigos = codigos_com_complemento(q)
         assert codigos, chave

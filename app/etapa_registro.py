@@ -85,4 +85,8 @@ def etapa_atual(sessao, registro, conta_id, fluxo):
     resultado['selos_condicoes']=[texto for item in objetos if item['form']==3 if (texto:=selo(sessao,item['estado']))]
     resultado.update(instrumentos=instrumentos, minhas=minhas, form1_confirmado=fluxo['atual']=='confirmar')
     if resultado['form']=='Ciclo completo': resultado['minhas']=[]
+    if registro.estado_atual=='encerrado_nao_cabe':
+        resultado.update(form='Encerrado',situacao='Não cabe Registro — histórico somente leitura',responsavel=None,minhas=[])
+        for lista in instrumentos.values():
+            for item in lista:item['situacao']='Histórico somente leitura'
     return resultado

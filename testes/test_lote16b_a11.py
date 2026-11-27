@@ -34,11 +34,17 @@ def test_a11_concluir_encaminha_uma_vez_e_salvar_nao(sessao,entrada):
     from app.modelos import IdentidadeForms34
     from sqlalchemy import select
     assert not sessao.scalars(select(IdentidadeForms34).where(IdentidadeForms34.registro_id==entrada.registro_id)).all()
+    from app.fila_form2 import salvar_bloco
+    salvar_bloco(sessao,conta_id='CONTA-B1',comando_id=str(uuid4()),participacao_id=entrada.id,versao=entrada.versao,bloco=14,campos={'opcao:F2-14.5':['SIM'],'opcao:F2-14.6':['SIM']})
+    sessao.commit()
+    assert not sessao.scalars(select(IdentidadeForms34)).all()
     comando=str(uuid4());v=entrada.versao
     r=executar(sessao,conta_id='CONTA-B1',comando_id=comando,participacao_id=entrada.id,acao='concluir',versao=v)
     sessao.commit()
     ids=entrada.conteudo['conclusao_analise']['encaminhamentos']
     assert len(ids)==2 and len(set(ids))==2
+    from app.fluxo_forms34 import estado
+    assert all(estado(sessao,i)['situacao_form2']=='concluida' for i in ids)
     repetido=executar(sessao,conta_id='CONTA-B1',comando_id=comando,participacao_id=entrada.id,acao='concluir',versao=v)
     assert repetido['permitido'] and repetido['reexecutado'] and repetido['participacao_id']==r['participacao_id']
     assert len(sessao.scalars(select(IdentidadeForms34).where(IdentidadeForms34.registro_id==entrada.registro_id)).all())==2
@@ -49,7 +55,8 @@ def test_a11_encerrar_preserva_e_recusa_ato(sessao,entrada):
     from app.fluxo_forms34 import consultar
     from app.modelos import Registro
     obj=entrar(sessao,entrada)
-    entrada.conteudo={**entrada.conteudo,'respostas_etapa1':{**entrada.conteudo['respostas_etapa1'],'F2-1.3':'NAO_CABE_REGISTRO'}}
+    from app.fila_form2 import salvar_bloco
+    salvar_bloco(sessao,conta_id='CONTA-B1',comando_id=str(uuid4()),participacao_id=entrada.id,versao=entrada.versao,bloco=1,campos={'F2-1.3':'NAO_CABE_REGISTRO'})
     sessao.commit()
     with pytest.raises(ValueError,match='justificativa'):
         executar(sessao,conta_id='CONTA-B1',comando_id=str(uuid4()),participacao_id=entrada.id,acao='encerrar_nao_cabe',versao=entrada.versao)
@@ -57,6 +64,14 @@ def test_a11_encerrar_preserva_e_recusa_ato(sessao,entrada):
     sessao.commit()
     assert sessao.get(Registro,entrada.registro_id).estado_atual=='encerrado_nao_cabe'
     assert consultar(sessao,'CONTA-B1',obj)[0].id==obj
+    from testes.apoio_entrada import ClienteAposApresentacao as TestClient
+    from app.main import app
+    from app.central_instrumentos import itens_em_andamento
+    pagina=TestClient(app).get(f'/forms34/{obj}/blocos/14?conta_id=CONTA-B1')
+    assert pagina.status_code==200 and 'Registro encerrado' in pagina.text
+    assert 'data-ato34=' not in pagina.text
+    listas=itens_em_andamento(sessao,'CONTA-B1')
+    assert all(not i['pendente'] for lista in listas.values() for i in lista if obj in i['href'])
     with pytest.raises(ValueError,match='encerrado'):ato(sessao,obj,'adicionar_risco',motivo='Novo fictício')
 
 def test_a11_controlador_somente_leitura():

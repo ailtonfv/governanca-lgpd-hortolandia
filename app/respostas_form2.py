@@ -81,8 +81,8 @@ def _definicao_bloco(numero, contrato, catalogo):
             if item["id"] in MODOS_IDENTIFICACAO:
                 item.update(edicao="habilitada", modo=MODOS_IDENTIFICACAO[item["id"]])
     if numero==1:
-        q=next(q for q in itens if q['id']=='F2-1.3')
-        q['alternativas'].append(dict(id=q['id'],codigo='NAO_CABE_REGISTRO',rotulo='Não cabe Registro (situação única)',complemento='',tratamento=''))
+        q=next((q for q in itens if q['id']=='F2-1.3'),None)
+        if q is not None:q['alternativas'].append(dict(id=q['id'],codigo='NAO_CABE_REGISTRO',rotulo='Não cabe Registro (situação única)',complemento='',tratamento=''))
     from app.classificacao_analise_form2 import classificar
     for q in itens:
         classificar(q)

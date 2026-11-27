@@ -23,4 +23,5 @@ def resumo(sessao, obj, e, papeis, pessoa_id):
         situacao = f'Ação concluída automaticamente em {horario(ultimo.ocorrido_em)}, após a verificação aprovada'
     if e.get('aprendizagem_devolvida'):
         situacao = 'Aprendizagem devolvida à Secretaria para ajustes em '+horario(e['aprendizagem_devolvida']['em'])
+    if e.get('registro_encerrado'):situacao='Registro encerrado — histórico somente leitura'
     return dict(titulo=titulo(obj,e), situacao=situacao, **proxima)

@@ -31,6 +31,9 @@ def classificar(form, estado, papeis=(), pessoa_id=None):
                     ato=ato, botao=titulo or 'Acompanhar',
                     pendencia=titulo or 'Nenhuma providência sua neste momento')
 
+    if estado.get('registro_encerrado'):
+        return resultado('historico',1,titulo='Consultar histórico')
+
     if form == 1:
         for p in estado.get('providencias', []):
             if p['categoria'] == 'conferencia_form1':

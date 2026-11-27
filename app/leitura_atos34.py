@@ -160,6 +160,7 @@ def situacao_bloco(form,n,e):
 
 
 def situacao_atual(e):
+    if e.get('registro_encerrado'):return 'Registro encerrado — histórico somente leitura'
     if e.get('form')==3:
         if e.get('concluida'):return e['situacao']
         if e.get('triagem') or e.get('triagem_sem_consenso'):return situacao_bloco(3,15,e)

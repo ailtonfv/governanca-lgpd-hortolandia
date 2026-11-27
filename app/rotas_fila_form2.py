@@ -370,6 +370,7 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
         ParticipacaoForm2.unidade_id.in_(gestores),
         ParticipacaoForm2.estado != "concluida").order_by(ParticipacaoForm2.responsavel_id.is_not(None), ParticipacaoForm2.entrada_em)).all() if gestores else []
     from app.modelos import Comando, VersaoForm1Integral
+    gerenciaveis=[p for p in gerenciaveis if sessao.get(Registro,p.registro_id).estado_atual!='encerrado_nao_cabe']
     referencias = {p.id: rotulo_apresentacao(sessao.get(VersaoForm1Integral, p.snapshot_id)) for p in gerenciaveis}
     chave = request.query_params.get("atribuicao")
     comando = sessao.get(Comando, chave) if chave else None

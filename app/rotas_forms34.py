@@ -320,7 +320,7 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
         bloqueio_edicao = motivo_bloqueio(e, bloco)
         if registro.estado_atual=='encerrado_nao_cabe':
             bloqueio_edicao='Registro encerrado: instrumentos preservados somente para leitura.'
-            atos=[];ato_proposta=None;ato_principal=None;outros_atos=[];destaques=[]
+            atos=[];proposta=None;principal=None;restantes=[];destaques=[]
         vinculadas = []
         for aid in e.get('acoes', []):
             try:

@@ -54,6 +54,7 @@ from app.modelos import (AtribuicaoForm1Integral, ConferenciaInternaForm1Integra
 
 
 ROTULOS_ESTADO = {
+    "encerrado_nao_cabe": "Encerrado — não cabe Registro",
     "em_andamento": "Em andamento",
     "em_validacao": "Em validação",
     "em_execucao": "Em execução",

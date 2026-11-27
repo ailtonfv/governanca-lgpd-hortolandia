@@ -202,11 +202,16 @@ def executar(sessao, *, conta_id, comando_id, participacao_id, acao, versao,
                 from app.resultado_analise_form2 import resultado_salvo
                 texto = resultado_salvo(p.conteudo or {})
                 from app.encaminhamento_conclusao_form2 import encaminhar
-                encaminhamentos=encaminhar(sessao,p,conta_id,comando.id)
+                encaminhamentos=[]
                 p.conteudo = {**(p.conteudo or {}), 'conclusao_analise': {
                     'pessoa_id': pessoa.id, 'em': agora().isoformat(), 'snapshot_id': p.snapshot_id,
                     'versao': p.versao, 'resultado': texto.strip(), 'conferencia_r17': conferida, 'encaminhamentos':encaminhamentos,
                     'aviso': 'Conclusão da etapa de análise; não equivale a homologação jurídica.'}}
+                p.estado='concluida'
+                p.concluida_em=agora()
+                sessao.flush()
+                encaminhamentos=encaminhar(sessao,p,conta_id,comando.id)
+                p.conteudo={**p.conteudo,'conclusao_analise':{**p.conteudo['conclusao_analise'],'encaminhamentos':encaminhamentos}}
             if not texto.strip():
                 raise ValueError("Registre a manifestação antes de concluir.")
             p.manifestacao = texto.strip()

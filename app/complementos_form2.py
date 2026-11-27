@@ -1,6 +1,6 @@
 """D1: salvamento parcial permitido; complemento conta antes de consolidar."""
 ITENS = frozenset(('F2-5.2','F2-5.6.1','F2-6.5.1','F2-7.4.1','F2-8.2','F2-8.6',
-    'F2-9W.2','F2-9W.3','F2-9W.5','F2-10.1','F2-11S.2','F2-12.2','F2-12.3',
+    'F2-9W.2','F2-9W.3','F2-9W.5','F2-11S.2','F2-12.2','F2-12.3',
     'F2-12A.1.1','F2-13.6.1','F2-9.6.1','F2-9.6.2','F2-9.7.2'))
 
 

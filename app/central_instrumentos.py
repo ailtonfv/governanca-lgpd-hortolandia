@@ -22,7 +22,7 @@ def itens_em_andamento(sessao, conta_id):
     painel = carregar_painel(sessao, conta_id)
     unidades_apa = unidades_em_que_e_apa_atual(sessao, pessoa.id)
     for r in (painel or {}).get('registros', []):
-        if r['estado_codigo'] in ('concluido', 'cancelado'):
+        if r['estado_codigo'] in ('concluido', 'cancelado', 'encerrado_nao_cabe'):
             continue
         registro = sessao.get(Registro, r['id'])
         estado = {**r, 'designar_arp': r['unidade_id'] in unidades_apa and not sessao.get(AtribuicaoForm1Integral, r['id'])}
@@ -38,7 +38,7 @@ def itens_em_andamento(sessao, conta_id):
             (ParticipacaoForm2.tipo == 'dpo') & ParticipacaoForm2.responsavel_id.is_(None)),
         ParticipacaoForm2.estado.in_(['aguardando', 'em_atendimento'])).order_by(Registro.codigo_lgpd, ParticipacaoForm2.id)).all()
     for p, r in linhas:
-        if not autorizado(sessao, pessoa, p):
+        if r.estado_atual=='encerrado_nao_cabe' or not autorizado(sessao, pessoa, p):
             continue
         tipo = {'servico': 'Serviço', 'processo': 'Processo', 'atividade': 'Atividade'}.get(r.tipo_objeto, r.tipo_objeto)
         nome = nome_objeto_em_analise(sessao, r.id, p.snapshot_id)

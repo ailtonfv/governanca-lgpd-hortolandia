@@ -66,7 +66,10 @@ def consultar(sessao, conta_id, identidade_id):
     exigir(papeis, 'secretaria', 'dpo', 'secretario', 'gabinete', 'verificador', 'relator', 'executor_unidade', 'leitor_unidade')
     from app.condicoes_aceitacao34 import enriquecer
     from app.criterios_form3 import projetar_guarda
-    return obj, ref, projetar_guarda(sessao,ref,enriquecer(sessao, estado(sessao, obj.id))), pessoa, papeis, uid
+    from app.modelos import Registro
+    leitura=projetar_guarda(sessao,ref,enriquecer(sessao, estado(sessao, obj.id)))
+    leitura['registro_encerrado']=sessao.get(Registro,obj.registro_id).estado_atual=='encerrado_nao_cabe'
+    return obj, ref, leitura, pessoa, papeis, uid
 
 
 def _gravar_estado(sessao, comando, obj, acao, e):

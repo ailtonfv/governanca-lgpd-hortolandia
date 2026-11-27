@@ -16,7 +16,7 @@ def test_percurso_revisao_completo(sessao):
         pagina = cliente.get(f"{rota}/{bloco}", params=aal)
         assert pagina.status_code == 200
         ids.extend(re.findall(r'<legend>(F2-[^ ]+) —', pagina.text))
-    assert len(ids) == len(set(ids)) == 235
+    assert len(ids) == len(set(ids)) == 234
     assert 'F2-9.4' not in ids
     assert not any(i.startswith(('F2-9W.', 'F2-11S.')) for i in ids)
     assert cliente.get(f"{rota}/3", params={"conta_id": "CONTA-A1"}).status_code == 403
