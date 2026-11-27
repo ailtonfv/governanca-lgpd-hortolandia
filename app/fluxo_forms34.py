@@ -199,6 +199,14 @@ def _sem_pendencia(e):
     return not e.get('decisoes_pendentes')
 
 
+def _abrir_revisao_risco(e):
+    if e.get('revisao_aberta') and 'blocos_revisados' in e:
+        return
+    if e.get('conclusao'):
+        e.setdefault('conclusoes_anteriores', []).append(e.pop('conclusao'))
+    e.update(revisao_aberta=True, concluida=False, blocos_revisados=[], nova_nota_confirmada=False)
+
+
 def em_atraso(e, hoje=None):
     if not e.get('prazo') or e.get('verificada') or e.get('cancelada'):
         return False
@@ -227,11 +235,11 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
     agora = agora_utc().isoformat()
     f3 = e['form'] == 3
     from app.etapas_forms34 import motivo_bloqueio, conferencia_etapa, validar_verificacao
-    if f3 and e.get('conclusao') and acao not in ('revisar_avaliacao', 'informar_ripd', 'confirmar_ripd'):
+    if f3 and e.get('conclusao') and acao not in ('abrir_reavaliacao', 'revisar_avaliacao', 'informar_ripd', 'confirmar_ripd'):
         raise ValueError('Avaliação concluída: use Reavaliar o risco para abrir uma nova rodada.')
     if 'dpo' in papeis and acao in ('aceitar_residual','aprovar_plano','decidir_prorrogacao','cancelar','executar_medida','verificar'):
         raise PermissionError('O DPO não exerce estes atos de autoridade, execução ou verificação.')
-    if acao in ('propor_avaliacao', 'revisar_avaliacao', 'confirmar_avaliacao', 'propor_triagem', 'confirmar_triagem',
+    if acao in ('abrir_reavaliacao', 'propor_avaliacao', 'revisar_avaliacao', 'confirmar_avaliacao', 'propor_triagem', 'confirmar_triagem',
                 'sem_consenso', 'aceitar_residual', 'concluir_avaliacao', 'encaminhar_acao', 'informar_ripd', 'confirmar_ripd') and not f3:
         raise ValueError('Ato exclusivo do FORM 3.')
     if acao in ('planejar', 'aprovar_plano', 'executar_medida', 'verificar', 'pedir_prorrogacao',
@@ -293,12 +301,19 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         if f3:
             e['sinais'] = sorted(set(e.get('sinais_origem', [])) | ({'F3-3.10'} if e['respostas'].get('F3-3.10') else set()) |
                 ({'F3-3.54'} if e['respostas'].get('F3-3.54') in ('Sim','Requer análise','A confirmar') else set()))
+            if e.get('revisao_aberta') and 'blocos_revisados' in e:
+                e['blocos_revisados'] = sorted(set(e['blocos_revisados']) | {dados['bloco']})
     elif acao == 'abrir_detalhes':
         exigir(papeis, 'secretaria', 'dpo')
         bloco = dados.get('bloco')
         if type(bloco) is not int or not 1 <= bloco <= (16 if f3 else 9):
             raise ValueError('Bloco inválido.')
         e.setdefault('aberturas', {})[str(bloco)] = _texto(dados, 'motivo', 300)
+    elif acao == 'abrir_reavaliacao':
+        exigir(papeis, 'secretaria', 'dpo')
+        if not _consenso(e, 'avaliacao'):
+            raise ValueError('A abertura de nova rodada exige uma nota conjunta anterior.')
+        _abrir_revisao_risco(e)
     elif acao in ('propor_avaliacao','revisar_avaliacao'):
         if acao=='propor_avaliacao' and e.get('avaliacao'):
             raise ValueError('Para corrigir a avaliação registrada, use Revisar proposta.')
@@ -309,7 +324,8 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         if alvo.get('avaliacao_sem_consenso'):
             raise ValueError('Sem consenso: aguarda deliberação do Comitê antes de reapresentar.')
         lado = _lado(papeis)
-        if acao == 'revisar_avaliacao':e['revisao_aberta'] = True
+        if acao == 'revisar_avaliacao' and vigente:
+            _abrir_revisao_risco(e)
         nova = dict(evento=_texto(dados, 'evento'), causa=_texto(dados, 'causa'),
             consequencia=_texto(dados, 'consequencia'), avaliacao=propor_avaliacao(dados),
             avaliacao_proponente=dict(lado=lado,pessoa_id=pessoa.id,em=agora),
@@ -341,6 +357,7 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
             e['triagem_confirmacoes'] = {}
             e['deliberacoes_rodada'] = {}
             e['acoes_rodada'] = []
+            e['nova_nota_confirmada'] = True
         e['situacao'] = 'Avaliação conjunta registrada' if _consenso(e, campo) else 'Aguardando confirmação'
     elif acao == 'sem_consenso':
         campo = dados.get('campo')
@@ -488,6 +505,12 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
                 e.setdefault('acoes_rodada',[]).append(a.id)
     elif acao == 'concluir_avaliacao':
         exigir(papeis, 'secretaria', 'dpo')
+        if e.get('revisao_aberta') and 'blocos_revisados' in e:
+            faltam = sorted(set(range(1, 17)) - set(e['blocos_revisados']))
+            if faltam:
+                raise ValueError('Salve os blocos a revisar nesta rodada: ' + ', '.join(map(str, faltam)) + '.')
+            if not e.get('nova_nota_confirmada'):
+                raise ValueError('Confirme a nova nota conjunta antes de concluir esta rodada.')
         if not _consenso(e, 'avaliacao'):
             raise ValueError('Aguardando confirmação conjunta; medidas de proteção continuam disponíveis.')
         if exige_triagem(e['avaliacao'], e.get('sinais')) and not _consenso(e, 'triagem'):
@@ -613,9 +636,7 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
                 re = estado(sessao, risco.id) if risco else None
                 if opcao == 'reavaliar':
                     if not risco:raise ValueError('Esta ação não tem risco de origem; use nova providência.')
-                    if re.get('conclusao'):re.setdefault('conclusoes_anteriores', []).append(re.pop('conclusao'))
-                    re['concluida'] = False
-                    re['revisao_aberta'] = True
+                    _abrir_revisao_risco(re)
                     re['reavaliacao_solicitada'] = dict(acao_id=obj.id,pessoa_id=pessoa.id,em=agora,justificativa=justificativa)
                     _gravar_estado(sessao,cmd,risco,'reavaliacao_solicitada',re)
                     destino_id = risco.id

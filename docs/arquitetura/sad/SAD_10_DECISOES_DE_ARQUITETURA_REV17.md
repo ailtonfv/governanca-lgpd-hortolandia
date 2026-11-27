@@ -1138,6 +1138,8 @@ Encaminhamento do FORM 2 exige questionário pronto para encaminhar. Mantêm-se 
 
 A avaliação conjunta confirmada continua vigente durante uma reavaliação. A nova proposta é guardada separadamente, com autoria e data, aguardando confirmação da outra parte. Matriz, faixa e atos dependentes continuam usando a avaliação vigente. Com a confirmação conjunta, a nova avaliação substitui a anterior; sem consenso, a vigente permanece e a divergência é submetida ao Comitê. Os eventos anteriores não são reescritos. Não há migração.
 
+Complemento C254, decidido em 27/11/2026. A nova rodada começa com as respostas editáveis da rodada anterior. Os 16 blocos exigem salvamento na nova rodada e a conclusão exige nova nota conjunta e nova decisão do residual. A nota anterior permanece vigente até a confirmação da nova proposta.
+
 Preservadas as competências e condições de aceitação. O tratamento já existente dos atos dependentes (nova aceitação, manifestações e triagem após substituição da avaliação) é aplicado somente na efetiva confirmação da nova nota, não durante a proposta. A aceitação anterior permanece documentada no histórico. Não foi criada regra especial para mudanças de faixa.
 
 

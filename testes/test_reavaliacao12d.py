@@ -20,6 +20,19 @@ def revisar(s,obj):
     ato(s,obj,'revisar_avaliacao',evento='Novo evento fictício',causa='Nova causa fictícia',
         consequencia='Nova consequência fictícia',p=5,i=5,pr=5,ir=5,controles=[],justificativa='Nova avaliação fictícia')
 
+def test_g9_abertura_preserva_respostas_e_cobra_revisao_por_bloco(sessao, entrada):
+    obj = preparar(sessao, entrada)
+    ato(sessao, obj, 'salvar_bloco', bloco=6, campos={'F3-3.18': 'Sim'})
+    ato(sessao, obj, 'abrir_reavaliacao')
+    assert estado(sessao, obj)['respostas']['F3-3.18'] == 'Sim'
+    assert estado(sessao, obj)['blocos_revisados'] == []
+    html = TestClient(app).get(f'/forms34/{obj}/blocos/6?conta_id=CONTA-B1').text
+    assert 'A revisar' in html and 'Salvar bloco 6' in html
+    ato(sessao, obj, 'salvar_bloco', bloco=6, campos={'F3-3.18': 'Não'})
+    assert estado(sessao, obj)['blocos_revisados'] == [6]
+    with pytest.raises(ValueError, match='Salve os blocos a revisar'):
+        ato(sessao, obj, 'concluir_avaliacao')
+
 def test_vigente_preservada_durante_proposta_e_matriz(sessao,entrada):
     obj=preparar(sessao,entrada);antes=deepcopy(estado(sessao,obj));revisar(sessao,obj);e=estado(sessao,obj)
     for k in ('avaliacao','avaliacao_confirmacoes','triagem','triagem_confirmacoes','aceitacao','evento','causa','consequencia'):

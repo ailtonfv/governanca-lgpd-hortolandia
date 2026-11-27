@@ -135,7 +135,8 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
                                   versao=int(d.get('versao','0')),acao=acao,dados=dados)
                 if not r.get('permitido'):raise ValueError(r.get('motivo'))
                 s.commit()
-                return RedirectResponse(url_objeto(r['identidade_id'],conta_id,bloco if r['identidade_id']==obj.id else 1,registrado=d.get('comando_id')),303)
+                destino_bloco = bloco if r['identidade_id']==obj.id and acao!='abrir_reavaliacao' else 1
+                return RedirectResponse(url_objeto(r['identidade_id'],conta_id,destino_bloco,registrado=d.get('comando_id')),303)
             except FormularioIncompleto as exc:
                 s.rollback(); falhas_r17=True; valores_enviados=dict(d,condicoes=[dict(texto=t,tipo=p) for t,p in zip(d.getlist('condicao_texto'),d.getlist('condicao_tipo'))]); acao_erro=acao; status=409
             except ErrosCampos as exc:

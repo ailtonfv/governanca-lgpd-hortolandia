@@ -7,6 +7,7 @@ J = campo('justificativa', 'Justificativa', 'textarea')
 E = campo('evidencia', 'Referência da evidência (sem dados pessoais)', 'textarea')
 S = ('secretaria', 'dpo')
 ATOS = {
+ 'abrir_reavaliacao':(3,14,S,'Reavaliar o risco',[]),
  'adicionar_risco':(3,4,S,'Registrar outro risco na mesma origem',[campo('motivo','Evento ou motivo do novo risco','textarea')]),
  'propor_avaliacao': (3,14,S,'Registrar proposta de avaliação',[
     campo('evento','Evento de risco','textarea'), campo('causa','Causa','textarea'),
@@ -85,7 +86,8 @@ def disponiveis(form, bloco, papeis, estado=None, pessoa_id=None, revisar=False)
     for a in candidatos:
         k=a['acao'];campo='triagem' if bloco==15 else 'avaliacao'
         if k=='salvar_temas' and estado.get('plano_aprovado'):continue
-        if form == 3 and estado.get('conclusao') and k not in ('revisar_avaliacao', 'informar_ripd','confirmar_ripd'):continue
+        if form == 3 and estado.get('conclusao') and k not in ('abrir_reavaliacao', 'revisar_avaliacao', 'informar_ripd','confirmar_ripd'):continue
+        if k=='abrir_reavaliacao' and (estado.get('revisao_aberta') or set(estado.get('avaliacao_confirmacoes',{})) != {'secretaria','dpo'}):continue
         if k == 'propor_triagem' and set(estado.get('avaliacao_confirmacoes', {})) != {'secretaria','dpo'}:continue
         if k == 'concluir_avaliacao' and (not estado.get('aceitacao') or estado.get('reavaliacao')):continue
         if k == 'encaminhar_acao' and estado.get('acoes'):

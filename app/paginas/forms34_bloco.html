@@ -33,7 +33,7 @@
 {% if not ato_proposta %}<section class="risco-resumo34"><h2>Descrição do risco</h2><dl><dt>Evento</dt><dd>{{ estado.evento or 'Ainda não identificado' }}</dd><dt>Causa</dt><dd>{{ estado.causa or 'Ainda não informada' }}</dd><dt>Consequência para o titular</dt><dd>{{ estado.consequencia or 'Ainda não informada' }}</dd></dl></section>{% endif %}
 {% if ato_proposta and ato_proposta.reavaliacao %}{{ quadro({}, {}, {},matriz,estado.avaliacao,proposta_av.data_nota if proposta_av else none) }}{% endif %}{% if ato_proposta %}{{ formulario(ato_proposta,estado,registro,obj,matriz,valores_formulario,erros_campos,true) }}{% else %}{{ quadro({}, {}, {},matriz,estado.avaliacao,proposta_av.data_nota if proposta_av else none) }}{% endif %}
 <p class="situacao-avaliacao34" role="status">{{ situacao_avaliacao }}</p>
-{% if estado.avaliacao and not revisar and not estado.get('reavaliacao',estado).get('avaliacao_sem_consenso') and ('secretaria' in papeis or 'dpo' in papeis) %}<a class="botao-link-secundario" href="?conta_id={{ conta_id|urlencode }}&revisar=1#ato-revisar_avaliacao">Reavaliar o risco</a>{% endif %}
+{% if estado.avaliacao and not revisar and not estado.get('reavaliacao',estado).get('avaliacao_sem_consenso') and ('secretaria' in papeis or 'dpo' in papeis) and (estado.revisao_aberta or estado.avaliacao_confirmacoes|length < 2) %}<a class="botao-link-secundario" href="?conta_id={{ conta_id|urlencode }}&revisar=1#ato-revisar_avaliacao">{{ 'Propor nova nota' if estado.revisao_aberta else 'Revisar proposta de avaliação' }}</a>{% endif %}
 {% endif %}
 {% if ref.form==3 and bloco==14 %}
 {% if proposta_av and proposta_av.confirmada %}<p>A nota conjunta atual continua valendo até que uma nova avaliação seja confirmada pelas duas partes.</p>{% endif %}

@@ -47,6 +47,8 @@ def grade_visual(grade,obj,conta,bloco,estado=None):
         texto=g['texto'] if g['m'] else ''
         if g['n'] and g['n']==g['m']:
             texto='✓ Todas respondidas · '+str(g['a_confirmar'])+' a confirmar' if g.get('a_confirmar') else '✓ Todas as perguntas ativas respondidas'
+        if estado and estado.get('revisao_aberta') and 'blocos_revisados' in estado:
+            texto = 'Revisado nesta rodada' if g['numero'] in estado['blocos_revisados'] else 'A revisar'
         saida.append(dict(numero=g['numero'],titulo=titulo_bloco(g['titulo'], estado.get('form') if estado else None, g['numero']),
             texto=texto,situacao_ato=ato,respondidas=g['n'],ativas=g['m'],percentual=g['percentual'],
             href=f'/forms34/{obj}/blocos/{g["numero"]}?'+urlencode({'conta_id':conta}),atual=g['numero']==bloco))

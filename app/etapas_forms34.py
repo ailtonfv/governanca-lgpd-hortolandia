@@ -22,6 +22,8 @@ def motivo_bloqueio(estado, bloco):
     if estado['form'] == 3:
         if estado.get('conclusao') or estado.get('acoes') and not estado.get('revisao_aberta'):
             return 'Conteúdo preservado. Use Reavaliar o risco para abrir uma nova rodada.'
+        if estado.get('revisao_aberta'):
+            return ''
         if bloco == 14 and set(estado.get('avaliacao_confirmacoes', {})) == {'secretaria', 'dpo'}:
             return 'Nota conjunta confirmada. Mudanças exigem Reavaliar o risco.'
         if bloco == 15 and set(estado.get('triagem_confirmacoes', {})) == {'secretaria', 'dpo'}:
