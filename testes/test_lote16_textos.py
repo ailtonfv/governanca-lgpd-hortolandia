@@ -7,6 +7,7 @@ def test_textos_aprovados_e_catalogo_local_sem_mudar_codigo_docs():
     texto=(raiz/'app/paginas/apoio_como-funciona.html').read_text(encoding='utf8')
     for trecho in ('se o risco foi totalmente reduzido','nem falha ainda aberta','por todos os servidores',
                    'prazo máximo é de 30 dias','Aceitação com condições gera uma providência',
+                   'a Secretaria propõe a nota do risco que sobrou e o DPO confirma',
                    'Não vê o conteúdo dos Registros.'):
         assert trecho in texto
     novo=(raiz/'app/paginas/novo_registro.html').read_text(encoding='utf8')

@@ -426,6 +426,12 @@ def projetar_fluxo_conferencia(sessao, registro_id, unidade_id):
         (historico.confirmada_em if historico else None, "Conferência confirmada"),
     ]
     ultima = max((a for a in atividades if a[0] is not None), default=None)
+    lacrada = sessao.get(VersaoForm1Integral, referencia.snapshot_id) if referencia else None
+    versao_anterior = False
+    if lacrada:
+        from app.rev22_form1 import LACRE
+        revisao = lacrada.conteudo.get('form1_integral', {}).get('revisao_22', {})
+        versao_anterior = revisao.get('catalogo_sha256') != LACRE
     return {
         "ultima_atividade": ultima,
         "salvamentos": trabalho['salvamentos'],
@@ -433,6 +439,7 @@ def projetar_fluxo_conferencia(sessao, registro_id, unidade_id):
                  (historico.confirmada_em or historico.devolvida_em or historico.solicitada_em) if historico else
                  trabalho['primeiro'].ocorrido_em if trabalho['primeiro'] else sessao.get(Registro,registro_id).criado_em,
         "blocos_com_respostas": len(_blocos_com_respostas_salvas(rascunho.conteudo)) if rascunho and trabalho['iniciado'] else 0,
+        "versao_anterior": versao_anterior,
         "iniciado_pelo_servidor": trabalho['iniciado'],
         "devolucao_anterior": devolucao_anterior,
         "apresentada_em": referencia.solicitada_em if referencia else None,

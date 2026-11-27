@@ -6,6 +6,12 @@
 
 Em produção, o acesso será por autenticação real; `conta_id` é exclusivo da demonstração.
 
+**Lote 17 — correções da primeira metade da vistoria.** A branch `lote-17-vistoria-8020` parte de `e7e347f`. O painel do DPO e a Central usam a tarefa vigente dos FORMs 3 e 4. A faixa de sessão identifica o servidor fictício e seu papel. A navegação dos blocos usa uma moldura compartilhada. Os ajustes também cobrem mensagens de recusa, nota residual, datas em horário de Brasília, condicionais e lacunas.
+
+Para o título das providências, a lista e a Central usam a resposta da F4-4.3, com o texto do plano como alternativa. A escolha de um título curto continua pendente. O FORM 3 mantém um encaminhamento por lacuna; repetir o encaminhamento da mesma lacuna reaproveita a providência existente.
+
+Os grupos G1 a G8 ficam nesta branch para vistoria futura. A porta 8020 segue vinculada ao Lote 16.
+
 **Lote 16-B — fechamento em 27/11/2026, branch `lote-16-pente-fino`:** A8, A9, A3 e A7 já entregues; esta rodada completa A11.3–7, A4 restante, A6 e A12, com ressalvas, e aplica parte dos ajustes editoriais da Parte B. O controlador é fixo; o encerramento justificado mantém instrumentos somente para leitura; os destinos do FORM 2 produzem efeito apenas na conclusão da análise. Sem merge no `main`.
 
 Verificação: uma bateria integral de 1.331 casos, seguida de retestes direcionados e um teste adicional. Consolidado de **1.332 casos: 1.283 aprovados, as mesmas 48 falhas antigas e um ignorado**, sem falhas novas remanescentes. São 16 testes novos nesta rodada. Não representa segunda execução integral nem aceite visual.

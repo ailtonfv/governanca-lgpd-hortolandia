@@ -16,9 +16,9 @@ def test_nomes_troca_e_link_so_aal(sessao,entrada):
     for conta in ('CONTA-B1','CONTA-E1'):
         pagina=c.get('/forms34?conta_id='+conta)
         assert pagina.status_code==200
-        assert titulo in pagina.text
+        assert titulo.rstrip() in pagina.text
         assert 'troca-compacta34' not in pagina.text
-        assert ('Encaminhar um risco a partir do FORM 2' in pagina.text)==(conta=='CONTA-B1')
+        assert ('Ir às filas do FORM 2' in pagina.text)==(conta=='CONTA-B1')
     assert 'Ver como: trocar servidor fictício' not in c.get('/dashboard?conta_id=CONTA-B1').text
 
 

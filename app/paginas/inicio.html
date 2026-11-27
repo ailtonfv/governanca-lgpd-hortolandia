@@ -121,7 +121,8 @@
           {% else %}<p>Função nesta atividade: AAL designado. Consulte a preparação em modo de leitura.</p>{% endif %}
           {% else %}
           {% set fluxo = registro.fluxo_conferencia %}
-          <p>Blocos: {{ fluxo.blocos_com_respostas }} de 14 com respostas.</p>
+          {% if fluxo.versao_anterior %}<p>Preenchido na versão anterior do FORM 1.</p>
+          {% else %}<p>Blocos: {{ fluxo.blocos_com_respostas }} de 14 com respostas.</p>{% endif %}
           <a href="/como-funciona?conta_id={{ conta_id|urlencode }}">Como funciona o FORM 1</a>
           {% if fluxo.apresentada_em %}<p class="resumo-conferencia-cartao"><strong>Conferência interna:</strong> {{ fluxo.estado }}{% if fluxo.rotulo_apresentacao %} · {{ fluxo.rotulo_apresentacao }}{% endif %}. <a href="{{ url_registro }}#historico-conferencias-form1">Consultar histórico de apresentações</a></p>{% endif %}
           {% for aviso in registro.providencias if aviso.justificativa_devolucao %}<p class="aviso-leitura"><strong>Justificativa do APA:</strong> {{ aviso.justificativa_devolucao }}</p>{% endfor %}

@@ -78,7 +78,7 @@
     {% endif %}
   </section>
 
-  {% if registro.form1_integral.pode_atribuir_arp %}
+  {% if registro.form1_integral.pode_atribuir_arp and not esta_na_fila and registro.etapa_atual.form == 1 %}
   <section class="area-designacao-arp" aria-labelledby="titulo-atribuicao-arp">
   {% if registro.form1_integral.arp_atual %}
     <p id="titulo-atribuicao-arp"><strong>ARP vigente:</strong> matrícula {{ registro.form1_integral.arp_atual.matricula }} · {{ registro.form1_integral.arp_atual.nome }}.</p>
@@ -117,8 +117,10 @@
   </form>
   {% if registro.form1_integral.arp_atual %}</details>{% endif %}
   </section>
-  {% else %}
+  {% elif not registro.form1_integral.pode_atribuir_arp %}
   <p class="aviso-leitura">Somente um APA responsável pelo Registro nesta Secretaria pode definir ou substituir o ARP. Esta informação não concede ação de preenchimento.</p>
+  {% elif registro.form1_integral.arp_atual %}
+  <p><strong>ARP vigente:</strong> matrícula {{ registro.form1_integral.arp_atual.matricula }} · {{ registro.form1_integral.arp_atual.nome }}.</p>
   {% endif %}
 
   <details class="informacoes-institucionais-form1 area-somente-leitura">

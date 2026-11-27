@@ -15,5 +15,5 @@
 {% if titulo == 'Concluídos' %}</details>{% endif %}{% endfor %}
 
 {% for item in referencias %}<article><h2>{{ item.registro }} · {{ item.codigo }}</h2><a href="/forms34/{{ item.id }}/referencia-restrita?conta_id={{ conta_id|urlencode }}">Consultar solicitação jurídica restrita</a></article>{% endfor %}
-{% if pode_encaminhar %}<p class="acoes-fila-form2"><a href="/form2/filas?conta_id={{ conta_id|urlencode }}">Encaminhar um risco a partir do FORM 2</a></p>{% endif %}
+{% if pode_encaminhar %}<p class="acoes-fila-form2"><a href="/form2/filas?conta_id={{ conta_id|urlencode }}">Ir às filas do FORM 2</a></p>{% endif %}
 {% endblock %}
