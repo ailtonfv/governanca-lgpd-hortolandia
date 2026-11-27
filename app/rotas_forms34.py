@@ -187,7 +187,7 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
             a['comando_id']=str(uuid4())
             fonte_ato={'executar_medida':'execucao','verificar':'verificacao','aprender':'aprendizagem','informar_ripd':'referencia_ripd'}.get(a['acao'])
             a['valores']={**a.get('valores',{}),**dict(e.get(fonte_ato,{}) if fonte_ato else {})}
-            if a['acao']=='planejar':a['valores'].update(plano=e.get('plano',''),cargo=e.get('cargo_responsavel',''),duracao_dias=e.get('duracao_dias',''))
+            if a['acao']=='planejar':a['valores'].update(titulo_providencia=e.get('titulo_providencia',''),plano=e.get('plano',''),cargo=e.get('cargo_responsavel',''),duracao_dias=e.get('duracao_dias',''))
             a['valores']={k:('sim' if v else 'nao') if isinstance(v,bool) else v for k,v in a['valores'].items()}
             a['resumo']=f"{rotulo} ({s.get(Registro,obj.registro_id).codigo_lgpd}): {a['titulo']}. A autoria será registrada."
             if a['acao']=='aprovar_plano':

@@ -19,7 +19,7 @@ OBRIGATORIOS={
  'autorizar_referencia':('pessoa_id','necessidade'),
  'propor_residual_acao':('pr','ir','justificativa'), 'decidir_residual_acao':('opcao','justificativa'),
  'aceitar_residual_acao':('justificativa',),
- 'planejar':('plano','cargo','duracao_dias'), 'aprovar_plano':('justificativa',),
+ 'planejar':('titulo_providencia','plano','cargo','duracao_dias'), 'aprovar_plano':('justificativa',),
  'solicitar_tema':('nome_sugerido','justificativa'),
  'executar_medida':('resumo','evidencia'), 'verificar':('aprovada','evidencia'),
  'pedir_prorrogacao':('prazo','justificativa'),
@@ -42,6 +42,10 @@ def obrigatorios(acao,dados):
 def validar(acao,dados):
     erros={k:'Preencha este campo obrigatório.' for k in obrigatorios(acao,dados)
            if dados.get(k) is None or isinstance(dados.get(k),str) and not dados[k].strip()}
+    if acao == 'planejar' and 'titulo_providencia' not in erros:
+        titulo = dados['titulo_providencia']
+        if not isinstance(titulo, str) or len(titulo.strip()) > 80:
+            erros['titulo_providencia'] = 'Informe o título em até 80 caracteres.'
     if acao in ('propor_avaliacao','revisar_avaliacao'):
         try:
             numeros=[int(dados[k]) for k in ('p','i','pr','ir')]

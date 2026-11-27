@@ -671,7 +671,8 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         e.pop('executor_id',None)  # autoria anterior permanece nos eventos, não no novo cargo
         from app.prazos_plano34 import duracao_validada
         duracao = duracao_validada(e, dados.get('duracao_dias'))
-        e.update(plano=_texto(dados,'plano'),cargo_responsavel=cargo,unidade_responsavel_id=uid,
+        e.update(titulo_providencia=_texto(dados,'titulo_providencia',80),
+                 plano=_texto(dados,'plano'),cargo_responsavel=cargo,unidade_responsavel_id=uid,
                  duracao_dias=duracao, plano_registrado_em=agora, prazo=None)
     elif acao == 'aprovar_plano':
         faixa = _faixa(e)

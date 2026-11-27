@@ -8,11 +8,19 @@ def rotulo_objeto(obj):
 
 
 def descricao_objeto(e):
-    texto = e.get('evento') if e['form'] == 3 else e.get('respostas', {}).get('F4-4.3') or e.get('plano')
+    return _descricao(e.get('evento')) if e['form'] == 3 else titulo_providencia(e)
+
+
+def _descricao(texto):
     if not isinstance(texto, str):texto = None
     if texto:
         texto = ' '.join(texto.split())
     return texto or 'Título ainda não informado'
+
+
+def titulo_providencia(estado):
+    texto = _descricao(estado.get('titulo_providencia') or estado.get('respostas', {}).get('F4-4.3'))
+    return texto if len(texto) <= 80 else texto[:79].rstrip() + '…'
 
 
 def titulo(obj, e):

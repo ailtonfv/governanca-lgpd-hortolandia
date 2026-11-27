@@ -43,6 +43,7 @@ ATOS = {
  'autorizar_referencia':(3,16,('aal',),'Autorizar consulta restrita pela autoridade do caso',[
     campo('pessoa_id','Autoridade participante','autoridade'),campo('necessidade','Necessidade de acesso','textarea')]),
  'planejar':(4,3,('secretaria',),'Registrar plano e responsável',[
+    campo('titulo_providencia','Título da providência'),
     campo('plano','Plano da providência','textarea'),campo('cargo','Cargo, função ou unidade responsável','select'),campo('duracao_dias','Duração após a aprovação (dias corridos)','inteiro')]),
  'propor_residual_acao':(4,8,('secretaria',),'Propor nota residual após a providência',[campo('pr','Probabilidade residual (1 a 5)','number'),campo('ir','Impacto residual (1 a 5)','number'),J]),
  'confirmar_residual_acao':(4,8,('dpo',),'Confirmar nota residual após a providência',[]),

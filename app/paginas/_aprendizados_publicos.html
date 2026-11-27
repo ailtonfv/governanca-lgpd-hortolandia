@@ -1,6 +1,6 @@
 {% macro orientacao(item) %}
 <article class="dash-card">
-  <header><h3>{{ item.secretaria }} · {{ item.servico }}</h3></header>
+  <header><h3>{{ item.titulo_providencia }}</h3><p>{{ item.secretaria }} · {{ item.servico }}</p></header>
   <h3>Diretriz</h3><p>{{ item.diretriz }}</p>
   <h4>Contexto</h4><p>{{ item.contexto }}</p>
   <h4>Aplicação e limites</h4><p>{{ item.limites }}</p>

@@ -18,7 +18,7 @@ def consultar(sessao, conta, *, secretaria='', palavra='', tema='', fonte=None):
             e=ev.conteudo.get('estado',{})
             if e.get('aprendizagem') and e.get('aprendizagem_conferida') and e.get('aprendizagem_autorizada') and e.get('verificada') and e.get('verificacao',{}).get('aprovada'):
                 temas_por_id[i['obj'].id]=e['aprendizagem'].get('temas',e.get('temas',{}))
-    campos = ('registro', 'servico', 'item', 'unidade_id', 'secretaria', 'contexto', 'diretriz', 'limites', 'autorizado')
+    campos = ('registro', 'servico', 'item', 'unidade_id', 'secretaria', 'contexto', 'diretriz', 'limites', 'autorizado', 'titulo_providencia')
     linhas = [dict(**{k:l[k] for k in campos}, temas=nomes(sessao,temas_por_id.get(l['id']))) for l in publicados
               if (not secretaria or l['unidade_id'] == secretaria) and corresponde(temas_por_id.get(l['id']),tema)]
     busca = palavra.strip().casefold()

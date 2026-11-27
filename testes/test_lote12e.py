@@ -146,7 +146,7 @@ def test_percurso_http_encaminha_planeja_e_exibe_proposta_sem_repetir_ato(sessao
     paginas['item1_apos_encaminhar']=resposta.text
     comando=str(uuid4())
     resposta=cliente.post(f'/forms34/{acao}/blocos/3?conta_id=CONTA-B1',data={
-        'acao':'planejar','tema_principal':'T07','comando_id':comando,'versao':estado(sessao,acao)['versao'],
+        'acao':'planejar','titulo_providencia':'Organizar controles fictícios','tema_principal':'T07','comando_id':comando,'versao':estado(sessao,acao)['versao'],
         'plano':'Plano fictício: restringir o acesso à equipe autorizada e registrar a evidência.',
         'cargo':'Chefia da unidade','duracao_dias':30})
     assert resposta.status_code==200 and 'Plano registrado em' in resposta.text

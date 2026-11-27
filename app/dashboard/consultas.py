@@ -125,6 +125,9 @@ def linha(d, registro_id, item=None):
         obj,e = item['obj'],item['estado']
         l.update(id=obj.id, item=f"{'Risco' if obj.tipo=='R' else 'Providência'} {obj.numero}",
                  situacao=situacao_risco(e) if obj.tipo=='R' else situacao_acao(e))
+        if obj.tipo == 'A':
+            from app.acompanhamento_forms34 import titulo_providencia
+            l['titulo_providencia'] = titulo_providencia(e)
     return l
 
 
@@ -392,7 +395,7 @@ def aprendizados(d):
                 ultimo=e
         if ultimo:
             a=ultimo['aprendizagem'];p=ultimo['aprendizagem_autorizada']
-            linhas.append({**linha(d,i['obj'].registro_id,i),'contexto':a.get('contexto') or 'Contexto não informado',
+            linhas.append({**linha(d,i['obj'].registro_id,{**i,'estado':ultimo}),'contexto':a.get('contexto') or 'Contexto não informado',
                 'diretriz':a['diretriz'],'limites':a['escopo'],'autorizado':p['em'],'verificado':ultimo['verificacao']['em']})
     return [quadro('aprendizados','Aprendizados autorizados para consulta',linhas,'aprendizados',
         'Verificação, conferência do DPO e autorização da Secretaria','Última versão autorizada; não exibe evidências.','Secretaria e DPO')]

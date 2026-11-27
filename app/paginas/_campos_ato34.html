@@ -10,7 +10,8 @@
 {% elif c.tipo=='inteiro' %}<input {{ attrs|safe }} type="number" min="1" step="1" value="{{ valor or '' }}">
 {% elif c.tipo=='multi' %}<select {{ attrs|safe }} multiple size="5">{% for chave,nome in c.lista %}<option value="{{ chave }}" {% if chave in valor %}selected{% endif %}>{{ nome }}</option>{% endfor %}</select><p>Selecione no máximo dois temas, diferentes do principal.</p>
 {% elif c.tipo in ['bool','select','unidade','executor','juridico','autoridade','number'] %}<select {{ attrs|safe }}><option value="">{{ 'Ainda não avaliado' if c.tipo=='number' else 'Escolha…' }}</option>{% for chave,nome in c.lista %}<option value="{{ chave }}" {% if chave|string==valor|string %}selected{% endif %}>{{ nome }}</option>{% endfor %}</select>
-{% else %}<input {{ attrs|safe }} type="{{ c.tipo }}" value="{{ valor or '' }}" maxlength="200">{% endif %}
+{% else %}<input {{ attrs|safe }} type="{{ c.tipo }}" value="{{ valor or '' }}" maxlength="{{ 80 if c.nome=='titulo_providencia' else 200 }}">{% endif %}
+{% if c.nome=='titulo_providencia' %}<p class="ajuda">Diga em poucas palavras o que será feito.</p>{% endif %}
 <p class="erro-campo" id="erro-{{ c.uid }}" {% if not erro %}hidden{% endif %}>{{ erro }}</p></div>
 {% if c.nome in ['tema_principal','temas_complementares'] %}<details><summary>Quando usar cada tema</summary><ul>{% for chave,nome in c.lista %}<li>{{ nome }}</li>{% endfor %}</ul></details>{% endif %}
 {%- endmacro %}

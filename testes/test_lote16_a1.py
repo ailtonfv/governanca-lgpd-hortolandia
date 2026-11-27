@@ -18,6 +18,21 @@ def test_limite_critico_e_imediato():
         with pytest.raises(ErrosCampos):duracao_validada({}, valor)
 
 
+def test_g12_titulo_obrigatorio_com_limite_e_alternativa_historica():
+    from app.acompanhamento_forms34 import titulo_providencia
+    from app.validacao_atos34 import validar
+
+    dados = dict(plano='Plano de teste', cargo='Equipe', duracao_dias=30)
+    with pytest.raises(ErrosCampos) as ausente:
+        validar('planejar', dados)
+    assert 'titulo_providencia' in ausente.value.erros
+    with pytest.raises(ErrosCampos, match='80 caracteres'):
+        validar('planejar', {**dados, 'titulo_providencia': 'x'*81})
+    validar('planejar', {**dados, 'titulo_providencia': 'x'*80})
+    assert titulo_providencia({'titulo_providencia':'Revisar controles'}) == 'Revisar controles'
+    assert titulo_providencia({'respostas':{'F4-4.3':'x'*100}}) == 'x'*79+'…'
+
+
 def test_calendario_local_e_data_historica():
     e = {'duracao_dias':30, 'faixa_origem':'Crítico'}
     assert vencimento_na_aprovacao(e, '2026-11-27T01:00:00+00:00') == '2026-12-26'
