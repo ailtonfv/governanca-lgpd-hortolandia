@@ -1,0 +1,6 @@
+{% set resposta=valores.get(q.id,'Ainda não avaliado') if q.tipo in ['readonly','computed','ato'] else v %}
+{% if resposta=='A confirmar' or (resposta is sequence and resposta is not string and 'A confirmar' in resposta) %}<p><span class="pendencia-resposta34">A confirmar</span></p>
+{% elif resposta is string or resposta is number %}<p class="resposta-leitura34">{{ resposta if resposta is number or resposta else 'Sem resposta' }}</p>
+{% else %}<p class="resposta-leitura34">{{ resposta|join(' · ') if resposta else 'Sem resposta' }}</p>{% endif %}
+{% if estado.get('complementos',{}).get(q.id) %}<p>{{ estado.complementos[q.id] }}</p>{% endif %}
+{% if q.id=='F3-3.47' %}{% for nome,detalhe in estado.get('controles_bloco13',{}).items() if nome in v %}<dl><dt>{{ nome }}</dt><dd>{{ detalhe.get('implementado') or 'Sem resposta' }}</dd><dt>Referência da evidência, sem dados pessoais</dt><dd>{{ detalhe.get('evidencia') or 'Sem resposta' }}</dd></dl>{% endfor %}{% if estado.get('observacoes_controles') %}<p>{{ estado.observacoes_controles }}</p>{% endif %}{% endif %}

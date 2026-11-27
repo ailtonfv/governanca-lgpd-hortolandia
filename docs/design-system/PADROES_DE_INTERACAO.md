@@ -178,3 +178,5 @@ Borda forte e “Sua parte” indicam competência; fundo amarelo-claro e sino i
 ### Lote 16-B — A3 e C163
 
 Os blocos dos FORMs 3 e 4 usam `_situacao_forms34.html` para situação, papel e próxima providência. Manifestações completas ficam no bloco 14 do FORM 3 e no bloco 8 do FORM 4; nos demais, um link com a quantidade. A nota vigente mantém sua matriz durante a reavaliação. A classe compartilhada `barra-salvar-bloco` mantém o salvamento dos FORMs 2 a 4 visível, com espaço reservado no fim da página e sem ampliar permissões. Inspeção visual na vistoria ainda pendente.
+
+A7: `_resposta_forms34.html` apresenta somente as alternativas salvas, texto em parágrafo e selo para A confirmar. Usado pelo questionário compartilhado quando o papel não permite edição ou o estado está bloqueado. Valores calculados permanecem visíveis, inclusive zero quando efetivamente calculado.

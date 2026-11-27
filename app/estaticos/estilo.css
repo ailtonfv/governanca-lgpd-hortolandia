@@ -483,3 +483,5 @@ body:has(.barra-salvar-bloco){padding-bottom:7rem}
 @media(max-width:600px){body:has(.barra-salvar-bloco){padding-bottom:11rem}}
 .situacao-bloco34{padding:1rem;border-left:4px solid #075985;background:#edf5fa;margin:1rem 0}
 .agrupamento-perguntas34>legend{display:block;margin-bottom:1rem}
+
+.resposta-leitura34{white-space:pre-wrap;color:#172b3a}.pendencia-resposta34{display:inline-block;background:#fff4d5;color:#513b00;border:1px solid #a87900;border-radius:.3rem;padding:.15rem .5rem;font-weight:700}
