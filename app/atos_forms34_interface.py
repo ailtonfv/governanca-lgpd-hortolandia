@@ -46,8 +46,8 @@ ATOS = {
     campo('plano','Plano da providência','textarea'),campo('cargo','Cargo, função ou unidade responsável','select'),campo('duracao_dias','Duração após a aprovação (dias corridos)','inteiro')]),
  'propor_residual_acao':(4,8,('secretaria',),'Propor nota residual após a providência',[campo('pr','Probabilidade residual (1 a 5)','number'),campo('ir','Impacto residual (1 a 5)','number'),J]),
  'confirmar_residual_acao':(4,8,('dpo',),'Confirmar nota residual após a providência',[]),
- 'decidir_residual_acao':(4,8,('secretaria',),'Decidir sobre o risco residual após a providência',[campo('opcao','Tratamento do risco residual','select',(('reavaliar','Reavaliar o risco no FORM 3'),('nova_providencia','Nova providência'))),J]),
- 'aceitar_residual_acao':(4,8,('secretario','gabinete'),'Aceitar o risco residual após a providência',[J]),
+ 'decidir_residual_acao':(4,8,('secretaria',),'Decidir sobre o risco residual após a providência',[campo('opcao','Tratamento do risco residual','select',(('reavaliar','Reavaliar o risco no FORM 3'),('nova_providencia','Nova providência'))),campo('justificativa','Justificativa da decisão','textarea')]),
+ 'aceitar_residual_acao':(4,8,('secretario','gabinete'),'Aceitar o risco residual após a providência',[campo('justificativa','Justificativa da decisão','textarea')]),
  'aprovar_plano':(4,3,('secretario','gabinete'),'Aprovar plano',[J]),
  'executar_medida':(4,6,('executor_unidade',),'Registrar execução',[campo('resumo','Resumo do que foi feito','textarea'), E]),
  'verificar':(4,7,('verificador',),'Registrar verificação independente',[

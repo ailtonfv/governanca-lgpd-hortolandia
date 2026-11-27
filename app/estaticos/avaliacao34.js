@@ -27,6 +27,17 @@
   }form.addEventListener('change',update);update();
  });
  document.querySelectorAll('[data-ato34]').forEach(form=>{
+  function limparObrigatorio(evento){
+   const campo=evento.target;
+   if (!campo.matches('[required][aria-invalid="true"]') || !campo.value.trim()) return;
+   const mensagem=document.getElementById(campo.getAttribute('aria-describedby'));
+   if (mensagem?.textContent.trim() !== 'Preencha este campo obrigatório.') return;
+   campo.removeAttribute('aria-invalid');
+   mensagem.hidden=true;
+   mensagem.textContent='';
+  }
+  form.addEventListener('input',limparObrigatorio);
+  form.addEventListener('change',limparObrigatorio);
   function observacao(){const wrap=form.querySelector('[data-obrigatorio-observacao]');if(!wrap)return;
    const active=form.elements.sem_dados_pessoais?.value==='nao'||form.elements.sem_falha_exposta?.value==='nao';wrap.querySelector('textarea').required=active;
    const badge=wrap.querySelector('[data-marcador]');badge.textContent=active?'Obrigatório neste caso':'*Obrigatório ao responder Não';

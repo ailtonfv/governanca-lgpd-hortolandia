@@ -23,7 +23,8 @@ def conteudo_decisao(acao,e,autores,unidades):
       'autorizar_aprendizagem':['aprender','conferir_aprendizagem']}
     if acao=='confirmar_ripd':return conteudo_ato('informar_ripd',e,autores,unidades)
     if acao in ('confirmar_residual_acao','decidir_residual_acao','aceitar_residual_acao'):
-        return conteudo_ato('propor_residual_acao',e,autores,unidades)
+        return [('Justificativa da nota' if rotulo == 'Justificativa' else rotulo, valor)
+                for rotulo, valor in conteudo_ato('propor_residual_acao',e,autores,unidades)]
     return [linha for fonte in fontes.get(acao,[]) for linha in conteudo_ato(fonte,e,autores,unidades)]
 
 def mensagem_decisao(e):
