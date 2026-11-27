@@ -26,4 +26,6 @@ def aal_em_exercicio(sessao, registro_id, pessoa_id):
 
 def bloquear_registro(sessao, p):
     if p:
-        sessao.scalar(select(Registro).where(Registro.id == p.registro_id).with_for_update())
+        registro=sessao.scalar(select(Registro).where(Registro.id == p.registro_id).with_for_update())
+        if registro and registro.estado_atual=='encerrado_nao_cabe':
+            raise ValueError('Registro encerrado: instrumentos preservados somente para leitura.')

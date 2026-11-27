@@ -17,7 +17,9 @@
 {% if numero < 14 %}<a href="{{ numero+1 }}?conta_id={{ conta_id|urlencode }}">Próximo bloco</a>{% endif %}
 <a href="/form2/participacoes/{{ p.id }}/governanca?conta_id={{ conta_id|urlencode }}&amp;bloco_origem={{ numero }}">Pendências com a origem (FORM 1)</a></nav>
 
-{% if numero == 14 %}<div class="acoes-fila-form2"><a class="botao-link" href="/form2/participacoes/{{ p.id }}/encaminhar34?conta_id={{ conta_id|urlencode }}">Encaminhar para riscos ou providências</a></div>{% endif %}
+{% if registro.estado_atual=='encerrado_nao_cabe' %}<p class="aviso-alerta">Registro encerrado: instrumentos preservados somente para leitura.</p>{% endif %}
+{% if numero==1 and fatos_origem.get('respostas',{}).get('1.4','')|lower is string and 'única' in fatos_origem.get('respostas',{}).get('1.4','')|lower %}<p class="aviso-alerta">O FORM 1 informa que este fluxo é uma situação única. O sistema registra serviços que se repetem, não casos individuais. Confirme se cabe Registro ou peça complementação.</p>{% endif %}
+{% if numero == 14 %}<div class="acoes-fila-form2"><a class="botao-link" href="/form2/participacoes/{{ p.id }}?conta_id={{ conta_id|urlencode }}">Concluir a análise e aplicar os destinos indicados</a></div>{% endif %}
 <details class="apoio-bloco"><summary>Orientações e consultas de apoio</summary>{% if numero == 14 %}<article><h2>Conferência da consolidação</h2><p>Reúna as respostas salvas, as complementações e as manifestações das áreas. Salve o bloco antes de abrir a conferência.</p><div class="acoes-fila-form2"><a class="botao-link" href="/form2/participacoes/{{ p.id }}/consolidacao?conta_id={{ conta_id|urlencode }}">Conferir consolidação</a></div></article>{% endif %}<p>Demonstração com dados fictícios. As respostas candidatas, inclusive as jurídicas e o resultado da validação (bloco 14), são rascunhos não homologados. Salvar não conclui a validação institucional.</p>
 <details class="origem-fila-form2"><summary>Consultar respostas do FORM 1</summary>
 <p>Respostas do FORM 1 em análise, somente para consulta.</p>
@@ -27,7 +29,7 @@
 </details><p class="aviso-dados">Não informe nomes, CPF, protocolos de atendimento ou dados de casos concretos.</p>
 {% if numero == 14 and complementos_pendentes %}<aside class="aviso-alerta"><p>Há complementos necessários antes de registrar a consolidação.</p><ul>{% for item in complementos_pendentes %}<li><a href="{{ item.bloco }}?conta_id={{ conta_id|urlencode }}#{{ item.ancora }}">{{ item.item }}</a></li>{% endfor %}</ul></aside>{% endif %}
 {% include "_saida_bloco_form2.html" %}<form method="post" id="revisao-bloco"><input type="hidden" name="conta_id" value="{{ conta_id }}"><input type="hidden" name="comando_id" value="{{ comando_id }}"><input type="hidden" name="versao" value="{{ p.versao }}">
-<fieldset {% if p.responsavel_id != pessoa.id or p.estado != 'em_atendimento' %}disabled{% endif %}>
+<fieldset {% if p.responsavel_id != pessoa.id or p.estado != 'em_atendimento' or registro.estado_atual=='encerrado_nao_cabe' %}disabled{% endif %}>
 {% from '_condicoes_form2.html' import gatilhos, ajuda %}
 {% if numero in (1,2) %}
 {% set fatos = fatos_origem.get('respostas', {}) %}
@@ -97,7 +99,7 @@
 {% if q.id in ('F2-14.2', 'F2-14.8') %}<section aria-label="Itens a confirmar"><h3>Itens a confirmar nos blocos 1 a 13</h3><p>{% set quantidade = confirmacoes_por_bloco|map(attribute='itens')|map('length')|sum %}{{ quantidade }} {{ 'pergunta ativa' if quantidade == 1 else 'perguntas ativas' }} com resposta ‘A confirmar’. A classificação de impeditivos depende de deliberação institucional.</p>
 {% for grupo in confirmacoes_por_bloco %}<h4>Bloco {{ grupo.bloco }}</h4><ul>{% for item in grupo.itens %}<li><a href="{{ grupo.bloco }}?conta_id={{ conta_id|urlencode }}#{{ item.ancora }}">{{ item.item }}</a> · A confirmar</li>{% endfor %}</ul>{% else %}<p>Nenhuma resposta ativa marcada como “A confirmar”.</p>{% endfor %}</section>{% endif %}
 {% if bloqueada %}
-{% if q.edicao != "consulta" %}<p>{{ q.controle }}</p>{% endif %}
+{% if q.id=="F2-10.1" or q.edicao != "consulta" %}<p>{{ q.controle }}</p>{% endif %}
 {% if q.alternativas %}<ul>{% for a in q.alternativas %}<li>{{ a.rotulo }}</li>{% endfor %}</ul>{% endif %}
 {% else %}
 {% set repetivel = q.repetivel %}

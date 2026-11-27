@@ -87,44 +87,8 @@ async def ingresso(request:Request,pid:str,conta_id:str):
         p=s.get(ParticipacaoForm2,pid)
         if not p or p.responsavel_id!=pessoa.id or p.tipo!='principal' or not autorizado(s,pessoa,p):
             return erro(request,conta_id,'Somente o AAL responsável encaminha.',403)
-        erros_ingresso={}; dados_ingresso={}; status_ingresso=200
-        if request.method=='POST':
-            d=await request.form(); dados_ingresso=dict(d)
-            try:
-                if d.get('form') not in ('3','4'):raise ErrosCampos({'form':'Escolha para onde encaminhar: Riscos (FORM 3) ou Providência (FORM 4).'})
-                r=dominio.ingressar(s,conta_id=conta_id,comando_id=d.get('comando_id'),participacao_id=pid,
-                    versao=int(d.get('versao','0')),form=int(d.get('form','0')),justificativa=d.get('justificativa',''))
-                if not r.get('permitido'):raise ValueError(r.get('motivo'))
-                s.commit()
-                return RedirectResponse(url_objeto(r['identidade_id'],conta_id,registrado=d.get('comando_id')),303)
-            except FormularioIncompleto as exc:
-                s.rollback();erros_ingresso={'r17':str(exc)};status_ingresso=409
-            except ErrosCampos as exc:
-                s.rollback();erros_ingresso=exc.erros;status_ingresso=409
-            except (ValueError,PermissionError) as e:
-                s.rollback();return erro(request,conta_id,e,403 if isinstance(e,PermissionError) else 409,
-                    f'/form2/participacoes/{pid}/encaminhar34')
-        from app.form2_rev212 import indice_valores
-        respostas=indice_valores(p.conteudo or {})
-        selecionados={n:any(v in ('Sim','SIM') for v in respostas.get('opcao:F2-14.'+str(n+2),[])) for n in (3,4)}
-        return paginas.TemplateResponse(request=request,name='forms34_ingresso.html',status_code=status_ingresso,context={
-            'conferencia_r17':conferencia_para_tela(s,p), 'base_r17':f'/form2/participacoes/{p.id}/blocos',
-            'salvos':selecionados,'risco_direto':bool(dominio.sinais_form2(p.conteudo or {})) and not selecionados[3],
-            'erros':erros_ingresso,'dados':dados_ingresso,
-            'p':p,'registro':s.get(Registro,p.registro_id),'pessoa':pessoa,'conta_id':conta_id,'comando_id':str(uuid4())})
-
-
-def escolhas(s,ref,papeis,uid):
-    r={'unidade':[(u.id,u.nome) for u in s.scalars(select(Unidade).where(Unidade.ativa.is_(True)))],
-       'juridico':[],'executor':[],'autoridade':[]}
-    for p in s.scalars(select(Pessoa).where(Pessoa.ativa.is_(True))):
-        if unidades(s,p.id,'juridico_form2'):r['juridico'].append((p.id,p.nome))
-        if (uid in unidades(s,p.id,'preenchedor')|unidades(s,p.id,'aal_form2')
-                and not unidades(s,p.id,'governanca_protecao_dados')):
-            r['executor'].append((p.id,p.nome))
-        if uid in unidades(s,p.id,'demo34_secretario') or unidades(s,p.id,'demo34_gabinete'):
-            r['autoridade'].append((p.id,p.nome))
-    return r
+        if request.method=='POST':return erro(request,conta_id,'O encaminhamento ocorre ao concluir a análise do FORM 2.',409,f'/form2/participacoes/{pid}')
+        return RedirectResponse(f'/form2/participacoes/{pid}/blocos/14?conta_id={conta_id}',303)
 
 
 @router.api_route('/forms34/{objeto_id}/blocos/{bloco}',methods=['GET','POST'])
@@ -327,6 +291,9 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
         acompanhamento = resumo_acompanhamento(s,obj,e,papeis,pessoa.id)
         situacao_topo = acompanhamento['situacao']
         bloqueio_edicao = motivo_bloqueio(e, bloco)
+        if registro.estado_atual=='encerrado_nao_cabe':
+            bloqueio_edicao='Registro encerrado: instrumentos preservados somente para leitura.'
+            atos=[];ato_proposta=None;ato_principal=None;outros_atos=[];destaques=[]
         vinculadas = []
         for aid in e.get('acoes', []):
             try:

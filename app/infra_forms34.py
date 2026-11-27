@@ -40,6 +40,8 @@ def _registro(sessao, registro_id):
                             .with_for_update().execution_options(populate_existing=True))
     if not registro:
         raise ValueError("Registro de origem inexistente.")
+    if registro.estado_atual=='encerrado_nao_cabe':
+        raise ValueError('Registro encerrado: instrumentos preservados somente para leitura.')
     return registro
 
 

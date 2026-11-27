@@ -75,6 +75,9 @@ def montar_bloco(base):
             continue
         q.update(redacao)
         q['ajudas_usuario'] = orientacoes_ao_usuario(q.get('instrucao', ''))
+        if chave == 'F2-10.1':
+            q.update(edicao='consulta',alternativas=[],controle='Município de Hortolândia (pessoa jurídica controladora). A Secretaria exerce as funções de tratamento dentro de suas competências.')
+        if chave == 'F2-10.2':q['enunciado']='Há outra entidade que também decida sobre este tratamento?'
         if chave == 'F2-13.1':
             q['enunciado'] = 'Este serviço orienta o titular a usar o canal institucional ou tem canal próprio?'
             q['ajudas_usuario'].append('Canal institucional da Prefeitura: Encarregado de Dados (canal oficial).')

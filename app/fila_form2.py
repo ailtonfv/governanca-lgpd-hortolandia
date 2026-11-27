@@ -187,15 +187,25 @@ def executar(sessao, *, conta_id, comando_id, participacao_id, acao, versao,
             p.versao += 1
             evento(sessao, comando, p, "form2_consulta_encaminhada", ordem=21)
             return fechar_comando(comando, {"permitido": True, "participacao_id": filho.id})
+        elif acao == "encerrar_nao_cabe":
+            if p.tipo!='principal' or (p.conteudo or {}).get('respostas_etapa1',{}).get('F2-1.3')!='NAO_CABE_REGISTRO':
+                raise ValueError('Registre primeiro a decisão Não cabe Registro na F2-1.3.')
+            if not texto.strip():raise ValueError('Informe a justificativa do encerramento.')
+            registro.estado_atual='encerrado_nao_cabe'
+            p.conteudo={**(p.conteudo or {}),'encerramento_nao_cabe':dict(justificativa=texto.strip(),pessoa_id=pessoa.id,em=agora().isoformat())}
+            from app.eventos import registrar_evento
+            registrar_evento(sessao,comando,'registro',registro.id,'encerrar_registro_nao_cabe',p.conteudo['encerramento_nao_cabe'],registro_id=registro.id,ordem_no_comando=19,versao_regra='A11-20261126')
         elif acao == "concluir":
             if p.tipo == "principal":
                 from app.obrigatoriedade_forms import conferencia_participacao, exigir
                 conferida = exigir(conferencia_participacao(sessao, p), f'/form2/participacoes/{p.id}/blocos')
                 from app.resultado_analise_form2 import resultado_salvo
                 texto = resultado_salvo(p.conteudo or {})
+                from app.encaminhamento_conclusao_form2 import encaminhar
+                encaminhamentos=encaminhar(sessao,p,conta_id,comando.id)
                 p.conteudo = {**(p.conteudo or {}), 'conclusao_analise': {
                     'pessoa_id': pessoa.id, 'em': agora().isoformat(), 'snapshot_id': p.snapshot_id,
-                    'versao': p.versao, 'resultado': texto.strip(), 'conferencia_r17': conferida,
+                    'versao': p.versao, 'resultado': texto.strip(), 'conferencia_r17': conferida, 'encaminhamentos':encaminhamentos,
                     'aviso': 'Conclusão da etapa de análise; não equivale a homologação jurídica.'}}
             if not texto.strip():
                 raise ValueError("Registre a manifestação antes de concluir.")
