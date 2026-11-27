@@ -4,6 +4,13 @@ import json
 from pathlib import Path
 
 ARQUIVO = Path(__file__).parent / 'catalogos/lacunas_form3.json'
+
+
+def sugestao_para_tela(texto):
+    texto = (texto or '').replace(' do catálogo F4-4.4', ' (catálogo de providências)')
+    return (texto.replace('(catálogo F4-4.4)', '(catálogo de providências)')
+            .replace('ver Anexo E da Cartilha', 'ver na Cartilha: Cláusulas orientativas para terceiros')
+            .replace('Ação de ', 'Providência de '))
 PENDENTES = {'F3-3.22', 'F3-3.29', 'F3-3.44'}
 NENHUM = 'Nenhum controle identificado'
 DESTINOS = ('Confirmar com a Secretaria', 'Complementação ou correção do FORM 1',

@@ -84,3 +84,10 @@ def test_controles_pela_rota_e_validacao_da_origem(sessao,entrada):
     with pytest.raises(ValueError,match='origem'):
         salvar(4,{'F4-4.2':'LAC-F3-3.18'},dict(bloco=1,campos={'F4-4.2':'texto livre'}),
             {'origem_lacuna':{'id':'LAC-F3-3.18'}})
+def test_sugestao_apresenta_topico_institucional_sem_codigo_tecnico():
+    from app.lacunas_form3 import sugestao_para_tela
+
+    assert sugestao_para_tela('Ação de guarda do catálogo F4-4.4') == (
+        'Providência de guarda (catálogo de providências)')
+    assert sugestao_para_tela('Criar/alterar cláusula contratual (ver Anexo E da Cartilha)') == (
+        'Criar/alterar cláusula contratual (ver na Cartilha: Cláusulas orientativas para terceiros)')

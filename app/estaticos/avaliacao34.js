@@ -55,8 +55,11 @@
    const partes=[];
    form.querySelectorAll('select,textarea,input:not([type=hidden])').forEach(c=>{
     if(c.disabled||!c.value)return;
-    const label=form.querySelector(`label[for="${c.id}"]`);
-    const nome=(label?.textContent||c.name).replace(/\*.*$/,'').trim();
+    const label=c.labels?.[0]?.cloneNode(true);
+    label?.querySelectorAll('[data-marcador], .indicador-obrigatoriedade, select, input, textarea').forEach(el=>el.remove());
+    const nomesResiduais={pr:'Probabilidade residual',ir:'Impacto residual'};
+    const nome=(acao==='propor_residual_acao' && nomesResiduais[c.name])
+      || (label?.textContent||c.name).replace(/\*.*$/,'').trim();
     partes.push(nome+': '+(c.tagName==='SELECT'?c.selectedOptions[0]?.textContent:c.type==='date'?c.value.split('-').reverse().join('/'):c.value));
    });
    button.dataset.confirmarAto=base+(partes.length?'\n'+partes.join('\n'):'');

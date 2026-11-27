@@ -254,7 +254,7 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
             import json
             fonte_leitura=json.loads(ref.fonte_canonica) if isinstance(ref.fonte_canonica,str) else ref.fonte_canonica
             quando=fonte_leitura.get('ocorrido_em')
-            valores['F3-3.3']='Risco encaminhado pelo AAL durante a análise do FORM 2'+(f' (versão de {data_br(quando)}).' if quando else '. Data preservada no histórico da origem.')
+            valores['F3-3.3']='Risco encaminhado pelo AAL durante a análise do FORM 2'+(f' (versão de {data_local(quando)}).' if quando else '. Data preservada no histórico da origem.')
         if ref.form==4:
             for q in itens:
                 if q['id']=='F4-4.9' and e.get('prioridade_origem'):q['ajuda']='Prioridade herdada do FORM 3: '+e['prioridade_origem']
@@ -311,7 +311,7 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
             fonte=fonte.get('estado',fonte)
             av=fonte.get('avaliacao') or {};res=av.get('residual',{})
             risco=s.get(IdentidadeForms34,e.get('risco_id'))
-            origem_texto=f"Risco {risco.codigo.split('-')[-1] if risco else 'registrado'} — {res.get('faixa',e.get('faixa_origem','Não avaliado'))} ({res.get('nota','nota não disponível')}), "+('aceito pelo '+('Prefeito' if res.get('faixa')=='Crítico' else 'Secretário') if fonte.get('aceitacao') else 'sem aceitação registrada na origem')+(f" em {data_br(fonte['aceitacao']['em'])}" if fonte.get('aceitacao',{}).get('em') else '')
+            origem_texto=f"Risco {risco.numero if risco else 'registrado'} — {res.get('faixa',e.get('faixa_origem','Não avaliado'))} ({res.get('nota','nota não disponível')}), "+('aceito pelo '+('Prefeito' if res.get('faixa')=='Crítico' else 'Secretário') if fonte.get('aceitacao') else 'sem aceitação registrada na origem')+(f" em {data_local(fonte['aceitacao']['em'])}" if fonte.get('aceitacao',{}).get('em') else '')
             if risco:
                 from app.acompanhamento_forms34 import titulo
                 origem_texto = titulo(risco, {**fonte, 'form':3})+' — '+origem_texto.split(' — ',1)[1]
@@ -345,11 +345,13 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
             except (ValueError, PermissionError):pass
         from app.restrito_forms34 import pode_ler
         from app.clausulas_lgpd import aplica4,itens4,pendencias4,catalogo as catalogo_clausulas
-        from app.lacunas_form3 import listar as listar_lacunas, incoerencias, DESTINOS
+        from app.lacunas_form3 import listar as listar_lacunas, incoerencias, sugestao_para_tela, DESTINOS
         return paginas.TemplateResponse(request=request,name='forms34_bloco.html',status_code=status,context={
             'clausulas_acao':itens4(e.get('fornecedor_guarda_dados',False)) if ref.form==4 and aplica4(e['respostas']) else [],
             'clausulas_pendentes':pendencias4(e) if ref.form==4 else [],'clausulas_aviso':catalogo_clausulas()['aviso_fixo'],
-            'lacunas':listar_lacunas(e) if ref.form==3 else [], 'destinos_lacunas':DESTINOS, 'alto_risco_referencia':alto_risco_referencia(e['respostas']),
+            'lacunas':[{**lacuna, 'acao_sugerida': sugestao_para_tela(lacuna.get('acao_sugerida'))}
+                       for lacuna in listar_lacunas(e)] if ref.form==3 else [],
+            'destinos_lacunas':DESTINOS, 'alto_risco_referencia':alto_risco_referencia(e['respostas']),
             'incoerencias_controles':incoerencias(e) if ref.form==3 else [],
             'temas_acao':nomes_temas(s,e.get('temas')) if ref.form==4 else [],
             'temas_aprendizagem':nomes_temas(s,e.get('aprendizagem',{}).get('temas')) if ref.form==4 else [],
