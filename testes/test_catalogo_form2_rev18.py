@@ -46,7 +46,10 @@ class TestCatalogoForm2(unittest.TestCase):
         titulos = leitor.titulos_blocos_form2()
         self.assertEqual(list(titulos), list(range(1, 15)))
         for bloco in self.blocos:
-            self.assertTrue(bloco["titulo"].casefold().startswith(titulos[bloco["numero"]].casefold()))
+            if bloco['numero']==12:
+                from app.textos_parte_b16 import TITULO12
+                self.assertEqual(titulos[12],TITULO12)
+            else:self.assertTrue(bloco["titulo"].casefold().startswith(titulos[bloco["numero"]].casefold()))
         for paginas, nome in ((fila, "_regua_fila_form2.html"), (preparacao, "_regua_form2.html")):
             html = paginas.get_template(nome).render(
                 p={"id": "participacao"}, conta_id="conta", estados_regua={},

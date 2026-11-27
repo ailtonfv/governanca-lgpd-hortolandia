@@ -145,7 +145,7 @@ def test_bloco_parcial_e_avisos_de_guarda(principal):
     salvo = c.post(url, data={"conta_id":"CONTA-B1","comando_id":"L5-GUARDA","versao":principal.versao,
                                 "resposta_F2-2.9":GUARDA_INSTITUCIONAL})
     assert salvo.status_code == 200
-    assert "Em preenchimento · 1 de 10 perguntas ativas" in salvo.text and salvo.text.count("Guarda em definição") >= 2
+    assert "Em preenchimento · 1 de 10 perguntas ativas" in salvo.text and salvo.text.count("Prazo de guarda: em definição pela Prefeitura") >= 2
     assert "Respostas completas" not in salvo.text
     painel = c.get("/form2/painel-dpo?conta_id=CONTA-E1")
     assert "Temporalidade em definição: 1 Registro" in painel.text

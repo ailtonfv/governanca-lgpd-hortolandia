@@ -161,7 +161,7 @@ def test_p108_etiquetas_legiveis(principal):
     pagina = TestClient(app).get(f'/form2/participacoes/{principal.id}/blocos/3?conta_id=CONTA-B1')
     assert 'Em deliberação' in pagina.text
     assert 'Proposta em deliberação. Não equivale a homologação.' in pagina.text
-    assert 'Guarda em definição' in pagina.text
+    assert 'Prazo de guarda: em definição pela Prefeitura' in pagina.text
     assert 'title="[D11] Aguarda homologação jurídica (D11)"' in pagina.text
     assert '⚖' not in pagina.text and '🗄' not in pagina.text
 

@@ -30,7 +30,7 @@ def test_a3_situacao_perguntas_e_manifestacoes_no_bloco_certo(sessao,entrada):
         assert bool(soup.id('manifestacoes34'))==(bloco==14)
         if bloco!=14:
             assert any('/blocos/14?' in a.get('href','') and a['href'].endswith('#manifestacoes34') for t,a in soup.tags)
-            assert r.text.index('id="perguntas34"')<r.text.index('Histórico de atos e salvamentos')
+            assert r.text.index('id="perguntas34"')<r.text.index('Histórico de registros e salvamentos')
             assert len(soup.classe('barra-salvar-bloco'))==1
         else:
             assert len(soup.classe('matriz34'))==1

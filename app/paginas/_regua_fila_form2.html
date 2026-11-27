@@ -9,6 +9,6 @@
 {% from '_cartao_bloco.html' import cartao %}
 {{ cartao(n,titulos.get(n,''),estados_regua.get('situacao',{}).get(n|string,'— Ainda não preenchido'),'/form2/participacoes/'~p.id~'/blocos/'~n~'?conta_id='~(conta_id|urlencode),numero|default(0)==n,salvo,pendente,n in (3,4,5,10),n==2 and aguarda_temporalidade(p.conteudo),estados_regua.get('progresso',{}).get(n|string)) }}
 {% endfor %}</ol></nav>
-<p class="legenda-grade"><strong>Em deliberação:</strong> o texto destas perguntas ainda aguarda homologação do Jurídico. Responda normalmente; a redação pode mudar.</p>
+<p class="legenda-grade"><strong>Em deliberação:</strong> o texto destas perguntas ainda aguarda homologação do Jurídico. Responda normalmente; a redação pode mudar. <strong>Prazo de guarda: em definição pela Prefeitura</strong> identifica os blocos que aguardam a tabela de temporalidade.</p>
 </section>
 <script defer src="{{ url_for('estaticos', path='/regua_form2.js') }}"></script>
