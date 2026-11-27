@@ -184,6 +184,9 @@ def disponiveis(form, bloco, papeis, estado=None, pessoa_id=None, revisar=False)
 
 
 def interpretar(acao, formulario):
+    if 'lacunas_ids' in formulario and acao in ('destinar_lacuna','encaminhar_acao'):
+        ids = formulario.getlist('lacunas_ids') if hasattr(formulario,'getlist') else formulario['lacunas_ids']
+        return dict(lacunas_ids=ids, destino=formulario.get('destino',''), prioridade=formulario.get('prioridade',''))
     if acao == 'destinar_lacuna':
         return {k: formulario.get(k, '') for k in ('lacuna_id','destino','prioridade')}
     if acao not in ATOS:

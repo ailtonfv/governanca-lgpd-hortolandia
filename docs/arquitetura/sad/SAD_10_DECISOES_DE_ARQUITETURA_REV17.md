@@ -1140,6 +1140,8 @@ A avaliação conjunta confirmada continua vigente durante uma reavaliação. A 
 
 Complemento C254, decidido em 27/11/2026. A nova rodada começa com as respostas editáveis da rodada anterior. Os 16 blocos exigem salvamento na nova rodada e a conclusão exige nova nota conjunta e nova decisão do residual. A nota anterior permanece vigente até a confirmação da nova proposta.
 
+Complemento C231, decidido em 27/11/2026. O bloco 16 do FORM 3 sugere uma providência para as lacunas com a mesma ação sugerida. O AAL em exercício pode separar e juntar lacunas, definir destino e registrar a prioridade mais alta do grupo. Cada lacuna encaminhada conserva o vínculo com a providência resultante, que lista as origens no FORM 4. Reenvio do grupo resolve para o mesmo encaminhamento. Verificações e itens “A confirmar” ficam fora da composição automática.
+
 Preservadas as competências e condições de aceitação. O tratamento já existente dos atos dependentes (nova aceitação, manifestações e triagem após substituição da avaliação) é aplicado somente na efetiva confirmação da nova nota, não durante a proposta. A aceitação anterior permanece documentada no histórico. Não foi criada regra especial para mudanças de faixa.
 
 

@@ -534,27 +534,30 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
         if not f3:
             raise ValueError('Ato exclusivo do FORM 3.')
         from app.lacunas_form3 import listar, validar_destino
-        lacuna = next((l for l in listar(e) if l['id'] == dados.get('lacuna_id')), None)
-        if not lacuna:
-            raise ValueError('Lacuna não está ativa nesta versão.')
+        from app.grupos_lacunas import selecionar, registrar_grupo
+        ids = dados.get('lacunas_ids', [dados.get('lacuna_id')])
+        _, existente = selecionar(e, listar(e), ids)
+        if existente:
+            raise ValueError('A providência deste grupo já foi encaminhada.')
         validar_destino(dados)
-        e.setdefault('destinos_lacunas', {})[lacuna['id']] = dict(destino=dados['destino'], prioridade=dados['prioridade'])
+        registrar_grupo(e, ids, dados['destino'], dados['prioridade'])
     elif acao == 'encaminhar_acao':
         exigir(papeis, 'aal')
-        lacuna = None
-        if dados.get('lacuna_id'):
+        lacunas = []
+        if dados.get('lacuna_id') or 'lacunas_ids' in dados:
             from app.lacunas_form3 import listar
-            lacuna = next((l for l in listar(e) if l['id'] == dados['lacuna_id']), None)
-            if not lacuna:
-                raise ValueError('Lacuna não está ativa nesta versão. Atualize a página.')
-            existente = e.get('encaminhamentos_lacunas', {}).get(lacuna['id'])
+            from app.grupos_lacunas import selecionar, prioridade_grupo, PRIORIDADES
+            ids = dados.get('lacunas_ids', [dados.get('lacuna_id')])
+            lacunas, existente = selecionar(e, listar(e), ids)
             if existente:
-                return fechar_comando(cmd, {'permitido': True, 'identidade_id': existente['acao_id'], 'existente': True})
+                return fechar_comando(cmd, {'permitido': True, 'identidade_id': existente, 'existente': True})
             if dados.get('destino') != 'Providência no FORM 4':
                 raise ValueError('Escolha Providência no FORM 4 para criar a ação.')
-            if dados.get('prioridade') not in ('Imediata', 'Alta', 'Média', 'Baixa', 'A confirmar'):
-                raise ValueError('Escolha a prioridade desta lacuna.')
-            dados = {**dados, 'justificativa': lacuna['rotulo'], 'outra': True}
+            if dados.get('prioridade') not in PRIORIDADES:
+                raise ValueError('Escolha a prioridade do grupo.')
+            prioridade = prioridade_grupo(e, ids, dados['prioridade'])
+            motivo_grupo = lacunas[0]['rotulo'] if len(lacunas) == 1 else 'Providência encaminhada pelo grupo de lacunas do FORM 3.'
+            dados = {**dados, 'justificativa': motivo_grupo, 'prioridade': prioridade, 'outra': True}
         motivo = _texto(dados, 'justificativa')
         if e.get('acoes') and dados.get('outra') is not True:
             return fechar_comando(cmd, {'permitido': True, 'identidade_id': e['acoes'][-1],
@@ -569,9 +572,11 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
                  situacao='Em preenchimento', risco_id=obj.id,
                  faixa_origem=_faixa(e), motivo=motivo, prorrogacoes=0, prazo=None,
                  executor_id=None, decisoes_pendentes={}, escopos_restritos=[]))
-        if lacuna:
+        if lacunas:
+            lacuna = lacunas[0]
             ae = estado(sessao, a.id)
             ae['origem_lacuna'] = deepcopy(lacuna)
+            ae['origem_lacunas'] = deepcopy(lacunas)
             ae['respostas'].update({'F4-4.2': lacuna['id'], 'F4-4.9': dados['prioridade']})
             ae['prioridade_origem'] = dados['prioridade']
             ae['tema_sugerido'] = lacuna.get('tema')
@@ -580,8 +585,9 @@ def executar(sessao, *, conta_id, comando_id, identidade_id, versao, acao, dados
             if tema and tema.ativo:
                 ae['temas'] = {'principal': tema.codigo, 'complementares': []}
             _gravar_estado(sessao, cmd, a, 'origem_lacuna', ae)
-            e.setdefault('encaminhamentos_lacunas', {})[lacuna['id']] = dict(
-                acao_id=a.id, prioridade=dados['prioridade'], destino=dados['destino'])
+            for item in lacunas:
+                e.setdefault('encaminhamentos_lacunas', {})[item['id']] = dict(
+                    acao_id=a.id, prioridade=dados['prioridade'], destino=dados['destino'])
         e.setdefault('acoes', []).append(a.id)
         e.setdefault('acoes_rodada', []).append(a.id)
         destino_id = a.id

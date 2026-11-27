@@ -15,6 +15,12 @@
 {% if estado.selo_condicoes %}<p class="aviso-alerta">{{ estado.selo_condicoes }}</p>{% endif %}
 {% if ref.form==3 and not estado.referencia_ripd %}<p>{{ ripd_texto }}</p>{% endif %}
 <p>Origem: {% if estado.risco_id %}<a href="/forms34/{{ estado.risco_id }}/blocos/16?conta_id={{ conta_id|urlencode }}">{{ origem_texto }}</a>{% else %}{{ origem_texto }}{% endif %}</p>
+{% if ref.form==4 and bloco==1 and (estado.origem_lacunas or estado.origem_lacuna) %}
+<section aria-labelledby="lacunas-cobertas"><h2 id="lacunas-cobertas">Lacunas cobertas pela providência</h2>
+<ul>{% for l in estado.origem_lacunas or [estado.origem_lacuna] %}
+<li>{{ l.id }} · <a href="/forms34/{{ estado.risco_id }}/blocos/{{ l.bloco }}?conta_id={{ conta_id|urlencode }}#{{ l.pergunta }}">{{ l.pergunta }}</a> · {{ l.rotulo }}</li>
+{% endfor %}</ul></section>
+{% endif %}
 {% if bloco==9 and estado.aprendizagem_devolvida %}<div class="aviso-alerta"><strong>Aprendizagem devolvida à Secretaria para ajustes</strong><p>Observação do DPO: {{ estado.aprendizagem_devolvida.observacao }}</p><p>{{ autores.get(estado.aprendizagem_devolvida.pessoa_id,'DPO') }} · {{ estado.aprendizagem_devolvida.em|hora_local }}</p></div>{% endif %}
 {% if aviso_regra_anterior %}<p class="aviso-alerta" role="alert">{{ aviso_regra_anterior }}</p>{% endif %}
 {% if ref.form==4 and bloco==8 and estado.residual_acao %}<section><h2>Nota residual após a providência</h2><p>{{ estado.residual_acao.probabilidade }} × {{ estado.residual_acao.impacto }} = {{ estado.residual_acao.nota }} — {{ estado.residual_acao.faixa }}</p><p>{{ estado.residual_acao.justificativa }}</p><p>{{ 'Nota conjunta confirmada' if estado.residual_acao_confirmacoes|length==2 else 'Proposta da Secretaria, aguardando confirmação do DPO' }}</p></section>{% endif %}

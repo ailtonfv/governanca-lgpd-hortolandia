@@ -1,5 +1,26 @@
 <section><h2>Lacunas encontradas e verificações</h2>
 {% for aviso in incoerencias_controles %}<p class="aviso-alerta">{{ aviso }}</p>{% endfor %}
+{% if bloco==16 and 'aal' in papeis and not estado.get('conclusao') and grupos_lacunas %}
+<section aria-label="Providências sugeridas"><h3>Providências sugeridas por grupo</h3>
+<p>Desmarque uma lacuna para encaminhá-la separadamente. Para juntar lacunas, marque os itens adicionais. Salve a composição antes de sair.</p>
+{% for sugestao in grupos_lacunas %}
+<form method="post" class="acoes-lacuna">
+<input type="hidden" name="versao" value="{{ estado.versao }}"><input type="hidden" name="comando_id" value="{{ sugestao.comando_id }}">
+<fieldset><legend>{{ sugestao.titulo }} — {{ sugestao.itens|length }} {{ 'lacuna' if sugestao.itens|length==1 else 'lacunas' }}</legend>
+{% set membros = sugestao.itens|map(attribute='id')|list %}
+{% for l in sugestao.itens %}<label><input type="checkbox" name="lacunas_ids" value="{{ l.id }}" checked>{{ l.pergunta }} · {{ l.rotulo }}</label>{% endfor %}
+<details><summary>Juntar lacunas de outro grupo</summary>
+{% for l in lacunas if l.id not in membros and l.id not in estado.get('encaminhamentos_lacunas',{}) %}
+<label><input type="checkbox" name="lacunas_ids" value="{{ l.id }}">{{ l.pergunta }} · {{ l.rotulo }}</label>
+{% else %}<p>Nenhuma lacuna adicional disponível.</p>{% endfor %}
+</details>
+<label>Destino do grupo<select name="destino" required><option value="">Escolha…</option>{% for destino in destinos_lacunas %}<option {% if destino==sugestao.destino %}selected{% endif %}>{{ destino }}</option>{% endfor %}</select></label>
+<label>Prioridade do grupo<select name="prioridade" required><option value="">Escolha…</option>{% for p in prioridades_lacunas %}<option {% if p==sugestao.prioridade %}selected{% endif %}>{{ p }}</option>{% endfor %}</select></label>
+<p>A prioridade será a mais alta entre as lacunas selecionadas.</p>
+<button name="acao" value="destinar_lacuna">Salvar destino e prioridade</button><button name="acao" value="encaminhar_acao">Criar providência no FORM 4</button>
+</fieldset></form>
+{% endfor %}</section>
+{% endif %}
 {% for natureza,titulo in [('lacuna','Lacunas'),('verificacao','Verificações'),('a_confirmar','A confirmar')] %}
 {% set grupo=lacunas|selectattr('natureza','equalto',natureza)|list %}
 {% if grupo %}<h3>{{ titulo }}</h3>
@@ -13,7 +34,7 @@
 {% if l.acao_sugerida %}<p>Sugestão: {{ l.acao_sugerida }}</p>{% endif %}
 {% set encaminhada=estado.get('encaminhamentos_lacunas',{}).get(l.id) %}
 {% if encaminhada %}<a href="/forms34/{{ encaminhada.acao_id }}/blocos/1?conta_id={{ conta_id|urlencode }}">Consultar providência encaminhada</a>
-{% elif bloco==16 and 'aal' in papeis and not estado.get('conclusao') %}
+{% elif bloco==16 and 'aal' in papeis and not estado.get('conclusao') and l.id not in lacunas_agrupadas %}
 <form method="post" class="acoes-lacuna"><input type="hidden" name="lacuna_id" value="{{ l.id }}"><input type="hidden" name="justificativa" value="{{ l.rotulo }}"><input type="hidden" name="versao" value="{{ estado.versao }}"><input type="hidden" name="comando_id" value="{{ comando_id }}">
 {% set escolha=estado.get('destinos_lacunas',{}).get(l.id,{}) %}<label>Destino<select name="destino">{% for destino in destinos_lacunas %}<option {% if destino==escolha.get('destino',l.destino) %}selected{% endif %}>{{ destino }}</option>{% endfor %}</select></label><label>Prioridade<select name="prioridade"><option value="">Escolha…</option>{% for p in ['Imediata','Alta','Média','Baixa','A confirmar'] %}<option {% if p==escolha.get("prioridade") %}selected{% endif %}>{{ p }}</option>{% endfor %}</select></label><button name="acao" value="destinar_lacuna">Salvar destino e prioridade</button><button name="acao" value="encaminhar_acao">Criar providência no FORM 4</button></form>
 {% endif %}</article>{% endfor %}{% endif %}{% endif %}{% endfor %}

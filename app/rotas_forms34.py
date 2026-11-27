@@ -349,11 +349,17 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
         from app.restrito_forms34 import pode_ler
         from app.clausulas_lgpd import aplica4,itens4,pendencias4,catalogo as catalogo_clausulas
         from app.lacunas_form3 import listar as listar_lacunas, incoerencias, sugestao_para_tela, DESTINOS
+        from app.grupos_lacunas import grupos_para_tela, PRIORIDADES
+        lacunas = [{**lacuna, 'acao_sugerida': sugestao_para_tela(lacuna.get('acao_sugerida'))}
+                   for lacuna in listar_lacunas(e)] if ref.form == 3 else []
+        grupos_lacunas = grupos_para_tela(e, lacunas) if ref.form == 3 and bloco == 16 else []
+        for grupo in grupos_lacunas:
+            grupo['comando_id'] = str(uuid4())
         return paginas.TemplateResponse(request=request,name='forms34_bloco.html',status_code=status,context={
             'clausulas_acao':itens4(e.get('fornecedor_guarda_dados',False)) if ref.form==4 and aplica4(e['respostas']) else [],
             'clausulas_pendentes':pendencias4(e) if ref.form==4 else [],'clausulas_aviso':catalogo_clausulas()['aviso_fixo'],
-            'lacunas':[{**lacuna, 'acao_sugerida': sugestao_para_tela(lacuna.get('acao_sugerida'))}
-                       for lacuna in listar_lacunas(e)] if ref.form==3 else [],
+            'lacunas':lacunas, 'grupos_lacunas':grupos_lacunas, 'prioridades_lacunas':PRIORIDADES,
+            'lacunas_agrupadas':{l['id'] for grupo in grupos_lacunas for l in grupo['itens']},
             'destinos_lacunas':DESTINOS, 'alto_risco_referencia':alto_risco_referencia(e['respostas']),
             'incoerencias_controles':incoerencias(e) if ref.form==3 else [],
             'temas_acao':nomes_temas(s,e.get('temas')) if ref.form==4 else [],
