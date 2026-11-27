@@ -19,3 +19,13 @@ def test_a12_checklist_e_lacunas():
     assert pendencias4({'respostas':respostas,'clausulas_contrato':{'B01':'Não'}})==[catalogo()['parte_b']['temas'][0]['tema']]
     from app.lacunas_form3 import listar
     assert any(q['id']=='LAC-F2-9F.1' for q in listar({'respostas':{},'fornecedor_guarda_dados':True,'respostas_fornecedor':{'F2-9F.1':['NAO']}}))
+
+
+def test_a12_quadro_renderiza_abertura_e_quatro_passos():
+    from app.rotas_fila_form2 import paginas
+    c=catalogo()
+    html=paginas.get_template('_clausulas_form2.html').render(numero=9,ativa=lambda *args:True,clausulas_lgpd=c,valores={'opcao:F2-9C.1':['SIM']})
+    assert c['abertura'] in html
+    assert c['como_usar']['adaptacao_para_tela']['texto_tela'] in html
+    assert all(p['titulo'] in html for p in c['como_usar']['passos'])
+    assert len(c['parte_b']['temas'])==10

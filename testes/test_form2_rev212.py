@@ -14,7 +14,7 @@ def salvar(conteudo, bloco, **campos):
 
 def test_catalogo_e_controles():
     itens = [q for b in range(1, 15) for q in definicao_revisao(b)["itens"]]
-    assert len(itens) == len({q["id"] for q in itens}) == 255
+    assert len(itens) == len({q["id"] for q in itens}) == 264
     por_id = {q["id"]: q for q in itens}
     assert sha256(por_id["F2-1.2"]["enunciado"].encode("utf-8")).hexdigest() == "9811f0889b165a54c5c69642ca0fd02fc7f0c87c109421514e49c0575be1b522"
     assert por_id["F2-14.1"]["edicao"] == "bloqueada_d11"
