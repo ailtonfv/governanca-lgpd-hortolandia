@@ -1,6 +1,22 @@
 """Projeções visuais; pontuação gravada continua no domínio."""
 from app.avaliacao_risco34 import pontuar
 from app.apresentacao_form2 import data_local
+
+
+def _descricao(texto):
+    normalizado = ' '.join(texto.split()) if isinstance(texto, str) else ''
+    return normalizado or 'Título ainda não informado'
+
+
+def titulo_providencia(estado):
+    texto = _descricao(estado.get('titulo_providencia') or estado.get('respostas', {}).get('F4-4.3'))
+    return texto if len(texto) <= 80 else texto[:79].rstrip() + '…'
+
+
+def descricao_objeto(estado):
+    return _descricao(estado.get('evento')) if estado['form'] == 3 else titulo_providencia(estado)
+
+
 PROBABILIDADE=['Muito baixa: não se espera que ocorra','Baixa: pode ocorrer em situação excepcional','Média: pode ocorrer algumas vezes','Alta: provável; já ocorreu ou há falha conhecida','Muito alta: esperado ou recorrente']
 IMPACTO=['Muito baixo: incômodo mínimo','Baixo: transtorno pequeno','Médio: transtorno relevante (tempo, custo, constrangimento)','Alto: consequência séria e de difícil reversão (discriminação, prejuízo financeiro, exposição de dado sensível)','Muito alto: consequência grave ou irreversível (integridade física, retaliação, perda de acesso a serviço essencial)']
 EXIGENCIAS={'Pequeno':'Pequeno: acompanhar controles; aceitação pela autoridade da Secretaria.',

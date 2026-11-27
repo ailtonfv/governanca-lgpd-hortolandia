@@ -86,7 +86,7 @@ def test_migracao_aditiva_idempotente_e_tela(sessao,entrada):
     assert resposta.status_code==200
     assert estado(sessao,obj)['temas']=={'principal':'T07','complementares':['T04','T09']}
     antes=estado(sessao,obj)
-    recusado=c.post(url,data=dict(acao='planejar',versao=antes['versao'],comando_id=str(uuid4()),plano='Plano fictício para revisar e documentar os acessos.',cargo='Equipe da unidade executora',duracao_dias=30,tema_principal=''))
+    recusado=c.post(url,data=dict(acao='planejar',titulo_providencia='Revisar acessos fictícios',versao=antes['versao'],comando_id=str(uuid4()),plano='Plano fictício para revisar e documentar os acessos.',cargo='Equipe da unidade executora',duracao_dias=30,tema_principal=''))
     assert recusado.status_code==409 and 'tema principal' in recusado.text
     assert estado(sessao,obj)==antes
 

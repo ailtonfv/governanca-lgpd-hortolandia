@@ -126,7 +126,7 @@ def linha(d, registro_id, item=None):
         l.update(id=obj.id, item=f"{'Risco' if obj.tipo=='R' else 'Providência'} {obj.numero}",
                  situacao=situacao_risco(e) if obj.tipo=='R' else situacao_acao(e))
         if obj.tipo == 'A':
-            from app.acompanhamento_forms34 import titulo_providencia
+            from app.apresentacao_forms34 import titulo_providencia
             l['titulo_providencia'] = titulo_providencia(e)
     return l
 

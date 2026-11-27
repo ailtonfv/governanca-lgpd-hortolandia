@@ -355,6 +355,9 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
         grupos_lacunas = grupos_para_tela(e, lacunas) if ref.form == 3 and bloco == 16 else []
         for grupo in grupos_lacunas:
             grupo['comando_id'] = str(uuid4())
+        fonte_proposta = e.get('reavaliacao') or e
+        if e.get('revisao_aberta') and not e.get('reavaliacao'):
+            fonte_proposta = {chave: e.get(chave, '') for chave in ('evento', 'causa', 'consequencia')}
         return paginas.TemplateResponse(request=request,name='forms34_bloco.html',status_code=status,context={
             'clausulas_acao':itens4(e.get('fornecedor_guarda_dados',False)) if ref.form==4 and aplica4(e['respostas']) else [],
             'clausulas_pendentes':pendencias4(e) if ref.form==4 else [],'clausulas_aviso':catalogo_clausulas()['aviso_fixo'],
@@ -374,7 +377,7 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
             'falhas_r17':falhas_r17,'conferencia_r17':conferencia34(ref.form,e),'base_r17':f'/forms34/{obj.id}/blocos',
             'erros_campos':erros_campos,'acao_erro':acao_erro,'revisar':revisar,
             'ato_proposta':proposta,'ato_principal':principal,'outros_atos':[a for a in restantes if a is not principal],
-            'valores_formulario':valores_enviados if acao_erro else valores_proposta(e.get('reavaliacao',e)),
+            'valores_formulario':valores_enviados if acao_erro else valores_proposta(fonte_proposta),
             'matriz':matriz(),'situacao_avaliacao':situacao_avaliacao(e),
             'grade_visual':grade_visual(grade_atual,obj.id,conta_id,bloco,e),
             'titulo_bloco':titulo_bloco(next(g['titulo'] for g in grade_atual if g['numero']==bloco), ref.form, bloco),

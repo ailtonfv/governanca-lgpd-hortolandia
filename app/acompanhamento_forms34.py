@@ -1,26 +1,11 @@
 """Leitura compartilhada da Central, listas e cabeçalho, sem novos atos."""
 from app.leitura_atos34 import NOMES, horario
 from app.infra_forms34 import historico
+from app.apresentacao_forms34 import descricao_objeto
 
 
 def rotulo_objeto(obj):
     return f"{'Risco' if obj.tipo == 'R' else 'Providência'} {obj.numero}"
-
-
-def descricao_objeto(e):
-    return _descricao(e.get('evento')) if e['form'] == 3 else titulo_providencia(e)
-
-
-def _descricao(texto):
-    if not isinstance(texto, str):texto = None
-    if texto:
-        texto = ' '.join(texto.split())
-    return texto or 'Título ainda não informado'
-
-
-def titulo_providencia(estado):
-    texto = _descricao(estado.get('titulo_providencia') or estado.get('respostas', {}).get('F4-4.3'))
-    return texto if len(texto) <= 80 else texto[:79].rstrip() + '…'
 
 
 def titulo(obj, e):

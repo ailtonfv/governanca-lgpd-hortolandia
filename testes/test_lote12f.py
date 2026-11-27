@@ -152,7 +152,7 @@ def test_tela_verificacao_historico_e_aprendizagem(sessao, entrada):
     for k in VERIFICACAO:assert f'name="{k}"' in verificador.text
     aprendizagem=client.get(f'/forms34/{obj}/blocos/9?conta_id=CONTA-B1').text
     assert 'value="aprender"' not in aprendizagem
-    assert 'A aprendizagem pode ser registrada depois da verificação da ação.' in aprendizagem
+    assert 'A aprendizagem pode ser registrada depois da verificação da providência.' in aprendizagem
     todos=client.get(f'/forms34/{obj}/blocos/6?conta_id=CONTA-B1&filtrar=1&historico=todos').text
     class Historico(HTMLParser):
         def __init__(self):super().__init__();self.salvos=[];self.soltos=[]

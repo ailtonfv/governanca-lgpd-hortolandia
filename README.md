@@ -8,9 +8,11 @@ Em produção, o acesso será por autenticação real; `conta_id` é exclusivo d
 
 **Lote 17 — correções da primeira metade da vistoria.** A branch `lote-17-vistoria-8020` parte de `e7e347f`. O painel do DPO e a Central usam a tarefa vigente dos FORMs 3 e 4. A faixa de sessão identifica o servidor fictício e seu papel. A navegação dos blocos usa uma moldura compartilhada. Os ajustes também cobrem mensagens de recusa, nota residual, datas em horário de Brasília, condicionais e lacunas.
 
-Para o título das providências, a lista e a Central usam a resposta da F4-4.3, com o texto do plano como alternativa. A escolha de um título curto continua pendente. O FORM 3 mantém um encaminhamento por lacuna; repetir o encaminhamento da mesma lacuna reaproveita a providência existente.
+No complemento G9 a G13, a reavaliação abre uma rodada editável com os blocos a revisar. O FORM 4 exige título de até 80 caracteres ao registrar o plano, com alternativa abreviada da F4-4.3 nas providências antigas. No bloco 16 do FORM 3, lacunas com a mesma sugestão começam agrupadas. A Secretaria pode separar ou juntar itens. Cada lacuna mantém seu vínculo, e repetir o encaminhamento do grupo reaproveita a providência existente.
 
-Os grupos G1 a G8 ficam nesta branch para vistoria futura. A porta 8020 segue vinculada ao Lote 16.
+Os grupos G1 a G13 ficam nesta branch para vistoria futura. A porta 8020 segue vinculada ao Lote 16.
+
+**Verificação do complemento G9 a G13.** Bateria completa única de 1.344 casos. A primeira passagem registrou 1.292 aprovações, 51 falhas e um caso ignorado. Após três retestes aprovados, o resultado consolidado é de 1.295 aprovações, as mesmas 48 falhas antigas e um caso ignorado.
 
 **Verificação do Lote 17.** Bateria integral única com 1.337 casos identificáveis no XML do pytest. Na primeira passagem, 1.283 aprovações, 53 falhas e um caso ignorado. Cinco divergências em relação à base do Lote 16 tiveram reteste aprovado. O resultado consolidado é de 1.288 aprovações, as mesmas 48 falhas antigas e um caso ignorado. A justificativa da triagem voltou a ficar antes do botão de confirmação. A validação responsiva em tela continua pendente.
 
