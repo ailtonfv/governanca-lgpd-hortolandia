@@ -168,11 +168,14 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
         try:itens=[dict(q,ativa=ativa(q,e['respostas'],e),recolhida=recolhida(q,e['respostas'],e))
                    for q in perguntas(ref.form) if q['bloco']==bloco]
         except (FileNotFoundError,ValueError) as exc:return erro(request,conta_id,exc,503)
+        from app.referencias_leitura_form3 import referencias
+        anteriores=referencias(s,ref,itens)
+        for q in itens:q['referencias_anteriores']=anteriores.get(q['id'],[])
         from app.opcao_outro import eh_outro
         from app.criterios_form3 import volume, alto_risco_referencia, GERAIS, ESPECIFICOS
         for q in itens:
             q['opcoes_outro']=[v for v in q['opcoes'] if eh_outro(v)]
-            q['ocultar_condicional']=q['id'] in ('F3-3.33','F3-3.41','F3-3.42') or q['id'].startswith('F3-3.43.')
+            q['ocultar_condicional']=q['id']=='F3-3.38' or q['id'] in ('F3-3.33','F3-3.41','F3-3.42') or q['id'].startswith('F3-3.43.')
             if q['id']=='F3-3.6':q['ajuda']=volume()
             if q['id']=='F3-3.53':q['ajuda']='Calculado a partir do bloco 3.'
             if q['id']=='F3-3.10':

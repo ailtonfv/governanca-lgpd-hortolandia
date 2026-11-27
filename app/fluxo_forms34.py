@@ -51,6 +51,8 @@ def estado(sessao, identidade_id):
                   if e.tipo_evento.startswith('f34_') and 'estado' in e.conteudo), None)
     if dados is None:
         raise ValueError('Identidade técnica sem ingresso autorizado.')
+    if dados.get('form')==3:
+        dados['respostas']={k:('A confirmar' if v=='Requer análise' else ['A confirmar' if x=='Requer análise' else x for x in v] if isinstance(v,list) else v) for k,v in dados.get('respostas',{}).items()}
     dados['versao'] = eventos[-1].sequencia_cadeia
     return dados
 

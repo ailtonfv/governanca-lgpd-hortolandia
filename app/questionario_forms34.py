@@ -45,6 +45,7 @@ def perguntas(form):
             c = controles[item['id']]
             tipo = c['controle']
             alternativas = opcoes(c, controles)
+            if form==3:alternativas=list(dict.fromkeys('A confirmar' if v=='Requer análise' else v for v in alternativas))
             if item['id'] == 'F3-3.47':
                 alternativas.append('Nenhum controle identificado')
             if item['id'] == 'F3-3.35':
@@ -63,14 +64,14 @@ def perguntas(form):
             if item['id'] == 'F3-3.61':
                 alternativas = [v for v in alternativas if v != 'Providência no FORM 4']
             saida.append(dict(id=item['id'], bloco=bloco['numero'], titulo='Gatilhos de revisão e aprendizagem' if form==4 and bloco['numero']==9 else bloco['titulo'],
-                enunciado=texto_pergunta(item['enunciado']), tipo=tipo, opcoes=alternativas,
+                enunciado='A equipe deste serviço conhece e sabe acionar o fluxo?' if item['id']=='F3-3.46' else texto_pergunta(item['enunciado']), tipo=tipo, opcoes=alternativas,
                 detalhe=item['id'] in DETALHES4, depende=DEPENDENCIAS.get(item['id']),
-                ajuda='Confirme os fatos da origem; esta resposta não é preenchida automaticamente.'
-                      if c['controle'] == 'readonly' and alternativas else ''))
+                ajuda='Fluxo institucional de incidentes da Prefeitura: existe' if item['id']=='F3-3.46' else ''))
     return saida
 
 
 def ativa(item, respostas, estado):
+    if item['id']=='F3-3.38':return False
     if item['id'] == 'F4-4.9.1':
         return bool(estado.get('prioridade_origem') and respostas.get('F4-4.9')) and respostas['F4-4.9'] != estado['prioridade_origem']
     dep = DEPENDENCIAS.get(item['id'])
