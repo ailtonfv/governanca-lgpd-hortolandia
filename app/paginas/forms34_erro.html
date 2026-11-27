@@ -1,5 +1,6 @@
 {% extends 'base.html' %}{% block conteudo %}
 <h1>Não foi possível registrar esta operação</h1><p role="alert" class="mensagem mensagem-erro">{{ erro }}</p>
+{% if falta_resultado %}<p><a href="{{ base_r17 }}/14?conta_id={{ conta_id|urlencode }}#F2-14.1">Preencher a F2-14.1 (resultado)</a></p>{% endif %}
 {% from '_conferencia_r17.html' import resumo as resumo_r17 %}{% if conferencia_r17 %}{{ resumo_r17(conferencia_r17,base_r17,conta_id,true) }}{% endif %}
 <div class="acoes-fila-form2"><a class="botao-link" href="{{ retorno }}?conta_id={{ conta_id|urlencode }}">Voltar e conferir</a></div>
 {% endblock %}

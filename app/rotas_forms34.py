@@ -284,9 +284,11 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
         ultimo=next((h for h in hist if h['ato']),None)
         situacao_topo=(ultimo['nome']+' em '+ultimo['quando']) if ultimo else e['situacao']
         if ref.form == 4:
+            from app.acompanhamento_forms34 import situacao_nota_posterior
             v = e.get('verificacao', {})
             ex = e.get('execucao', {})
             valores.update(v.get('respostas', {}))
+            valores['F4-4.25'] = situacao_nota_posterior(e)
             valores['F4-4.19'] = ('Evidência informada pela Secretaria: '+ex['evidencia']+' · '+autores.get(ex.get('pessoa_id'), 'Autor registrado')+' · '+str(data_local(ex['em']))) if ex else 'Aguardando referência da execução'
             valores['F4-4.18.1'] = (autores.get(v.get('pessoa_id'), 'Autor registrado')+' · '+unidades_nomes.get(v.get('unidade_id'), 'Secretaria registrada no ato')+' · '+str(data_local(v['em']))) if v else 'Aguardando verificação'
             for q in itens:

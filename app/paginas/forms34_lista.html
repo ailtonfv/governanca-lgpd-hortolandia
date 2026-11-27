@@ -3,12 +3,16 @@
 <p>Servidor em sessão: <strong>{{ pessoa.nome|identidade_demonstrativa }}</strong></p>
 <form method="get"><input type="hidden" name="conta_id" value="{{ conta_id }}">{% if filtro_form %}<input type="hidden" name="form" value="{{ filtro_form }}">{% endif %}<label>Tema<select name="tema"><option value="">Todos os temas</option>{% for t in temas %}<option value="{{ t.codigo }}" {% if tema==t.codigo %}selected{% endif %}>{{ t.codigo }} · {{ t.nome }}</option>{% endfor %}</select></label><button type="submit">Filtrar</button></form>
 <p class="aviso-dados">Demonstração com dados fictícios. Competências e metodologia: proposta em deliberação. Não equivale a homologação.</p>
-<nav><a href="/forms34?conta_id={{ conta_id|urlencode }}">Todos</a> · <a href="/forms34?conta_id={{ conta_id|urlencode }}&form=3">Riscos (FORM 3)</a> · <a href="/forms34?conta_id={{ conta_id|urlencode }}&form=4">Providências (FORM 4)</a></nav>{% if gabinete and not objetos|selectattr("pendente")|list %}<p>Nenhuma decisão aguardando o Gabinete</p>{% endif %}{% for grupo in (true, false) %}
-{% if not grupo %}<details class="grupos-acompanhamento"><summary>Em acompanhamento ({{ objetos|rejectattr('pendente')|list|length }})</summary>{% else %}<h2>Suas providências</h2>{% endif %}
-{% for item in objetos if item.pendente == grupo %}<article class="item-risco34"><header><h2>{{ item.descricao }}</h2><p><small>{{ item.rotulo }} · {{ identificar_registro(item.registro) }}</small></p><p>{{ item.situacao }}</p><p>Contexto: {{ contextos.get(item.registro.contexto_atuacao_id,'') }}</p><p>{{ "Aguarda você: " ~ item.botao if item.pendente else "Você não tem providências agora" }}</p>
-{% if item.estado.selo_condicoes %}<p class="aviso-alerta">{{ item.estado.selo_condicoes }}</p>{% endif %}{% if item.estado.form==4 %}<p>{{ item.temas|join(' · ') }}</p>{% endif %}<a class="botao-link" href="/forms34/{{ item.obj.id }}/blocos/{{ item.bloco }}?conta_id={{ conta_id|urlencode }}">{{ item.botao }}</a></header></article>
-{% else %}{% if grupo %}<p>Você não tem providências agora.</p>{% endif %}{% endfor %}
-{% if not grupo %}</details>{% endif %}{% endfor %}
+<nav><a href="/forms34?conta_id={{ conta_id|urlencode }}">Todos</a> · <a href="/forms34?conta_id={{ conta_id|urlencode }}&form=3">Riscos (FORM 3)</a> · <a href="/forms34?conta_id={{ conta_id|urlencode }}&form=4">Providências (FORM 4)</a></nav>{% if gabinete and not objetos|selectattr("pendente")|list %}<p>Nenhuma decisão aguardando o Gabinete</p>{% endif %}
+{% set tarefas = objetos|selectattr('pendente')|list %}
+{% set concluidos = objetos|selectattr('concluido')|list %}
+{% set andamento = objetos|rejectattr('pendente')|rejectattr('concluido')|list %}
+{% for titulo, grupo in [('Suas providências', tarefas), ('Em andamento', andamento), ('Concluídos', concluidos)] %}
+{% if titulo == 'Concluídos' %}<details class="grupos-acompanhamento"><summary>{{ titulo }} ({{ grupo|length }})</summary>{% else %}<h2>{{ titulo }}</h2>{% endif %}
+{% for item in grupo %}<article class="item-risco34"><header><h3>{{ item.descricao }}</h3><p><small>{{ item.rotulo }} · {{ identificar_registro(item.registro) }}</small></p><p>{{ item.situacao }}</p><p>Contexto: {{ contextos.get(item.registro.contexto_atuacao_id,'') }}</p>{% if item.pendente %}<p>Aguarda você: {{ item.botao }}</p>{% endif %}
+{% if item.estado.selo_condicoes %}<p class="aviso-alerta">{{ item.estado.selo_condicoes }}</p>{% endif %}{% if item.estado.form==4 %}<p>{{ item.temas|join(' · ') }}</p>{% endif %}<a class="botao-link" href="/forms34/{{ item.obj.id }}/blocos/{{ item.bloco }}?conta_id={{ conta_id|urlencode }}">{{ 'Consultar' if item.concluido else item.botao }}</a></header></article>
+{% else %}{% if titulo == 'Suas providências' %}<p>Você não tem providências agora.</p>{% endif %}{% endfor %}
+{% if titulo == 'Concluídos' %}</details>{% endif %}{% endfor %}
 
 {% for item in referencias %}<article><h2>{{ item.registro }} · {{ item.codigo }}</h2><a href="/forms34/{{ item.id }}/referencia-restrita?conta_id={{ conta_id|urlencode }}">Consultar solicitação jurídica restrita</a></article>{% endfor %}
 {% if pode_encaminhar %}<p class="acoes-fila-form2"><a href="/form2/filas?conta_id={{ conta_id|urlencode }}">Encaminhar um risco a partir do FORM 2</a></p>{% endif %}

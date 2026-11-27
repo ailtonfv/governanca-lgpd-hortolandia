@@ -526,9 +526,21 @@ async def agir(request: Request, participacao_id: str,
     except (ValueError, PermissionError) as erro:
         sessao.rollback()
         if isinstance(erro, FormularioIncompleto):
+            concluir = dados.get("acao") == "concluir"
+            faltam = len(erro.conferencia['grupos'])
+            falta_resultado = any(q['ancora'] == 'F2-14.1' for q in erro.conferencia['faltantes'])
+            mensagem = str(erro)
+            if concluir:
+                contagem = 'falta 1 bloco obrigatório' if faltam == 1 else f'faltam {faltam} blocos obrigatórios'
+                resultado_pendente = ', incluindo a F2-14.1 (resultado)' if falta_resultado else ''
+                mensagem = f'Não foi possível concluir a análise: {contagem}{resultado_pendente}.'
             return paginas.TemplateResponse(request=request, name='forms34_erro.html', status_code=409,
-                context={'conta_id':conta_id,'erro':str(erro), 'retorno':f'/form2/participacoes/{participacao_id}',
-                         'conferencia_r17':erro.conferencia, 'base_r17':erro.base})
+                context={'conta_id':conta_id,'erro':mensagem,
+                         'retorno':f'/form2/participacoes/{participacao_id}/blocos/14' if concluir else f'/form2/participacoes/{participacao_id}',
+                         'conferencia_r17':erro.conferencia, 'base_r17':erro.base,
+                         'falta_resultado':falta_resultado})
+        if dados.get("acao") == "concluir" and isinstance(erro, ValueError):
+            raise HTTPException(409, f"Não foi possível concluir a análise: {erro}")
         raise HTTPException(409 if isinstance(erro, ValueError) else 403, str(erro))
     if dados.get("acao") == "consultar":
         return RedirectResponse(f"/form2/participacoes/{participacao_id}?" + urlencode(

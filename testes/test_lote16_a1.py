@@ -116,7 +116,12 @@ def test_pendencia_residual_do_dpo_aparece_no_painel_e_no_topo(sessao, entrada):
     assert bloco.text.count('id="ato-confirmar_residual_acao"') == 1
     assert 'Nota fictícia posterior' in bloco.text[principal:]
 
+    secretaria = cliente.get(f'/forms34/{obj}/blocos/8?conta_id=CONTA-B1')
+    assert 'id="ato-propor_residual_acao"' not in secretaria.text
+    assert 'Proposta: 6 — Moderado, aguardando confirmação do DPO' in secretaria.text
     ato(sessao, obj, 'confirmar_residual_acao', conta='CONTA-E1')
+    confirmado = cliente.get(pendencia['href'])
+    assert '6 — Moderado (nota conjunta confirmada em ' in confirmado.text
     itens = itens_em_andamento(sessao, 'CONTA-E1')
     assert not any(item['ato'] == 'confirmar_residual_acao' for item in itens[4])
 

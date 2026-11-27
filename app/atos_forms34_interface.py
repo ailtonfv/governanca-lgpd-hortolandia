@@ -119,7 +119,7 @@ def disponiveis(form, bloco, papeis, estado=None, pessoa_id=None, revisar=False)
             if k in posteriores:
                 nota=nota_confirmada(estado)
                 if not estado.get('verificada') or reducao_total(estado) or estado.get('cancelada'):continue
-                if k=='propor_residual_acao' and (nota or 'dpo' in papeis):continue
+                if k=='propor_residual_acao' and (estado.get('residual_acao') or 'dpo' in papeis):continue
                 if k=='confirmar_residual_acao' and (nota or not estado.get('residual_acao')):continue
                 if k=='decidir_residual_acao':
                     if not nota or estado.get('decisao_residual_acao') or 'dpo' in papeis:continue
