@@ -583,6 +583,8 @@ def bloco_fila(request: Request, participacao_id: str, bloco: int, conta_id: str
     from app.contrato_form2_respostas import carregar_contrato
     from app.origem_form2 import ler_origem
     from app.eventos import registrar_auditoria
+    from app.cartilha_local import links_cartilha_clausulas
+    from app.clausulas_lgpd import catalogo as catalogo_clausulas
     pessoa = pessoa_ativa(sessao, conta_id)
     p = sessao.get(ParticipacaoForm2, participacao_id)
     if not p or p.tipo != "principal" or not autorizado(sessao, pessoa, p) or p.responsavel_id != pessoa.id:
@@ -617,13 +619,16 @@ def bloco_fila(request: Request, participacao_id: str, bloco: int, conta_id: str
             confirmacao = "Bloco salvo."
             if resultado_salvo.get("complemento_solicitado"):
                 confirmacao += " Complementação solicitada à origem."
+    clausulas = catalogo_clausulas() if bloco == 9 else None
+    links_clausulas = (links_cartilha_clausulas(request, sessao, conta_id, p.registro_id, clausulas["links"])
+                       if clausulas and aplicavel("F2-9C.1", "", valores, ramos, regras) else [])
     return paginas.TemplateResponse(request=request, name="bloco_fila_form2.html",
         context={"conferencia_r17":conferencia_para_tela(sessao,p) if p.tipo=="principal" else None,"base_r17":f"/form2/participacoes/{p.id}/blocos","ato_registrado": ato_registrado(sessao, request.query_params.get("salvo"), conta_id, participacao_id=p.id) if confirmacao else None, "atuacao": contexto_atuacao(sessao, pessoa, p), "p": p, "estados_regua": estados_regua_form2(conteudo, ramos), "pessoa": pessoa, "conta_id": conta_id, "bloco": definicao,
         "cargo": CARGOS_FICTICIOS.get(pessoa.id), "numero": bloco, "confirmacao": confirmacao, "ocorrencias": ocorrencias, "origens_repetiveis": origens_repetiveis,
         "comando_id": str(uuid4()),
         "finalidade_validada": conteudo.get(RASCUNHO, {}).get("2", {}).get("texto:F2-2.3"),
         "secretarias_selecao": secretarias_ativas(sessao),
-        "clausulas_lgpd":__import__("app.clausulas_lgpd",fromlist=["catalogo"]).catalogo() if bloco==9 else None,
+        "clausulas_lgpd": clausulas, "links_cartilha_clausulas": links_clausulas,
         "fatos_origem": origem["conteudo"],
         "registro": sessao.get(Registro, p.registro_id),
         "secretaria": sessao.get(Unidade, sessao.get(Registro, p.registro_id).unidade_principal_atual_id),

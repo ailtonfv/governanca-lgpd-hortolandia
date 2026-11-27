@@ -347,6 +347,7 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
                     quando=str(data_local(ingresso_acao.ocorrido_em)) if ingresso_acao else ''))
             except (ValueError, PermissionError):pass
         from app.restrito_forms34 import pode_ler
+        from app.cartilha_local import links_cartilha_clausulas
         from app.clausulas_lgpd import aplica4,itens4,pendencias4,catalogo as catalogo_clausulas
         from app.lacunas_form3 import listar as listar_lacunas, incoerencias, sugestao_para_tela, DESTINOS
         from app.grupos_lacunas import grupos_para_tela, PRIORIDADES
@@ -358,9 +359,13 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
         fonte_proposta = e.get('reavaliacao') or e
         if e.get('revisao_aberta') and not e.get('reavaliacao'):
             fonte_proposta = {chave: e.get(chave, '') for chave in ('evento', 'causa', 'consequencia')}
+        clausulas_acao = itens4(e.get('fornecedor_guarda_dados', False)) if ref.form == 4 and aplica4(e['respostas']) else []
+        clausulas = catalogo_clausulas()
+        links_clausulas = (links_cartilha_clausulas(request, s, conta_id, registro.id, clausulas['links'])
+                           if bloco == 2 and clausulas_acao else [])
         return paginas.TemplateResponse(request=request,name='forms34_bloco.html',status_code=status,context={
-            'clausulas_acao':itens4(e.get('fornecedor_guarda_dados',False)) if ref.form==4 and aplica4(e['respostas']) else [],
-            'clausulas_pendentes':pendencias4(e) if ref.form==4 else [],'clausulas_aviso':catalogo_clausulas()['aviso_fixo'],
+            'clausulas_acao':clausulas_acao, 'links_cartilha_clausulas':links_clausulas,
+            'clausulas_pendentes':pendencias4(e) if ref.form==4 else [],'clausulas_aviso':clausulas['aviso_fixo'],
             'lacunas':lacunas, 'grupos_lacunas':grupos_lacunas, 'prioridades_lacunas':PRIORIDADES,
             'lacunas_agrupadas':{l['id'] for grupo in grupos_lacunas for l in grupo['itens']},
             'destinos_lacunas':DESTINOS, 'alto_risco_referencia':alto_risco_referencia(e['respostas']),

@@ -12,7 +12,10 @@ import re
 from xml.etree import ElementTree as ET
 from zipfile import BadZipFile, ZipFile
 
-from app.ajudas_cartilha_form1 import ARQUIVO_CARTILHA, SECOES_CARTILHA, SHA256_CARTILHA
+from app.ajudas_cartilha_form1 import (
+    ARQUIVO_CARTILHA, SECOES_CARTILHA, SHA256_CARTILHA,
+    VERSAO_CARTILHA_AJUDAS_FORM1, titulo_topico,
+)
 
 CAMINHO_CARTILHA = Path(__file__).resolve().parent.parent / "documentos_locais" / "cartilha" / ARQUIVO_CARTILHA
 NS = {
@@ -116,3 +119,34 @@ def secoes_cartilha_disponiveis():
         return _ler_edicao(str(CAMINHO_CARTILHA), estado.st_mtime_ns, estado.st_size)
     except (OSError, BadZipFile, ET.ParseError, KeyError, ValueError):
         return {}
+
+
+def destinos_cartilha_clausulas(links, secoes):
+    """Resolve somente o título exato da seção na edição local conferida."""
+    por_titulo = {titulo_topico(secao): secao for secao in secoes}
+    return {
+        link["chave"].split(maxsplit=1)[0]: por_titulo[titulo]
+        for link in links.values()
+        if (titulo := link["rotulo"].removeprefix("Na Cartilha: ")) in por_titulo
+    }
+
+
+def links_cartilha_clausulas(request, sessao, conta_id, registro_id, links):
+    from app.consultas_interface import pode_consultar_registro
+
+    if not acesso_local_cartilha(request):
+        return []
+    destinos = destinos_cartilha_clausulas(links, secoes_cartilha_disponiveis())
+    if not destinos or not pode_consultar_registro(sessao, conta_id, registro_id):
+        return []
+    disponiveis = []
+    for link in links.values():
+        chave = link["chave"].split(maxsplit=1)[0]
+        secao = destinos.get(chave)
+        if secao:
+            url = request.url_for(
+                "consultar_cartilha_secao", registro_id=registro_id,
+                edicao=VERSAO_CARTILHA_AJUDAS_FORM1, secao_id=secao,
+            )
+            disponiveis.append({"chave": chave, "rotulo": link["rotulo"], "url": url.include_query_params(conta_id=conta_id)})
+    return disponiveis
