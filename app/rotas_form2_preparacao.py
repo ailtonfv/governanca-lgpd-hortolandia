@@ -174,12 +174,22 @@ async def revisao_form2(request: Request, registro_id: str, preparacao_id: str, 
             chave = nome.split(":", 1)[1]
             if ativa(chave.partition("#")[0], conjunto_da_chave(chave)):
                 pendencias.append(chave)
+    from app.cartilha_topicos import links_por_pergunta, links_topicos
+    from app.consultas_interface import pode_consultar_registro
+    from app.mapa_cartilha import FORM2_BLOCOS, FORM2_PERGUNTAS, GRADE_CARTILHA
+    cartilha_visivel = pode_consultar_registro(sessao, conta_id, registro_id)
     return paginas.TemplateResponse(request=request, name="form2_revisao.html", status_code=409 if erro else 200,
         headers={"Cache-Control": "private, no-store"},
         context={"secretarias_selecao": secretarias_ativas(sessao), "registro": dados["registro"], "prep": prep, "bloco": definicao, "valores": valores,
                  "estados_regua": estados_regua_form2(prep.conteudo, ramos, demonstrativo=False),
                  "versao": versao, "erro": erro, "comando_id": str(uuid.uuid4()), "conta_id": conta_id,
                  "ativa": ativa, "pendencias": pendencias,
+                 "links_cartilha": links_topicos(request, conta_id, FORM2_BLOCOS[bloco], registro_id)
+                     if cartilha_visivel else [],
+                 "links_cartilha_grade": links_topicos(request, conta_id, GRADE_CARTILHA, registro_id)
+                     if cartilha_visivel else [],
+                 "links_cartilha_perguntas": links_por_pergunta(request, conta_id, definicao["itens"], FORM2_PERGUNTAS,
+                                                              registro_id) if cartilha_visivel else {},
                  "origens_repetiveis": [q["id"] for q in definicao["itens"] if q["repetivel"]],
                  "inativas": prep.conteudo.get("respostas_inativas_rev212", {}).get(str(bloco), {}),
                  "fatos_origem": [q for q in dados["origem"].get("perguntas", [])

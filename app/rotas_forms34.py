@@ -347,7 +347,10 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
                     quando=str(data_local(ingresso_acao.ocorrido_em)) if ingresso_acao else ''))
             except (ValueError, PermissionError):pass
         from app.restrito_forms34 import pode_ler
-        from app.cartilha_local import links_cartilha_clausulas
+        from app.cartilha_topicos import links_por_pergunta, links_topicos
+        from app.mapa_cartilha import (FORM3_BLOCOS, FORM3_LACUNAS, FORM3_PERGUNTAS,
+                                      FORM4_BLOCOS, FORM4_CLAUSULAS, FORM4_PERGUNTAS,
+                                      GRADE_CARTILHA)
         from app.clausulas_lgpd import aplica4,itens4,pendencias4,catalogo as catalogo_clausulas
         from app.lacunas_form3 import listar as listar_lacunas, incoerencias, sugestao_para_tela, DESTINOS
         from app.grupos_lacunas import grupos_para_tela, PRIORIDADES
@@ -361,11 +364,20 @@ async def bloco(request:Request,objeto_id:str,bloco:int,conta_id:str):
             fonte_proposta = {chave: e.get(chave, '') for chave in ('evento', 'causa', 'consequencia')}
         clausulas_acao = itens4(e.get('fornecedor_guarda_dados', False)) if ref.form == 4 and aplica4(e['respostas']) else []
         clausulas = catalogo_clausulas()
-        links_clausulas = (links_cartilha_clausulas(request, s, conta_id, registro.id, clausulas['links'])
+        escopo_cartilha = {"objeto_id": obj.id}
+        links_clausulas = (links_topicos(request, conta_id, FORM4_CLAUSULAS, registro.id, **escopo_cartilha)
                            if bloco == 2 and clausulas_acao else [])
+        bloco_cartilha = FORM3_BLOCOS if ref.form == 3 else FORM4_BLOCOS
+        perguntas_cartilha = FORM3_PERGUNTAS if ref.form == 3 else FORM4_PERGUNTAS
         return paginas.TemplateResponse(request=request,name='forms34_bloco.html',status_code=status,context={
             'clausulas_acao':clausulas_acao, 'links_cartilha_clausulas':links_clausulas,
             'clausulas_pendentes':pendencias4(e) if ref.form==4 else [],'clausulas_aviso':clausulas['aviso_fixo'],
+            'links_cartilha': links_topicos(request, conta_id, bloco_cartilha[bloco], registro.id, **escopo_cartilha),
+            'links_cartilha_grade': links_topicos(request, conta_id, GRADE_CARTILHA, registro.id, **escopo_cartilha),
+            'links_cartilha_perguntas': links_por_pergunta(request, conta_id, itens, perguntas_cartilha,
+                                                          registro.id, **escopo_cartilha),
+            'links_cartilha_lacunas': links_topicos(request, conta_id, FORM3_LACUNAS, registro.id, **escopo_cartilha)
+                if ref.form == 3 and bloco == 13 else [],
             'lacunas':lacunas, 'grupos_lacunas':grupos_lacunas, 'prioridades_lacunas':PRIORIDADES,
             'lacunas_agrupadas':{l['id'] for grupo in grupos_lacunas for l in grupo['itens']},
             'destinos_lacunas':DESTINOS, 'alto_risco_referencia':alto_risco_referencia(e['respostas']),

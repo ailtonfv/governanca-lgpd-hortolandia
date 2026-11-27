@@ -1,3 +1,11 @@
-{% for link in links_cartilha %}
+{% macro link_topico(link) -%}
 <p class="referencia-cartilha-form1"><a data-cartilha-chave="{{ link.chave }}" href="{{ link.url }}" target="_blank" rel="noopener noreferrer">{{ link.rotulo }} <span>(abre em outra aba)</span></a></p>
-{% endfor %}
+{%- endmacro %}
+{% if links_cartilha|length > 2 %}
+{{ link_topico(links_cartilha[0]) }}
+<details><summary>Mais tópicos da Cartilha</summary>
+{% for link in links_cartilha[1:] %}{{ link_topico(link) }}{% endfor %}
+</details>
+{% else %}
+{% for link in links_cartilha %}{{ link_topico(link) }}{% endfor %}
+{% endif %}

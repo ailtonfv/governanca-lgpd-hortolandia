@@ -26,7 +26,10 @@
 {% if grupo %}<h3>{{ titulo }}</h3>
 {% if bloco == 13 %}
 {% for sugestao, itens_grupo in grupo|groupby('acao_sugerida') %}
-<details><summary>{{ sugestao or 'Sem sugestão registrada' }} — {{ itens_grupo|length }} {{ ('lacuna' if itens_grupo|length == 1 else 'lacunas') if natureza == 'lacuna' else ('item' if itens_grupo|length == 1 else 'itens') }}</summary>
+{% set referencia_cartilha = ' (ver na Cartilha: Cláusulas orientativas para terceiros)' %}
+{% set orientacoes_cartilha = links_cartilha_lacunas and referencia_cartilha in (sugestao or '') %}
+<details><summary>{{ (sugestao|replace(referencia_cartilha, '') if orientacoes_cartilha else sugestao) or 'Sem sugestão registrada' }} — {{ itens_grupo|length }} {{ ('lacuna' if itens_grupo|length == 1 else 'lacunas') if natureza == 'lacuna' else ('item' if itens_grupo|length == 1 else 'itens') }}</summary>
+{% if orientacoes_cartilha %}{% with links_cartilha=links_cartilha_lacunas %}{% include '_links_cartilha.html' %}{% endwith %}{% endif %}
 <ul>{% for l in itens_grupo %}<li><a href="/forms34/{{ obj.id }}/blocos/{{ l.bloco }}?conta_id={{ conta_id|urlencode }}#{{ l.pergunta }}">{{ l.pergunta }}</a> · {{ l.rotulo }}
 {% set encaminhada=estado.get('encaminhamentos_lacunas',{}).get(l.id) %}{% if encaminhada %}<a href="/forms34/{{ encaminhada.acao_id }}/blocos/1?conta_id={{ conta_id|urlencode }}">Consultar providência encaminhada</a>{% endif %}</li>{% endfor %}</ul></details>
 {% endfor %}

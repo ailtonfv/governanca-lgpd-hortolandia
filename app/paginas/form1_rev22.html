@@ -55,6 +55,7 @@
 {% set query_bloco = '?conta_id=' ~ (conta_id|urlencode) ~ '&bloco=' %}
 {% call navegacao(query_bloco ~ (bloco-1) if adotada and bloco>1 else none, query_bloco ~ (bloco+1) if adotada and bloco<14 else none, retorno_painel(request, conta_id, 'form1'), 'Voltar à lista de Registros do FORM 1' if request.query_params.get("instrumento") == "form1" else "Voltar ao Painel") %}
 {{ mapa_blocos|default('') }}
+{% with links_cartilha=links_cartilha_grade %}{% include '_links_cartilha.html' %}{% endwith %}
 {% endcall %}</div>
 <script type="application/json" id="condicoes-rev22">{{ {"campos":condicoes,"respostas":contexto_condicoes}|tojson }}</script><script defer src="/estaticos/condicoes_rev22.js"></script>
 {% if adotada and pode and not conflito_versao %}

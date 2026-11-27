@@ -72,7 +72,7 @@ def renderizar_bloco(request,registro_id,conta_id,bloco,conjunto,sessao,*,tentat
     from app.rev22_form1 import blocos_com_respostas, contagem_blocos, condicoes_tela, orientacao_condicional
     from app.ajudas_cartilha_form1 import ajudas_rev22
     from app.cartilha_topicos import links_topicos
-    from app.mapa_cartilha import FORM1_BLOCOS, topicos_pergunta_form1
+    from app.mapa_cartilha import FORM1_BLOCOS, GRADE_CARTILHA, topicos_pergunta_form1
     from app.consultas_interface import _devolucao_para_interface
     respondidos = blocos_com_respostas(conteudo) if trabalho['iniciado'] else set()
     contagens=contagem_blocos(conteudo)
@@ -112,6 +112,7 @@ def renderizar_bloco(request,registro_id,conta_id,bloco,conjunto,sessao,*,tentat
         erro_bloco=erro, conflito_versao=bool(erro and erro.startswith('Este bloco foi alterado em outra aba.')),
         versao_formulario=tentativa.get('versao',r.versao_rascunho) if tentativa is not None else r.versao_rascunho,
         links_cartilha=links_topicos(request, conta_id, FORM1_BLOCOS[bloco], registro_id),
+        links_cartilha_grade=links_topicos(request, conta_id, GRADE_CARTILHA, registro_id),
         pode_definir_retorno=reg.unidade_principal_atual_id in unidades_em_que_e_apa_atual(sessao,identidade["pessoa_id"]),
         atualizada=atualizada, contagens=contagens, condicoes=condicoes_tela(), contexto_condicoes=contexto,
         retirada_antiga=bool(conteudo.get('revisao_22',{}).get('legado',{}).get('9.2.1')),

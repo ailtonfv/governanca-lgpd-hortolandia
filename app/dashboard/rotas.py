@@ -33,6 +33,8 @@ def linha_tempo(l,agora,limites=None):
 @router.get('/dashboard')
 @router.get('/dashboard/{tela}')
 def dashboard(request:Request,tela:str='abertura',conta_id:str='CONTA-B1'):
+    from app.cartilha_topicos import links_topicos
+    from app.mapa_cartilha import CARTILHA_DASHBOARD
     if tela not in TELAS:raise HTTPException(404,'Tela indisponível.')
     filtros={k:request.query_params.get(k,'') for k in ('secretaria','tipo','inicio','fim','etapa','faixa')}
     agora=datetime.now(timezone.utc)
@@ -54,7 +56,8 @@ def dashboard(request:Request,tela:str='abertura',conta_id:str='CONTA-B1'):
                 except PermissionError:
                     dashboard_disponivel = False
                 return paginas.TemplateResponse(request=request,name='aprendizados_publicos.html',
-                    context=dict(conta_id=conta_id, aprendizado=aprendizado, dashboard_disponivel=dashboard_disponivel,telas=TELAS))
+                    context=dict(conta_id=conta_id, aprendizado=aprendizado, dashboard_disponivel=dashboard_disponivel,telas=TELAS,
+                        links_cartilha=links_topicos(request, conta_id, CARTILHA_DASHBOARD[tela], origem="aprendizados")))
             escopo=escopo_da_conta(sessao,conta_id)
             fonte=carregar(sessao,escopo)
             dados=c.filtrar(fonte,escopo,filtros)
@@ -122,6 +125,7 @@ def dashboard(request:Request,tela:str='abertura',conta_id:str='CONTA-B1'):
             if filtros['etapa']:mostrando.append('FORM '+filtros['etapa'])
             return paginas.TemplateResponse(request=request,name='dashboard.html',context=dict(
                 conta_id=conta_id,tela=tela,titulo=TELAS[tela],telas=TELAS,perfil=rotulo_perfil(sessao,conta_id,escopo),titulo_perfil=titulo_perfil,
+                links_cartilha=links_topicos(request, conta_id, CARTILHA_DASHBOARD[tela], origem="dashboard"),
                 filtros=filtros,secretarias=secretarias,travada=escopo.unidades is not None,faixas=c.FAIXAS,cores=CORES,
                 q=indices,url=url,selecao=selecao,quadros=[indices[k] for k in escolhas.get(tela,[]) if k in indices],
                 atencao=atencao_perfil,esteira=esteira,segmentos=segmentos,risco=linhas_risco,correcao=indices['acoes']['lista'],

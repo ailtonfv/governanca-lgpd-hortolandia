@@ -15,6 +15,7 @@
   <div>
     {% if instrumento %}<p class="etiqueta">{{ 'FORM 2 — Validação jurídica e institucional' if instrumento == 'form2' else 'FORM 1 — Levantamento do tratamento' }}</p>{% endif %}
     <h1>{{ titulo_pagina }}</h1>
+{% include '_links_cartilha.html' %}
     <p><strong>Servidor em sessão:</strong> {{ identificacao_servidor(identidade) }} · {{ papel_sessao }}</p>
     <p><strong>Secretaria de atuação:</strong> {{ secretaria.nome }}</p>
   </div>

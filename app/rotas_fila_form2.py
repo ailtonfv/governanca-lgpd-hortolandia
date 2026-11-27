@@ -451,9 +451,14 @@ def filas(request: Request, conta_id: str, sessao: Session = Depends(sessao_fila
         encaminhaveis.setdefault(item.registro_id, {
             "snapshot": item.snapshot_id, "codigo": registros[item.registro_id].codigo_lgpd,
             "rotulo": rotulo_apresentacao(item)})
+    from app.cartilha_topicos import links_topicos
+    from app.mapa_cartilha import CARTILHA_FILAS
+
     return paginas.TemplateResponse(request=request, name="filas_form2.html",
         context={"ato_registrado": ato_registrado(sessao, chave, conta_id), "nomes_objetos": nomes_objetos, "referencias": referencias, "mensagem_atribuicao": mensagem, "atribuidores": atribuidores, "cartoes": ordenados, "identificacoes":identificacoes, "entradas": entradas, "pode_encaminhar": bool(unidades_apa), "encaminhaveis": encaminhaveis,
                  "conta_id": conta_id, "pessoa": pessoa, "participacoes": participacoes,
+                 "links_cartilha": links_topicos(request, conta_id, CARTILHA_FILAS, origem="central")
+                     if gerenciaveis else [],
                  "registros": registros, "unidades": unidades, "linhas": linhas, "grupos_dpo": grupos_dpo,
                  "confirmacoes_dpo": confirmacoes_dpo,
                  "impedimentos": impedimentos, "complementos": complementos, "gerenciaveis": gerenciaveis, "agentes": {p.id: candidatos_atribuicao(sessao, p, pessoa.id) for p in gerenciaveis},
@@ -583,7 +588,8 @@ def bloco_fila(request: Request, participacao_id: str, bloco: int, conta_id: str
     from app.contrato_form2_respostas import carregar_contrato
     from app.origem_form2 import ler_origem
     from app.eventos import registrar_auditoria
-    from app.cartilha_local import links_cartilha_clausulas
+    from app.cartilha_topicos import links_por_pergunta, links_topicos
+    from app.mapa_cartilha import FORM2_BLOCOS, FORM2_CLAUSULAS, FORM2_PERGUNTAS, GRADE_CARTILHA
     from app.clausulas_lgpd import catalogo as catalogo_clausulas
     pessoa = pessoa_ativa(sessao, conta_id)
     p = sessao.get(ParticipacaoForm2, participacao_id)
@@ -620,7 +626,8 @@ def bloco_fila(request: Request, participacao_id: str, bloco: int, conta_id: str
             if resultado_salvo.get("complemento_solicitado"):
                 confirmacao += " Complementação solicitada à origem."
     clausulas = catalogo_clausulas() if bloco == 9 else None
-    links_clausulas = (links_cartilha_clausulas(request, sessao, conta_id, p.registro_id, clausulas["links"])
+    escopo_cartilha = {"participacao_id": p.id}
+    links_clausulas = (links_topicos(request, conta_id, FORM2_CLAUSULAS, p.registro_id, **escopo_cartilha)
                        if clausulas and aplicavel("F2-9C.1", "", valores, ramos, regras) else [])
     return paginas.TemplateResponse(request=request, name="bloco_fila_form2.html",
         context={"conferencia_r17":conferencia_para_tela(sessao,p) if p.tipo=="principal" else None,"base_r17":f"/form2/participacoes/{p.id}/blocos","ato_registrado": ato_registrado(sessao, request.query_params.get("salvo"), conta_id, participacao_id=p.id) if confirmacao else None, "atuacao": contexto_atuacao(sessao, pessoa, p), "p": p, "estados_regua": estados_regua_form2(conteudo, ramos), "pessoa": pessoa, "conta_id": conta_id, "bloco": definicao,
@@ -629,6 +636,10 @@ def bloco_fila(request: Request, participacao_id: str, bloco: int, conta_id: str
         "finalidade_validada": conteudo.get(RASCUNHO, {}).get("2", {}).get("texto:F2-2.3"),
         "secretarias_selecao": secretarias_ativas(sessao),
         "clausulas_lgpd": clausulas, "links_cartilha_clausulas": links_clausulas,
+        "links_cartilha": links_topicos(request, conta_id, FORM2_BLOCOS[bloco], p.registro_id, **escopo_cartilha),
+        "links_cartilha_grade": links_topicos(request, conta_id, GRADE_CARTILHA, p.registro_id, **escopo_cartilha),
+        "links_cartilha_perguntas": links_por_pergunta(request, conta_id, definicao["itens"], FORM2_PERGUNTAS,
+                                                      p.registro_id, **escopo_cartilha),
         "fatos_origem": origem["conteudo"],
         "registro": sessao.get(Registro, p.registro_id),
         "secretaria": sessao.get(Unidade, sessao.get(Registro, p.registro_id).unidade_principal_atual_id),

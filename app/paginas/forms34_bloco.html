@@ -3,6 +3,7 @@
 <link rel="stylesheet" href="{{ url_for('estaticos',path='/filas_form2.css') }}"><link rel="stylesheet" href="{{ url_for('estaticos',path='/forms34.css') }}?v=20261120-12f">
 <div class="forms34 filas-form2"><p class="etiqueta">{{ identificar_registro(registro) }}</p>
 <h1>FORM {{ ref.form }} · Bloco {{ bloco }} — {{ titulo_bloco }}</h1>
+{% include '_links_cartilha.html' %}
 <p>Contexto: {{ contexto_nome }}</p>
 {% include '_situacao_forms34.html' %}
 {% from '_ato_forms34.html' import formulario %}
@@ -67,6 +68,7 @@
 {% if ref.form==3 and bloco in [3,15] and alto_risco_referencia %}<p class="aviso-alerta">Possível alto risco, pelos critérios de referência da ANPD (Resolução CD/ANPD nº 2/2022, art. 4º).</p>{% endif %}
 {% if ref.form==3 and bloco==3 and estado.respostas.get('F3-3.6')=='Alto' %}<p class="aviso-alerta">Volume alto: confira se cabe marcar Larga escala.</p>{% endif %}
 {% if ref.form==3 and bloco in [13,16] %}{% include '_lacunas_form3.html' %}{% endif %}
+{% with links_cartilha=links_cartilha_grade %}{% include '_links_cartilha.html' %}{% endwith %}
 {% if ref.form==3 and bloco==14 %}<details><summary>Ver detalhes da avaliação</summary>{% include '_perguntas_forms34.html' %}</details>{% endif %}
 
 {% if ref.form==4 %}<p>Risco de origem: {{ estado.faixa_origem or 'Não avaliado' }}. Prazo: {{ prazo_br }}.{% if atraso %} <strong>Em atraso</strong>{% endif %}</p>{% endif %}

@@ -37,6 +37,7 @@
 <link rel="stylesheet" href="{{ url_for('estaticos', path='/instrumentos_registro.css') }}?v=20261119-12d-cartoes">
 <div class="central-acesso">
   <h1>Central de Acesso</h1>
+{% include '_links_cartilha.html' %}
   <nav aria-label="Orientações"><a href="/como-funciona?conta_id={{ conta_id|urlencode }}">Como funciona o sistema</a> · <a href="/fluxograma?conta_id={{ conta_id|urlencode }}">Ver o fluxograma</a></nav>
 
   {% if exibir_painel_dpo %}<p><a href="/temas/pedidos?conta_id={{ conta_id|urlencode }}">Pedidos de novos temas — Em análise</a></p>{% endif %}
@@ -117,6 +118,8 @@
     <ul class="lista-instrumentos-registro">
       {% if exibir_dashboard %}{{ cartao('dashboard', 'Dashboard LGPD', 'Indicadores consolidados de governança, Registros, pendências, riscos e providências.', 'Somente leitura. Você vê os dados que o seu perfil permite.', 'M3 3v17h18 M7 16v-4 M12 16V6 M17 16V9', acesso='Acessar Dashboard') }}{% endif %}
     </ul>
+    {% with links_cartilha=links_cartilha_dashboard %}{% include '_links_cartilha.html' %}{% endwith %}
   </section>{% endif %}
 </div>
+<footer>{% with links_cartilha=links_cartilha_glossario %}{% include '_links_cartilha.html' %}{% endwith %}</footer>
 {% endblock %}

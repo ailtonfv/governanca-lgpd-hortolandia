@@ -192,6 +192,8 @@ def central(
     from app.central_instrumentos import cartoes_em_andamento, itens_em_andamento
     from app.caminho_central import caminho
     from app.aprendizados_publicos import consultar as aprendizados_publicos
+    from app.cartilha_topicos import links_topicos
+    from app.mapa_cartilha import CARTILHA_CENTRAL, CARTILHA_CENTRAL_DASHBOARD, CARTILHA_GLOSSARIO
     listas = itens_em_andamento(sessao, conta_id)
     from app.dashboard.fontes import escopo_da_conta
     try:
@@ -201,6 +203,10 @@ def central(
         exibir_dashboard = False
     resposta = paginas.TemplateResponse(request=request, name="central.html", context={
         "exibir_dashboard": exibir_dashboard,
+        "links_cartilha": links_topicos(request, conta_id, CARTILHA_CENTRAL, origem="central"),
+        "links_cartilha_dashboard": links_topicos(request, conta_id, CARTILHA_CENTRAL_DASHBOARD, origem="dashboard")
+            if exibir_dashboard else [],
+        "links_cartilha_glossario": links_topicos(request, conta_id, CARTILHA_GLOSSARIO, origem="central"),
         "papel_sessao": papeis_em_sessao(sessao,conta_id),
         "pode_abrir_registro": bool(unidades_em_que_e_apa_atual(sessao,pessoa_id)),
         "cartoes_forms": cartoes_em_andamento(sessao, conta_id, listas),
@@ -220,10 +226,15 @@ def central(
 @app.get("/como-funciona", response_class=HTMLResponse)
 @app.get("/fluxograma", response_class=HTMLResponse)
 def apoio_entrada(request: Request, conta_id: str = Query(default="CONTA-A1", max_length=50), sessao: Session = Depends(obter_sessao)):
+    from app.cartilha_topicos import links_topicos
+    from app.mapa_cartilha import CARTILHA_ABERTURA
+
     if carregar_central(sessao, conta_id) is None:
         return _erro_acesso_central(request, conta_indisponivel=True)
     pagina = "fluxograma" if request.url.path == "/fluxograma" else "como-funciona"
-    resposta = paginas.TemplateResponse(request=request, name="apoio_" + pagina + ".html", context={"conta_id": conta_id})
+    resposta = paginas.TemplateResponse(request=request, name="apoio_" + pagina + ".html",
+        context={"conta_id": conta_id,
+                 "links_cartilha": links_topicos(request, conta_id, CARTILHA_ABERTURA[pagina], origem="central")})
     if pagina == 'como-funciona':
         from app.apresentacao_entrada import marcar
         marcar(resposta, conta_id)
@@ -264,6 +275,9 @@ def painel_registros(
     instrumento: Literal["form1", "form2"] | None = None,
     sessao: Session = Depends(obter_sessao),
 ):
+    from app.cartilha_topicos import links_topicos
+    from app.mapa_cartilha import CARTILHA_PAINEL
+
     acesso = carregar_central(sessao, conta_id)
     if acesso is None:
         return _erro_acesso_central(request, conta_indisponivel=True)
@@ -304,7 +318,8 @@ def painel_registros(
         name="inicio.html",
         context={**painel, "papel_sessao":papeis_em_sessao(sessao,conta_id), "conta_id": conta_id, "secretaria": secretarias[secretaria_id],
                  "instrumento": instrumento, "registros_exibidos": registros_exibidos,
-                 "pode_trocar_secretaria": len(secretarias) > 1},
+                 "pode_trocar_secretaria": len(secretarias) > 1,
+                 "links_cartilha": links_topicos(request, conta_id, CARTILHA_PAINEL, origem="central")},
     )
     resposta.set_cookie(f"secretaria_{conta_id}", secretaria_id, httponly=True,
                         samesite="lax", secure=request.url.scheme == "https")
@@ -517,21 +532,19 @@ def criar_registro_pela_tela(
     )
 
 
-@app.get("/registros/{registro_id}/cartilha/{edicao}/{secao_id}", response_class=HTMLResponse)
-def consultar_cartilha_secao(
-    registro_id: str, edicao: str, secao_id: str, request: Request,
-    conta_id: str = Query(max_length=50), sessao: Session = Depends(obter_sessao),
-):
-    cabecalhos = {
-        "Cache-Control": "private, no-store", "X-Robots-Tag": "noindex, nofollow",
-        "Referrer-Policy": "no-referrer", "X-Content-Type-Options": "nosniff",
-        "Content-Security-Policy": "default-src 'none'; style-src 'self'; script-src 'self'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'; form-action 'none'",
-    }
+CABECALHOS_CARTILHA = {
+    "Cache-Control": "private, no-store", "X-Robots-Tag": "noindex, nofollow",
+    "Referrer-Policy": "no-referrer", "X-Content-Type-Options": "nosniff",
+    "Content-Security-Policy": "default-src 'none'; style-src 'self'; script-src 'self'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'; form-action 'none'",
+}
+
+
+def _exigir_cartilha_local(request):
     if not acesso_local_cartilha(request):
-        raise HTTPException(403, "Consulta da Cartilha restrita ao ambiente local da PoC.", headers=cabecalhos)
-    identidade, registro = carregar_registro(sessao, conta_id, registro_id)
-    if not identidade or not registro:
-        raise HTTPException(403, "Consulta não disponível para este Registro e agente.", headers=cabecalhos)
+        raise HTTPException(403, "Consulta da Cartilha restrita ao ambiente local da PoC.", headers=CABECALHOS_CARTILHA)
+
+
+def _renderizar_cartilha(request, edicao, secao_id):
     from app.cartilha_local import EDICAO_INTEGRADA
     from app.ajudas_cartilha_form1 import titulo_topico
     from app.cartilha_topicos import catalogo_topicos, destinos_integrados
@@ -546,12 +559,70 @@ def consultar_cartilha_secao(
     else:
         conteudo = None
     if not conteudo:
-        raise HTTPException(404, "Seção indisponível. Volte à aba do FORM 1.", headers=cabecalhos)
+        raise HTTPException(404, "Seção indisponível. Volte à aba do formulário ou do painel.", headers=CABECALHOS_CARTILHA)
     return paginas.TemplateResponse(
         request=request, name="cartilha_secao.html",
         context={"titulo_secao": titulo, "edicao": edicao, "pagina_isolada": True,
-                 "conteudo_secao": conteudo}, headers=cabecalhos,
+                 "conteudo_secao": conteudo}, headers=CABECALHOS_CARTILHA,
     )
+
+
+@app.get("/registros/{registro_id}/cartilha/{edicao}/{secao_id}", response_class=HTMLResponse)
+def consultar_cartilha_secao(
+    registro_id: str, edicao: str, secao_id: str, request: Request,
+    conta_id: str = Query(max_length=50), sessao: Session = Depends(obter_sessao),
+    participacao_id: str | None = Query(default=None, max_length=50),
+    objeto_id: str | None = Query(default=None, max_length=50),
+):
+    from app.cartilha_local import EDICAO_INTEGRADA
+    from app.consultas_interface import pode_consultar_registro
+
+    _exigir_cartilha_local(request)
+    permitido = False
+    try:
+        if edicao == EDICAO_INTEGRADA and participacao_id and not objeto_id:
+            from app.fila_form2 import autorizado, pessoa_ativa
+            from app.modelos import ParticipacaoForm2
+
+            pessoa = pessoa_ativa(sessao, conta_id)
+            p = sessao.get(ParticipacaoForm2, participacao_id)
+            permitido = bool(p and p.registro_id == registro_id and p.tipo == "principal"
+                             and p.responsavel_id == pessoa.id and autorizado(sessao, pessoa, p))
+        elif edicao == EDICAO_INTEGRADA and objeto_id and not participacao_id:
+            from app.fluxo_forms34 import consultar
+
+            objeto, *_ = consultar(sessao, conta_id, objeto_id)
+            permitido = objeto.registro_id == registro_id
+        elif not participacao_id and not objeto_id:
+            permitido = pode_consultar_registro(sessao, conta_id, registro_id)
+    except (PermissionError, ValueError):
+        pass
+    if not permitido:
+        raise HTTPException(403, "Consulta não disponível para este Registro e agente.", headers=CABECALHOS_CARTILHA)
+    return _renderizar_cartilha(request, edicao, secao_id)
+
+
+@app.get("/ajuda/cartilha/{edicao}/{secao_id}", response_class=HTMLResponse)
+def consultar_cartilha_apoio(
+    request: Request, edicao: str, secao_id: str, origem: str = Query(max_length=30),
+    conta_id: str = Query(max_length=50), sessao: Session = Depends(obter_sessao),
+):
+    from app.cartilha_local import EDICAO_INTEGRADA
+    from app.fila_form2 import pessoa_ativa
+    from app.dashboard.fontes import escopo_da_conta
+    from app.mapa_cartilha import TOPICOS_APOIO
+
+    _exigir_cartilha_local(request)
+    if edicao != EDICAO_INTEGRADA or secao_id not in TOPICOS_APOIO.get(origem, ()):
+        raise HTTPException(404, "Tópico indisponível nesta área.", headers=CABECALHOS_CARTILHA)
+    try:
+        if origem == "dashboard":
+            escopo_da_conta(sessao, conta_id)
+        else:
+            pessoa_ativa(sessao, conta_id)
+    except PermissionError as erro:
+        raise HTTPException(403, str(erro), headers=CABECALHOS_CARTILHA) from erro
+    return _renderizar_cartilha(request, edicao, secao_id)
 
 
 @app.get("/registros/{registro_id}", response_class=HTMLResponse)

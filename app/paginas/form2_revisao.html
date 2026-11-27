@@ -18,7 +18,9 @@
 {% set parametros = navegacao %}
 {% set bloco_atual = numero %}
 {% include '_regua_form2.html' %}
+{% with links_cartilha=links_cartilha_grade %}{% include '_links_cartilha.html' %}{% endwith %}
 <h1>Bloco {{ numero }} — {{ bloco.titulo }}</h1>
+{% include '_links_cartilha.html' %}
 <p>{{ bloco.itens|length }} itens. Salve o rascunho para atualizar as perguntas aplicáveis.</p>
 {% if juridico %}<p>Alternativas em avaliação pelo Jurídico. Você pode comentar cada item.</p>
 {% else %}<p>O rascunho pode ser retomado pela régua dos blocos.</p>{% endif %}
@@ -32,6 +34,7 @@
 {% include "_saida_bloco_form2.html" %}<form method="post" class="form1" id="revisao-bloco">
 <input type="hidden" name="edicao" value="REV21.2"><input type="hidden" name="comando_id" value="{{ comando_id }}"><input type="hidden" name="versao_lida" value="{{ versao }}">
 {% for q in bloco.itens if not q.oculto_por_origem %}
+{% if ativa(q.id,'') %}{% with links_cartilha=(links_cartilha_perguntas|default({})).get(q.id, ()) %}{% include '_links_cartilha.html' %}{% endwith %}{% endif %}
 {% set op = 'opcao:' ~ q.id %}{% set txt = 'texto:' ~ q.id %}{% set com = 'comentario:' ~ q.id %}
 {% set bloqueada = juridico or numero == 1 or q.edicao in ('habilitada', 'consulta', 'bloqueada_d11') %}
 {% if q.id in ('F2-9W.1','F2-11S.1','F2-12A.1') %}<h2>{{ {'F2-9W.1':'Wi-Fi oferecido pela Prefeitura','F2-11S.1':'Informações de saúde','F2-12A.1':'Informações de alta sensibilidade'}[q.id] }}</h2>{% endif %}

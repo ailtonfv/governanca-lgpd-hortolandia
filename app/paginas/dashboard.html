@@ -28,6 +28,7 @@
 {% block conteudo %}
 <link rel="stylesheet" href="{{ url_for('estaticos',path='/dashboard.css') }}">
 <div class="dashboard"><p class="dash-contexto">Dashboard LGPD · {{ perfil }} · Somente leitura</p><h1>{{ titulo }}</h1>
+{% include '_links_cartilha.html' %}
 <p class="dash-deliberacao">Proposta em deliberação. Não equivale a homologação.</p>
 <nav class="dash-nav" aria-label="Telas do dashboard">{% for k,v in telas.items() %}<a href="{{ url(k) }}" {% if k==tela %}aria-current="page"{% endif %}>{{ {'abertura':'Visão geral','risco':'Riscos','correcao':'Providências','operacao':'Filas e prazos','cobertura':'Cobertura','aprendizados':'Aprendizados','circulacao':'Compartilhamento'}[k] }}</a>{% endfor %}</nav>
 <details class="dash-opcoes"><summary>Filtros · {{ mostrando }}</summary><form method="get" class="dash-filtros"><input type="hidden" name="conta_id" value="{{ conta_id }}">
